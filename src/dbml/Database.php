@@ -1750,9 +1750,10 @@ class Database
      *
      * @param bool $innerOnly namespace PHPSTORM_META のような外側を含めるか
      * @param ?string $filename ファイルとして吐き出す先
+     * @param ?string $namespace エンティティの名前空間。未指定だと Entityable に集約される
      * @return string phpstorm.meta の内容
      */
-    public function echoPhpStormMeta($innerOnly = false, $filename = null)
+    public function echoPhpStormMeta($innerOnly = false, $filename = null, $namespace = null)
     {
         $export = function ($value, $nest = 0, $parents = []) use (&$export) {
             if (!is_array($value)) {
@@ -1778,7 +1779,12 @@ class Database
         foreach ($this->getSchema()->getTableNames() as $tname) {
             $entityname = $this->getEntityClass($tname);
             if (trim($entityname, '\\') === Entity::class) {
-                $entityname = Entityable::class;
+                if ($namespace === null) {
+                    $entityname = Entityable::class;
+                }
+                else {
+                    $entityname = trim($namespace, '\\') . '\\' . $this->convertEntityName($tname) . 'Entity';
+                }
             }
 
             $columns = array_map(function (Column $column) {

@@ -2523,10 +2523,19 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_echoPhpStormMeta($database)
     {
-        $phpstorm_meta = $database->echoPhpStormMeta(false, __DIR__ . '/../../../.phpstorm.meta.php');
+        $metafile = sys_get_temp_dir() . '/phpstormmeta';
+        $phpstorm_meta = $database->echoPhpStormMeta(false, $metafile);
+        $this->assertFileExists($metafile);
         $this->assertContains('namespace PHPSTORM_META', $phpstorm_meta);
         $this->assertContains('DateTime::class', $phpstorm_meta);
         $this->assertContains('new \\ryunosuke\\dbml\\Entity\\Entityable', $phpstorm_meta);
+        $this->assertContains('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
+        $this->assertContains('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
+
+        $phpstorm_meta = $database->echoPhpStormMeta(true, null, 'EntityNamespace');
+        $this->assertNotContains('namespace PHPSTORM_META', $phpstorm_meta);
+        $this->assertContains('DateTime::class', $phpstorm_meta);
+        $this->assertContains('EntityNamespace', $phpstorm_meta);
         $this->assertContains('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
         $this->assertContains('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
     }
