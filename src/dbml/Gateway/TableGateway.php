@@ -1528,7 +1528,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * ```
      *
      * @param string $name スコープ名
-     * @param string|array $tableDescriptor SELECT 句
+     * @param string|array|\Closure $tableDescriptor SELECT 句
      * @param string|array $where WHERE 句
      * @param string|array $orderBy ORDER BY 句
      * @param string|array $limit LIMIT 句
