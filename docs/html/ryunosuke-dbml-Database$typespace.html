@@ -54,7 +54,7 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L45-L6633" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L45-L6639" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">ryunosuke\dbml\Database</span></h2>
@@ -1007,10 +1007,10 @@ $index = $db-&gt;describe('tablename.indexname'); // テーブル名.インデ�
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1746-L1806" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1746-L1812" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::echoPhpStormMeta()" tabindex="-1" class="structure-title ">
-                        echoPhpStormMeta                        	<small>($innerOnly = false, $filename = null) : string</small>
+                        echoPhpStormMeta                        	<small>($innerOnly = false, $filename = null, $namespace = null) : string</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>コード補完用の phpstorm.meta を取得する</p>
@@ -1029,6 +1029,12 @@ $index = $db-&gt;describe('tablename.indexname'); // テーブル名.インデ�
 				<td class="type">?string</td>
 				<td class="rest">$filename = null</td>
 				<td class="desc"><p>ファイルとして吐き出す先</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">?string</td>
+				<td class="rest">$namespace = null</td>
+				<td class="desc"><p>エンティティの名前空間。未指定だと Entityable に集約される</p>
 </td>
 			</tr>
         		</tbody>
@@ -1061,7 +1067,7 @@ $index = $db-&gt;describe('tablename.indexname'); // テーブル名.インデ�
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1808-L1840" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1814-L1846" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::setLogger()" tabindex="-1" class="structure-title ">
                         setLogger                        	<small>($logger) : <a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database" class="fqsen "><small>ryunosuke\dbml\</small><wbr>Database</a></small>
@@ -1111,7 +1117,7 @@ $index = $db-&gt;describe('tablename.indexname'); // テーブル名.インデ�
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1842-L1908" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1848-L1914" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::setAutoCastType()" tabindex="-1" class="structure-title ">
                         setAutoCastType                        	<small>($array) : <a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database" class="fqsen "><small>ryunosuke\dbml\</small><wbr>Database</a></small>
@@ -1178,7 +1184,7 @@ $index = $db-&gt;describe('tablename.indexname'); // テーブル名.インデ�
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1910-L1940" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1916-L1946" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::setConnection()" tabindex="-1" class="structure-title ">
                         setConnection                        	<small>($connection) : <a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database" class="fqsen "><small>ryunosuke\dbml\</small><wbr>Database</a></small>
@@ -1233,7 +1239,7 @@ $db-&gt;setConnection($connection);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1942-L1953" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1948-L1959" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getConnection()" tabindex="-1" class="structure-title ">
                         getConnection                        	<small>() : <a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection</a></small>
@@ -1276,7 +1282,7 @@ $db-&gt;setConnection($connection);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1955-L1964" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1961-L1970" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getMasterConnection()" tabindex="-1" class="structure-title ">
                         getMasterConnection                        	<small>() : <a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection</a></small>
@@ -1317,7 +1323,7 @@ $db-&gt;setConnection($connection);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1966-L1978" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1972-L1984" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getSlaveConnection()" tabindex="-1" class="structure-title ">
                         getSlaveConnection                        	<small>() : <a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection</a></small>
@@ -1358,7 +1364,7 @@ $db-&gt;setConnection($connection);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1980-L1995" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1986-L2001" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getConnections()" tabindex="-1" class="structure-title ">
                         getConnections                        	<small>() : <a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection</a>[]</small>
@@ -1401,7 +1407,7 @@ $db-&gt;setConnection($connection);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L1997-L2010" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2003-L2016" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getPdo()" tabindex="-1" class="structure-title ">
                         getPdo                        	<small>() : <a href="http://php.net/manual/ja/class.pdo.php" class="fqsen" target="_blank">\PDO</a></small>
@@ -1444,7 +1450,7 @@ $db-&gt;setConnection($connection);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2012-L2022" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2018-L2028" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getMasterPdo()" tabindex="-1" class="structure-title ">
                         getMasterPdo                        	<small>() : <a href="http://php.net/manual/ja/class.pdo.php" class="fqsen" target="_blank">\PDO</a></small>
@@ -1485,7 +1491,7 @@ $db-&gt;setConnection($connection);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2024-L2034" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2030-L2040" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getSlavePdo()" tabindex="-1" class="structure-title ">
                         getSlavePdo                        	<small>() : <a href="http://php.net/manual/ja/class.pdo.php" class="fqsen" target="_blank">\PDO</a></small>
@@ -1526,7 +1532,7 @@ $db-&gt;setConnection($connection);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2036-L2093" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2042-L2099" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::setPdoAttribute()" tabindex="-1" class="structure-title ">
                         setPdoAttribute                        	<small>($attributes, $target = null) : <a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></small>
@@ -1588,7 +1594,7 @@ $restore();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2095-L2109" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2101-L2115" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::isEmulationMode()" tabindex="-1" class="structure-title ">
                         isEmulationMode                        	<small>() : bool</small>
@@ -1629,7 +1635,7 @@ $restore();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2111-L2119" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2117-L2125" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getPlatform()" tabindex="-1" class="structure-title ">
                         getPlatform                        	<small>() : <a href="Doctrine-DBAL-Platforms-AbstractPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractPlatform" class="fqsen "><small>Doctrine\DBAL\Platforms\</small><wbr>AbstractPlatform</a></small>
@@ -1670,7 +1676,7 @@ $restore();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2121-L2134" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2127-L2140" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getCompatiblePlatform()" tabindex="-1" class="structure-title ">
                         getCompatiblePlatform                        	<small>() : <a href="ryunosuke-dbml-Metadata-CompatiblePlatform$typespace.html#ryunosuke\dbml\Metadata\CompatiblePlatform" class="fqsen "><small>ryunosuke\dbml\Metadata\</small><wbr>CompatiblePlatform</a></small>
@@ -1711,7 +1717,7 @@ $restore();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2136-L2144" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2142-L2150" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getSchema()" tabindex="-1" class="structure-title ">
                         getSchema                        	<small>() : <a href="ryunosuke-dbml-Metadata-Schema$typespace.html#ryunosuke\dbml\Metadata\Schema" class="fqsen "><small>ryunosuke\dbml\Metadata\</small><wbr>Schema</a></small>
@@ -1752,7 +1758,7 @@ $restore();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2146-L2163" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2152-L2169" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getEntityClass()" tabindex="-1" class="structure-title ">
                         getEntityClass                        	<small>($tablename) : string<span class="type-separator"></span><wbr>false</small>
@@ -1799,7 +1805,7 @@ $restore();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2165-L2176" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2171-L2182" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getGatewayClass()" tabindex="-1" class="structure-title ">
                         getGatewayClass                        	<small>($tablename) : string</small>
@@ -1846,7 +1852,7 @@ $restore();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2178-L2188" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2184-L2194" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::convertTableName()" tabindex="-1" class="structure-title ">
                         convertTableName                        	<small>($entityname) : string</small>
@@ -1893,7 +1899,7 @@ $restore();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2190-L2202" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2196-L2208" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::convertEntityName()" tabindex="-1" class="structure-title ">
                         convertEntityName                        	<small>($tablename) : string</small>
@@ -1941,7 +1947,7 @@ $restore();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2204-L2396" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2210-L2402" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::overrideColumns()" tabindex="-1" class="structure-title ">
                         overrideColumns                        	<small>($definition) : <a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database" class="fqsen "><small>ryunosuke\dbml\</small><wbr>Database</a></small>
@@ -2090,7 +2096,7 @@ php 側の型が活用される箇所はそう多くないが、例えば下記�
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2398-L2434" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2404-L2440" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::addRelation()" tabindex="-1" class="structure-title ">
                         addRelation                        	<small>($relations) : array</small>
@@ -2153,7 +2159,7 @@ $db-&gt;addRelation([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2436-L2462" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2442-L2468" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::addForeignKey()" tabindex="-1" class="structure-title ">
                         addForeignKey                        	<small>($localTable, $foreignTable, $columnsMap, $fkname = null) : <a href="Doctrine-DBAL-Schema-ForeignKeyConstraint$typespace.html#Doctrine\DBAL\Schema\ForeignKeyConstraint" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>ForeignKeyConstraint</a></small>
@@ -2220,7 +2226,7 @@ ForeignKeyConstraint 指定で追加する場合は <tag_link data-kind='fqsen' 
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2464-L2484" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2470-L2490" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::ignoreForeignKey()" tabindex="-1" class="structure-title ">
                         ignoreForeignKey                        	<small>($localTable, $foreignTable, $columnsMap) : <a href="Doctrine-DBAL-Schema-ForeignKeyConstraint$typespace.html#Doctrine\DBAL\Schema\ForeignKeyConstraint" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>ForeignKeyConstraint</a></small>
@@ -2281,7 +2287,7 @@ ForeignKeyConstraint 指定で無効にする場合は <tag_link data-kind='fqse
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2486-L2497" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2492-L2503" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::begin()" tabindex="-1" class="structure-title ">
                         begin                        	<small>() : int</small>
@@ -2323,7 +2329,7 @@ ForeignKeyConstraint 指定で無効にする場合は <tag_link data-kind='fqse
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2499-L2510" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2505-L2516" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::commit()" tabindex="-1" class="structure-title ">
                         commit                        	<small>() : int</small>
@@ -2365,7 +2371,7 @@ ForeignKeyConstraint 指定で無効にする場合は <tag_link data-kind='fqse
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2512-L2523" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2518-L2529" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::rollback()" tabindex="-1" class="structure-title ">
                         rollback                        	<small>() : int</small>
@@ -2407,7 +2413,7 @@ ForeignKeyConstraint 指定で無効にする場合は <tag_link data-kind='fqse
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2525-L2548" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2531-L2554" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::transact()" tabindex="-1" class="structure-title ">
                         transact                        	<small>($main, $catch = null, $options = [], $throwable = true) : mixed</small>
@@ -2479,7 +2485,7 @@ $return = $db-&gt;transact(function ($db) {
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2550-L2570" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2556-L2576" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::transaction()" tabindex="-1" class="structure-title ">
                         transaction                        	<small>($main = null, $catch = null, $options = []) : <a href="ryunosuke-dbml-Transaction-Transaction$typespace.html#ryunosuke\dbml\Transaction\Transaction" class="fqsen "><small>ryunosuke\dbml\Transaction\</small><wbr>Transaction</a></small>
@@ -2539,7 +2545,7 @@ $return = $db-&gt;transact(function ($db) {
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2572-L2600" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2578-L2606" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::preview()" tabindex="-1" class="structure-title ">
                         preview                        	<small>($main, $options = null) : array</small>
@@ -2603,7 +2609,7 @@ $logs = $db-&gt;preview(function ($db) {
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2602-L2614" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2608-L2620" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::raw()" tabindex="-1" class="structure-title ">
                         raw                        	<small>($expr, $params = []) : <a href="ryunosuke-dbml-Query-Expression-Expression$typespace.html#ryunosuke\dbml\Query\Expression\Expression" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Expression</a></small>
@@ -2657,7 +2663,7 @@ $logs = $db-&gt;preview(function ($db) {
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2616-L2666" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2622-L2672" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::operator()" tabindex="-1" class="structure-title ">
                         operator                        	<small>($cond, $params = []) : <a href="ryunosuke-dbml-Query-Expression-Expression$typespace.html#ryunosuke\dbml\Query\Expression\Expression" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Expression</a></small>
@@ -2736,7 +2742,7 @@ $db-&gt;select([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2668-L2704" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2674-L2710" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::binder()" tabindex="-1" class="structure-title ">
                         binder                        	<small>() : callable<span class="type-separator"></span><wbr><a href="http://php.net/manual/ja/class.arrayobject.php" class="fqsen" target="_blank">\ArrayObject</a></small>
@@ -2784,7 +2790,7 @@ $db-&gt;fetchAll($sql, $binder);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2706-L2729" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2712-L2735" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::quote()" tabindex="-1" class="structure-title ">
                         quote                        	<small>($value, $type = null) : string<span class="type-separator"></span><wbr>null</small>
@@ -2840,7 +2846,7 @@ bool を quote すると文字ではなく int になる。</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2731-L2742" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2737-L2748" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::quoteIdentifier()" tabindex="-1" class="structure-title ">
                         quoteIdentifier                        	<small>($identifier) : string</small>
@@ -2888,7 +2894,7 @@ bool を quote すると文字ではなく int になる。</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2744-L2796" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2750-L2802" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::queryInto()" tabindex="-1" class="structure-title ">
                         queryInto                        	<small>($sql, $params = []) : string</small>
@@ -2953,7 +2959,7 @@ $db-&gt;queryInto($db-&gt;select('tablename', ['id' =&gt; 1]));
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2798-L2841" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2804-L2847" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::bindInto()" tabindex="-1" class="structure-title ">
                         bindInto                        	<small>($data, &amp;$params) : mixed</small>
@@ -3019,7 +3025,7 @@ $db-&gt;bindInto(['col1' =&gt; new Expression('UPPER(?)', [1]), 'col2' =&gt; 2],
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2843-L3149" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L2849-L3155" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::whereInto()" tabindex="-1" class="structure-title ">
                         whereInto                        	<small>($identifier, &amp;$params, $andor = &quot;OR&quot;, &amp;$filterd = null) : array</small>
@@ -3229,7 +3235,7 @@ $wheres = [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3151-L3332" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3157-L3338" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::anywhere()" tabindex="-1" class="structure-title ">
                         anywhere                        	<small>($table, $word) : array</small>
@@ -3341,7 +3347,7 @@ $db-&gt;whereInto($db-&gt;anywhere('tablename', '2000/12'), $params);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3334-L3344" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3340-L3350" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::createQueryBuilder()" tabindex="-1" class="structure-title ">
                         createQueryBuilder                        	<small>() : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -3383,7 +3389,7 @@ $db-&gt;whereInto($db-&gt;anywhere('tablename', '2000/12'), $params);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3346-L3388" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3352-L3394" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::warmup()" tabindex="-1" class="structure-title ">
                         warmup                        	<small>($table_names = []) : array</small>
@@ -3437,7 +3443,7 @@ RDBMS にも依るが、これによって・・・</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3390-L3421" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3396-L3427" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::fetchArray()" tabindex="-1" class="structure-title ">
                         fetchArray                        	<small>($sql, $params = []) : array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Entity-Entityable$typespace.html#ryunosuke\dbml\Entity\Entityable" class="fqsen "><small>ryunosuke\dbml\Entity\</small><wbr>Entityable</a>[]</small>
@@ -3555,7 +3561,7 @@ RDBMS にも依るが、これによって・・・</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3423-L3454" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3429-L3460" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::fetchAssoc()" tabindex="-1" class="structure-title ">
                         fetchAssoc                        	<small>($sql, $params = []) : array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Entity-Entityable$typespace.html#ryunosuke\dbml\Entity\Entityable" class="fqsen "><small>ryunosuke\dbml\Entity\</small><wbr>Entityable</a>[]</small>
@@ -3673,7 +3679,7 @@ RDBMS にも依るが、これによって・・・</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3456-L3481" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3462-L3487" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::fetchLists()" tabindex="-1" class="structure-title ">
                         fetchLists                        	<small>($sql, $params = []) : array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Entity-Entityable$typespace.html#ryunosuke\dbml\Entity\Entityable" class="fqsen "><small>ryunosuke\dbml\Entity\</small><wbr>Entityable</a>[]</small>
@@ -3785,7 +3791,7 @@ RDBMS にも依るが、これによって・・・</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3483-L3508" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3489-L3514" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::fetchPairs()" tabindex="-1" class="structure-title ">
                         fetchPairs                        	<small>($sql, $params = []) : array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Entity-Entityable$typespace.html#ryunosuke\dbml\Entity\Entityable" class="fqsen "><small>ryunosuke\dbml\Entity\</small><wbr>Entityable</a>[]</small>
@@ -3897,7 +3903,7 @@ RDBMS にも依るが、これによって・・・</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3510-L3546" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3516-L3552" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::fetchTuple()" tabindex="-1" class="structure-title ">
                         fetchTuple                        	<small>($sql, $params = []) : array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Entity-Entityable$typespace.html#ryunosuke\dbml\Entity\Entityable" class="fqsen "><small>ryunosuke\dbml\Entity\</small><wbr>Entityable</a><span class="type-separator"></span><wbr>false</small>
@@ -4016,7 +4022,7 @@ RDBMS にも依るが、これによって・・・</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3548-L3581" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3554-L3587" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::fetchValue()" tabindex="-1" class="structure-title ">
                         fetchValue                        	<small>($sql, $params = []) : mixed</small>
@@ -4132,7 +4138,7 @@ RDBMS にも依るが、これによって・・・</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3685-L3753" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3691-L3759" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::select()" tabindex="-1" class="structure-title ">
                         select                        	<small>($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -6059,7 +6065,7 @@ $results = $db-&gt;selectValue('tablename', ['create_date &lt; ?' =&gt; '2000-12
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3755-L3798" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3761-L3804" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::entity()" tabindex="-1" class="structure-title ">
                         entity                        	<small>($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -7067,7 +7073,7 @@ $results = $db-&gt;entityTuple('tablename', ['create_date &lt; ?' =&gt; '2000-12
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3800-L3870" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3806-L3876" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::subselect()" tabindex="-1" class="structure-title ">
                         subselect                        	<small>($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -7647,7 +7653,7 @@ $row = $db-&gt;selectTuple([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3872-L3920" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3878-L3926" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::subquery()" tabindex="-1" class="structure-title ">
                         subquery                        	<small>($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -7752,7 +7758,7 @@ $db-&gt;select('t_article', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3922-L3968" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3928-L3974" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::subexists()" tabindex="-1" class="structure-title ">
                         subexists                        	<small>($tableDescriptor, $where = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -7839,7 +7845,7 @@ $db-&gt;select('t_article, t_something', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3970-L3978" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3976-L3984" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::notSubexists()" tabindex="-1" class="structure-title ">
                         notSubexists                        	<small>($tableDescriptor, $where = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -7892,7 +7898,7 @@ $db-&gt;select('t_article, t_something', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3980-L4052" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L3986-L4058" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::subaggregate()" tabindex="-1" class="structure-title ">
                         subaggregate                        	<small>($aggregate, $column, $where = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -8263,7 +8269,7 @@ $db-&gt;select('t_article A+t_comment C', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4054-L4085" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4060-L4091" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::union()" tabindex="-1" class="structure-title ">
                         union                        	<small>($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -8359,7 +8365,7 @@ $db-&gt;unionAll([$db-&gt;select('t_article'), $db-&gt;select('t_article')]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4087-L4104" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4093-L4110" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::unionAll()" tabindex="-1" class="structure-title ">
                         unionAll                        	<small>($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -8443,7 +8449,7 @@ $db-&gt;unionAll([$db-&gt;select('t_article'), $db-&gt;select('t_article')]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4106-L4133" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4112-L4139" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::exists()" tabindex="-1" class="structure-title ">
                         exists                        	<small>($tableDescriptor, $where = [], $for_update = false) : bool</small>
@@ -8514,7 +8520,7 @@ $db-&gt;exists('t_article', ['delete_flg' =&gt; 0], true);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4135-L4159" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4141-L4165" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::selectExists()" tabindex="-1" class="structure-title ">
                         selectExists                        	<small>($tableDescriptor, $where = [], $for_update = false) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -8579,7 +8585,7 @@ $db-&gt;selectNotExists('t_table', ['delete_flg' =&gt; 0]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4161-L4177" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4167-L4183" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::selectNotExists()" tabindex="-1" class="structure-title ">
                         selectNotExists                        	<small>($tableDescriptor, $where = [], $for_update = false) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -8638,7 +8644,7 @@ $db-&gt;selectNotExists('t_table', ['delete_flg' =&gt; 0]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4179-L4208" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4185-L4214" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::selectAggregate()" tabindex="-1" class="structure-title ">
                         selectAggregate                        	<small>($aggregation, $column, $where = [], $groupBy = [], $having = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
@@ -9036,7 +9042,7 @@ $db-&gt;selectMax('t_table.id', ['delete_flg' =&gt; 0], 'group_id');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4210-L4222" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4216-L4228" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::neighbor()" tabindex="-1" class="structure-title ">
                         neighbor                        	<small>($tableDescriptor, $predicates, $limit = 1) : array</small>
@@ -9096,7 +9102,7 @@ $db-&gt;selectMax('t_table.id', ['delete_flg' =&gt; 0], 'group_id');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4224-L4335" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4230-L4341" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::aggregate()" tabindex="-1" class="structure-title ">
                         aggregate                        	<small>($aggregation, $column, $where = [], $groupBy = [], $having = []) : int<span class="type-separator"></span><wbr>array</small>
@@ -9549,7 +9555,7 @@ $db-&gt;aggregate([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4337-L4373" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4343-L4379" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::yield()" tabindex="-1" class="structure-title ">
                         yield                        	<small>($sql, $params = []) : <a href="ryunosuke-dbml-Generator-Yielder$typespace.html#ryunosuke\dbml\Generator\Yielder" class="fqsen "><small>ryunosuke\dbml\Generator\</small><wbr>Yielder</a></small>
@@ -9822,7 +9828,7 @@ foreach ($db-&gt;yieldArray($db-&gt;select('very_many_heavy_table')) as $row) {
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4375-L4421" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4381-L4427" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::export()" tabindex="-1" class="structure-title ">
                         export                        	<small>($generator, $sql, $params = [], $config = [], $file = null) : int</small>
@@ -10102,7 +10108,7 @@ $db-&gt;exportJson($db-&gt;select('t_parent/t_child'), [], [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4423-L4546" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4429-L4552" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::gather()" tabindex="-1" class="structure-title ">
                         gather                        	<small>($tablename, $wheres = [], $other_wheres = [], $parentive = false) : array</small>
@@ -10217,7 +10223,7 @@ $db-&gt;gather('t_comment_file', ['file_id' =&gt; 1], [], true);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4548-L4604" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4554-L4610" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::prepare()" tabindex="-1" class="structure-title ">
                         prepare                        	<small>($sql, $params = []) : <a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -10633,7 +10639,7 @@ $stmt-&gt;executeAffect(['id' =&gt; 102]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4606-L4615" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4612-L4621" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::executeSelect()" tabindex="-1" class="structure-title ">
                         executeSelect                        	<small>($query, $params = []) : <a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement</a></small>
@@ -10693,7 +10699,7 @@ $stmt-&gt;executeAffect(['id' =&gt; 102]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4617-L4626" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4623-L4632" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::executeAffect()" tabindex="-1" class="structure-title strike">
                         executeAffect                        	<small>($query, $params = []) : int</small>
@@ -10753,7 +10759,7 @@ $stmt-&gt;executeAffect(['id' =&gt; 102]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4628-L4651" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4634-L4657" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::executeQuery()" tabindex="-1" class="structure-title ">
                         executeQuery                        	<small>($query, $params = []) : <a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement</a></small>
@@ -10813,7 +10819,7 @@ $stmt-&gt;executeAffect(['id' =&gt; 102]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4653-L4685" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4659-L4691" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::executeUpdate()" tabindex="-1" class="structure-title strike">
                         executeUpdate                        	<small>($query, $params = []) : int</small>
@@ -10873,7 +10879,7 @@ $stmt-&gt;executeAffect(['id' =&gt; 102]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4687-L4721" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4693-L4727" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::dryrun()" tabindex="-1" class="structure-title ">
                         dryrun                        	<small>() : <a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database" class="fqsen "><small>ryunosuke\dbml\</small><wbr>Database</a></small>
@@ -10936,7 +10942,7 @@ $db-&gt;t_table-&gt;dryrun()-&gt;update($data, $where);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4723-L4764" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4729-L4770" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getEmptyRecord()" tabindex="-1" class="structure-title ">
                         getEmptyRecord                        	<small>($tablename, $default = []) : array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Entity-Entityable$typespace.html#ryunosuke\dbml\Entity\Entityable" class="fqsen "><small>ryunosuke\dbml\Entity\</small><wbr>Entityable</a></small>
@@ -10998,7 +11004,7 @@ $entity = $db-&gt;getEmptyRecord('Article');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4766-L4830" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4772-L4836" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::import()" tabindex="-1" class="structure-title ">
                         import                        	<small>($datatree) : int</small>
@@ -11071,7 +11077,7 @@ $db-&gt;import([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4832-L5054" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L4838-L5060" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::loadCsv()" tabindex="-1" class="structure-title ">
                         loadCsv                        	<small>($tableName, $filename, $options = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -11200,7 +11206,7 @@ $db-&gt;loadCsv([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5056-L5094" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5062-L5100" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::insertSelect()" tabindex="-1" class="structure-title ">
                         insertSelect                        	<small>($tableName, $sql, $columns = [], $params = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -11341,7 +11347,7 @@ $db-&gt;insertSelect('t_destination', $db-&gt;select('t_source'));
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5096-L5176" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5102-L5182" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::insertArray()" tabindex="-1" class="structure-title ">
                         insertArray                        	<small>($tableName, $data, $chunk = 0) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -11471,7 +11477,7 @@ $db-&gt;insertSelect('t_destination', $db-&gt;select('t_source'));
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5178-L5235" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5184-L5241" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::updateArray()" tabindex="-1" class="structure-title ">
                         updateArray                        	<small>($tableName, $data, $identifier = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -11604,7 +11610,7 @@ $db-&gt;updateArray('tablename', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5237-L5363" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5243-L5369" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::modifyArray()" tabindex="-1" class="structure-title ">
                         modifyArray                        	<small>($tableName, $insertData, $updateData = [], $chunk = 0) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -11765,7 +11771,7 @@ $db-&gt;modifyArray('tablename', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5365-L5503" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5371-L5509" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::changeArray()" tabindex="-1" class="structure-title ">
                         changeArray                        	<small>($tableName, $dataarray, $identifier) : array</small>
@@ -11927,7 +11933,7 @@ $db-&gt;changeArray('table_name', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5505-L5653" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5511-L5659" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::save()" tabindex="-1" class="structure-title ">
                         save                        	<small>($tableName, $data) : array</small>
@@ -12051,7 +12057,7 @@ $db-&gt;save('t_parent', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5655-L5785" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5661-L5791" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::insert()" tabindex="-1" class="structure-title ">
                         insert                        	<small>($tableName, $data) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -12303,7 +12309,7 @@ $condition が配列の場合は $tableName で selectNotExists する。つま�
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5787-L5867" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5793-L5873" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::update()" tabindex="-1" class="structure-title ">
                         update                        	<small>($tableName, $data, $identifier = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -12506,7 +12512,7 @@ $db-&gt;update([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5869-L5924" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5875-L5930" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::delete()" tabindex="-1" class="structure-title ">
                         delete                        	<small>($tableName, $identifier = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -12673,7 +12679,7 @@ $db-&gt;delete('t_article + t_comment', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5926-L5997" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5932-L6003" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::remove()" tabindex="-1" class="structure-title ">
                         remove                        	<small>($tableName, $identifier = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -12836,7 +12842,7 @@ $db-&gt;remove('parenttable', ['id' =&gt; 1]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L5999-L6081" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6005-L6087" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::destroy()" tabindex="-1" class="structure-title ">
                         destroy                        	<small>($tableName, $identifier = []) : int<span class="type-separator"></span><wbr>string[]</small>
@@ -13006,7 +13012,7 @@ $db-&gt;destroy('parenttable', ['status' =&gt; 'deleted']);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6083-L6201" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6089-L6207" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::reduce()" tabindex="-1" class="structure-title ">
                         reduce                        	<small>($tableName, $limit = null, $orderBy = [], $groupBy = [], $identifier = []) : int<span class="type-separator"></span><wbr>string</small>
@@ -13164,7 +13170,7 @@ $db-&gt;reduce('logs', 10, '-log_time', ['category'], ['log_time &lt; ?' =&gt; d
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6203-L6294" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6209-L6300" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::upsert()" tabindex="-1" class="structure-title ">
                         upsert                        	<small>($tableName, $insertData, $updateData = []) : int<span class="type-separator"></span><wbr>array</small>
@@ -13368,7 +13374,7 @@ $condition が配列の場合は $tableName で selectNotExists する。つま�
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6296-L6419" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6302-L6425" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::modify()" tabindex="-1" class="structure-title ">
                         modify                        	<small>($tableName, $insertData, $updateData = []) : int<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -13631,7 +13637,7 @@ $condition が配列の場合は $tableName で selectNotExists する。つま�
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6421-L6482" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6427-L6488" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::replace()" tabindex="-1" class="structure-title ">
                         replace                        	<small>($tableName, $data) : int<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -13745,7 +13751,7 @@ $db-&gt;replace('tablename', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6484-L6540" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6490-L6546" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::duplicate()" tabindex="-1" class="structure-title ">
                         duplicate                        	<small>($targetTable, $overrideData = [], $where = [], $sourceTable = null) : int<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -13820,7 +13826,7 @@ $db-&gt;duplicate('tablename', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6542-L6563" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6548-L6569" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::truncate()" tabindex="-1" class="structure-title ">
                         truncate                        	<small>($tableName, $cascade = false) : int</small>
@@ -13876,7 +13882,7 @@ $db-&gt;duplicate('tablename', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6565-L6575" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6571-L6581" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getLastInsertId()" tabindex="-1" class="structure-title ">
                         getLastInsertId                        	<small>($tableName = null, $columnName = null) : null<span class="type-separator"></span><wbr>string</small>
@@ -13929,7 +13935,7 @@ $db-&gt;duplicate('tablename', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6577-L6598" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6583-L6604" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::resetAutoIncrement()" tabindex="-1" class="structure-title ">
                         resetAutoIncrement                        	<small>($tableName, $seq = 1) : void</small>
@@ -13981,7 +13987,7 @@ $db-&gt;duplicate('tablename', [
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6600-L6610" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Database.php#L6606-L6616" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Database::getAffectedRows()" tabindex="-1" class="structure-title ">
                         getAffectedRows                        	<small>() : int<span class="type-separator"></span><wbr>null</small>
