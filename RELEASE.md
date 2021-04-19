@@ -22,6 +22,10 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.10
+
+- [feature][Database] echoPhpStormMeta 周りを修正
+
 ## 2.0.9
 
 - [feature][Database] IGNORE シンタックスが使えるメソッドに ～Ignore を用意
