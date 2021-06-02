@@ -171,6 +171,47 @@ namespace ryunosuke\Test\Gateway {
                 ];
             });
         }
+
+        public function scopeId($id)
+        {
+            $this->where(['article_id' => $id]);
+        }
+
+        public function getTitleChecksColumn()
+        {
+            return function ($row) {
+                return $row['title'] . ':' . $row['checks'];
+            };
+        }
+
+        public function setTitleChecksColumn($value)
+        {
+            $parts = explode(':', $value, 2);
+            return [
+                'title'  => $parts[0],
+                'checks' => $parts[1],
+            ];
+        }
+
+        /**
+         * @implicit true
+         */
+        public function getStatementColumn()
+        {
+            return 'UPPER(%s.title)';
+        }
+
+        public function getClosureColumn()
+        {
+            return function ($row) {
+                return $row['article_id'] . '-' . $row['title'];
+            };
+        }
+
+        public function getQueryBuilderColumn(Database $db)
+        {
+            return $db->subcount('t_comment');
+        }
     }
 
     class Comment extends TableGateway

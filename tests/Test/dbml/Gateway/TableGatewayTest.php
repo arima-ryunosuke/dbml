@@ -2136,6 +2136,39 @@ FROM t_article Article", $Article->column([
     /**
      * @dataProvider provideGateway
      * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_magic_scope_column($gateway, $database)
+    {
+        $database->refresh();
+        $database = $database->context(['registerSpecialMethod' => true]);
+
+        // set から始まるメソッドで仮想カラムの更新ができる
+        $database->t_article->pk(1)->update([
+            'title_checks' => 'hello world:1,2,3',
+        ]);
+        // get から始まるメソッドで仮想カラムの取得ができる
+        $this->assertEquals([
+            'article_id'    => '1',
+            'title'         => 'hello world',
+            'checks'        => '1,2,3',
+            'statement'     => 'HELLO WORLD',
+            'closure'       => '1-hello world',
+            'query_builder' => '3',
+        ], $database->t_article->scope('id', 1)->tuple([
+            '*',
+            'statement',
+            'closure',
+            'query_builder',
+        ]));
+
+        // statement はアノテーションで implicit を指定してるので ! で引っ張ることができる
+        $this->assertArrayHasKey('statement', $database->t_article->pk(1)->tuple('!'));
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
      */
     function test_proxyAutoIncrement($gateway)
     {

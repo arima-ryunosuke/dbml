@@ -18,7 +18,9 @@ use function ryunosuke\dbml\array_get;
 use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\parameter_length;
+use function ryunosuke\dbml\parse_annotation;
 use function ryunosuke\dbml\reflect_callable;
+use function ryunosuke\dbml\snake_case;
 use function ryunosuke\dbml\split_noempty;
 use function ryunosuke\dbml\throws;
 use function ryunosuke\dbml\try_finally;
@@ -92,6 +94,7 @@ use function ryunosuke\dbml\try_finally;
  * Closure を受けたスコープはクエリビルダ引数を返す必要があるが、引数を受けられるのでパラメータ付きスコープを定義することができる。
  * また、 Closure 内の `$this` は「その時点の Gateway インスタンス」を指すように bind される。これにより `$this->alias` などが使用でき、当たっているスコープやエイリアス名などが取得できる。
  * さらに `$this` に下記の `column` `where` `orderBy` などを適用して return すればクエリビルダ引数を返さなくてもメソッドベースで適用できる。
+ * scopeXXX で始まるメソッドを定義すると上記のクロージャで定義したような動作となる。
  *
  * `scoping` を使用するとスコープを登録せずにその場限りのスコープを当てることができる。
  * また `column` `where` `orderBy` などの個別メソッドがあり、句別にスコープを当てることもできる。
@@ -112,6 +115,11 @@ use function ryunosuke\dbml\try_finally;
  * $gw->addScope('latest', function ($limit = 10) {
  *     return $this->orderBy('create_date DESC')->limit($limit);
  * });
+ * // 上記のメソッド版（意味は同じ。$this を返す必要はない）
+ * public function scopeLatest($limit = 10)
+ * {
+ *     $this->orderBy('create_date DESC')->limit($limit);
+ * }
  *
  * // 有効レコードを全取得する（'active' スコープで縛る）
  * $gw->scope('active')->array();
@@ -167,6 +175,29 @@ use function ryunosuke\dbml\try_finally;
  *
  * // あるいはメソッドチェーンでも良い（良い、というかそれを想定している）
  * $gw->scope('active')->array();
+ * ```
+ *
+ * ### 仮想カラム
+ *
+ * `(get|set)VirtualNameColumn` というメソッドを定義すると仮想カラムとしてアクセスできるようになる（仮想カラムに関しては {@link Database::overrideColumns()} を参照）。
+ * 参照時は get, 更新時は set が呼ばれる。
+ * 実処理はメソッド本体だが、アノテーションを用いて implicit や type 属性を指定できる（ここでは記述できないのでテストを参照）。
+ *
+ * ```php
+ * // full_name という仮想カラムを定義（取得）
+ * public function getFullNameColumn()
+ * {
+ *     return 'CONCAT(first_name, " ", family_name)';
+ * }
+ * // full_name という仮想カラムを定義（設定）
+ * public function setFullNameColumn($value, $row)
+ * {
+ *     $parts = explode(' ', $value);
+ *     return [
+ *         'first_name'  => $parts[0],
+ *         'family_name' => $parts[1],
+ *     ];
+ * }
  * ```
  *
  * ### Traversable, Countable
@@ -758,13 +789,19 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         return [
             // 直接回した場合のフェッチモード
-            'defaultIteration'  => 'array',
+            'defaultIteration'      => 'array',
             // マジック JOIN 時のデフォルトモード
-            'defaultJoinMethod' => 'auto',
+            'defaultJoinMethod'     => 'auto',
             // affect 系で無視するスコープ
-            'ignoreAffectScope' => [], // for compatible. In the future the default will be ['']
+            'ignoreAffectScope'     => [], // for compatible. In the future the default will be ['']
             // bindScope が上書きか累積か
-            'overrideBindScope' => false, // for compatible. In the future the default will be true or delete
+            'overrideBindScope'     => false, // for compatible. In the future the default will be true or delete
+            // スコープや仮想カラムのメソッドを自動登録するか
+            'registerSpecialMethod' => false, // for compatible. In the future the default will be true or delete
+            // メソッドベーススコープの命名規則
+            'scopeRenamer'          => function ($name) { return lcfirst($name); },
+            // メソッドベース仮想カラムの命名規則
+            'columnRenamer'         => function ($name) { return snake_case($name); },
         ];
     }
 
@@ -792,6 +829,42 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             $default['defaultJoinMethod'] = $this->defaultJoinMethod;
         }
         $this->setDefault($default + $database->getOptions());
+
+        if ($this->getUnsafeOption('registerSpecialMethod')) {
+            $scope_renamer = $this->getUnsafeOption('scopeRenamer');
+            $column_renamer = $this->getUnsafeOption('columnRenamer');
+            $vcolumns = [];
+            foreach (get_class_methods($this) as $method) {
+                if (preg_match('#^scope(.+)#i', $method, $m)) {
+                    $this->addScope($scope_renamer($m[1]), function (...$args) use ($method) {
+                        $this->$method(...$args);
+                        return $this;
+                    });
+                }
+                if (preg_match('#^(get|set)(.+?)Column$#i', $method, $m)) {
+                    $rmethod = new \ReflectionMethod($this, $method);
+                    $attrs = parse_annotation($rmethod);
+                    if (strcasecmp($m[1], 'get') === 0) {
+                        $vcolumns[$column_renamer($m[2])] = array_replace($attrs, [
+                            'select' => $rmethod->getClosure($this),
+                        ]);
+                    }
+                    if (strcasecmp($m[1], 'set') === 0) {
+                        $vcolumns[$column_renamer($m[2])] = array_replace($attrs, [
+                            'affect' => $rmethod->getClosure($this),
+                        ]);
+                    }
+                }
+            }
+            $this->database->overrideColumns([
+                $table_name => array_map(function ($col) {
+                    return array_replace([
+                        'lazy'     => true,
+                        'implicit' => false,
+                    ], $col);
+                }, $vcolumns),
+            ]);
+        }
 
         $this->addScope('');
         $this->setProvider(function () {
