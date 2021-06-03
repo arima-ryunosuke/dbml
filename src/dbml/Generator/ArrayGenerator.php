@@ -34,7 +34,7 @@ class ArrayGenerator extends AbstractGenerator
 
     protected function generateHead($resource)
     {
-        return fwrite($resource, "<?php return array(\n");
+        return fwrite($resource, /** @lang text */ "<?php return array(\n");
     }
 
     protected function generateBody($resource, $key, $value, $first_flg)

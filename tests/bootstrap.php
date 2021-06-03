@@ -6,6 +6,14 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/annotation.php';
 require_once __DIR__ . '/classess.php';
 
+function var_pretty($v, ...$args)
+{
+    return \ryunosuke\dbml\var_pretty($v, [
+        'return' => false,
+        'trace'  => true,
+    ]);
+}
+
 (function () {
     if (DIRECTORY_SEPARATOR === '\\') {
         $tmpdir = $_SERVER['TMP'] ?? $_SERVER['TEMP'] ?? null;

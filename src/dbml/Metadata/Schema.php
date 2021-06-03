@@ -423,7 +423,7 @@ class Schema
         }
         $lazykeys = $this->lazyForeignKeys[$table_name] ?? [];
         $this->lazyForeignKeys[$table_name] = [];
-        foreach ($lazykeys ?? [] as $fkname => $fk) {
+        foreach ($lazykeys ?? [] as $fk) {
             $this->addForeignKey($fk());
         }
         return $this->foreignKeys[$table_name];
@@ -516,7 +516,6 @@ class Schema
                 }
 
                 // キー指定がないなら唯一のものを、あるならそれを取得
-                $fkey = null;
                 if ($fkeyname === null) {
                     if ($fcount >= 2) {
                         throw new \UnexpectedValueException('ambiguous foreign keys ' . implode(', ', array_keys($fkeys)) . '.');
@@ -603,7 +602,7 @@ class Schema
 
         // テーブルとカラムが一致するものがあるなら例外
         $fkeys = $this->getTableForeignKeys($lTable);
-        foreach ($fkeys as $fname => $fk) {
+        foreach ($fkeys as $fk) {
             if ($fTable === $fk->getForeignTableName()) {
                 if ($lCols === $fk->getLocalColumns() && $fCols === $fk->getForeignColumns()) {
                     throw new \UnexpectedValueException('foreign key already defined same.');

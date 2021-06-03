@@ -552,7 +552,7 @@ class Transaction
             'logger' => new Logger([
                 'destination' => function ($log) use (&$logs) { $logs[] = $log; },
                 'metadata'    => [],
-            ])
+            ]),
         ]);
 
         $finally = $cx->_ready(true);

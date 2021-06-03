@@ -581,7 +581,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
                 $andconds = [];
                 foreach ($wheres as $where) {
                     $orconds = [];
-                    foreach ($where as $c => $v) {
+                    foreach ($where as $v) {
                         if ($v instanceof Queryable) {
                             $orconds[] = $v->merge($params);
                         }

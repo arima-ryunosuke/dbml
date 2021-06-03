@@ -526,14 +526,14 @@ AND ((flag=1))", "$gw");
             return [
                 'where' => [
                     'id' => $val,
-                ]
+                ],
             ];
         });
         $gateway->addScope('scope2', function ($val) {
             return [
                 'where' => [
                     'name' => $val,
-                ]
+                ],
             ];
         });
         $gateway->addScope('scope3', ['id2' => 'id']);
@@ -566,7 +566,7 @@ AND ((flag=1))", "$gw");
             'idname' => '2b',
         ], $gateway->tuple([
             'id',
-            'idname' => $database->getCompatiblePlatform()->getConcatExpression('id', 'name')
+            'idname' => $database->getCompatiblePlatform()->getConcatExpression('id', 'name'),
         ], ['id' => 2]));
     }
 
@@ -582,7 +582,7 @@ AND ((flag=1))", "$gw");
                     'where' => [
                         'class' => get_class($this),
                         'alias' => $this->alias(),
-                    ]
+                    ],
                 ];
             }
         });
@@ -630,12 +630,12 @@ AND ((flag=1))", "$gw");
     {
         $gateway->addScope('hoge', function ($hoge) {
             return [
-                'where' => ['hoge' => $hoge]
+                'where' => ['hoge' => $hoge],
             ];
         });
         $gateway->addScope('empty', function () {
             return [
-                'where' => ['empty' => 99]
+                'where' => ['empty' => 99],
             ];
         });
 
@@ -880,10 +880,10 @@ AND ((flag=1))", "$gw");
         ]);
         $max = $platform->quoteSingleIdentifier('foreign_c1.id@max');
         $count = $platform->quoteSingleIdentifier('*@count');
-        $this->assertContains("(SELECT MAX(foreign_c1.id) AS $max FROM foreign_c1 WHERE foreign_c1.id = foreign_p.id) AS submax", $queryInto($stmt, ['id' => 1]));
-        $this->assertContains("(SELECT COUNT(*) AS $count FROM foreign_c2 WHERE foreign_c2.cid = foreign_p.id) AS subcount", $queryInto($stmt, ['id' => 1]));
-        $this->assertContains("(EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = foreign_p.id))", $queryInto($stmt, ['id' => 1]));
-        $this->assertContains("(NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = foreign_p.id))", $queryInto($stmt, ['id' => 1]));
+        $this->assertStringContainsString("(SELECT MAX(foreign_c1.id) AS $max FROM foreign_c1 WHERE foreign_c1.id = foreign_p.id) AS submax", $queryInto($stmt, ['id' => 1]));
+        $this->assertStringContainsString("(SELECT COUNT(*) AS $count FROM foreign_c2 WHERE foreign_c2.cid = foreign_p.id) AS subcount", $queryInto($stmt, ['id' => 1]));
+        $this->assertStringContainsString("(EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = foreign_p.id))", $queryInto($stmt, ['id' => 1]));
+        $this->assertStringContainsString("(NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = foreign_p.id))", $queryInto($stmt, ['id' => 1]));
 
         // insert
         $stmt = $gateway->prepareInsert([':name', 'id' => new Expression(':id')]);
@@ -921,19 +921,19 @@ AND ((flag=1))", "$gw");
     {
         // 素で呼ぶと全件
         $this->assertEquals(10, $gateway->count());
-        $this->assertEquals(10, count($gateway));
+        $this->assertCount(10, $gateway);
 
         // where 後はその結果
         $this->assertEquals(3, $gateway->where(['id' => [1, 2, 3]])->count());
         $this->assertEquals(1, $gateway->where(['id' => [1, 2, 3]])->count('*', ['name' => 'b']));
 
         // iterate 後はキャッシュ結果
-        $this->assertEquals(3, count($gateway->where(['id' => [1, 2, 3]])));
-        $this->assertEquals(1, count($gateway->where(['id' => [1, 2, 3]])->where(['name' => 'b'])));
+        $this->assertCount(3, $gateway->where(['id' => [1, 2, 3]]));
+        $this->assertCount(1, $gateway->where(['id' => [1, 2, 3]])->where(['name' => 'b']));
 
         // 上記の操作はオリジナルに一切影響を与えない（全件のまま）
         $this->assertEquals(10, $gateway->count());
-        $this->assertEquals(10, count($gateway));
+        $this->assertCount(10, $gateway);
     }
 
     /**
@@ -1139,7 +1139,7 @@ AND ((flag=1))", "$gw");
             'idname' => '2b',
         ], $gateway->tuple([
             'id',
-            'idname' => $database->getCompatiblePlatform()->getConcatExpression('id', 'name')
+            'idname' => $database->getCompatiblePlatform()->getConcatExpression('id', 'name'),
         ], ['id' => 2]));
 
         $this->assertEquals([
@@ -1329,7 +1329,7 @@ AND ((flag=1))", "$gw");
 
         // truncate すると全て吹き飛ぶはず
         $gateway->truncate();
-        $this->assertEquals(0, $count = $gateway->count());
+        $this->assertEquals(0, $gateway->count());
 
         /// array 系
         $gateway->insertArray([
@@ -1663,14 +1663,14 @@ AND ((flag=1))", "$gw");
             't_comment'  => [
                 [
                     'comment' => 'saved comment',
-                ]
+                ],
             ],
         ]);
         $this->assertEquals([
             'article_id' => 3,
             't_comment'  => [
                 [
-                    'comment_id' => 4
+                    'comment_id' => 4,
                 ],
             ],
         ], $primary);
@@ -1703,7 +1703,7 @@ AND ((flag=1))", "$gw");
         $article = $t_article->pk($primary['article_id'])->tuple([
             'article_id',
             't_comment comments' => [
-                'comment_id'
+                'comment_id',
             ],
         ]);
         $this->assertEquals([
@@ -1933,7 +1933,7 @@ FROM t_article Article", $Article->column([
                 'tests2s' => [
                     1 => [
                         'id'    => '1',
-                        'name2' => 'A'
+                        'name2' => 'A',
                     ],
                 ],
             ],
@@ -1965,34 +1965,34 @@ FROM t_article Article", $Article->column([
 
         // 素。何も問題ない
         $query = $t_article->as('A')->where([
-            $t_comment->as('C')->subexists()
+            $t_comment->as('C')->subexists(),
         ])->select()->queryInto();
         $this->assertEquals('SELECT * FROM t_article A WHERE (EXISTS (SELECT * FROM t_comment C WHERE C.article_id = A.article_id))', $query);
 
         // emptyCondition
         $query = $t_article->as('A')->where([
-            $t_comment->as('C')->subexists('*', ['!id' => null])
+            $t_comment->as('C')->subexists('*', ['!id' => null]),
         ])->select()->queryInto();
         $this->assertEquals('SELECT * FROM t_article A', $query);
 
         // サブクエリ
         $query = $t_article->as('A')->where([
-            'article_id' => $t_comment->as('C')->select('article_id')
+            'article_id' => $t_comment->as('C')->select('article_id'),
         ])->select()->queryInto();
         $this->assertEquals('SELECT * FROM t_article A WHERE A.article_id IN (SELECT C.article_id FROM t_comment C)', $query);
 
         // 結合テーブル明示（動いていない時代があった）
         $query = $t_article->as('A')->where([
-            'A' => $t_comment->as('C')->subexists()
+            'A' => $t_comment->as('C')->subexists(),
         ])->select()->queryInto();
         $this->assertEquals('SELECT * FROM t_article A WHERE (EXISTS (SELECT * FROM t_comment C WHERE C.article_id = A.article_id))', $query);
 
         // HAVING や ORDER の自動修飾子は邪魔なだけ…なんだが場合によっては WHERE に関数カマすこともあるし、それを言い出すと「自動修飾自体が邪魔」となる
         // 将来的には「自動修飾オプション」を設ける。このテストはさしあたり「.があれば修飾されない」を確認するもの
         $query = $t_article->as('A')->having([
-            'FUNC(A.article_id)' => 1
+            'FUNC(A.article_id)' => 1,
         ])->orderBy([
-            'FUNC(A.article_id)' => 'ASC'
+            'FUNC(A.article_id)' => 'ASC',
         ])->select()->queryInto();
         $this->assertEquals("SELECT * FROM t_article A HAVING FUNC(A.article_id) = '1' ORDER BY FUNC(A.article_id) ASC", $query);
     }
@@ -2073,17 +2073,17 @@ FROM t_article Article", $Article->column([
         // Join 記法も受け付けられるので一応テスト
         $select = $Article->as('A')->column([
             'article_id',
-            '+t_comment C' => []
+            '+t_comment C' => [],
         ])->select(null);
         $this->assertEquals('SELECT A.article_id FROM t_article A INNER JOIN t_comment C ON C.article_id = A.article_id', "$select");
 
         $select = $Article->as('A')->column([
-            '+t_comment C' => []
+            '+t_comment C' => [],
         ])->select(null);
         $this->assertEquals('SELECT * FROM t_article A INNER JOIN t_comment C ON C.article_id = A.article_id', "$select");
 
         $select = $Article->as('A')->column([
-            '+C' => $t_comment->column([])
+            '+C' => $t_comment->column([]),
         ])->select(null);
         $this->assertEquals('SELECT * FROM t_article A INNER JOIN t_comment C ON C.article_id = A.article_id', "$select");
     }

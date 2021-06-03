@@ -32,13 +32,11 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test___callStatic()
     {
-        /** @var Operator $actual */
-
-        /** @noinspection PhpUndefinedMethodInspection */
         $actual = Operator::BETWEEN('columnName', [1, 2]);
         $this->assertEquals('columnName BETWEEN ? AND ?', $actual);
         $this->assertEquals([1, 2], $actual->getParams());
 
+        /** @noinspection PhpUndefinedMethodInspection */
         $actual = Operator::MATCH('hoge');
         $actual->lazy('columnName');
         $this->assertEquals('MATCH (columnName) AGAINST (?)', $actual);

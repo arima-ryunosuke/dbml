@@ -174,7 +174,7 @@ use ryunosuke\dbml\Utility\Adhoc;
  * @method array                  getAutoCastType()
  * @nethod self                   setAutoCastType($array) 実際に定義している
  * @method string                 getInjectCallStack()
- * @method $this                  setInjectCallStack(string|array $string)
+ * @method $this                  setInjectCallStack(string|array|callable $string)
  * @method bool                   getMasterMode()
  * @method $this                  setMasterMode($bool)
  * @method string                 getCheckSameColumn()
@@ -694,7 +694,7 @@ class Database
                 // なお、クロージャの $this は「その Type」でバインドされる
                 'piyo'                  => [
                     'select' => function ($value, AbstractPlatform $platform) { return Type::getType('string')->convertToPHPValue($value, $platform); },
-                    'affect' => function ($value, AbstractPlatform $platform) { return Type::getType('string')->convertToDatabaseValue($value, $platform); }
+                    'affect' => function ($value, AbstractPlatform $platform) { return Type::getType('string')->convertToDatabaseValue($value, $platform); },
                 ],
                 // いずれにせよ上記の hoge,fuga,piyo のようにそもそも Type::hasType ではないものは無視される
             ],
@@ -1444,7 +1444,7 @@ class Database
         $params = array_fill_keys(array_keys($columns), []);
         $pvals = [];
         $result = [];
-        foreach ($rows as $n => $row) {
+        foreach ($rows as $row) {
             if (!is_array($row)) {
                 throw new \InvalidArgumentException('$data\'s element must be array.');
             }
@@ -1545,7 +1545,7 @@ class Database
         }
         // Expression や QueryBuilder はどうしようもないのでクエリを投げて取得
         // 例えば modify メソッドの列に↑のようなオブジェクトが来てかつ UPDATE された場合、lastInsertId は得られない
-        foreach ($primary as $cname => $val) {
+        foreach ($primary as $val) {
             if (is_object($val)) {
                 return $this->selectTuple([$tableName => array_keys($pcols)], $primary);
             }
@@ -1756,7 +1756,7 @@ class Database
     public function echoPhpStormMeta($innerOnly = false, $filename = null, $namespace = null)
     {
         $export = function ($value, $nest = 0, $parents = []) use (&$export) {
-            if (!is_array($value)) {
+            if (!is_array($value) || !$value) {
                 return var_export($value, true);
             }
 
@@ -3248,7 +3248,7 @@ class Database
         }
 
         // 検索ワードの正規化
-        $is_numeric = $quoted ? false : is_numeric($word);
+        $is_numeric = !$quoted && is_numeric($word);
         $date_fromto = $quoted ? false : date_fromto(null, $word);
         if ($quoted) {
             $inwords = '%' . $this->getCompatiblePlatform()->escapeLike($word) . '%';
@@ -3413,7 +3413,7 @@ class Database
      *
      * @used-by fetchArrayOrThrow()
      *
-     * @param string|QueryBuilder $sql クエリ
+     * @param string|QueryBuilder|Statement $sql クエリ
      * @param iterable $params bind パラメータ
      * @return array|Entityable[] クエリ結果
      */
@@ -3446,7 +3446,7 @@ class Database
      *
      * @used-by fetchAssocOrThrow()
      *
-     * @param string|QueryBuilder $sql クエリ
+     * @param string|QueryBuilder|Statement $sql クエリ
      * @param iterable $params bind パラメータ
      * @return array|Entityable[] クエリ結果
      */
@@ -3473,7 +3473,7 @@ class Database
      *
      * @used-by fetchListsOrThrow()
      *
-     * @param string|QueryBuilder $sql クエリ
+     * @param string|QueryBuilder|Statement $sql クエリ
      * @param iterable $params bind パラメータ
      * @return array|Entityable[] クエリ結果
      */
@@ -3500,7 +3500,7 @@ class Database
      *
      * @used-by fetchPairsOrThrow()
      *
-     * @param string|QueryBuilder $sql クエリ
+     * @param string|QueryBuilder|Statement $sql クエリ
      * @param iterable $params bind パラメータ
      * @return array|Entityable[] クエリ結果
      */
@@ -3535,7 +3535,7 @@ class Database
      *
      * @used-by fetchTupleOrThrow()
      *
-     * @param string|QueryBuilder $sql クエリ
+     * @param string|QueryBuilder|Statement $sql クエリ
      * @param iterable $params bind パラメータ
      * @return array|Entityable|false クエリ結果
      */
@@ -3570,7 +3570,7 @@ class Database
      *
      * @used-by fetchValueOrThrow()
      *
-     * @param string|QueryBuilder $sql クエリ
+     * @param string|QueryBuilder|Statement $sql クエリ
      * @param iterable $params bind パラメータ
      * @return mixed クエリ結果
      */
@@ -3605,13 +3605,13 @@ class Database
             /// 配列の配列系
             case self::METHOD_ARRAY:
                 $result = [];
-                foreach ($row_provider as $n => $row) {
+                foreach ($row_provider as $row) {
                     $result[] = $converter ? $converter($row) : $row;
                 }
                 return $result;
             case self::METHOD_ASSOC:
                 $result = [];
-                foreach ($row_provider as $n => $row) {
+                foreach ($row_provider as $row) {
                     foreach ($row as $e) {
                         $key = $e;
                         break;
@@ -3624,7 +3624,7 @@ class Database
             /// 配列系
             case self::METHOD_LISTS:
                 $result = [];
-                foreach ($row_provider as $n => $row) {
+                foreach ($row_provider as $row) {
                     $row = $converter ? $converter($row) : $row;
                     foreach ($row as $e) {
                         $val = $e;
@@ -3636,7 +3636,7 @@ class Database
                 return $result;
             case self::METHOD_PAIRS:
                 $result = [];
-                foreach ($row_provider as $n => $row) {
+                foreach ($row_provider as $row) {
                     foreach ($row as $e) {
                         $key = $e;
                         break;
@@ -3658,7 +3658,7 @@ class Database
             case self::METHOD_TUPLE:
                 $result = false;
                 $first = true;
-                foreach ($row_provider as $n => $row) {
+                foreach ($row_provider as $row) {
                     if ($first) {
                         $first = false;
                         $result = $converter ? $converter($row) : $row;
@@ -3671,7 +3671,7 @@ class Database
             case self::METHOD_VALUE:
                 $result = false;
                 $first = true;
-                foreach ($row_provider as $n => $row) {
+                foreach ($row_provider as $row) {
                     if ($first) {
                         $first = false;
                         $row = $converter ? $converter($row) : $row;
@@ -5474,7 +5474,7 @@ class Database
             }
         }
 
-        foreach ($col_group as $gid => $group) {
+        foreach ($col_group as $group) {
             if ($group['bulks'] ?? []) {
                 $this->modifyArray($tableName, $group['bulks'], ...[[], 0, $opt]);
             }
@@ -6037,7 +6037,6 @@ class Database
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
         $tableName = $this->_preaffect($tableName, []);
-        $aliasName = null;
 
         $tableName = $this->convertTableName($tableName);
         $identifier = $this->_prewhere($tableName, $identifier);
@@ -6635,5 +6634,25 @@ class Database
             $cache[$yaml] = $result;
         }
         return $cache[$yaml];
+    }
+
+    /**
+     * 初期状態に戻す
+     *
+     * このメソッドはテスト用なので運用コードで決して呼んではならない。
+     *
+     * @internal
+     * @ignore
+     * @codeCoverageIgnore
+     *
+     * @return $this
+     */
+    public function refresh()
+    {
+        $this->getUnsafeOption('cacheProvider')->clear();
+        $this->cache = [];
+        $this->txConnection = $this->getMasterConnection();
+        $this->affectedRows = null;
+        return $this->unstackAll();
     }
 }

@@ -70,7 +70,7 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->fail();
         }
         catch (\Exception $ex) {
-            $this->assertContains('does not exists', $ex->getMessage());
+            $this->assertStringContainsString('does not exists', $ex->getMessage());
         }
     }
 

@@ -1010,7 +1010,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     }
                 }
                 // サブビルダにも適用する
-                foreach ($this->subbuilders as $subkey => $subbuilder) {
+                foreach ($this->subbuilders as $subbuilder) {
                     $subbuilder->$subtype([$cond => $param]);
                 }
                 return $subcond;
@@ -1285,7 +1285,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     $children = [];
                     $counter = [];
                     $child_rows = $subdatabase->fetchArray($this);
-                    foreach ($child_rows as $nc => $child_row) {
+                    foreach ($child_rows as $child_row) {
                         $pckey = $child_row[Database::AUTO_PARENT_KEY];
                         if ($suboffset !== null || $sublength !== null) {
                             $counter[$pckey] = ($counter[$pckey] ?? 0) + 1;
@@ -2168,7 +2168,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $stdclasses = array_unset($condition, function ($v) { return $v instanceof \stdClass; }, []);
 
         if ($fromAlias) {
-            foreach ($stdclasses as $n => $cond) {
+            foreach ($stdclasses as $cond) {
                 $condition = array_merge(array_sprintf((array) $cond, function ($v, $k) use ($joinAlias, $fromAlias) {
                     return sprintf('%s.%s = %s.%s', $joinAlias, is_int($k) ? $v : $k, $fromAlias, $v);
                 }), $condition);

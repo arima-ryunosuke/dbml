@@ -368,7 +368,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         if ($platform instanceof SQLServerPlatform) {
             $expected = 'SET IDENTITY_INSERT t_table ON';
-            $this->assertContains($expected, $cplatform->getIdentityInsertSQL('t_table', true));
+            $this->assertStringContainsString($expected, $cplatform->getIdentityInsertSQL('t_table', true));
         }
         else {
             $expected = new DBALException('is not supported by platform');
@@ -384,7 +384,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_getTruncateTableSQL($cplatform, $platform)
     {
         $expected = $platform instanceof PostgreSqlPlatform ? 'RESTART IDENTITY' : 't_table';
-        $this->assertContains($expected, $cplatform->getTruncateTableSQL('t_table'));
+        $this->assertStringContainsString($expected, $cplatform->getTruncateTableSQL('t_table'));
     }
 
     /**
@@ -440,7 +440,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_getSpaceshipSyntax($cplatform, $platform)
     {
         $expected = $platform instanceof MySqlPlatform ? '<=>' : 'IS NULL OR';
-        $this->assertContains($expected, $cplatform->getSpaceshipSyntax('hoge'));
+        $this->assertStringContainsString($expected, $cplatform->getSpaceshipSyntax('hoge'));
     }
 
     /**
@@ -867,7 +867,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function assertExpression(Expression $expr, $expectedQuery, array $expectedparams)
     {
-        $this->assertEquals($expectedQuery, "$expr");
+        $this->assertEquals($expectedQuery, (string) $expr);
         $this->assertEquals($expectedparams, $expr->getParams());
     }
 }

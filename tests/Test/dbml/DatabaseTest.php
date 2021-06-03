@@ -460,13 +460,13 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // クラス名
         $database = new Database(DriverManager::getConnection(['url' => 'sqlite:///:memory:']), [
-            'compatiblePlatform' => get_class($cplatform)
+            'compatiblePlatform' => get_class($cplatform),
         ]);
         $this->assertInstanceOf(get_class($cplatform), $database->getCompatiblePlatform());
 
         // インスタンス
         $database = new Database(DriverManager::getConnection(['url' => 'sqlite:///:memory:']), [
-            'compatiblePlatform' => $cplatform
+            'compatiblePlatform' => $cplatform,
         ]);
         $this->assertSame($cplatform, $database->getCompatiblePlatform());
     }
@@ -678,7 +678,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             'START TRANSACTION',
             'INSERT INTO test (id) VALUES (1)',
             'SELECT test.* FROM test WHERE id = 1',
-            'ROLLBACK'
+            'ROLLBACK',
         ], $logs);
 
         // master/slave 個別設定
@@ -703,11 +703,11 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals([
             'START TRANSACTION',
             'INSERT INTO test (id) VALUES (1)',
-            'ROLLBACK'
+            'ROLLBACK',
         ], $masterlogs);
 
         $this->assertEquals([
-            'SELECT test.* FROM test WHERE id = 1'
+            'SELECT test.* FROM test WHERE id = 1',
         ], $slavelogs);
     }
 
@@ -841,7 +841,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['t_comment_t_article_0'], $fkeys);
         $this->assertEquals([
             'fk_articlecomment',
-            't_comment_t_article_0'
+            't_comment_t_article_0',
         ], array_keys($database->getSchema()->getTableForeignKeys('t_comment')));
 
         // 後処理
@@ -862,7 +862,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         // 外部キーを削除すると・・・
         $fkey = $database->ignoreForeignKey('foreign_c1', 'foreign_p', 'id');
         // リレーションが消えるはず
-        $this->assertContains('ON 1', (string ) $database->select('foreign_p P + foreign_c1 C'));
+        $this->assertStringContainsString('ON 1', (string ) $database->select('foreign_p P + foreign_c1 C'));
         // 戻り値は外部キーオブジェクトのはず
         $this->assertInstanceOf(Schema\ForeignKeyConstraint::class, $fkey);
 
@@ -870,7 +870,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertException('foreign key is not found', L($database)->ignoreForeignKey('foreign_c1', 'foreign_p', 'id'));
 
         // まず test1<->test2 のリレーションがないことを担保して・・・
-        $this->assertContains('ON 1', (string ) $database->select('foreign_p P + foreign_c1 C'));
+        $this->assertStringContainsString('ON 1', (string ) $database->select('foreign_p P + foreign_c1 C'));
         // 仮想キーを追加すると・・・
         $database->addForeignKey('foreign_c1', 'foreign_p', 'id');
         // リレーションが発生するはず
@@ -980,10 +980,10 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 'test' => null,
             ],
             'EtoT'         => [
-                'TestClass' => 'test'
+                'TestClass' => 'test',
             ],
             'TtoE'         => [
-                'test' => ['TestClass']
+                'test' => ['TestClass'],
             ],
         ], $tableMap());
 
@@ -1002,7 +1002,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $hogefuga = $database->getCompatiblePlatform()->getConcatExpression('?', ':fuga');
         $stmt = $database->prepare("select $hogefuga as hogefuga", ['hoge']);
         $this->assertEquals([
-            'hogefuga' => 'hogefuga'
+            'hogefuga' => 'hogefuga',
         ], $database->fetchTuple($stmt, ['fuga' => 'fuga']));
 
         // 様々なメソッドで fetch できるはず
@@ -1030,7 +1030,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             'foreign_p' => [
                 $database->submax('foreign_c1.id'),
                 $database->subcount('foreign_c2'),
-            ]
+            ],
         ], [
             'id = :id',
             $database->subexists('foreign_c1'),
@@ -1125,7 +1125,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             '' => [
                 'NULL as a',
                 "'' as a",
-            ]
+            ],
         ]));
         $database->setAutoCastType(['guid' => true]);
         $this->assertEquals(['id' => '1'], $database->fetchTuple('select 1 as "A.id", 1 as "B.id" from test where id = 1'));
@@ -1140,7 +1140,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 'NULL as a',
                 'NULL as a',
                 "'' as a",
-            ]
+            ],
         ], [], [], 1));
         $this->assertException('cause loose', L($database)->selectAssoc([
             'test',
@@ -1148,7 +1148,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 'NULL as a',
                 '0 as a',
                 '1 as a',
-            ]
+            ],
         ]));
         $database->setAutoCastType(['guid' => true]);
         $this->assertEquals(['id' => '1'], $database->fetchTuple('select NULL as "A.id", 1 as "B.id", 1 as "C.id" from test where id = 1'));
@@ -1167,7 +1167,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                         'NULL as a',
                         '0 as a',
                         '1 as a',
-                    ]
+                    ],
                 ]),
             ],
         ], ['id' => 1])));
@@ -1424,7 +1424,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 [
                     'or_column1' => 'hoge',
                     'or_column2' => 'fuga',
-                ]
+                ],
             ])
             , true);
     }
@@ -1610,8 +1610,8 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['hoge IN(?) OR fuga IN(?,?)'], $whereInto([
             'hoge IN(?) OR fuga IN(?)' => new \ArrayObject([
                 new \ArrayObject([1]),
-                new \ArrayObject([2, 3])
-            ])
+                new \ArrayObject([2, 3]),
+            ]),
         ]));
         $this->assertEquals([1, 2, 3], $params);
 
@@ -1879,7 +1879,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                         'cond8' => 8,
                     ],
                 ],
-            ]
+            ],
         ], $params);
         $this->assertEquals([
             'cond1 = ?',
@@ -1900,7 +1900,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             [
                 'opt1' => ['evil2' => 'evil2'],
                 'opt2' => ['evil3', 'evil4'],
-            ]
+            ],
         ], $params);
         $this->assertEquals(['id IN (?)', '(opt1 IN (?)) OR (opt2 IN (?,?))'], $where);
         $this->assertEquals(['evil1', 'evil2', 'evil3', 'evil4'], $params);
@@ -1940,7 +1940,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                     'name'   => 'b',
                 ],
             ], $database->selectArray('multiprimary M', [
-                '(mainid, subid)' => [[1, 1], [1, 2]]
+                '(mainid, subid)' => [[1, 1], [1, 2]],
             ]));
         }
     }
@@ -1970,7 +1970,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 "(EXISTS (SELECT * FROM test2 WHERE (id = ?) AND (name2 = ?)))",
                 "?",
                 "(select 1)",
-            ])
+            ]),
         ], $where);
         $this->assertEquals([null, 0, 'hoge', 1, 'fuga', 'dummy'], $params);
         $this->assertStringIgnoreBreak("NULL and
@@ -2117,7 +2117,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
         ], $database->gather('g_ancestor', ['' => 2], [
             'g_parent' => [
-                'parent_id' => 3
+                'parent_id' => 3,
             ],
             'g_child'  => [
                 'child_id <= ?' => 5,
@@ -2167,7 +2167,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $row = $database->select([
             't_article.*' => [
                 'children' => $database->subselectAssoc('t_comment ManagedComment'),
-            ]
+            ],
         ])->limit(1)->cast()->tuple();
         $this->assertInstanceOf(Article::class, $row);
         $this->assertContainsOnlyInstancesOf(ManagedComment::class, $row['children']);
@@ -2182,14 +2182,14 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $row3 = $database->select([
             't_article.*' => [
                 't_comment' => ['*'],
-            ]
+            ],
         ])->limit(1)->cast()->tuple();
 
         // 完全指定呼び出しが・・・
         $row4 = $database->select([
             't_article.*' => [
                 'Comment' => $database->subselectAssoc('t_comment'),
-            ]
+            ],
         ])->limit(1)->cast()->tuple();
 
         // 全て一致するはず
@@ -2202,7 +2202,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $row2 = $database->selectTuple([
             't_article.*' => [
                 't_comment AS hogera' => ['*'],
-            ]
+            ],
         ], [], [], 1);
         $this->assertArrayHasKey('hogera', $row2);
     }
@@ -2220,7 +2220,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals([
             'id'   => 6,
             'name' => 'f',
-            'data' => ''
+            'data' => '',
         ], $val);
     }
 
@@ -2237,7 +2237,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals([
             'id'   => 6,
             'name' => 'f',
-            'data' => ''
+            'data' => '',
         ], $val);
     }
 
@@ -2251,7 +2251,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals([
             'f',
             'g',
-            'h'
+            'h',
         ], $cols);
     }
 
@@ -2277,7 +2277,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $row = $database->selectTuple('test.id,name', [], [], [5 => 1]);
         $this->assertEquals([
             'id'   => 6,
-            'name' => 'f'
+            'name' => 'f',
         ], $row);
 
         $one = $database->selectTuple('test.id,name', ['1=0']);
@@ -2344,7 +2344,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 'cint',
                 'cdatetime',
                 'carray',
-            ]
+            ],
         ], [], [], 1);
         $this->assertSame(1, $row['cint']);
         $this->assertInstanceOf('\DateTime', $row['cdatetime']);
@@ -2361,8 +2361,8 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         ], $database->selectTuple([
             't_article' => [
                 'article_id',
-                't_comment comments' => ['comment_id']
-            ]
+                't_comment comments' => ['comment_id'],
+            ],
         ], [], [], 1));
 
         if ($database->getCompatiblePlatform()->supportsTableNameAttribute()) {
@@ -2507,14 +2507,14 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_echoAnnotation($database)
     {
         $annotation = $database->echoAnnotation('ryunosuke\\Test\\dbml\\Annotation', __DIR__ . '/../../annotation.php');
-        $this->assertContains('namespace ryunosuke\\Test\\dbml\\Annotation;', $annotation);
-        $this->assertContains('trait Database{}', $annotation);
-        $this->assertContains('trait TableGateway{}', $annotation);
-        $this->assertContains('trait ArticleTableGateway{}', $annotation);
-        $this->assertContains('trait CommentTableGateway{}', $annotation);
-        $this->assertContains('trait ArticleEntity{}', $annotation);
-        $this->assertContains('trait CommentEntity{}', $annotation);
-        $this->assertContains('$tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []', $annotation);
+        $this->assertStringContainsString('namespace ryunosuke\\Test\\dbml\\Annotation;', $annotation);
+        $this->assertStringContainsString('trait Database{}', $annotation);
+        $this->assertStringContainsString('trait TableGateway{}', $annotation);
+        $this->assertStringContainsString('trait ArticleTableGateway{}', $annotation);
+        $this->assertStringContainsString('trait CommentTableGateway{}', $annotation);
+        $this->assertStringContainsString('trait ArticleEntity{}', $annotation);
+        $this->assertStringContainsString('trait CommentEntity{}', $annotation);
+        $this->assertStringContainsString('$tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []', $annotation);
     }
 
     /**
@@ -2526,18 +2526,18 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $metafile = sys_get_temp_dir() . '/phpstormmeta';
         $phpstorm_meta = $database->echoPhpStormMeta(false, $metafile);
         $this->assertFileExists($metafile);
-        $this->assertContains('namespace PHPSTORM_META', $phpstorm_meta);
-        $this->assertContains('DateTime::class', $phpstorm_meta);
-        $this->assertContains('new \\ryunosuke\\dbml\\Entity\\Entityable', $phpstorm_meta);
-        $this->assertContains('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
-        $this->assertContains('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
+        $this->assertStringContainsString('namespace PHPSTORM_META', $phpstorm_meta);
+        $this->assertStringContainsString('DateTime::class', $phpstorm_meta);
+        $this->assertStringContainsString('new \\ryunosuke\\dbml\\Entity\\Entityable', $phpstorm_meta);
+        $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
+        $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
 
         $phpstorm_meta = $database->echoPhpStormMeta(true, null, 'EntityNamespace');
-        $this->assertNotContains('namespace PHPSTORM_META', $phpstorm_meta);
-        $this->assertContains('DateTime::class', $phpstorm_meta);
-        $this->assertContains('EntityNamespace', $phpstorm_meta);
-        $this->assertContains('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
-        $this->assertContains('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
+        $this->assertStringNotContainsString('namespace PHPSTORM_META', $phpstorm_meta);
+        $this->assertStringContainsString('DateTime::class', $phpstorm_meta);
+        $this->assertStringContainsString('EntityNamespace', $phpstorm_meta);
+        $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
+        $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
     }
 
     /**
@@ -2967,11 +2967,14 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 ],
             ]);
 
-            $this->assertEquals($g_ancestor += 0, $database->count('g_ancestor'));
-            $this->assertEquals($g_parent += 0, $database->count('g_parent'));
-            $this->assertEquals($g_child += 1, $database->count('g_child'));
-            $this->assertEquals($g_grand1 += 1, $database->count('g_grand1'));
-            $this->assertEquals($g_grand2 += 1, $database->count('g_grand2'));
+            /** @noinspection PhpUnusedLocalVariableInspection */
+            {
+                $this->assertEquals($g_ancestor += 0, $database->count('g_ancestor'));
+                $this->assertEquals($g_parent += 0, $database->count('g_parent'));
+                $this->assertEquals($g_child += 1, $database->count('g_child'));
+                $this->assertEquals($g_grand1 += 1, $database->count('g_grand1'));
+                $this->assertEquals($g_grand2 += 1, $database->count('g_grand2'));
+            }
 
             $this->assertEquals([
                 "ancestor_id" => 3,
@@ -3394,7 +3397,7 @@ INSERT INTO test (name) VALUES
             'C',
             'D',
             'e',
-            'f'
+            'f',
         ], $database->selectLists('test.name', [
             'id' => [1, 2, 3, 4, 5, 6],
         ]));
@@ -3428,7 +3431,7 @@ INSERT INTO test (name) VALUES
             'C',
             'D',
             'e',
-            'f'
+            'f',
         ], $database->selectLists('multiprimary.name', [
             'OR' => [
                 [
@@ -3455,7 +3458,7 @@ INSERT INTO test (name) VALUES
                     'mainid' => 2,
                     'subid'  => 6,
                 ],
-            ]
+            ],
         ], ['mainid', 'subid']));
     }
 
@@ -3567,7 +3570,7 @@ INSERT INTO test (name) VALUES
             'C',
             'D',
             'nothing',
-            'zzz'
+            'zzz',
         ], $database->selectLists('test.name', [
             'id' => [1, 2, 3, 4, 990, 991],
         ]));
@@ -3580,7 +3583,7 @@ INSERT INTO test (name) VALUES
         ]);
         $this->assertEquals([
             'UUU',
-            'ZZZ'
+            'ZZZ',
         ], $database->selectLists('test.name', [
             'id' => [1, 999],
         ]));
@@ -3697,7 +3700,7 @@ INSERT INTO test (name) VALUES
 
         $pk = $database->modifyArray('test', [
             ['id' => 98, 'name' => 'xx'],
-            ['id' => 99, 'name' => 'yy']
+            ['id' => 99, 'name' => 'yy'],
         ]);
         $this->assertEquals(2, $pk);
         unset($manager);
@@ -3792,13 +3795,13 @@ INSERT INTO test (id, name) VALUES
     {
         // simple
         $database->insert('test', [
-            'name' => 'xx'
+            'name' => 'xx',
         ]);
         $this->assertEquals('xx', $database->selectValue('test.name', [], ['id' => 'desc'], 1));
 
         // into
         $database->insert('test', [
-            'name' => new Expression('UPPER(?)', 'lower')
+            'name' => new Expression('UPPER(?)', 'lower'),
         ]);
         $this->assertEquals('LOWER', $database->selectValue('test.name', [], ['id' => 'desc'], 1));
 
@@ -3868,14 +3871,14 @@ INSERT INTO test (id, name) VALUES
             ],
             '+foreign_c1' => [
                 'name' => new Expression("UPPER('fuga')"),
-            ]
+            ],
         ], ['seq' => 9]));
         $this->assertEquals([
             [
                 'id'    => '99',
                 'pname' => 'hoge',
                 'name'  => 'FUGA',
-                'seq'   => '9'
+                'seq'   => '9',
             ],
         ], $database->selectArray('foreign_p(99).*, name pname + foreign_c1.*'));
 
@@ -3886,7 +3889,7 @@ INSERT INTO test (id, name) VALUES
             ],
             '+foreign_c1' => [
                 'name' => new Expression("UPPER('fuga')"),
-            ]
+            ],
         ], ['seq' => 9]);
         $this->assertContains("INTO foreign_p (id, name) VALUES (99, 'hoge')", $sqls[0]);
         $this->assertContains("INTO foreign_c1 (seq, name, id) VALUES ('9', UPPER('fuga'), '99')", $sqls[1]);
@@ -3931,50 +3934,50 @@ INSERT INTO test (id, name) VALUES
     {
         // 連想配列
         $affected = $database->update('test', [
-            'name' => 'xx'
+            'name' => 'xx',
         ], [
-            'id <= ?' => 2
+            'id <= ?' => 2,
         ]);
         $this->assertEquals(2, $affected);
 
         // フラット配列
         $affected = $database->update('test', [
-            'name' => 'yy'
+            'name' => 'yy',
         ], [
-            'id <= 2'
+            'id <= 2',
         ]);
         $this->assertEquals(2, $affected);
 
         // key = value
         $affected = $database->update('test', [
-            'name' => 'YY'
+            'name' => 'YY',
         ], [
-            'id' => 2
+            'id' => 2,
         ]);
         $this->assertEquals(1, $affected);
 
         // 文字列 where
         $affected = $database->update('test', [
-            'name' => 'HH'
+            'name' => 'HH',
         ], '1=1');
         $this->assertEquals(10, $affected);
 
         // 条件なし1 where
         $affected = $database->update('test', [
-            'name' => 'zz'
+            'name' => 'zz',
         ], []);
         $this->assertEquals(10, $affected);
         // 条件なし2 where
         $affected = $database->update('test', [
-            'name' => 'ZZ'
+            'name' => 'ZZ',
         ]);
         $this->assertEquals(10, $affected);
 
         // into
         $affected = $database->update('test', [
-            'name' => new Expression('UPPER(?)', 'lower')
+            'name' => new Expression('UPPER(?)', 'lower'),
         ], [
-            'id = 1'
+            'id = 1',
         ]);
         $this->assertEquals(1, $affected);
         $this->assertEquals('LOWER', $database->fetchValue('select name from test where id = 1'));
@@ -4017,7 +4020,7 @@ INSERT INTO test (id, name) VALUES
                 ],
                 '+foreign_c1 C1' => [
                     'name' => new Expression('UPPER(C1.name)'),
-                ]
+                ],
             ], []));
             $this->assertEquals([
                 [
@@ -4088,19 +4091,19 @@ INSERT INTO test (id, name) VALUES
     {
         // 連想配列
         $affected = $database->delete('test', [
-            'id <= ?' => 2
+            'id <= ?' => 2,
         ]);
         $this->assertEquals(2, $affected);
 
         // フラット配列
         $affected = $database->delete('test', [
-            'id > 8'
+            'id > 8',
         ]);
         $this->assertEquals(2, $affected);
 
         // key = value
         $affected = $database->delete('test', [
-            'id' => 5
+            'id' => 5,
         ]);
         $this->assertEquals(1, $affected);
 
@@ -4341,7 +4344,7 @@ INSERT INTO test (id, name) VALUES
             '2006-06-06',
             '2007-07-07',
             '2008-08-08',
-            '2009-09-09'
+            '2009-09-09',
         ], $database->selectLists('oprlog.log_date'));
         $database->rollback();
 
@@ -4513,7 +4516,7 @@ INSERT INTO test (id, name) VALUES
         $row = [
             'id'   => 2,
             'name' => 'xx',
-            'data' => ''
+            'data' => '',
         ];
         $database->upsert('test', $row);
 
@@ -4525,7 +4528,7 @@ INSERT INTO test (id, name) VALUES
         $row = [
             'id'   => 999,
             'name' => 'xx',
-            'data' => ''
+            'data' => '',
         ];
         $database->upsert('test', $row);
 
@@ -4536,7 +4539,7 @@ INSERT INTO test (id, name) VALUES
 
         $row = [
             'name' => 'zz',
-            'data' => ''
+            'data' => '',
         ];
         $database->upsert('test', $row);
 
@@ -4553,11 +4556,11 @@ INSERT INTO test (id, name) VALUES
         $row1 = [
             'id'   => 2,
             'name' => 'xx',
-            'data' => ''
+            'data' => '',
         ];
         $row2 = [
             'name' => 'zz',
-            'data' => ''
+            'data' => '',
         ];
         $database->upsert('test', $row1, $row2);
 
@@ -4567,12 +4570,12 @@ INSERT INTO test (id, name) VALUES
         $row1 = [
             'id'   => 999,
             'name' => 'xx',
-            'data' => ''
+            'data' => '',
         ];
         $row2 = [
             'id'   => 999,
             'name' => 'zz',
-            'data' => ''
+            'data' => '',
         ];
         $database->upsert('test', $row1, $row2);
 
@@ -4618,7 +4621,7 @@ INSERT INTO test (id, name) VALUES
         $row = [
             'id'   => 2,
             'name' => 'qq',
-            'data' => ''
+            'data' => '',
         ];
 
         // 更新された時はそのID値が返るはず
@@ -4627,7 +4630,7 @@ INSERT INTO test (id, name) VALUES
 
         $row = [
             'name' => 'qq',
-            'data' => ''
+            'data' => '',
         ];
 
         // 挿入された時はそのAUTOINCREMENTの値が返るはず
@@ -4637,7 +4640,7 @@ INSERT INTO test (id, name) VALUES
         $row = [
             'id'   => 1,
             'name' => 'qq',
-            'data' => ''
+            'data' => '',
         ];
         $row2 = ['id' => 99] + $row;
 
@@ -5181,7 +5184,7 @@ AND (g_parent.ancestor_id = g_ancestor.ancestor_id)))
         $rows = $database->selectArray([
             't_article' => [
                 'comment_ids' => $database->subquery('t_comment.' . $cplatform->getGroupConcatSyntax('comment_id', ',')),
-            ]
+            ],
         ], ['article_id' => [1, 2]]);
         $this->assertEquals([
             [
@@ -5195,9 +5198,9 @@ AND (g_parent.ancestor_id = g_ancestor.ancestor_id)))
         $rows = $database->selectArray([
             't_article' => [
                 'article_id',
-            ]
+            ],
         ], [
-            'article_id' => $database->subquery('t_comment')
+            'article_id' => $database->subquery('t_comment'),
         ]);
         $this->assertEquals([
             [
@@ -5208,7 +5211,7 @@ AND (g_parent.ancestor_id = g_ancestor.ancestor_id)))
         $row = $database->entityTuple([
             'Article' => [
                 'comment_ids' => $database->subquery('t_comment.' . $cplatform->getGroupConcatSyntax('comment_id', ',')),
-            ]
+            ],
         ], ['article_id' => 1]);
         $this->assertEquals('1,2,3', $row->{"comment_ids"});
     }
@@ -5223,7 +5226,7 @@ AND (g_parent.ancestor_id = g_ancestor.ancestor_id)))
             't_article' => [
                 'has_comment'    => $database->subexists('t_comment'),
                 'nothas_comment' => $database->notSubexists('t_comment'),
-            ]
+            ],
         ], ['article_id' => [1, 2]]);
         $this->assertTrue(!!$rows[0]['has_comment']);
         $this->assertFalse(!!$rows[0]['nothas_comment']);
@@ -5234,7 +5237,7 @@ AND (g_parent.ancestor_id = g_ancestor.ancestor_id)))
             'Article' => [
                 'has_comment'    => $database->subexists('Comment'),
                 'nothas_comment' => $database->notSubexists('Comment'),
-            ]
+            ],
         ], ['article_id' => 1]);
         $this->assertTrue(!!$row['has_comment']);
         $this->assertFalse(!!$row['nothas_comment']);
@@ -5328,38 +5331,38 @@ AND
         $select = $database->select([
             'foreign_d1' => [
                 'has_d2' => $database->subexists('foreign_d2:fk_dd12'),
-            ]
+            ],
         ]);
         $exsits = $cplatform->convertSelectExistsQuery('EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.d2_id)');
-        $this->assertContains("$exsits", "$select");
+        $this->assertStringContainsString("$exsits", "$select");
 
         // 相互外部キー2
         $select = $database->select([
             'foreign_d2' => [
                 'has_d1' => $database->subexists('foreign_d1:fk_dd21'),
-            ]
+            ],
         ]);
         $exsits = $cplatform->convertSelectExistsQuery('EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.id = foreign_d2.id)');
-        $this->assertContains("$exsits", "$select");
+        $this->assertStringContainsString("$exsits", "$select");
 
         // ダブル外部キー
         $select = $database->select([
             'foreign_s' => [
                 'has_sc1' => $database->subexists('foreign_sc:fk_sc1'),
                 'has_sc2' => $database->subexists('foreign_sc:fk_sc2'),
-            ]
+            ],
         ]);
         $exsits1 = $cplatform->convertSelectExistsQuery('EXISTS (SELECT * FROM foreign_sc WHERE foreign_sc.s_id1 = foreign_s.id)');
         $exsits2 = $cplatform->convertSelectExistsQuery('EXISTS (SELECT * FROM foreign_sc WHERE foreign_sc.s_id2 = foreign_s.id)');
-        $this->assertContains("$exsits1", "$select");
-        $this->assertContains("$exsits2", "$select");
+        $this->assertStringContainsString("$exsits1", "$select");
+        $this->assertStringContainsString("$exsits2", "$select");
 
         // 指定しないと例外
         $this->assertException('ambiguous', function () use ($database) {
             $database->select([
                 'foreign_d1' => [
                     'has_d2' => $database->subexists('foreign_d2'),
-                ]
+                ],
             ]);
         });
     }
@@ -5374,7 +5377,7 @@ AND
             't_article' => [
                 'cmin' => $database->submin('t_comment.comment_id'),
                 'cmax' => $database->submax('t_comment.comment_id'),
-            ]
+            ],
         ], [], [], 1);
         $this->assertEquals('1', $row['cmin']);
         $this->assertEquals('3', $row['cmax']);
@@ -5384,7 +5387,7 @@ AND
                 't_article' => [
                     'cmin' => $database->submin('t_comment.comment_id, comment'),
                     'cmax' => $database->submax('t_comment.comment_id, comment'),
-                ]
+                ],
             ], [], [], 1);
         });
     }
@@ -5401,21 +5404,21 @@ AND
                 new Expression('(select \'value\') as value'),
                 'builder' => $database->select(
                     [
-                        'test' => 'name'
+                        'test' => 'name',
                     ], [
-                        'id = ?' => 2
+                        'id = ?' => 2,
                     ]
                 ),
             ],
         ];
         $where = [
-            'id >= ?' => 5
+            'id >= ?' => 5,
         ];
         $order = [
-            'id' => 'desc'
+            'id' => 'desc',
         ];
         $limit = [
-            2 => 3
+            2 => 3,
         ];
         $rows = $database->selectArray($table, $where, $order, $limit);
 
@@ -5486,7 +5489,7 @@ ORDER BY T.id DESC, name ASC
                 'id',
                 'ord'  => 'id + 10',
                 'name' => 'name2',
-            ]
+            ],
         ], ['id' => [3, 4, 5]]);
         $this->assertEquals([
             ['id' => '3', 'name' => 'c', 'a' => 'A'],
@@ -5775,7 +5778,7 @@ anywhere.enable = 1
         $database->mergeOption('anywhereOption', [
             'misctype' => [
                 'cdate' => ['type' => 'string'],
-            ]
+            ],
         ]);
         $this->assertEquals([
             'MT.cdate LIKE ?'              => '%2011/12%',
@@ -5851,7 +5854,7 @@ anywhere.enable = 1
                     'keyonly' => false,
                     'type'    => 'integer',
                 ],
-            ]
+            ],
         ]);
         $this->assertEquals([
             'MT.id = ?'                     => '2000',
@@ -5886,8 +5889,8 @@ anywhere.enable = 1
         $select = $database->select([
             'test1',
             [
-                'hoge{id}' => $database->subselectArray('test2')
-            ]
+                'hoge{id}' => $database->subselectArray('test2'),
+            ],
         ]);
 
         $this->assertIsArray($database->fetchArray($select));
@@ -5922,7 +5925,7 @@ anywhere.enable = 1
                     'assocT{id}'    => $database->subselect('test2.name2, id')->cast(Entity::class)->assoc(),
                     'tupleT{id}'    => $database->subselect('test2.name2, id')->cast(Entity::class)->tuple(),
                     'callbackT{id}' => $database->subselect('test2.name2, id')->cast(function ($row) { return $row; })->array(),
-                ]
+                ],
             ]
         );
 
@@ -5961,8 +5964,8 @@ anywhere.enable = 1
         $rows = $database->selectArray([
             'foreign_c1' => [
                 '*',
-                'P' => $database->subselectTuple('foreign_p')
-            ]
+                'P' => $database->subselectTuple('foreign_p'),
+            ],
         ]);
 
         // 子から親を引っ張れば同じものが含まれるものがあるはず
@@ -5982,7 +5985,7 @@ anywhere.enable = 1
         $row = $database->selectTuple([
             'foreign_c1.*' => [
                 'foreign_p.*' => [],
-            ]
+            ],
         ], [], [], 1);
         // 親は assoc されず単一 row で返ってくるはず
         $this->assertEquals([
@@ -6010,7 +6013,7 @@ anywhere.enable = 1
             'foreign_p P' => [
                 'C1' => $database->foreign_c1()->column('*'),
                 'C2' => $database->foreign_c2()->column('name'),
-            ]
+            ],
         ], [], [], 1);
         $this->assertEquals(
             [
@@ -6033,7 +6036,7 @@ anywhere.enable = 1
         // 外部キーがなければ例外が飛ぶはず
         $this->assertException('has not foreign key', L($database)->selectTuple([
             'test1' => [
-                'test2' => $database->foreign_c1()
+                'test2' => $database->foreign_c1(),
             ],
         ], [], [], 1));
     }
@@ -6053,7 +6056,7 @@ anywhere.enable = 1
                 'pie'              => new Expression('3.14'),
                 'foreign_c1 as C1' => ['name'],
                 'foreign_c2 AS C2' => ['name'],
-            ]
+            ],
         ]);
         $this->assertEquals([
             [
@@ -6094,9 +6097,9 @@ anywhere.enable = 1
                         '*',
                         '..pid',
                         'ppname' => '..name',
-                    ]
+                    ],
                 ]),
-            ]
+            ],
         ]);
         // pname, pid で親カラムが参照できているはず
         $this->assertEquals([
@@ -6148,7 +6151,7 @@ anywhere.enable = 1
                     '..pid',
                     'ppname' => '..nocolumn',
                 ],
-            ]
+            ],
         ]));
     }
 
@@ -6164,7 +6167,7 @@ anywhere.enable = 1
                 'piyo' => function ($row) { return $row['id'] . ':' . $row['name']; },
                 'func' => function () { return function ($prefix) { return $prefix . $this['name']; }; },
                 'last' => new Expression("'dbval'"),
-            ]
+            ],
         ])->limit(1);
 
         $expected = [
@@ -6172,7 +6175,7 @@ anywhere.enable = 1
             'name' => 'a',
             'piyo' => '1:a',
             'func' => function () { /* dummy */ },
-            'last' => 'dbval'
+            'last' => 'dbval',
         ];
 
         $this->assertEquals([0 => $expected], $select->array());
@@ -6234,13 +6237,6 @@ anywhere.enable = 1
         $database->insert('test', ['name' => 'hoge']);
         $lastid = $database->getLastInsertId('test', 'id');
         $this->assertEquals($database->max('test.id'), $lastid);
-
-        // ID列じゃないカラムで lastInsertId した時の返り値がバラバラでテストが困難
-        if (false) {
-            $database->insert('noauto', ['id' => 'hoge', 'name' => 'hoge']);
-            $lastid = $database->getLastInsertId('noauto', 'id');
-            $this->assertNull($lastid);
-        }
     }
 
     /**

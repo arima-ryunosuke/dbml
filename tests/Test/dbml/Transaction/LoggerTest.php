@@ -24,7 +24,7 @@ class LoggerTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // ロックの解放を担保
         $tmp = sys_get_temp_dir() . '/log.txt';
-        new Logger($fp = fopen($tmp, 'a'), [
+        new Logger(fopen($tmp, 'a'), [
             'lockmode' => true,
         ]);
         $this->assertTrue(flock(fopen($tmp, 'a'), LOCK_EX | LOCK_NB));

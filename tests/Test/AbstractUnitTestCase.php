@@ -120,7 +120,7 @@ abstract class AbstractUnitTestCase extends TestCase
                             [
                                 'create_sql' => [
                                     'sqlite' => 'CREATE TABLE auto (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(32) NOT NULL)',
-                                ]
+                                ],
                             ]
                         ),
                         new Table('noauto',
@@ -311,7 +311,7 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             [
                                 new ForeignKeyConstraint(['ancestor_id'], 'g_ancestor', ['ancestor_id'], 'fkey_generation1', [
-                                    'onDelete' => 'CASCADE'
+                                    'onDelete' => 'CASCADE',
                                 ]),
                             ]
                         ),
@@ -324,8 +324,8 @@ abstract class AbstractUnitTestCase extends TestCase
                             [new Index('PRIMARY', ['child_id'], true, true)],
                             [
                                 new ForeignKeyConstraint(['parent_id'], 'g_parent', ['parent_id'], 'fkey_generation2', [
-                                    'onDelete' => 'CASCADE'
-                                ])
+                                    'onDelete' => 'CASCADE',
+                                ]),
                             ]
                         ),
                         new Table('g_grand1',
@@ -339,7 +339,7 @@ abstract class AbstractUnitTestCase extends TestCase
                             [
                                 new ForeignKeyConstraint(['ancestor_id'], 'g_ancestor', ['ancestor_id'], 'fkey_generation3_1', []),
                                 new ForeignKeyConstraint(['parent_id'], 'g_parent', ['parent_id'], 'fkey_generation3_2', [
-                                    'onDelete' => 'CASCADE'
+                                    'onDelete' => 'CASCADE',
                                 ]),
                             ]
                         ),
@@ -358,8 +358,8 @@ abstract class AbstractUnitTestCase extends TestCase
                                 [new Index('PRIMARY', ['grand_id'], true, true)],
                                 [
                                     new ForeignKeyConstraint(['parent_id', 'ancestor_id'], 'g_parent', ['parent_id', 'ancestor_id'], 'fkey_generation3', [
-                                        'onDelete' => 'CASCADE'
-                                    ])
+                                        'onDelete' => 'CASCADE',
+                                    ]),
                                 ]
                             ));
                         },
@@ -386,7 +386,7 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             [
                                 new Index('PRIMARY', ['article_id'], true, true),
-                                new Index('secondary', ['title'])
+                                new Index('secondary', ['title']),
                             ]
                         ),
                         new Table('t_comment',
@@ -399,8 +399,8 @@ abstract class AbstractUnitTestCase extends TestCase
                             [
                                 new ForeignKeyConstraint(['article_id'], 't_article', ['article_id'], 'fk_articlecomment', [
                                     'onUpdate' => 'CASCADE',
-                                    'onDelete' => 'CASCADE'
-                                ])
+                                    'onDelete' => 'CASCADE',
+                                ]),
                             ]
                         ),
                         new View('v_blog', '
@@ -579,17 +579,17 @@ abstract class AbstractUnitTestCase extends TestCase
                     }
                     for ($i = 0, $char = 'a'; $i < 10; $i++) {
                         $db->insert('test1', [
-                            'name1' => $char++
+                            'name1' => $char++,
                         ]);
                     }
                     for ($i = 0, $char = 'A'; $i < 20; $i++) {
                         $db->insert('test2', [
-                            'name2' => $char++
+                            'name2' => $char++,
                         ]);
                     }
                     for ($i = 0, $char = 'a'; $i < 100; $i++) {
                         $db->insert('paging', [
-                            'name' => $char++
+                            'name' => $char++,
                         ]);
                     }
                     for ($i = 0, $char = 'a'; $i < 10; $i++) {
@@ -605,7 +605,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 $db->insert('oprlog', [
                                     'category'   => "category-$i",
                                     'primary_id' => $j,
-                                    'log_date'   => date('Y-m-d', strtotime("200$i-$j-$k"))
+                                    'log_date'   => date('Y-m-d', strtotime("200$i-$j-$k")),
                                 ]);
                             }
                         }
@@ -696,7 +696,7 @@ abstract class AbstractUnitTestCase extends TestCase
                         'type' => Type::getType('simple_array'),
                     ],
                     'comment_count' => [
-                        'select' => $db->subcount('t_comment')
+                        'select' => $db->subcount('t_comment'),
                     ],
                     'vaffect'       => [
                         'affect' => function ($value, $row) {
@@ -835,7 +835,6 @@ abstract class AbstractUnitTestCase extends TestCase
 
     public static function forcedRead($object, $property)
     {
-        $refprop = null;
         $class = get_class($object);
         while (true) {
             try {
@@ -855,7 +854,6 @@ abstract class AbstractUnitTestCase extends TestCase
 
     public static function forcedWrite($object, $property, $value)
     {
-        $refprop = null;
         $class = get_class($object);
         while (true) {
             try {

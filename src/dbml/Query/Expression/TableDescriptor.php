@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnusedPrivateFieldInspection */
 
 namespace ryunosuke\dbml\Query\Expression;
 
@@ -518,7 +518,7 @@ class TableDescriptor
             $this->condition = array_merge($this->condition, [
                 (object) array_rekey((array) $database->parseYaml(trim($condition2)), function ($k, $v) {
                     return is_int($k) ? $v : $k;
-                })
+                }),
             ]);
         }
 

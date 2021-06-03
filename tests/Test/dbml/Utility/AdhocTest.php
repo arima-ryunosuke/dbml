@@ -75,7 +75,7 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
                 '(fuga)',
                 'y' => [
                     '(piyo)',
-                    'z' => ['zzz']
+                    'z' => ['zzz'],
                 ],
             ],
         ], Adhoc::wrapParentheses([
@@ -84,9 +84,9 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
                 'fuga',
                 'y' => [
                     'piyo',
-                    'z' => ['zzz']
-                ]
-            ]
+                    'z' => ['zzz'],
+                ],
+            ],
         ]));
     }
 

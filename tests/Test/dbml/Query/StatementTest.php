@@ -65,7 +65,7 @@ class StatementTest extends \ryunosuke\Test\AbstractUnitTestCase
             [
                 'hoge' => 'hoge',
                 'fuga' => 'fuga',
-            ]
+            ],
         ];
 
         // executeSelect はスレーブに接続されるのでエラーにならないはず

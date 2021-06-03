@@ -39,7 +39,7 @@ class IntegrationTest extends AbstractUnitTestCase
                 ''          => [
                     'cond_id_in'      => $database->operator('article_id', [1, 3]),
                     'cond_title_like' => $database->operator('title:%LIKE%', 'タイトル'),
-                ]
+                ],
             ]);
             $select->having([
                 'cond_id_in'      => 1,
@@ -127,7 +127,7 @@ class IntegrationTest extends AbstractUnitTestCase
             1 => [
                 'article_id' => '1',
                 'title'      => 'タイトルです',
-                'checks'     => ''
+                'checks'     => '',
             ],
         ], iterator_to_array($database->t_article()->pk(1)));
 
@@ -190,12 +190,12 @@ class IntegrationTest extends AbstractUnitTestCase
         ], $database->t_article->as('A')->select('!', $pk)->tuple());
 
         $where = (string) $database->t_article->where([
-            '*' => 'aaa'
+            '*' => 'aaa',
         ]);
         // vcolumn で collate を指定してるので含まれる
-        $this->assertContains('t_article.title collate utf8_bin LIKE', $where);
+        $this->assertStringContainsString('t_article.title collate utf8_bin LIKE', $where);
         // vcolumn で type: simple_array にしているので含まれない
-        $this->assertNotContains('t_article.checks LIKE', $where);
+        $this->assertStringNotContainsString('t_article.checks LIKE', $where);
 
         $database->setAutoCastType([]);
     }
@@ -216,16 +216,16 @@ class IntegrationTest extends AbstractUnitTestCase
         $rows = $database->selectAssoc('t_article A/t_comment C.comment', [
             'A.article_id <> ?' => 2,
             'C'                 => [
-                'C.comment_id <> ?' => 1
-            ]
+                'C.comment_id <> ?' => 1,
+            ],
         ], [
             'C' => [
-                'C.comment_id' => 'DESC'
-            ]
+                'C.comment_id' => 'DESC',
+            ],
         ], [
             1,
             'C' => [
-                1 => 3
+                1 => 3,
             ],
         ]);
         $this->assertEquals([

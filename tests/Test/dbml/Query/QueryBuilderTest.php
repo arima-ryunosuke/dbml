@@ -91,7 +91,7 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertEquals(0, $n);
             $this->assertEquals(['id' => '2', 'name' => 'b'], $row);
         }
-        $this->assertEquals(1, count($builder));
+        $this->assertCount(1, $builder);
     }
 
     /**
@@ -203,8 +203,8 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
             '+test2' => [
                 '*',
-                ['test2.id = Q.id']
-            ]
+                ['test2.id = Q.id'],
+            ],
         ])->where(['test2.id' => 1]));
         $this->assertEquals([0, 1], $builder->getParams());
 
@@ -298,7 +298,7 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
         $this->assertQuery("SELECT test.id, SELECT NOW() AS now, (select 1) as hoge, (SELECT 1 FROM test WHERE a = ?) FROM test",
             $builder->column([
                 'test' => [
-                    'id'
+                    'id',
                 ],
                 [
                     // @todo
@@ -309,13 +309,13 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
                         ->select('1')
                         ->from('test')
                         ->where(['a' => 1]),
-                ]
+                ],
             ])
         );
         $this->assertQuery("SELECT hogefuga (select 1) as hoge",
             $builder->column([
                 new Expression('(select 1) as hoge'),
-                new SelectOption('hogefuga')
+                new SelectOption('hogefuga'),
             ])
         );
 
@@ -367,7 +367,7 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
                 'name1'         => function ($v) { return 'ss_' . $v; },
                 'id,name1 idn1' => function ($id, $name) { return "$id-$name"; },
                 'last'          => new Expression("'dbval'"),
-            ]
+            ],
         ]);
         $this->assertEquals([
             'name1' => 'ss_a',
@@ -391,7 +391,7 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
         $this->assertException('cannot be mixed', L($builder->reset())->column([
             'test1' => [
                 'id,name idn' => function ($id, $name) { return "$id-$name"; },
-            ]
+            ],
         ]));
     }
 
@@ -446,7 +446,7 @@ GREATEST(1,2,3) FROM test1', $builder);
             'test2 as t2' => [
                 'id2' => 'id',
                 'nm2' => 'name',
-            ]
+            ],
         ]));
     }
 
@@ -469,14 +469,14 @@ GREATEST(1,2,3) FROM test1', $builder);
         $this->assertQuery("SELECT test1.* FROM test1", $builder->column('test1'));
 
         $this->assertQuery('SELECT t.id AS hoge FROM test1 t', $builder->column([
-            'test1 t' => 'id AS hoge'
+            'test1 t' => 'id AS hoge',
         ])
         );
         $this->assertQuery('SELECT test1.id AS id1, test1.name AS nm1 FROM test1',
             $builder->column([
                 'test1' => [
                     'id as id1',
-                    'name as nm1'
+                    'name as nm1',
                 ],
             ])
         );
@@ -484,8 +484,8 @@ GREATEST(1,2,3) FROM test1', $builder);
             $builder->column([
                 'test2' => [
                     'id2' => 'id',
-                    'nm2' => 'name'
-                ]
+                    'nm2' => 'name',
+                ],
             ])
         );
         $this->assertQuery("SELECT test1.*, test1.ccc FROM test1", $builder->column('test1.*, ccc'));
@@ -520,7 +520,7 @@ GREATEST(1,2,3) FROM test1', $builder);
         $builder->reset()->column([
             't_comment' => [
                 't_article' => [],
-            ]
+            ],
         ]);
         $this->assertEquals([
             Alias::forge(Database::AUTO_PARENT_KEY, 't_article.article_id'),
@@ -623,7 +623,7 @@ GREATEST(1,2,3) FROM test1', $builder);
                     new ForeignKeyConstraint(['f_child_id1'], 't_child', ['child_id'], 'fkey_asterisk_two1'),
                     new ForeignKeyConstraint(['f_child_id2'], 't_child', ['child_id'], 'fkey_asterisk_two2'),
                 ]
-            )
+            ),
         ]);
 
         $builder->getDatabase()->getSchema()->refresh();
@@ -646,7 +646,7 @@ GREATEST(1,2,3) FROM test1', $builder);
         $this->assertEquals($database->selectTuple([
             't_ancestor.*' => [
                 't_parent.*' => [],
-            ]
+            ],
         ]), $database->selectTuple('t_ancestor.**'));
 
         // ***
@@ -655,14 +655,14 @@ GREATEST(1,2,3) FROM test1', $builder);
                 't_parent.*' => [
                     't_child.*' => [],
                 ],
-            ]
+            ],
         ]), $database->selectTuple('t_ancestor.***'));
 
         // ****,pk
         $row = $database->selectTuple([
             't_ancestor' => [
                 '****',
-            ]
+            ],
         ]);
         $this->assertEquals($database->selectTuple([
             't_ancestor.*' => [
@@ -673,7 +673,7 @@ GREATEST(1,2,3) FROM test1', $builder);
                         't_two:fkey_asterisk_two2.*' => [],
                     ],
                 ],
-            ]
+            ],
         ]), $row);
         $this->assertArrayHasKey("1\x1F1", $row['t_parent'][1]['t_child'][1]['t_grand']);
         $this->assertArrayHasKey("1\x1F2", $row['t_parent'][1]['t_child'][1]['t_grand']);
@@ -684,7 +684,7 @@ GREATEST(1,2,3) FROM test1', $builder);
             't_ancestor' => [
                 '**',
                 't_parent' => null,
-            ]
+            ],
         ]);
         $this->assertEquals([
             'ancestor_id'   => '1',
@@ -739,17 +739,17 @@ GREATEST(1,2,3) FROM test1', $builder);
                     ],
                 ],
                 new Expression('NOALIAS_FUNC()'),
-            ]
+            ],
         ]);
-        $this->assertContains('now() AS string', "$builder");
-        $this->assertContains('NOW() AS expression', "$builder");
-        $this->assertContains('(SELECT test1.id FROM test1) AS builder', "$builder");
-        $this->assertContains('(id = ?) AS arrayeq', "$builder");
-        $this->assertContains('(id IN (?,?,?)) AS arrayin', "$builder");
-        $this->assertContains('(id LIKE ?) AS arraylike', "$builder");
-        $this->assertContains('(id > ?) AS arrayholder', "$builder");
-        $this->assertContains('((A IN (?)) AND (B = ?) AND ((C = ?) OR (D = ?))) AS arraycomplex', "$builder");
-        $this->assertContains(', NOALIAS_FUNC()', "$builder");
+        $this->assertStringContainsString('now() AS string', "$builder");
+        $this->assertStringContainsString('NOW() AS expression', "$builder");
+        $this->assertStringContainsString('(SELECT test1.id FROM test1) AS builder', "$builder");
+        $this->assertStringContainsString('(id = ?) AS arrayeq', "$builder");
+        $this->assertStringContainsString('(id IN (?,?,?)) AS arrayin', "$builder");
+        $this->assertStringContainsString('(id LIKE ?) AS arraylike', "$builder");
+        $this->assertStringContainsString('(id > ?) AS arrayholder', "$builder");
+        $this->assertStringContainsString('((A IN (?)) AND (B = ?) AND ((C = ?) OR (D = ?))) AS arraycomplex', "$builder");
+        $this->assertStringContainsString(', NOALIAS_FUNC()', "$builder");
         $this->assertEquals([123, 1, 2, 3, 'hoge', 123, 41, 42, 43, 44,], $builder->getParams());
 
         $context = $builder->getDatabase()->context(['notableAsColumn' => true]);
@@ -780,15 +780,15 @@ GREATEST(1,2,3) FROM test1', $builder);
             ],
             new Expression('NOALIAS_FUNC()'),
         ]);
-        $this->assertContains('now() AS string', "$builder");
-        $this->assertContains('NOW() AS expression', "$builder");
-        $this->assertContains('(SELECT test1.id FROM test1) AS builder', "$builder");
-        $this->assertContains('(id = ?) AS arrayeq', "$builder");
-        $this->assertContains('(id IN (?,?,?)) AS arrayin', "$builder");
-        $this->assertContains('(id LIKE ?) AS arraylike', "$builder");
-        $this->assertContains('(id > ?) AS arrayholder', "$builder");
-        $this->assertContains('((A IN (?)) AND (B = ?) AND ((C = ?) OR (D = ?))) AS arraycomplex', "$builder");
-        $this->assertContains(', NOALIAS_FUNC()', "$builder");
+        $this->assertStringContainsString('now() AS string', "$builder");
+        $this->assertStringContainsString('NOW() AS expression', "$builder");
+        $this->assertStringContainsString('(SELECT test1.id FROM test1) AS builder', "$builder");
+        $this->assertStringContainsString('(id = ?) AS arrayeq', "$builder");
+        $this->assertStringContainsString('(id IN (?,?,?)) AS arrayin', "$builder");
+        $this->assertStringContainsString('(id LIKE ?) AS arraylike', "$builder");
+        $this->assertStringContainsString('(id > ?) AS arrayholder', "$builder");
+        $this->assertStringContainsString('((A IN (?)) AND (B = ?) AND ((C = ?) OR (D = ?))) AS arraycomplex', "$builder");
+        $this->assertStringContainsString(', NOALIAS_FUNC()', "$builder");
         $this->assertEquals([123, 1, 2, 3, 'hoge', 123, 41, 42, 43, 44,], $builder->getParams());
     }
 
@@ -929,7 +929,7 @@ GREATEST(1,2,3) FROM test1', $builder);
     {
         $builder->column([
             't_article' => [
-                't' => 'title2'
+                't' => 'title2',
             ],
         ]);
         $this->assertQuery("SELECT UPPER(t_article.title) AS t FROM t_article", $builder);
@@ -981,7 +981,7 @@ GREATEST(1,2,3) FROM test1', $builder);
     {
         $builder->column([
             'test' => [
-                '+sub[aaa=1, bbb = 2]' => $builder->getDatabase()->select('test1')
+                '+sub[aaa=1, bbb = 2]' => $builder->getDatabase()->select('test1'),
             ],
         ]);
         $this->assertQuery("SELECT * FROM test INNER JOIN (SELECT test1.* FROM test1) sub ON (aaa=1) AND (bbb = 2)", $builder);
@@ -997,7 +997,7 @@ GREATEST(1,2,3) FROM test1', $builder);
             'foreign_p P' => [
                 '+foreign_c1'     => [
                     ['1=1'],
-                    'id'
+                    'id',
                 ],
                 '<foreign_c2.cid' => [],
             ],
@@ -1022,21 +1022,21 @@ GREATEST(1,2,3) FROM test1', $builder);
     {
         $builder->column([
             'foreign_p P' => [
-                '<c1' => $database->foreign_c1()->scoping('*', '1=1')
+                '<c1' => $database->foreign_c1()->scoping('*', '1=1'),
             ],
         ]);
         $this->assertQuery("SELECT c1.* FROM foreign_p P LEFT JOIN foreign_c1 c1 ON (c1.id = P.id) AND (1=1)", $builder);
 
         $builder->column([
             'foreign_p P' => [
-                '<c1.id' => $database->foreign_c1('name', ['1=1', '2=2'])
+                '<c1.id' => $database->foreign_c1('name', ['1=1', '2=2']),
             ],
         ]);
         $this->assertQuery("SELECT c1.id, c1.name FROM foreign_p P LEFT JOIN foreign_c1 c1 ON (c1.id = P.id) AND (1=1) AND (2=2)", $builder);
 
         $builder->column([
             'foreign_p P' => [
-                '<c1.id' => $database->foreign_c1()->scoping('name', ['a' => 1, ['b' => 2, 'c' => 3]])
+                '<c1.id' => $database->foreign_c1()->scoping('name', ['a' => 1, ['b' => 2, 'c' => 3]]),
             ],
         ]);
         $this->assertQuery("SELECT c1.id, c1.name FROM foreign_p P LEFT JOIN foreign_c1 c1 ON (c1.id = P.id) AND (c1.a = ?) AND ((c1.b = ?) OR (c1.c = ?))", $builder);
@@ -1045,7 +1045,7 @@ GREATEST(1,2,3) FROM test1', $builder);
         $builder->detectAutoOrder(true);
         $builder->column([
             'foreign_p P' => [
-                '<c1' => $database->foreign_c1()->scoping('*', '1=1', ['id' => 'DESC'])
+                '<c1' => $database->foreign_c1()->scoping('*', '1=1', ['id' => 'DESC']),
             ],
         ]);
         $this->assertQuery("SELECT c1.* FROM foreign_p P LEFT JOIN foreign_c1 c1 ON (c1.id = P.id) AND (1=1) ORDER BY P.id ASC, c1.id DESC", $builder);
@@ -1075,7 +1075,7 @@ ORDER BY P.id DESC
                 'test1',
                 'test2' => [
                     ['test2.key1 = test1.key2'],
-                ]
+                ],
             ])
         );
 
@@ -1084,7 +1084,7 @@ ORDER BY P.id DESC
                 'test1',
                 '<test2' => [
                     ['test2.key1 = test1.key2', 'flg = 1'],
-                ]
+                ],
             ])
         );
     }
@@ -1117,7 +1117,7 @@ ORDER BY P.id DESC
                 'foreign_p P.*' => [
                     '+foreign_c1 C1' => '!id',
                     '+foreign_c2 C2' => [
-                        ['con']
+                        ['con'],
                     ],
                 ],
             ])
@@ -1169,7 +1169,7 @@ INNER JOIN foreign_c2 ON (foreign_c2.cid = foreign_p.id) AND (condition = 2)",
                     '+foreign_c2:fk_parentchild2'    => [
                         ['condition = 2'],
                     ],
-                ]
+                ],
             ])
         );
     }
@@ -1200,12 +1200,12 @@ AND
                     '+foreign_c1 C1:' => [
                         [
                             $database->subexists('foreign_c1'),
-                        ]
+                        ],
                     ],
                     '+foreign_c2 C2:' => [
                         [
                             'C2.cid' => $database->submax('foreign_c2.cid'),
-                        ]
+                        ],
                     ],
                 ],
             ])->where([
@@ -1229,12 +1229,12 @@ AND
                     '+foreign_c1 C1:' => [
                         [
                             'P' => $database->subexists('foreign_c1'),
-                        ]
+                        ],
                     ],
                     '+foreign_c2 C2:' => [
                         [
                             'C2.cid|P' => $database->submax('foreign_c2.cid'),
-                        ]
+                        ],
                     ],
                 ],
             ])->where([
@@ -1258,12 +1258,12 @@ AND
                     '+foreign_sc SC1:' => [
                         [
                             'S:fk_sc1' => $database->subexists('foreign_sc'),
-                        ]
+                        ],
                     ],
                     '+foreign_sc SC2:' => [
                         [
                             'SC2.id|S:fk_sc2' => $database->submax('foreign_sc.id'),
-                        ]
+                        ],
                     ],
                 ],
             ])->where([
@@ -1290,9 +1290,9 @@ AND
                     $this->fail('never call');
                 },
                 't_comment comments' => [
-                    '*'
+                    '*',
                 ],
-                'comment_count'
+                'comment_count',
             ],
         ])->where(['article_id' => 1]);
 
@@ -1350,7 +1350,7 @@ AND
                 'id2'        => 1,
                 'id3'        => [2, 3],
                 'id4 = ?'    => 4,
-                'id5 IN (?)' => [5, 6]
+                'id5 IN (?)' => [5, 6],
             ]
         ));
         $this->assertEquals([1, 2, 3, 4, 5, 6], $builder->getParams());
@@ -1384,7 +1384,7 @@ AND
                     'or_cond1' => 3,
                     'or_cond2' => 4,
                 ],
-            ]
+            ],
         ]));
         $this->assertEquals([1, 1, 2, 3, 4], $builder->getParams());
     }
@@ -1413,7 +1413,7 @@ AND
             'OR' => [
                 'article_id > ?' => 10,
                 'article_id < ?' => -10,
-            ]
+            ],
         ]);
         $this->assertEquals('SELECT A.* FROM t_article A WHERE (article_id > ?) OR (article_id < ?)', (string) $builder);
         $this->assertEquals([10, -10], $builder->getParams());
@@ -1425,7 +1425,7 @@ AND
             'C'            => [
                 'comment LIKE = ?' => 'message',
                 'delete_flg'       => 0,
-            ]
+            ],
         ]);
 
         $t = $builder;
@@ -1490,7 +1490,7 @@ AND
         $this->assertEquals("SELECT test.* FROM test WHERE hoge IN (NULL)", $builder->reset()->column('test')->where([
             'hoge' => [
                 '' => [1, 2],
-            ]
+            ],
         ])->queryInto());
     }
 
@@ -1545,7 +1545,7 @@ AND
             [
                 'A.*' => 'hoge',
                 'C.*' => 'hoge',
-            ]
+            ],
         ]);
         $this->assertEquals([
             'A.article_id = ?',
@@ -1704,8 +1704,8 @@ SQL
             'A'    => $builder->getDatabase()->select('test1.id', ['fuga' => 0]),
             $builder->getDatabase()->subexists('foreign_c1', ['hoge' => 1]),
         ]);
-        $this->assertContains('(A IN (SELECT test1.id FROM test1 WHERE fuga = ?))', (string) $builder);
-        $this->assertContains('((EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = foreign_p.id))))', (string) $builder);
+        $this->assertStringContainsString('(A IN (SELECT test1.id FROM test1 WHERE fuga = ?))', (string) $builder);
+        $this->assertStringContainsString('((EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = foreign_p.id))))', (string) $builder);
         $this->assertEquals([1, 0, 1], $builder->getParams());
 
         // 外部キーを見てくれる
@@ -1714,16 +1714,16 @@ SQL
             $builder->getDatabase()->notSubexists('foreign_c2', ['fuga' => 2]),
             $builder->getDatabase()->select('test', ['piyo' => 3])->exists(),
         ]);
-        $this->assertContains('((EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = foreign_p.id))))', (string) $builder);
-        $this->assertContains('((NOT EXISTS (SELECT * FROM foreign_c2 WHERE (fuga = ?) AND (foreign_c2.cid = foreign_p.id))))', (string) $builder);
-        $this->assertContains('((EXISTS (SELECT * FROM test WHERE piyo = ?)))', (string) $builder);
+        $this->assertStringContainsString('((EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = foreign_p.id))))', (string) $builder);
+        $this->assertStringContainsString('((NOT EXISTS (SELECT * FROM foreign_c2 WHERE (fuga = ?) AND (foreign_c2.cid = foreign_p.id))))', (string) $builder);
+        $this->assertStringContainsString('((EXISTS (SELECT * FROM test WHERE piyo = ?)))', (string) $builder);
         $this->assertEquals([1, 2, 3], $builder->getParams());
 
         // 素でやると自動で判断してくれる
         $builder->reset()->column('test1')->innerJoinOn('foreign_p', '1=1')->where([
             $builder->getDatabase()->subexists('foreign_c1', ['hoge' => 1]),
         ]);
-        $this->assertContains('(EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = foreign_p.id)))', (string) $builder);
+        $this->assertStringContainsString('(EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = foreign_p.id)))', (string) $builder);
 
         // キーで明示できる
         $builder->reset()->column('test1')->innerJoinOn('foreign_p PPP', '1=1')->where([
@@ -1731,7 +1731,7 @@ SQL
             'PPP' => $builder->getDatabase()->subexists('foreign_c1', ['hoge' => 1]),
             'single-cond',
         ]);
-        $this->assertContains('(EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = PPP.id)))', (string) $builder);
+        $this->assertStringContainsString('(EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = PPP.id)))', (string) $builder);
 
         // OR も動く
         $builder->reset()->column('foreign_p PPP')->where([
@@ -1740,25 +1740,25 @@ SQL
                 $builder->getDatabase()->notSubexists('foreign_c1', ['hoge' => 1]),
             ],
         ]);
-        $this->assertContains('(EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = PPP.id)))) OR ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = PPP.id)))', (string) $builder);
+        $this->assertStringContainsString('(EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = PPP.id)))) OR ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE (hoge = ?) AND (foreign_c1.id = PPP.id)))', (string) $builder);
 
         // 相互外部キー1
         $builder->reset()->column('foreign_d1')->where([
             $builder->getDatabase()->subexists('foreign_d2:fk_dd12'),
         ]);
-        $this->assertContains('(EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.d2_id))', (string) $builder);
+        $this->assertStringContainsString('(EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.d2_id))', (string) $builder);
         // 相互外部キー2
         $builder->reset()->column('foreign_d2')->where([
             $builder->getDatabase()->subexists('foreign_d1:fk_dd21'),
         ]);
-        $this->assertContains('(EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.id = foreign_d2.id))', (string) $builder);
+        $this->assertStringContainsString('(EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.id = foreign_d2.id))', (string) $builder);
         // ダブル外部キー
         $builder->reset()->column('foreign_s')->where([
             $builder->getDatabase()->subexists('foreign_sc:fk_sc1'),
             $builder->getDatabase()->subexists('foreign_sc:fk_sc2'),
         ]);
-        $this->assertContains('(EXISTS (SELECT * FROM foreign_sc WHERE foreign_sc.s_id1 = foreign_s.id))', (string) $builder);
-        $this->assertContains('(EXISTS (SELECT * FROM foreign_sc WHERE foreign_sc.s_id2 = foreign_s.id))', (string) $builder);
+        $this->assertStringContainsString('(EXISTS (SELECT * FROM foreign_sc WHERE foreign_sc.s_id1 = foreign_s.id))', (string) $builder);
+        $this->assertStringContainsString('(EXISTS (SELECT * FROM foreign_sc WHERE foreign_sc.s_id2 = foreign_s.id))', (string) $builder);
     }
 
     /**
@@ -1769,11 +1769,11 @@ SQL
     {
         // 条件が空なら where 句は生成されない
         $builder->where([]);
-        $this->assertNotContains('where', "$builder");
+        $this->assertStringNotContainsString('where', "$builder");
 
         // 条件があっても空配列は無視されるのでやはり生成されない
         $builder->where(['id' => []]);
-        $this->assertNotContains('where', "$builder");
+        $this->assertStringNotContainsString('where', "$builder");
     }
 
     /**
@@ -1814,7 +1814,7 @@ SQL
         ])->isEmptyCondition(), $builder->where(['!id1' => null])->andWhere(['!id2' => null])->isEmptyCondition());
 
         // false -> false
-        $this->assertEquals($expected = $builder->where([
+        $this->assertEquals($builder->where([
             '!id1' => 1,
             '!id2' => 1,
         ])->isEmptyCondition(), $builder->where(['!id1' => 1])->andWhere(['!id2' => 1])->isEmptyCondition());
@@ -1876,7 +1876,7 @@ SQL
                 'id2'        => 1,
                 'id3'        => [2, 3],
                 'id4 = ?'    => 4,
-                'id5 IN (?)' => [5, 6]
+                'id5 IN (?)' => [5, 6],
             ]
         ));
         $this->assertEquals([1, 2, 3, 4, 5, 6], $builder->getParams());
@@ -1910,7 +1910,7 @@ SQL
                     'or_cond1' => 3,
                     'or_cond2' => 4,
                 ],
-            ]
+            ],
         ]));
         $this->assertEquals([1, 1, 2, 3, 4], $builder->getParams());
     }
@@ -1967,14 +1967,14 @@ SQL
             'test' => [
                 'id' => \Closure::fromCallable('intval'),
                 'name',
-            ]
+            ],
         ])->limit(3);
 
         // orderBy
         $builder->orderBy([
             '' => [
-                'id' => [2, 1, 3]
-            ]
+                'id' => [2, 1, 3],
+            ],
         ]);
         $this->assertSame([
             1 => ['id' => 2, 'name' => 'b'],
@@ -2057,64 +2057,64 @@ SQL
             ],
             [
                 'hoge' => 't_article.title',
-            ]
+            ],
         ])->innerJoinOn('test2 T2', 'TRUE')->innerJoinOn($builder->getDatabase()->select('test'), 'TRUE');
 
         // 't_article.article_id' は SELECT に出現するので許容されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure('t_article.article_id');
-        $this->assertContains('ORDER BY t_article.article_id ASC', "$builder");
+        $this->assertStringContainsString('ORDER BY t_article.article_id ASC', "$builder");
 
         // 'article_id' は SELECT 句に出現しないがカラムは存在するので許容されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure('article_id');
-        $this->assertContains('ORDER BY article_id ASC', "$builder");
+        $this->assertStringContainsString('ORDER BY article_id ASC', "$builder");
 
         // 'test2.id' も同様
         $builder->resetQueryPart('orderBy')->orderBySecure('test2.id');
-        $this->assertContains('ORDER BY test2.id ASC', "$builder");
+        $this->assertStringContainsString('ORDER BY test2.id ASC', "$builder");
 
         // 仮想カラムは許容されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure('title2');
-        $this->assertContains('ORDER BY title2 ASC', "$builder");
+        $this->assertStringContainsString('ORDER BY title2 ASC', "$builder");
 
         // エイリアス名は許容されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure('hoge');
-        $this->assertContains('ORDER BY hoge ASC', "$builder");
+        $this->assertStringContainsString('ORDER BY hoge ASC', "$builder");
 
         // インラインなエイリアスも許容されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure('title9');
-        $this->assertContains('ORDER BY title9 ASC', "$builder");
+        $this->assertStringContainsString('ORDER BY title9 ASC', "$builder");
 
         // サブクエリな from でも解釈可能なら許容されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure('data');
-        $this->assertContains('ORDER BY data ASC', "$builder");
+        $this->assertStringContainsString('ORDER BY data ASC', "$builder");
 
         // なんだかよくわからないテーブルは許容されないはず
         $builder->resetQueryPart('orderBy')->orderBySecure('t_unknown.id');
-        $this->assertNotContains('ORDER BY ', "$builder");
+        $this->assertStringNotContainsString('ORDER BY ', "$builder");
 
         // なんだかよくわからないカラムは許容されないはず
         $builder->resetQueryPart('orderBy')->orderBySecure('t_article.unknown');
-        $this->assertNotContains('ORDER BY ', "$builder");
+        $this->assertStringNotContainsString('ORDER BY ', "$builder");
 
         // 'NOW()' は許容されないはず
         $builder->resetQueryPart('orderBy')->orderBySecure('NOW()');
-        $this->assertNotContains('ORDER BY ', "$builder");
+        $this->assertStringNotContainsString('ORDER BY ', "$builder");
 
         // しかし Expression 化すれば許容されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure(new Expression('NOW()'));
-        $this->assertContains('ORDER BY NOW()', "$builder");
+        $this->assertStringContainsString('ORDER BY NOW()', "$builder");
 
         // 配列は全て実行されるが不正なものは除外されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure(['t_article.article_id', 'invalid', 'test2.id' => 'ASC'], false);
-        $this->assertContains('ORDER BY t_article.article_id DESC, test2.id ASC', "$builder");
+        $this->assertStringContainsString('ORDER BY t_article.article_id DESC, test2.id ASC', "$builder");
 
         // 明らかな攻撃クエリ
         $builder->resetQueryPart('orderBy')->orderBySecure(';DELETE FROM tablename -- .id');
-        $this->assertNotContains('ORDER BY ', "$builder");
+        $this->assertStringNotContainsString('ORDER BY ', "$builder");
 
         // 順序に変な文字を与えても ASC 化されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure(['t_article.article_id', 'invalid', 'test2.id' => 'invalid1'], 'invalid2');
-        $this->assertContains('ORDER BY t_article.article_id ASC, test2.id ASC', "$builder");
+        $this->assertStringContainsString('ORDER BY t_article.article_id ASC, test2.id ASC', "$builder");
     }
 
     /**
@@ -2634,7 +2634,7 @@ SQL
             $this->fail('exception not thrown.');
         }
         catch (\Exception $ex) {
-            $this->assertContains('not autoincrement column', $ex->getMessage());
+            $this->assertStringContainsString('not autoincrement column', $ex->getMessage());
         }
     }
 
@@ -2781,7 +2781,7 @@ SQL
                 'phpe'       => function () { },
                 't_comment'  => ['*'],
                 '+t_comment' => ['*'],
-            ]
+            ],
         ]);
         $builder->orderBy(['' => function () { }]);
         $builder->hint('hint');
@@ -2804,7 +2804,7 @@ SQL
                 'test1' => ['id', 'name1'],
                 ''      => [
                     'children{id}' => $builder->getDatabase()->subselectArray('test2'),
-                ]
+                ],
             ]
         )->limit(2);
 
@@ -2837,7 +2837,7 @@ SQL
             'id'       => '1',
             'name1'    => 'a',
             'children' => [
-                ['id' => '1', 'name2' => 'A']
+                ['id' => '1', 'name2' => 'A'],
             ],
         ], $builder->limit(1)->tuple());
 
@@ -2852,8 +2852,8 @@ SQL
         // from が無い subselect 指定は無効なはず
         $this->assertException(new \UnexpectedValueException('has not foreign key'), L($builder)->column([
             [
-                'hoge' => $builder->getDatabase()->subselectArray('t_dummy')
-            ]
+                'hoge' => $builder->getDatabase()->subselectArray('t_dummy'),
+            ],
         ]));
 
         // prepared statement は使用できないはず
@@ -2861,7 +2861,7 @@ SQL
             'test1' => ['id', 'name1'],
             ''      => [
                 'children{id}' => $builder->getDatabase()->subselectArray('test2')->prepare(),
-            ]
+            ],
         ]));
     }
 
@@ -2926,9 +2926,9 @@ SQL
                         '*',
                         '..pid',
                         'ppname2' => '..name',
-                    ]
+                    ],
                 ], ['seq' => 1]),
-            ]
+            ],
         ]);
 
         $rows = $builder->postselect([
@@ -3010,8 +3010,8 @@ SQL
         foreach (QueryBuilder::LAZY_MODES as $mode => $opt) {
             $actual = $builder->getDatabase()->selectTuple([
                 'multiprimary' => [
-                    'sub{mainid}' => $builder->setLazyMode($mode)->column('multiprimary')->limit(2, 2)->array()
-                ]
+                    'sub{mainid}' => $builder->setLazyMode($mode)->column('multiprimary')->limit(2, 2)->array(),
+                ],
             ], ['mainid' => '1', 'subid' => '1']);
             if ($opt['generated']) {
                 $this->assertInstanceOf(\Generator::class, $actual['sub']);
@@ -3041,7 +3041,7 @@ SQL
         // 親で lockInShare すれば伝播する
         $parent->reset()->lockInShare()->column([
             'test.*' => [
-                'ddd{id}' => $builder->reset()->column('test1')->setLazyMode()->array()
+                'ddd{id}' => $builder->reset()->column('test1')->setLazyMode()->array(),
             ],
         ])->limit(1);
         $this->assertEquals(2, substr_count($stringify($parent), $readlock));
@@ -3049,7 +3049,7 @@ SQL
         // 親で lockInShare しても子で明示的にしてれば伝播しない
         $parent->reset()->lockInShare()->column([
             'test.*' => [
-                'ddd{id}' => $builder->reset()->column('test1')->setLazyMode()->lockForUpdate()->array()
+                'ddd{id}' => $builder->reset()->column('test1')->setLazyMode()->lockForUpdate()->array(),
             ],
         ])->limit(1);
         $this->assertEquals(1, substr_count($stringify($parent), $readlock));
@@ -3059,7 +3059,7 @@ SQL
         // そもそも InheritLockMode しなければ伝播しない
         $parent->reset()->lockForUpdate()->column([
             'test.*' => [
-                'ddd{id}' => $builder->setPropagateLockMode(false)->reset()->column('test2')->setLazyMode()->array()
+                'ddd{id}' => $builder->setPropagateLockMode(false)->reset()->column('test2')->setLazyMode()->array(),
             ],
         ])->limit(1);
         $this->assertEquals(0, substr_count($stringify($parent), $readlock));
@@ -3138,7 +3138,7 @@ SQL
         $builder->column([
             'test.*' => [
                 'func' => function () { return function ($arg) { return $this['id'] * $arg; }; },
-            ]
+            ],
         ]);
         $actual = $builder->limit(1)->tuple();
         $this->assertEquals(10, $actual['func'](10));
@@ -3150,7 +3150,7 @@ SQL
         $builder->column([
             'test' => [
                 'subcol{id}' => $builder->getDatabase()->subselectArray('test2.name2'),
-            ]
+            ],
         ]);
         $actual = $builder->postselect([
             ['id' => 1, 'name' => 'a', Database::AUTO_PRIMARY_KEY . 'subcol' => 1],
@@ -3183,7 +3183,7 @@ SQL
         $builder->column([
             'test.*' => [
                 'func' => function ($row) { return strtoupper($row['name']); },
-            ]
+            ],
         ]);
         $self = $this;
         $builder->before(function ($rows) use ($self) {
@@ -3282,9 +3282,9 @@ SQL
         $db = $builder->getDatabase();
         $builder->column([
             'test.*'       => [
-                '+sub[hoge=1 OR fuga=2]' => $db->select('test', ['sub1.id = test.id'])
+                '+sub[hoge=1 OR fuga=2]' => $db->select('test', ['sub1.id = test.id']),
             ],
-            '+sss[hoge=1]' => $db->select('test', ['sub1.id = test.id'])
+            '+sss[hoge=1]' => $db->select('test', ['sub1.id = test.id']),
         ]);
         $this->assertQuery("SELECT test.* FROM test INNER JOIN (SELECT test.* FROM test WHERE sub1.id = test.id) sub ON hoge=1 OR fuga=2 INNER JOIN (SELECT test.* FROM test WHERE sub1.id = test.id) sss ON hoge=1", $builder);
     }
@@ -3603,7 +3603,7 @@ SELECT t_leaf.*
 FROM t_leaf
 INNER JOIN t_root ON (t_root.root_id = t_leaf.leaf_root_id) AND (t_root.seq = t_leaf.leaf_root_seq)
 ', self::getDummyDatabase()->select([
-            't_leaf.*' => ['+t_root' => []]
+            't_leaf.*' => ['+t_root' => []],
         ]));
 
         $this->assertStringIgnoreBreak('
@@ -3611,7 +3611,7 @@ SELECT t_root.*
 FROM t_root
 INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_root_seq = t_root.seq)
 ', self::getDummyDatabase()->select([
-            't_root.*' => ['+t_leaf' => []]
+            't_root.*' => ['+t_leaf' => []],
         ]));
     }
 
@@ -3825,7 +3825,7 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
         $lock = trim($platform->getReadLockSQL());
         $lock = $lock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_READ));
         $builder->select('*')->from('test1')->lockInShare();
-        $this->assertContains(' ' . $lock, (string) $builder);
+        $this->assertStringContainsString(' ' . $lock, (string) $builder);
         $builder->array();
     }
 
@@ -3839,12 +3839,12 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
         $lock = trim($platform->getWriteLockSQL());
         $lock = $lock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_WRITE));
         $builder->select('*')->from('test1')->lockForUpdate();
-        $this->assertContains(' ' . $lock, (string) $builder);
+        $this->assertStringContainsString(' ' . $lock, (string) $builder);
         $builder->array();
 
         if (!$platform instanceof SQLServerPlatform) {
             $builder->select('*')->from('test1')->lockForUpdate('SKIP LOCKED');
-            $this->assertContains(' ' . $lock . ' SKIP LOCKED', (string) $builder);
+            $this->assertStringContainsString(' ' . $lock . ' SKIP LOCKED', (string) $builder);
         }
     }
 
@@ -3946,9 +3946,9 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     {
         // limit や groupBy や exists すると自動オーダーは無効になるはず
         $this->assertQuery('SELECT test1.* FROM test1', $builder->reset()->column('test1'));
-        $this->assertNotContains('ORDER BY id', (string) $builder->reset()->column('test1')->limit(1));
+        $this->assertStringNotContainsString('ORDER BY id', (string) $builder->reset()->column('test1')->limit(1));
         $this->assertQuery('SELECT test1.id FROM test1 GROUP BY id', $builder->reset()->column('test1.id')->groupBy('id'));
-        $this->assertNotContains('ORDER BY id', (string) $builder->reset()->column('test1')->exists());
+        $this->assertStringNotContainsString('ORDER BY id', (string) $builder->reset()->column('test1')->exists());
 
         // 識別子は可能な限りクオートされるはず
         $NULL = $builder->getDatabase()->getCompatiblePlatform()->getWrappedPlatform()->quoteSingleIdentifier('NULL');
@@ -3980,11 +3980,11 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
                     'seq',
                     'now' => new Expression('NOW(?)', 1),
                 ],
-            ]
+            ],
         ]);
         $query = $builder->queryInto();
-        $this->assertContains('-- (SELECT C1.* FROM foreign_c1 C1 WHERE C1.id IN ([parent.P.id])) AS C1', $query);
-        $this->assertContains("-- (SELECT C2.seq, NOW('1') AS now FROM foreign_c2 C2 WHERE (C2.seq = '1') AND (C2.cid IN ([parent.P.id]))) AS C2", $query);
+        $this->assertStringContainsString('-- (SELECT C1.* FROM foreign_c1 C1 WHERE C1.id IN ([parent.P.id])) AS C1', $query);
+        $this->assertStringContainsString("-- (SELECT C2.seq, NOW('1') AS now FROM foreign_c2 C2 WHERE (C2.seq = '1') AND (C2.cid IN ([parent.P.id]))) AS C2", $query);
 
         $builder->getDatabase()->insert('g_ancestor', [
             'ancestor_id'   => 1,
@@ -4010,11 +4010,11 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
                         'C' => $builder->getDatabase()->subselectTuple([
                             'g_child' => [
                                 'a' => $builder->getDatabase()->subexists('g_parent'),
-                            ]
+                            ],
                         ], ['child_id' => [1, 2, 3]]),
-                    ]
+                    ],
                 ], ['parent_id' => [1, 2, 3], $builder->getDatabase()->subexists('g_child')]),
-            ]
+            ],
         ]);
         $this->assertEquals([
             'a' => '1',

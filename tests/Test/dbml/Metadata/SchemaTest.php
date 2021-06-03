@@ -76,7 +76,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $schema->addTable($this->getDummyTable('metatest'));
 
-        $this->assertContains('Table', get_class($schema->getTable('metatest')));
+        $this->assertStringContainsString('Table', get_class($schema->getTable('metatest')));
 
         $this->assertException(SchemaException::tableAlreadyExists('metatest'), L($schema)->addTable($this->getDummyTable('metatest')));
     }
@@ -119,11 +119,11 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getTable($schema)
     {
-        $this->assertContains('Table', get_class($schema->getTable('metasample')));
+        $this->assertStringContainsString('Table', get_class($schema->getTable('metasample')));
 
         $schema->refresh();
 
-        $this->assertContains('Table', get_class($schema->getTable('metasample')));
+        $this->assertStringContainsString('Table', get_class($schema->getTable('metasample')));
 
         $this->assertException(SchemaException::tableDoesNotExist('hogera'), L($schema)->getTable('hogera'));
     }
@@ -221,7 +221,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $schema->addTable($this->getDummyTable('metatest'));
 
-        $this->assertContains('Index', get_class($schema->getTablePrimaryKey('metatest')));
+        $this->assertStringContainsString('Index', get_class($schema->getTablePrimaryKey('metatest')));
 
         $this->assertException(SchemaException::tableDoesNotExist('hogera'), L($schema)->getTablePrimaryKey('hogera'));
     }
@@ -318,7 +318,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             'implicit' => true,
             'others'   => [
                 'fuga' => 'FUGA',
-            ]
+            ],
         ]);
         $this->assertEquals([
             'virtual'  => true,

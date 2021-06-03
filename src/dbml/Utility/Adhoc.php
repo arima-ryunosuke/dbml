@@ -116,7 +116,7 @@ class Adhoc
             return false;
         }
 
-        foreach ($array as $k => $v) {
+        foreach ($array as $v) {
             if ($v instanceof Queryable) {
                 return true;
             }

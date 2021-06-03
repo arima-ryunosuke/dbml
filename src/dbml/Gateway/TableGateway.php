@@ -1548,7 +1548,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
                 arrayize($orderBy),
                 arrayize($limit),
                 arrayize($groupBy),
-                arrayize($having)
+                arrayize($having),
             ]);
         }
         $this->scopes[$name] = $scope;

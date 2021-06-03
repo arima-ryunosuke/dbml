@@ -167,7 +167,7 @@ namespace ryunosuke\Test\Gateway {
                 return [
                     'where' => [
                         'article_id' => $id,
-                    ]
+                    ],
                 ];
             });
         }
@@ -186,7 +186,7 @@ namespace ryunosuke\Test\Gateway {
                 return [
                     'where' => [
                         'comment_id' => $id,
-                    ]
+                    ],
                 ];
             });
         }

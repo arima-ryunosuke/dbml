@@ -330,7 +330,7 @@ class Logger implements SQLLogger
             $types ?? [],
             [
                 'microtime' => microtime(true),
-            ]
+            ],
         ];
     }
 
