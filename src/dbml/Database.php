@@ -3051,11 +3051,12 @@ class Database
                 $cond = trim($cond);
                 $emptyfilter = isset($cond[0]) && $cond[0] === '!';
                 if ($emptyfilter) {
-                    if (Adhoc::is_empty($value)) {
-                        if ($filterd === null) {
-                            $filterd = true;
-                        }
-                        $filterd = $filterd && true;
+                    $vcopy = $value;
+                    if (strpos($cond, '/* vcolumn') !== false) {
+                        array_shift($vcopy);
+                    }
+                    if (Adhoc::is_empty($vcopy)) {
+                        $filterd = ($filterd ?? true) && true;
                         continue;
                     }
                     $cond = substr($cond, 1);
@@ -3118,8 +3119,13 @@ class Database
                     $cond = str_subreplace($cond, '?', $subquerys);
                     $value = $subvalues;
 
-                    if (strpos($cond, ':') === false && substr_count($cond, '?') < count($value)) {
-                        $cond .= ' = ?';
+                    if (strpos($cond, ':') === false && ($diff = count($value) - substr_count($cond, '?')) > 0) {
+                        if ($diff === 1) {
+                            $cond .= ' = ?'; // for compatible
+                        }
+                        else {
+                            $cond .= ' IN (' . implode(',', array_fill(0, $diff, '?')) . ')';
+                        }
                     }
                 }
 
@@ -3143,10 +3149,7 @@ class Database
                     }
                 }
                 elseif ($emptyfilter) {
-                    if ($filterd === null) {
-                        $filterd = true;
-                    }
-                    $filterd = $filterd && true;
+                    $filterd = ($filterd ?? true) && true;
                 }
             }
         }

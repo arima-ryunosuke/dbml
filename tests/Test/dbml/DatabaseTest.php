@@ -1987,6 +1987,15 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['(EXISTS (SELECT * FROM test1 WHERE id = ?)) = ?'], $where);
         $this->assertEquals([1, 0], $params);
         $this->assertStringIgnoreBreak("(EXISTS (SELECT * FROM test1 WHERE id = '1')) = '0'", $database->queryInto($where[0], $params));
+
+        $params = [];
+        $where = $database->whereInto([
+            '?' => [$database->selectExists('test1', ['id' => 1]), 2, 3],
+        ], $params);
+
+        $this->assertEquals(['(EXISTS (SELECT * FROM test1 WHERE id = ?)) IN (?,?)'], $where);
+        $this->assertEquals([1, 2, 3], $params);
+        $this->assertStringIgnoreBreak("(EXISTS (SELECT * FROM test1 WHERE id = '1')) IN ('2','3')", $database->queryInto($where[0], $params));
     }
 
     /**

@@ -1625,6 +1625,7 @@ AND
             'P.count_child'                                                => 0,
             'P.count_child > ?'                                            => 1,
             'P.count_child BETWEEN ? AND ?'                                => [7, 9],
+            '!P.count_child'                                               => [],
             'P.has_child',
             'P.has_child'                                                  => 0,
             'P.has_child IN (?)'                                           => [[0, 1]],
