@@ -431,33 +431,42 @@ abstract class AbstractUnitTestCase extends TestCase
     public static function provideDatabase()
     {
         return self::$databases ?: self::$databases = array_map(function ($v) {
-            return [
-                new Database($v[0], [
-                    'modifyAutoSelect' => false,
-                    'tableMapper'      => static function ($tablename) {
-                        if ($tablename === 't_article') {
-                            return [
-                                'Article' => [
-                                    'entityClass'  => \ryunosuke\Test\Entity\Article::class,
-                                    'gatewayClass' => \ryunosuke\Test\Gateway\Article::class,
-                                ],
-                            ];
-                        }
-                        if ($tablename === 't_comment') {
-                            return [
-                                'Comment'        => [
-                                    'entityClass'  => \ryunosuke\Test\Entity\Comment::class,
-                                    'gatewayClass' => \ryunosuke\Test\Gateway\Comment::class,
-                                ],
-                                'ManagedComment' => [
-                                    'entityClass'  => \ryunosuke\Test\Entity\ManagedComment::class,
-                                    'gatewayClass' => \ryunosuke\Test\Gateway\Comment::class,
-                                ],
-                            ];
-                        }
-                    },
-                ])
-            ];
+            $database = new Database($v[0], [
+                'modifyAutoSelect' => false,
+                'tableMapper'      => static function ($tablename) {
+                    if ($tablename === 't_article') {
+                        return [
+                            'Article' => [
+                                'entityClass'  => \ryunosuke\Test\Entity\Article::class,
+                                'gatewayClass' => \ryunosuke\Test\Gateway\Article::class,
+                            ],
+                        ];
+                    }
+                    if ($tablename === 't_comment') {
+                        return [
+                            'Comment'        => [
+                                'entityClass'  => \ryunosuke\Test\Entity\Comment::class,
+                                'gatewayClass' => \ryunosuke\Test\Gateway\Comment::class,
+                            ],
+                            'ManagedComment' => [
+                                'entityClass'  => \ryunosuke\Test\Entity\ManagedComment::class,
+                                'gatewayClass' => \ryunosuke\Test\Gateway\Comment::class,
+                            ],
+                        ];
+                    }
+                },
+            ]);
+            $database->declareVirtualTable('v_article_comment', [
+                't_article' => [
+                    'article_id',
+                    '<t_comment C' => [
+                        'comment_id',
+                    ],
+                ],
+            ], [
+                'C.comment_id IS NOT NULL',
+            ]);
+            return [$database];
         }, self::provideConnection());
     }
 

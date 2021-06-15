@@ -750,6 +750,40 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_declareVirtualTable($database)
+    {
+        $database->declareVirtualTable('virtual_table', [
+            'foreign_p P' => [
+                '*',
+                '+foreign_c1 C1' => [
+                    '*',
+                ],
+                'count_c2'       => $database->subcount('foreign_c2'),
+            ],
+        ], [
+            'P.id >= ?' => 1,
+        ]);
+
+        $count = $database->getPlatform()->quoteIdentifier('*@count');
+        $select = $database->select('virtual_table', [
+            'C1.seq <> ?' => 2,
+        ]);
+        $this->assertStringIgnoreBreak("SELECT P.*,
+(SELECT COUNT(*) AS $count FROM foreign_c2 WHERE foreign_c2.cid = P.id) AS count_c2,
+C1.*
+FROM foreign_p P
+INNER JOIN foreign_c1 C1 ON C1.id = P.id
+WHERE (P.id >= ?) AND (C1.seq <> ?)
+", (string) $select);
+        $this->assertEquals([1, 2], $select->getParams());
+
+        $this->assertNull($database->getVirtualTable('not-found'));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_overrideColumns($database)
     {
         $database->overrideColumns([

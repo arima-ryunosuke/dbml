@@ -2430,6 +2430,36 @@ SELECT test.* FROM test", $builder);
      * @param QueryBuilder $builder
      * @param Database $database
      */
+    function test_vtable($builder, $database)
+    {
+        $this->assertEquals([
+            ['article_id' => '1', 'comment_id' => '1'],
+            ['article_id' => '1', 'comment_id' => '2'],
+            ['article_id' => '1', 'comment_id' => '3'],
+        ], $database->selectArray('v_article_comment'));
+
+        $this->assertEquals([
+            ['article_id' => '1', 'comment_id' => '2'],
+        ], $database->selectArray('v_article_comment', [
+            'C.comment_id' => 2,
+        ]));
+
+        $this->assertEquals([
+            ['article_id' => '1', 'comment_id' => '2', 'id' => 3],
+        ], $database->selectArray([
+            'v_article_comment' => [
+                'id' => $database->raw('(t_article.article_id + C.comment_id)'),
+            ],
+        ], [
+            'C.comment_id' => 2,
+        ]));
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     * @param Database $database
+     */
     function test_vcolumn_lazy($builder, $database)
     {
         $database->overrideColumns([

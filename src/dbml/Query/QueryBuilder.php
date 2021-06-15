@@ -820,14 +820,20 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         };
 
         foreach ($columns as $key => $column) {
-            // 仮想カラム
-            if ($schema->hasTable($table) && is_string($column)) {
-                $vcolumn = $schema->getTableColumnExpression($table, $column, 'select', $this->database);
-                if ($vcolumn) {
-                    $key = is_int($key) ? $column : $key;
-                    // 仮想カラムは修飾子を付与するチャンスを与えなければ実質使い物にならない（エイリアスが動的だから）
-                    $column = is_string($vcolumn) ? sprintf($vcolumn, $accessor) : $vcolumn;
+            // 仮想テーブル
+            if ($vtable = $this->database->getVirtualTable($key)) {
+                $this->build($vtable, true);
+                if ($column !== ['*']) {
+                    $this->addSelect($column);
                 }
+                continue;
+            }
+
+            // 仮想カラム
+            if ($schema->hasTable($table) && is_string($column) && $vcolumn = $schema->getTableColumnExpression($table, $column, 'select', $this->database)) {
+                $key = is_int($key) ? $column : $key;
+                // 仮想カラムは修飾子を付与するチャンスを与えなければ実質使い物にならない（エイリアスが動的だから）
+                $column = is_string($vcolumn) ? sprintf($vcolumn, $accessor) : $vcolumn;
             }
 
             // Expression 化出来そうならする

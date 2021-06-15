@@ -648,6 +648,9 @@ class Database
     /** @var Connection */
     private $txConnection;
 
+    /** @var \ArrayObject */
+    private $vtables;
+
     /** @var \ArrayObject 「未初期化なら生成して返す」系のメソッドのキャッシュ */
     private $cache;
 
@@ -872,6 +875,7 @@ class Database
         }
         $this->connections = array_combine(['master', 'slave'], $connections);
         $this->txConnection = $this->getMasterConnection();
+        $this->vtables = new \ArrayObject();
         $this->cache = new \ArrayObject();
 
         $this->setDefault($options);
@@ -2205,6 +2209,52 @@ class Database
     {
         $map = $this->_tableMap()['TtoE'];
         return first_value($map[$tablename] ?? []) ?: $tablename;
+    }
+
+    /**
+     * 仮想テーブルを宣言する
+     *
+     * {@link select()} の引数に名前をつけて簡易に呼び出すことができる。
+     * ややこしくなるので既に存在するテーブル名と同じものは登録できない。
+     *
+     * ```php
+     * # 仮想テーブルを追加する
+     * $db->declareVirtualTable('v_article_comment', [
+     *     't_article@active' => [
+     *         '*',
+     *         '*t_comment@active' => [
+     *             '*',
+     *         ],
+     *     ],
+     * ]);
+     *
+     * # 追加した仮想テーブルをあたかもテーブルのように使用できる
+     * $db->selectArray('v_article_comment'); // 上で追加した配列を与えるのと同じ
+     * ```
+     *
+     * @inheritdoc select()
+     *
+     * @param string|array $vtableName 仮想テーブル名
+     * @return $this 自分自身
+     */
+    public function declareVirtualTable($vtableName, $tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        assert(!$this->getSchema()->hasTable($vtableName));
+        $this->vtables[$vtableName] = array_combine(QueryBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]);
+        return $this;
+    }
+
+    /**
+     * 仮想テーブルを取得する
+     *
+     * 原則内部向け。
+     *
+     * @param string $vtableName
+     * @return array|null 設定されていたらそれを、なかったら null
+     */
+    public function getVirtualTable($vtableName)
+    {
+        return $this->vtables[$vtableName] ?? null;
     }
 
     /**
