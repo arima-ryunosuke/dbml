@@ -1056,21 +1056,28 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                                 }
                                 return '?';
                             }
+
+                            $prefix = "/* vcolumn $vname-" . (is_int($cond) ? $cond : 'k') . " */";
                             $vcol = $this->database->getSchema()->getTableColumnExpression($tablename, $vname, 'select', $this->database);
                             if (is_string($vcol)) {
-                                return sprintf($vcol, $modifier);
+                                return "$prefix " . sprintf($vcol, $modifier);
                             }
                             elseif ($vcol instanceof Queryable) {
                                 $vcolq = clone $vcol;
-                                if ($vcolq instanceof QueryBuilder && ($submethod = $vcolq->getSubmethod()) !== null) {
+                                if ($vcolq instanceof QueryBuilder && ($vcolq->submethod !== null || $vcolq->lazyMode !== null)) {
                                     foreach ($froms as $from) {
                                         if ($vcolq->setSubwhere($from['table'], $from['alias'])) {
                                             break;
                                         }
                                     }
                                 }
+                                if ($vcolq instanceof QueryBuilder && $vcolq->lazyMode !== null) {
+                                    $vcolq->andWhere($cols)->exists();
+                                    $cols = [true];
+                                }
+
                                 $params[] = $vcolq;
-                                return "/* vcolumn $vname-" . (is_int($cond) ? $cond : 'k') . " */ ?";
+                                return "$prefix ?";
                             }
                         }, $cond2, -1, $count);
 
@@ -2319,13 +2326,15 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *
      * 基本は {@link Database::whereInto()} の where 記法と同じ。加えて下記の記法が使用できる。
      *
-     * | No | where                   | 説明
-     * | --:|:--                      |:--
-     * | 30 | `['' => 123]`           | キーを空文字にすると駆動表の主キーを表す
-     * | 31 | `['C' => 'childwhere']` | サブビルダの名前をキーにして配列を渡すと「その子供ビルダの where」を意味する
-     * | 32 | `['C/childwhere']`      | サブビルダの名前を "/" で区切ると「その子供ビルダの where」を意味する
-     * | 33 | `['*.delete_flg' => 1]` | テーブル部分に `*` を指定すると「あらゆるテーブルのそのカラム」を意味する
-     * | 34 | `['*' => "hoge"]`       | `*` を指定すると「よしなに検索」となる。{@link Database::anywhere()} も参照
+     * | No | where                         | 説明
+     * | --:|:--                            |:--
+     * | 30 | `['' => 123]`                 | キーを空文字にすると駆動表の主キーを表す
+     * | 31 | `['C' => 'childwhere']`       | サブビルダの名前をキーにして配列を渡すと「その子供ビルダの where」を意味する
+     * | 32 | `['C/childwhere']`            | サブビルダの名前を "/" で区切ると「その子供ビルダの where」を意味する
+     * | 33 | `['*.delete_flg' => 1]`       | テーブル部分に `*` を指定すると「あらゆるテーブルのそのカラム」を意味する
+     * | 34 | `['*' => "hoge"]`             | `*` を指定すると「よしなに検索」となる。{@link Database::anywhere()} も参照
+     * | 40 | `['table.vcolumn' => "hoge"]` | 仮想カラム（単純なものに限る）も普通のカラムと同じように指定できる
+     * | 41 | `['table.vcolumn' => [cond]]` | 仮想カラム（実態が subselect に限る）に配列パラメータを与えると「追加の WHERE で EXISTS」となる。この記法は whereInto と同じく、ユーザ入力を直接与えると SQL インジェクションの危険があるため、**決してユーザ由来の値を渡してはならない**
      *
      * ```php
      * # 引数配列内では AND、引数間では OR される
@@ -2356,6 +2365,11 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * # No.34（table1, table2, table3 から "hoge" でよしなに検索する）
      * $qb->column('table1 t1, table2 t2, table3 t3')->where(['*.*' => 'hoge']); // テーブル定義次第だが、全テーブルのあらゆるテキスト系カラムで LIKE "%hoge%" される
      * $qb->column('table1 t1, table2 t2, table3 t3')->where(['t2.*' => 'hoge']); // "*.*" ではなく "エイリアス名.*" とすると全テーブルではなく指定したものだけよしなにされる
+     *
+     * # No.40（仮想カラムを指定。仮想カラムは「親に紐づく子供の COUNT」とする）
+     * $qb->column('t_parent')->where(['t_parent.child_count' => 0]); // WHERE (SELECT COUNT(*) FROM t_child WHERE (t_child.parent_id = t_parent.id)) = 0
+     * # No.41（仮想カラムを指定。仮想カラムは「親に紐づく子供の subselect」とする）
+     * $qb->column('t_parent')->where(['t_parent.children' => ['delete_flg' => 0]]); // WHERE EXISTS(SELECT * FROM t_child WHERE (t_child.parent_id = t_parent.id AND delete_flg = 0)) = 0
      * ```
      *
      * @param mixed $predicates 条件配列
