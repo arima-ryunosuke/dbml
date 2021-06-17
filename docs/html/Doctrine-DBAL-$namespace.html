@@ -54,19 +54,6 @@
     		<h3>Namespaces</h3>
 		<ul>
             				<li class="structure-item">
-					<h4 id="Doctrine\DBAL\Abstraction\" tabindex="-1" class="structure-title ">
-						<a href="Doctrine-DBAL-Abstraction-$namespace.html#Doctrine\DBAL\Abstraction\">Abstraction</a>
-					</h4>
-					<div class="inner-item">
-						<div class="description"></div>
-					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
 					<h4 id="Doctrine\DBAL\Cache\" tabindex="-1" class="structure-title ">
 						<a href="Doctrine-DBAL-Cache-$namespace.html#Doctrine\DBAL\Cache\">Cache</a>
 					</h4>
@@ -158,6 +145,19 @@
 					<div class="clearfix"></div>
 				</li>
             				<li class="structure-item">
+					<h4 id="Doctrine\DBAL\SQL\" tabindex="-1" class="structure-title ">
+						<a href="Doctrine-DBAL-SQL-$namespace.html#Doctrine\DBAL\SQL\">SQL</a>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
 					<h4 id="Doctrine\DBAL\Schema\" tabindex="-1" class="structure-title ">
 						<a href="Doctrine-DBAL-Schema-$namespace.html#Doctrine\DBAL\Schema\">Schema</a>
 					</h4>
@@ -194,7 +194,7 @@
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver.php#L8-L61" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="#L11-L48" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="Doctrine\DBAL\Driver" tabindex="-1" class="structure-title ">
 							<a href="Doctrine-DBAL-Driver$typespace.html#Doctrine\DBAL\Driver">Driver</a>
@@ -220,15 +220,14 @@ Interface that all DBAL drivers must implement.</p>
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L36-L2167" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="#L36-L1822" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="Doctrine\DBAL\Connection" tabindex="-1" class="structure-title ">
 							<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection">Connection</a>
 						</h4>
 						<div class="inner-item">
-							<div class="description"><p>A wrapper around a Doctrine\DBAL\Driver\Connection that adds features like<br />
-events, transaction isolation levels, configuration, emulated transaction nesting,<br />
-lazy connecting and more.</p>
+							<div class="description"><p>A database abstraction-level connection that implements features like events, transaction isolation levels,<br />
+configuration, emulated transaction nesting, lazy connecting and more.</p>
 </div>
 						</div>
 						<div class="attribute">
@@ -244,7 +243,7 @@ lazy connecting and more.</p>
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Exception.php#L5-L10" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="#L15-L152" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="Doctrine\DBAL\Exception" tabindex="-1" class="structure-title ">
 							<a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception">Exception</a>
@@ -260,55 +259,12 @@ lazy connecting and more.</p>
 					</li>
                 					<li class="structure-item">
 						<div class="attribute">
-							<span class="label label-danger"></span>
-							<span class="label label-warning"></span>
-							<span class="label label-info"></span>
-							<span class="label label-info"></span>
-							<span class="label label-deprecated">deprecated </span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/DBALException.php#L25-L314" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-            						</div>
-						<h4 id="Doctrine\DBAL\DBALException" tabindex="-1" class="structure-title strike">
-							<a href="Doctrine-DBAL-DBALException$typespace.html#Doctrine\DBAL\DBALException">DBALException</a>
-						</h4>
-						<div class="inner-item">
-							<div class="description"></div>
-						</div>
-						<div class="attribute">
-							<span class="label label-default"></span>
-							<span class="label label-default"></span>
-						</div>
-						<div class="clearfix"></div>
-					</li>
-                					<li class="structure-item">
-						<div class="attribute">
-							<span class="label label-danger">final</span>
-							<span class="label label-warning"></span>
-							<span class="label label-info"></span>
-							<span class="label label-info"></span>
-							<span class="label label-deprecated">deprecated </span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/FetchMode.php#L7-L75" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-            						</div>
-						<h4 id="Doctrine\DBAL\FetchMode" tabindex="-1" class="structure-title strike">
-							<a href="Doctrine-DBAL-FetchMode$typespace.html#Doctrine\DBAL\FetchMode">FetchMode</a>
-						</h4>
-						<div class="inner-item">
-							<div class="description"><p>Contains statement fetch modes.</p>
-</div>
-						</div>
-						<div class="attribute">
-							<span class="label label-default"></span>
-							<span class="label label-default"></span>
-						</div>
-						<div class="clearfix"></div>
-					</li>
-                					<li class="structure-item">
-						<div class="attribute">
 							<span class="label label-danger">final</span>
 							<span class="label label-warning"></span>
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/ParameterType.php#L7-L65" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="#L5-L57" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="Doctrine\DBAL\ParameterType" tabindex="-1" class="structure-title ">
 							<a href="Doctrine-DBAL-ParameterType$typespace.html#Doctrine\DBAL\ParameterType">ParameterType</a>
@@ -330,7 +286,7 @@ lazy connecting and more.</p>
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Events.php#L5-L33" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="#L5-L33" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="Doctrine\DBAL\Events" tabindex="-1" class="structure-title ">
 							<a href="Doctrine-DBAL-Events$typespace.html#Doctrine\DBAL\Events">Events</a>
@@ -348,12 +304,34 @@ lazy connecting and more.</p>
 					</li>
                 					<li class="structure-item">
 						<div class="attribute">
+							<span class="label label-danger"></span>
+							<span class="label label-warning"></span>
+							<span class="label label-info"></span>
+							<span class="label label-info"></span>
+							<span class="label label-deprecated"></span>
+                            			<a href="#L5-L23" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+            						</div>
+						<h4 id="Doctrine\DBAL\LockMode" tabindex="-1" class="structure-title ">
+							<a href="Doctrine-DBAL-LockMode$typespace.html#Doctrine\DBAL\LockMode">LockMode</a>
+						</h4>
+						<div class="inner-item">
+							<div class="description"><p>Contains all DBAL LockModes.</p>
+</div>
+						</div>
+						<div class="attribute">
+							<span class="label label-default"></span>
+							<span class="label label-default"></span>
+						</div>
+						<div class="clearfix"></div>
+					</li>
+                					<li class="structure-item">
+						<div class="attribute">
 							<span class="label label-danger">final</span>
 							<span class="label label-warning"></span>
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/TransactionIsolationLevel.php#L7-L35" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="#L7-L35" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="Doctrine\DBAL\TransactionIsolationLevel" tabindex="-1" class="structure-title ">
 							<a href="Doctrine-DBAL-TransactionIsolationLevel$typespace.html#Doctrine\DBAL\TransactionIsolationLevel">TransactionIsolationLevel</a>
@@ -374,10 +352,10 @@ lazy connecting and more.</p>
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/ConnectionException.php#L5-L41" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="#L16-L339" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
-						<h4 id="Doctrine\DBAL\ConnectionException" tabindex="-1" class="structure-title ">
-							<a href="Doctrine-DBAL-ConnectionException$typespace.html#Doctrine\DBAL\ConnectionException">ConnectionException</a>
+						<h4 id="Doctrine\DBAL\Result" tabindex="-1" class="structure-title ">
+							<a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result">Result</a>
 						</h4>
 						<div class="inner-item">
 							<div class="description"></div>
@@ -395,13 +373,57 @@ lazy connecting and more.</p>
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/DriverManager.php#L29-L455" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="#L9-L70" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+            						</div>
+						<h4 id="Doctrine\DBAL\Query" tabindex="-1" class="structure-title ">
+							<a href="Doctrine-DBAL-Query$typespace.html#Doctrine\DBAL\Query">Query</a>
+						</h4>
+						<div class="inner-item">
+							<div class="description"><p>An SQL query together with its bound parameters.</p>
+</div>
+						</div>
+						<div class="attribute">
+							<span class="label label-default"></span>
+							<span class="label label-default"></span>
+						</div>
+						<div class="clearfix"></div>
+					</li>
+                					<li class="structure-item">
+						<div class="attribute">
+							<span class="label label-danger"></span>
+							<span class="label label-warning"></span>
+							<span class="label label-info"></span>
+							<span class="label label-info"></span>
+							<span class="label label-deprecated"></span>
+                            			<a href="#L13-L237" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+            						</div>
+						<h4 id="Doctrine\DBAL\Statement" tabindex="-1" class="structure-title ">
+							<a href="Doctrine-DBAL-Statement$typespace.html#Doctrine\DBAL\Statement">Statement</a>
+						</h4>
+						<div class="inner-item">
+							<div class="description"><p>A database abstraction-level statement that implements support for logging, DBAL mapping types, etc.</p>
+</div>
+						</div>
+						<div class="attribute">
+							<span class="label label-default"></span>
+							<span class="label label-default"></span>
+						</div>
+						<div class="clearfix"></div>
+					</li>
+                					<li class="structure-item">
+						<div class="attribute">
+							<span class="label label-danger">final</span>
+							<span class="label label-warning"></span>
+							<span class="label label-info"></span>
+							<span class="label label-info"></span>
+							<span class="label label-deprecated"></span>
+                            			<a href="#L27-L478" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="Doctrine\DBAL\DriverManager" tabindex="-1" class="structure-title ">
 							<a href="Doctrine-DBAL-DriverManager$typespace.html#Doctrine\DBAL\DriverManager">DriverManager</a>
 						</h4>
 						<div class="inner-item">
-							<div class="description"><p>Factory for creating Doctrine\DBAL\Connection instances.</p>
+							<div class="description"><p>Factory for creating <tag_link data-kind='fqsen' data-type-category='class' data-type-fqsen='Doctrine\DBAL\Connection' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\Connection'>Doctrine\DBAL\Connection</tag_link> instances.</p>
 </div>
 						</div>
 						<div class="attribute">
@@ -417,38 +439,13 @@ lazy connecting and more.</p>
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/LockMode.php#L5-L23" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-            						</div>
-						<h4 id="Doctrine\DBAL\LockMode" tabindex="-1" class="structure-title ">
-							<a href="Doctrine-DBAL-LockMode$typespace.html#Doctrine\DBAL\LockMode">LockMode</a>
-						</h4>
-						<div class="inner-item">
-							<div class="description"><p>Contains all DBAL LockModes.</p>
-</div>
-						</div>
-						<div class="attribute">
-							<span class="label label-default"></span>
-							<span class="label label-default"></span>
-						</div>
-						<div class="clearfix"></div>
-					</li>
-                					<li class="structure-item">
-						<div class="attribute">
-							<span class="label label-danger"></span>
-							<span class="label label-warning"></span>
-							<span class="label label-info"></span>
-							<span class="label label-info"></span>
-							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L11-L164" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="#L9-L140" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="Doctrine\DBAL\Configuration" tabindex="-1" class="structure-title ">
 							<a href="Doctrine-DBAL-Configuration$typespace.html#Doctrine\DBAL\Configuration">Configuration</a>
 						</h4>
 						<div class="inner-item">
 							<div class="description"><p>Configuration container for the Doctrine DBAL.</p>
-<p>Internal note: When adding a new configuration option just write a getter/setter</p>
-<pre><code>           pair and add the option to the _attributes array with a proper default value.
-</code></pre>
 </div>
 						</div>
 						<div class="attribute">
@@ -462,17 +459,15 @@ lazy connecting and more.</p>
 							<span class="label label-danger"></span>
 							<span class="label label-warning"></span>
 							<span class="label label-info"></span>
-							<span class="label label-info">iterateable</span>
+							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Statement.php#L21-L589" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="#L5-L41" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
-						<h4 id="Doctrine\DBAL\Statement" tabindex="-1" class="structure-title ">
-							<a href="Doctrine-DBAL-Statement$typespace.html#Doctrine\DBAL\Statement">Statement</a>
+						<h4 id="Doctrine\DBAL\ConnectionException" tabindex="-1" class="structure-title ">
+							<a href="Doctrine-DBAL-ConnectionException$typespace.html#Doctrine\DBAL\ConnectionException">ConnectionException</a>
 						</h4>
 						<div class="inner-item">
-							<div class="description"><p>A thin wrapper around a Doctrine\DBAL\Driver\Statement that adds support<br />
-for logging, DBAL mapping types, etc.</p>
-</div>
+							<div class="description"></div>
 						</div>
 						<div class="attribute">
 							<span class="label label-default"></span>

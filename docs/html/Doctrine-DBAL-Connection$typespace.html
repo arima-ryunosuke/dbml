@@ -54,27 +54,17 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L36-L2167" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="#L36-L1822" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">Doctrine\DBAL\Connection</span></h2>
 
-	<div class="description"><p>A wrapper around a Doctrine\DBAL\Driver\Connection that adds features like<br />
-events, transaction isolation levels, configuration, emulated transaction nesting,<br />
-lazy connecting and more.</p>
+	<div class="description"><p>A database abstraction-level connection that implements features like events, transaction isolation levels,<br />
+configuration, emulated transaction nesting, lazy connecting and more.</p>
 </div>
 
 	<h3>Construction</h3>
-        	<table class="table">
-		<caption>Implements</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection</a></td>
-				<td class="desc">Connection interface.</td>
-			</tr>
-        		</tbody>
-	</table>
-            
+                
 	<h3>Hierarchy</h3>
 	<div class="hierarchy"></div>
 
@@ -83,67 +73,7 @@ lazy connecting and more.</p>
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L43-L48" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::TRANSACTION_READ_UNCOMMITTED" tabindex="-1" class="structure-title">
-						<small>integer</small>
-                        TRANSACTION_READ_UNCOMMITTED						<var> = 1</var>
-					</h4>
-					<div class="inner-item">
-						<div class="description"><p>Constant for transaction isolation level READ UNCOMMITTED.</p>
-</div>
-
-                                                					</div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L50-L55" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::TRANSACTION_READ_COMMITTED" tabindex="-1" class="structure-title">
-						<small>integer</small>
-                        TRANSACTION_READ_COMMITTED						<var> = 2</var>
-					</h4>
-					<div class="inner-item">
-						<div class="description"><p>Constant for transaction isolation level READ COMMITTED.</p>
-</div>
-
-                                                					</div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L57-L62" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::TRANSACTION_REPEATABLE_READ" tabindex="-1" class="structure-title">
-						<small>integer</small>
-                        TRANSACTION_REPEATABLE_READ						<var> = 3</var>
-					</h4>
-					<div class="inner-item">
-						<div class="description"><p>Constant for transaction isolation level REPEATABLE READ.</p>
-</div>
-
-                                                					</div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L64-L69" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::TRANSACTION_SERIALIZABLE" tabindex="-1" class="structure-title">
-						<small>integer</small>
-                        TRANSACTION_SERIALIZABLE						<var> = 4</var>
-					</h4>
-					<div class="inner-item">
-						<div class="description"><p>Constant for transaction isolation level SERIALIZABLE.</p>
-</div>
-
-                                                					</div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L71-L74" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L44-L47" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::PARAM_INT_ARRAY" tabindex="-1" class="structure-title">
 						<small>integer</small>
@@ -158,7 +88,7 @@ lazy connecting and more.</p>
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L76-L79" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L49-L52" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::PARAM_STR_ARRAY" tabindex="-1" class="structure-title">
 						<small>integer</small>
@@ -173,7 +103,7 @@ lazy connecting and more.</p>
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L81-L84" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L54-L57" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::ARRAY_PARAM_OFFSET" tabindex="-1" class="structure-title">
 						<small>integer</small>
@@ -194,7 +124,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L86-L91" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L59-L64" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_conn" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection</a><span class="type-separator"></span><wbr>null</small>
@@ -210,7 +140,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L93-L94" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L66-L67" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_config" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-DBAL-Configuration$typespace.html#Doctrine\DBAL\Configuration" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Configuration</a></small>
@@ -225,7 +155,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L96-L97" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L69-L70" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_eventManager" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-Common-EventManager$typespace.html#Doctrine\Common\EventManager" class="fqsen "><small>Doctrine\Common\</small><wbr>EventManager</a></small>
@@ -240,7 +170,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L99-L100" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L72-L77" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_expr" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-DBAL-Query-Expression-ExpressionBuilder$typespace.html#Doctrine\DBAL\Query\Expression\ExpressionBuilder" class="fqsen "><small>Doctrine\DBAL\Query\Expression\</small><wbr>ExpressionBuilder</a></small>
@@ -255,7 +185,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L145-L150" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L129-L136" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_schemaManager" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-DBAL-Schema-AbstractSchemaManager$typespace.html#Doctrine\DBAL\Schema\AbstractSchemaManager" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>AbstractSchemaManager</a><span class="type-separator"></span><wbr>null</small>
@@ -271,7 +201,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L152-L157" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L138-L143" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_driver" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-DBAL-Driver$typespace.html#Doctrine\DBAL\Driver" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Driver</a></small>
@@ -280,21 +210,6 @@ lazy connecting and more.</p>
 					<div class="inner-item">
 						<div class="description"><p>The used DBAL driver.</p>
 </div>
-                                                					</div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-primary"></span>
-						<span class="label label-protected">protected</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L166-L167" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::$defaultFetchMode" tabindex="-1" class="structure-title">
-						<small>int</small>
-						$defaultFetchMode						<var> = 2</var>
-					</h4>
-					<div class="inner-item">
-						<div class="description"></div>
                                                 					</div>
 				</li>
             		</ul>
@@ -311,7 +226,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L169-L218" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L152-L198" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::__construct()" tabindex="-1" class="structure-title ">
                         __construct                        	<small>($params, $driver, $config = null, $eventManager = null) : void</small>
@@ -323,7 +238,7 @@ lazy connecting and more.</p>
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
+				<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;string,mixed&gt;$typespace.html#array&lt;string,mixed&gt;" class="fqsen ">array&lt;string,mixed&gt;</a></td>
 				<td class="rest">$params</td>
 				<td class="desc"><p>The connection parameters.</p>
 </td>
@@ -384,10 +299,10 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L220-L230" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L200-L212" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getParams()" tabindex="-1" class="structure-title ">
-                        getParams                        	<small>() : mixed[]</small>
+                        getParams                        	<small>() : <a href="array&lt;string,mixed&gt;$typespace.html#array&lt;string,mixed&gt;" class="fqsen ">array&lt;string,mixed&gt;</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Gets the parameters used during instantiation.</p>
@@ -401,7 +316,7 @@ lazy connecting and more.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">mixed[]</td>
+			<td class="type"><a href="array&lt;string,mixed&gt;$typespace.html#array&lt;string,mixed&gt;" class="fqsen ">array&lt;string,mixed&gt;</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -424,53 +339,13 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L232-L240" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L214-L232" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getDatabase()" tabindex="-1" class="structure-title ">
-                        getDatabase                        	<small>() : string</small>
+                        getDatabase                        	<small>() : string<span class="type-separator"></span><wbr>null</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"><p>Gets the name of the database this Connection is connected to.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">string</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L242-L252" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::getHost()" tabindex="-1" class="structure-title strike">
-                        getHost                        	<small>() : string<span class="type-separator"></span><wbr>null</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Gets the hostname of the currently connected database.</p>
+						<div class="description"><p>Gets the name of the currently selected database.</p>
 </div>
                         	<table class="table">
 		<caption>Parameters</caption>
@@ -482,132 +357,25 @@ lazy connecting and more.</p>
 		<tbody>
 		<tr>
 			<td class="type">string<span class="type-separator"></span><wbr>null</td>
-			<td class="desc"></td>
+			<td class="desc"><p>The name of the database or NULL if a database is not selected.</p>
+<pre><code>                The platforms which don't support the concept of a database (e.g. embedded databases)
+                must always return a string as an indicator of an implicitly selected database.
+</code></pre>
+</td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L254-L264" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::getPort()" tabindex="-1" class="structure-title strike">
-                        getPort                        	<small>() : mixed</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Gets the port of the currently connected database.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
 	</table>
                             	<table class="table">
-		<caption>Return</caption>
+		<caption>Throws</caption>
 		<tbody>
-		<tr>
-			<td class="type">mixed</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L266-L276" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::getUsername()" tabindex="-1" class="structure-title strike">
-                        getUsername                        	<small>() : string<span class="type-separator"></span><wbr>null</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Gets the username used by this connection.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
         		</tbody>
 	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">string<span class="type-separator"></span><wbr>null</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L278-L288" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::getPassword()" tabindex="-1" class="structure-title strike">
-                        getPassword                        	<small>() : string<span class="type-separator"></span><wbr>null</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Gets the password used by this connection.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">string<span class="type-separator"></span><wbr>null</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -624,7 +392,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L290-L298" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L234-L242" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getDriver()" tabindex="-1" class="structure-title ">
                         getDriver                        	<small>() : <a href="Doctrine-DBAL-Driver$typespace.html#Doctrine\DBAL\Driver" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Driver</a></small>
@@ -664,7 +432,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L300-L308" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L244-L252" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getConfiguration()" tabindex="-1" class="structure-title ">
                         getConfiguration                        	<small>() : <a href="Doctrine-DBAL-Configuration$typespace.html#Doctrine\DBAL\Configuration" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Configuration</a></small>
@@ -704,7 +472,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L310-L318" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L254-L262" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getEventManager()" tabindex="-1" class="structure-title ">
                         getEventManager                        	<small>() : <a href="Doctrine-Common-EventManager$typespace.html#Doctrine\Common\EventManager" class="fqsen "><small>Doctrine\Common\</small><wbr>EventManager</a></small>
@@ -744,7 +512,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L320-L334" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L264-L279" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getDatabasePlatform()" tabindex="-1" class="structure-title ">
                         getDatabasePlatform                        	<small>() : <a href="Doctrine-DBAL-Platforms-AbstractPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractPlatform" class="fqsen "><small>Doctrine\DBAL\Platforms\</small><wbr>AbstractPlatform</a></small>
@@ -793,9 +561,49 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L336-L344" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L281-L287" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Connection::getExpressionBuilder()" tabindex="-1" class="structure-title ">
+					<h4 id="Doctrine\DBAL\Connection::createExpressionBuilder()" tabindex="-1" class="structure-title ">
+                        createExpressionBuilder                        	<small>() : <a href="Doctrine-DBAL-Query-Expression-ExpressionBuilder$typespace.html#Doctrine\DBAL\Query\Expression\ExpressionBuilder" class="fqsen "><small>Doctrine\DBAL\Query\Expression\</small><wbr>ExpressionBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Creates an expression builder for the connection.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Query-Expression-ExpressionBuilder$typespace.html#Doctrine\DBAL\Query\Expression\ExpressionBuilder" class="fqsen "><small>Doctrine\DBAL\Query\Expression\</small><wbr>ExpressionBuilder</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated">deprecated </span>
+						<span class="label label-public">public</span>
+                        			<a href="#L289-L306" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Connection::getExpressionBuilder()" tabindex="-1" class="structure-title strike">
                         getExpressionBuilder                        	<small>() : <a href="Doctrine-DBAL-Query-Expression-ExpressionBuilder$typespace.html#Doctrine\DBAL\Query\Expression\ExpressionBuilder" class="fqsen "><small>Doctrine\DBAL\Query\Expression\</small><wbr>ExpressionBuilder</a></small>
 						</h4>
 					<div class="inner-item">
@@ -833,7 +641,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L346-L376" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L308-L340" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::connect()" tabindex="-1" class="structure-title ">
                         connect                        	<small>() : bool</small>
@@ -859,7 +667,16 @@ lazy connecting and more.</p>
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -876,7 +693,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L481-L491" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L447-L457" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::isAutoCommit()" tabindex="-1" class="structure-title ">
                         isAutoCommit                        	<small>() : bool</small>
@@ -927,7 +744,7 @@ lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L493-L526" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L459-L492" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::setAutoCommit()" tabindex="-1" class="structure-title ">
                         setAutoCommit                        	<small>($autoCommit) : void</small>
@@ -986,252 +803,9 @@ committed. If this method is called and the auto-commit mode is not changed, the
 						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L528-L540" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::setFetchMode()" tabindex="-1" class="structure-title strike">
-                        setFetchMode                        	<small>($fetchMode) : void</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Sets the fetch mode.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">int</td>
-				<td class="rest">$fetchMode</td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">void</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L542-L559" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::fetchAssoc()" tabindex="-1" class="structure-title strike">
-                        fetchAssoc                        	<small>($sql, $params = [], $types = []) : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Prepares and executes an SQL query and returns the first row of the result<br />
-as an associative array.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">string</td>
-				<td class="rest">$sql</td>
-				<td class="desc"><p>SQL query</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$params = []</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$types = []</td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type"><a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></td>
-			<td class="desc"><p>mixed&gt;|false False is returned if no rows are found.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Throws</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                                                    					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L561-L576" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::fetchArray()" tabindex="-1" class="structure-title strike">
-                        fetchArray                        	<small>($sql, $params = [], $types = []) : <a href="array&lt;int,$typespace.html#array&lt;int," class="fqsen ">array&lt;int,</a></small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Prepares and executes an SQL query and returns the first row of the result<br />
-as a numerically indexed array.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">string</td>
-				<td class="rest">$sql</td>
-				<td class="desc"><p>SQL query</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$params = []</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$types = []</td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type"><a href="array&lt;int,$typespace.html#array&lt;int," class="fqsen ">array&lt;int,</a></td>
-			<td class="desc"><p>mixed&gt;|false False is returned if no rows are found.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L578-L596" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::fetchColumn()" tabindex="-1" class="structure-title strike">
-                        fetchColumn                        	<small>($sql, $params = [], $column = 0, $types = []) : mixed<span class="type-separator"></span><wbr>false</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Prepares and executes an SQL query and returns the value of a single column<br />
-of the first row of the result.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">string</td>
-				<td class="rest">$sql</td>
-				<td class="desc"><p>SQL query</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$params = []</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">int</td>
-				<td class="rest">$column = 0</td>
-				<td class="desc"><p>0-indexed column number</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$types = []</td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">mixed<span class="type-separator"></span><wbr>false</td>
-			<td class="desc"><p>False is returned if no rows are found.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Throws</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                                                    					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L598-L623" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L494-L513" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchAssociative()" tabindex="-1" class="structure-title ">
                         fetchAssociative                        	<small>($query, $params = [], $types = []) : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
@@ -1298,10 +872,10 @@ as an associative array.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L625-L650" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L515-L534" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchNumeric()" tabindex="-1" class="structure-title ">
-                        fetchNumeric                        	<small>($query, $params = [], $types = []) : <a href="array&lt;int,$typespace.html#array&lt;int," class="fqsen ">array&lt;int,</a></small>
+                        fetchNumeric                        	<small>($query, $params = [], $types = []) : <a href="list&lt;$typespace.html#list&lt;" class="fqsen ">list&lt;</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the first row of the result<br />
@@ -1332,7 +906,7 @@ as a numerically indexed array.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="array&lt;int,$typespace.html#array&lt;int," class="fqsen ">array&lt;int,</a></td>
+			<td class="type"><a href="list&lt;$typespace.html#list&lt;" class="fqsen ">list&lt;</a></td>
 			<td class="desc"><p>mixed&gt;|false False is returned if no rows are found.</p>
 </td>
 			<td class="rest"></td>
@@ -1365,7 +939,7 @@ as a numerically indexed array.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L652-L677" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L536-L555" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchOne()" tabindex="-1" class="structure-title ">
                         fetchOne                        	<small>($query, $params = [], $types = []) : mixed<span class="type-separator"></span><wbr>false</small>
@@ -1432,7 +1006,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L679-L687" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L557-L565" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::isConnected()" tabindex="-1" class="structure-title ">
                         isConnected                        	<small>() : bool</small>
@@ -1472,7 +1046,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L689-L697" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L567-L575" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::isTransactionActive()" tabindex="-1" class="structure-title ">
                         isTransactionActive                        	<small>() : bool</small>
@@ -1513,7 +1087,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L729-L757" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L607-L635" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::delete()" tabindex="-1" class="structure-title ">
                         delete                        	<small>($table, $criteria, $types = []) : int</small>
@@ -1580,7 +1154,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L759-L767" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L637-L645" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::close()" tabindex="-1" class="structure-title ">
                         close                        	<small>() : void</small>
@@ -1620,7 +1194,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L769-L781" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L647-L661" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::setTransactionIsolation()" tabindex="-1" class="structure-title ">
                         setTransactionIsolation                        	<small>($level) : int</small>
@@ -1649,7 +1223,16 @@ of the first row of the result.</p>
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -1666,7 +1249,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L783-L795" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L663-L677" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getTransactionIsolation()" tabindex="-1" class="structure-title ">
                         getTransactionIsolation                        	<small>() : int</small>
@@ -1690,7 +1273,16 @@ of the first row of the result.</p>
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -1707,7 +1299,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L797-L831" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L679-L713" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::update()" tabindex="-1" class="structure-title ">
                         update                        	<small>($table, $data, $criteria, $types = []) : int</small>
@@ -1779,7 +1371,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L833-L868" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L715-L750" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::insert()" tabindex="-1" class="structure-title ">
                         insert                        	<small>($table, $data, $types = []) : int</small>
@@ -1846,7 +1438,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L889-L906" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L771-L788" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::quoteIdentifier()" tabindex="-1" class="structure-title ">
                         quoteIdentifier                        	<small>($str) : string</small>
@@ -1898,14 +1490,13 @@ problems than they solve.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L908-L920" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L790-L803" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::quote()" tabindex="-1" class="structure-title ">
                         quote                        	<small>($value, $type = Doctrine\DBAL\ParameterType::STRING) : mixed</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Quotes a string for use in a query.</tag_inheritdoc></p>
-</div>
+						<div class="description"></div>
                         	<table class="table">
 		<caption>Parameters</caption>
 		<tbody>
@@ -1915,7 +1506,7 @@ problems than they solve.</p>
 				<td class="desc"></td>
 			</tr>
         			<tr>
-				<td class="type">int</td>
+				<td class="type">int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr><a href="Doctrine-DBAL-Types-Type$typespace.html#Doctrine\DBAL\Types\Type" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>Type</a><span class="type-separator"></span><wbr>null</td>
 				<td class="rest">$type = Doctrine\DBAL\ParameterType::STRING</td>
 				<td class="desc"></td>
 			</tr>
@@ -1926,74 +1517,6 @@ problems than they solve.</p>
 		<tbody>
 		<tr>
 			<td class="type">mixed</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::quote()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection::quote()</a></td>
-				<td class="desc">Quotes a string for use in a query.</td>
-				<td class="rest">implement</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L922-L936" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::fetchAll()" tabindex="-1" class="structure-title strike">
-                        fetchAll                        	<small>($sql, $params = [], $types = []) : mixed[]</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Prepares and executes an SQL query and returns the result as an associative array.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">string</td>
-				<td class="rest">$sql</td>
-				<td class="desc"><p>The SQL query.</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
-				<td class="rest">$params = []</td>
-				<td class="desc"><p>The query parameters.</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">int[]<span class="type-separator"></span><wbr>string[]</td>
-				<td class="rest">$types = []</td>
-				<td class="desc"><p>The query parameter types.</p>
-</td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">mixed[]</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -2016,10 +1539,10 @@ problems than they solve.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L938-L962" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L805-L823" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchAllNumeric()" tabindex="-1" class="structure-title ">
-                        fetchAllNumeric                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="array&lt;int,array&lt;int,mixed&gt;&gt;$typespace.html#array&lt;int,array&lt;int,mixed&gt;&gt;" class="fqsen ">array&lt;int,array&lt;int,mixed&gt;&gt;</a></small>
+                        fetchAllNumeric                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="list&lt;list&lt;mixed&gt;&gt;$typespace.html#list&lt;list&lt;mixed&gt;&gt;" class="fqsen ">list&lt;list&lt;mixed&gt;&gt;</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the result as an array of numeric arrays.</p>
@@ -2049,7 +1572,7 @@ problems than they solve.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;int,array&lt;int,mixed&gt;&gt;$typespace.html#array&lt;int,array&lt;int,mixed&gt;&gt;" class="fqsen ">array&lt;int,array&lt;int,mixed&gt;&gt;</a></td>
+			<td class="type">array<span class="type-separator"></span><wbr><a href="list&lt;list&lt;mixed&gt;&gt;$typespace.html#list&lt;list&lt;mixed&gt;&gt;" class="fqsen ">list&lt;list&lt;mixed&gt;&gt;</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -2081,10 +1604,10 @@ problems than they solve.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L964-L988" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L825-L843" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchAllAssociative()" tabindex="-1" class="structure-title ">
-                        fetchAllAssociative                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="array&lt;int,array&lt;string,mixed&gt;&gt;$typespace.html#array&lt;int,array&lt;string,mixed&gt;&gt;" class="fqsen ">array&lt;int,array&lt;string,mixed&gt;&gt;</a></small>
+                        fetchAllAssociative                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="list&lt;array&lt;string,mixed&gt;&gt;$typespace.html#list&lt;array&lt;string,mixed&gt;&gt;" class="fqsen ">list&lt;array&lt;string,mixed&gt;&gt;</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the result as an array of associative arrays.</p>
@@ -2114,7 +1637,7 @@ problems than they solve.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;int,array&lt;string,mixed&gt;&gt;$typespace.html#array&lt;int,array&lt;string,mixed&gt;&gt;" class="fqsen ">array&lt;int,array&lt;string,mixed&gt;&gt;</a></td>
+			<td class="type">array<span class="type-separator"></span><wbr><a href="list&lt;array&lt;string,mixed&gt;&gt;$typespace.html#list&lt;array&lt;string,mixed&gt;&gt;" class="fqsen ">list&lt;array&lt;string,mixed&gt;&gt;</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -2146,7 +1669,7 @@ problems than they solve.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L990-L1015" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L845-L860" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchAllKeyValue()" tabindex="-1" class="structure-title ">
                         fetchAllKeyValue                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="array&lt;mixed,mixed&gt;$typespace.html#array&lt;mixed,mixed&gt;" class="fqsen ">array&lt;mixed,mixed&gt;</a></small>
@@ -2212,7 +1735,7 @@ mapped to the first column and the values mapped to the second column.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1017-L1041" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L862-L878" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchAllAssociativeIndexed()" tabindex="-1" class="structure-title ">
                         fetchAllAssociativeIndexed                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="array&lt;mixed,array&lt;string,mixed&gt;&gt;$typespace.html#array&lt;mixed,array&lt;string,mixed&gt;&gt;" class="fqsen ">array&lt;mixed,array&lt;string,mixed&gt;&gt;</a></small>
@@ -2279,10 +1802,10 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1043-L1067" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L880-L898" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchFirstColumn()" tabindex="-1" class="structure-title ">
-                        fetchFirstColumn                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="array&lt;int,mixed&gt;$typespace.html#array&lt;int,mixed&gt;" class="fqsen ">array&lt;int,mixed&gt;</a></small>
+                        fetchFirstColumn                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="list&lt;mixed&gt;$typespace.html#list&lt;mixed&gt;" class="fqsen ">list&lt;mixed&gt;</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the result as an array of the first column values.</p>
@@ -2312,7 +1835,7 @@ and their values.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;int,mixed&gt;$typespace.html#array&lt;int,mixed&gt;" class="fqsen ">array&lt;int,mixed&gt;</a></td>
+			<td class="type">array<span class="type-separator"></span><wbr><a href="list&lt;mixed&gt;$typespace.html#list&lt;mixed&gt;" class="fqsen ">list&lt;mixed&gt;</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -2344,10 +1867,10 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1069-L1095" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L900-L922" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::iterateNumeric()" tabindex="-1" class="structure-title ">
-                        iterateNumeric                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;int,array&lt;int,mixed&gt;&gt;$typespace.html#Traversable&lt;int,array&lt;int,mixed&gt;&gt;" class="fqsen ">Traversable&lt;int,array&lt;int,mixed&gt;&gt;</a></small>
+                        iterateNumeric                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;int,list&lt;mixed&gt;&gt;$typespace.html#Traversable&lt;int,list&lt;mixed&gt;&gt;" class="fqsen ">Traversable&lt;int,list&lt;mixed&gt;&gt;</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the result as an iterator over rows represented as numeric arrays.</p>
@@ -2377,7 +1900,7 @@ and their values.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;int,array&lt;int,mixed&gt;&gt;$typespace.html#Traversable&lt;int,array&lt;int,mixed&gt;&gt;" class="fqsen ">Traversable&lt;int,array&lt;int,mixed&gt;&gt;</a></td>
+			<td class="type"><a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;int,list&lt;mixed&gt;&gt;$typespace.html#Traversable&lt;int,list&lt;mixed&gt;&gt;" class="fqsen ">Traversable&lt;int,list&lt;mixed&gt;&gt;</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -2409,7 +1932,7 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1097-L1124" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L924-L947" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::iterateAssociative()" tabindex="-1" class="structure-title ">
                         iterateAssociative                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;int,array&lt;string,mixed&gt;&gt;$typespace.html#Traversable&lt;int,array&lt;string,mixed&gt;&gt;" class="fqsen ">Traversable&lt;int,array&lt;string,mixed&gt;&gt;</a></small>
@@ -2475,7 +1998,7 @@ as associative arrays.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1126-L1147" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L949-L964" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::iterateKeyValue()" tabindex="-1" class="structure-title ">
                         iterateKeyValue                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;mixed,mixed&gt;$typespace.html#Traversable&lt;mixed,mixed&gt;" class="fqsen ">Traversable&lt;mixed,mixed&gt;</a></small>
@@ -2541,7 +2064,7 @@ mapped to the first column and the values mapped to the second column.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1149-L1169" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L966-L982" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::iterateAssociativeIndexed()" tabindex="-1" class="structure-title ">
                         iterateAssociativeIndexed                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;mixed,array&lt;string,mixed&gt;&gt;$typespace.html#Traversable&lt;mixed,array&lt;string,mixed&gt;&gt;" class="fqsen ">Traversable&lt;mixed,array&lt;string,mixed&gt;&gt;</a></small>
@@ -2608,7 +2131,7 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1171-L1197" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L984-L1006" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::iterateColumn()" tabindex="-1" class="structure-title ">
                         iterateColumn                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;int,mixed&gt;$typespace.html#Traversable&lt;int,mixed&gt;" class="fqsen ">Traversable&lt;int,mixed&gt;</a></small>
@@ -2673,7 +2196,7 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1199-L1219" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1008-L1018" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::prepare()" tabindex="-1" class="structure-title ">
                         prepare                        	<small>($sql) : <a href="Doctrine-DBAL-Statement$typespace.html#Doctrine\DBAL\Statement" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Statement</a></small>
@@ -2697,8 +2220,7 @@ and their values.</p>
 		<tbody>
 		<tr>
 			<td class="type"><a href="Doctrine-DBAL-Statement$typespace.html#Doctrine\DBAL\Statement" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Statement</a></td>
-			<td class="desc"><p>The prepared statement.</p>
-</td>
+			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
@@ -2712,17 +2234,7 @@ and their values.</p>
 			</tr>
         		</tbody>
 	</table>
-                            	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::prepare()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection::prepare()</a></td>
-				<td class="desc">Prepares a statement for execution and returns a Statement object.</td>
-				<td class="rest">implement</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -2739,10 +2251,10 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1221-L1278" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1020-L1074" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::executeQuery()" tabindex="-1" class="structure-title ">
-                        executeQuery                        	<small>($sql, $params = [], $types = [], $qcp = null) : <a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement</a></small>
+                        executeQuery                        	<small>($sql, $params = [], $types = [], $qcp = null) : <a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Executes an, optionally parametrized, SQL query.</p>
@@ -2779,9 +2291,8 @@ If an SQLLogger is configured, the execution is logged.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement</a></td>
-			<td class="desc"><p>The executed statement.</p>
-</td>
+			<td class="type"><a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></td>
+			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
@@ -2812,10 +2323,10 @@ If an SQLLogger is configured, the execution is logged.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1280-L1329" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1076-L1122" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::executeCacheQuery()" tabindex="-1" class="structure-title ">
-                        executeCacheQuery                        	<small>($sql, $params, $types, $qcp) : <a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement</a></small>
+                        executeCacheQuery                        	<small>($sql, $params, $types, $qcp) : <a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Executes a caching query.</p>
@@ -2850,7 +2361,7 @@ If an SQLLogger is configured, the execution is logged.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement</a></td>
+			<td class="type"><a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -2863,192 +2374,6 @@ If an SQLLogger is configured, the execution is logged.</p>
 				<td class="type"><a href="Doctrine-DBAL-Cache-CacheException$typespace.html#Doctrine\DBAL\Cache\CacheException" class="fqsen "><small>Doctrine\DBAL\Cache\</small><wbr>CacheException</a></td>
 				<td class="desc"></td>
 			</tr>
-        		</tbody>
-	</table>
-                                                    					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1331-L1357" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::project()" tabindex="-1" class="structure-title strike">
-                        project                        	<small>($sql, $params, $function) : mixed[]</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Executes an, optionally parametrized, SQL query and returns the result,<br />
-applying a given projection/transformation function on each row of the result.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">string</td>
-				<td class="rest">$sql</td>
-				<td class="desc"><p>The SQL query to execute.</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
-				<td class="rest">$params</td>
-				<td class="desc"><p>The parameters, if any.</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type"><a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></td>
-				<td class="rest">$function</td>
-				<td class="desc"><p>The transformation function that is applied on each row.</p>
-<pre><code>                      The function receives a single parameter, an array, that
-                      represents a row of the result set.
-</code></pre>
-</td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">mixed[]</td>
-			<td class="desc"><p>The projected result of the query.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1359-L1392" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::query()" tabindex="-1" class="structure-title strike">
-                        query                        	<small>() : <a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Statement</a></small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Executes an SQL statement, returning a result set as a Statement object.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type"><a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Statement</a></td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Throws</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::query()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection::query()</a></td>
-				<td class="desc">Executes an SQL statement, returning a result set as a Statement object.</td>
-				<td class="rest">implement</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1394-L1413" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::executeUpdate()" tabindex="-1" class="structure-title strike">
-                        executeUpdate                        	<small>($sql, $params = [], $types = []) : int</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Executes an SQL INSERT/UPDATE/DELETE query with the given parameters<br />
-and returns the number of affected rows.</p>
-<p>This method supports PDO binding types as well as DBAL mapping types.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">string</td>
-				<td class="rest">$sql</td>
-				<td class="desc"><p>SQL statement</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$params = []</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$types = []</td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">int</td>
-			<td class="desc"><p>The number of affected rows.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Throws</caption>
-		<tbody>
         			<tr>
 				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
 				<td class="desc"></td>
@@ -3072,7 +2397,7 @@ and returns the number of affected rows.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1415-L1475" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1124-L1180" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::executeStatement()" tabindex="-1" class="structure-title ">
                         executeStatement                        	<small>($sql, $params = [], $types = []) : int</small>
@@ -3145,74 +2470,9 @@ and returns the number of affected rows.</p>
 						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1477-L1508" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::exec()" tabindex="-1" class="structure-title strike">
-                        exec                        	<small>($sql) : int</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Executes an SQL statement and return the number of affected rows.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">string</td>
-				<td class="rest">$sql</td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">int</td>
-			<td class="desc"><p>The number of affected rows.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Throws</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::exec()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection::exec()</a></td>
-				<td class="desc">Executes an SQL statement and return the number of affected rows.</td>
-				<td class="rest">implement</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1510-L1518" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1182-L1190" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getTransactionNestingLevel()" tabindex="-1" class="structure-title ">
                         getTransactionNestingLevel                        	<small>() : int</small>
@@ -3251,110 +2511,9 @@ and returns the number of affected rows.</p>
 						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1520-L1530" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::errorCode()" tabindex="-1" class="structure-title strike">
-                        errorCode                        	<small>() : string<span class="type-separator"></span><wbr>null</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Fetches the SQLSTATE associated with the last database operation.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">string<span class="type-separator"></span><wbr>null</td>
-			<td class="desc"><p>The last error code.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::errorCode()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection::errorCode()</a></td>
-				<td class="desc">Returns the error code associated with the last operation on the database handle.</td>
-				<td class="rest">implement</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1532-L1540" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::errorInfo()" tabindex="-1" class="structure-title strike">
-                        errorInfo                        	<small>() : mixed[]</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns extended error information associated with the last operation on the database handle.</tag_inheritdoc></p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">mixed[]</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::errorInfo()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection::errorInfo()</a></td>
-				<td class="desc">Returns extended error information associated with the last operation on the database handle.</td>
-				<td class="rest">implement</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1542-L1557" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1192-L1213" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::lastInsertId()" tabindex="-1" class="structure-title ">
                         lastInsertId                        	<small>($name = null) : string</small>
@@ -3388,17 +2547,16 @@ columns or sequences.</p>
 		</tr>
 		</tbody>
 	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
+                            	<table class="table">
+		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::lastInsertId()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection::lastInsertId()</a></td>
-				<td class="desc">Returns the ID of the last inserted row or sequence value.</td>
-				<td class="rest">implement</td>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-                            					</div>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -3415,7 +2573,7 @@ columns or sequences.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1559-L1586" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1215-L1242" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::transactional()" tabindex="-1" class="structure-title ">
                         transactional                        	<small>($func) : mixed</small>
@@ -3474,7 +2632,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1588-L1608" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1244-L1264" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::setNestTransactionsWithSavepoints()" tabindex="-1" class="structure-title ">
                         setNestTransactionsWithSavepoints                        	<small>($nestTransactionsWithSavepoints) : void</small>
@@ -3506,7 +2664,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-ConnectionException$typespace.html#Doctrine\DBAL\ConnectionException" class="fqsen "><small>Doctrine\DBAL\</small><wbr>ConnectionException</a></td>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -3528,7 +2686,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1610-L1618" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1266-L1274" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getNestTransactionsWithSavepoints()" tabindex="-1" class="structure-title ">
                         getNestTransactionsWithSavepoints                        	<small>() : bool</small>
@@ -3568,7 +2726,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1620-L1629" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1276-L1285" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::_getNestedTransactionSavePointName()" tabindex="-1" class="structure-title ">
                         _getNestedTransactionSavePointName                        	<small>() : mixed</small>
@@ -3610,14 +2768,13 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1631-L1664" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1287-L1322" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::beginTransaction()" tabindex="-1" class="structure-title ">
                         beginTransaction                        	<small>() : bool</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Initiates a transaction.</tag_inheritdoc></p>
-</div>
+						<div class="description"></div>
                         	<table class="table">
 		<caption>Parameters</caption>
 		<tbody>
@@ -3628,23 +2785,21 @@ the transaction is rolled back and the exception re-thrown.</p>
 		<tbody>
 		<tr>
 			<td class="type">bool</td>
-			<td class="desc"><p>TRUE on success or FALSE on failure.</p>
-</td>
+			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
 	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
+                            	<table class="table">
+		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::beginTransaction()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection::beginTransaction()</a></td>
-				<td class="desc">Initiates a transaction.</td>
-				<td class="rest">implement</td>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-                            					</div>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -3661,14 +2816,13 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1666-L1718" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1324-L1375" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::commit()" tabindex="-1" class="structure-title ">
                         commit                        	<small>() : bool</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Commits a transaction.</tag_inheritdoc></p>
-</div>
+						<div class="description"></div>
                         	<table class="table">
 		<caption>Parameters</caption>
 		<tbody>
@@ -3679,23 +2833,21 @@ the transaction is rolled back and the exception re-thrown.</p>
 		<tbody>
 		<tr>
 			<td class="type">bool</td>
-			<td class="desc"><p>TRUE on success or FALSE on failure.</p>
-</td>
+			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
 	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
+                            	<table class="table">
+		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::commit()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection::commit()</a></td>
-				<td class="desc">Commits a transaction.</td>
-				<td class="rest">implement</td>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-                            					</div>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -3712,7 +2864,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1738-L1786" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1397-L1445" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::rollBack()" tabindex="-1" class="structure-title ">
                         rollBack                        	<small>() : bool</small>
@@ -3739,22 +2891,12 @@ the transaction is rolled back and the exception re-thrown.</p>
 		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-ConnectionException$typespace.html#Doctrine\DBAL\ConnectionException" class="fqsen "><small>Doctrine\DBAL\</small><wbr>ConnectionException</a></td>
-				<td class="desc">If the rollback operation failed.</td>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-                            	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::rollBack()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection::rollBack()</a></td>
-				<td class="desc">Rolls back the current transaction, as initiated by beginTransaction().</td>
-				<td class="rest">implement</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -3771,7 +2913,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1788-L1804" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1447-L1465" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::createSavepoint()" tabindex="-1" class="structure-title ">
                         createSavepoint                        	<small>($savepoint) : void</small>
@@ -3804,7 +2946,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-ConnectionException$typespace.html#Doctrine\DBAL\ConnectionException" class="fqsen "><small>Doctrine\DBAL\</small><wbr>ConnectionException</a></td>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -3826,7 +2968,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1806-L1826" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1467-L1489" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::releaseSavepoint()" tabindex="-1" class="structure-title ">
                         releaseSavepoint                        	<small>($savepoint) : void</small>
@@ -3859,7 +3001,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-ConnectionException$typespace.html#Doctrine\DBAL\ConnectionException" class="fqsen "><small>Doctrine\DBAL\</small><wbr>ConnectionException</a></td>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -3881,7 +3023,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1828-L1844" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1491-L1509" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::rollbackSavepoint()" tabindex="-1" class="structure-title ">
                         rollbackSavepoint                        	<small>($savepoint) : void</small>
@@ -3914,7 +3056,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-ConnectionException$typespace.html#Doctrine\DBAL\ConnectionException" class="fqsen "><small>Doctrine\DBAL\</small><wbr>ConnectionException</a></td>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -3936,10 +3078,10 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1846-L1858" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1511-L1525" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getWrappedConnection()" tabindex="-1" class="structure-title ">
-                        getWrappedConnection                        	<small>() : <a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection</a></small>
+                        getWrappedConnection                        	<small>() : <a href="Doctrine-DBAL-Driver-PDO-Connection$typespace.html#Doctrine\DBAL\Driver\PDO\Connection" class="fqsen "><small>Doctrine\DBAL\Driver\PDO\</small><wbr>Connection</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Gets the wrapped driver connection.</p>
@@ -3953,13 +3095,22 @@ the transaction is rolled back and the exception re-thrown.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection</a></td>
+			<td class="type"><a href="Doctrine-DBAL-Driver-PDO-Connection$typespace.html#Doctrine\DBAL\Driver\PDO\Connection" class="fqsen "><small>Doctrine\DBAL\Driver\PDO\</small><wbr>Connection</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -3976,9 +3127,59 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1860-L1873" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1527-L1539" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Connection::getSchemaManager()" tabindex="-1" class="structure-title ">
+					<h4 id="Doctrine\DBAL\Connection::createSchemaManager()" tabindex="-1" class="structure-title ">
+                        createSchemaManager                        	<small>() : <a href="Doctrine-DBAL-Schema-AbstractSchemaManager$typespace.html#Doctrine\DBAL\Schema\AbstractSchemaManager" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>AbstractSchemaManager</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Creates a SchemaManager that can be used to inspect or change the<br />
+database schema through the connection.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-AbstractSchemaManager$typespace.html#Doctrine\DBAL\Schema\AbstractSchemaManager" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>AbstractSchemaManager</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                                                    					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated">deprecated </span>
+						<span class="label label-public">public</span>
+                        			<a href="#L1541-L1564" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Connection::getSchemaManager()" tabindex="-1" class="structure-title strike">
                         getSchemaManager                        	<small>() : <a href="Doctrine-DBAL-Schema-AbstractSchemaManager$typespace.html#Doctrine\DBAL\Schema\AbstractSchemaManager" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>AbstractSchemaManager</a></small>
 						</h4>
 					<div class="inner-item">
@@ -4000,7 +3201,16 @@ database schema through the connection.</p>
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -4017,7 +3227,7 @@ database schema through the connection.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1875-L1890" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1566-L1581" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::setRollbackOnly()" tabindex="-1" class="structure-title ">
                         setRollbackOnly                        	<small>() : void</small>
@@ -4067,7 +3277,7 @@ outcome for the transaction to be rolled back.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1892-L1906" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1583-L1597" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::isRollbackOnly()" tabindex="-1" class="structure-title ">
                         isRollbackOnly                        	<small>() : bool</small>
@@ -4116,7 +3326,7 @@ outcome for the transaction to be rolled back.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1908-L1920" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1599-L1613" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::convertToDatabaseValue()" tabindex="-1" class="structure-title ">
                         convertToDatabaseValue                        	<small>($value, $type) : mixed</small>
@@ -4153,7 +3363,16 @@ rules of a specific DBAL mapping type.</p>
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -4170,7 +3389,7 @@ rules of a specific DBAL mapping type.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L1922-L1934" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1615-L1629" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::convertToPHPValue()" tabindex="-1" class="structure-title ">
                         convertToPHPValue                        	<small>($value, $type) : mixed</small>
@@ -4207,58 +3426,16 @@ rules of a specific DBAL mapping type.</p>
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default">internal</span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L2006-L2052" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::resolveParams()" tabindex="-1" class="structure-title ">
-                        resolveParams                        	<small>($params, $types) : <a href="array&lt;int,$typespace.html#array&lt;int," class="fqsen ">array&lt;int,</a></small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Resolves the parameters to a format which can be displayed.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
+                            	<table class="table">
+		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type">array</td>
-				<td class="rest">$params</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$types</td>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type"><a href="array&lt;int,$typespace.html#array&lt;int," class="fqsen ">array&lt;int,</a></td>
-			<td class="desc"><p>int|string|Type|null&gt;|array&lt;string, int|string|Type|null&gt;</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -4275,7 +3452,7 @@ rules of a specific DBAL mapping type.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L2054-L2062" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1698-L1706" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::createQueryBuilder()" tabindex="-1" class="structure-title ">
                         createQueryBuilder                        	<small>() : <a href="Doctrine-DBAL-Query-QueryBuilder$typespace.html#Doctrine\DBAL\Query\QueryBuilder" class="fqsen "><small>Doctrine\DBAL\Query\</small><wbr>QueryBuilder</a></small>
@@ -4307,50 +3484,7 @@ rules of a specific DBAL mapping type.</p>
 				</li>
             				<li class="structure-item">
 					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L2064-L2102" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Connection::ping()" tabindex="-1" class="structure-title strike">
-                        ping                        	<small>() : bool</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Ping the server</p>
-<p>When the server is not available the method returns FALSE.<br />
-It is responsibility of the developer to handle this case<br />
-and abort the request or reconnect manually:</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">bool</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
+						<span class="label label-danger">final</span>
 						<span class="label label-default"></span>
 						<span class="label label-magic"></span>
 						<span class="label label-danger"></span>
@@ -4358,10 +3492,10 @@ and abort the request or reconnect manually:</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L2104-L2124" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1708-L1721" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Connection::handleExceptionDuringQuery()" tabindex="-1" class="structure-title ">
-                        handleExceptionDuringQuery                        	<small>($e, $sql, $params = [], $types = []) : void</small>
+					<h4 id="Doctrine\DBAL\Connection::convertExceptionDuringQuery()" tabindex="-1" class="structure-title ">
+                        convertExceptionDuringQuery                        	<small>($e, $sql, $params = [], $types = []) : <a href="Doctrine-DBAL-Exception-DriverException$typespace.html#Doctrine\DBAL\Exception\DriverException" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>DriverException</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -4369,7 +3503,7 @@ and abort the request or reconnect manually:</p>
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="http://php.net/manual/ja/class.throwable.php" class="fqsen" target="_blank">\Throwable</a></td>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Exception$typespace.html#Doctrine\DBAL\Driver\Exception" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Exception</a></td>
 				<td class="rest">$e</td>
 				<td class="desc"></td>
 			</tr>
@@ -4394,22 +3528,57 @@ and abort the request or reconnect manually:</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">void</td>
+			<td class="type"><a href="Doctrine-DBAL-Exception-DriverException$typespace.html#Doctrine\DBAL\Exception\DriverException" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>DriverException</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
 	</table>
-                            	<table class="table">
-		<caption>Throws</caption>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger">final</span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default">internal</span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L1723-L1729" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Connection::convertException()" tabindex="-1" class="structure-title ">
+                        convertException                        	<small>($e) : <a href="Doctrine-DBAL-Exception-DriverException$typespace.html#Doctrine\DBAL\Exception\DriverException" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>DriverException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Exception$typespace.html#Doctrine\DBAL\Driver\Exception" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Exception</a></td>
+				<td class="rest">$e</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-                                                    					</div>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception-DriverException$typespace.html#Doctrine\DBAL\Exception\DriverException" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>DriverException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -4422,23 +3591,81 @@ and abort the request or reconnect manually:</p>
 						<span class="label label-default"></span>
 						<span class="label label-magic"></span>
 						<span class="label label-danger"></span>
-						<span class="label label-default">internal</span>
 						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Connection.php#L2126-L2141" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1790-L1801" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Connection::handleDriverException()" tabindex="-1" class="structure-title ">
-                        handleDriverException                        	<small>($e) : void</small>
+					<h4 id="Doctrine\DBAL\Connection::executeUpdate()" tabindex="-1" class="structure-title strike">
+                        executeUpdate                        	<small>($sql, $params = [], $types = []) : int</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"></div>
+						<div class="description"><p>BC layer for a wide-spread use-case of old DBAL APIs</p>
+</div>
                         	<table class="table">
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="http://php.net/manual/ja/class.throwable.php" class="fqsen" target="_blank">\Throwable</a></td>
-				<td class="rest">$e</td>
+				<td class="type">string</td>
+				<td class="rest">$sql</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;mixed&gt;$typespace.html#array&lt;mixed&gt;" class="fqsen ">array&lt;mixed&gt;</a></td>
+				<td class="rest">$params = []</td>
+				<td class="desc"><p>The query parameters</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;int$typespace.html#array&lt;int" class="fqsen ">array&lt;int</a><span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr><a href="null&gt;$typespace.html#null&gt;" class="fqsen ">null&gt;</a></td>
+				<td class="rest">$types = []</td>
+				<td class="desc"><p>The parameter types</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">int</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated">deprecated </span>
+						<span class="label label-public">public</span>
+                        			<a href="#L1803-L1811" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Connection::query()" tabindex="-1" class="structure-title strike">
+                        query                        	<small>($sql) : <a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>BC layer for a wide-spread use-case of old DBAL APIs</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$sql</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -4447,22 +3674,58 @@ and abort the request or reconnect manually:</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">void</td>
+			<td class="type"><a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
 	</table>
-                            	<table class="table">
-		<caption>Throws</caption>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated">deprecated </span>
+						<span class="label label-public">public</span>
+                        			<a href="#L1813-L1821" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Connection::exec()" tabindex="-1" class="structure-title strike">
+                        exec                        	<small>($sql) : int</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>BC layer for a wide-spread use-case of old DBAL APIs</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="type">string</td>
+				<td class="rest">$sql</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-                                                    					</div>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">int</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>

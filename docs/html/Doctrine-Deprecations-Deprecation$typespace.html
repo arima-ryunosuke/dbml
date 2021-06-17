@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html>
+<head>	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/styles/foundation.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js-bootstrap-css/1.2.1/typeaheadjs.min.css">
+	<link rel="stylesheet" type="text/css" data-href="common.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/3.1.1/bootstrap3-typeahead.min.js"></script>
+	<script data-src="common.js"></script>
+
+	<script>
+        (function () {
+            var cachekey;
+            try {
+                cachekey = window.parent.CACHEKEY;
+            }
+            catch (e) {
+                cachekey = 'nocache';
+            }
+            $('link[data-href]').attr('href', function () {
+                return this.dataset.href + '?' + cachekey;
+            });
+            $('script[data-src]').attr('src', function () {
+                return this.dataset.src + '?' + cachekey;
+            });
+
+            $(document).on('click', 'a[href]:not([target="_blank"]):not(.cachekey)', function () {
+                this.classList.add('cachekey');
+                this.href = this.href.replace('.html', '.html?' + cachekey);
+            });
+        })();
+	</script>
+    </head>
+<body class="typespace">
+<a id="anchor" href="./" style="display: none"></a>
+<h1 class="ellipsis fixed">
+	<span class="pull-left">
+	Structure
+	<small class="ellipsis-text">(Doctrine\Deprecations\Deprecation)</small>
+	</span>
+	<span class="pull-right">
+		<small class="frame-switch">
+		<a target="_parent">frame</a> | <a target="_parent">noframe</a>
+		</small>
+	</span>
+</h1>
+<div class="main-wrapper">
+	<div class="attribute">
+		<span class="label label-danger"></span>
+		<span class="label label-warning"></span>
+		<span class="label label-info"></span>
+		<span class="label label-info"></span>
+		<span class="label label-deprecated"></span>
+        			<a href="#L22-L266" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                    	</div>
+
+	<h2>class <span class="category-name">Doctrine\Deprecations\Deprecation</span></h2>
+
+	<div class="description"><p>Manages Deprecation logging in different ways.</p>
+<p>By default triggered exceptions are not logged.</p>
+<p>To enable different deprecation logging mechanisms you can call the<br />
+following methods:</p>
+<ul>
+<li><p>Minimal collection of deprecations via getTriggeredDeprecations()<br />
+\Doctrine\Deprecations\Deprecation::enableTrackingDeprecations();</p>
+</li>
+<li><p>Uses @trigger_error with E_USER_DEPRECATED<br />
+\Doctrine\Deprecations\Deprecation::enableWithTriggerError();</p>
+</li>
+<li><p>Sends deprecation messages via a PSR-3 logger<br />
+\Doctrine\Deprecations\Deprecation::enableWithPsrLogger($logger);</p>
+</li>
+</ul>
+<p>Packages that trigger deprecations should use the <code>trigger()</code> or<br />
+<code>triggerIfCalledFromOutside()</code> methods.</p>
+</div>
+
+	<h3>Construction</h3>
+                
+	<h3>Hierarchy</h3>
+	<div class="hierarchy"></div>
+
+	<h3>Constants</h3>
+    
+	<h3>Properties</h3>
+    
+	<h3>Methods</h3>
+    		<ul>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L64-L98" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::trigger()" tabindex="-1" class="structure-title ">
+                        trigger                        	<small>($package, $link, $message, ...$args) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Trigger a deprecation for the given package and identfier.</p>
+<p>The link should point to a Github issue or Wiki entry detailing the<br />
+deprecation. It is additionally used to de-duplicate the trigger of the<br />
+same deprecation during a request.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$package</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$link</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">...$args</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L100-L157" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::triggerIfCalledFromOutside()" tabindex="-1" class="structure-title ">
+                        triggerIfCalledFromOutside                        	<small>($package, $link, $message, ...$args) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Trigger a deprecation for the given package and identifier when called from outside.</p>
+<p>"Outside" means we assume that $package is currently installed as a<br />
+dependency and the caller is not a file in that package. When $package<br />
+is installed as a root package then deprecations triggered from the<br />
+tests folder are also considered "outside".</p>
+<p>This deprecation method assumes that you are using Composer to install<br />
+the dependency and are using the default /vendor/ folder and not a<br />
+Composer plugin to change the install location. The assumption is also<br />
+that $package is the exact composer packge name.</p>
+<p>Compared to <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Doctrine\Deprecations\Deprecation::trigger()' data-type-array='0' data-type-nullable='' data-description='Doctrine\Deprecations\Deprecation::trigger()'>Doctrine\Deprecations\Deprecation::trigger()</tag_link> this method causes some overhead when<br />
+deprecation tracking is enabled even during deduplication, because it<br />
+needs to call <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Doctrine\Deprecations\Deprecation::debug_backtrace()' data-type-array='0' data-type-nullable='' data-description='Doctrine\Deprecations\Deprecation::debug_backtrace()'>Doctrine\Deprecations\Deprecation::debug_backtrace()</tag_link></p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$package</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$link</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">...$args</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L206-L209" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::enableTrackingDeprecations()" tabindex="-1" class="structure-title ">
+                        enableTrackingDeprecations                        	<small>() : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L211-L214" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::enableWithTriggerError()" tabindex="-1" class="structure-title ">
+                        enableWithTriggerError                        	<small>() : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L216-L220" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::enableWithPsrLogger()" tabindex="-1" class="structure-title ">
+                        enableWithPsrLogger                        	<small>($logger) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-LoggerInterface$typespace.html#Psr\Log\LoggerInterface" class="fqsen "><small>Psr\Log\</small><wbr>LoggerInterface</a></td>
+				<td class="rest">$logger</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L222-L225" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::withoutDeduplication()" tabindex="-1" class="structure-title ">
+                        withoutDeduplication                        	<small>() : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L227-L236" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::disable()" tabindex="-1" class="structure-title ">
+                        disable                        	<small>() : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L238-L241" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::ignorePackage()" tabindex="-1" class="structure-title ">
+                        ignorePackage                        	<small>($packageName) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$packageName</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L243-L248" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::ignoreDeprecations()" tabindex="-1" class="structure-title ">
+                        ignoreDeprecations                        	<small>(...$links) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">...$links</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L250-L255" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::getUniqueTriggeredDeprecationsCount()" tabindex="-1" class="structure-title ">
+                        getUniqueTriggeredDeprecationsCount                        	<small>() : int</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">int</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L257-L265" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Deprecations\Deprecation::getTriggeredDeprecations()" tabindex="-1" class="structure-title ">
+                        getTriggeredDeprecations                        	<small>() : array<span class="type-separator"></span><wbr><a href="array&lt;string,int&gt;$typespace.html#array&lt;string,int&gt;" class="fqsen ">array&lt;string,int&gt;</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Returns each triggered deprecation link identifier and the amount of occurrences.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;string,int&gt;$typespace.html#array&lt;string,int&gt;" class="fqsen ">array&lt;string,int&gt;</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            		</ul>
+    
+	<div class="attribute">
+		<span class="label label-default"></span>
+		<span class="label label-default"></span>
+	</div>
+	<div class="clearfix"></div>
+</div>
+</body>
+</html>

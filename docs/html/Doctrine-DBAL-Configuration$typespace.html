@@ -54,15 +54,12 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L11-L164" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="#L9-L140" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">Doctrine\DBAL\Configuration</span></h2>
 
 	<div class="description"><p>Configuration container for the Doctrine DBAL.</p>
-<p>Internal note: When adding a new configuration option just write a getter/setter</p>
-<pre><code>           pair and add the option to the _attributes array with a proper default value.
-</code></pre>
 </div>
 
 	<h3>Construction</h3>
@@ -79,15 +76,62 @@
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L19-L25" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L17-L22" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Configuration::$_attributes" tabindex="-1" class="structure-title">
-						<small>mixed[]</small>
-						$_attributes						<var> = []</var>
+					<h4 id="Doctrine\DBAL\Configuration::$sqlLogger" tabindex="-1" class="structure-title">
+						<small><a href="Doctrine-DBAL-Logging-SQLLogger$typespace.html#Doctrine\DBAL\Logging\SQLLogger" class="fqsen "><small>Doctrine\DBAL\Logging\</small><wbr>SQLLogger</a><span class="type-separator"></span><wbr>null</small>
+						$sqlLogger						<var> = null</var>
 					</h4>
 					<div class="inner-item">
-						<div class="description"><p>The attributes that are contained in the configuration.<br />
-Values are default values.</p>
+						<div class="description"><p>The SQL logger in use. If null, SQL logging is disabled.</p>
+</div>
+                                                					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-primary"></span>
+						<span class="label label-protected">protected</span>
+                        			<a href="#L24-L29" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Configuration::$resultCacheImpl" tabindex="-1" class="structure-title">
+						<small><a href="Doctrine-Common-Cache-Cache$typespace.html#Doctrine\Common\Cache\Cache" class="fqsen "><small>Doctrine\Common\Cache\</small><wbr>Cache</a><span class="type-separator"></span><wbr>null</small>
+						$resultCacheImpl						<var> = null</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"><p>The cache driver implementation that is used for query result caching.</p>
+</div>
+                                                					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-primary"></span>
+						<span class="label label-protected">protected</span>
+                        			<a href="#L31-L36" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Configuration::$schemaAssetsFilter" tabindex="-1" class="structure-title">
+						<small>callable<span class="type-separator"></span><wbr>null</small>
+						$schemaAssetsFilter						<var> = null</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"><p>The callable to use to filter schema assets.</p>
+</div>
+                                                					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-primary"></span>
+						<span class="label label-protected">protected</span>
+                        			<a href="#L38-L43" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Configuration::$autoCommit" tabindex="-1" class="structure-title">
+						<small>bool</small>
+						$autoCommit						<var> = true</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"><p>The default auto-commit mode for connections.</p>
 </div>
                                                 					</div>
 				</li>
@@ -105,7 +149,7 @@ Values are default values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L27-L35" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L45-L51" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Configuration::setSQLLogger()" tabindex="-1" class="structure-title ">
                         setSQLLogger                        	<small>($logger = null) : void</small>
@@ -150,10 +194,10 @@ Values are default values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L37-L45" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L53-L59" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Configuration::getSQLLogger()" tabindex="-1" class="structure-title ">
-                        getSQLLogger                        	<small>() : <a href="Doctrine-DBAL-Logging-SQLLogger$typespace.html#Doctrine\DBAL\Logging\SQLLogger" class="fqsen "><small>Doctrine\DBAL\Logging\</small><wbr>SQLLogger</a><span class="type-separator"></span><wbr>null</small>
+                        getSQLLogger                        	<small>() : ?<a href="Doctrine-DBAL-Logging-SQLLogger$typespace.html#Doctrine\DBAL\Logging\SQLLogger" class="fqsen "><small>Doctrine\DBAL\Logging\</small><wbr>SQLLogger</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Gets the SQL logger that is used.</p>
@@ -167,7 +211,7 @@ Values are default values.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="Doctrine-DBAL-Logging-SQLLogger$typespace.html#Doctrine\DBAL\Logging\SQLLogger" class="fqsen "><small>Doctrine\DBAL\Logging\</small><wbr>SQLLogger</a><span class="type-separator"></span><wbr>null</td>
+			<td class="type">?<a href="Doctrine-DBAL-Logging-SQLLogger$typespace.html#Doctrine\DBAL\Logging\SQLLogger" class="fqsen "><small>Doctrine\DBAL\Logging\</small><wbr>SQLLogger</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -190,10 +234,10 @@ Values are default values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L47-L55" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L61-L67" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Configuration::getResultCacheImpl()" tabindex="-1" class="structure-title ">
-                        getResultCacheImpl                        	<small>() : <a href="Doctrine-Common-Cache-Cache$typespace.html#Doctrine\Common\Cache\Cache" class="fqsen "><small>Doctrine\Common\Cache\</small><wbr>Cache</a><span class="type-separator"></span><wbr>null</small>
+                        getResultCacheImpl                        	<small>() : ?<a href="Doctrine-Common-Cache-Cache$typespace.html#Doctrine\Common\Cache\Cache" class="fqsen "><small>Doctrine\Common\Cache\</small><wbr>Cache</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Gets the cache driver implementation that is used for query result caching.</p>
@@ -207,7 +251,7 @@ Values are default values.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="Doctrine-Common-Cache-Cache$typespace.html#Doctrine\Common\Cache\Cache" class="fqsen "><small>Doctrine\Common\Cache\</small><wbr>Cache</a><span class="type-separator"></span><wbr>null</td>
+			<td class="type">?<a href="Doctrine-Common-Cache-Cache$typespace.html#Doctrine\Common\Cache\Cache" class="fqsen "><small>Doctrine\Common\Cache\</small><wbr>Cache</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -230,7 +274,7 @@ Values are default values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L57-L65" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L69-L75" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Configuration::setResultCacheImpl()" tabindex="-1" class="structure-title ">
                         setResultCacheImpl                        	<small>($cacheImpl) : void</small>
@@ -273,25 +317,22 @@ Values are default values.</p>
 						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
+						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L67-L89" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L77-L83" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Configuration::setFilterSchemaAssetsExpression()" tabindex="-1" class="structure-title strike">
-                        setFilterSchemaAssetsExpression                        	<small>($filterExpression) : void</small>
+					<h4 id="Doctrine\DBAL\Configuration::setSchemaAssetsFilter()" tabindex="-1" class="structure-title ">
+                        setSchemaAssetsFilter                        	<small>($callable = null) : void</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"><p>Sets the filter schema assets expression.</p>
-<p>Only include tables/sequences matching the filter expression regexp in<br />
-schema instances generated for the active connection when calling<br />
-{AbstractSchemaManager#createSchema()}.</p>
+						<div class="description"><p>Sets the callable to use to filter schema assets.</p>
 </div>
                         	<table class="table">
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type">string<span class="type-separator"></span><wbr>null</td>
-				<td class="rest">$filterExpression</td>
+				<td class="type">?callable</td>
+				<td class="rest">$callable = null</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -321,94 +362,9 @@ schema instances generated for the active connection when calling<br />
 						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L91-L101" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Configuration::getFilterSchemaAssetsExpression()" tabindex="-1" class="structure-title strike">
-                        getFilterSchemaAssetsExpression                        	<small>() : string<span class="type-separator"></span><wbr>null</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Returns filter schema assets expression.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">string<span class="type-separator"></span><wbr>null</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L117-L125" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Configuration::setSchemaAssetsFilter()" tabindex="-1" class="structure-title ">
-                        setSchemaAssetsFilter                        	<small>($callable = null) : ?callable</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Sets the callable to use to filter schema assets.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">?callable</td>
-				<td class="rest">$callable = null</td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">?callable</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L127-L133" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L85-L91" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Configuration::getSchemaAssetsFilter()" tabindex="-1" class="structure-title ">
                         getSchemaAssetsFilter                        	<small>() : ?callable</small>
@@ -448,7 +404,7 @@ schema instances generated for the active connection when calling<br />
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L135-L151" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L93-L107" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Configuration::setAutoCommit()" tabindex="-1" class="structure-title ">
                         setAutoCommit                        	<small>($autoCommit) : void</small>
@@ -465,7 +421,7 @@ the method commit or the method rollback. By default, new connections are in aut
         			<tr>
 				<td class="type">bool</td>
 				<td class="rest">$autoCommit</td>
-				<td class="desc"><p>True to enable auto-commit mode; false to disable it.</p>
+				<td class="desc"><p>True to enable auto-commit mode; false to disable it</p>
 </td>
 			</tr>
         		</tbody>
@@ -507,7 +463,7 @@ the method commit or the method rollback. By default, new connections are in aut
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Configuration.php#L153-L163" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L109-L119" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Configuration::getAutoCommit()" tabindex="-1" class="structure-title ">
                         getAutoCommit                        	<small>() : bool</small>
@@ -542,6 +498,89 @@ the method commit or the method rollback. By default, new connections are in aut
         		</tbody>
 	</table>
     					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L121-L131" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Configuration::setMiddlewares()" tabindex="-1" class="structure-title ">
+                        setMiddlewares                        	<small>($middlewares) : <a href="Doctrine-DBAL-Configuration$typespace.html#Doctrine\DBAL\Configuration" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Configuration</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr><a href="Doctrine-DBAL-Driver-Middleware$typespace.html#Doctrine\DBAL\Driver\Middleware" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Middleware</a>[]</td>
+				<td class="rest">$middlewares</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Configuration$typespace.html#Doctrine\DBAL\Configuration" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Configuration</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L133-L139" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Configuration::getMiddlewares()" tabindex="-1" class="structure-title ">
+                        getMiddlewares                        	<small>() : array<span class="type-separator"></span><wbr><a href="Doctrine-DBAL-Driver-Middleware$typespace.html#Doctrine\DBAL\Driver\Middleware" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Middleware</a>[]</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">array<span class="type-separator"></span><wbr><a href="Doctrine-DBAL-Driver-Middleware$typespace.html#Doctrine\DBAL\Driver\Middleware" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Middleware</a>[]</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>

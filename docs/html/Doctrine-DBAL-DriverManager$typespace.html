@@ -54,12 +54,12 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/DriverManager.php#L29-L455" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="#L27-L478" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">Doctrine\DBAL\DriverManager</span></h2>
 
-	<div class="description"><p>Factory for creating Doctrine\DBAL\Connection instances.</p>
+	<div class="description"><p>Factory for creating <tag_link data-kind='fqsen' data-type-category='class' data-type-fqsen='Doctrine\DBAL\Connection' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\Connection'>Doctrine\DBAL\Connection</tag_link> instances.</p>
 </div>
 
 	<h3>Construction</h3>
@@ -83,7 +83,7 @@
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/DriverManager.php#L82-L202" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L115-L224" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\DriverManager::getConnection()" tabindex="-1" class="structure-title ">
                         getConnection                        	<small>($params, $config = null, $eventManager = null) : <a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection</a></small>
@@ -93,7 +93,7 @@
 This method returns a Doctrine\DBAL\Connection which wraps the underlying<br />
 driver connection.</p>
 <p>$params must contain at least one of the following.</p>
-<p>Either 'driver' with one of the array keys of <tag_link data-kind='fqsen' data-type-category='property' data-type-fqsen='Doctrine\DBAL\DriverManager::$_driverMap' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\DriverManager::$_driverMap'>Doctrine\DBAL\DriverManager::$_driverMap</tag_link>,<br />
+<p>Either 'driver' with one of the array keys of <tag_link data-kind='fqsen' data-type-category='classconstant' data-type-fqsen='Doctrine\DBAL\DriverManager::DRIVER_MAP' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\DriverManager::DRIVER_MAP'>Doctrine\DBAL\DriverManager::DRIVER_MAP</tag_link>,<br />
 OR 'driverClass' that contains the full class name (with namespace) of the<br />
 driver class to instantiate.</p>
 <p>Other (optional) parameters:</p>
@@ -104,9 +104,6 @@ The password to use when connecting.</p>
 <p><b>driverOptions (array)</b>:<br />
 Any additional driver-specific options for the driver. These are just passed<br />
 through to the driver.</p>
-<p><b>pdo</b>:<br />
-You can pass an existing PDO instance through this parameter. The PDO<br />
-instance will be wrapped in a Doctrine\DBAL\Connection.</p>
 <p><b>wrapperClass</b>:<br />
 You may specify a custom wrapper class through the 'wrapperClass'<br />
 parameter but this class MUST inherit from Doctrine\DBAL\Connection.</p>
@@ -117,7 +114,7 @@ The driver class to use.</p>
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type">array</td>
+				<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;string,mixed&gt;$typespace.html#array&lt;string,mixed&gt;" class="fqsen ">array&lt;string,mixed&gt;</a></td>
 				<td class="rest">$params</td>
 				<td class="desc"></td>
 			</tr>
@@ -171,7 +168,7 @@ The driver class to use.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/DriverManager.php#L204-L212" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L226-L234" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\DriverManager::getAvailableDrivers()" tabindex="-1" class="structure-title ">
                         getAvailableDrivers                        	<small>() : array<span class="type-separator"></span><wbr>string[]</small>

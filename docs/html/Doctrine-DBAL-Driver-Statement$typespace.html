@@ -54,81 +54,24 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/Statement.php#L7-L109" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="#L7-L76" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>interface <span class="category-name">Doctrine\DBAL\Driver\Statement</span></h2>
 
-	<div class="description"><p>Statement interface.<br />
-Drivers must implement this interface.</p>
-<p>This resembles (a subset of) the PDOStatement interface.</p>
+	<div class="description"><p>Driver-level statement</p>
 </div>
 
 	<h3>Construction</h3>
-        	<table class="table">
-		<caption>Implements</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement</a></td>
-				<td class="desc">Interface for the reading part of a prepare statement only.</td>
-			</tr>
-        			<tr>
-				<td class="type"><a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a></td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-            
+                
 	<h3>Hierarchy</h3>
 	<div class="hierarchy">
 	<ul class="">
         			<li class="">
-                <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a>                
-	<ul class="has-indent">
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement</a>                
-	<ul class="has-indent">
-        			<li class="indent">
                 <a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement" class="fqsen bold"><small>Doctrine\DBAL\Driver\</small><wbr>Statement</a>                
 	<ul class="has-indent">
         			<li class="indent">
-                <a href="Doctrine-DBAL-Driver-PDOStatement$typespace.html#Doctrine\DBAL\Driver\PDOStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>PDOStatement</a>                			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Statement$typespace.html#Doctrine\DBAL\Statement" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Statement</a>                			</li>
-        	</ul>
-    			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Cache-ArrayStatement$typespace.html#Doctrine\DBAL\Cache\ArrayStatement" class="fqsen "><small>Doctrine\DBAL\Cache\</small><wbr>ArrayStatement</a>                			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Cache-ResultCacheStatement$typespace.html#Doctrine\DBAL\Cache\ResultCacheStatement" class="fqsen "><small>Doctrine\DBAL\Cache\</small><wbr>ResultCacheStatement</a>                			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Driver-PDOStatement$typespace.html#Doctrine\DBAL\Driver\PDOStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>PDOStatement</a>                			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Statement$typespace.html#Doctrine\DBAL\Statement" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Statement</a>                			</li>
-        	</ul>
-    			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement" class="fqsen bold"><small>Doctrine\DBAL\Driver\</small><wbr>Statement</a>                			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Cache-ArrayStatement$typespace.html#Doctrine\DBAL\Cache\ArrayStatement" class="fqsen "><small>Doctrine\DBAL\Cache\</small><wbr>ArrayStatement</a>                			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Cache-ResultCacheStatement$typespace.html#Doctrine\DBAL\Cache\ResultCacheStatement" class="fqsen "><small>Doctrine\DBAL\Cache\</small><wbr>ResultCacheStatement</a>                			</li>
-        			<li class="indent">
-                <a href="ryunosuke-dbml-Entity-Entity$typespace.html#ryunosuke\dbml\Entity\Entity" class="fqsen "><small>ryunosuke\dbml\Entity\</small><wbr>Entity</a>                			</li>
-        			<li class="indent">
-                <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a>                			</li>
-        			<li class="indent">
-                <a href="ryunosuke-dbml-Generator-Yielder$typespace.html#ryunosuke\dbml\Generator\Yielder" class="fqsen "><small>ryunosuke\dbml\Generator\</small><wbr>Yielder</a>                			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Driver-PDOStatement$typespace.html#Doctrine\DBAL\Driver\PDOStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>PDOStatement</a>                			</li>
-        			<li class="indent">
-                <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a>                			</li>
-        			<li class="indent">
-                <a href="ryunosuke-dbml-Query-Pagination-Paginator$typespace.html#ryunosuke\dbml\Query\Pagination\Paginator" class="fqsen "><small>ryunosuke\dbml\Query\Pagination\</small><wbr>Paginator</a>                			</li>
-        			<li class="indent">
-                <a href="ryunosuke-dbml-Query-Pagination-Sequencer$typespace.html#ryunosuke\dbml\Query\Pagination\Sequencer" class="fqsen "><small>ryunosuke\dbml\Query\Pagination\</small><wbr>Sequencer</a>                			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Statement$typespace.html#Doctrine\DBAL\Statement" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Statement</a>                			</li>
+                <a href="Doctrine-DBAL-Driver-PDO-Statement$typespace.html#Doctrine\DBAL\Driver\PDO\Statement" class="fqsen "><small>Doctrine\DBAL\Driver\PDO\</small><wbr>Statement</a>                			</li>
         	</ul>
     			</li>
         	</ul>
@@ -150,7 +93,7 @@ Drivers must implement this interface.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/Statement.php#L15-L31" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L12-L30" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Driver\Statement::bindValue()" tabindex="-1" class="structure-title ">
                         bindValue                        	<small>($param, $value, $type = Doctrine\DBAL\ParameterType::STRING) : bool</small>
@@ -165,7 +108,7 @@ fetchAll(), fetchArray(), fetchColumn(), fetchAssoc() methods to have the named 
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type">int<span class="type-separator"></span><wbr>string</td>
+				<td class="type">string<span class="type-separator"></span><wbr>int</td>
 				<td class="rest">$param</td>
 				<td class="desc"><p>Parameter identifier. For a prepared statement using named placeholders,</p>
 <pre><code>                     this will be a parameter name of the form :name. For a prepared statement
@@ -200,7 +143,16 @@ fetchAll(), fetchArray(), fetchColumn(), fetchAssoc() methods to have the named 
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Exception$typespace.html#Doctrine\DBAL\Driver\Exception" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -217,14 +169,14 @@ fetchAll(), fetchArray(), fetchColumn(), fetchAssoc() methods to have the named 
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/Statement.php#L33-L59" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L32-L59" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Driver\Statement::bindParam()" tabindex="-1" class="structure-title ">
                         bindParam                        	<small>($param, &amp;$variable, $type = Doctrine\DBAL\ParameterType::STRING, $length = null) : bool</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Binds a PHP variable to a corresponding named (not supported by mysqli driver, see comment below) or question<br />
-mark placeholder in the SQL statement that was use to prepare the statement. Unlike PDOStatement-&gt;bindValue(),<br />
+mark placeholder in the SQL statement that was use to prepare the statement. Unlike <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Doctrine\DBAL\Driver\Statement::bindValue()' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\Driver\Statement::bindValue()'>Doctrine\DBAL\Driver\Statement::bindValue()</tag_link>,<br />
 the variable is bound as a reference and will only be evaluated at the time<br />
 that PDOStatement-&gt;execute() is called.</p>
 <p>As mentioned above, the named parameters are not natively supported by the mysqli driver, use executeQuery(),<br />
@@ -238,7 +190,7 @@ parameters that both send in data and are updated to receive it.</p>
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type">int<span class="type-separator"></span><wbr>string</td>
+				<td class="type">string<span class="type-separator"></span><wbr>int</td>
 				<td class="rest">$param</td>
 				<td class="desc"><p>Parameter identifier. For a prepared statement using named placeholders,</p>
 <pre><code>                        this will be a parameter name of the form :name. For a prepared statement using
@@ -256,8 +208,7 @@ parameters that both send in data and are updated to receive it.</p>
 				<td class="type">int</td>
 				<td class="rest">$type = Doctrine\DBAL\ParameterType::STRING</td>
 				<td class="desc"><p>Explicit data type for the parameter using the <tag_link data-kind='fqsen' data-type-category='class' data-type-fqsen='Doctrine\DBAL\ParameterType' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\ParameterType'>Doctrine\DBAL\ParameterType</tag_link></p>
-<pre><code>                        constants. To return an INOUT parameter from a stored procedure, use the bitwise
-                        OR operator to set the PDO::PARAM_INPUT_OUTPUT bits for the data_type parameter.
+<pre><code>                        constants.
 </code></pre>
 </td>
 			</tr>
@@ -282,99 +233,16 @@ parameters that both send in data and are updated to receive it.</p>
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/Statement.php#L61-L70" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Driver\Statement::errorCode()" tabindex="-1" class="structure-title strike">
-                        errorCode                        	<small>() : string<span class="type-separator"></span><wbr>int<span class="type-separator"></span><wbr>bool</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Fetches the SQLSTATE associated with the last operation on the statement handle.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
                             	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">string<span class="type-separator"></span><wbr>int<span class="type-separator"></span><wbr>bool</td>
-			<td class="desc"><p>The error code string.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            	<table class="table">
-		<caption>See</caption>
+		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type">
-                                            <a href="Doctrine_Adapter_Interface$typespace.html#Doctrine_Adapter_Interface::errorCode()" class="fqsen ">Doctrine_Adapter_Interface::errorCode()</a>                    				</td>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Exception$typespace.html#Doctrine\DBAL\Driver\Exception" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Exception</a></td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-    					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/Statement.php#L72-L79" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Driver\Statement::errorInfo()" tabindex="-1" class="structure-title strike">
-                        errorInfo                        	<small>() : mixed[]</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Fetches extended error information associated with the last operation on the statement handle.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">mixed[]</td>
-			<td class="desc"><p>The error info array.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -391,15 +259,15 @@ parameters that both send in data and are updated to receive it.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/Statement.php#L81-L95" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L61-L75" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Driver\Statement::execute()" tabindex="-1" class="structure-title ">
-                        execute                        	<small>($params = null) : bool</small>
+                        execute                        	<small>($params = null) : <a href="Doctrine-DBAL-Driver-Result$typespace.html#Doctrine\DBAL\Driver\Result" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Result</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Executes a prepared statement</p>
 <p>If the prepared statement included parameter markers, you must either:<br />
-call PDOStatement-&gt;bindParam() to bind PHP variables to the parameter markers:<br />
+call <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Doctrine\DBAL\Driver\Statement::bindParam()' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\Driver\Statement::bindParam()'>Doctrine\DBAL\Driver\Statement::bindParam()</tag_link> to bind PHP variables to the parameter markers:<br />
 bound variables pass their value as input and receive the output value,<br />
 if any, of their associated parameter markers or pass an array of input-only<br />
 parameter values.</p>
@@ -410,7 +278,7 @@ parameter values.</p>
         			<tr>
 				<td class="type">mixed[]<span class="type-separator"></span><wbr>null</td>
 				<td class="rest">$params = null</td>
-				<td class="desc"><p>An array of values with as many elements as there are</p>
+				<td class="desc"><p>A numeric array of values with as many elements as there are</p>
 <pre><code>                        bound parameters in the SQL statement being executed.
 </code></pre>
 </td>
@@ -421,463 +289,22 @@ parameter values.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">bool</td>
-			<td class="desc"><p>TRUE on success or FALSE on failure.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/Statement.php#L97-L108" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Driver\Statement::rowCount()" tabindex="-1" class="structure-title ">
-                        rowCount                        	<small>() : int</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Returns the number of rows affected by the last DELETE, INSERT, or UPDATE statement<br />
-executed by the corresponding object.</p>
-<p>If the last SQL statement executed by the associated Statement object was a SELECT statement,<br />
-some databases may return the number of rows returned by that statement. However,<br />
-this behaviour is not guaranteed for all databases and should not be<br />
-relied on for portable applications.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">int</td>
-			<td class="desc"><p>The number of rows.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/ResultStatement.php#L13-L20" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Driver\Statement::closeCursor()" tabindex="-1" class="structure-title strike">
-                        closeCursor                        	<small>() : bool</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Closes the cursor, enabling the statement to be executed again.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">bool</td>
-			<td class="desc"><p>TRUE on success or FALSE on failure.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement::closeCursor()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement::closeCursor()</a></td>
-				<td class="desc">Closes the cursor, enabling the statement to be executed again.</td>
-				<td class="rest">inherit</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/ResultStatement.php#L22-L29" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Driver\Statement::columnCount()" tabindex="-1" class="structure-title ">
-                        columnCount                        	<small>() : int</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Returns the number of columns in the result set</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">int</td>
-			<td class="desc"><p>The number of columns in the result set represented</p>
-<pre><code>            by the PDOStatement object. If there is no result set,
-            this method should return 0.
-</code></pre>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement::columnCount()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement::columnCount()</a></td>
-				<td class="desc">Returns the number of columns in the result set</td>
-				<td class="rest">inherit</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/ResultStatement.php#L31-L42" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Driver\Statement::setFetchMode()" tabindex="-1" class="structure-title strike">
-                        setFetchMode                        	<small>($fetchMode, $arg2 = null, $arg3 = null) : bool</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Sets the fetch mode to use while iterating this statement.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">int</td>
-				<td class="rest">$fetchMode</td>
-				<td class="desc"><p>The fetch mode must be one of the <tag_link data-kind='fqsen' data-type-category='class' data-type-fqsen='Doctrine\DBAL\FetchMode' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\FetchMode'>Doctrine\DBAL\FetchMode</tag_link> constants.</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">mixed</td>
-				<td class="rest">$arg2 = null</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">mixed</td>
-				<td class="rest">$arg3 = null</td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">bool</td>
+			<td class="type"><a href="Doctrine-DBAL-Driver-Result$typespace.html#Doctrine\DBAL\Driver\Result" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Result</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
 	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement::setFetchMode()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement::setFetchMode()</a></td>
-				<td class="desc">Sets the fetch mode to use while iterating this statement.</td>
-				<td class="rest">inherit</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/ResultStatement.php#L44-L71" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Driver\Statement::fetch()" tabindex="-1" class="structure-title strike">
-                        fetch                        	<small>($fetchMode = null, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0) : mixed</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Returns the next row of a result set.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">int<span class="type-separator"></span><wbr>null</td>
-				<td class="rest">$fetchMode = null</td>
-				<td class="desc"><p>Controls how the next row will be returned to the caller.</p>
-<pre><code>                               The value must be one of the {@link FetchMode} constants,
-                               defaulting to {@link FetchMode::MIXED}.
-</code></pre>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">int</td>
-				<td class="rest">$cursorOrientation = PDO::FETCH_ORI_NEXT</td>
-				<td class="desc"><p>For a ResultStatement object representing a scrollable cursor,</p>
-<pre><code>                               this value determines which row will be returned to the caller.
-                               This value must be one of the \PDO::FETCH_ORI_* constants,
-                               defaulting to \PDO::FETCH_ORI_NEXT. To request a scrollable
-                               cursor for your ResultStatement object, you must set the \PDO::ATTR_CURSOR
-                               attribute to \PDO::CURSOR_SCROLL when you prepare the SQL statement with
-                               \PDO::prepare().
-</code></pre>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">int</td>
-				<td class="rest">$cursorOffset = 0</td>
-				<td class="desc"><p>For a ResultStatement object representing a scrollable cursor for which the</p>
-<pre><code>                               cursorOrientation parameter is set to \PDO::FETCH_ORI_ABS, this value
-                               specifies the absolute number of the row in the result set that shall be
-                               fetched.
-                               For a ResultStatement object representing a scrollable cursor for which the
-                               cursorOrientation parameter is set to \PDO::FETCH_ORI_REL, this value
-                               specifies the row to fetch relative to the cursor position before
-                               ResultStatement::fetch() was called.
-</code></pre>
-</td>
-			</tr>
-        		</tbody>
-	</table>
                             	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">mixed</td>
-			<td class="desc"><p>The return value of this method on success depends on the fetch mode. In all cases, FALSE is</p>
-<pre><code>          returned on failure.
-</code></pre>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
+		<caption>Throws</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement::fetch()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement::fetch()</a></td>
-				<td class="desc">Returns the next row of a result set.</td>
-				<td class="rest">inherit</td>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Exception$typespace.html#Doctrine\DBAL\Driver\Exception" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/ResultStatement.php#L73-L97" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Driver\Statement::fetchAll()" tabindex="-1" class="structure-title strike">
-                        fetchAll                        	<small>($fetchMode = null, $fetchArgument = null, $ctorArgs = null) : mixed[]</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Returns an array containing all of the result set rows.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">int<span class="type-separator"></span><wbr>null</td>
-				<td class="rest">$fetchMode = null</td>
-				<td class="desc"><p>Controls how the next row will be returned to the caller.</p>
-<pre><code>                                  The value must be one of the {@link FetchMode} constants,
-                                  defaulting to {@link FetchMode::MIXED}.
-</code></pre>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>null</td>
-				<td class="rest">$fetchArgument = null</td>
-				<td class="desc"><p>This argument has a different meaning depending on the value</p>
-<pre><code>                                  of the $fetchMode parameter:
-                                  * {@link FetchMode::COLUMN}:
-                                    Returns the indicated 0-indexed column.
-                                  * {@link FetchMode::CUSTOM_OBJECT}:
-                                    Returns instances of the specified class, mapping the columns of each row
-                                    to named properties in the class.
-                                  * {@link PDO::FETCH_FUNC}: Returns the results of calling
-                                    the specified function, using each row's
-                                    columns as parameters in the call.
-</code></pre>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">mixed[]<span class="type-separator"></span><wbr>null</td>
-				<td class="rest">$ctorArgs = null</td>
-				<td class="desc"><p>Controls how the next row will be returned to the caller.</p>
-<pre><code>                                  The value must be one of the {@link FetchMode} constants,
-                                  defaulting to {@link FetchMode::MIXED}.
-</code></pre>
-</td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">mixed[]</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement::fetchAll()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement::fetchAll()</a></td>
-				<td class="desc">Returns an array containing all of the result set rows.</td>
-				<td class="rest">inherit</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/ResultStatement.php#L99-L109" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Driver\Statement::fetchColumn()" tabindex="-1" class="structure-title strike">
-                        fetchColumn                        	<small>($columnIndex = 0) : mixed<span class="type-separator"></span><wbr>false</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>Returns a single column from the next row of a result set or FALSE if there are no more rows.</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">int</td>
-				<td class="rest">$columnIndex = 0</td>
-				<td class="desc"><p>0-indexed number of the column you wish to retrieve from the row.</p>
-<pre><code>                    If no value is supplied, fetches the first column.
-</code></pre>
-</td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">mixed<span class="type-separator"></span><wbr>false</td>
-			<td class="desc"><p>A single column in the next row of a result set, or FALSE if there are no more rows.</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Driver-ResultStatement$typespace.html#Doctrine\DBAL\Driver\ResultStatement::fetchColumn()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>ResultStatement::fetchColumn()</a></td>
-				<td class="desc">Returns a single column from the next row of a result set or FALSE if there are no more rows.</td>
-				<td class="rest">inherit</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
+                                                    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>

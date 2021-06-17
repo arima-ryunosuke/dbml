@@ -61,7 +61,7 @@
 							<span class="label label-info"></span>
 							<span class="label label-info">iterateable</span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L28-L2482" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L30-L2555" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="ryunosuke\dbml\Gateway\TableGateway" tabindex="-1" class="structure-title ">
 							<a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway">TableGateway</a>
@@ -127,7 +127,8 @@ $gw[1]['hoge_count'] = $db-&gt;raw('hoge_count + 1'); // 単純かつアトミ�
 <code>addScope</code> の引数はクエリビルダ引数と全く同じだが、第1引数のみ Closure を受け付ける。<br />
 Closure を受けたスコープはクエリビルダ引数を返す必要があるが、引数を受けられるのでパラメータ付きスコープを定義することができる。<br />
 また、 Closure 内の <code>$this</code> は「その時点の Gateway インスタンス」を指すように bind される。これにより <code>$this-&gt;alias</code> などが使用でき、当たっているスコープやエイリアス名などが取得できる。<br />
-さらに <code>$this</code> に下記の <code>column</code> <code>where</code> <code>orderBy</code> などを適用して return すればクエリビルダ引数を返さなくてもメソッドベースで適用できる。</p>
+さらに <code>$this</code> に下記の <code>column</code> <code>where</code> <code>orderBy</code> などを適用して return すればクエリビルダ引数を返さなくてもメソッドベースで適用できる。<br />
+scopeXXX で始まるメソッドを定義すると上記のクロージャで定義したような動作となる。</p>
 <p><code>scoping</code> を使用するとスコープを登録せずにその場限りのスコープを当てることができる。<br />
 また <code>column</code> <code>where</code> <code>orderBy</code> などの個別メソッドがあり、句別にスコープを当てることもできる。</p>
 <pre><code class="language-php">// デフォルトスコープを登録（select 時に常に `NOW()` が付いてくるようになる）
@@ -145,6 +146,11 @@ $gw-&gt;addScope('latest', function ($limit = 10) {
 $gw-&gt;addScope('latest', function ($limit = 10) {
     return $this-&gt;orderBy('create_date DESC')-&gt;limit($limit);
 });
+// 上記のメソッド版（意味は同じ。$this を返す必要はない）
+public function scopeLatest($limit = 10)
+{
+    $this-&gt;orderBy('create_date DESC')-&gt;limit($limit);
+}
 
 // 有効レコードを全取得する（'active' スコープで縛る）
 $gw-&gt;scope('active')-&gt;array();
@@ -195,6 +201,25 @@ $gw-&gt;array();
 
 // あるいはメソッドチェーンでも良い（良い、というかそれを想定している）
 $gw-&gt;scope('active')-&gt;array();
+</code></pre>
+<h3>仮想カラム</h3>
+<p><code>(get|set)VirtualNameColumn</code> というメソッドを定義すると仮想カラムとしてアクセスできるようになる（仮想カラムに関しては <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::overrideColumns()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::overrideColumns()'>ryunosuke\dbml\Database::overrideColumns()</tag_link> を参照）。<br />
+参照時は get, 更新時は set が呼ばれる。<br />
+実処理はメソッド本体だが、アノテーションを用いて implicit や type 属性を指定できる（ここでは記述できないのでテストを参照）。</p>
+<pre><code class="language-php">// full_name という仮想カラムを定義（取得）
+public function getFullNameColumn()
+{
+    return 'CONCAT(first_name, " ", family_name)';
+}
+// full_name という仮想カラムを定義（設定）
+public function setFullNameColumn($value, $row)
+{
+    $parts = explode(' ', $value);
+    return [
+        'first_name'  =&gt; $parts[0],
+        'family_name' =&gt; $parts[1],
+    ];
+}
 </code></pre>
 <h3>Traversable, Countable</h3>
 <p>Traversable と Countable を実装しているので、 foreach で回すことができるし count() で件数取得もできる。</p>

@@ -39,7 +39,7 @@
 <h1 class="ellipsis fixed">
 	<span class="pull-left">
 	Structure
-	<small class="ellipsis-text">(Doctrine\DBAL\Driver\PDOStatementImplementations)</small>
+	<small class="ellipsis-text">(Doctrine\DBAL\SQL\Parser)</small>
 	</span>
 	<span class="pull-right">
 		<small class="frame-switch">
@@ -49,32 +49,36 @@
 </h1>
 <div class="main-wrapper">
 	<div class="attribute">
-		<span class="label label-danger"></span>
+		<span class="label label-danger">final</span>
 		<span class="label label-warning"></span>
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/PDOStatementImplementations.php#L42-L72" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="#L18-L117" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
-	<h2>trait <span class="category-name">Doctrine\DBAL\Driver\PDOStatementImplementations</span></h2>
+	<h2>class <span class="category-name">Doctrine\DBAL\SQL\Parser</span></h2>
 
-	<div class="description"></div>
+	<div class="description"><p>The SQL parser that focuses on identifying prepared statement parameters. It implements parsing other tokens like<br />
+string literals and comments only as a way to not confuse their contents with the the parameter placeholders.</p>
+<p>The parsing logic and the implementation is inspired by the PHP PDO parser.</p>
+</div>
 
 	<h3>Construction</h3>
-                
+                	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                    						<a href="https://github.com/php/php-src/blob/php-7.4.12/ext/pdo/pdo_sql_parser.re#L49-L69" target="_blank">https://github.com/php/php-src/blob/php-7.4.12/ext/pdo/pdo_sql_parser.re#L49-L69</a>
+                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    
 	<h3>Hierarchy</h3>
-	<div class="hierarchy">
-	<ul class="">
-        			<li class="">
-                <a href="Doctrine-DBAL-Driver-PDOStatementImplementations$typespace.html#Doctrine\DBAL\Driver\PDOStatementImplementations" class="fqsen bold"><small>Doctrine\DBAL\Driver\</small><wbr>PDOStatementImplementations</a>                
-	<ul class="has-indent">
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Driver-PDOStatement$typespace.html#Doctrine\DBAL\Driver\PDOStatement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>PDOStatement</a>                			</li>
-        	</ul>
-    			</li>
-        	</ul>
-    </div>
+	<div class="hierarchy"></div>
 
 	<h3>Constants</h3>
     
@@ -90,12 +94,12 @@
 						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
+						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/PDOStatementImplementations.php#L47-L57" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L45-L69" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Driver\PDOStatementImplementations::setFetchMode()" tabindex="-1" class="structure-title strike">
-                        setFetchMode                        	<small>($fetchMode, $arg2 = null, $arg3 = null) : bool</small>
+					<h4 id="Doctrine\DBAL\SQL\Parser::__construct()" tabindex="-1" class="structure-title ">
+                        __construct                        	<small>($mySQLStringEscaping) : void</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -103,18 +107,8 @@
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type">int</td>
-				<td class="rest">$fetchMode</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">mixed</td>
-				<td class="rest">$arg2 = null</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">mixed</td>
-				<td class="rest">$arg3 = null</td>
+				<td class="type">bool</td>
+				<td class="rest">$mySQLStringEscaping</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -123,7 +117,7 @@
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">bool</td>
+			<td class="type">void</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -144,31 +138,27 @@
 						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
-						<span class="label label-deprecated">deprecated </span>
+						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/dbal/blob/2.12.1/lib/Doctrine/DBAL/Driver/PDOStatementImplementations.php#L59-L71" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L71-L106" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Driver\PDOStatementImplementations::fetchAll()" tabindex="-1" class="structure-title strike">
-                        fetchAll                        	<small>($fetchMode = null, $fetchArgument = null, $ctorArgs = null) : mixed[]</small>
+					<h4 id="Doctrine\DBAL\SQL\Parser::parse()" tabindex="-1" class="structure-title ">
+                        parse                        	<small>($sql, $visitor) : void</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"></div>
+						<div class="description"><p>Parses the given SQL statement</p>
+</div>
                         	<table class="table">
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type">int<span class="type-separator"></span><wbr>null</td>
-				<td class="rest">$fetchMode = null</td>
+				<td class="type">string</td>
+				<td class="rest">$sql</td>
 				<td class="desc"></td>
 			</tr>
         			<tr>
-				<td class="type">mixed</td>
-				<td class="rest">$fetchArgument = null</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">mixed</td>
-				<td class="rest">$ctorArgs = null</td>
+				<td class="type"><a href="Doctrine-DBAL-SQL-Parser-Visitor$typespace.html#Doctrine\DBAL\SQL\Parser\Visitor" class="fqsen "><small>Doctrine\DBAL\SQL\Parser\</small><wbr>Visitor</a></td>
+				<td class="rest">$visitor</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -177,7 +167,7 @@
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">mixed[]</td>
+			<td class="type">void</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
