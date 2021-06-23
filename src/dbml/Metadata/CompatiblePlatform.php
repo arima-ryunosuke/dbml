@@ -2,13 +2,13 @@
 
 namespace ryunosuke\dbml\Metadata;
 
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Platforms\MySqlPlatform;
-use Doctrine\DBAL\Platforms\PostgreSqlPlatform;
+use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\DBAL\Platforms\PostgreSQL94Platform as PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
-use Doctrine\DBAL\Platforms\SQLServerPlatform;
+use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\SelectOption;
 use ryunosuke\dbml\Query\Queryable;
@@ -87,7 +87,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsInsertSet()
     {
-        if ($this->platform instanceof MySqlPlatform || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
+        if ($this->platform instanceof MySQLPlatform || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
             return true;
         }
 
@@ -104,7 +104,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof SqlitePlatform) {
             return true;
         }
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return true;
         }
         return false;
@@ -120,7 +120,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof SqlitePlatform) {
             return true;
         }
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return true;
         }
         if ($this->platform instanceof PostgreSqlPlatform) {
@@ -139,7 +139,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof SqlitePlatform) {
             return true;
         }
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return true;
         }
         if ($this->platform instanceof PostgreSqlPlatform) {
@@ -158,7 +158,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof SqlitePlatform) {
             return true;
         }
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return true;
         }
         return false;
@@ -173,7 +173,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsZeroAffectedUpdate()
     {
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return true;
         }
         return false;
@@ -186,7 +186,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsUpdateJoin()
     {
-        if ($this->platform instanceof MySqlPlatform || $this->platform instanceof SQLServerPlatform) {
+        if ($this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform) {
             return true;
         }
         return false;
@@ -199,7 +199,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsDeleteJoin()
     {
-        if ($this->platform instanceof MySqlPlatform || $this->platform instanceof SQLServerPlatform) {
+        if ($this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform) {
             return true;
         }
         return false;
@@ -212,7 +212,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsUpdateLimit()
     {
-        if ($this->platform instanceof MySqlPlatform || $this->platform instanceof SQLServerPlatform) {
+        if ($this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform) {
             return true;
         }
         return false;
@@ -225,7 +225,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsDeleteLimit()
     {
-        if ($this->platform instanceof MySqlPlatform || $this->platform instanceof SQLServerPlatform) {
+        if ($this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform) {
             return true;
         }
         return false;
@@ -267,7 +267,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function supportsTableNameAttribute()
     {
         // エラーは出ないが MySql しか対応していないっぽい？
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return true;
         }
         return false;
@@ -362,7 +362,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function getDualTable()
     {
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return 'dual';
         }
         return '';
@@ -375,7 +375,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function getFoundRowsOption()
     {
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return SelectOption::SQL_CALC_FOUND_ROWS();
         }
         return null;
@@ -388,7 +388,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function getFoundRowsQuery()
     {
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return 'SELECT FOUND_ROWS()';
         }
         return '';
@@ -406,7 +406,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             $constraint = implode(',', $columns);
             return "ON CONFLICT($constraint) DO UPDATE SET";
         }
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return "ON DUPLICATE KEY UPDATE";
         }
         if ($this->platform instanceof PostgreSqlPlatform) {
@@ -427,7 +427,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof SqlitePlatform) {
             return "excluded.$column";
         }
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return "VALUES($column)";
         }
         if ($this->platform instanceof PostgreSqlPlatform) {
@@ -498,7 +498,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     {
         $index_name = implode(', ', arrayize($index_name));
 
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return "$mode INDEX ($index_name)";
         }
         if ($this->platform instanceof SQLServerPlatform) {
@@ -670,7 +670,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             }
             return "GROUP_CONCAT($expr, $qseparator)";
         }
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             $query = "GROUP_CONCAT(" . implode(', ', arrayize($expr));
 
             if ($order !== null) {
@@ -710,7 +710,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function getSpaceshipSyntax($column)
     {
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return "$column <=> ?";
         }
         return "$column IS NULL OR $column = ?";
@@ -826,7 +826,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
                 "INSERT INTO sqlite_sequence (name, seq) VALUES ('$tableName', $seq)",
             ];
         }
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return ["ALTER TABLE $tableName AUTO_INCREMENT = $seq"];
         }
         if ($this->platform instanceof PostgreSqlPlatform) {
@@ -851,7 +851,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof SqlitePlatform) {
             return 'OR IGNORE';
         }
-        if ($this->platform instanceof MySqlPlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return 'IGNORE';
         }
 
@@ -925,41 +925,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
-     * リトライ可能例外か判定する
-     *
-     * @param \Exception $ex 判定する例外
-     * @return bool リトライ可能例外なら true
-     */
-    public function isRetryableException($ex)
-    {
-        // \Doctrine\DBAL\Exception\DriverException は元例外として \Doctrine\DBAL\Driver\DriverException を保持している
-        if ($ex instanceof \Doctrine\DBAL\Exception\DriverException) {
-            $ex = $ex->getPrevious();
-        }
-
-        if ($this->platform instanceof MySqlPlatform) {
-            // \Doctrine\DBAL\Driver\DriverException は実質的に PDOException なのでこいつで判定
-            if ($ex instanceof \Doctrine\DBAL\Driver\DriverException) {
-                switch ($ex->getErrorCode()) {
-                    case 1205:// ER_LOCK_WAIT_TIMEOUT
-                    case 1213:// ER_LOCK_DEADLOCK
-                    case 2006:// CR_SERVER_GONE_ERROR
-                        return true;
-                }
-            }
-        }
-        // @fixme mysql 以外はさっぱりわからない
-        else {
-            // \Doctrine\DBAL\Driver\DriverException は実質的に PDOException なのでこいつで判定
-            if ($ex instanceof \Doctrine\DBAL\Driver\DriverException) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * SELECT 文を UPDATE 文に変換する
      *
      * @param QueryBuilder $builder 変換するクエリビルダ
@@ -972,7 +937,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         $sets = array_sprintf($builder->getQueryPart('colval'), '%2$s = %1$s', ', ');
 
         // JOIN がなければ変換はできる
-        if (count($froms) === 1 || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $this->platform instanceof MySqlPlatform) {
+        if (count($froms) === 1 || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $this->platform instanceof MySQLPlatform) {
             // SQLServerPlatform はエイリアス指定の update をサポートしていない
             if ($from['alias'] !== $from['table'] && $this->platform instanceof SQLServerPlatform) {
                 throw new \DomainException($this->platform->getName() . ' is not supported');
@@ -1009,7 +974,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         $from = reset($froms);
 
         // JOIN がなければ変換はできる。 MySql と SQLServer は共通でOK（\ryunosuke\dbml\Test\Platforms\SqlitePlatform はテスト用で実際には無理）
-        if (count($froms) === 1 || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $this->platform instanceof MySqlPlatform || $this->platform instanceof SQLServerPlatform) {
+        if (count($froms) === 1 || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform) {
             $builder->select('__dbml_from_maker');
 
             if ($targets) {
@@ -1024,7 +989,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
                 if (count($froms) > 1) {
                     $alias = $from['alias'];
                 }
-                elseif ($from['alias'] !== $from['table'] && ($this->platform instanceof MySqlPlatform || $this->platform instanceof SQLServerPlatform)) {
+                elseif ($from['alias'] !== $from['table'] && ($this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform)) {
                     $alias = $from['alias'];
                 }
             }

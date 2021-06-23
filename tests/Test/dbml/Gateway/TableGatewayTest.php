@@ -3,7 +3,7 @@
 namespace ryunosuke\Test\dbml\Gateway;
 
 use Doctrine\DBAL\Logging\DebugStack;
-use Doctrine\DBAL\Platforms\SQLServerPlatform;
+use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
@@ -868,7 +868,7 @@ AND ((flag=1))", "$gw");
         // select
         $stmt = $gateway->where(['name' => 'b'])->prepareSelect('*', ['id = :id']);
         $this->assertEquals("SELECT test.* FROM test WHERE (test.name = 'b') AND (id = '1')", $queryInto($stmt, ['id' => 1]));
-        $this->assertEquals($stmt->executeSelect(['id' => 2])->fetchAll(), $gateway->array('*', ['id' => 2]));
+        $this->assertEquals($stmt->executeSelect(['id' => 2])->fetchAllAssociative(), $gateway->array('*', ['id' => 2]));
 
         $stmt = $database->foreign_p()->where(['name' => 'a'])->prepareSelect([
             'submax'   => $database->foreign_c1()->submax('id'),
@@ -889,12 +889,12 @@ AND ((flag=1))", "$gw");
         $stmt = $gateway->prepareInsert([':name', 'id' => new Expression(':id')]);
         $this->assertEquals("INSERT INTO test (name, id) VALUES ('xxx', '1')", $queryInto($stmt, ['id' => 1, 'name' => 'xxx']));
         if (!$cplatform->supportsIdentityUpdate()) {
-            $database->getConnection()->exec($cplatform->getIdentityInsertSQL($gateway->tableName(), true));
+            $database->getConnection()->executeStatement($cplatform->getIdentityInsertSQL($gateway->tableName(), true));
         }
         $stmt->executeAffect(['id' => 101, 'name' => 'XXX']);
         $stmt->executeAffect(['id' => 102, 'name' => 'YYY']);
         if (!$cplatform->supportsIdentityUpdate()) {
-            $database->getConnection()->exec($cplatform->getIdentityInsertSQL($gateway->tableName(), false));
+            $database->getConnection()->executeStatement($cplatform->getIdentityInsertSQL($gateway->tableName(), false));
         }
         $this->assertEquals(['XXX', 'YYY'], $gateway->lists('name', ['id' => [101, 102]]));
 

@@ -4,7 +4,7 @@ namespace ryunosuke\Test;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Platforms\SQLServerPlatform;
+use Doctrine\DBAL\Platforms\SQLServer2012Platform;
 use Doctrine\DBAL\Schema\AbstractAsset;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
@@ -40,12 +40,15 @@ abstract class AbstractUnitTestCase extends TestCase
 
         $prefix = strtoupper($dbms);
         $config = ['url' => $getconst("{$prefix}_URL")];
+        if ($dbms === 'sqlite') {
+            $config['platform'] = new \ryunosuke\Test\Platforms\SqlitePlatform();
+        }
 
         if ($init) {
             $mparam = DriverManager::getConnection($config)->getParams();
             $dbname = isset($mparam['dbname']) ? $mparam['dbname'] : (isset($mparam['path']) ? $mparam['path'] : '');
             unset($mparam['url'], $mparam['dbname'], $mparam['path']);
-            DriverManager::getConnection($mparam)->getSchemaManager()->dropAndCreateDatabase($dbname);
+            DriverManager::getConnection($mparam)->createSchemaManager()->dropAndCreateDatabase($dbname);
         }
 
         $connection = DriverManager::getConnection($config + [
@@ -59,7 +62,7 @@ abstract class AbstractUnitTestCase extends TestCase
 
         $init_command = trim($getconst("{$prefix}_INITCOMMAND"));
         if ($init_command) {
-            $connection->exec($init_command);
+            $connection->executeStatement($init_command);
         }
 
         return $connection;
@@ -115,7 +118,7 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
                             [],
-                            0,
+                            [],
                             // Doctrine で Sqlite の「本当の意味」での AUTOINCREMENT な列を作成することは出来ない(ので、置換する)
                             [
                                 'create_sql' => [
@@ -240,6 +243,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                             ],
                             [new Index('PRIMARY', ['id', 'seq'], true, true)],
+                            [],
                             [new ForeignKeyConstraint(['id'], 'foreign_p', ['id'], 'fk_parentchild1')]
                         ),
                         new Table('foreign_c2',
@@ -249,6 +253,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                             ],
                             [new Index('PRIMARY', ['cid', 'seq'], true, true)],
+                            [],
                             [new ForeignKeyConstraint(['cid'], 'foreign_p', ['id'], 'fk_parentchild2')]
                         ),
                         new Table('foreign_d1',
@@ -269,8 +274,8 @@ abstract class AbstractUnitTestCase extends TestCase
                         function (Connection $connection) {
                             $fk1 = new ForeignKeyConstraint(['d2_id'], 'foreign_d2', ['id'], 'fk_dd12');
                             $fk2 = new ForeignKeyConstraint(['id'], 'foreign_d1', ['id'], 'fk_dd21');
-                            $connection->getSchemaManager()->createForeignKey($fk1, 'foreign_d1');
-                            $connection->getSchemaManager()->createForeignKey($fk2, 'foreign_d2');
+                            $connection->createSchemaManager()->createForeignKey($fk1, 'foreign_d1');
+                            $connection->createSchemaManager()->createForeignKey($fk2, 'foreign_d2');
                         },
                         new Table('foreign_s',
                             [
@@ -287,6 +292,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('s_id2', Type::getType('integer'), ['notnull' => false]),
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
+                            [],
                             [
                                 new ForeignKeyConstraint(['s_id1'], 'foreign_s', ['id'], 'fk_sc1'),
                                 new ForeignKeyConstraint(['s_id2'], 'foreign_s', ['id'], 'fk_sc2'),
@@ -309,6 +315,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Index('PRIMARY', ['parent_id'], true, true),
                                 new Index('SECONDARY10', ['parent_id', 'ancestor_id'], true),
                             ],
+                            [],
                             [
                                 new ForeignKeyConstraint(['ancestor_id'], 'g_ancestor', ['ancestor_id'], 'fkey_generation1', [
                                     'onDelete' => 'CASCADE',
@@ -322,6 +329,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('parent_id', Type::getType('integer'), []),
                             ],
                             [new Index('PRIMARY', ['child_id'], true, true)],
+                            [],
                             [
                                 new ForeignKeyConstraint(['parent_id'], 'g_parent', ['parent_id'], 'fkey_generation2', [
                                     'onDelete' => 'CASCADE',
@@ -336,6 +344,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('grand1_name', Type::getType('string'), ['length' => 32]),
                             ],
                             [new Index('PRIMARY', ['grand_id'], true, true)],
+                            [],
                             [
                                 new ForeignKeyConstraint(['ancestor_id'], 'g_ancestor', ['ancestor_id'], 'fkey_generation3_1', []),
                                 new ForeignKeyConstraint(['parent_id'], 'g_parent', ['parent_id'], 'fkey_generation3_2', [
@@ -345,10 +354,10 @@ abstract class AbstractUnitTestCase extends TestCase
                         ),
                         function (Connection $connection) {
                             // 謎のエラーが出るのでさしあたり除外
-                            if ($connection->getDatabasePlatform() instanceof SQLServerPlatform) {
+                            if ($connection->getDatabasePlatform() instanceof SQLServer2012Platform) {
                                 return;
                             }
-                            $connection->getSchemaManager()->createTable(new Table('g_grand2',
+                            $connection->createSchemaManager()->createTable(new Table('g_grand2',
                                 [
                                     new Column('grand_id', Type::getType('integer'), ['autoincrement' => true]),
                                     new Column('parent_id', Type::getType('integer'), []),
@@ -356,6 +365,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                     new Column('grand2_name', Type::getType('string'), ['length' => 32]),
                                 ],
                                 [new Index('PRIMARY', ['grand_id'], true, true)],
+                                [],
                                 [
                                     new ForeignKeyConstraint(['parent_id', 'ancestor_id'], 'g_parent', ['parent_id', 'ancestor_id'], 'fkey_generation3', [
                                         'onDelete' => 'CASCADE',
@@ -376,6 +386,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('summary', Type::getType('string')),
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
+                            [],
                             [new ForeignKeyConstraint(['id'], 'horizontal1', ['id'], 'fkey_horizontal')]
                         ),
                         new Table('t_article',
@@ -396,6 +407,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('comment', Type::getType('text')),
                             ],
                             [new Index('PRIMARY', ['comment_id'], true, true)],
+                            [],
                             [
                                 new ForeignKeyConstraint(['article_id'], 't_article', ['article_id'], 'fk_articlecomment', [
                                     'onUpdate' => 'CASCADE',
@@ -478,7 +490,10 @@ abstract class AbstractUnitTestCase extends TestCase
     public static function getDummyDatabase()
     {
         if (self::$database === null) {
-            $connection = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
+            $connection = DriverManager::getConnection([
+                'url'      => 'sqlite:///:memory:',
+                'platform' => new \ryunosuke\Test\Platforms\SqlitePlatform(),
+            ]);
             self::createTables($connection, [
                 new Table('t',
                     [
@@ -506,6 +521,7 @@ abstract class AbstractUnitTestCase extends TestCase
                         new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                     ],
                     [new Index('PRIMARY', ['id', 'seq'], true, true)],
+                    [],
                     [new ForeignKeyConstraint(['id'], 'foreign_p', ['id'], 'fk_parentchild1')]
                 ),
                 new Table('foreign_c2',
@@ -515,6 +531,7 @@ abstract class AbstractUnitTestCase extends TestCase
                         new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                     ],
                     [new Index('PRIMARY', ['cid', 'seq'], true, true)],
+                    [],
                     [new ForeignKeyConstraint(['cid'], 'foreign_p', ['id'], 'fk_parentchild2')]
                 ),
             ]);
@@ -672,11 +689,6 @@ abstract class AbstractUnitTestCase extends TestCase
 
         /** @var Database $db */
         foreach (array_column(self::provideDatabase(), 0) as $db) {
-            // DBMS によっては接続時間？ かなにかが原因で唐突に切れる事があるので再接続する
-            if (!$db->getConnection()->ping()) {
-                $db->getConnection()->close();
-            }
-
             $db->overrideColumns([
                 't_article' => [
                     'title'         => [
@@ -733,7 +745,7 @@ abstract class AbstractUnitTestCase extends TestCase
                 continue;
             }
             $method = 'drop' . class_shorten($tableorview);
-            $connection->getSchemaManager()->tryMethod($method, $tableorview->getQuotedName($connection->getDatabasePlatform()));
+            $connection->createSchemaManager()->tryMethod($method, $tableorview->getQuotedName($connection->getDatabasePlatform()));
         }
         // そのあと create
         foreach ($tableorviews as $tableorview) {
@@ -743,7 +755,7 @@ abstract class AbstractUnitTestCase extends TestCase
                 $platname = $connection->getDatabasePlatform()->getName();
                 if (isset($options['create_sql'][$platname])) {
                     $sql = $options['create_sql'][$platname];
-                    $connection->executeUpdate($sql);
+                    $connection->executeStatement($sql);
                     continue;
                 }
             }
@@ -752,7 +764,7 @@ abstract class AbstractUnitTestCase extends TestCase
                 continue;
             }
             $method = 'create' . class_shorten($tableorview);
-            $connection->getSchemaManager()->$method($tableorview);
+            $connection->createSchemaManager()->$method($tableorview);
         }
     }
 
@@ -769,7 +781,9 @@ abstract class AbstractUnitTestCase extends TestCase
 
     public static function assertException($e, $callback)
     {
+        $check_code = true;
         if (is_string($e)) {
+            $check_code = false;
             if (class_exists($e)) {
                 $e = (new \ReflectionClass($e))->newInstanceWithoutConstructor();
             }
@@ -791,7 +805,9 @@ abstract class AbstractUnitTestCase extends TestCase
         }
         catch (\Throwable $ex) {
             self::assertInstanceOf(get_class($e), $ex);
-            self::assertEquals($e->getCode(), $ex->getCode());
+            if ($check_code) {
+                self::assertEquals($e->getCode(), $ex->getCode());
+            }
             if (strlen($e->getMessage()) > 0) {
                 self::assertContains($e->getMessage(), $ex->getMessage());
             }

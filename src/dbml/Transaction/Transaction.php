@@ -3,6 +3,7 @@
 namespace ryunosuke\dbml\Transaction;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception\RetryableException;
 use Doctrine\DBAL\Logging\LoggerChain;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\DBAL\TransactionIsolationLevel;
@@ -230,7 +231,7 @@ class Transaction
             }
         }
         $default['retryable'] = function ($ex) {
-            return $this->database->getCompatiblePlatform()->isRetryableException($ex);
+            return $ex instanceof RetryableException;
         };
         $this->setDefault($options + $default);
     }

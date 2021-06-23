@@ -3,6 +3,7 @@
 namespace ryunosuke\dbml\Query;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Result;
 use ryunosuke\dbml\Database;
 
 /**
@@ -68,7 +69,7 @@ class Statement implements Queryable
         $this->database = $database;
     }
 
-    private function _execute(iterable $params, Connection $connection)
+    private function _execute($method, iterable $params, Connection $connection)
     {
         $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
 
@@ -85,8 +86,7 @@ class Statement implements Queryable
         }
 
         // 実行して返す
-        $stmt->execute();
-        return $stmt;
+        return $stmt->$method();
     }
 
     /**
@@ -94,7 +94,7 @@ class Statement implements Queryable
      *
      * @param array $params 追加パラメータ
      * @param ?Connection $connection コネクション
-     * @return \Doctrine\DBAL\Statement stmt オブジェクト
+     * @return Result result オブジェクト
      */
     public function executeSelect(iterable $params = [], Connection $connection = null)
     {
@@ -107,7 +107,7 @@ class Statement implements Queryable
      *
      * @param array $params 追加パラメータ
      * @param ?Connection $connection コネクション
-     * @return \Doctrine\DBAL\Statement stmt オブジェクト
+     * @return int affected row
      */
     public function executeAffect(iterable $params = [], Connection $connection = null)
     {
@@ -123,7 +123,7 @@ class Statement implements Queryable
      */
     public function executeQuery(iterable $params = [], Connection $connection = null)
     {
-        return $this->_execute($params, $connection ?: $this->database->getSlaveConnection());
+        return $this->_execute('executeQuery', $params, $connection ?: $this->database->getSlaveConnection());
     }
 
     /**
@@ -134,7 +134,7 @@ class Statement implements Queryable
      */
     public function executeUpdate(iterable $params = [], Connection $connection = null)
     {
-        return $this->_execute($params, $connection ?: $this->database->getMasterConnection());
+        return $this->_execute('executeStatement', $params, $connection ?: $this->database->getMasterConnection());
     }
 
     /**

@@ -521,8 +521,8 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
         $slave = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
-        $master->exec('CREATE TABLE test(id integer)');
-        $slave->exec('CREATE TABLE test(id integer)');
+        $master->executeStatement('CREATE TABLE test(id integer)');
+        $slave->executeStatement('CREATE TABLE test(id integer)');
         $master->insert('test', ['id' => 66]);
         $database = new Database([$master, $slave]);
 

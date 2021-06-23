@@ -2,14 +2,13 @@
 
 namespace ryunosuke\Test\dbml;
 
-use Doctrine\Common\Cache\FilesystemCache;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Logging\DebugStack;
-use Doctrine\DBAL\Platforms\MySqlPlatform;
-use Doctrine\DBAL\Platforms\PostgreSqlPlatform;
+use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\DBAL\Platforms\PostgreSQL94Platform as PostgreSqlPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
-use Doctrine\DBAL\Platforms\SQLServerPlatform;
+use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
 use Doctrine\DBAL\Schema;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
@@ -99,19 +98,17 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         rm_rf($tmpdir);
         mkdir_p($tmpdir);
         $db = new Database(['url' => 'sqlite:///:memory:'], [
-            'logger'        => new Logger([
+            'logger'      => new Logger([
                 'destination' => "$tmpdir/log.txt",
                 'metadata'    => [],
             ]),
-            'initCommand'   => 'PRAGMA cache_size = 1000',
-            'cacheProvider' => new FilesystemCache("$tmpdir/cache"),
+            'initCommand' => 'PRAGMA cache_size = 1000',
         ]);
         $db->getMasterConnection()->connect();
         $db->getSlaveConnection()->connect();
         unset($db);
         gc_collect_cycles();
         $this->assertStringEqualsFile("$tmpdir/log.txt", "PRAGMA cache_size = 1000\n");
-        $this->assertFileExists("$tmpdir/cache");
 
         $this->assertException('$dbconfig must be', function () { new Database(null); });
     }
@@ -254,7 +251,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertEquals([], $database->insertIgnore('noauto', ['id' => 'x']));
             $this->assertEquals([], $database->updateIgnore('noauto', ['id' => 'x'], ['id' => 'a']));
             // insert しようとしてダメでさらに update しようとしてダメだった場合に無視できるのは mysql のみ（本当は方法があるのかもしれないが詳しくないのでわからない）
-            if ($database->getPlatform() instanceof MySqlPlatform) {
+            if ($database->getPlatform() instanceof MySQLPlatform) {
                 $this->assertEquals([], $database->modifyIgnore('noauto', ['id' => 'x'], ['id' => 'a']));
             }
 
@@ -303,7 +300,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertEquals([], $database->remove('foreign_c1', ['id' => -1], ['primary' => 2]));
             $this->assertEquals([], $database->destroy('foreign_c1', ['id' => -1], ['primary' => 2]));
 
-            if ($database->getPlatform() instanceof MySqlPlatform) {
+            if ($database->getPlatform() instanceof MySQLPlatform) {
                 $this->assertEquals(['id' => 1], $database->deleteIgnore('foreign_p', ['id' => 1]));
             }
         }
@@ -409,8 +406,8 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
         $slave = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
 
-        $master->exec('CREATE TABLE test(id integer)');
-        $slave->exec('CREATE TABLE test(id integer)');
+        $master->executeStatement('CREATE TABLE test(id integer)');
+        $slave->executeStatement('CREATE TABLE test(id integer)');
 
         $database = new Database([$master, $slave]);
 
@@ -418,7 +415,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $database->insert('test', ['id' => 1]);
 
         // マスターには登録されているが・・・
-        $this->assertEquals([['id' => 1]], $master->fetchAll('select * from test'));
+        $this->assertEquals([['id' => 1]], $master->fetchAllAssociative('select * from test'));
 
         // スレーブでは取得できない
         $this->assertEquals([], $database->selectArray('test'));
@@ -484,10 +481,10 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $database = new Database([$master, $slave]);
 
-        $this->assertSame($master->getWrappedConnection(), $database->getPdo());
-        $this->assertSame($master->getWrappedConnection(), $database->getMasterPdo());
-        $this->assertSame($slave->getWrappedConnection(), $database->getSlavePdo());
-        $this->assertSame($master->getWrappedConnection(), $database->setMasterMode(true)->getSlavePdo());
+        $this->assertSame($master->getWrappedConnection()->getWrappedConnection(), $database->getPdo());
+        $this->assertSame($master->getWrappedConnection()->getWrappedConnection(), $database->getMasterPdo());
+        $this->assertSame($slave->getWrappedConnection()->getWrappedConnection(), $database->getSlavePdo());
+        $this->assertSame($master->getWrappedConnection()->getWrappedConnection(), $database->setMasterMode(true)->getSlavePdo());
     }
 
     function test_setPdoAttribute()
@@ -497,8 +494,8 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         /** @var \PDO $mPdo */
         /** @var \PDO $sPdo */
-        $mPdo = $master->getWrappedConnection();
-        $sPdo = $slave->getWrappedConnection();
+        $mPdo = $master->getWrappedConnection()->getWrappedConnection();
+        $sPdo = $slave->getWrappedConnection()->getWrappedConnection();
 
         /// マスターだけモード
 
@@ -656,8 +653,8 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
         $slave = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
 
-        $master->exec('CREATE TABLE test(id integer)');
-        $slave->exec('CREATE TABLE test(id integer)');
+        $master->executeStatement('CREATE TABLE test(id integer)');
+        $slave->executeStatement('CREATE TABLE test(id integer)');
 
         $database = new Database([$master, $slave]);
         $database->selectArray('test', ['id' => 1]); // スキーマ漁りの暖機運転
@@ -1056,8 +1053,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     {
         // select
         $stmt = $database->prepareSelect('test', ['id' => $database->raw(':id')]);
-        $this->assertEquals($stmt->executeSelect(['id' => 1])->fetchAll(), $database->fetchArray($stmt, ['id' => 1]));
-        $this->assertEquals($stmt->executeSelect(['id' => 2])->fetchAll(), $database->fetchArray($stmt, ['id' => 2]));
+        $this->assertEquals($stmt->executeSelect(['id' => 1])->fetchAllAssociative(), $database->fetchArray($stmt, ['id' => 1]));
+        $this->assertEquals($stmt->executeSelect(['id' => 2])->fetchAllAssociative(), $database->fetchArray($stmt, ['id' => 2]));
 
         // select in subquery
         $stmt = $database->prepareSelect([
@@ -1070,18 +1067,18 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             $database->subexists('foreign_c1'),
             $database->notSubexists('foreign_c2'),
         ]);
-        $this->assertEquals($stmt->executeSelect(['id' => 1])->fetchAll(), $database->fetchArray($stmt, ['id' => 1]));
-        $this->assertEquals($stmt->executeSelect(['id' => 2])->fetchAll(), $database->fetchArray($stmt, ['id' => 2]));
+        $this->assertEquals($stmt->executeSelect(['id' => 1])->fetchAllAssociative(), $database->fetchArray($stmt, ['id' => 1]));
+        $this->assertEquals($stmt->executeSelect(['id' => 2])->fetchAllAssociative(), $database->fetchArray($stmt, ['id' => 2]));
 
         // insert
         $stmt = $database->prepareInsert('test', ['id' => $database->raw(':id'), ':name']);
         if (!$database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            $database->getConnection()->exec($database->getCompatiblePlatform()->getIdentityInsertSQL('test', true));
+            $database->getConnection()->executeStatement($database->getCompatiblePlatform()->getIdentityInsertSQL('test', true));
         }
         $stmt->executeAffect(['id' => 101, 'name' => 'XXX']);
         $stmt->executeAffect(['id' => 102, 'name' => 'YYY']);
         if (!$database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            $database->getConnection()->exec($database->getCompatiblePlatform()->getIdentityInsertSQL('test', false));
+            $database->getConnection()->executeStatement($database->getCompatiblePlatform()->getIdentityInsertSQL('test', false));
         }
         $this->assertEquals(['XXX', 'YYY'], $database->selectLists('test.name', ['id' => [101, 102]]));
 
@@ -1961,7 +1958,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals([1, 2, 3, 4], $params);
 
         // mysql は行値式を解すので実際に投げて確認する
-        if ($database->getPlatform() instanceof MySqlPlatform) {
+        if ($database->getPlatform() instanceof MySQLPlatform) {
             $this->assertEquals([
                 [
                     'mainid' => '1',
@@ -3178,7 +3175,7 @@ IGNORE 0 LINES
      */
     function test_loadCsv_native($database)
     {
-        if (!$database->getPlatform() instanceof MySqlPlatform) {
+        if (!$database->getPlatform() instanceof MySQLPlatform) {
             return;
         }
 
@@ -3430,7 +3427,7 @@ INSERT INTO test (name) VALUES
         $affected = $database->updateArray('test', $data, ['id <> ?' => 5]);
 
         // 6件与えているが、変更されるのは4件のはず(mysql の場合。他DBMSは5件)
-        $expected = $database->getPlatform() instanceof MySqlPlatform ? 4 : 5;
+        $expected = $database->getPlatform() instanceof MySQLPlatform ? 4 : 5;
         $this->assertEquals($expected, $affected);
 
         // 実際に取得して変わっている/いないを確認
@@ -3464,7 +3461,7 @@ INSERT INTO test (name) VALUES
         $affected = $database->updateArray('multiprimary', $data, ['NOT (mainid = ? AND subid = ?)' => [1, 5]]);
 
         // 6件与えているが、変更されるのは4件のはず(mysql の場合。他DBMSは5件)
-        $expected = $database->getPlatform() instanceof MySqlPlatform ? 4 : 5;
+        $expected = $database->getPlatform() instanceof MySQLPlatform ? 4 : 5;
         $this->assertEquals($expected, $affected);
 
         // 実際に取得して変わっている/いないを確認
@@ -3595,7 +3592,7 @@ INSERT INTO test (name) VALUES
 
         // mysql は 4件変更・2件追加で計10affected, sqlite は単純に 6affected
         $expected = null;
-        if ($database->getPlatform() instanceof MySqlPlatform) {
+        if ($database->getPlatform() instanceof MySQLPlatform) {
             $expected = 10;
         }
         if ($database->getPlatform() instanceof SqlitePlatform) {
@@ -3652,7 +3649,7 @@ INSERT INTO test (name) VALUES
             ], [], 1);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 3affected
             $expected = null;
-            if ($database->getPlatform() instanceof MySqlPlatform) {
+            if ($database->getPlatform() instanceof MySQLPlatform) {
                 $expected = 5;
             }
             if ($database->getPlatform() instanceof SqlitePlatform) {
@@ -3673,7 +3670,7 @@ INSERT INTO test (name) VALUES
             ], ['name' => 'U'], 2);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 3affected
             $expected = null;
-            if ($database->getPlatform() instanceof MySqlPlatform) {
+            if ($database->getPlatform() instanceof MySQLPlatform) {
                 $expected = 5;
             }
             if ($database->getPlatform() instanceof SqlitePlatform) {
@@ -3695,7 +3692,7 @@ INSERT INTO test (name) VALUES
             ], [], 3);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 4affected
             $expected = null;
-            if ($database->getPlatform() instanceof MySqlPlatform) {
+            if ($database->getPlatform() instanceof MySQLPlatform) {
                 $expected = 5;
             }
             if ($database->getPlatform() instanceof SqlitePlatform) {
@@ -3853,7 +3850,7 @@ INSERT INTO test (id, name) VALUES
             $sql = $database->context(['insertSet' => true])->dryrun()->insert('test', ['name' => 'zz']);
             $this->assertEquals("INSERT INTO test SET name = 'zz'", $sql);
 
-            if ($database->getPlatform() instanceof MySqlPlatform) {
+            if ($database->getPlatform() instanceof MySQLPlatform) {
                 $database->executeAffect($sql);
                 $this->assertEquals('zz', $database->selectValue('test.name', [], ['id' => 'desc'], 1));
             }
@@ -4051,7 +4048,7 @@ INSERT INTO test (id, name) VALUES
         $this->assertEquals(['name' => 'EEE', 'data' => 'RRR'], $database->selectTuple('test.!id', ['id' => 1]));
 
         // 普通はこういうことはせず、 JOIN 時のみ有用なので mysql だけでテストする
-        if ($database->getPlatform() instanceof MySqlPlatform) {
+        if ($database->getPlatform() instanceof MySQLPlatform) {
             $database->insert('foreign_p', ['id' => 1, 'name' => 'pname']);
             $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'c1name1']);
             $database->insert('foreign_c1', ['id' => 1, 'seq' => 2, 'name' => 'c1name2']);
@@ -4777,7 +4774,7 @@ INSERT INTO test (id, name) VALUES
             $this->assertEquals(['id' => 11], $primary);
 
             // null も数値で返るはず(mysqlのみ)
-            if ($database->getPlatform() instanceof MySqlPlatform) {
+            if ($database->getPlatform() instanceof MySQLPlatform) {
                 $primary = $database->modifyOrThrow('test', ['id' => null, 'name' => 'modify2']);
                 $this->assertEquals(['id' => 12], $primary);
             }
@@ -4820,7 +4817,7 @@ INSERT INTO test (id, name) VALUES
         ]);
         $this->assertEquals(['id' => 10], $result);
 
-        if ($database->getPlatform() instanceof MySqlPlatform) {
+        if ($database->getPlatform() instanceof MySQLPlatform) {
             $sql = $database->dryrun()->modifyConditionally('test', ['id' => -1], [
                 'id'   => 10,
                 'name' => 'zzz',
@@ -4856,7 +4853,7 @@ INSERT INTO test (id, name) VALUES
         $database->setConvertEmptyToNull(false);
 
         // DBMS によって挙動が違うし、そもそもエラーになるものもあるので mysql のみ
-        if ($database->getConnection()->getDatabasePlatform() instanceof MySqlPlatform) {
+        if ($database->getConnection()->getDatabasePlatform() instanceof MySQLPlatform) {
             $mode = $database->fetchValue('SELECT @@SESSION.sql_mode');
             $database->executeAffect("SET @@SESSION.sql_mode := ''");
             $pk = $database->insertOrThrow('nullable', ['name' => '', 'cint' => '', 'cfloat' => '', 'cdecimal' => '']);
@@ -5069,7 +5066,7 @@ INSERT INTO test (id, name) VALUES
         $duplicatest = $database->getSchema()->getTable('test');
         $duplicatest->addColumn('name2', 'string', ['length' => 32, 'default' => '']);
         self::forcedWrite($duplicatest, '_name', 'duplicatest');
-        $database->getConnection()->getSchemaManager()->dropAndCreateTable($duplicatest);
+        $database->getConnection()->createSchemaManager()->dropAndCreateTable($duplicatest);
         $database->getSchema()->refresh();
 
         // 全コピーしたら件数・データ共に等しいはず

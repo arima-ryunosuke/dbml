@@ -182,8 +182,8 @@ use function ryunosuke\dbml\throws;
  *
  *     @param string $string  null, "min", "max", ""first, "last" のいずれか
  * }
- * @method bool                   getPropagateLockMode()
- * @method $this                  setPropagateLockMode($bool)
+ * @method int                    getPropagateLockMode()
+ * @method $this                  setPropagateLockMode($int)
  * @method bool                   getInjectChildColumn()
  * @method $this                  setInjectChildColumn($bool)
  *
@@ -319,7 +319,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     private $wrappers = [];
 
     /** @var int ロックモード定数（LockMode::XXX） */
-    private $lockMode;
+    private $lockMode = LockMode::NONE;
 
     /** @var string ロックオプション */
     private $lockOption;
@@ -3340,7 +3340,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 }
 
                 // 親のロックモードを受け継ぐ
-                if ($this->lockMode !== null && $subselect->lockMode === null && $subselect->getPropagateLockMode()) {
+                if ($this->lockMode !== LockMode::NONE && $subselect->lockMode === LockMode::NONE && $subselect->getPropagateLockMode()) {
                     $subselect->lockMode = $this->lockMode;
                     $subselect->lockOption = $this->lockOption;
                 }
@@ -3619,7 +3619,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function unlock()
     {
-        $this->lockMode = null;
+        $this->lockMode = LockMode::NONE;
         $this->lockOption = null;
         return $this->_dirty();
     }
@@ -3844,7 +3844,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $this->callbacks = [];
         $this->joinOrders = [];
         $this->wrappers = [];
-        $this->lockMode = null;
+        $this->lockMode = LockMode::NONE;
         $this->lockOption = null;
         $this->rowcount = false;
         $this->applyments = [

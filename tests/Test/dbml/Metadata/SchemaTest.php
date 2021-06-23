@@ -2,7 +2,6 @@
 
 namespace ryunosuke\Test\dbml\Metadata;
 
-use Doctrine\Common\Cache\VoidCache;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
@@ -10,15 +9,16 @@ use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
-use Roave\DoctrineSimpleCache\SimpleCacheAdapter;
 use ryunosuke\dbml\Metadata\Schema;
 use ryunosuke\Test\Database;
+use Symfony\Component\Cache\Adapter\NullAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 
 class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
     public static function provideSchema()
     {
-        $schmer = self::getDummyDatabase()->getConnection()->getSchemaManager();
+        $schmer = self::getDummyDatabase()->getConnection()->createSchemaManager();
         $schmer->dropAndCreateTable(new Table(
             'metasample',
             [
@@ -533,7 +533,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test_relation()
     {
-        $schmer = self::getDummyDatabase()->getConnection()->getSchemaManager();
+        $schmer = self::getDummyDatabase()->getConnection()->createSchemaManager();
         $schmer->dropAndCreateTable(new Table(
             't_root',
             [
@@ -550,6 +550,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
                 new Column('root1_seq', Type::getType('integer')),
             ],
             [new Index('PRIMARY', ['inner1_id'], true, true)],
+            [],
             [new ForeignKeyConstraint(['root1_id', 'root1_seq'], 't_root', ['root_id', 'seq'], 'fk_inner1')]
         ));
         $schmer->dropAndCreateTable(new Table(
@@ -560,6 +561,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
                 new Column('root2_seq', Type::getType('integer')),
             ],
             [new Index('PRIMARY', ['inner2_id'], true, true)],
+            [],
             [new ForeignKeyConstraint(['root2_id', 'root2_seq'], 't_root', ['root_id', 'seq'], 'fk_inner2')]
         ));
         $schmer->dropAndCreateTable(new Table(
@@ -572,13 +574,14 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
                 new Column('leaf_root_seq', Type::getType('integer')),
             ],
             [new Index('PRIMARY', ['leaf_id'], true, true)],
+            [],
             [
                 new ForeignKeyConstraint(['leaf_inner1_id', 'leaf_root_id', 'leaf_root_seq'], 't_inner1', ['inner1_id', 'root1_id', 'root1_seq'], 'fk_leaf1'),
                 new ForeignKeyConstraint(['leaf_inner2_id', 'leaf_root_id', 'leaf_root_seq'], 't_inner2', ['inner2_id', 'root2_id', 'root2_seq'], 'fk_leaf2'),
             ]
         ));
 
-        $schema = new Schema(self::getDummyDatabase()->getConnection()->getSchemaManager(), new SimpleCacheAdapter(new VoidCache()));
+        $schema = new Schema(self::getDummyDatabase()->getConnection()->createSchemaManager(), new Psr16Cache(new NullAdapter()));
 
         // 2つの経路がある
         $this->assertEquals([

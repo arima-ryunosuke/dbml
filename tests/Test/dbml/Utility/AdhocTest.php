@@ -2,9 +2,9 @@
 
 namespace ryunosuke\Test\dbml\Utility;
 
-use Doctrine\Common\Cache\ArrayCache;
-use Roave\DoctrineSimpleCache\SimpleCacheAdapter;
 use ryunosuke\dbml\Utility\Adhoc;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 
 class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -128,7 +128,7 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test_cacheGetOrSet()
     {
-        $cache = new SimpleCacheAdapter(new ArrayCache());
+        $cache = new Psr16Cache(new ArrayAdapter());
 
         $called = 0;
         $provider = function () use (&$called) {

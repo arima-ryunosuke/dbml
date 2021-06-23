@@ -3,8 +3,7 @@
 namespace ryunosuke\dbml\Generator;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver\PDOStatement;
-use Doctrine\DBAL\Driver\ResultStatement;
+use Doctrine\DBAL\Result;
 use ryunosuke\dbml\Database;
 
 /**
@@ -21,7 +20,7 @@ class Yielder implements \Iterator
     /** @var array 現在行 */
     private $current;
 
-    /** @var ResultStatement|\Closure ステートメント */
+    /** @var Result|\Closure ステートメント */
     private $statement;
 
     /** @var Connection */
@@ -42,7 +41,7 @@ class Yielder implements \Iterator
     /**
      * コンストラクタ
      *
-     * @param ResultStatement|\Closure $statement 取得に使用される \Statement
+     * @param Result|\Closure $statement 取得に使用される \Statement
      * @param Connection $connection 取得に使用するコネクション
      * @param ?string $method フェッチメソッド名
      * @param ?callable $callback 1行ごとに呼ばれるコールバック処理
@@ -69,12 +68,12 @@ class Yielder implements \Iterator
     {
         if ($this->statement instanceof \Closure) {
             $this->statement = ($this->statement)($this->connection);
-            if (!$this->statement instanceof \PDOStatement) {
+            if (!$this->statement instanceof Result) {
                 throw new \RuntimeException('stetement provider returns invalid type.');
             }
         }
 
-        $row = $this->statement->fetch();
+        $row = $this->statement->fetchAssociative();
         if ($row === false) {
             return false;
         }
@@ -88,8 +87,8 @@ class Yielder implements \Iterator
     private function _cleanup()
     {
         $this->setBufferMode($this->bufferedMode);
-        if ($this->statement instanceof PDOStatement) {
-            $this->statement->closeCursor();
+        if ($this->statement instanceof Result) {
+            $this->statement->free();
         }
         $this->statement = null;
         $this->indexes = [];

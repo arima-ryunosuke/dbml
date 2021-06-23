@@ -37,7 +37,7 @@ namespace {
 
 namespace ryunosuke\Test {
 
-    use Doctrine\DBAL\Platforms\SQLServerPlatform;
+    use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
 
     /**
      * テスト用 Database
@@ -90,13 +90,13 @@ namespace ryunosuke\Test {
                 $specified_id = count($pcols) === 1 && reset($pcols)->getAutoincrement() && isset($data[key($pcols)]);
 
                 if ($specified_id) {
-                    $this->getConnection()->exec($this->getCompatiblePlatform()->getIdentityInsertSQL($tableName2, true));
+                    $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($tableName2, true));
                 }
 
                 $result = parent::insert(...func_get_args());
 
                 if ($specified_id) {
-                    $this->getConnection()->exec($this->getCompatiblePlatform()->getIdentityInsertSQL($tableName2, false));
+                    $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($tableName2, false));
                 }
 
                 return $result;
@@ -123,13 +123,13 @@ namespace ryunosuke\Test {
                 }
 
                 if ($specified_id) {
-                    $this->getConnection()->exec($this->getCompatiblePlatform()->getIdentityInsertSQL($targetTable2, true));
+                    $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($targetTable2, true));
                 }
 
                 $result = parent::duplicate(...func_get_args());
 
                 if ($specified_id) {
-                    $this->getConnection()->exec($this->getCompatiblePlatform()->getIdentityInsertSQL($targetTable2, false));
+                    $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($targetTable2, false));
                 }
 
                 return $result;
@@ -283,20 +283,6 @@ namespace ryunosuke\Test\Platforms {
         public function getWriteLockSQL()
         {
             return '/* lock for write */';
-        }
-    }
-}
-
-namespace ryunosuke\Test\Driver\PDOSqlite {
-
-    /**
-     * 上記の Platform を使用させるための Driver
-     */
-    class Driver extends \Doctrine\DBAL\Driver\PDOSqlite\Driver
-    {
-        public function getDatabasePlatform()
-        {
-            return new \ryunosuke\Test\Platforms\SqlitePlatform();
         }
     }
 }

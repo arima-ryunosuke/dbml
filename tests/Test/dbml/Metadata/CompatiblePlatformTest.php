@@ -2,16 +2,14 @@
 
 namespace ryunosuke\Test\dbml\Metadata;
 
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\PDOException;
-use Doctrine\DBAL\Exception\DriverException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Platforms\MySqlPlatform;
+use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\OraclePlatform;
-use Doctrine\DBAL\Platforms\PostgreSqlPlatform;
+use Doctrine\DBAL\Platforms\PostgreSQL94Platform as PostgreSqlPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
-use Doctrine\DBAL\Platforms\SQLServerPlatform;
+use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
 
@@ -25,7 +23,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         $platforms = [
             new \ryunosuke\Test\Platforms\SqlitePlatform(),
             new SqlitePlatform(),
-            new MySqlPlatform(),
+            new MySQLPlatform(),
             new PostgreSqlPlatform(),
             new SQLServerPlatform(),
             new OraclePlatform(),
@@ -84,7 +82,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsInsertSet($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform || $platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform;
+        $expected = $platform instanceof MySQLPlatform || $platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform;
         $this->assertEquals($expected, $cplatform->supportsInsertSet());
     }
 
@@ -95,7 +93,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsReplace($cplatform, $platform)
     {
-        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySqlPlatform;
+        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform;
         $this->assertEquals($expected, $cplatform->supportsReplace());
     }
 
@@ -106,7 +104,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsMerge($cplatform, $platform)
     {
-        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySqlPlatform || $platform instanceof PostgreSqlPlatform;
+        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform || $platform instanceof PostgreSqlPlatform;
         $this->assertEquals($expected, $cplatform->supportsMerge());
     }
 
@@ -117,7 +115,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsBulkMerge($cplatform, $platform)
     {
-        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySqlPlatform || $platform instanceof PostgreSqlPlatform;
+        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform || $platform instanceof PostgreSqlPlatform;
         $this->assertEquals($expected, $cplatform->supportsBulkMerge());
     }
 
@@ -128,7 +126,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsIgnore($cplatform, $platform)
     {
-        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySqlPlatform;
+        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform;
         $this->assertEquals($expected, $cplatform->supportsIgnore());
     }
 
@@ -139,7 +137,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsZeroAffectedUpdate($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform;
+        $expected = $platform instanceof MySQLPlatform;
         $this->assertEquals($expected, $cplatform->supportsZeroAffectedUpdate());
     }
 
@@ -150,7 +148,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsUpdateJoin($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform || $platform instanceof SQLServerPlatform;
+        $expected = $platform instanceof MySQLPlatform || $platform instanceof SQLServerPlatform;
         $this->assertEquals($expected, $cplatform->supportsUpdateJoin());
     }
 
@@ -161,7 +159,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsDeleteJoin($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform || $platform instanceof SQLServerPlatform;
+        $expected = $platform instanceof MySQLPlatform || $platform instanceof SQLServerPlatform;
         $this->assertEquals($expected, $cplatform->supportsDeleteJoin());
     }
 
@@ -172,7 +170,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsUpdateLimit($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform || $platform instanceof SQLServerPlatform;
+        $expected = $platform instanceof MySQLPlatform || $platform instanceof SQLServerPlatform;
         $this->assertEquals($expected, $cplatform->supportsUpdateLimit());
     }
 
@@ -183,7 +181,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsDeleteLimit($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform || $platform instanceof SQLServerPlatform;
+        $expected = $platform instanceof MySQLPlatform || $platform instanceof SQLServerPlatform;
         $this->assertEquals($expected, $cplatform->supportsDeleteLimit());
     }
 
@@ -216,7 +214,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsTableNameAttribute($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform;
+        $expected = $platform instanceof MySQLPlatform;
         $this->assertEquals($expected, $cplatform->supportsTableNameAttribute());
     }
 
@@ -281,7 +279,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getDualTable($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform ? 'dual' : '';
+        $expected = $platform instanceof MySQLPlatform ? 'dual' : '';
         $this->assertEquals($expected, $cplatform->getDualTable());
     }
 
@@ -292,7 +290,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getFoundRowsOption($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform ? 'SQL_CALC_FOUND_ROWS' : '';
+        $expected = $platform instanceof MySQLPlatform ? 'SQL_CALC_FOUND_ROWS' : '';
         $this->assertEquals($expected, $cplatform->getFoundRowsOption());
     }
 
@@ -303,7 +301,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getFoundRowsQuery($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform ? 'SELECT FOUND_ROWS()' : '';
+        $expected = $platform instanceof MySQLPlatform ? 'SELECT FOUND_ROWS()' : '';
         $this->assertEquals($expected, $cplatform->getFoundRowsQuery());
     }
 
@@ -318,7 +316,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($platform instanceof SqlitePlatform) {
             $expected = 'ON CONFLICT(col) DO UPDATE SET';
         }
-        if ($platform instanceof MySqlPlatform) {
+        if ($platform instanceof MySQLPlatform) {
             $expected = 'ON DUPLICATE KEY UPDATE';
         }
         if ($platform instanceof PostgreSqlPlatform) {
@@ -330,7 +328,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($platform instanceof SqlitePlatform) {
             $expected = 'ON CONFLICT(col1,col2) DO UPDATE SET';
         }
-        if ($platform instanceof MySqlPlatform) {
+        if ($platform instanceof MySQLPlatform) {
             $expected = 'ON DUPLICATE KEY UPDATE';
         }
         if ($platform instanceof PostgreSqlPlatform) {
@@ -350,7 +348,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($platform instanceof SqlitePlatform) {
             $expected = 'excluded.name';
         }
-        if ($platform instanceof MySqlPlatform) {
+        if ($platform instanceof MySQLPlatform) {
             $expected = 'VALUES(name)';
         }
         if ($platform instanceof PostgreSqlPlatform) {
@@ -407,7 +405,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_getIndexHintSQL($cplatform, $platform)
     {
         $expected = '';
-        if ($platform instanceof MySqlPlatform) {
+        if ($platform instanceof MySQLPlatform) {
             $expected = 'IGNORE INDEX (idx_1, idx_2)';
         }
         if ($platform instanceof SQLServerPlatform) {
@@ -439,7 +437,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getSpaceshipSyntax($cplatform, $platform)
     {
-        $expected = $platform instanceof MySqlPlatform ? '<=>' : 'IS NULL OR';
+        $expected = $platform instanceof MySQLPlatform ? '<=>' : 'IS NULL OR';
         $this->assertStringContainsString($expected, $cplatform->getSpaceshipSyntax('hoge'));
     }
 
@@ -544,7 +542,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $expected = "GROUP_CONCAT(id, '|')";
             $this->assertEquals($expected, $cplatform->getGroupConcatSyntax('id', '|'));
         }
-        if ($platform instanceof MySqlPlatform) {
+        if ($platform instanceof MySQLPlatform) {
             $expected = "GROUP_CONCAT(id)";
             $actual = $cplatform->getGroupConcatSyntax('id');
             $this->assertEquals($expected, $actual);
@@ -694,7 +692,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($platform instanceof SqlitePlatform) {
             $this->assertEquals('OR IGNORE', $cplatform->getIgnoreSyntax());
         }
-        elseif ($platform instanceof MySqlPlatform) {
+        elseif ($platform instanceof MySQLPlatform) {
             $this->assertEquals('IGNORE', $cplatform->getIgnoreSyntax());
         }
         else {
@@ -734,7 +732,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($platform instanceof SqlitePlatform) {
             $expected = ['id' => new Expression('excluded.id')];
         }
-        if ($platform instanceof MySqlPlatform) {
+        if ($platform instanceof MySQLPlatform) {
             $expected = ['id' => new Expression('VALUES(id)')];
         }
         if ($platform instanceof PostgreSqlPlatform) {
@@ -762,38 +760,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
-    function test_isRetryableException($cplatform, $platform)
-    {
-        $pdoexception = function ($state, $code) {
-            $pe = new \PDOException();
-            $pe->errorInfo = [$state, $code];
-            return $pe;
-        };
-        if ($platform instanceof MySqlPlatform) {
-            $dataset = [
-                [true, new DriverException('', new PDOException($pdoexception('', 1205)))],
-                [true, new DriverException('', new PDOException($pdoexception('', 1213)))],
-                [true, new DriverException('', new PDOException($pdoexception('', 2006)))],
-                [false, new DriverException('', new PDOException($pdoexception('', 9999)))],
-                [false, new \Exception()],
-            ];
-        }
-        else {
-            $dataset = [
-                [true, new PDOException($pdoexception('', 0))],
-                [false, new \Exception()],
-            ];
-        }
-        foreach ($dataset as $n => $data) {
-            $this->assertEquals($data[0], $cplatform->isRetryableException($data[1]), "$n is failed.");
-        }
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
     function test_convertUpdateQuery($cplatform, $platform)
     {
         $builder = self::getDummyDatabase()->select('test')->set(['key' => 1]);
@@ -808,7 +774,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         }
 
         $builder = self::getDummyDatabase()->select('foreign_c1 C, foreign_p')->set(['key' => 1]);
-        if ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $platform instanceof MySqlPlatform) {
+        if ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $platform instanceof MySQLPlatform) {
             $this->assertEquals('UPDATE foreign_c1 C, foreign_p SET key = ?', $cplatform->convertUpdateQuery($builder));
         }
         elseif ($platform instanceof SQLServerPlatform) {
@@ -830,7 +796,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('DELETE FROM test', $cplatform->convertDeleteQuery($builder, []));
 
         $builder = self::getDummyDatabase()->select('test T');
-        if ($platform instanceof MySqlPlatform || $platform instanceof SQLServerPlatform) {
+        if ($platform instanceof MySQLPlatform || $platform instanceof SQLServerPlatform) {
             $this->assertEquals('DELETE T FROM test T', $cplatform->convertDeleteQuery($builder, []));
         }
         else {
@@ -838,7 +804,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         }
 
         $builder = self::getDummyDatabase()->select('foreign_c1 C, foreign_p');
-        if ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $platform instanceof MySqlPlatform) {
+        if ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $platform instanceof MySQLPlatform) {
             $this->assertEquals('DELETE C FROM foreign_c1 C, foreign_p', $cplatform->convertDeleteQuery($builder, []));
         }
         elseif ($platform instanceof SQLServerPlatform) {
@@ -857,7 +823,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_convertDeleteQuery_multi($cplatform, $platform)
     {
         $builder = self::getDummyDatabase()->select('foreign_c1 C, foreign_p P');
-        if ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $platform instanceof MySqlPlatform) {
+        if ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $platform instanceof MySQLPlatform) {
             $this->assertEquals('DELETE C, P FROM foreign_c1 C, foreign_p P', $cplatform->convertDeleteQuery($builder, ['C', 'P']));
         }
         else {

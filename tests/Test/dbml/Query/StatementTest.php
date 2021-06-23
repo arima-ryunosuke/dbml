@@ -56,10 +56,10 @@ class StatementTest extends \ryunosuke\Test\AbstractUnitTestCase
         $slave = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
         $database = new Database([$master, $slave]);
 
-        $master->exec('CREATE TABLE test_master(id integer)');
-        $master->exec('insert into test_master values(1)');
-        $slave->exec('CREATE TABLE test_slave(id integer)');
-        $slave->exec('insert into test_slave values(1)');
+        $master->executeStatement('CREATE TABLE test_master(id integer, name string)');
+        $master->executeStatement('insert into test_master values(1, "hoge")');
+        $slave->executeStatement('CREATE TABLE test_slave(id integer, name string)');
+        $slave->executeStatement('insert into test_slave values(1, "hoge")');
 
         $expected = [
             [
@@ -70,16 +70,16 @@ class StatementTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // executeSelect はスレーブに接続されるのでエラーにならないはず
         $stmt = new Statement('select ? as hoge, :fuga as fuga from test_slave', ['hoge'], $database);
-        $this->assertEquals($expected, $stmt->executeSelect([':fuga' => 'fuga'])->fetchAll());
+        $this->assertEquals($expected, $stmt->executeSelect([':fuga' => 'fuga'])->fetchAllAssociative());
 
         // executeAffect はマスターに接続されるのでエラーにならないはず
-        $stmt = new Statement('select ? as hoge, :fuga as fuga from test_master', ['hoge'], $database);
-        $this->assertEquals($expected, $stmt->executeAffect([':fuga' => 'fuga'])->fetchAll());
+        $stmt = new Statement('update test_master set name = :fuga where id = ?', [1], $database);
+        $this->assertEquals(1, $stmt->executeAffect([':fuga' => 'fuga']));
 
         // connection を指定すればそれが使われるはず
         $stmt = new Statement('select ? as hoge, :fuga as fuga from test_master', ['hoge'], $database);
-        $this->assertEquals($expected, $stmt->executeSelect([':fuga' => 'fuga'], $master)->fetchAll());
+        $this->assertEquals($expected, $stmt->executeSelect([':fuga' => 'fuga'], $master)->fetchAllAssociative());
         $stmt = new Statement('select ? as hoge, :fuga as fuga from test_slave', ['hoge'], $database);
-        $this->assertEquals($expected, $stmt->executeSelect([':fuga' => 'fuga'], $slave)->fetchAll());
+        $this->assertEquals($expected, $stmt->executeSelect([':fuga' => 'fuga'], $slave)->fetchAllAssociative());
     }
 }

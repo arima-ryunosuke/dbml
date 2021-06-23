@@ -2,8 +2,8 @@
 
 namespace ryunosuke\Test;
 
-use Doctrine\DBAL\Platforms\MySqlPlatform;
-use Doctrine\DBAL\Platforms\PostgreSqlPlatform;
+use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\DBAL\Platforms\PostgreSQL94Platform as PostgreSqlPlatform;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\Comment;
 
@@ -33,7 +33,7 @@ class IntegrationTest extends AbstractUnitTestCase
     function test_column_having($database)
     {
         // group by なしの having は mysql でしか動かない
-        if ($database->getPlatform() instanceof MySqlPlatform) {
+        if ($database->getPlatform() instanceof MySQLPlatform) {
             $select = $database->select([
                 't_article' => ['*'],
                 ''          => [

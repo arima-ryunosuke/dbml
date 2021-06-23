@@ -177,7 +177,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $dsn = ['url' => 'sqlite:///' . sys_get_temp_dir() . '/heavy'];
         $database = new Database(DriverManager::getConnection($dsn));
-        $database->getConnection()->getSchemaManager()->dropAndCreateTable(
+        $database->getConnection()->createSchemaManager()->dropAndCreateTable(
             new Table('t_heavy',
                 [
                     new Column('id', Type::getType('integer'), ['autoincrement' => true]),

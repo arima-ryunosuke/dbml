@@ -2,7 +2,6 @@
 
 namespace ryunosuke\dbml;
 
-use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\CacheProvider;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -15,7 +14,6 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
-use Roave\DoctrineSimpleCache\SimpleCacheAdapter;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Exception\NonAffectedException;
@@ -39,6 +37,9 @@ use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\dbml\Utility\Adhoc;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Adapter\DoctrineAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 
 // @formatter:off
 /**
@@ -661,7 +662,7 @@ class Database
     {
         $default_options = [
             // キャッシュオブジェクト
-            'cacheProvider'        => new SimpleCacheAdapter(new ArrayCache()),
+            'cacheProvider'        => new Psr16Cache(new ArrayAdapter()),
             // 初期化後の SQL コマンド（mysql@PDO でいう MYSQL_ATTR_INIT_COMMAND）
             'initCommand'          => null,
             // テーブル名 => Entity クラス名のコンバータ
@@ -870,7 +871,7 @@ class Database
             }
         }
 
-        if (count(array_unique(array_maps($connections, func_method('getDriver'), func_method('getName')))) !== 1) {
+        if (count(array_unique(array_map(function ($connection) { return get_class($connection->getDriver()); }, $connections))) !== 1) {
             throw new \DomainException('master and slave connection are must be same platform.');
         }
         $this->connections = array_combine(['master', 'slave'], $connections);
@@ -882,7 +883,7 @@ class Database
 
         // for compatible
         if ($this->getUnsafeOption('cacheProvider') instanceof CacheProvider) {
-            $this->setOption('cacheProvider', new SimpleCacheAdapter($this->getUnsafeOption('cacheProvider')));
+            $this->setOption('cacheProvider', new Psr16Cache(new DoctrineAdapter($this->getUnsafeOption('cacheProvider')))); // @codeCoverageIgnore
         }
 
         foreach ($this->getConnections() as $con) {
@@ -1139,7 +1140,7 @@ class Database
         $revert = $this->_toTablePrefix($sql);
         try {
             $stmt = $this->_sqlToStmt($sql, $params, $this->getSlaveConnection());
-            return $this->perform($stmt, $method, $converter);
+            return $this->perform($stmt->fetchAllAssociative(), $method, $converter);
         }
         finally {
             $revert();
@@ -1163,7 +1164,27 @@ class Database
         else {
             $stmt = $this->executeSelect($sql, $params);
         }
-        $stmt->setFetchMode($this->getCheckSameColumn() ? \PDO::FETCH_NAMED : \PDO::FETCH_ASSOC);
+        if ($this->getUnsafeOption('checkSameColumn')) {
+            // doctrine 3 系の PDO\Result で fetchmode を指定する術はない
+            $result = (function () { return $this->result; })->call($stmt);
+            if ($result instanceof \Doctrine\DBAL\Driver\PDO\Result) {
+                return new class($result) {
+                    private $result;
+
+                    public function __construct(\Doctrine\DBAL\Driver\PDO\Result $result) { $this->result = $result; }
+
+                    public function __call($name, $arguments) { return $this->result->$name(...$arguments); }
+
+                    public function fetchAllAssociative(): array
+                    {
+                        return (function () {
+                            /** @noinspection PhpUndefinedMethodInspection */
+                            return $this->fetchAll(\PDO::FETCH_ASSOC | \PDO::FETCH_NAMED);
+                        })->call($this->result);
+                    }
+                };
+            }
+        }
 
         return $stmt;
     }
@@ -1506,12 +1527,12 @@ class Database
             return [$tableName => $data];
         }
 
-        if (is_string($tableName) && str_contains($tableName, array_merge(Database::JOIN_MAPPER, [',', '.']))) {
+        if (is_string($tableName) && str_exists($tableName, array_merge(Database::JOIN_MAPPER, [',', '.']))) {
             $tableName = array_each(TableDescriptor::forge($this, $tableName, []), function (&$carry, TableDescriptor $td) {
                 $carry[$td->descriptor] = $td->column;
             }, []);
         }
-        if (is_string($tableName) && str_contains($tableName, TableDescriptor::META_CHARACTORS)) {
+        if (is_string($tableName) && str_exists($tableName, TableDescriptor::META_CHARACTORS)) {
             $tableName = TableDescriptor::forge($this, $tableName, []);
         }
         if (is_array($tableName)) {
@@ -1608,7 +1629,7 @@ class Database
         $schema = $this->getSchema();
 
         if (!strlen($objectname)) {
-            return $this->getSlaveConnection()->getSchemaManager()->createSchema();
+            return $this->getSlaveConnection()->createSchemaManager()->createSchema();
         }
 
         [$parentname, $childname] = explode('.', $objectname) + [1 => null];
@@ -2014,9 +2035,9 @@ class Database
      */
     public function getPdo()
     {
-        /** @var \PDO $pdo */
-        $pdo = $this->getConnection()->getWrappedConnection();
-        return $pdo;
+        /** @var \Doctrine\DBAL\Driver\PDO\Connection $conn */
+        $conn = $this->getConnection()->getWrappedConnection();
+        return $conn->getWrappedConnection();
     }
 
     /**
@@ -2026,9 +2047,9 @@ class Database
      */
     public function getMasterPdo()
     {
-        /** @var \PDO $pdo */
-        $pdo = $this->getMasterConnection()->getWrappedConnection();
-        return $pdo;
+        /** @var \Doctrine\DBAL\Driver\PDO\Connection $conn */
+        $conn = $this->getMasterConnection()->getWrappedConnection();
+        return $conn->getWrappedConnection();
     }
 
     /**
@@ -2038,9 +2059,9 @@ class Database
      */
     public function getSlavePdo()
     {
-        /** @var \PDO $pdo */
-        $pdo = $this->getSlaveConnection()->getWrappedConnection();
-        return $pdo;
+        /** @var \Doctrine\DBAL\Driver\PDO\Connection $conn */
+        $conn = $this->getSlaveConnection()->getWrappedConnection();
+        return $conn->getWrappedConnection();
     }
 
     /**
@@ -2070,8 +2091,8 @@ class Database
         }
         $target = (array) $target;
 
-        $masterPdo = $this->connections['master']->getWrappedConnection();
-        $slavePdo = $this->connections['slave']->getWrappedConnection();
+        $masterPdo = $this->getMasterPdo();
+        $slavePdo = $this->getSlavePdo();
 
         /** @var \PDO[] $pdos */
         $pdos = [];
@@ -2150,7 +2171,7 @@ class Database
      */
     public function getSchema()
     {
-        return $this->cache['schema'] ?? $this->cache['schema'] = new Schema($this->connections['slave']->getSchemaManager(), $this->getUnsafeOption('cacheProvider'));
+        return $this->cache['schema'] ?? $this->cache['schema'] = new Schema($this->connections['slave']->createSchemaManager(), $this->getUnsafeOption('cacheProvider'));
     }
 
     /**
@@ -4377,19 +4398,19 @@ class Database
         $selectCount = count($builder->getQueryPart('select'));
         $groupCount = count($builder->getQueryPart('groupBy'));
         if ($groupCount === 0 && $selectCount === 1) {
-            return var_apply($stmt->fetch(\PDO::FETCH_COLUMN), $cast); // value
+            return var_apply($stmt->fetchOne(), $cast); // value
         }
         elseif ($groupCount === 0 && $selectCount >= 2) {
-            return var_apply($stmt->fetch(\PDO::FETCH_ASSOC), $cast); // tuple
+            return var_apply($stmt->fetchAssociative(), $cast); // tuple
         }
         elseif ($groupCount === 1 && $selectCount === 2) {
-            return var_apply($stmt->fetchAll(\PDO::FETCH_COLUMN | \PDO::FETCH_UNIQUE), $cast); // pairs
+            return var_apply($stmt->fetchAllKeyValue(), $cast); // pairs
         }
         elseif ($groupCount === 1 && $selectCount >= 3) {
-            return var_apply($stmt->fetchAll(\PDO::FETCH_ASSOC | \PDO::FETCH_UNIQUE), $cast); // assoc
+            return var_apply($stmt->fetchAllAssociativeIndexed(), $cast); // assoc
         }
         else {
-            return var_apply($stmt->fetchAll(\PDO::FETCH_ASSOC), $cast); // array
+            return var_apply($stmt->fetchAllAssociative(), $cast); // array
         }
     }
 
@@ -4735,7 +4756,7 @@ class Database
         // コンテキストを戻すための try～catch
         try {
             $this->affectedRows = null;
-            return $this->affectedRows = $this->getMasterConnection()->executeUpdate($query, $params);
+            return $this->affectedRows = $this->getMasterConnection()->executeStatement($query, $params);
         }
         catch (\Exception $ex) {
             $this->unstackAll();

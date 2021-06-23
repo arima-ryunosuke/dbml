@@ -4,8 +4,8 @@ namespace ryunosuke\Test\dbml\Query;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\LockMode;
-use Doctrine\DBAL\Platforms\MySqlPlatform;
-use Doctrine\DBAL\Platforms\SQLServerPlatform;
+use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
@@ -209,7 +209,7 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals([0, 1], $builder->getParams());
 
         // mysql では実際に投げてみる
-        if ($builder->getDatabase()->getPlatform() instanceof MySqlPlatform) {
+        if ($builder->getDatabase()->getPlatform() instanceof MySQLPlatform) {
             $this->assertEquals([
                 [
                     'qid'   => 1,
@@ -582,6 +582,7 @@ GREATEST(1,2,3) FROM test1', $builder);
                     new Column('ancestor_name2', Type::getType('string'), ['length' => 32]),
                 ],
                 [new Index('PRIMARY', ['ancestor_id'], true, true)],
+                [],
                 [new ForeignKeyConstraint(['ancestor_id'], 't_ancestor', ['ancestor_id'], 'fkey_asterisk0')]
             ),
             new Table('t_parent',
@@ -591,6 +592,7 @@ GREATEST(1,2,3) FROM test1', $builder);
                     new Column('f_ancestor_id', Type::getType('integer')),
                 ],
                 [new Index('PRIMARY', ['parent_id'], true, true)],
+                [],
                 [new ForeignKeyConstraint(['f_ancestor_id'], 't_ancestor', ['ancestor_id'], 'fkey_asterisk1')]
             ),
             new Table('t_child',
@@ -600,6 +602,7 @@ GREATEST(1,2,3) FROM test1', $builder);
                     new Column('f_parent_id', Type::getType('integer')),
                 ],
                 [new Index('PRIMARY', ['child_id'], true, true)],
+                [],
                 [new ForeignKeyConstraint(['f_parent_id'], 't_parent', ['parent_id'], 'fkey_asterisk2')]
             ),
             new Table('t_grand',
@@ -610,6 +613,7 @@ GREATEST(1,2,3) FROM test1', $builder);
                     new Column('grand_name', Type::getType('string'), ['length' => 32]),
                 ],
                 [new Index('PRIMARY', ['f_child_id', 'grand_id1', 'grand_id2'], true, true)],
+                [],
                 [new ForeignKeyConstraint(['f_child_id'], 't_child', ['child_id'], 'fkey_asterisk3')]
             ),
             new Table('t_two',
@@ -619,6 +623,7 @@ GREATEST(1,2,3) FROM test1', $builder);
                     new Column('f_child_id2', Type::getType('integer')),
                 ],
                 [new Index('PRIMARY', ['id'], true, true)],
+                [],
                 [
                     new ForeignKeyConstraint(['f_child_id1'], 't_child', ['child_id'], 'fkey_asterisk_two1'),
                     new ForeignKeyConstraint(['f_child_id2'], 't_child', ['child_id'], 'fkey_asterisk_two2'),
@@ -2567,7 +2572,7 @@ SQL
 
         // 上記全てを複合しためちゃくちゃ複雑な count(クエリとしての意味はない。というか無茶苦茶なので mysql でしかテストできない)
         $db = $builder->getDatabase();
-        if ($db->getPlatform() instanceof MySqlPlatform) {
+        if ($db->getPlatform() instanceof MySQLPlatform) {
             $db->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
             $db->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
             $db->insert('foreign_p', ['id' => 3, 'name' => 'name3']);
@@ -3473,8 +3478,8 @@ SQL
     {
         $fk1 = new ForeignKeyConstraint(['gg_id'], 'gg1', ['gg_id'], 'fk_gg12');
         $fk2 = new ForeignKeyConstraint(['gg_id'], 'gg2', ['gg_id'], 'fk_gg21');
-        $builder->getDatabase()->getConnection()->getSchemaManager()->tryMethod('dropForeignKey', $fk1, 'gg2');
-        $builder->getDatabase()->getConnection()->getSchemaManager()->tryMethod('dropForeignKey', $fk2, 'gg1');
+        $builder->getDatabase()->getConnection()->createSchemaManager()->tryMethod('dropForeignKey', $fk1, 'gg2');
+        $builder->getDatabase()->getConnection()->createSchemaManager()->tryMethod('dropForeignKey', $fk2, 'gg1');
         self::createTables($builder->getDatabase()->getConnection(), [
             new Table('ppp',
                 [
@@ -3492,6 +3497,7 @@ SQL
                     new Column('seq', Type::getType('integer')),
                 ],
                 [new Index('PRIMARY', ['id', 'seq'], true, true)],
+                [],
                 [new ForeignKeyConstraint(['id', 'seq'], 'ppp', ['id', 'seq'], 'fkey1')]
             ),
             new Table('fff',
@@ -3500,6 +3506,7 @@ SQL
                     new Column('fff_seq', Type::getType('integer')),
                 ],
                 [new Index('PRIMARY', ['fff_id', 'fff_seq'], true, true)],
+                [],
                 [new ForeignKeyConstraint(['fff_id', 'fff_seq'], 'ppp', ['id', 'seq'], 'fkey2')]
             ),
             new Table('mmm',
@@ -3509,6 +3516,7 @@ SQL
                     new Column('seq', Type::getType('integer')),
                 ],
                 [new Index('PRIMARY', ['mmm_id1', 'mmm_id2'], true, true)],
+                [],
                 [
                     new ForeignKeyConstraint(['mmm_id1', 'seq'], 'ppp', ['id', 'seq'], 'fkey3'),
                     new ForeignKeyConstraint(['mmm_id2', 'seq'], 'ppp', ['id', 'seq'], 'fkey4'),
@@ -3527,8 +3535,8 @@ SQL
                 [new Index('PRIMARY', ['gg_id'], true, true)]
             ),
         ]);
-        $builder->getDatabase()->getConnection()->getSchemaManager()->createForeignKey($fk2, 'gg1');
-        $builder->getDatabase()->getConnection()->getSchemaManager()->createForeignKey($fk1, 'gg2');
+        $builder->getDatabase()->getConnection()->createSchemaManager()->createForeignKey($fk2, 'gg1');
+        $builder->getDatabase()->getConnection()->createSchemaManager()->createForeignKey($fk1, 'gg2');
 
         $builder->getDatabase()->getSchema()->refresh();
 
@@ -3589,7 +3597,7 @@ SQL
 
     function test_joinIndirect()
     {
-        $schmer = self::getDummyDatabase()->getConnection()->getSchemaManager();
+        $schmer = self::getDummyDatabase()->getConnection()->createSchemaManager();
         $schmer->dropAndCreateTable(new Table(
             't_root',
             [
@@ -3606,6 +3614,7 @@ SQL
                 new Column('root1_seq', Type::getType('integer')),
             ],
             [new Index('PRIMARY', ['inner1_id'], true, true)],
+            [],
             [new ForeignKeyConstraint(['root1_id', 'root1_seq'], 't_root', ['root_id', 'seq'], 'fk_inner1')]
         ));
         $schmer->dropAndCreateTable(new Table(
@@ -3616,6 +3625,7 @@ SQL
                 new Column('root2_seq', Type::getType('integer')),
             ],
             [new Index('PRIMARY', ['inner2_id'], true, true)],
+            [],
             [new ForeignKeyConstraint(['root2_id', 'root2_seq'], 't_root', ['root_id', 'seq'], 'fk_inner2')]
         ));
         $schmer->dropAndCreateTable(new Table(
@@ -3628,6 +3638,7 @@ SQL
                 new Column('leaf_root_seq', Type::getType('integer')),
             ],
             [new Index('PRIMARY', ['leaf_id'], true, true)],
+            [],
             [
                 new ForeignKeyConstraint(['leaf_inner1_id', 'leaf_root_id', 'leaf_root_seq'], 't_inner1', ['inner1_id', 'root1_id', 'root1_seq'], 'fk_leaf1'),
                 new ForeignKeyConstraint(['leaf_inner2_id', 'leaf_root_id', 'leaf_root_seq'], 't_inner2', ['inner2_id', 'root2_id', 'root2_seq'], 'fk_leaf2'),
