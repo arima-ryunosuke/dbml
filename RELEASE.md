@@ -22,6 +22,16 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.11
+
+- bump version
+  - php: 7.4
+  - doctrine: 3.*
+- [feature][Database] declareVirtualTable で仮想テーブルを登録できるように実装
+- [feature][QueryBuilder] subselect 仮想カラムに配列が来た場合に where して exists する機能
+- [fixbug][Database] 仮想カラムの where で ! が効かない不具合を修正
+- [feature][Gateway] 特殊なメソッドを定義するとスコープ・仮想カラムとして使える機能
+
 ## 2.0.10
 
 - [feature][Database] echoPhpStormMeta 周りを修正
