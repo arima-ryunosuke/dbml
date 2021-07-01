@@ -632,15 +632,15 @@ class Database
         Types::BINARY               => ['string'],
         Types::BLOB                 => ['string'],
         Types::GUID                 => ['string'],
-        Types::DATETIME_MUTABLE     => ['\\' . \DateTime::class, 'string'],
-        Types::DATETIME_IMMUTABLE   => ['\\' . \DateTimeImmutable::class, 'string'],
-        Types::DATETIMETZ_MUTABLE   => ['\\' . \DateTime::class, 'string'],
-        Types::DATETIMETZ_IMMUTABLE => ['\\' . \DateTimeImmutable::class, 'string'],
-        Types::DATE_MUTABLE         => ['\\' . \DateTime::class, 'string'],
-        Types::DATE_IMMUTABLE       => ['\\' . \DateTimeImmutable::class, 'string'],
-        Types::TIME_MUTABLE         => ['\\' . \DateTime::class, 'string'],
-        Types::TIME_IMMUTABLE       => ['\\' . \DateTimeImmutable::class, 'string'],
-        Types::DATEINTERVAL         => ['\\' . \DateInterval::class, 'string'],
+        Types::DATETIME_MUTABLE     => [\DateTime::class, 'string'],
+        Types::DATETIME_IMMUTABLE   => [\DateTimeImmutable::class, 'string'],
+        Types::DATETIMETZ_MUTABLE   => [\DateTime::class, 'string'],
+        Types::DATETIMETZ_IMMUTABLE => [\DateTimeImmutable::class, 'string'],
+        Types::DATE_MUTABLE         => [\DateTime::class, 'string'],
+        Types::DATE_IMMUTABLE       => [\DateTimeImmutable::class, 'string'],
+        Types::TIME_MUTABLE         => [\DateTime::class, 'string'],
+        Types::TIME_IMMUTABLE       => [\DateTimeImmutable::class, 'string'],
+        Types::DATEINTERVAL         => [\DateInterval::class, 'string'],
     ];
 
     /** @var Connection[] */
@@ -1745,7 +1745,9 @@ class Database
  * @method array|\\{$eclass}       findOrThrow($args2)";
                 $entities["{$ename}Entity"] = array_map(function (Column $column) {
                     $typename = $column->getType()->getName();
-                    $typenames = static::$typeMap[$typename] ?? [$typename];
+                    $typenames = array_map(function ($typename) {
+                        return class_exists($typename) ? "\\$typename" : $typename;
+                    }, static::$typeMap[$typename] ?? [$typename]);
                     return sprintf(" * @property %s \$%s", implode('|', $typenames), $column->getName());
                 }, $this->getSchema()->getTableColumns($tname));
             }
@@ -1793,7 +1795,7 @@ class Database
                 $ks = $keys[$k];
                 $ls = str_repeat(' ', ($nest + 1) * 4);
                 $ms = str_repeat(' ', $maxlen - strlen($keys[$k]));
-                $vs = class_exists($v) ? "$v::class" : var_export($v, true);
+                $vs = class_exists($v) ? "\\$v::class" : var_export($v, true);
                 $lines[] = "{$ls}{$ks}{$ms} => {$vs}";
             }
             $lines[] = "";
@@ -1814,6 +1816,12 @@ class Database
 
             $columns = array_map(function (Column $column) {
                 $typename = $column->getType()->getName();
+                $autocast = $this->getUnsafeOption('autoCastType');
+                if (is_callable($autotype = $autocast[$typename]['select'] ?? null)) {
+                    if ($types = reflect_types(reflect_callable($autotype))->getTypes()) {
+                        return $types[0]->getName();
+                    }
+                }
                 return (static::$typeMap[$typename] ?? [$typename])[0];
             }, $this->getSchema()->getTableColumns($tname));
             $entities[$entityname] = ($entities[$entityname] ?? []) + $columns;

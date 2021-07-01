@@ -2563,21 +2563,37 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_echoPhpStormMeta($database)
     {
+        $database = $database->context();
+        $database->setAutoCastType([
+            Types::SIMPLE_ARRAY => [
+                'select' => function (): \ArrayObject { },
+                'affect' => false,
+            ],
+            Types::INTEGER      => [
+                'select' => function () {/* no return type */ },
+                'affect' => false,
+            ],
+        ]);
+
         $metafile = sys_get_temp_dir() . '/phpstormmeta';
         $phpstorm_meta = $database->echoPhpStormMeta(false, $metafile);
         $this->assertFileExists($metafile);
         $this->assertStringContainsString('namespace PHPSTORM_META', $phpstorm_meta);
-        $this->assertStringContainsString('DateTime::class', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\dbml\\Entity\\Entityable', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
+        $this->assertStringContainsString('=> \DateTime::class', $phpstorm_meta);
+        $this->assertStringContainsString('=> \ArrayObject::class', $phpstorm_meta);
 
         $phpstorm_meta = $database->echoPhpStormMeta(true, null, 'EntityNamespace');
         $this->assertStringNotContainsString('namespace PHPSTORM_META', $phpstorm_meta);
-        $this->assertStringContainsString('DateTime::class', $phpstorm_meta);
-        $this->assertStringContainsString('EntityNamespace', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
+        $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
+        $this->assertStringContainsString('new \\EntityNamespace\\test', $phpstorm_meta);
+        $this->assertStringContainsString('=> \DateTime::class', $phpstorm_meta);
+
+        $database->unstackAll();
     }
 
     /**
