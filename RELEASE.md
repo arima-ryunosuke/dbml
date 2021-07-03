@@ -22,6 +22,10 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.12
+
+- [fixbug][Database] echoPhpStormMeta で autoCastType を考慮するように修正
+
 ## 2.0.11
 
 - bump version
