@@ -55,6 +55,31 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * AUTO_INCREMENT な列に null を与えると自動採番が働くかどうか
+     *
+     * @return bool AUTO_INCREMENT な列に null を与えると自動採番が働くなら true
+     */
+    public function supportsIdentityNullable()
+    {
+        if ($this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
+            return false;
+        }
+        if ($this->platform instanceof SqlitePlatform) {
+            return true;
+        }
+        if ($this->platform instanceof MySQLPlatform) {
+            return true;
+        }
+        if ($this->platform instanceof PostgreSqlPlatform) {
+            return false;
+        }
+        if ($this->platform instanceof SQLServerPlatform) {
+            return false;
+        }
+        return false;
+    }
+
+    /**
      * AUTO_INCREMENT な列を明示指定して UPDATE できるか否かを返す
      *
      * @return bool AUTO_INCREMENT な列を明示指定して UPDATE できるなら true

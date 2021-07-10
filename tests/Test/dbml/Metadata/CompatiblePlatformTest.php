@@ -21,12 +21,12 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     public static function providePlatform()
     {
         $platforms = [
-            new \ryunosuke\Test\Platforms\SqlitePlatform(),
-            new SqlitePlatform(),
-            new MySQLPlatform(),
-            new PostgreSqlPlatform(),
-            new SQLServerPlatform(),
-            new OraclePlatform(),
+            'sqlite_t'   => new \ryunosuke\Test\Platforms\SqlitePlatform(),
+            'sqlite'     => new SqlitePlatform(),
+            'mysql'      => new MySQLPlatform(),
+            'postgresql' => new PostgreSqlPlatform(),
+            'sqlserver'  => new SQLServerPlatform(),
+            'oracle'     => new OraclePlatform(),
         ];
         return array_map(function (AbstractPlatform $v) {
             return [
@@ -51,6 +51,18 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_getWrappedPlatform($cplatform, $platform)
     {
         $this->assertEquals(spl_object_hash($platform), spl_object_hash($cplatform->getWrappedPlatform()));
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
+    function test_supportsIdentityNullable($cplatform, $platform)
+    {
+        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform;
+        $expected = $expected && !$platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform;
+        $this->assertEquals($expected, $cplatform->supportsIdentityNullable());
     }
 
     /**

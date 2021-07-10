@@ -1448,7 +1448,7 @@ class Database
         }
 
         // mysql は null を指定すれば自動採番されるが、他の RDBMS では伏せないと採番されないようだ
-        if ($autocolumn && !isset($row[$autocolumn])) {
+        if ($autocolumn && !isset($row[$autocolumn]) && !$this->getCompatiblePlatform()->supportsIdentityNullable()) {
             unset($row[$autocolumn]);
         }
 
