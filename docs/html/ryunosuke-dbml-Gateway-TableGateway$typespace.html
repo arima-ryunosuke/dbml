@@ -4369,7 +4369,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 		<tbody>
 		<tr>
 			<td class="type">array</td>
-			<td class="desc"><p>主キー配列</p>
+			<td class="desc"><p>基本的には主キー配列. dryrun 中は SQL をネストして返す</p>
 </td>
 			<td class="rest"></td>
 		</tr>
@@ -4395,7 +4395,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
                         			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2400-L2409" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::save()" tabindex="-1" class="structure-title ">
-                        save                        	<small>($data) : array</small>
+                        save                        	<small>($data) : array<span class="type-separator"></span><wbr>string[]</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::save()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::save()'>ryunosuke\dbml\Database::save()</tag_link></p>
@@ -4415,8 +4415,8 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">array</td>
-			<td class="desc"><p>階層を持った主キー配列</p>
+			<td class="type">array<span class="type-separator"></span><wbr>string[]</td>
+			<td class="desc"><p>基本的には階層を持った主キー配列. dryrun 中は文字列配列</p>
 </td>
 			<td class="rest"></td>
 		</tr>
@@ -4748,7 +4748,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
                         			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2488-L2497" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::upsert()" tabindex="-1" class="structure-title ">
-                        upsert                        	<small>($insertData, $updateData = []) : int<span class="type-separator"></span><wbr>array</small>
+                        upsert                        	<small>($insertData, $updateData = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::upsert()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::upsert()'>ryunosuke\dbml\Database::upsert()</tag_link></p>
@@ -4774,8 +4774,8 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">int<span class="type-separator"></span><wbr>array</td>
-			<td class="desc"><p>affected rows. if update return 0 or 2, else insert return 1</p>
+			<td class="type">int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array</td>
+			<td class="desc"><p>基本的には affected row. dryrun 中は文字列</p>
 </td>
 			<td class="rest"></td>
 		</tr>
@@ -4801,7 +4801,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
                         			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2499-L2508" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::modify()" tabindex="-1" class="structure-title ">
-                        modify                        	<small>($insertData, $updateData = []) : int<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
+                        modify                        	<small>($insertData, $updateData = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::modify()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::modify()'>ryunosuke\dbml\Database::modify()</tag_link></p>
@@ -4827,8 +4827,8 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">int<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></td>
-			<td class="desc"><p>affected rows. if update return 0 or 2, else insert return 1</p>
+			<td class="type">int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></td>
+			<td class="desc"><p>基本的には affected row. dryrun 中は文字列、preparing 中は Statement</p>
 </td>
 			<td class="rest"></td>
 		</tr>
@@ -4854,7 +4854,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
                         			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2510-L2519" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::replace()" tabindex="-1" class="structure-title ">
-                        replace                        	<small>($insertData) : int<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
+                        replace                        	<small>($insertData) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::replace()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::replace()'>ryunosuke\dbml\Database::replace()</tag_link></p>
@@ -4873,8 +4873,8 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">int<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></td>
-			<td class="desc"><p>affected rows. if update return 0 or 2, else insert return 1</p>
+			<td class="type">int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></td>
+			<td class="desc"><p>基本的には affected row. dryrun 中は文字列、preparing 中は Statement</p>
 </td>
 			<td class="rest"></td>
 		</tr>
@@ -4900,7 +4900,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
                         			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2521-L2530" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::truncate()" tabindex="-1" class="structure-title ">
-                        truncate                        	<small>($cascade = false) : int</small>
+                        truncate                        	<small>($cascade = false) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::truncate()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::truncate()'>ryunosuke\dbml\Database::truncate()</tag_link></p>
@@ -4920,8 +4920,8 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">int</td>
-			<td class="desc"><p>affected rows</p>
+			<td class="type">int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></td>
+			<td class="desc"><p>基本的には affected row. dryrun 中は文字列、preparing 中は Statement</p>
 </td>
 			<td class="rest"></td>
 		</tr>
@@ -4968,7 +4968,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 		<tbody>
 		<tr>
 			<td class="type">null<span class="type-separator"></span><wbr>string</td>
-			<td class="desc"><p>最後に挿入した ID</p>
+			<td class="desc"><p>最後に挿入した ID. dryrun 中は max+1 から始まる連番を返す</p>
 </td>
 			<td class="rest"></td>
 		</tr>

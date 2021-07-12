@@ -58,186 +58,7 @@
             Doctrine\Common\Cache                        		</a>	</h4>
 	<div class="description"></div>
                 
-                	<h4 class="fqsen-title">class		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider">
-                                    Doctrine\Common\Cache::CacheProvider		</a>	</h4>
-	<div class="description"><p>Base class for cache provider implementations.</p>
-</div>
-        	<h4 class="fqsen-title">classconstant		<small>string</small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::DOCTRINE_NAMESPACE_CACHEKEY">
-                                    Doctrine\Common\Cache\CacheProvider::DOCTRINE_NAMESPACE_CACHEKEY		</a>	</h4>
-	<div class="description"></div>
-    	<h4 class="fqsen-title">classconstant		<small>string</small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::STATS_HITS">
-                                    Doctrine\Common\Cache\CacheProvider::STATS_HITS		</a>	</h4>
-	<div class="description"></div>
-    	<h4 class="fqsen-title">classconstant		<small>string</small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::STATS_MISSES">
-                                    Doctrine\Common\Cache\CacheProvider::STATS_MISSES		</a>	</h4>
-	<div class="description"></div>
-    	<h4 class="fqsen-title">classconstant		<small>string</small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::STATS_UPTIME">
-                                    Doctrine\Common\Cache\CacheProvider::STATS_UPTIME		</a>	</h4>
-	<div class="description"></div>
-    	<h4 class="fqsen-title">classconstant		<small>string</small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::STATS_MEMORY_USAGE">
-                                    Doctrine\Common\Cache\CacheProvider::STATS_MEMORY_USAGE		</a>	</h4>
-	<div class="description"></div>
-    	<h4 class="fqsen-title">classconstant		<small>string</small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::STATS_MEMORY_AVAILABLE">
-                                    Doctrine\Common\Cache\CacheProvider::STATS_MEMORY_AVAILABLE		</a>	</h4>
-	<div class="description"></div>
-    	<h4 class="fqsen-title">classconstant		<small>string</small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::STATS_MEMORY_AVAILIABLE">
-                                    Doctrine\Common\Cache\CacheProvider::STATS_MEMORY_AVAILIABLE		</a>	</h4>
-	<div class="description"><p>Only for backward compatibility (may be removed in next major release)</p>
-</div>
-            	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::setNamespace()">
-                                    Doctrine\Common\Cache\CacheProvider::setNamespace		</a>	<small>($namespace) : void</small>
-		</h4>
-	<div class="description"><p>Sets the namespace to prefix all cache ids with.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::getNamespace()">
-                                    Doctrine\Common\Cache\CacheProvider::getNamespace		</a>	<small>() : string</small>
-		</h4>
-	<div class="description"><p>Retrieves the namespace that prefixes all cache ids.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::fetch()">
-                                    Doctrine\Common\Cache\CacheProvider::fetch		</a>	<small>($id) : mixed</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Fetches an entry from the cache.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::fetchMultiple()">
-                                    Doctrine\Common\Cache\CacheProvider::fetchMultiple		</a>	<small>($keys) : mixed[]</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns an associative array of values for keys is found in cache.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::saveMultiple()">
-                                    Doctrine\Common\Cache\CacheProvider::saveMultiple		</a>	<small>($keysAndValues, $lifetime = 0) : bool</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns a boolean value indicating if the operation succeeded.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::contains()">
-                                    Doctrine\Common\Cache\CacheProvider::contains		</a>	<small>($id) : bool</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Tests if an entry exists in the cache.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::save()">
-                                    Doctrine\Common\Cache\CacheProvider::save		</a>	<small>($id, $data, $lifeTime = 0) : bool</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Puts data into the cache.</p>
-<p>If a cache entry with the given id already exists, its data will be replaced.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::deleteMultiple()">
-                                    Doctrine\Common\Cache\CacheProvider::deleteMultiple		</a>	<small>($keys) : bool</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Deletes several cache entries.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::delete()">
-                                    Doctrine\Common\Cache\CacheProvider::delete		</a>	<small>($id) : bool</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Deletes a cache entry.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::getStats()">
-                                    Doctrine\Common\Cache\CacheProvider::getStats		</a>	<small>() : mixed[]<span class="type-separator"></span><wbr>null</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Retrieves cached information from the data store.</p>
-<p>The server's statistics array has the following values:</p>
-<ul>
-<li><p><b>hits</b><br />
-Number of keys that have been requested and found present.</p>
-</li>
-<li><p><b>misses</b><br />
-Number of items that have been requested and not found.</p>
-</li>
-<li><p><b>uptime</b><br />
-Time that the server is running.</p>
-</li>
-<li><p><b>memory_usage</b><br />
-Memory used by this server to store items.</p>
-</li>
-<li><p><b>memory_available</b><br />
-Memory allowed to use for storage.</tag_inheritdoc></p>
-</li>
-</ul>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::flushAll()">
-                                    Doctrine\Common\Cache\CacheProvider::flushAll		</a>	<small>() : bool</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Flushes all cache entries, globally.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::deleteAll()">
-                                    Doctrine\Common\Cache\CacheProvider::deleteAll		</a>	<small>() : bool</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Deletes all cache entries in the current cache namespace.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::doFetchMultiple()">
-                                    Doctrine\Common\Cache\CacheProvider::doFetchMultiple		</a>	<small>($keys) : mixed[]</small>
-		</h4>
-	<div class="description"><p>Default implementation of doFetchMultiple. Each driver that supports multi-get should owerwrite it.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::doFetch()">
-                                    Doctrine\Common\Cache\CacheProvider::doFetch		</a>	<small>($id) : mixed<span class="type-separator"></span><wbr>false</small>
-		</h4>
-	<div class="description"><p>Fetches an entry from the cache.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::doContains()">
-                                    Doctrine\Common\Cache\CacheProvider::doContains		</a>	<small>($id) : bool</small>
-		</h4>
-	<div class="description"><p>Tests if an entry exists in the cache.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::doSaveMultiple()">
-                                    Doctrine\Common\Cache\CacheProvider::doSaveMultiple		</a>	<small>($keysAndValues, $lifetime = 0) : bool</small>
-		</h4>
-	<div class="description"><p>Default implementation of doSaveMultiple. Each driver that supports multi-put should override it.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::doSave()">
-                                    Doctrine\Common\Cache\CacheProvider::doSave		</a>	<small>($id, $data, $lifeTime = 0) : bool</small>
-		</h4>
-	<div class="description"><p>Puts data into the cache.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::doDeleteMultiple()">
-                                    Doctrine\Common\Cache\CacheProvider::doDeleteMultiple		</a>	<small>($keys) : bool</small>
-		</h4>
-	<div class="description"><p>Default implementation of doDeleteMultiple. Each driver that supports multi-delete should override it.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::doDelete()">
-                                    Doctrine\Common\Cache\CacheProvider::doDelete		</a>	<small>($id) : bool</small>
-		</h4>
-	<div class="description"><p>Deletes a cache entry.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::doFlush()">
-                                    Doctrine\Common\Cache\CacheProvider::doFlush		</a>	<small>() : bool</small>
-		</h4>
-	<div class="description"><p>Flushes all cache entries.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-CacheProvider$typespace.html#Doctrine\Common\Cache\CacheProvider::doGetStats()">
-                                    Doctrine\Common\Cache\CacheProvider::doGetStats		</a>	<small>() : mixed[]<span class="type-separator"></span><wbr>null</small>
-		</h4>
-	<div class="description"><p>Retrieves cached information from the data store.</p>
-</div>
-                    	<h4 class="fqsen-title">interface		<small></small>
+                        	<h4 class="fqsen-title">interface		<small></small>
 		<a href="Doctrine-Common-Cache-Cache$typespace.html#Doctrine\Common\Cache\Cache">
                                     Doctrine\Common\Cache::Cache		</a>	</h4>
 	<div class="description"><p>Interface for cache drivers.</p>
@@ -315,86 +136,6 @@ Memory used by this server to store items.</p>
 Memory allowed to use for storage.</p>
 </li>
 </ul>
-</div>
-            	<h4 class="fqsen-title">interface		<small></small>
-		<a href="Doctrine-Common-Cache-FlushableCache$typespace.html#Doctrine\Common\Cache\FlushableCache">
-                                    Doctrine\Common\Cache::FlushableCache		</a>	</h4>
-	<div class="description"><p>Interface for cache that can be flushed.</p>
-</div>
-                	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-FlushableCache$typespace.html#Doctrine\Common\Cache\FlushableCache::flushAll()">
-                                    Doctrine\Common\Cache\FlushableCache::flushAll		</a>	<small>() : bool</small>
-		</h4>
-	<div class="description"><p>Flushes all cache entries, globally.</p>
-</div>
-            	<h4 class="fqsen-title">interface		<small></small>
-		<a href="Doctrine-Common-Cache-ClearableCache$typespace.html#Doctrine\Common\Cache\ClearableCache">
-                                    Doctrine\Common\Cache::ClearableCache		</a>	</h4>
-	<div class="description"><p>Interface for cache that can be flushed.</p>
-<p>Intended to be used for partial clearing of a cache namespace. For a more<br />
-global "flushing", see <tag_link data-kind='fqsen' data-type-category='interface' data-type-fqsen='Doctrine\Common\Cache\FlushableCache' data-type-array='0' data-type-nullable='' data-description='Doctrine\Common\Cache\FlushableCache'>Doctrine\Common\Cache\FlushableCache</tag_link>.</p>
-</div>
-                	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-ClearableCache$typespace.html#Doctrine\Common\Cache\ClearableCache::deleteAll()">
-                                    Doctrine\Common\Cache\ClearableCache::deleteAll		</a>	<small>() : bool</small>
-		</h4>
-	<div class="description"><p>Deletes all cache entries in the current cache namespace.</p>
-</div>
-            	<h4 class="fqsen-title">interface		<small></small>
-		<a href="Doctrine-Common-Cache-MultiOperationCache$typespace.html#Doctrine\Common\Cache\MultiOperationCache">
-                                    Doctrine\Common\Cache::MultiOperationCache		</a>	</h4>
-	<div class="description"><p>Interface for cache drivers that supports multiple items manipulation.</p>
-</div>
-                	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-MultiOperationCache$typespace.html#Doctrine\Common\Cache\MultiOperationCache::fetchMultiple()">
-                                    Doctrine\Common\Cache\MultiOperationCache::fetchMultiple		</a>	<small>($keys) : mixed[]</small>
-		</h4>
-	<div class="description"><p>Returns an associative array of values for keys is found in cache.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-MultiOperationCache$typespace.html#Doctrine\Common\Cache\MultiOperationCache::deleteMultiple()">
-                                    Doctrine\Common\Cache\MultiOperationCache::deleteMultiple		</a>	<small>($keys) : bool</small>
-		</h4>
-	<div class="description"><p>Deletes several cache entries.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-MultiOperationCache$typespace.html#Doctrine\Common\Cache\MultiOperationCache::saveMultiple()">
-                                    Doctrine\Common\Cache\MultiOperationCache::saveMultiple		</a>	<small>($keysAndValues, $lifetime = 0) : bool</small>
-		</h4>
-	<div class="description"><p>Returns a boolean value indicating if the operation succeeded.</p>
-</div>
-            	<h4 class="fqsen-title">interface		<small></small>
-		<a href="Doctrine-Common-Cache-MultiGetCache$typespace.html#Doctrine\Common\Cache\MultiGetCache">
-                                    Doctrine\Common\Cache::MultiGetCache		</a>	</h4>
-	<div class="description"><p>Interface for cache drivers that allows to get many items at once.</p>
-</div>
-                	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-MultiGetCache$typespace.html#Doctrine\Common\Cache\MultiGetCache::fetchMultiple()">
-                                    Doctrine\Common\Cache\MultiGetCache::fetchMultiple		</a>	<small>($keys) : mixed[]</small>
-		</h4>
-	<div class="description"><p>Returns an associative array of values for keys is found in cache.</p>
-</div>
-            	<h4 class="fqsen-title">interface		<small></small>
-		<a href="Doctrine-Common-Cache-MultiDeleteCache$typespace.html#Doctrine\Common\Cache\MultiDeleteCache">
-                                    Doctrine\Common\Cache::MultiDeleteCache		</a>	</h4>
-	<div class="description"><p>Interface for cache drivers that allows to put many items at once.</p>
-</div>
-                	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-MultiDeleteCache$typespace.html#Doctrine\Common\Cache\MultiDeleteCache::deleteMultiple()">
-                                    Doctrine\Common\Cache\MultiDeleteCache::deleteMultiple		</a>	<small>($keys) : bool</small>
-		</h4>
-	<div class="description"><p>Deletes several cache entries.</p>
-</div>
-            	<h4 class="fqsen-title">interface		<small></small>
-		<a href="Doctrine-Common-Cache-MultiPutCache$typespace.html#Doctrine\Common\Cache\MultiPutCache">
-                                    Doctrine\Common\Cache::MultiPutCache		</a>	</h4>
-	<div class="description"><p>Interface for cache drivers that allows to put many items at once.</p>
-</div>
-                	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-Common-Cache-MultiPutCache$typespace.html#Doctrine\Common\Cache\MultiPutCache::saveMultiple()">
-                                    Doctrine\Common\Cache\MultiPutCache::saveMultiple		</a>	<small>($keysAndValues, $lifetime = 0) : bool</small>
-		</h4>
-	<div class="description"><p>Returns a boolean value indicating if the operation succeeded.</p>
 </div>
         
     
@@ -19396,7 +19137,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway::save()">
-                                    ryunosuke\dbml\Gateway\TableGateway::save		</a>	<small>($data) : array</small>
+                                    ryunosuke\dbml\Gateway\TableGateway::save		</a>	<small>($data) : array<span class="type-separator"></span><wbr>string[]</small>
 		</h4>
 	<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::save()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::save()'>ryunosuke\dbml\Database::save()</tag_link></p>
 </div>
@@ -19438,25 +19179,25 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway::upsert()">
-                                    ryunosuke\dbml\Gateway\TableGateway::upsert		</a>	<small>($insertData, $updateData = []) : int<span class="type-separator"></span><wbr>array</small>
+                                    ryunosuke\dbml\Gateway\TableGateway::upsert		</a>	<small>($insertData, $updateData = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array</small>
 		</h4>
 	<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::upsert()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::upsert()'>ryunosuke\dbml\Database::upsert()</tag_link></p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway::modify()">
-                                    ryunosuke\dbml\Gateway\TableGateway::modify		</a>	<small>($insertData, $updateData = []) : int<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
+                                    ryunosuke\dbml\Gateway\TableGateway::modify		</a>	<small>($insertData, $updateData = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 		</h4>
 	<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::modify()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::modify()'>ryunosuke\dbml\Database::modify()</tag_link></p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway::replace()">
-                                    ryunosuke\dbml\Gateway\TableGateway::replace		</a>	<small>($insertData) : int<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
+                                    ryunosuke\dbml\Gateway\TableGateway::replace		</a>	<small>($insertData) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 		</h4>
 	<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::replace()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::replace()'>ryunosuke\dbml\Database::replace()</tag_link></p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway::truncate()">
-                                    ryunosuke\dbml\Gateway\TableGateway::truncate		</a>	<small>($cascade = false) : int</small>
+                                    ryunosuke\dbml\Gateway\TableGateway::truncate		</a>	<small>($cascade = false) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 		</h4>
 	<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::truncate()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::truncate()'>ryunosuke\dbml\Database::truncate()</tag_link></p>
 </div>
@@ -20396,6 +20137,12 @@ $row = $gw-&gt;find([1, 2], ['column1', 'column2']);
                                     ryunosuke\dbml\Metadata\CompatiblePlatform::getWrappedPlatform		</a>	<small>() : <a href="Doctrine-DBAL-Platforms-AbstractPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractPlatform" class="fqsen "><small>Doctrine\DBAL\Platforms\</small><wbr>AbstractPlatform</a></small>
 		</h4>
 	<div class="description"><p>元 platform を取得する</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="ryunosuke-dbml-Metadata-CompatiblePlatform$typespace.html#ryunosuke\dbml\Metadata\CompatiblePlatform::supportsIdentityNullable()">
+                                    ryunosuke\dbml\Metadata\CompatiblePlatform::supportsIdentityNullable		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>AUTO_INCREMENT な列に null を与えると自動採番が働くかどうか</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Metadata-CompatiblePlatform$typespace.html#ryunosuke\dbml\Metadata\CompatiblePlatform::supportsIdentityUpdate()">
@@ -26674,7 +26421,7 @@ $db-&gt;modifyArray('tablename', [
 		</h4>
 	<div class="description"><p>INSERT+UPDATE+DELETE を同時に行う</p>
 <p>テーブル状態を指定した配列・条件に「持っていく」メソッドとも言える。</p>
-<p>このメソッドは複数のステートメントが実行され、 dryrun や prepare を使うことが出来ない。<br />
+<p>このメソッドは複数のステートメントが実行され、 prepare を使うことが出来ない。<br />
 また、可能な限りクエリを少なくかつ効率的に実行されるように構築されるので、テーブル定義や与えたデータによってはまったく構成の異なるクエリになる可能性がある（結果は同じになるが）。<br />
 具体的には</p>
 <ul>
@@ -26686,6 +26433,10 @@ $db-&gt;modifyArray('tablename', [
 <li>merge をサポートしていなくてカラムがバラバラだった場合：    各行 select + 各行 insert/update + delete 的な動作（最悪）</li>
 </ul>
 <p>という動作になる。</p>
+<p>返り値は <code>[primaryKeys]</code> となり「その世界における主キー配列」を返す。</p>
+<p>ただし dryrun 中は [[primaryKeys], [実行した SQL]] という2タプルの階層配列を返す。<br />
+この返り値は内部規定であり、この構造に依存したコードを書いてはならない。<br />
+また、primaryKeys は現在の状態に基づく値であり、dryrun で得られた key や sql を後で実行する場合は注意を払わなければならない。</p>
 <pre><code class="language-php"># `['category' =&gt; 'misc']` の世界でレコードが3行になる。指定した3行が無ければ作成され、有るなら更新され、id 指定している 1,2,3 以外のレコードは削除される
 $db-&gt;changeArray('table_name', [
     ['id' =&gt; 1, 'name' =&gt; 'hoge'],
@@ -26727,7 +26478,7 @@ $db-&gt;changeArray('table_name', [
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::save()">
-                                    ryunosuke\dbml\Database::save		</a>	<small>($tableName, $data) : array</small>
+                                    ryunosuke\dbml\Database::save		</a>	<small>($tableName, $data) : array<span class="type-separator"></span><wbr>string[]</small>
 		</h4>
 	<div class="description"><p>自身 modify + 子テーブルの changeArray を行う</p>
 <p>フレームワークや ORM における save に近い。<br />
@@ -27023,7 +26774,7 @@ $db-&gt;reduce('logs', 10, '-log_time', ['category'], ['log_time &lt; ?' =&gt; d
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::upsert()">
-                                    ryunosuke\dbml\Database::upsert		</a>	<small>($tableName, $insertData, $updateData = []) : int<span class="type-separator"></span><wbr>array</small>
+                                    ryunosuke\dbml\Database::upsert		</a>	<small>($tableName, $insertData, $updateData = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array</small>
 		</h4>
 	<div class="description"><p>行が無かったら INSERT、有ったら UPDATE</p>
 <p>アプリレイヤーで SELECT EXISTS（排他ロック） で行を確認し、無ければ INSERT 有れば UPDATE する。<br />
@@ -27064,7 +26815,7 @@ $condition が配列の場合は $tableName で selectNotExists する。つま�
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::modify()">
-                                    ryunosuke\dbml\Database::modify		</a>	<small>($tableName, $insertData, $updateData = []) : int<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
+                                    ryunosuke\dbml\Database::modify		</a>	<small>($tableName, $insertData, $updateData = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 		</h4>
 	<div class="description"><p>MERGE 構文</p>
 <p>RDBMS で方言・効果がかなり激しい。</p>
@@ -27112,7 +26863,7 @@ $condition が配列の場合は $tableName で selectNotExists する。つま�
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::replace()">
-                                    ryunosuke\dbml\Database::replace		</a>	<small>($tableName, $data) : int<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
+                                    ryunosuke\dbml\Database::replace		</a>	<small>($tableName, $data) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 		</h4>
 	<div class="description"><p>REPLACE 構文</p>
 <p>標準のよくある REPLACE とは違って、元のカラム値は維持される。<br />
@@ -27133,7 +26884,7 @@ $db-&gt;replace('tablename', [
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::duplicate()">
-                                    ryunosuke\dbml\Database::duplicate		</a>	<small>($targetTable, $overrideData = [], $where = [], $sourceTable = null) : int<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
+                                    ryunosuke\dbml\Database::duplicate		</a>	<small>($targetTable, $overrideData = [], $where = [], $sourceTable = null) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 		</h4>
 	<div class="description"><p>行を複製する</p>
 <pre><code class="language-php"># 最もシンプルな例。単純に tablename のレコードが2倍になる（主キーが重複してしまうので AUTOINCREMENT の場合のみ）
@@ -27149,7 +26900,7 @@ $db-&gt;duplicate('tablename', [
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::truncate()">
-                                    ryunosuke\dbml\Database::truncate		</a>	<small>($tableName, $cascade = false) : int</small>
+                                    ryunosuke\dbml\Database::truncate		</a>	<small>($tableName, $cascade = false) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 		</h4>
 	<div class="description"><p>TRUNCATE 構文</p>
 <pre><code class="language-php">$db-&gt;truncate('tablename');
