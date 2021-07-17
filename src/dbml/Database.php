@@ -654,6 +654,9 @@ class Database
     /** @var int */
     private $affectedRows;
 
+    /** @var int[] dryrun 中の挿入 ID. dryrun でしか使わないので（値が戻って欲しいので ArrayObject にはしていない） */
+    private $lastInsertIds = [];
+
     public static function getDefaultOptions()
     {
         $default_options = [
@@ -5456,7 +5459,7 @@ class Database
      *
      * テーブル状態を指定した配列・条件に「持っていく」メソッドとも言える。
      *
-     * このメソッドは複数のステートメントが実行され、 dryrun や prepare を使うことが出来ない。
+     * このメソッドは複数のステートメントが実行され、 prepare を使うことが出来ない。
      * また、可能な限りクエリを少なくかつ効率的に実行されるように構築されるので、テーブル定義や与えたデータによってはまったく構成の異なるクエリになる可能性がある（結果は同じになるが）。
      * 具体的には
      *
@@ -5468,6 +5471,12 @@ class Database
      * - merge をサポートしていなくてカラムがバラバラだった場合：    各行 select + 各行 insert/update + delete 的な動作（最悪）
      *
      * という動作になる。
+     *
+     * 返り値は `[primaryKeys]` となり「その世界における主キー配列」を返す。
+     *
+     * ただし dryrun 中は [[primaryKeys], [実行した SQL]] という2タプルの階層配列を返す。
+     * この返り値は内部規定であり、この構造に依存したコードを書いてはならない。
+     * また、primaryKeys は現在の状態に基づく値であり、dryrun で得られた key や sql を後で実行する場合は注意を払わなければならない。
      *
      * ```php
      * # `['category' => 'misc']` の世界でレコードが3行になる。指定した3行が無ければ作成され、有るなら更新され、id 指定している 1,2,3 以外のレコードは削除される
@@ -5508,12 +5517,14 @@ class Database
      * @param string $tableName テーブル名
      * @param array $dataarray データ配列
      * @param array|mixed $identifier 束縛条件。 false を与えると DELETE 文自体を発行しない（速度向上と安全担保）
-     * @return array 主キー配列
+     * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
      */
     public function changeArray($tableName, $dataarray, $identifier)
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
+
+        $dryrun = $this->getUnsafeOption('dryrun');
 
         $whereconds = arrayize($identifier);
 
@@ -5522,7 +5533,10 @@ class Database
         // 与えられていないなら消すだけ
         if (empty($dataarray)) {
             if ($identifier !== false) {
-                $this->delete($tableName, $whereconds);
+                $sql = $this->delete($tableName, $whereconds);
+                if ($dryrun) {
+                    return [[], [$sql]];
+                }
             }
             return [];
         }
@@ -5534,7 +5548,7 @@ class Database
 
         // modifyArray や prepareModify が使えるか
         $bulkable = $this->getCompatiblePlatform()->supportsBulkMerge();
-        $preparable = $this->getCompatiblePlatform()->supportsMerge() && !$this->isEmulationMode();
+        $preparable = $this->getCompatiblePlatform()->supportsMerge() && !$this->isEmulationMode() && !$dryrun;
 
         // カラムの種類でグルーピングする
         $col_group = [];
@@ -5557,9 +5571,11 @@ class Database
             }
         }
 
+        $sqls = [];
+
         foreach ($col_group as $group) {
             if ($group['bulks'] ?? []) {
-                $this->modifyArray($tableName, $group['bulks'], ...[[], 0, $opt]);
+                $sqls[] = $this->modifyArray($tableName, $group['bulks'], ...[[], 0, $opt]);
             }
             if ($group['rows'] ?? []) {
                 // 2件以上じゃないとプリペアの旨味が少ない
@@ -5572,7 +5588,7 @@ class Database
                         $stmt->executeAffect($row);
                     }
                     else {
-                        $this->modify($tableName, $row, ...[[], $opt]);
+                        $sqls[] = $this->modify($tableName, $row, ...[[], $opt]);
                     }
 
                     if ($autocolumn !== null && !isset($primaries[$n][$autocolumn])) {
@@ -5586,7 +5602,10 @@ class Database
         if ($identifier !== false) {
             $cond = $this->getCompatiblePlatform()->getPrimaryCondition($primaries, $tableName);
             $whereconds[] = $this->queryInto("NOT ($cond)", $cond->getParams());
-            $this->delete($tableName, $whereconds);
+            $sqls[] = $this->delete($tableName, $whereconds);
+        }
+        if ($dryrun) {
+            return [$primaries, array_flatten($sqls)];
         }
         return $primaries;
     }
@@ -5671,7 +5690,7 @@ class Database
      *
      * @param string|array $tableName テーブル名
      * @param array $data 階層を持ったデータ配列
-     * @return array 階層を持った主キー配列
+     * @return array|string[] 基本的には階層を持った主キー配列. dryrun 中は文字列配列
      */
     public function save($tableName, $data)
     {
@@ -5711,6 +5730,9 @@ class Database
         };
         $flatten($tableName, $data, null, $dataarray);
 
+        $dryrun = $this->getUnsafeOption('dryrun');
+        $sqls = [];
+
         // フラット構造になったので縦断的に changeArray ができ、キーに親情報があるので復元・主キー設定もできる
         $primaries = [];
         $result = [];
@@ -5732,10 +5754,20 @@ class Database
             }
 
             // changeArray すれば主キーが得られる。主キーが得られれば外部キーに設定できるし返り値用に整形できる
-            $primaries[$tname] = $this->changeArray($tname, $rows, $parents ?: false, $opt);
-            foreach ($primaries[$tname] as $id => $pkval) {
-                array_put($result, $pkval, preg_split($SEPARATOR_REGEX, $id));
+            $changed = $this->changeArray($tname, $rows, $parents ?: false, $opt);
+            if ($dryrun) {
+                $primaries[$tname] = $changed[0];
+                $sqls = array_merge($sqls, $changed[1]);
             }
+            else {
+                $primaries[$tname] = $changed;
+                foreach ($primaries[$tname] as $id => $pkval) {
+                    array_put($result, $pkval, preg_split($SEPARATOR_REGEX, $id));
+                }
+            }
+        }
+        if ($dryrun) {
+            return $sqls;
         }
 
         return $single_mode ? $result[$tableName][0] : $result[$tableName];
@@ -6321,7 +6353,7 @@ class Database
      * @param string|array $tableName テーブル名
      * @param mixed $insertData INSERT データ配列
      * @param mixed $updateData UPDATE データ配列
-     * @return int|array affected rows. if update return 0 or 2, else insert return 1
+     * @return int|string|array 基本的には affected row. dryrun 中は文字列
      */
     public function upsert($tableName, $insertData, $updateData = [])
     {
@@ -6414,7 +6446,7 @@ class Database
      * @param string|array $tableName テーブル名
      * @param mixed $insertData INSERT データ配列
      * @param mixed $updateData UPDATE データ配列
-     * @return int|array|Statement affected rows. if update return 0 or 2, else insert return 1
+     * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
     public function modify($tableName, $insertData, $updateData = [])
     {
@@ -6525,7 +6557,7 @@ class Database
      *
      * @param string|array $tableName テーブル名
      * @param mixed $data REPLACE データ配列
-     * @return int|array|Statement affected rows. if update return 0 or 2, else insert return 1
+     * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
     public function replace($tableName, $data)
     {
@@ -6588,7 +6620,7 @@ class Database
      * @param array $overrideData selectしたデータを上書きするデータ
      * @param array|mixed $where 検索条件
      * @param ?string $sourceTable 元となるテーブル名。省略すると $targetTable と同じになる
-     * @return int|Statement affected rows
+     * @return int|string|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
     public function duplicate($targetTable, array $overrideData = [], $where = [], $sourceTable = null)
     {
@@ -6637,7 +6669,7 @@ class Database
      *
      * @param string $tableName テーブル名
      * @param bool $cascade CASCADE フラグ。PostgreSql の場合のみ有効
-     * @return int affected rows
+     * @return int|string|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
     public function truncate($tableName, $cascade = false)
     {
@@ -6655,10 +6687,15 @@ class Database
      *
      * @param ?string $tableName テーブル名。PostgreSql の場合のみ有効
      * @param ?string $columnName カラム名。PostgreSql の場合のみ有効
-     * @return null|string 最後に挿入した ID
+     * @return null|string 最後に挿入した ID. dryrun 中は max+1 から始まる連番を返す
      */
     public function getLastInsertId($tableName = null, $columnName = null)
     {
+        if ($this->getUnsafeOption('dryrun')) {
+            $key = "$tableName.$columnName";
+            $this->lastInsertIds[$key] = ($this->lastInsertIds[$key] ?? $this->max([$tableName => $columnName])) + 1;
+            return $this->lastInsertIds[$key];
+        }
         return $this->getMasterConnection()->lastInsertId($this->getCompatiblePlatform()->getIdentitySequenceName($tableName, $columnName));
     }
 
@@ -6736,6 +6773,7 @@ class Database
         $this->cache = [];
         $this->txConnection = $this->getMasterConnection();
         $this->affectedRows = null;
+        $this->lastInsertIds = [];
         return $this->unstackAll();
     }
 }

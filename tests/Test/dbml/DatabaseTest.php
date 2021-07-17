@@ -3062,6 +3062,177 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_save_misc($database)
+    {
+        $sqls = $database->dryrun()->save('g_ancestor', [
+            [
+                'ancestor_id'   => 1,
+                'ancestor_name' => 'A',
+                'g_parent'      => [
+                    [
+                        'parent_id'   => 1,
+                        'parent_name' => 'AA',
+                        'g_child'     => [
+                            [
+                                'child_id'   => 1,
+                                'child_name' => 'AAA',
+                            ],
+                            [
+                                'child_id'   => 2,
+                                'child_name' => 'AAB',
+                            ],
+                        ],
+                    ],
+                    [
+                        'parent_id'   => 2,
+                        'parent_name' => 'AB',
+                        'g_child'     => [
+                            [
+                                'child_id'   => 3,
+                                'child_name' => 'ABA',
+                            ],
+                            [
+                                'child_id'   => 4,
+                                'child_name' => 'ABB',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'ancestor_id'   => 2,
+                'ancestor_name' => 'B',
+                'g_parent'      => [
+                    [
+                        'parent_id'   => 3,
+                        'parent_name' => 'BA',
+                        'g_child'     => [
+                            [
+                                'child_id'   => 5,
+                                'child_name' => 'BAA',
+                            ],
+                            [
+                                'child_id'   => 6,
+                                'child_name' => 'BAB',
+                            ],
+                        ],
+                    ],
+                    [
+                        'parent_id'   => 4,
+                        'parent_name' => 'BB',
+                        'g_child'     => [
+                            [
+                                'child_id'   => 7,
+                                'child_name' => 'BBA',
+                            ],
+                            [
+                                'child_id'   => 8,
+                                'child_name' => 'BBB',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+        if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
+            $this->assertArrayStartsWith([
+                'INSERT INTO g_ancestor',
+                'INSERT INTO g_parent',
+                'DELETE FROM g_parent',
+                'INSERT INTO g_child',
+                'DELETE FROM g_child',
+            ], $sqls);
+        }
+        else {
+            $this->assertArrayStartsWith([
+                'INSERT INTO g_ancestor',
+                'INSERT INTO g_ancestor',
+                'INSERT INTO g_parent',
+                'INSERT INTO g_parent',
+                'INSERT INTO g_parent',
+                'INSERT INTO g_parent',
+                'DELETE FROM g_parent',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'DELETE FROM g_child',
+            ], $sqls);
+        }
+
+        foreach ($sqls as $sql) {
+            $database->executeAffect($sql);
+        }
+
+        $sqls = $database->dryrun()->save('g_ancestor', [
+            'ancestor_name' => 'C',
+            'g_parent'      => [
+                [
+                    'parent_name' => 'CA',
+                    'g_child'     => [
+                        [
+                            'child_name' => 'CAA',
+                        ],
+                        [
+                            'child_name' => 'CAB',
+                        ],
+                    ],
+                    'g_grand1'    => [
+                        [
+                            'grand1_name' => 'CAA',
+                        ],
+                        [
+                            'grand1_name' => 'CAB',
+                        ],
+                    ],
+                ],
+                [
+                    'parent_name' => 'AB',
+                    'g_child'     => [
+                        [
+                            'child_name' => 'CBA',
+                        ],
+                        [
+                            'child_name' => 'CBB',
+                        ],
+                    ],
+                    'g_grand1'    => [
+                        [
+                            'grand1_name' => 'CBA',
+                        ],
+                        [
+                            'grand1_name' => 'CBB',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+        $this->assertArrayStartsWith([
+            'INSERT INTO g_ancestor',
+            'INSERT INTO g_parent',
+            'INSERT INTO g_parent',
+            'DELETE FROM g_parent',
+            'INSERT INTO g_child',
+            'INSERT INTO g_child',
+            'INSERT INTO g_child',
+            'INSERT INTO g_child',
+            'DELETE FROM g_child',
+            'INSERT INTO g_grand1',
+            'INSERT INTO g_grand1',
+            'INSERT INTO g_grand1',
+            'INSERT INTO g_grand1',
+            'DELETE FROM g_grand1',
+        ], $sqls);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_loadCsv($database)
     {
         // SqlServer はいろいろと辛いので除外（ID 列さえ除けば多分動くはず）
@@ -5051,6 +5222,72 @@ INSERT INTO test (id, name) VALUES
 
         // 一連の流れで mainid=2 に波及していないことを担保
         $this->assertEquals($mainid2, $database->selectArray('multiprimary', ['mainid' => 2]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_changeArray_misc($database)
+    {
+        $changed = $database->dryrun()->changeArray('test', [], true);
+        $this->assertEquals([], $changed[0]);
+        $this->assertArrayStartsWith(['DELETE FROM'], $changed[1]);
+
+        $changed = $database->dryrun()->changeArray('test', [
+            ['id' => 1, 'name' => 'X'],
+            ['id' => 2, 'name' => 'Y'],
+            ['id' => null, 'name' => 'Z'],
+        ], true);
+
+        $this->assertEquals([
+            ['id' => 1],
+            ['id' => 2],
+            ['id' => 11],
+        ], $changed[0]);
+
+        if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
+            $this->assertArrayStartsWith([
+                'INSERT INTO test',
+                'INSERT INTO test',
+                'DELETE FROM test',
+            ], $changed[1]);
+        }
+        else {
+            $this->assertArrayStartsWith([
+                'UPDATE test',
+                'UPDATE test',
+                'INSERT INTO test',
+                'DELETE FROM test',
+            ], $changed[1]);
+        }
+
+        $changed = $database->dryrun()->changeArray('multiprimary', [
+            ['mainid' => 1, 'subid' => 1, 'name' => 'X'],
+            ['mainid' => 1, 'subid' => 2, 'name' => 'Y'],
+            ['mainid' => 1, 'subid' => 3, 'name' => 'Z'],
+        ], ['mainid' => 1]);
+
+        $this->assertEquals([
+            ['mainid' => 1, 'subid' => 1],
+            ['mainid' => 1, 'subid' => 2],
+            ['mainid' => 1, 'subid' => 3],
+        ], $changed[0]);
+
+        if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
+            $this->assertArrayStartsWith([
+                'INSERT INTO multiprimary',
+                'DELETE FROM multiprimary',
+            ], $changed[1]);
+        }
+        else {
+            $this->assertArrayStartsWith([
+                'UPDATE multiprimary',
+                'UPDATE multiprimary',
+                'UPDATE multiprimary',
+                'DELETE FROM multiprimary',
+            ], $changed[1]);
+        }
     }
 
     /**
