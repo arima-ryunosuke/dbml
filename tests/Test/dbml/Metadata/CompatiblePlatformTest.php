@@ -83,7 +83,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsIdentityAutoUpdate($cplatform, $platform)
     {
-        $expected = !$platform instanceof PostgreSqlPlatform;
+        $expected = !($platform instanceof PostgreSqlPlatform || $platform instanceof OraclePlatform);
         $this->assertEquals($expected, $cplatform->supportsIdentityAutoUpdate());
     }
 
@@ -277,11 +277,11 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         $expected = $platform instanceof SQLServerPlatform ? 'w$%o$_r$[d' : 'w$%o$_r[d';
         $this->assertEquals($expected, $cplatform->escapeLike('w%o_r[d', '$'));
 
-        $expected = $platform instanceof SQLServerPlatform ? 'w[%]o[_]r[[]d' : 'w\\%o\\_r[d';
+        $expected = $platform instanceof SQLServerPlatform ? 'w\\%o\\_r\\[d' : 'w\\%o\\_r[d';
         $this->assertEquals($expected, $cplatform->escapeLike('w%o_r[d'));
 
-        $expected = $platform instanceof SQLServerPlatform ? 'a[%]%m%%x%y' : 'a\\%%m%%x%y';
-        $this->assertEquals($expected, $cplatform->escapeLike(['a%', new Expression('m%'), ['x', 'y']]));
+        $expected = $platform instanceof SQLServerPlatform ? '\\[a\\%%m%%x%y' : '[a\\%%m%%x%y';
+        $this->assertEquals($expected, $cplatform->escapeLike(['[a%', new Expression('m%'), ['x', 'y']]));
     }
 
     /**

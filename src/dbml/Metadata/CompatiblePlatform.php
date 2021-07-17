@@ -99,10 +99,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsIdentityAutoUpdate()
     {
-        if ($this->platform instanceof PostgreSqlPlatform) {
-            return false;
-        }
-        return true;
+        return !$this->platform->usesSequenceEmulatedIdentityColumns();
     }
 
     /**
@@ -358,26 +355,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return "$word";
         }
 
-        // SQLServer は [] でエスケープ可能
-        if (func_num_args() === 1 && $this->platform instanceof SQLServerPlatform) {
-            $map = [
-                '_' => '[_]',
-                '%' => '[%]',
-                '[' => '[[]',
-            ];
-            return strtr($word, $map);
-        }
-
-        $map = [
-            $escaper => $escaper . $escaper,
-            '_'      => $escaper . '_',
-            '%'      => $escaper . '%',
-        ];
-        // SQLServer は [] で文字範囲検索もできるのでそれもエスケープ
-        if ($this->platform instanceof SQLServerPlatform) {
-            $map['['] = $escaper . '[';
-        }
-        return strtr($word, $map);
+        return $this->platform->escapeStringForLike($word, $escaper);
     }
 
     /**
