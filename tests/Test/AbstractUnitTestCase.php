@@ -735,6 +735,13 @@ abstract class AbstractUnitTestCase extends TestCase
         self::readyRecord();
     }
 
+    protected function tearDown()
+    {
+        parent::tearDown();
+
+        gc_collect_cycles();
+    }
+
     public static function createTables(Connection $connection, $tableorviews)
     {
         /** @var AbstractAsset $tableorview */
@@ -821,6 +828,14 @@ abstract class AbstractUnitTestCase extends TestCase
         $expected = preg_replace('/[\r\n]/', ' ', trim($expected, "\r\n"));
         $actual = preg_replace('/[\r\n]/', ' ', trim($actual, "\r\n"));
         self::assertEquals($expected, $actual);
+    }
+
+    public static function assertArrayStartsWith($expected, $actual, $message = '')
+    {
+        foreach ($expected as $k => $v) {
+            self::assertArrayHasKey($k, $actual);
+            self::assertStringStartsWith($v, $actual[$k]);
+        }
     }
 
     public static function forcedCallize($callable, $method = null)

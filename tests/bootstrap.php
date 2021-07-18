@@ -6,12 +6,15 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/annotation.php';
 require_once __DIR__ . '/classess.php';
 
-function var_pretty($v, ...$args)
+function var_pretty(...$args)
 {
-    return \ryunosuke\dbml\var_pretty($v, [
-        'return' => false,
-        'trace'  => true,
-    ]);
+    foreach ($args as $n => $arg) {
+        \ryunosuke\dbml\var_pretty($arg, [
+            'return'    => false,
+            'trace'     => $n === 0,
+            'maxcolumn' => 110,
+        ]);
+    }
 }
 
 (function () {
