@@ -16,6 +16,7 @@ use PHPUnit\Framework\Error\Error;
 use PHPUnit\Framework\Exception;
 use PHPUnit\Framework\SkippedTestError;
 use PHPUnit\Framework\TestCase;
+use function ryunosuke\dbml\cacheobject;
 use function ryunosuke\dbml\class_shorten;
 
 abstract class AbstractUnitTestCase extends TestCase
@@ -535,7 +536,9 @@ abstract class AbstractUnitTestCase extends TestCase
                     [new ForeignKeyConstraint(['cid'], 'foreign_p', ['id'], 'fk_parentchild2')]
                 ),
             ]);
-            self::$database = new Database($connection);
+            self::$database = new Database($connection, [
+                'cacheProvider' => cacheobject(sys_get_temp_dir() . '/dbml-dummy'),
+            ]);
         }
         return self::$database;
     }

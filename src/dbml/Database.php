@@ -2,7 +2,6 @@
 
 namespace ryunosuke\dbml;
 
-use Doctrine\Common\Cache\CacheProvider;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Event\Listeners\SQLSessionInit;
@@ -37,9 +36,6 @@ use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\dbml\Utility\Adhoc;
-use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\Cache\Adapter\DoctrineAdapter;
-use Symfony\Component\Cache\Psr16Cache;
 
 // @formatter:off
 /**
@@ -662,7 +658,7 @@ class Database
     {
         $default_options = [
             // キャッシュオブジェクト
-            'cacheProvider'        => new Psr16Cache(new ArrayAdapter()),
+            'cacheProvider'        => null,
             // 初期化後の SQL コマンド（mysql@PDO でいう MYSQL_ATTR_INIT_COMMAND）
             'initCommand'          => null,
             // テーブル名 => Entity クラス名のコンバータ
@@ -879,12 +875,17 @@ class Database
         $this->vtables = new \ArrayObject();
         $this->cache = new \ArrayObject();
 
-        $this->setDefault($options);
+        if (!isset($options['cacheProvider'])) {
+            $source = array_pickup($this->txConnection->getParams(), ['url', 'driver', 'host', 'port', 'user', 'password', 'dbname']);
+            $options['cacheProvider'] = cacheobject(sys_get_temp_dir() . '/' . sha1(serialize($source)));
+        }
 
         // for compatible
-        if ($this->getUnsafeOption('cacheProvider') instanceof CacheProvider) {
-            $this->setOption('cacheProvider', new Psr16Cache(new DoctrineAdapter($this->getUnsafeOption('cacheProvider')))); // @codeCoverageIgnore
+        if ($options['cacheProvider'] instanceof \Doctrine\Common\Cache\CacheProvider) {
+            $options['cacheProvider'] = new \Symfony\Component\Cache\Psr16Cache(new \Symfony\Component\Cache\Adapter\DoctrineAdapter($this->getUnsafeOption('cacheProvider'))); // @codeCoverageIgnore
         }
+
+        $this->setDefault($options);
 
         foreach ($this->getConnections() as $con) {
             $commands = (array) $this->getUnsafeOption('initCommand');
