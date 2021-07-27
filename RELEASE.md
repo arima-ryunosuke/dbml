@@ -22,6 +22,13 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.13
+
+- [refactor][CompatiblePlatform] dbal と重複している機能を委譲
+- [feature][Database] 一部対応していなかった affect 系メソッドの dryrun に対応
+- [fixbug][Database] symfony/cache が入っていない環境でエラーになっていた不具合を修正
+- [fixbug][Database] 自動採番列 が null のときに伏せる処理があると modify がコケることがある不具合を修正
+
 ## 2.0.12
 
 - [fixbug][Database] echoPhpStormMeta で autoCastType を考慮するように修正
