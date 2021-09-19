@@ -10,7 +10,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
     private static $platform;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
 
@@ -23,7 +23,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         });
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         parent::tearDownAfterClass();
 

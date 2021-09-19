@@ -25,7 +25,7 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
         ];
     }
 
-    function setUp()
+    function setUp(): void
     {
         $this->setDefault(static::getDefaultOptions());
     }

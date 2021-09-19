@@ -631,78 +631,78 @@ use function ryunosuke\dbml\try_finally;
  *     駆動表を省略できる <@uses Database::selectAvg()>
  * }
  *
- * @method array                  insertOrThrow($data) {
+ * @method array|string           insertOrThrow($data) {
  *     <@uses TableGateway::insert()> の例外送出版
  * }
- * @method array                  updateOrThrow($data, array $identifier = []) {
+ * @method array|string           updateOrThrow($data, array $identifier = []) {
  *     <@uses TableGateway::update()> の例外送出版
  * }
- * @method array                  deleteOrThrow(array $identifier = []) {
+ * @method array|string           deleteOrThrow(array $identifier = []) {
  *     <@uses TableGateway::delete()> の例外送出版
  * }
- * @method array                  removeOrThrow(array $identifier = []) {
+ * @method array|string           removeOrThrow(array $identifier = []) {
  *     <@uses TableGateway::remove()> の例外送出版
  * }
- * @method array                  destroyOrThrow(array $identifier = []) {
+ * @method array|string[]         destroyOrThrow(array $identifier = []) {
  *     <@uses TableGateway::destroy()> の例外送出版
  * }
- * @method array                  reduceOrThrow($limit = null, $orderBy = [], $groupBy = [], $identifier = []) {
+ * @method array|string           reduceOrThrow($limit = null, $orderBy = [], $groupBy = [], $identifier = []) {
  *     <@uses TableGateway::reduce()> の例外送出版
  * }
- * @method array                  upsertOrThrow($insertData, $updateData = []) {
+ * @method array|string           upsertOrThrow($insertData, $updateData = []) {
  *     <@uses TableGateway::upsert()> の例外送出版
  * }
- * @method array                  modifyOrThrow($insertData, $updateData = []) {
+ * @method array|string           modifyOrThrow($insertData, $updateData = []) {
  *     <@uses TableGateway::modify()> の例外送出版
  * }
- * @method array                  replaceOrThrow($data) {
+ * @method array|string           replaceOrThrow($data) {
  *     <@uses TableGateway::replace()> の例外送出版
  * }
  *
- * @method array                  insertSelectIgnore($sql, $columns = [], iterable $params = []) {
+ * @method array|string           insertSelectIgnore($sql, $columns = [], iterable $params = []) {
  *     駆動表を省略できる <@uses Database::insertSelectIgnore()>
  * }
- * @method array                  insertArrayIgnore($data, $chunk = 0) {
+ * @method array|string           insertArrayIgnore($data, $chunk = 0) {
  *     駆動表を省略できる <@uses Database::insertArrayIgnore()>
  * }
- * @method array                  updateArrayIgnore($data, $identifier = []) {
+ * @method array|string           updateArrayIgnore($data, $identifier = []) {
  *     駆動表を省略できる <@uses Database::updateArrayIgnore()>
  * }
- * @method array                  modifyArrayIgnore($insertData, $updateData = [], $chunk = 0) {
+ * @method array|string           modifyArrayIgnore($insertData, $updateData = [], $chunk = 0) {
  *     駆動表を省略できる <@uses Database::modifyArrayIgnore()>
  * }
  * @method array                  changeArrayIgnore($dataarray, $identifier) {
  *     駆動表を省略できる <@uses Database::changeArrayIgnore()>
  * }
- * @method array                  saveIgnore($data) {
+ * @method array|string[]         saveIgnore($data) {
  *     駆動表を省略できる <@uses Database::saveIgnore()>
  * }
- * @method array                  insertIgnore($data) {
+ * @method array|string           insertIgnore($data) {
  *     駆動表を省略できる <@uses Database::insertIgnore()>
  * }
- * @method array                  updateIgnore($data, array $identifier = []) {
+ * @method array|string           updateIgnore($data, array $identifier = []) {
  *     駆動表を省略できる <@uses Database::updateIgnore()>
  * }
- * @method array                  deleteIgnore(array $identifier = []) {
+ * @method array|string           deleteIgnore(array $identifier = []) {
  *     駆動表を省略できる <@uses Database::deleteIgnore()>
  * }
- * @method array                  removeIgnore(array $identifier = []) {
+ * @method array|string           removeIgnore(array $identifier = []) {
  *     駆動表を省略できる <@uses Database::removeIgnore()>
  * }
- * @method array                  destroyIgnore(array $identifier = []) {
+ * @method array|string[]         destroyIgnore(array $identifier = []) {
  *     駆動表を省略できる <@uses Database::destroyIgnore()>
  * }
- * @method array                  modifyIgnore($insertData, $updateData = []) {
+ * @method array|string           modifyIgnore($insertData, $updateData = []) {
  *     駆動表を省略できる <@uses Database::modifyIgnore()>
  * }
  *
- * @method array                  insertConditionally($condition, $data) {
+ * @method array|string           insertConditionally($condition, $data) {
  *     駆動表を省略できる <@uses Database::insertConditionally()>
  * }
- * @method array                  upsertConditionally($condition, $insertData, $updateData = []) {
+ * @method array|string           upsertConditionally($condition, $insertData, $updateData = []) {
  *     駆動表を省略できる <@uses Database::upsertConditionally()>
  * }
- * @method array                  modifyConditionally($condition, $insertData, $updateData = []) {
+ * @method array|string           modifyConditionally($condition, $insertData, $updateData = []) {
  *     駆動表を省略できる <@uses Database::modifyConditionally()>
  * }
  *

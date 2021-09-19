@@ -1304,13 +1304,13 @@ AND
         $builder->unselect(0);
 
         $builder->unselect(0, 'article_id', 'title', 'callback', 'comments', 'comment_count');
-        $this->assertStringNotContainsString('dummy1', (string) $builder);   // by 0
-        $this->assertStringNotContainsString('dummy2', (string) $builder);   // by 0 (reseq)
-        $this->assertStringContainsString('article_id', (string) $builder);  // no match
-        $this->assertStringContainsString('AS id', (string) $builder);       // no specified
-        $this->assertStringNotContainsString('title', (string) $builder);    // match
-        $this->assertStringNotContainsString('callback', (string) $builder); // match (callbacks)
-        $this->assertStringNotContainsString('comments', (string) $builder); // match (subbuilder)
+        $this->assertStringNotContainsString('dummy1', (string) $builder);        // by 0
+        $this->assertStringNotContainsString('dummy2', (string) $builder);        // by 0 (reseq)
+        $this->assertStringContainsString('article_id', (string) $builder);       // no match
+        $this->assertStringContainsString('AS id', (string) $builder);            // no specified
+        $this->assertStringNotContainsString('title', (string) $builder);         // match
+        $this->assertStringNotContainsString('callback', (string) $builder);      // match (callbacks)
+        $this->assertStringNotContainsString('comments', (string) $builder);      // match (subbuilder)
         $this->assertStringNotContainsString('comment_count', (string) $builder); // match (virtual column)
         $this->assertEquals([
             'article_id' => 1,
@@ -2197,9 +2197,9 @@ SQL
 
         $builder->setNullsOrder('hoge');
         @$builder->orderBy('hoge')->getQuery();
-        $this->assertContains('hoge is not supported', error_get_last()['message']);
+        $this->assertStringContainsString('hoge is not supported', error_get_last()['message']);
         @$builder->orderBy(new Expression('? + ?', [1, 2]))->getQuery();
-        $this->assertContains('is not support parametable query', error_get_last()['message']);
+        $this->assertStringContainsString('is not support parametable query', error_get_last()['message']);
     }
 
     /**
@@ -4087,7 +4087,7 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
 
         $builder->reset()->detectAutoOrder(true);
         $this->assertEquals('invalid QueryBuilder', @"$builder");
-        $this->assertContains('query builder is not set "from"', error_get_last()['message']);
+        $this->assertStringContainsString('query builder is not set "from"', error_get_last()['message']);
     }
 
     public static function assertQuery($expected, $actual, $message = '')

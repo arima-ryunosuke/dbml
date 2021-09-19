@@ -223,10 +223,10 @@ select 4, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
         ]));
         $database->fetchArray('select ?', [1]);
 
-        $this->assertContains("-- time: 20", $logs[0]);
-        $this->assertContains("-- elapsed: 0.", $logs[0]);
-        $this->assertContains("-- traces[]", $logs[0]);
-        $this->assertContains(__FILE__, $logs[0]);
+        $this->assertStringContainsString("-- time: 20", $logs[0]);
+        $this->assertStringContainsString("-- elapsed: 0.", $logs[0]);
+        $this->assertStringContainsString("-- traces[]", $logs[0]);
+        $this->assertStringContainsString(__FILE__, $logs[0]);
     }
 
     function test_metadata_custom()

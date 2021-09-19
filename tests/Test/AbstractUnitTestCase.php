@@ -543,7 +543,7 @@ abstract class AbstractUnitTestCase extends TestCase
         return self::$database;
     }
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
 
@@ -686,7 +686,7 @@ abstract class AbstractUnitTestCase extends TestCase
         }
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -738,7 +738,7 @@ abstract class AbstractUnitTestCase extends TestCase
         self::readyRecord();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
 
@@ -819,7 +819,7 @@ abstract class AbstractUnitTestCase extends TestCase
                 self::assertEquals($e->getCode(), $ex->getCode());
             }
             if (strlen($e->getMessage()) > 0) {
-                self::assertContains($e->getMessage(), $ex->getMessage());
+                self::assertStringContainsString($e->getMessage(), $ex->getMessage());
             }
             return;
         }

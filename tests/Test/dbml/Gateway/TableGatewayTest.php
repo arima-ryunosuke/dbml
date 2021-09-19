@@ -1326,6 +1326,7 @@ AND ((flag=1))", "$gw");
         /// insertSelect
         $gateway->insertSelect($gateway->select(['name', 'data']), ['name', 'data']);
         $this->assertEquals($count * 2, $count = $gateway->count());
+        $this->assertEquals(24, $count);
 
         // truncate すると全て吹き飛ぶはず
         $gateway->truncate();

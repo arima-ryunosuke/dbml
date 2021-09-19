@@ -458,72 +458,72 @@ use ryunosuke\dbml\Utility\Adhoc;
  *     AVG クエリを返す（<@uses Database::selectAggregate()> を参照）
  * }
  *
- * @method array                  insertOrThrow($tableName, $data) {
+ * @method array|string           insertOrThrow($tableName, $data) {
  *     <@uses Database::insert()> の例外送出版
  * }
- * @method array                  updateOrThrow($tableName, $data, array $identifier = []) {
+ * @method array|string           updateOrThrow($tableName, $data, array $identifier = []) {
  *     <@uses Database::update()> の例外送出版
  * }
- * @method array                  deleteOrThrow($tableName, array $identifier = []) {
+ * @method array|string           deleteOrThrow($tableName, array $identifier = []) {
  *     <@uses Database::delete()> の例外送出版
  * }
- * @method array                  removeOrThrow($tableName, array $identifier = []) {
+ * @method array|string           removeOrThrow($tableName, array $identifier = []) {
  *     <@uses Database::remove()> の例外送出版
  * }
- * @method array                  destroyOrThrow($tableName, array $identifier = []) {
+ * @method array|string[]         destroyOrThrow($tableName, array $identifier = []) {
  *     <@uses Database::destroy()> の例外送出版
  * }
- * @method array                  reduceOrThrow($tableName, $limit = null, $orderBy = [], $groupBy = [], $identifier = []) {
+ * @method array|string           reduceOrThrow($tableName, $limit = null, $orderBy = [], $groupBy = [], $identifier = []) {
  *     <@uses Database::reduce()> の例外送出版
  * }
- * @method array                  upsertOrThrow($tableName, $insertData, $updateData = []) {
+ * @method array|string           upsertOrThrow($tableName, $insertData, $updateData = []) {
  *     <@uses Database::upsert()> の例外送出版
  * }
- * @method array                  modifyOrThrow($tableName, $insertData, $updateData = []) {
+ * @method array|string           modifyOrThrow($tableName, $insertData, $updateData = []) {
  *     <@uses Database::modify()> の例外送出版
  * }
- * @method array                  replaceOrThrow($tableName, $data) {
+ * @method array|string           replaceOrThrow($tableName, $data) {
  *     <@uses Database::replace()> の例外送出版
  * }
  *
- * @method array                  insertSelectIgnore($tableName, $sql, $columns = [], iterable $params = []) {
+ * @method array|string           insertSelectIgnore($tableName, $sql, $columns = [], iterable $params = []) {
  *     IGNORE 付き <@uses Database::insertSelect()>
  * }
- * @method array                  insertArrayIgnore($tableName, $data, $chunk = 0) {
+ * @method array|string           insertArrayIgnore($tableName, $data, $chunk = 0) {
  *     IGNORE 付き <@uses Database::insertArray()>
  * }
- * @method array                  updateArrayIgnore($tableName, $data, $identifier = []) {
+ * @method array|string           updateArrayIgnore($tableName, $data, $identifier = []) {
  *     IGNORE 付き <@uses Database::updateArray()>
  * }
- * @method array                  modifyArrayIgnore($tableName, $insertData, $updateData = [], $chunk = 0) {
+ * @method array|string           modifyArrayIgnore($tableName, $insertData, $updateData = [], $chunk = 0) {
  *     IGNORE 付き <@uses Database::modifyArray()>
  * }
  * @method array                  changeArrayIgnore($tableName, $dataarray, $identifier) {
  *     IGNORE 付き <@uses Database::changeArray()>
  * }
- * @method array                  saveIgnore($tableName, $data) {
+ * @method array|string[]         saveIgnore($tableName, $data) {
  *     IGNORE 付き <@uses Database::save()>
  * }
- * @method array                  insertIgnore($tableName, $data) {
+ * @method array|string           insertIgnore($tableName, $data) {
  *     IGNORE 付き <@uses Database::insert()>
  * }
- * @method array                  updateIgnore($tableName, $data, array $identifier = []) {
+ * @method array|string           updateIgnore($tableName, $data, array $identifier = []) {
  *     IGNORE 付き <@uses Database::update()>
  * }
- * @method array                  deleteIgnore($tableName, array $identifier = []) {
+ * @method array|string           deleteIgnore($tableName, array $identifier = []) {
  *     IGNORE 付き <@uses Database::delete()>
  * }
- * @method array                  removeIgnore($tableName, array $identifier = []) {
+ * @method array|string           removeIgnore($tableName, array $identifier = []) {
  *     IGNORE 付き <@uses Database::remove()>
  * }
- * @method array                  destroyIgnore($tableName, array $identifier = []) {
+ * @method array|string[]         destroyIgnore($tableName, array $identifier = []) {
  *     IGNORE 付き <@uses Database::destroy()>
  * }
- * @method array                  modifyIgnore($tableName, $insertData, $updateData = []) {
+ * @method array|string           modifyIgnore($tableName, $insertData, $updateData = []) {
  *     IGNORE 付き <@uses Database::modify()>
  * }
  *
- * @method array                  insertConditionally($tableName, $condition, $data) {
+ * @method array|string           insertConditionally($tableName, $condition, $data) {
  *     条件付き <@uses Database::insert()>
  *
  *     $condition が WHERE 的判定され、合致しないときは insert が行われない。
@@ -533,7 +533,7 @@ use ryunosuke\dbml\Utility\Adhoc;
  *
  *     @param QueryBuilder|string|array $condition WHERE 条件 or Select オブジェクト
  * }
- * @method array                  upsertConditionally($tableName, $condition, $insertData, $updateData = []) {
+ * @method array|string           upsertConditionally($tableName, $condition, $insertData, $updateData = []) {
  *     条件付き <@uses Database::upsert()>
  *
  *     $condition が WHERE 的判定され、合致しないときは upsert が行われない。
@@ -543,7 +543,7 @@ use ryunosuke\dbml\Utility\Adhoc;
  *
  *     @param QueryBuilder|string|array $condition WHERE 条件 or Select オブジェクト
  * }
- * @method array                  modifyConditionally($tableName, $condition, $insertData, $updateData = []) {
+ * @method array|string           modifyConditionally($tableName, $condition, $insertData, $updateData = []) {
  *     条件付き <@uses Database::modify()>
  *
  *     $condition が WHERE 的判定され、合致しないときは modify が行われない。
@@ -1084,9 +1084,9 @@ class Database
     {
         $classname = __CLASS__;
         $properties = (array) $this;
-        unset($properties["\0$classname\0connections"]); // 旨味が少ない（有益な情報があまりない）
+        unset($properties["\0$classname\0connections"]);  // 旨味が少ない（有益な情報があまりない）
         unset($properties["\0$classname\0txConnection"]); // connections と同じ
-        unset($properties["\0$classname\0cache"]); // 不要（個別に見れば良い）
+        unset($properties["\0$classname\0cache"]);        // 不要（個別に見れば良い）
         return $properties;
     }
 
@@ -1182,7 +1182,6 @@ class Database
                     public function fetchAllAssociative(): array
                     {
                         return (function () {
-                            /** @noinspection PhpUndefinedMethodInspection */
                             return $this->fetchAll(\PDO::FETCH_ASSOC | \PDO::FETCH_NAMED);
                         })->call($this->result);
                     }

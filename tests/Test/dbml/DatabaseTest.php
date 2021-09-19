@@ -1220,25 +1220,25 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $database->setInjectCallStack('DatabaseTest.php');
         $database->executeSelect('select * from test');
-        $this->assertContains(__FILE__, $logger->queries[1]['sql']);
+        $this->assertStringContainsString(__FILE__, $logger->queries[1]['sql']);
 
         $database->setInjectCallStack('!vendor');
         $database->executeSelect('select * from test');
-        $this->assertContains('Database.php#', $logger->queries[2]['sql']);
-        $this->assertNotContains('phpunit', $logger->queries[2]['sql']);
+        $this->assertStringContainsString('Database.php#', $logger->queries[2]['sql']);
+        $this->assertStringNotContainsString('phpunit', $logger->queries[2]['sql']);
 
         $database->setInjectCallStack(['DatabaseTest.php', '!phpunit']);
         $database->executeSelect('select * from test');
-        $this->assertContains(__FILE__, $logger->queries[3]['sql']);
-        $this->assertNotContains('phpunit', $logger->queries[3]['sql']);
+        $this->assertStringContainsString(__FILE__, $logger->queries[3]['sql']);
+        $this->assertStringNotContainsString('phpunit', $logger->queries[3]['sql']);
 
         $database->setInjectCallStack('DatabaseTest.php');
         $database->executeAffect("update test set name='hoge'");
-        $this->assertContains(__FILE__, $logger->queries[4]['sql']);
+        $this->assertStringContainsString(__FILE__, $logger->queries[4]['sql']);
 
         $database->setInjectCallStack(function ($path) { return preg_match('/phpunit$/', $path); });
         $database->executeAffect("update test set name='hoge'");
-        $this->assertContains('phpunit#', $logger->queries[5]['sql']);
+        $this->assertStringContainsString('phpunit#', $logger->queries[5]['sql']);
 
         $database->setInjectCallStack(null);
         $database->getConnection()->getConfiguration()->setSQLLogger(null);
@@ -1536,8 +1536,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals("select $quoted", $query1);
         $this->assertEquals("select $quoted", $query2);
         // 視認しづらいので、実際に投げてエラーにならないことを担保する
-        $this->assertContains('EvilString', $database->fetchValue($query1));
-        $this->assertContains('EvilString', $database->fetchValue($query2));
+        $this->assertStringContainsString('EvilString', $database->fetchValue($query1));
+        $this->assertStringContainsString('EvilString', $database->fetchValue($query2));
 
         // Queryable とパラメータを投げることは出来ない（足りない分を補填する形ならOKだが、大抵の場合は誤り）
         $this->assertException("long", L($database)->queryInto(new Expression('?,?,?', [1, 2, 3]), [1, 2, 3]));
@@ -2527,15 +2527,15 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     function test_getAnnotation($database)
     {
         $annotation = $database->getAnnotation();
-        $this->assertContains('$t_article', $annotation);
-        $this->assertContains('$Comment', $annotation);
-        $this->assertContains(\ryunosuke\dbml\Gateway\TableGateway::class, $annotation);
-        $this->assertContains(\ryunosuke\Test\Gateway\Article::class, $annotation);
-        $this->assertContains(\ryunosuke\Test\Gateway\Comment::class, $annotation);
+        $this->assertStringContainsString('$t_article', $annotation);
+        $this->assertStringContainsString('$Comment', $annotation);
+        $this->assertStringContainsString(\ryunosuke\dbml\Gateway\TableGateway::class, $annotation);
+        $this->assertStringContainsString(\ryunosuke\Test\Gateway\Article::class, $annotation);
+        $this->assertStringContainsString(\ryunosuke\Test\Gateway\Comment::class, $annotation);
 
         $annotation = $database->getAnnotation(['t_article', 'Comment']);
-        $this->assertNotContains('$t_article', $annotation);
-        $this->assertNotContains('$Comment', $annotation);
+        $this->assertStringNotContainsString('$t_article', $annotation);
+        $this->assertStringNotContainsString('$Comment', $annotation);
 
         $this->assertNull($database->getAnnotation('*'));
     }
@@ -4066,8 +4066,8 @@ INSERT INTO test (id, name) VALUES
             'id'   => 1,
             'name' => 'a',
         ]);
-        $this->assertContains('INSERT INTO test (id, name) SELECT', $sql);
-        $this->assertContains('WHERE (NOT EXISTS (SELECT * FROM test WHERE id =', $sql);
+        $this->assertStringContainsString('INSERT INTO test (id, name) SELECT', $sql);
+        $this->assertStringContainsString('WHERE (NOT EXISTS (SELECT * FROM test WHERE id =', $sql);
     }
 
     /**
@@ -4118,8 +4118,8 @@ INSERT INTO test (id, name) VALUES
                 'name' => new Expression("UPPER('fuga')"),
             ],
         ], ['seq' => 9]);
-        $this->assertContains("INTO foreign_p (id, name) VALUES (99, 'hoge')", $sqls[0]);
-        $this->assertContains("INTO foreign_c1 (seq, name, id) VALUES ('9', UPPER('fuga'), '99')", $sqls[1]);
+        $this->assertStringContainsString("INTO foreign_p (id, name) VALUES (99, 'hoge')", $sqls[0]);
+        $this->assertStringContainsString("INTO foreign_c1 (seq, name, id) VALUES ('9', UPPER('fuga'), '99')", $sqls[1]);
 
         $this->assertException(new \InvalidArgumentException('specify multiple table'), L($database)->insert('test1,test2', ['X']));
         $this->assertException(new \InvalidArgumentException('data array are difference'), L($database)->insert('test.name', ['X', 'Y']));
@@ -5009,9 +5009,9 @@ INSERT INTO test (id, name) VALUES
                 'id'   => 10,
                 'name' => 'zzz',
             ]);
-            $this->assertContains('INSERT INTO test (id, name) SELECT', $sql);
-            $this->assertContains('WHERE (NOT EXISTS (SELECT * FROM test WHERE id =', $sql);
-            $this->assertContains('ON DUPLICATE KEY UPDATE id = VALUES(id), name = VALUES(name)', $sql);
+            $this->assertStringContainsString('INSERT INTO test (id, name) SELECT', $sql);
+            $this->assertStringContainsString('WHERE (NOT EXISTS (SELECT * FROM test WHERE id =', $sql);
+            $this->assertStringContainsString('ON DUPLICATE KEY UPDATE id = VALUES(id), name = VALUES(name)', $sql);
         }
     }
 
@@ -5052,7 +5052,7 @@ INSERT INTO test (id, name) VALUES
         $database->setInsertSet(true);
         if ($database->getCompatiblePlatform()->supportsInsertSet()) {
             $sql = $database->dryrun()->modifyOrThrow('test', ['name' => 'zz']);
-            $this->assertContains("INSERT INTO test SET name = 'zz' ", $sql);
+            $this->assertStringContainsString("INSERT INTO test SET name = 'zz' ", $sql);
         }
         unset($manager);
 

@@ -36,7 +36,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         ];
     }
 
-    function setUp()
+    function setUp(): void
     {
         parent::setUp();
 
@@ -353,7 +353,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         ]);
         $this->assertEquals(true, $schema->getTableColumns('metasample')['dummy']->getCustomSchemaOption('lazy')); // この時点では true
         $this->assertEquals('HOGE', $schema->getTableColumnExpression('metasample', 'dummy', 'select', 'hoge'));
-        $this->assertEquals('HOGE', $schema->getTableColumnExpression('metasample', 'dummy', 'select', 'fuga')); // キャッシュされるのでコールバックされない
+        $this->assertEquals('HOGE', $schema->getTableColumnExpression('metasample', 'dummy', 'select', 'fuga'));    // キャッシュされるのでコールバックされない
         $this->assertEquals(false, $schema->getTableColumns('metasample')['dummy']->getCustomSchemaOption('lazy')); // 呼ばれたので false
     }
 
