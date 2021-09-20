@@ -13,6 +13,7 @@ use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\arrayval;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\first_keyvalue;
+use function ryunosuke\dbml\quoteexplode;
 use function ryunosuke\dbml\str_subreplace;
 
 // @formatter:off
@@ -33,6 +34,7 @@ use function ryunosuke\dbml\str_subreplace;
  * | `'hoge:[~)' => [null, null]`                   | -                                            | バインド値に両方 null を渡すと条件自体が吹き飛ぶ
  * | `'hoge:LIKE%' => 'wo%rd'`                      | `hoge LIKE 'wo\%rd%'`                        | LIKEエスケープを施した上で右に"%"を付加してLIKEする。他にも `%LIKE` `%LIKE%` がある
  * | `'hoge:LIKEIN%' => ['he%lo', 'wo%rd']`         | `hoge LIKE 'he\%lo%' OR hoge LIKE 'wo\%rd%'` | 上記の配列IN版。構文的には `LIKE ANY('str1', 'str2')` みたいなもの
+ * | `'hoge:PHRASE' => 'word phrase'`             | `hoge LIKE '%word%' OR hoge LIKE '%phrase%'`   | いわゆる検索クエリを与えるとよしなに LIKE する。ダブルクォート:セパレータの無効化, ハイフン:NOT, パイプ:優先度高OR, スペース:AND, カンマ:優先度低OR
  * | `'hoge:NULLIN' => [1, 2, 3, NULL]`             | `hoge IN (1, 2, 3) OR hoge IS NULL`          | NULL を許容できる IN。 `[1, 2, 3, null]` などとすると IN(1, 2, 3) or NULL のようになる
  *
  * ```php
@@ -76,6 +78,7 @@ use function ryunosuke\dbml\str_subreplace;
  * @method static $this likeIn(...$words) {LIKEIN 演算子}
  * @method static $this likeInLeft(...$words) {%LIKEIN 演算子}
  * @method static $this likeInRight(...$words) {LIKEIN% 演算子}
+ * @method static $this phrase($phrase) {フレーズ演算子}
  */
 // @formatter:on
 class Operator implements Queryable
@@ -105,6 +108,7 @@ class Operator implements Queryable
     public const OP_RIGHT_LIKEIN  = 'LIKEIN%';  // x LIKE "hoge%" OR x LIKE "fuga%"
     public const OP_LEFT_LIKEIN   = '%LIKEIN';  // x LIKE "%hoge" OR x LIKE "%fuga"
     public const OP_BOTH_LIKEIN   = '%LIKEIN%'; // x LIKE "%hoge%" OR x LIKE "%fuga%"
+    public const OP_PHRASE        = 'PHRASE';   // (x LIKE "%hoge%" AND (x LIKE "%foo%" OR x LIKE "%bar%")) OR NOT (x LIKE "%fuga%")
     public const OP_RANGE         = '(~)';      // x > 1 && x <  9
     public const OP_RANGE_LTE     = '[~)';      // x >= 1 && x <  9
     public const OP_RANGE_GTE     = '(~]';      // x > 1 && x <= 9
@@ -126,6 +130,7 @@ class Operator implements Queryable
         self::OP_RIGHT_LIKEIN  => ['magic' => 'likeInRight', 'method' => ['_likein' => ['', '%']]],
         self::OP_LEFT_LIKEIN   => ['magic' => 'likeInLeft', 'method' => ['_likein' => ['%', '']]],
         self::OP_BOTH_LIKEIN   => ['magic' => 'likeIn', 'method' => ['_likein' => ['%', '%']]],
+        self::OP_PHRASE        => ['magic' => 'phrase', 'method' => ['_phrase' => []]],
         self::OP_LT            => ['magic' => 'lt', 'method' => ['_default' => []]],
         self::OP_LTE           => ['magic' => 'lte', 'method' => ['_default' => []]],
         self::OP_GT            => ['magic' => 'gt', 'method' => ['_default' => []]],
@@ -275,6 +280,7 @@ class Operator implements Queryable
      * @uses _like()
      * @uses _likein()
      * @uses _range()
+     * @uses _phrase()
      *
      * @return string
      */
@@ -396,6 +402,33 @@ class Operator implements Queryable
         $this->params = array_map(function ($operand) use ($l, $r) {
             return $l . $this->platform->escapeLike($operand) . $r;
         }, $this->operand2);
+    }
+
+    private function _phrase()
+    {
+        $split = function ($delimiter, $string) {
+            return array_filter(array_map('trim', quoteexplode($delimiter, $string, null, ['"' => '"'], '\\')), 'strlen');
+        };
+
+        $params = [];
+        $likes = [];
+        foreach ($split(',', $this->operand2[0]) as $i => $sentence) {
+            foreach ($split(" ", $sentence) as $j => $phrase) {
+                foreach ($split("|", $phrase) as $k => $word) {
+                    $like = $this->operand1 . ' LIKE ?';
+                    if ($word[0] === '-') {
+                        $like = "NOT ($like)";
+                        $word = substr($word, 1);
+                    }
+                    $likes[$i][$j][$k] = $like;
+                    $params[] = '%' . trim(stripslashes(strtr($this->platform->escapeLike($word), [' ' => '%'])), '"') . '%';
+                }
+                $likes[$i][$j] = implode(' OR ', Adhoc::wrapParentheses($likes[$i][$j]));
+            }
+            $likes[$i] = implode(' AND ', Adhoc::wrapParentheses($likes[$i]));
+        }
+        $this->string = implode(' OR ', Adhoc::wrapParentheses($likes));
+        $this->params = $params;
     }
 
     private function _range($op1, $op2)

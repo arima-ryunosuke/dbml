@@ -178,6 +178,34 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertOperator('a LIKE ? OR a LIKE ?', ['%a\\%z%', '%a\\_z%'], $operator);
     }
 
+    function test_op_phrase()
+    {
+        $operator = new Operator(self::$platform, 'PHRASE', 'a', '-x -y');
+        $this->assertOperator('(NOT (a LIKE ?)) AND (NOT (a LIKE ?))', ['%x%', '%y%'], $operator);
+
+        $operator = new Operator(self::$platform, 'PHRASE', 'a', 'x y');
+        $this->assertOperator('(a LIKE ?) AND (a LIKE ?)', ['%x%', '%y%'], $operator);
+
+        $operator = new Operator(self::$platform, 'PHRASE', 'a', 'x|z');
+        $this->assertOperator('(a LIKE ?) OR (a LIKE ?)', ['%x%', '%z%'], $operator);
+
+        $operator = new Operator(self::$platform, 'PHRASE', 'a', 'x, y');
+        $this->assertOperator('(a LIKE ?) OR (a LIKE ?)', ['%x%', '%y%'], $operator);
+
+        $operator = new Operator(self::$platform, 'PHRASE', 'a', '"x|y, z"');
+        $this->assertOperator('a LIKE ?', ['%x|y,%z%'], $operator);
+
+        $operator = new Operator(self::$platform, 'PHRASE', 'a', '-x1 y1, x2|y2 z, "x3|y3, z"');
+        $this->assertOperator('((NOT (a LIKE ?)) AND (a LIKE ?)) OR (((a LIKE ?) OR (a LIKE ?)) AND (a LIKE ?)) OR (a LIKE ?)', [
+            '%x1%',
+            '%y1%',
+            '%x2%',
+            '%y2%',
+            '%z%',
+            '%x3|y3,%z%',
+        ], $operator);
+    }
+
     function test_op_in()
     {
         $operator = new Operator(self::$platform, 'IN', 'a', [1, 2]);
