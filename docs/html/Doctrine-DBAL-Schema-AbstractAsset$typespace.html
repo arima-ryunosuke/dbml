@@ -108,7 +108,7 @@ array($tableName =&gt; Table($tableName)); if you want to rename the table, you 
                                     					</div>
 					<h4 id="Doctrine\DBAL\Schema\AbstractAsset::$_name" tabindex="-1" class="structure-title">
 						<small>string</small>
-						$_name						<var> = null</var>
+						$_name						<var> = &quot;&quot;</var>
 					</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -342,7 +342,7 @@ namespaced elements are returned as full-qualified names.</p>
                         getFullQualifiedName                        	<small>($defaultNamespaceName) : string</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"><p>The normalized name is full-qualified and lowerspaced. Lowerspacing is<br />
+						<div class="description"><p>The normalized name is full-qualified and lower-cased. Lower-casing is<br />
 actually wrong, but we have to do it to keep our sanity. If you are<br />
 using database objects that only differentiate in the casing (FOO vs<br />
 Foo) then you will NOT be able to use Doctrine Schema abstraction.</p>

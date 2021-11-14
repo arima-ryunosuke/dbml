@@ -263,7 +263,7 @@
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L20-L482" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L21-L515" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="ryunosuke\dbml\Query\Expression\Operator" tabindex="-1" class="structure-title ">
 							<a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator">Operator</a>
@@ -285,6 +285,7 @@
 <tr><td align="left"><code>'hoge:[~)' =&gt; [null, null]</code></td><td align="left">-</td><td align="left">バインド値に両方 null を渡すと条件自体が吹き飛ぶ</td></tr>
 <tr><td align="left"><code>'hoge:LIKE%' =&gt; 'wo%rd'</code></td><td align="left"><code>hoge LIKE 'wo\%rd%'</code></td><td align="left">LIKEエスケープを施した上で右に"%"を付加してLIKEする。他にも <code>%LIKE</code> <code>%LIKE%</code> がある</td></tr>
 <tr><td align="left"><code>'hoge:LIKEIN%' =&gt; ['he%lo', 'wo%rd']</code></td><td align="left"><code>hoge LIKE 'he\%lo%' OR hoge LIKE 'wo\%rd%'</code></td><td align="left">上記の配列IN版。構文的には <code>LIKE ANY('str1', 'str2')</code> みたいなもの</td></tr>
+<tr><td align="left"><code>'hoge:PHRASE' =&gt; 'word phrase'</code></td><td align="left"><code>hoge LIKE '%word%' OR hoge LIKE '%phrase%'</code></td><td align="left">いわゆる検索クエリを与えるとよしなに LIKE する。ダブルクォート:セパレータの無効化, ハイフン:NOT, パイプ:優先度高OR, スペース:AND, カンマ:優先度低OR</td></tr>
 <tr><td align="left"><code>'hoge:NULLIN' =&gt; [1, 2, 3, NULL]</code></td><td align="left"><code>hoge IN (1, 2, 3) OR hoge IS NULL</code></td><td align="left">NULL を許容できる IN。 <code>[1, 2, 3, null]</code> などとすると IN(1, 2, 3) or NULL のようになる</td></tr>
 </tbody>
 </table>

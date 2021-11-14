@@ -921,13 +921,13 @@ $q-&gt;where($q-&gt;expr()-&gt;gte('u.id', '?'));
         			<tr>
 				<td class="type">string</td>
 				<td class="rest">$x</td>
-				<td class="desc"><p>Field in string format to be inspected by LIKE() comparison.</p>
+				<td class="desc"><p>The expression to be inspected by the LIKE comparison</p>
 </td>
 			</tr>
         			<tr>
 				<td class="type">mixed</td>
 				<td class="rest">$y</td>
-				<td class="desc"><p>Argument to be used in LIKE() comparison.</p>
+				<td class="desc"><p>The pattern to compare against</p>
 </td>
 			</tr>
         		</tbody>
@@ -973,13 +973,13 @@ $q-&gt;where($q-&gt;expr()-&gt;gte('u.id', '?'));
         			<tr>
 				<td class="type">string</td>
 				<td class="rest">$x</td>
-				<td class="desc"><p>Field in string format to be inspected by NOT LIKE() comparison.</p>
+				<td class="desc"><p>The expression to be inspected by the NOT LIKE comparison</p>
 </td>
 			</tr>
         			<tr>
 				<td class="type">mixed</td>
 				<td class="rest">$y</td>
-				<td class="desc"><p>Argument to be used in NOT LIKE() comparison.</p>
+				<td class="desc"><p>The pattern to compare against</p>
 </td>
 			</tr>
         		</tbody>
@@ -1017,7 +1017,7 @@ $q-&gt;where($q-&gt;expr()-&gt;gte('u.id', '?'));
                         in                        	<small>($x, $y) : string</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"><p>Creates a IN () comparison expression with the given arguments.</p>
+						<div class="description"><p>Creates an IN () comparison expression with the given arguments.</p>
 </div>
                         	<table class="table">
 		<caption>Parameters</caption>
@@ -1025,13 +1025,13 @@ $q-&gt;where($q-&gt;expr()-&gt;gte('u.id', '?'));
         			<tr>
 				<td class="type">string</td>
 				<td class="rest">$x</td>
-				<td class="desc"><p>The field in string format to be inspected by IN() comparison.</p>
+				<td class="desc"><p>The SQL expression to be matched against the set.</p>
 </td>
 			</tr>
         			<tr>
 				<td class="type">string<span class="type-separator"></span><wbr>string[]</td>
 				<td class="rest">$y</td>
-				<td class="desc"><p>The placeholder or the array of values to be used by IN() comparison.</p>
+				<td class="desc"><p>The SQL expression or an array of SQL expressions representing the set.</p>
 </td>
 			</tr>
         		</tbody>
@@ -1077,13 +1077,13 @@ $q-&gt;where($q-&gt;expr()-&gt;gte('u.id', '?'));
         			<tr>
 				<td class="type">string</td>
 				<td class="rest">$x</td>
-				<td class="desc"><p>The expression to be inspected by NOT IN() comparison.</p>
+				<td class="desc"><p>The SQL expression to be matched against the set.</p>
 </td>
 			</tr>
         			<tr>
 				<td class="type">string<span class="type-separator"></span><wbr>string[]</td>
 				<td class="rest">$y</td>
-				<td class="desc"><p>The placeholder or the array of values to be used by NOT IN() comparison.</p>
+				<td class="desc"><p>The SQL expression or an array of SQL expressions representing the set.</p>
 </td>
 			</tr>
         		</tbody>

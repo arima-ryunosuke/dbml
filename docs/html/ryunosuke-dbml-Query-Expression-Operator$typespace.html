@@ -54,7 +54,7 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L20-L482" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L21-L515" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">ryunosuke\dbml\Query\Expression\Operator</span></h2>
@@ -75,6 +75,7 @@
 <tr><td align="left"><code>'hoge:[~)' =&gt; [null, null]</code></td><td align="left">-</td><td align="left">バインド値に両方 null を渡すと条件自体が吹き飛ぶ</td></tr>
 <tr><td align="left"><code>'hoge:LIKE%' =&gt; 'wo%rd'</code></td><td align="left"><code>hoge LIKE 'wo\%rd%'</code></td><td align="left">LIKEエスケープを施した上で右に"%"を付加してLIKEする。他にも <code>%LIKE</code> <code>%LIKE%</code> がある</td></tr>
 <tr><td align="left"><code>'hoge:LIKEIN%' =&gt; ['he%lo', 'wo%rd']</code></td><td align="left"><code>hoge LIKE 'he\%lo%' OR hoge LIKE 'wo\%rd%'</code></td><td align="left">上記の配列IN版。構文的には <code>LIKE ANY('str1', 'str2')</code> みたいなもの</td></tr>
+<tr><td align="left"><code>'hoge:PHRASE' =&gt; 'word phrase'</code></td><td align="left"><code>hoge LIKE '%word%' OR hoge LIKE '%phrase%'</code></td><td align="left">いわゆる検索クエリを与えるとよしなに LIKE する。ダブルクォート:セパレータの無効化, ハイフン:NOT, パイプ:優先度高OR, スペース:AND, カンマ:優先度低OR</td></tr>
 <tr><td align="left"><code>'hoge:NULLIN' =&gt; [1, 2, 3, NULL]</code></td><td align="left"><code>hoge IN (1, 2, 3) OR hoge IS NULL</code></td><td align="left">NULL を許容できる IN。 <code>[1, 2, 3, null]</code> などとすると IN(1, 2, 3) or NULL のようになる</td></tr>
 </tbody>
 </table>
@@ -119,7 +120,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L84-L84" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L87-L87" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::RAW" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -133,7 +134,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L85-L85" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L88-L88" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::COLVAL" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -147,7 +148,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L88-L88" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L91-L91" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_EQUAL" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -161,7 +162,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L89-L89" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L92-L92" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_SPACESHIP" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -175,7 +176,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L90-L90" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L93-L93" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_IS_NULL" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -189,7 +190,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L91-L91" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L94-L94" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_BETWEEN" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -203,7 +204,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L92-L92" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L95-L95" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_IN" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -217,7 +218,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L93-L93" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L96-L96" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_LT" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -231,7 +232,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L94-L94" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L97-L97" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_LTE" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -245,7 +246,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L95-L95" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L98-L98" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_GT" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -259,7 +260,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L96-L96" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L99-L99" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_GTE" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -273,7 +274,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L99-L99" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L102-L102" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_RIGHT_LIKE" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -287,7 +288,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L100-L100" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L103-L103" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_LEFT_LIKE" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -301,7 +302,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L101-L101" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L104-L104" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_BOTH_LIKE" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -315,7 +316,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L104-L104" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L107-L107" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_NULLIN" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -329,7 +330,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L105-L105" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L108-L108" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_RIGHT_LIKEIN" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -343,7 +344,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L106-L106" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L109-L109" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_LEFT_LIKEIN" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -357,7 +358,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L107-L107" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L110-L110" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_BOTH_LIKEIN" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -371,7 +372,21 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L108-L108" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L111-L111" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_PHRASE" tabindex="-1" class="structure-title">
+						<small>string</small>
+                        OP_PHRASE						<var> = &quot;PHRASE&quot;</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                                                					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L112-L112" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_RANGE" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -385,7 +400,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L109-L109" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L113-L113" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_RANGE_LTE" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -399,7 +414,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L110-L110" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L114-L114" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_RANGE_GTE" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -413,7 +428,7 @@ $db-&gt;whereInto([
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L111-L111" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L115-L115" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::OP_RANGE_BETWEEN" tabindex="-1" class="structure-title">
 						<small>string</small>
@@ -440,7 +455,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L166-L178" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L171-L183" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::define()" tabindex="-1" class="structure-title ">
                         define                        	<small>($operator, $callback) : void</small>
@@ -494,7 +509,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L180-L221" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L185-L226" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::__callStatic()" tabindex="-1" class="structure-title ">
                         __callStatic                        	<small>($operator, $operands) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -560,7 +575,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L223-L248" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L228-L253" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::__construct()" tabindex="-1" class="structure-title ">
                         __construct                        	<small>($platform, $operator, $operand1, $operand2) : void</small>
@@ -624,7 +639,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L250-L261" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L255-L266" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::__toString()" tabindex="-1" class="structure-title ">
                         __toString                        	<small>() : string</small>
@@ -665,7 +680,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L423-L435" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L456-L468" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::not()" tabindex="-1" class="structure-title ">
                         not                        	<small>() : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -706,7 +721,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L437-L449" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L470-L482" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::lazy()" tabindex="-1" class="structure-title ">
                         lazy                        	<small>($operand1, $platform = null) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -759,7 +774,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L451-L461" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L484-L494" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::getParams()" tabindex="-1" class="structure-title ">
                         getParams                        	<small>() : array</small>
@@ -810,7 +825,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L463-L469" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L496-L502" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::getQuery()" tabindex="-1" class="structure-title ">
                         getQuery                        	<small>() : string</small>
@@ -861,7 +876,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L471-L481" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L504-L514" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::merge()" tabindex="-1" class="structure-title ">
                         merge                        	<small>(&amp;$params) : string</small>
@@ -919,7 +934,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L61-L61" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L63-L63" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::is()" tabindex="-1" class="structure-title ">
                         is                        	<small>(...$args) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -964,7 +979,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L62-L62" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L64-L64" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::equal()" tabindex="-1" class="structure-title ">
                         equal                        	<small>($value) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1009,7 +1024,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L63-L63" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L65-L65" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::spaceship()" tabindex="-1" class="structure-title ">
                         spaceship                        	<small>($value) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1054,7 +1069,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L64-L64" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L66-L66" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::in()" tabindex="-1" class="structure-title ">
                         in                        	<small>(...$args) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1099,7 +1114,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L65-L65" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L67-L67" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::nullIn()" tabindex="-1" class="structure-title ">
                         nullIn                        	<small>(...$args) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1144,7 +1159,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L66-L66" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L68-L68" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::lt()" tabindex="-1" class="structure-title ">
                         lt                        	<small>($value) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1189,7 +1204,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L67-L67" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L69-L69" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::lte()" tabindex="-1" class="structure-title ">
                         lte                        	<small>($value) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1234,7 +1249,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L68-L68" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L70-L70" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::gt()" tabindex="-1" class="structure-title ">
                         gt                        	<small>($value) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1280,7 +1295,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L69-L69" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L71-L71" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::gte()" tabindex="-1" class="structure-title ">
                         gte                        	<small>($value) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1325,7 +1340,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L70-L70" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L72-L72" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::between()" tabindex="-1" class="structure-title ">
                         between                        	<small>($min, $max) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1375,7 +1390,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L71-L71" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L73-L73" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::range()" tabindex="-1" class="structure-title ">
                         range                        	<small>($min, $max) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1425,7 +1440,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L72-L72" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L74-L74" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::rangeLte()" tabindex="-1" class="structure-title ">
                         rangeLte                        	<small>($min, $max) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1475,7 +1490,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L73-L73" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L75-L75" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::rangeGte()" tabindex="-1" class="structure-title ">
                         rangeGte                        	<small>($min, $max) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1525,7 +1540,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L74-L74" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L76-L76" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::like()" tabindex="-1" class="structure-title ">
                         like                        	<small>($word) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1570,7 +1585,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L75-L75" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L77-L77" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::likeLeft()" tabindex="-1" class="structure-title ">
                         likeLeft                        	<small>($word) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1615,7 +1630,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L76-L76" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L78-L78" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::likeRight()" tabindex="-1" class="structure-title ">
                         likeRight                        	<small>($word) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1660,7 +1675,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L77-L77" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L79-L79" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::likeIn()" tabindex="-1" class="structure-title ">
                         likeIn                        	<small>(...$words) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1705,7 +1720,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L78-L78" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L80-L80" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::likeInLeft()" tabindex="-1" class="structure-title ">
                         likeInLeft                        	<small>(...$words) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1750,7 +1765,7 @@ $db-&gt;whereInto([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L79-L79" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L81-L81" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Expression\Operator::likeInRight()" tabindex="-1" class="structure-title ">
                         likeInRight                        	<small>(...$words) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
@@ -1764,6 +1779,51 @@ $db-&gt;whereInto([
         			<tr>
 				<td class="type">mixed</td>
 				<td class="rest">...$words</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic">magic</span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L82-L82" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Query\Expression\Operator::phrase()" tabindex="-1" class="structure-title ">
+                        phrase                        	<small>($phrase) : <a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator" class="fqsen "><small>ryunosuke\dbml\Query\Expression\</small><wbr>Operator</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>フレーズ演算子</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$phrase</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>

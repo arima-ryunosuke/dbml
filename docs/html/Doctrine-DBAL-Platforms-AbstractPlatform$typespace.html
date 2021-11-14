@@ -4561,7 +4561,7 @@ vendors allow to lighten this constraint up to be a real read lock.</p>
                         			<a href="#L1352-L1362" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Platforms\AbstractPlatform::getDropDatabaseSQL()" tabindex="-1" class="structure-title ">
-                        getDropDatabaseSQL                        	<small>($database) : string</small>
+                        getDropDatabaseSQL                        	<small>($name) : string</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Returns the SQL snippet to drop an existing database.</p>
@@ -4571,7 +4571,7 @@ vendors allow to lighten this constraint up to be a real read lock.</p>
 		<tbody>
         			<tr>
 				<td class="type">string</td>
-				<td class="rest">$database</td>
+				<td class="rest">$name</td>
 				<td class="desc"><p>The name of the database that should be dropped.</p>
 </td>
 			</tr>
@@ -8384,7 +8384,7 @@ requests may be impossible.</p>
                         			<a href="#L2929-L2941" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Platforms\AbstractPlatform::getCreateDatabaseSQL()" tabindex="-1" class="structure-title ">
-                        getCreateDatabaseSQL                        	<small>($database) : string</small>
+                        getCreateDatabaseSQL                        	<small>($name) : string</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Returns the SQL to create a new database.</p>
@@ -8394,7 +8394,7 @@ requests may be impossible.</p>
 		<tbody>
         			<tr>
 				<td class="type">string</td>
-				<td class="rest">$database</td>
+				<td class="rest">$name</td>
 				<td class="desc"><p>The name of the database that should be created.</p>
 </td>
 			</tr>
