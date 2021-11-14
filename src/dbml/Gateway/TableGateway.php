@@ -677,6 +677,9 @@ use function ryunosuke\dbml\try_finally;
  * @method array|string[]         saveIgnore($data) {
  *     駆動表を省略できる <@uses Database::saveIgnore()>
  * }
+ * @method array|string           createIgnore($data) {
+ *     駆動表を省略できる <@uses Database::createIgnore()>
+ * }
  * @method array|string           insertIgnore($data) {
  *     駆動表を省略できる <@uses Database::insertIgnore()>
  * }
@@ -704,6 +707,9 @@ use function ryunosuke\dbml\try_finally;
  * }
  * @method array|string           modifyConditionally($condition, $insertData, $updateData = []) {
  *     駆動表を省略できる <@uses Database::modifyConditionally()>
+ * }
+ * @method array|string           createConditionally($condition, $data) {
+ *     駆動表を省略できる <@uses Database::createConditionally()>
  * }
  *
  * @method Statement              prepareSelect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
@@ -1027,14 +1033,14 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             return $this->$method(...$arguments);
         }
         // affect～Ignore 系
-        if (preg_match('/^(insertSelect|insertArray|updateArray|modifyArray|changeArray|save|insert|update|delete|remove|destroy|modify)Ignore$/ui', $name, $matches)) {
+        if (preg_match('/^(insertSelect|insertArray|updateArray|modifyArray|changeArray|save|insert|update|delete|remove|destroy|create|modify)Ignore$/ui', $name, $matches)) {
             $method = strtolower($matches[1]);
             Adhoc::reargument($arguments, [$this, $method], []);
             $arguments[] = ['primary' => 2, 'ignore' => true];
             return $this->$method(...$arguments);
         }
         // affect～Conditionally 系
-        if (preg_match('/^(insert|upsert|modify)Conditionally$/ui', $name, $matches)) {
+        if (preg_match('/^(insert|create|upsert|modify)Conditionally$/ui', $name, $matches)) {
             $method = strtolower($matches[1]);
             $opt = Adhoc::reargument($arguments, [$this, $method], [0 => 'where']);
             $arguments[] = ['primary' => 2] + $opt;
@@ -2483,6 +2489,16 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         $this->resetResult();
         return $this->database->reduce($this->select(), $limit, $orderBy, $groupBy, $identifier, ...array_slice(func_get_args(), 4));
+    }
+
+    /**
+     * 駆動表を省略できる <@uses Database::create()>
+     *
+     * @inheritdoc Database::create()
+     */
+    public function create($data)
+    {
+        return $this->insertOrThrow($data);
     }
 
     /**

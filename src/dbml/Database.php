@@ -504,6 +504,9 @@ use ryunosuke\dbml\Utility\Adhoc;
  * @method array|string[]         saveIgnore($tableName, $data) {
  *     IGNORE 付き <@uses Database::save()>
  * }
+ * @method array|string           createIgnore($tableName, $data) {
+ *     IGNORE 付き <@uses Database::create()>
+ * }
  * @method array|string           insertIgnore($tableName, $data) {
  *     IGNORE 付き <@uses Database::insert()>
  * }
@@ -527,6 +530,16 @@ use ryunosuke\dbml\Utility\Adhoc;
  *     条件付き <@uses Database::insert()>
  *
  *     $condition が WHERE 的判定され、合致しないときは insert が行われない。
+ *     $condition が配列の場合は $tableName で selectNotExists する。つまり「存在しないとき実行」となる。
+ *
+ *     実行したら主キー配列を返し、されなかったら空配列を返す。
+ *
+ *     @param QueryBuilder|string|array $condition WHERE 条件 or Select オブジェクト
+ * }
+ * @method array|string           createConditionally($tableName, $condition, $data) {
+ *     条件付き <@uses Database::create()>
+ *
+ *     $condition が WHERE 的判定され、合致しないときは create が行われない。
  *     $condition が配列の場合は $tableName で selectNotExists する。つまり「存在しないとき実行」となる。
  *
  *     実行したら主キー配列を返し、されなかったら空配列を返す。
@@ -1042,14 +1055,14 @@ class Database
             return $this->$method(...$arguments);
         }
         // affect～Ignore 系
-        if (preg_match('/^(insertSelect|insertArray|updateArray|modifyArray|changeArray|save|insert|update|delete|remove|destroy|modify)Ignore$/ui', $name, $matches)) {
+        if (preg_match('/^(insertSelect|insertArray|updateArray|modifyArray|changeArray|save|insert|update|delete|remove|destroy|create|modify)Ignore$/ui', $name, $matches)) {
             $method = strtolower($matches[1]);
             Adhoc::reargument($arguments, [$this, $method], []);
             $arguments[] = ['primary' => 2, 'ignore' => true];
             return $this->$method(...$arguments);
         }
         // affect～Conditionally 系
-        if (preg_match('/^(insert|upsert|modify)Conditionally$/ui', $name, $matches)) {
+        if (preg_match('/^(insert|create|upsert|modify)Conditionally$/ui', $name, $matches)) {
             $method = strtolower($matches[1]);
             $opt = Adhoc::reargument($arguments, [$this, $method], [1 => 'where']);
             $arguments[] = ['primary' => 2] + $opt;
@@ -5773,6 +5786,26 @@ class Database
     }
 
     /**
+     * insertOrThrow のエイリアス
+     *
+     * updateOrThrow や deleteOrThrow を使う機会はそう多くなく、実質的に主キーを得たいがために insertOrThrow を使うことが多い。
+     * となると対象性がなく、コードリーディング時に余計な思考を挟むことが多い（「なぜ insert だけ OrThrow なんだろう？」）のでエイリアスを用意した。
+     *
+     * @param string|array $tableName テーブル名
+     * @param mixed $data INSERT データ配列
+     * @return string|array|Statement 基本的には主キー. dryrun 中は文字列、preparing 中は Statement
+     */
+    public function create($tableName, $data)
+    {
+        // 隠し引数 $opt
+        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
+        $opt['throw'] = true;
+        $opt['primary'] = $opt['primary'] ?? 1;
+
+        return $this->insert($tableName, $data, $opt);
+    }
+
+    /**
      * INSERT 構文
      *
      * ```php
@@ -5892,14 +5925,14 @@ class Database
             return $affected;
         }
 
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
-        }
         if ($affected === 0 && array_get($opt, 'primary') === 2) {
             return [];
         }
-        if (array_get($opt, 'primary')) {
+        if ($affected !== 0 && array_get($opt, 'primary')) {
             return $this->_postaffect($tableName, $data);
+        }
+        if ($affected === 0 && array_get($opt, 'throw')) {
+            throw new NonAffectedException('affected row is nothing.');
         }
         return $affected;
     }
@@ -5974,14 +6007,14 @@ class Database
             return $affected;
         }
 
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
+        if ($affected !== 0 && array_get($opt, 'primary')) {
+            return $this->_postaffect($tableName, $data + arrayize($identifier));
         }
         if ($affected === 0 && array_get($opt, 'primary') === 2) {
             return [];
         }
-        if (array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, $data + arrayize($identifier));
+        if ($affected === 0 && array_get($opt, 'throw')) {
+            throw new NonAffectedException('affected row is nothing.');
         }
         return $affected;
     }
@@ -6031,14 +6064,14 @@ class Database
             return $affected;
         }
 
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
+        if ($affected !== 0 && array_get($opt, 'primary')) {
+            return $this->_postaffect($tableName, arrayize($identifier));
         }
         if ($affected === 0 && array_get($opt, 'primary') === 2) {
             return [];
         }
-        if (array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, arrayize($identifier));
+        if ($affected === 0 && array_get($opt, 'throw')) {
+            throw new NonAffectedException('affected row is nothing.');
         }
         return $affected;
     }
@@ -6104,14 +6137,14 @@ class Database
             return $affected;
         }
 
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
+        if ($affected !== 0 && array_get($opt, 'primary')) {
+            return $this->_postaffect($tableName, arrayize($identifier));
         }
         if ($affected === 0 && array_get($opt, 'primary') === 2) {
             return [];
         }
-        if (array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, arrayize($identifier));
+        if ($affected === 0 && array_get($opt, 'throw')) {
+            throw new NonAffectedException('affected row is nothing.');
         }
         return $affected;
     }
@@ -6187,14 +6220,14 @@ class Database
         }
 
         $affected = array_sum($affected);
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
+        if ($affected !== 0 && array_get($opt, 'primary')) {
+            return $this->_postaffect($tableName, arrayize($identifier));
         }
         if ($affected === 0 && array_get($opt, 'primary') === 2) {
             return [];
         }
-        if (array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, arrayize($identifier));
+        if ($affected === 0 && array_get($opt, 'throw')) {
+            throw new NonAffectedException('affected row is nothing.');
         }
         return $affected;
     }
@@ -6521,18 +6554,18 @@ class Database
             return $affected;
         }
 
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
-        }
-
         if (!$cplatform->supportsIdentityAutoUpdate() && $this->getSchema()->getTableAutoIncrement($tableName) !== null) {
             $this->resetAutoIncrement($tableName, null);
+        }
+
+        if ($affected !== 0 && array_get($opt, 'primary')) {
+            return $this->_postaffect($tableName, $updatable ? $updateData : $insertData);
         }
         if ($affected === 0 && array_get($opt, 'primary') === 2) {
             return [];
         }
-        if (array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, $updatable ? $updateData : $insertData);
+        if ($affected === 0 && array_get($opt, 'throw')) {
+            throw new NonAffectedException('affected row is nothing.');
         }
         return $affected;
     }

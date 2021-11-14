@@ -199,7 +199,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['id' => 99], $database->upsertOrThrow('test', ['id' => 99, 'name' => 'hogera']));
         $this->assertEquals(['id' => 99], $database->modifyOrThrow('test', ['id' => 99, 'name' => 'rageho']));
         // ON AUTO_INCREMENT
-        $lastid = $database->insertOrThrow('test', ['name' => 'hogera']);
+        $lastid = $database->create('test', ['name' => 'hogera']);
         $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
         $lastid = $database->upsertOrThrow('test', ['name' => 'hogera']);
         $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
@@ -245,9 +245,11 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
             $database->truncate('noauto');
             $database->insert('noauto', ['id' => 'x', 'name' => '']);
+            $this->assertEquals(['id' => 'b'], $database->createIgnore('noauto', ['id' => 'b', 'name' => 'hoge']));
             $this->assertEquals(['id' => 'a'], $database->insertIgnore('noauto', ['id' => 'a', 'name' => 'hoge']));
             $this->assertEquals(['id' => 'a'], $database->updateIgnore('noauto', ['name' => 'fuga'], ['id' => 'a']));
             $this->assertEquals(['id' => 'a'], $database->modifyIgnore('noauto', ['id' => 'a', 'name' => 'piyo']));
+            $this->assertEquals([], $database->createIgnore('noauto', ['id' => 'x']));
             $this->assertEquals([], $database->insertIgnore('noauto', ['id' => 'x']));
             $this->assertEquals([], $database->updateIgnore('noauto', ['id' => 'x'], ['id' => 'a']));
             // insert しようとしてダメでさらに update しようとしてダメだった場合に無視できるのは mysql のみ（本当は方法があるのかもしれないが詳しくないのでわからない）
@@ -4020,6 +4022,32 @@ INSERT INTO test (id, name) VALUES
 ('2', 'Y'),
 ('3', 'Z')
 {$merge(['id'])} id = {$refer('id')}, name = {$refer('name')}", $affected);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_createConditionally($database)
+    {
+        $result = $database->createConditionally('test', ['id' => 1], [
+            'id'   => 1,
+            'name' => 'a',
+        ]);
+        $this->assertEquals([], $result);
+
+        $result = $database->createConditionally('test', ['id' => 100], [
+            'id'   => 100,
+            'name' => 'zzz',
+        ]);
+        $this->assertEquals(['id' => 100], $result);
+
+        $sql = $database->dryrun()->createConditionally('test', ['id' => 1], [
+            'id'   => 1,
+            'name' => 'a',
+        ]);
+        $this->assertStringContainsString('INSERT INTO test (id, name) SELECT', $sql);
+        $this->assertStringContainsString('WHERE (NOT EXISTS (SELECT * FROM test WHERE id =', $sql);
     }
 
     /**

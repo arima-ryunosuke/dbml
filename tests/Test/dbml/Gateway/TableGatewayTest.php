@@ -1428,12 +1428,15 @@ AND ((flag=1))", "$gw");
      */
     function test_affect_conditionally($gateway, $database)
     {
-        $this->assertEquals(['id' => '11'], $gateway->insertConditionally(['id' => -1], ['name' => 'hoge']));
-        $this->assertEquals(['id' => '12'], $gateway->upsertConditionally(['id' => -1], ['name' => 'fuga']));
-        $this->assertEquals(['id' => '13'], $gateway->modifyConditionally(['id' => -1], ['name' => 'piyo']));
-        $this->assertEquals([], $gateway->insertConditionally(['id' => 11], ['name' => 'hoge']));
-        $this->assertEquals([], $gateway->upsertConditionally(['id' => 12], ['name' => 'fuga']));
-        $this->assertEquals([], $gateway->modifyConditionally(['id' => 13], ['name' => 'piyo']));
+        $this->assertEquals(['id' => '11'], $gateway->createConditionally(['id' => -1], ['name' => 'xxxx']));
+        $this->assertEquals(['id' => '12'], $gateway->insertConditionally(['id' => -1], ['name' => 'hoge']));
+        $this->assertEquals(['id' => '13'], $gateway->upsertConditionally(['id' => -1], ['name' => 'fuga']));
+        $this->assertEquals(['id' => '14'], $gateway->modifyConditionally(['id' => -1], ['name' => 'piyo']));
+
+        $this->assertEquals(['id' => '15'], $gateway->createConditionally(['id' => 11], ['name' => 'xxxx']));
+        $this->assertEquals([], $gateway->insertConditionally(['id' => 12], ['name' => 'hoge']));
+        $this->assertEquals([], $gateway->upsertConditionally(['id' => 13], ['name' => 'fuga']));
+        $this->assertEquals([], $gateway->modifyConditionally(['id' => 14], ['name' => 'piyo']));
     }
 
     /**
@@ -1486,6 +1489,12 @@ AND ((flag=1))", "$gw");
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
+            public function create($data)
+            {
+                $this->called[] = __FUNCTION__;
+                return parent::{__FUNCTION__}(...func_get_args());
+            }
+
             public function upsert($insertData, $updateData = [])
             {
                 $this->called[] = __FUNCTION__;
@@ -1511,7 +1520,7 @@ AND ((flag=1))", "$gw");
             }
         };
         $gateway->truncate();
-        $gateway->insertOrThrow(['id' => 1]);
+        $gateway->createIgnore(['id' => 1]);
         $gateway->upsertOrThrow(['id' => 2]);
         $gateway->modifyConditionally(['id' => 3], ['id' => 3]);
         $gateway->insertIgnore(['id' => 4]);
@@ -1527,6 +1536,7 @@ AND ((flag=1))", "$gw");
         // サフィックス付きでもオーバーライドしたメソッドが呼ばれている
         $this->assertEquals([
             'truncate',
+            'create',
             'insert',
             'upsert',
             'modify',
