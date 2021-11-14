@@ -2365,9 +2365,14 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                     }
                 },
             ],
+            'json'         => [
+                'select' => true,
+                'affect' => true,
+            ],
         ]);
 
         $database->getSchema()->setTableColumn('misctype', 'carray', ['type' => Types::SIMPLE_ARRAY]);
+        $database->getSchema()->setTableColumn('misctype', 'cjson', ['type' => Types::JSON]);
 
         $database->insert('misctype', [
             'cint'      => 1,
@@ -2378,17 +2383,20 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cstring'   => 'hoge',
             'ctext'     => 'fuga',
             'carray'    => [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            'cjson'     => new Expression('?', [json_encode(['a' => 'A'])]),
         ]);
         $row = $database->selectTuple([
             'misctype MT' => [
                 'cint',
                 'cdatetime',
                 'carray',
+                'cjson',
             ],
         ], [], [], 1);
         $this->assertSame(1, $row['cint']);
         $this->assertInstanceOf('\DateTime', $row['cdatetime']);
         $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['carray']);
+        $this->assertEquals(['a' => 'A'], $row['cjson']);
 
         // 子供ネストもOK
         $this->assertSame([

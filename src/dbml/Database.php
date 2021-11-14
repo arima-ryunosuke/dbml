@@ -1437,7 +1437,7 @@ class Database
                 $typename = $type->getName();
                 if (isset($types[$typename]['affect'])) {
                     if ($converter = $types[$typename]['affect']) {
-                        if (array_key_exists($cname, $row)) {
+                        if (array_key_exists($cname, $row) && !$row[$cname] instanceof Queryable) {
                             if ($converter instanceof \Closure) {
                                 $row[$cname] = $converter($row[$cname], $this->getPlatform());
                             }

@@ -211,6 +211,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('cbinary', Type::getType('binary'), ['notnull' => false]),
                                 new Column('cblob', Type::getType('blob'), ['notnull' => false]),
                                 new Column('carray', Type::getType('simple_array'), ['notnull' => false]),
+                                new Column('cjson', Type::getType('json'), ['notnull' => false]),
                             ],
                             [new Index('PRIMARY', ['id'], true, true), new Index('IDX_MISCTYPE1', ['pid'], true)]
                         ),
