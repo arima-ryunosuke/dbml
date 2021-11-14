@@ -328,6 +328,25 @@ use ryunosuke\dbml\Utility\Adhoc;
  *     <@uses Database::selectValue()> の例外送出版（{@link fetchValue()} も参照）
  * }
  *
+ * @method array|Entityable[]     selectArrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses Database::selectArray()> の排他ロック兼例外送出版（{@link fetchArray()} も参照）
+ * }
+ * @method array|Entityable[]     selectAssocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses Database::selectAssoc()> の排他ロック兼例外送出版（{@link fetchAssoc()} も参照）
+ * }
+ * @method array                  selectListsForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses Database::selectLists()> の排他ロック兼例外送出版（{@link fetchLists()} も参照）
+ * }
+ * @method array                  selectPairsForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses Database::selectPairs()> の排他ロック兼例外送出版（{@link fetchPairs()} も参照）
+ * }
+ * @method array|Entityable|false selectTupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses Database::selectTuple()> の排他ロック兼例外送出版（{@link fetchTuple()} も参照）
+ * }
+ * @method mixed                  selectValueForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses Database::selectValue()> の排他ロック兼例外送出版（{@link fetchValue()} も参照）
+ * }
+ *
  * @method array|Entityable[]     entityArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
  *     <@uses Database::entity()> の array 版
  * }
@@ -366,6 +385,16 @@ use ryunosuke\dbml\Utility\Adhoc;
  * }
  * @method array|Entityable       entityTupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
  *     <@uses Database::entityTuple()> の例外送出版
+ * }
+ *
+ * @method array|Entityable[]     entityArrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses Database::entityArray()> の排他ロック兼例外送出版
+ * }
+ * @method array|Entityable[]     entityAssocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses Database::entityAssoc()> の排他ロック兼例外送出版
+ * }
+ * @method array|Entityable|false entityTupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses Database::entityTuple()> の排他ロック兼例外送出版
  * }
  *
  * @method Yielder                yieldArray($sql, iterable $params = []) {
@@ -1025,8 +1054,12 @@ class Database
             return $result;
         }
         // select|entity～ 系
-        if (preg_match('/^(select|entity)(.+?)(ForUpdate|InShare)?(OrThrow)?$/ui', $name, $matches)) {
+        if (preg_match('/^(select|entity)(.+?)(ForAffect|ForUpdate|InShare)?(OrThrow)?$/ui', $name, $matches)) {
             [, $mode, $perform, $lockmode, $orthrow] = array_map('strtolower', $matches + [3 => '', 4 => '']);
+            if ($lockmode === 'foraffect') {
+                $lockmode = 'ForUpdate';
+                $orthrow = 'OrThrow';
+            }
             $select = $this->$mode(...$arguments);
             if ($lockmode) {
                 $select->{"lock$lockmode"}();

@@ -1193,6 +1193,11 @@ AND ((flag=1))", "$gw");
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for read */', $log['sql']);
             $this->assertEquals([0], $log['params']);
 
+            $this->assertException('record', L($gateway)->findForAffect(0));
+            $log = $logger->queries[4];
+            $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for write */', $log['sql']);
+            $this->assertEquals([0], $log['params']);
+
             $database->getConnection()->getConfiguration()->setSQLLogger($current);
             $database->setAutoOrder(true);
         }

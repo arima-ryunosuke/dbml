@@ -181,6 +181,10 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertException($ex, L($database)->selectValueOrThrow('test', ['1=0']));
         $this->assertException($ex, L($database)->selectTupleOrThrow('test', ['1=0']));
 
+        // select～ForAffect 系(見つからなかった場合に例外が投がることを担保)
+        $this->assertEquals($database->selectArray('test'), $database->selectArrayForAffect('test'));
+        $this->assertException($ex, L($database)->selectValueForAffect('test', ['1=0']));
+
         // fetch～OrThrow 系(見つかる場合に同じ結果になることを担保)
         $sql = 'select id from test where id = 3';
         $this->assertEquals($database->fetchArray($sql), $database->fetchArrayOrThrow($sql));

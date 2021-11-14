@@ -513,6 +513,28 @@ use function ryunosuke\dbml\try_finally;
  *     <@uses TableGateway::find()> の例外送出版
  * }
  *
+ * @method array|Entityable[]     arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses TableGateway::array()> の排他ロック兼例外送出版
+ * }
+ * @method array|Entityable[]     assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses TableGateway::assoc()> の排他ロック兼例外送出版
+ * }
+ * @method array                  listsForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses TableGateway::lists()> の排他ロック兼例外送出版
+ * }
+ * @method array                  pairsForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses TableGateway::pairs()> の排他ロック兼例外送出版
+ * }
+ * @method array|Entityable       tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses TableGateway::tuple()> の排他ロック兼例外送出版
+ * }
+ * @method mixed                  valueForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
+ *     <@uses TableGateway::value()> の排他ロック兼例外送出版
+ * }
+ * @method array|Entityable       findForAffect($variadic_primary, $tableDescriptor = []) {
+ *     <@uses TableGateway::find()> の排他ロック兼例外送出版
+ * }
+ *
  * @method Yielder                yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
  *     レコード群を配列で少しずつ返す（<@uses Database::yieldArray()> を参照）
  * }
@@ -1049,9 +1071,13 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
         // 上記以外はすべて fetch 系メソッドとする（例外は Database 側で投げてくれるはず）
         $lockmode = null;
-        if (preg_match('#(ForUpdate|InShare)#ui', $name, $matches)) {
-            $lockmode = strtolower($matches[1]);
-            $name = str_ireplace($lockmode, '', $name);
+        if (preg_match('#(.+?)(ForAffect|ForUpdate|InShare)(OrThrow)?$#ui', $name, $matches)) {
+            [, $mode, $lockmode, $orthrow] = array_map('strtolower', $matches + [3 => '']);
+            if ($lockmode === 'foraffect') {
+                $lockmode = 'ForUpdate';
+                $orthrow = 'OrThrow';
+            }
+            $name = $mode . $orthrow;
         }
         $select = $this->select(...$arguments);
         if ($lockmode) {
