@@ -153,8 +153,6 @@ namespace ryunosuke\Test\Gateway {
 
     class Article extends TableGateway
     {
-        use \ryunosuke\Test\dbml\Annotation\ArticleTableGateway;
-
         protected $defaultIteration  = 'assoc';
         protected $defaultJoinMethod = 'left';
 
@@ -216,8 +214,6 @@ namespace ryunosuke\Test\Gateway {
 
     class Comment extends TableGateway
     {
-        use \ryunosuke\Test\dbml\Annotation\CommentTableGateway;
-
         public function __construct(Database $database, $table_name)
         {
             parent::__construct($database, $table_name);

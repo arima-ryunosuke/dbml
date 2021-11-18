@@ -3,7 +3,6 @@
 error_reporting(-1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/annotation.php';
 require_once __DIR__ . '/classess.php';
 
 function var_pretty(...$args)

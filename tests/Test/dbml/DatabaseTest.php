@@ -1014,7 +1014,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'TestClass' => null,
             ],
             'gatewayClass' => [
-                'test' => null,
+                'test'      => null,
+                'TestClass' => null,
             ],
             'EtoT'         => [
                 'TestClass' => 'test',
@@ -2579,12 +2580,14 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     {
         $annotation = $database->echoAnnotation('ryunosuke\\Test\\dbml\\Annotation', __DIR__ . '/../../annotation.php');
         $this->assertStringContainsString('namespace ryunosuke\\Test\\dbml\\Annotation;', $annotation);
-        $this->assertStringContainsString('trait Database{}', $annotation);
-        $this->assertStringContainsString('trait TableGateway{}', $annotation);
-        $this->assertStringContainsString('trait ArticleTableGateway{}', $annotation);
-        $this->assertStringContainsString('trait CommentTableGateway{}', $annotation);
-        $this->assertStringContainsString('trait ArticleEntity{}', $annotation);
-        $this->assertStringContainsString('trait CommentEntity{}', $annotation);
+        $this->assertStringContainsString('trait TableGatewayProvider', $annotation);
+        $this->assertStringContainsString('class Database', $annotation);
+        $this->assertStringContainsString('class ArticleTableGateway extends', $annotation);
+        $this->assertStringContainsString('class CommentTableGateway extends', $annotation);
+        $this->assertStringContainsString('class ManagedCommentTableGateway extends', $annotation);
+        $this->assertStringContainsString('class ArticleEntity extends', $annotation);
+        $this->assertStringContainsString('class CommentEntity extends', $annotation);
+        $this->assertStringContainsString('class ManagedCommentEntity extends', $annotation);
         $this->assertStringContainsString('$tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []', $annotation);
     }
 

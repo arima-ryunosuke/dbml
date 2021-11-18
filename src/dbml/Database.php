@@ -1171,9 +1171,11 @@ class Database
                         'entityClass'  => "$defaultEntity\\$entityname",
                         'gatewayClass' => "$defaultGateway\\$entityname",
                     ];
+                    $class = array_map(function ($v) { return ltrim($v, '\\'); }, $class);
 
                     $maps['entityClass'][$entityname] = class_exists($class['entityClass']) ? $class['entityClass'] : null;
                     $maps['gatewayClass'][$tablename] = class_exists($class['gatewayClass']) ? $class['gatewayClass'] : null;
+                    $maps['gatewayClass'][$entityname] = class_exists($class['gatewayClass']) ? $class['gatewayClass'] : null;
                     $maps['EtoT'][$entityname] = $tablename;
                     $maps['TtoE'][$tablename][] = $entityname;
                 }
@@ -1752,63 +1754,72 @@ class Database
     {
         $args1 = '$tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []';
         $args2 = '$variadic_primary, $tableDescriptor = []';
+        $args3 = '$predicates = [], $limit = 1';
 
-        $database = [];
-        $gateway = [];
+        $tablemap = $this->_tableMap();
+
+        $gateway_provider = [
+            'prop' => [],
+            'func' => [],
+        ];
+        foreach ($tablemap['gatewayClass'] as $tname => $gname) {
+            $ename = $this->convertEntityName($tname);
+            $gateway_provider['prop'][] = "/** @var {$ename}TableGateway */\npublic \$$tname;";
+            $gateway_provider['func'][] = "/** @return {$ename}TableGateway */\npublic function $tname($args1) { }";
+        }
+
         $gateways = [];
         $entities = [];
-        foreach ($this->getSchema()->getTableNames() as $tname) {
-            $ename = $this->convertEntityName($tname);
-            $eclass = ltrim($this->getEntityClass($tname), '\\');
-            $classess = [
-                $tname => '\\' . get_class($this->$tname),
-                $ename => '\\' . get_class($this->$ename),
-            ];
-            foreach ($classess as $name => $class) {
-                $database[] = sprintf(" * @property %s \$%s", $class, $name);
-                $database[] = sprintf(" * @method   %s %s", $class, $name) . "($args1)";
+        foreach ($tablemap['TtoE'] ?? [] as $tname => $entity_names) {
+            $column_types = array_each($this->getSchema()->getTableColumns($tname), function (&$carry, Column $column) {
+                $typename = $column->getType()->getName();
+                $typenames = array_map(function ($typename) {
+                    return class_exists($typename) ? "\\$typename" : $typename;
+                }, static::$typeMap[$typename] ?? [$typename]);
+                $carry[$column->getName()] = implode('|', $typenames);
+            }, []);
+            $shape = array_sprintf($column_types, '%2$s: %1$s', ', ');
+            $props = array_sprintf($column_types, "/** @var %1\$s */\npublic \$%2\$s;");
 
-                $gateway[] = sprintf(" * @property %s \$%s", $class, $name);
-                $gateway[] = sprintf(" * @method   %s %s", '$this', $name) . "($args1)";
-            }
-            if ($ename !== $tname) {
-                $gateways["{$ename}TableGateway"] = " * @mixin TableGateway
- * @method array|\\{$eclass}[]     array($args1)
- * @method array|\\{$eclass}[]     assoc($args1)
- * @method array|\\{$eclass}|false tuple($args1)
- * @method array|\\{$eclass}|false find($args2)
- * @method array|\\{$eclass}[]     arrayInShare($args1)
- * @method array|\\{$eclass}[]     assocInShare($args1)
- * @method array|\\{$eclass}|false tupleInShare($args1)
- * @method array|\\{$eclass}|false findInShare($args2)
- * @method array|\\{$eclass}[]     arrayForUpdate($args1)
- * @method array|\\{$eclass}[]     assocForUpdate($args1)
- * @method array|\\{$eclass}|false tupleForUpdate($args1)
- * @method array|\\{$eclass}|false findForUpdate($args2)
- * @method array|\\{$eclass}[]     arrayOrThrow($args1)
- * @method array|\\{$eclass}[]     assocOrThrow($args1)
- * @method array|\\{$eclass}       tupleOrThrow($args1)
- * @method array|\\{$eclass}       findOrThrow($args2)";
-                $entities["{$ename}Entity"] = array_map(function (Column $column) {
-                    $typename = $column->getType()->getName();
-                    $typenames = array_map(function ($typename) {
-                        return class_exists($typename) ? "\\$typename" : $typename;
-                    }, static::$typeMap[$typename] ?? [$typename]);
-                    return sprintf(" * @property %s \$%s", implode('|', $typenames), $column->getName());
-                }, $this->getSchema()->getTableColumns($tname));
+            foreach ($entity_names as $entity_name) {
+                $gclass = $tablemap['gatewayClass'][$entity_name] ?? TableGateway::class;
+                $eclass = $tablemap['entityClass'][$entity_name] ?? Entity::class;
+                $entity = "{$entity_name}Entity";
+
+                $suffixes = ['', 'InShare', 'ForUpdate', 'OrThrow', 'ForAffect'];
+                $rules = array_maps(static::METHODS, fn($rule) => $rule + ['arg' => $args1, 'suffix' => $suffixes]);
+                $rules['find'] = static::METHODS[self::METHOD_TUPLE] + ['arg' => $args2, 'suffix' => $suffixes];
+                $rules['neighbor'] = static::METHODS[self::METHOD_ASSOC] + ['arg' => $args3, 'suffix' => ['']];
+                $types = [
+                    "0-1" => "{$entity}[]|array<array{{$shape}}>", // array, assoc, neighbor
+                    "1-1" => "{$entity}|array{{$shape}}",          // tuple, find
+                ];
+                $methods = array_fill_keys(array_keys($rules), []);
+                foreach ($rules as $mname => $rule) {
+                    if ($type = ($types[sprintf("%d-%d", $rule['keyable'] === null, $rule['entity'])] ?? null)) {
+                        foreach ($rule['suffix'] as $suffix) {
+                            $methods[$mname][] = "/** @return $type */\npublic function $mname$suffix({$rule['arg']}) { }";
+                        }
+                    }
+                }
+
+                $gateways["{$entity_name}TableGateway extends \\$gclass"] = ["use TableGatewayProvider;"] + $methods;
+                $entities["{$entity_name}Entity extends \\$eclass"] = $props;
             }
         }
 
-        $gen = function ($comments, $name) {
-            $comments = implode("\n", (array) $comments);
-            return "/**\n$comments\n */\ntrait $name{}\n";
+        $gen = function ($type, $name, $body) {
+            $body = indent_php("\n" . implode("\n\n", array_flatten((array) $body)), ['baseline' => 0, 'indent' => 4]);
+            return "$type $name\n{{$body}\n}\n";
         };
         $namespace = $namespace ? "\nnamespace $namespace;\n" : '';
         $result = "<?php\n$namespace\n// this code auto generated.\n\n// @formatter\x3Aoff\n\n"; // 文字列内だけど phpstorm が反応する
-        $result .= $gen($database, "Database") . "\n";
-        $result .= $gen($gateway, "TableGateway") . "\n";
-        $result .= array_sprintf($gateways, $gen, "\n") . "\n";
-        $result .= array_sprintf($entities, $gen, "\n");
+        $result .= implode("\n", [
+            $gen('trait', "TableGatewayProvider", $gateway_provider),
+            $gen('class', "Database extends \\" . get_class($this), "use TableGatewayProvider;"),
+            array_sprintf($gateways, fn($body, $name) => $gen('class', $name, $body), "\n"),
+            array_sprintf($entities, fn($body, $name) => $gen('class', $name, $body), "\n"),
+        ]);
 
         if ($filename) {
             file_set_contents($filename, $result);
