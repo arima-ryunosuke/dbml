@@ -1146,6 +1146,23 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_convertEmptyToNull($database)
+    {
+        $database->setConvertEmptyToNull(true);
+        $this->assertEquals(1, $database->insert('auto', [
+            'id'   => null,
+            'name' => 'hoge',
+        ]));
+        $this->assertEquals(1, $database->insert('auto', [
+            'id'   => '',
+            'name' => 'hoge',
+        ]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_checkSameColumn($database)
     {
         $database->setAutoCastType(['guid' => true]);

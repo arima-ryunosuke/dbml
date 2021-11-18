@@ -1464,14 +1464,11 @@ class Database
             // 対象としない型（要するに文字列系）
             $targets = [Types::STRING => true, Types::TEXT => true, Types::BINARY => true, Types::BLOB => true];
             foreach ($columns as $cname => $column) {
-                // NULLABLE のみ対象で・・・
-                if (!$column->getNotnull()) {
-                    // 値が空文字で・・・
-                    if (array_key_exists($cname, $row) && $row[$cname] === '') {
-                        // 文字列系以外の型なら null にする
-                        if (!isset($targets[$column->getType()->getName()])) {
-                            $row[$cname] = null;
-                        }
+                // 値が空文字で・・・
+                if (array_key_exists($cname, $row) && $row[$cname] === '') {
+                    // AUTO_INCREMENT か NULLABLE な文字列系以外の型なら null にする
+                    if ($cname === $autocolumn || (!isset($targets[$column->getType()->getName()]) && !$column->getNotnull())) {
+                        $row[$cname] = null;
                     }
                 }
             }
