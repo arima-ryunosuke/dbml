@@ -1491,10 +1491,13 @@ AND
         $this->assertException("not match primary columns", L($builder->reset()->column('multiprimary'))->where(['' => [[1]]]));
         $this->assertException("not match primary columns", L($builder->reset()->column('multiprimary'))->where(['' => [[1, 2, 3]]]));
 
-        // トップレベル以外無視
-        $this->assertEquals("SELECT test.* FROM test WHERE hoge IN (NULL)", $builder->reset()->column('test')->where([
+        // トップレベル以外無視。ただし、OR などの数値キーは OK
+        $this->assertEquals("SELECT test.* FROM test WHERE (hoge IN (NULL)) AND (test.id = '3')", $builder->reset()->column('test')->where([
             'hoge' => [
                 '' => [1, 2],
+            ],
+            [
+                '' => 3,
             ],
         ])->queryInto());
     }
@@ -1685,6 +1688,11 @@ SQL
         $builder->addColumn('t_article A/t_comment C');
 
         $builder->where([
+            [
+                ''                => 1,
+                'A.comment_count' => 2,
+                '*.article_id'    => 3,
+            ],
             'A.article_id' => [
                 '*.*'            => 'injected1!',
                 '*.article_id'   => 'injected2!',
@@ -1697,11 +1705,25 @@ SQL
                 ],
             ],
         ]);
-        // value のみ見るので IN になるのは正しい動作
+        $qi = function ($str) use ($builder) {
+            return $builder->getDatabase()->getPlatform()->quoteSingleIdentifier($str);
+        };
         $C = $builder->getDatabase()->getCompatiblePlatform()->quoteIdentifierIfNeeded('C');
-        $this->assertEquals("SELECT A.*, A.article_id AS " . Database::AUTO_PRIMARY_KEY . "c, NULL AS $C FROM t_article A WHERE A.article_id IN (NULL)", $builder->queryInto());
+        $primary_key = Database::AUTO_PRIMARY_KEY;
+        $parent_key = Database::AUTO_PARENT_KEY;
+        $child_key = Database::AUTO_CHILD_KEY;
+
+        // OR でも効いている
+        $this->assertStringIgnoreBreak("SELECT A.*, A.article_id AS {$primary_key}c, NULL AS $C
+FROM t_article A
+WHERE ((A.article_id = '1')
+OR (/* vcolumn comment_count-k */ (SELECT COUNT(*) AS {$qi('*@count')} FROM t_comment WHERE t_comment.article_id = A.article_id) = '2')
+OR (A.article_id = '3'))
+AND (A.article_id IN (NULL))", $builder->queryInto());
         // 子供である C 条件が現れるのはインジェクションの危険性がある
-        $this->assertEquals("SELECT C.comment_id AS " . Database::AUTO_CHILD_KEY . ", C.*, C.article_id AS " . Database::AUTO_PARENT_KEY . " FROM t_comment C", $builder->getSubbuilder('C')->queryInto());
+        $this->assertStringIgnoreBreak("SELECT C.comment_id AS $child_key, C.*, C.article_id AS $parent_key
+FROM t_comment C
+WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
     }
 
     /**

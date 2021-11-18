@@ -965,10 +965,11 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
         $predicates = array_convert($predicates, function ($cond, &$param, $keys) use ($subtype, $froms) {
             $is_int = is_int($cond);
+            $is_toplevel = array_filter($keys, 'is_int') === $keys; // flipflop の仕様がある
 
             // 主キー
             if ($cond === '') {
-                if (count($keys) > 1) {
+                if (!$is_toplevel) {
                     return false;
                 }
                 $from = reset($froms) ?: throws(new \UnexpectedValueException('base table not found.'));
@@ -988,7 +989,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
             // エニーカラム（*.*）
             if (is_string($cond) && preg_match('#^((.*)\.)?\*$#u', $cond, $matches)) {
-                if (array_filter($keys, 'is_int') !== $keys) {
+                if (!$is_toplevel) {
                     return false;
                 }
                 [, , $alias] = $matches + [2 => '*'];
@@ -1004,7 +1005,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
             // エニーカラム（*.column_name）
             if (is_string($cond) && strpos($cond, '*.') === 0) {
-                if (count($keys) > 1) {
+                if (!$is_toplevel) {
                     return false;
                 }
                 [, $column] = explode('.', $cond, 2);
@@ -1023,7 +1024,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
             // ネストカラム（T1/T2/T3.column_name）
             if (is_string($cond) && strpos($cond, '/') !== false) {
-                if (count($keys) > 1) {
+                if (!$is_toplevel) {
                     return false;
                 }
                 [$subkey, $subcolumn] = explode('/', $cond, 2);
@@ -1034,7 +1035,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
             // サブカラム（['Sub' => [$condition]]）
             if (isset($this->subbuilders[$cond])) {
-                if (count($keys) > 1) {
+                if (!$is_toplevel) {
                     return false;
                 }
                 $this->subbuilders[$cond]->$subtype($param);
@@ -1042,7 +1043,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
             // 仮想カラム（tablename.virtualname）@todo 何をしているか分からない
             $cond2 = $is_int ? $param : $cond;
-            if (is_string($cond2) && preg_match('#([a-z_][a-z0-9_]*)\.([a-z_][a-z0-9_]*)#ui', $cond2, $matches) && count($keys) <= 1) {
+            if (is_string($cond2) && preg_match('#([a-z_][a-z0-9_]*)\.([a-z_][a-z0-9_]*)#ui', $cond2, $matches) && $is_toplevel) {
                 $modifier = $matches[1];
                 $tablename = $froms[$modifier]['table'] ?? $modifier;
                 if ($this->database->getSchema()->hasTable($tablename)) {
