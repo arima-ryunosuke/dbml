@@ -764,7 +764,7 @@ Driver connections must implement this interface.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::lastInsertId()">
-                                    Doctrine\DBAL\Driver\Connection::lastInsertId		</a>	<small>($name = null) : string</small>
+                                    Doctrine\DBAL\Driver\Connection::lastInsertId		</a>	<small>($name = null) : string<span class="type-separator"></span><wbr>int<span class="type-separator"></span><wbr>false</small>
 		</h4>
 	<div class="description"><p>Returns the ID of the last inserted row or sequence value.</p>
 </div>
@@ -823,7 +823,7 @@ Driver connections must implement this interface.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Driver-ServerInfoAwareConnection$typespace.html#Doctrine\DBAL\Driver\ServerInfoAwareConnection::lastInsertId()">
-                                    Doctrine\DBAL\Driver\ServerInfoAwareConnection::lastInsertId		</a>	<small>($name = null) : string</small>
+                                    Doctrine\DBAL\Driver\ServerInfoAwareConnection::lastInsertId		</a>	<small>($name = null) : string<span class="type-separator"></span><wbr>int<span class="type-separator"></span><wbr>false</small>
 		</h4>
 	<div class="description"><p>Returns the ID of the last inserted row or sequence value.</p>
 </div>
@@ -10231,7 +10231,7 @@ echo $qb-&gt;getSQL(); // SELECT u FROM User u
     -&gt;select('u')
     -&gt;from('users', 'u')
     -&gt;where('u.id = :user_id')
-    -&gt;setParameter(':user_id', 1);
+    -&gt;setParameter('user_id', 1);
 </code></pre>
 <p></code></p>
 </div>
@@ -10246,8 +10246,8 @@ echo $qb-&gt;getSQL(); // SELECT u FROM User u
     -&gt;from('users', 'u')
     -&gt;where('u.id = :user_id1 OR u.id = :user_id2')
     -&gt;setParameters(array(
-        ':user_id1' =&gt; 1,
-        ':user_id2' =&gt; 2
+        'user_id1' =&gt; 1,
+        'user_id2' =&gt; 2
     ));
 </code></pre>
 <p></code></p>
@@ -10864,8 +10864,133 @@ bugs in your code.</p>
 		<a href="Doctrine-DBAL-SQL-Parser-$namespace.html#Doctrine\DBAL\SQL\Parser\">
             Doctrine\DBAL\SQL\Parser                        		</a>	</h4>
 	<div class="description"></div>
+                	<h4 class="fqsen-title">namespace		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-$namespace.html#Doctrine\DBAL\SQL\Parser\Exception\">
+            Doctrine\DBAL\SQL\Parser\Exception                        		</a>	</h4>
+	<div class="description"></div>
                 
+                	<h4 class="fqsen-title">class		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError">
+                                    Doctrine\DBAL\SQL\Parser\Exception::RegularExpressionError		</a>	</h4>
+	<div class="description"></div>
+            	<h4 class="fqsen-title">property		<small>string</small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::$message">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::message		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">property		<small>integer</small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::$code">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::code		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">property		<small>NULL</small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::$file">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::file		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">property		<small>NULL</small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::$line">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::line		</a>	</h4>
+	<div class="description"></div>
+        	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::new()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::new		</a>	<small>() : <a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError" class="fqsen "><small>Doctrine\DBAL\SQL\Parser\Exception\</small><wbr>RegularExpressionError</a></small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::__construct()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::__construct		</a>	<small>($message, $code, $previous) : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::__wakeup()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::__wakeup		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getMessage()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getMessage		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getCode()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getCode		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getFile()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getFile		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getLine()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getLine		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getTrace()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getTrace		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getPrevious()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getPrevious		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getTraceAsString()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::getTraceAsString		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception-RegularExpressionError$typespace.html#Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::__toString()">
+                                    Doctrine\DBAL\SQL\Parser\Exception\RegularExpressionError::__toString		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+                
+    
                         	<h4 class="fqsen-title">interface		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception$typespace.html#Doctrine\DBAL\SQL\Parser\Exception">
+                                    Doctrine\DBAL\SQL\Parser::Exception		</a>	</h4>
+	<div class="description"></div>
+                	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception$typespace.html#Doctrine\DBAL\SQL\Parser\Exception::getMessage()">
+                                    Doctrine\DBAL\SQL\Parser\Exception::getMessage		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception$typespace.html#Doctrine\DBAL\SQL\Parser\Exception::getCode()">
+                                    Doctrine\DBAL\SQL\Parser\Exception::getCode		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception$typespace.html#Doctrine\DBAL\SQL\Parser\Exception::getFile()">
+                                    Doctrine\DBAL\SQL\Parser\Exception::getFile		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception$typespace.html#Doctrine\DBAL\SQL\Parser\Exception::getLine()">
+                                    Doctrine\DBAL\SQL\Parser\Exception::getLine		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception$typespace.html#Doctrine\DBAL\SQL\Parser\Exception::getTrace()">
+                                    Doctrine\DBAL\SQL\Parser\Exception::getTrace		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception$typespace.html#Doctrine\DBAL\SQL\Parser\Exception::getPrevious()">
+                                    Doctrine\DBAL\SQL\Parser\Exception::getPrevious		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception$typespace.html#Doctrine\DBAL\SQL\Parser\Exception::getTraceAsString()">
+                                    Doctrine\DBAL\SQL\Parser\Exception::getTraceAsString		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-SQL-Parser-Exception$typespace.html#Doctrine\DBAL\SQL\Parser\Exception::__toString()">
+                                    Doctrine\DBAL\SQL\Parser\Exception::__toString		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+            	<h4 class="fqsen-title">interface		<small></small>
 		<a href="Doctrine-DBAL-SQL-Parser-Visitor$typespace.html#Doctrine\DBAL\SQL\Parser\Visitor">
                                     Doctrine\DBAL\SQL\Parser::Visitor		</a>	</h4>
 	<div class="description"><p>SQL parser visitor</p>
@@ -16016,7 +16141,7 @@ If an SQLLogger is configured, the execution is logged.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::lastInsertId()">
-                                    Doctrine\DBAL\Connection::lastInsertId		</a>	<small>($name = null) : string</small>
+                                    Doctrine\DBAL\Connection::lastInsertId		</a>	<small>($name = null) : string<span class="type-separator"></span><wbr>int<span class="type-separator"></span><wbr>false</small>
 		</h4>
 	<div class="description"><p>Returns the ID of the last inserted row, or the last value from a sequence object,<br />
 depending on the underlying driver.</p>
@@ -26340,7 +26465,22 @@ $db-&gt;save('t_parent', [
 		</h4>
 	<div class="description"><p>insertOrThrow のエイリアス</p>
 <p>updateOrThrow や deleteOrThrow を使う機会はそう多くなく、実質的に主キーを得たいがために insertOrThrow を使うことが多い。<br />
-となると対象性がなく、コードリーディング時に余計な思考を挟むことが多い（「なぜ insert だけ OrThrow なんだろう？」）のでエイリアスを用意した。</p>
+となると対称性がなく、コードリーディング時に余計な思考を挟むことが多い（「なぜ insert だけ OrThrow なんだろう？」）のでエイリアスを用意した。</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::createIgnore()">
+                                    ryunosuke\dbml::createIgnore		</a>	<small>($tableName, $data) : array<span class="type-separator"></span><wbr>string</small>
+		</h4>
+	<div class="description"><p>IGNORE 付き <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::create()' data-type-array='0' data-type-nullable='' data-description='create()'>create()</tag_link></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::createConditionally()">
+                                    ryunosuke\dbml::createConditionally		</a>	<small>($tableName, $condition, $data) : array<span class="type-separator"></span><wbr>string</small>
+		</h4>
+	<div class="description"><p>条件付き <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::create()' data-type-array='0' data-type-nullable='' data-description='create()'>create()</tag_link></p>
+<p>$condition が WHERE 的判定され、合致しないときは create が行われない。<br />
+$condition が配列の場合は $tableName で selectNotExists する。つまり「存在しないとき実行」となる。</p>
+<p>実行したら主キー配列を返し、されなかったら空配列を返す。</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::insert()">
@@ -26994,21 +27134,6 @@ Web システムにおいては空文字でパラメータが来ることが多�
                                     ryunosuke\dbml::saveIgnore		</a>	<small>($tableName, $data) : array<span class="type-separator"></span><wbr>string[]</small>
 		</h4>
 	<div class="description"><p>IGNORE 付き <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::save()' data-type-array='0' data-type-nullable='' data-description='save()'>save()</tag_link></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::createIgnore()">
-                                    ryunosuke\dbml::createIgnore		</a>	<small>($tableName, $data) : array<span class="type-separator"></span><wbr>string</small>
-		</h4>
-	<div class="description"><p>IGNORE 付き <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::create()' data-type-array='0' data-type-nullable='' data-description='create()'>create()</tag_link></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::createConditionally()">
-                                    ryunosuke\dbml::createConditionally		</a>	<small>($tableName, $condition, $data) : array<span class="type-separator"></span><wbr>string</small>
-		</h4>
-	<div class="description"><p>条件付き <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::create()' data-type-array='0' data-type-nullable='' data-description='create()'>create()</tag_link></p>
-<p>$condition が WHERE 的判定され、合致しないときは create が行われない。<br />
-$condition が配列の場合は $tableName で selectNotExists する。つまり「存在しないとき実行」となる。</p>
-<p>実行したら主キー配列を返し、されなかったら空配列を返す。</p>
 </div>
                 
     

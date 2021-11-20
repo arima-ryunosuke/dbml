@@ -1001,7 +1001,7 @@ echo $qb-&gt;getSQL(); // SELECT u FROM User u
     -&gt;select('u')
     -&gt;from('users', 'u')
     -&gt;where('u.id = :user_id')
-    -&gt;setParameter(':user_id', 1);
+    -&gt;setParameter('user_id', 1);
 </code></pre>
 <p></code></p>
 </div>
@@ -1069,8 +1069,8 @@ echo $qb-&gt;getSQL(); // SELECT u FROM User u
     -&gt;from('users', 'u')
     -&gt;where('u.id = :user_id1 OR u.id = :user_id2')
     -&gt;setParameters(array(
-        ':user_id1' =&gt; 1,
-        ':user_id2' =&gt; 2
+        'user_id1' =&gt; 1,
+        'user_id2' =&gt; 2
     ));
 </code></pre>
 <p></code></p>
