@@ -5822,7 +5822,10 @@ class Database
      * insertOrThrow のエイリアス
      *
      * updateOrThrow や deleteOrThrow を使う機会はそう多くなく、実質的に主キーを得たいがために insertOrThrow を使うことが多い。
-     * となると対象性がなく、コードリーディング時に余計な思考を挟むことが多い（「なぜ insert だけ OrThrow なんだろう？」）のでエイリアスを用意した。
+     * となると対称性がなく、コードリーディング時に余計な思考を挟むことが多い（「なぜ insert だけ OrThrow なんだろう？」）のでエイリアスを用意した。
+     *
+     * @used-by createIgnore()
+     * @used-by createConditionally()
      *
      * @param string|array $tableName テーブル名
      * @param mixed $data INSERT データ配列

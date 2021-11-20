@@ -1438,7 +1438,7 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(['id' => '13'], $gateway->upsertConditionally(['id' => -1], ['name' => 'fuga']));
         $this->assertEquals(['id' => '14'], $gateway->modifyConditionally(['id' => -1], ['name' => 'piyo']));
 
-        $this->assertEquals(['id' => '15'], $gateway->createConditionally(['id' => 11], ['name' => 'xxxx']));
+        $this->assertEquals([], $gateway->createConditionally(['id' => 11], ['name' => 'xxxx']));
         $this->assertEquals([], $gateway->insertConditionally(['id' => 12], ['name' => 'hoge']));
         $this->assertEquals([], $gateway->upsertConditionally(['id' => 13], ['name' => 'fuga']));
         $this->assertEquals([], $gateway->modifyConditionally(['id' => 14], ['name' => 'piyo']));
@@ -1542,7 +1542,6 @@ AND ((flag=1))", "$gw");
         $this->assertEquals([
             'truncate',
             'create',
-            'insert',
             'upsert',
             'modify',
             'insert',

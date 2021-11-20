@@ -2524,7 +2524,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function create($data)
     {
-        return $this->insertOrThrow($data);
+        $this->resetResult();
+        return $this->database->create($this->tableName, ...func_get_args());
     }
 
     /**
