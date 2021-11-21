@@ -22,6 +22,13 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.15
+
+- [change][Database] echoAnnotation の出力を変更
+- [feature][Database] convertEmptyToNull の制限を緩和
+- [feature][QueryBuilder] 主キーカラム・エニーカラム・仮想カラムなどのトップレベルの制限を緩和
+- [fixbug][TableGateway] create がやっつけ実装だったので改善
+
 ## 2.0.14
 
 - [feature][Database] ForAffect（ForUpdateOrThrow のエイリアス）を実装
