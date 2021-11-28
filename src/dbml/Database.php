@@ -1230,18 +1230,24 @@ class Database
             // doctrine 3 系の PDO\Result で fetchmode を指定する術はない
             $result = (function () { return $this->result; })->call($stmt);
             if ($result instanceof \Doctrine\DBAL\Driver\PDO\Result) {
-                return new class($result) {
-                    private $result;
+                return new class($result, $this->getSlaveConnection()) extends \Doctrine\DBAL\Result {
+                    private \PDOStatement $statement;
 
-                    public function __construct(\Doctrine\DBAL\Driver\PDO\Result $result) { $this->result = $result; }
+                    public function __construct(\Doctrine\DBAL\Driver\Result $result, Connection $connection)
+                    {
+                        parent::__construct($result, $connection);
 
-                    public function __call($name, $arguments) { return $this->result->$name(...$arguments); }
+                        $this->statement = (function () { return $this->statement; })->call($result);
+                    }
+
+                    public function fetchAssociative()
+                    {
+                        return $this->statement->fetch(\PDO::FETCH_ASSOC | \PDO::FETCH_NAMED);
+                    }
 
                     public function fetchAllAssociative(): array
                     {
-                        return (function () {
-                            return $this->fetchAll(\PDO::FETCH_ASSOC | \PDO::FETCH_NAMED);
-                        })->call($this->result);
+                        return $this->statement->fetchAll(\PDO::FETCH_ASSOC | \PDO::FETCH_NAMED);
                     }
                 };
             }

@@ -2133,6 +2133,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $database->exportJson($database->select('test'), [], [], $path);
         $this->assertJson(file_get_contents($path));
 
+        $database->setCheckSameColumn('loose');
+        $this->assertException('cause loose', L($database)->exportCsv('select test.id, 0 as id from test'));
+        $database->setCheckSameColumn(null);
+
         $this->assertException(new \BadMethodCallException('undefined'), L($database)->exportHoge($database->select('test'), [], [], $path));
     }
 
