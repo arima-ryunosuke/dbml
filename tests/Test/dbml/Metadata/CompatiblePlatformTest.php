@@ -7,9 +7,9 @@ use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\OraclePlatform;
-use Doctrine\DBAL\Platforms\PostgreSQL94Platform as PostgreSqlPlatform;
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
-use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
 
@@ -24,7 +24,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             'sqlite_t'   => new \ryunosuke\Test\Platforms\SqlitePlatform(),
             'sqlite'     => new SqlitePlatform(),
             'mysql'      => new MySQLPlatform(),
-            'postgresql' => new PostgreSqlPlatform(),
+            'postgresql' => new PostgreSQLPlatform(),
             'sqlserver'  => new SQLServerPlatform(),
             'oracle'     => new OraclePlatform(),
         ];
@@ -58,6 +58,29 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_getName($cplatform, $platform)
+    {
+        $expected = 'oracle';
+        if ($platform instanceof SqlitePlatform) {
+            $expected = 'sqlite';
+        }
+        if ($platform instanceof MySQLPlatform) {
+            $expected = 'mysql';
+        }
+        if ($platform instanceof PostgreSQLPlatform) {
+            $expected = 'postgresql';
+        }
+        if ($platform instanceof SQLServerPlatform) {
+            $expected = 'mssql';
+        }
+        $this->assertEquals($expected, $cplatform->getName());
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_supportsIdentityNullable($cplatform, $platform)
     {
         $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform;
@@ -83,7 +106,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsIdentityAutoUpdate($cplatform, $platform)
     {
-        $expected = !($platform instanceof PostgreSqlPlatform || $platform instanceof OraclePlatform);
+        $expected = !($platform instanceof PostgreSQLPlatform || $platform instanceof OraclePlatform);
         $this->assertEquals($expected, $cplatform->supportsIdentityAutoUpdate());
     }
 
@@ -116,7 +139,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsMerge($cplatform, $platform)
     {
-        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform || $platform instanceof PostgreSqlPlatform;
+        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform || $platform instanceof PostgreSQLPlatform;
         $this->assertEquals($expected, $cplatform->supportsMerge());
     }
 
@@ -127,7 +150,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsBulkMerge($cplatform, $platform)
     {
-        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform || $platform instanceof PostgreSqlPlatform;
+        $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform || $platform instanceof PostgreSQLPlatform;
         $this->assertEquals($expected, $cplatform->supportsBulkMerge());
     }
 
@@ -261,7 +284,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('hogera', $cplatform->quoteIdentifierIfNeeded('hogera'));
         $this->assertEquals($platform->quoteSingleIdentifier('WHERE'), $cplatform->quoteIdentifierIfNeeded('WHERE'));
 
-        if ($platform instanceof PostgreSqlPlatform) {
+        if ($platform instanceof PostgreSQLPlatform) {
             $this->assertEquals('aaa', $cplatform->quoteIdentifierIfNeeded('aaa'));
             $this->assertEquals($platform->quoteSingleIdentifier('AAA'), $cplatform->quoteIdentifierIfNeeded('AAA'));
         }
@@ -331,7 +354,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($platform instanceof MySQLPlatform) {
             $expected = 'ON DUPLICATE KEY UPDATE';
         }
-        if ($platform instanceof PostgreSqlPlatform) {
+        if ($platform instanceof PostgreSQLPlatform) {
             $expected = 'ON CONFLICT(col) DO UPDATE SET';
         }
         $this->assertEquals($expected, $cplatform->getMergeSyntax(['col']));
@@ -343,7 +366,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($platform instanceof MySQLPlatform) {
             $expected = 'ON DUPLICATE KEY UPDATE';
         }
-        if ($platform instanceof PostgreSqlPlatform) {
+        if ($platform instanceof PostgreSQLPlatform) {
             $expected = 'ON CONFLICT(col1,col2) DO UPDATE SET';
         }
         $this->assertEquals($expected, $cplatform->getMergeSyntax(['col1', 'col2']));
@@ -363,7 +386,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($platform instanceof MySQLPlatform) {
             $expected = 'VALUES(name)';
         }
-        if ($platform instanceof PostgreSqlPlatform) {
+        if ($platform instanceof PostgreSQLPlatform) {
             $expected = 'EXCLUDED.name';
         }
         $this->assertEquals($expected, $cplatform->getReferenceSyntax('name'));
@@ -393,7 +416,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getTruncateTableSQL($cplatform, $platform)
     {
-        $expected = $platform instanceof PostgreSqlPlatform ? 'RESTART IDENTITY' : 't_table';
+        $expected = $platform instanceof PostgreSQLPlatform ? 'RESTART IDENTITY' : 't_table';
         $this->assertStringContainsString($expected, $cplatform->getTruncateTableSQL('t_table'));
     }
 
@@ -404,7 +427,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getIdentitySequenceName($cplatform, $platform)
     {
-        $expected = $platform instanceof PostgreSqlPlatform ? 'table_id_seq' : null;
+        $expected = $platform instanceof PostgreSQLPlatform ? 'table_id_seq' : null;
         $expected = $platform instanceof OraclePlatform ? 'TABLE_SEQ' : $expected;
         $this->assertEquals($expected, $cplatform->getIdentitySequenceName('table', 'id'));
     }
@@ -575,7 +598,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $actual = $cplatform->getGroupConcatSyntax(['id', 'seq'], '|', ['hoge' => 'ASC']);
             $this->assertEquals($expected, $actual);
         }
-        if ($platform instanceof PostgreSqlPlatform) {
+        if ($platform instanceof PostgreSQLPlatform) {
             $expected = "ARRAY_AGG(id)";
             $this->assertEquals($expected, $cplatform->getGroupConcatSyntax('id'));
 
@@ -595,8 +618,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getCountExpression($cplatform, $platform)
     {
-        $expected = $platform->getCountExpression('hoge');
-        $this->assertEquals($expected, $cplatform->getCountExpression('hoge'));
+        $this->assertEquals("COUNT(hoge)", $cplatform->getCountExpression('hoge'));
     }
 
     /**
@@ -606,8 +628,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getMinExpression($cplatform, $platform)
     {
-        $expected = $platform->getMinExpression('hoge');
-        $this->assertEquals($expected, $cplatform->getMinExpression('hoge'));
+        $this->assertEquals("MIN(hoge)", $cplatform->getMinExpression('hoge'));
     }
 
     /**
@@ -617,8 +638,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getMaxExpression($cplatform, $platform)
     {
-        $expected = $platform->getMaxExpression('hoge');
-        $this->assertEquals($expected, $cplatform->getMaxExpression('hoge'));
+        $this->assertEquals("MAX(hoge)", $cplatform->getMaxExpression('hoge'));
     }
 
     /**
@@ -628,8 +648,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getSumExpression($cplatform, $platform)
     {
-        $expected = $platform->getSumExpression('hoge');
-        $this->assertEquals($expected, $cplatform->getSumExpression('hoge'));
+        $this->assertEquals("SUM(hoge)", $cplatform->getSumExpression('hoge'));
     }
 
     /**
@@ -640,10 +659,10 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_getAvgExpression($cplatform, $platform)
     {
         if ($platform instanceof SQLServerPlatform) {
-            $expected = $platform->getAvgExpression('CAST(hoge AS float)');
+            $expected = 'AVG(CAST(hoge AS float))';
         }
         else {
-            $expected = $platform->getAvgExpression('hoge');
+            $expected = 'AVG(hoge)';
         }
         $this->assertEquals($expected, $cplatform->getAvgExpression('hoge'));
     }
@@ -686,11 +705,11 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
         ];
 
-        if (!isset($expected[$platform->getName()])) {
+        if (!isset($expected[$cplatform->getName()])) {
             $this->assertException('is not support', L($cplatform)->getResetSequenceExpression('t_table', 'c_sol', 99));
         }
         else {
-            $this->assertEquals($expected[$platform->getName()], $cplatform->getResetSequenceExpression('t_table', 'c_sol', 99));
+            $this->assertEquals($expected[$cplatform->getName()], $cplatform->getResetSequenceExpression('t_table', 'c_sol', 99));
         }
     }
 
@@ -719,13 +738,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_commentize($cplatform, $platform)
     {
-        $s = $platform->getSqlCommentStartString();
-        $e = $platform->getSqlCommentEndString();
-        $this->assertEquals("$s select 1 $e", $cplatform->commentize('select 1'));
-
-        $s = $platform->getSqlCommentStartString();
-        $e = $platform->getSqlCommentEndString();
-        $this->assertEquals("$s hoge fuga $e", $cplatform->commentize("hoge\nfuga"));
+        $this->assertEquals("-- hoge fuga \n", $cplatform->commentize("hoge\nfuga"));
 
         $this->assertEquals("/* hoge\nfuga */", $cplatform->commentize("hoge\nfuga", true));
     }
@@ -747,7 +760,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($platform instanceof MySQLPlatform) {
             $expected = ['id' => new Expression('VALUES(id)')];
         }
-        if ($platform instanceof PostgreSqlPlatform) {
+        if ($platform instanceof PostgreSQLPlatform) {
             $expected = ['id' => new Expression('EXCLUDED.id')];
         }
         $this->assertEquals($expected, $cplatform->convertMergeData(['id' => 1], []));

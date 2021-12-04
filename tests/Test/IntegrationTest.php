@@ -3,7 +3,7 @@
 namespace ryunosuke\Test;
 
 use Doctrine\DBAL\Platforms\MySQLPlatform;
-use Doctrine\DBAL\Platforms\PostgreSQL94Platform as PostgreSqlPlatform;
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\Comment;
 
@@ -68,7 +68,7 @@ class IntegrationTest extends AbstractUnitTestCase
      */
     function test_lockForUpdate_SkipLocked($db1)
     {
-        if ($db1->getPlatform() instanceof PostgreSqlPlatform) {
+        if ($db1->getPlatform() instanceof PostgreSQLPlatform) {
             // 排他ロックで取得しておく
             $db1->begin();
             $db1->select('test1', ['id' => [1, 2]])->lockForUpdate()->array();

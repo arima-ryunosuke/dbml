@@ -3,7 +3,7 @@
 namespace ryunosuke\Test\dbml\Gateway;
 
 use Doctrine\DBAL\Logging\DebugStack;
-use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;

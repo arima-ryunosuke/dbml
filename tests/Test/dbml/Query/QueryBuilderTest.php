@@ -5,7 +5,7 @@ namespace ryunosuke\Test\dbml\Query;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
-use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
@@ -19,6 +19,7 @@ use ryunosuke\dbml\Query\Expression\SelectOption;
 use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\Test\Database;
 use function ryunosuke\dbml\arrayval;
+use function ryunosuke\dbml\try_return;
 
 class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -3500,8 +3501,9 @@ SQL
     {
         $fk1 = new ForeignKeyConstraint(['gg_id'], 'gg1', ['gg_id'], 'fk_gg12');
         $fk2 = new ForeignKeyConstraint(['gg_id'], 'gg2', ['gg_id'], 'fk_gg21');
-        $builder->getDatabase()->getConnection()->createSchemaManager()->tryMethod('dropForeignKey', $fk1, 'gg2');
-        $builder->getDatabase()->getConnection()->createSchemaManager()->tryMethod('dropForeignKey', $fk2, 'gg1');
+        $smanager = $builder->getDatabase()->getConnection()->createSchemaManager();
+        try_return([$smanager, 'dropForeignKey'], $fk1, 'gg2');
+        try_return([$smanager, 'dropForeignKey'], $fk2, 'gg1');
         self::createTables($builder->getDatabase()->getConnection(), [
             new Table('ppp',
                 [
@@ -3620,7 +3622,8 @@ SQL
     function test_joinIndirect()
     {
         $schmer = self::getDummyDatabase()->getConnection()->createSchemaManager();
-        $schmer->dropAndCreateTable(new Table(
+        try_return([$schmer, 'dropTable'], 't_root');
+        $schmer->createTable(new Table(
             't_root',
             [
                 new Column('root_id', Type::getType('integer')),
@@ -3628,7 +3631,8 @@ SQL
             ],
             [new Index('PRIMARY', ['root_id', 'seq'], true, true)]
         ));
-        $schmer->dropAndCreateTable(new Table(
+        try_return([$schmer, 'dropTable'], 't_inner1');
+        $schmer->createTable(new Table(
             't_inner1',
             [
                 new Column('inner1_id', Type::getType('integer')),
@@ -3639,7 +3643,8 @@ SQL
             [],
             [new ForeignKeyConstraint(['root1_id', 'root1_seq'], 't_root', ['root_id', 'seq'], 'fk_inner1')]
         ));
-        $schmer->dropAndCreateTable(new Table(
+        try_return([$schmer, 'dropTable'], 't_inner2');
+        $schmer->createTable(new Table(
             't_inner2',
             [
                 new Column('inner2_id', Type::getType('integer')),
@@ -3650,7 +3655,8 @@ SQL
             [],
             [new ForeignKeyConstraint(['root2_id', 'root2_seq'], 't_root', ['root_id', 'seq'], 'fk_inner2')]
         ));
-        $schmer->dropAndCreateTable(new Table(
+        try_return([$schmer, 'dropTable'], 't_leaf');
+        $schmer->createTable(new Table(
             't_leaf',
             [
                 new Column('leaf_id', Type::getType('integer')),

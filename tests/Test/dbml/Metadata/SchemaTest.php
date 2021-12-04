@@ -13,20 +13,23 @@ use ryunosuke\dbml\Metadata\Schema;
 use ryunosuke\Test\Database;
 use Symfony\Component\Cache\Adapter\NullAdapter;
 use Symfony\Component\Cache\Psr16Cache;
+use function ryunosuke\dbml\try_return;
 
 class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
     public static function provideSchema()
     {
         $schmer = self::getDummyDatabase()->getConnection()->createSchemaManager();
-        $schmer->dropAndCreateTable(new Table(
+        try_return([$schmer, 'dropTable'], 'metasample');
+        $schmer->createTable(new Table(
             'metasample',
             [
                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
             ],
             [new Index('PRIMARY', ['id'], true, true)]
         ));
-        $schmer->dropAndCreateView(new View(
+        try_return([$schmer, 'dropView'], 'viewsample');
+        $schmer->createView(new View(
             'viewsample',
             'SELECT * FROM metasample'
         ));
@@ -459,25 +462,21 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideSchema
      * @param Schema $schema
      */
-    function test_addForeignKey($schema)
+    function test_addFsssoreignKey($schema)
     {
-        $newFK = function ($name, $lt, $lc, $ft, $fc) use ($schema) {
-            $fk = new ForeignKeyConstraint((array) $lc, $ft, (array) $fc, $name);
-            if ($lt) {
-                $fk->setLocalTable($schema->getTable($lt));
-            }
-            return $fk;
+        $newFK = function ($name, $lc, $ft, $fc) use ($schema) {
+            return new ForeignKeyConstraint((array) $lc, $ft, (array) $fc, $name);
         };
 
         $schema->addTable($this->getDummyTable('foreign1'));
         $schema->addTable($this->getDummyTable('foreign2'));
 
-        $this->assertEquals('fk_hogera', $schema->addForeignKey($newFK('fk_hogera', 'foreign1', 'id', 'foreign2', 'id'))->getName());
+        $this->assertEquals('fk_hogera', $schema->addForeignKey($newFK('fk_hogera', 'id', 'foreign2', 'id'), 'foreign1')->getName());
 
-        $this->assertException('localTable is not set', L($schema)->addForeignKey($newFK(null, null, 'id', 'foreign2', 'id')));
-        $this->assertException('already defined same', L($schema)->addForeignKey($newFK('fk_hogera', 'foreign1', 'id', 'foreign2', 'id')));
-        $this->assertException('column for foreign1', L($schema)->addForeignKey($newFK(null, 'foreign1', 'foreign2', 'foreign2', 'foreign2')));
-        $this->assertException('column for foreign1', L($schema)->addForeignKey($newFK(null, 'foreign2', 'foreign2', 'foreign1', 'foreign2')));
+        $this->assertException('localTable is not set', L($schema)->addForeignKey($newFK(null, 'id', 'foreign2', 'id'), null));
+        $this->assertException('already defined same', L($schema)->addForeignKey($newFK('fk_hogera', 'id', 'foreign2', 'id'), 'foreign1'));
+        $this->assertException('column for foreign1', L($schema)->addForeignKey($newFK(null, 'foreign2', 'foreign2', 'foreign2'), 'foreign1'));
+        $this->assertException('column for foreign1', L($schema)->addForeignKey($newFK(null, 'foreign2', 'foreign1', 'foreign2'), 'foreign2'));
     }
 
     /**
@@ -486,12 +485,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_ignoreForeignKey($schema)
     {
-        $newFK = function ($name, $lt, $lc, $ft, $fc) use ($schema) {
-            $fk = new ForeignKeyConstraint((array) $lc, $ft, (array) $fc, $name);
-            if ($lt) {
-                $fk->setLocalTable($schema->getTable($lt));
-            }
-            return $fk;
+        $newFK = function ($name, $lc, $ft, $fc) use ($schema) {
+            return new ForeignKeyConstraint((array) $lc, $ft, (array) $fc, $name);
         };
 
         $schema->addTable($this->getDummyTable('metatest'));
@@ -503,8 +498,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEmpty($schema->getTableForeignKeys('foreign'));
 
         $this->assertException('undefined foreign key', L($schema)->ignoreForeignKey('undefined'));
-        $this->assertException('localTable is not set', L($schema)->ignoreForeignKey($newFK(null, null, 'id', 'foreign2', 'id')));
-        $this->assertException('matched foreign key', L($schema)->ignoreForeignKey($newFK(null, 'foreign', 'notfound', 'metatest', 'notfound')));
+        $this->assertException('localTable is not set', L($schema)->ignoreForeignKey($newFK(null, 'id', 'foreign2', 'id'), null));
+        $this->assertException('matched foreign key', L($schema)->ignoreForeignKey($newFK(null, 'notfound', 'metatest', 'notfound'), 'foreign'));
     }
 
     /**
@@ -534,7 +529,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_relation()
     {
         $schmer = self::getDummyDatabase()->getConnection()->createSchemaManager();
-        $schmer->dropAndCreateTable(new Table(
+        try_return([$schmer, 'dropTable'], 't_root');
+        $schmer->createTable(new Table(
             't_root',
             [
                 new Column('root_id', Type::getType('integer')),
@@ -542,7 +538,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
             [new Index('PRIMARY', ['root_id', 'seq'], true, true)]
         ));
-        $schmer->dropAndCreateTable(new Table(
+        try_return([$schmer, 'dropTable'], 't_inner1');
+        $schmer->createTable(new Table(
             't_inner1',
             [
                 new Column('inner1_id', Type::getType('integer')),
@@ -553,7 +550,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             [],
             [new ForeignKeyConstraint(['root1_id', 'root1_seq'], 't_root', ['root_id', 'seq'], 'fk_inner1')]
         ));
-        $schmer->dropAndCreateTable(new Table(
+        try_return([$schmer, 'dropTable'], 't_inner2');
+        $schmer->createTable(new Table(
             't_inner2',
             [
                 new Column('inner2_id', Type::getType('integer')),
@@ -564,7 +562,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             [],
             [new ForeignKeyConstraint(['root2_id', 'root2_seq'], 't_root', ['root_id', 'seq'], 'fk_inner2')]
         ));
-        $schmer->dropAndCreateTable(new Table(
+        try_return([$schmer, 'dropTable'], 't_leaf');
+        $schmer->createTable(new Table(
             't_leaf',
             [
                 new Column('leaf_id', Type::getType('integer')),

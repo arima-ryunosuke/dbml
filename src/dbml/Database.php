@@ -937,6 +937,7 @@ class Database
 
         // for compatible
         if ($options['cacheProvider'] instanceof \Doctrine\Common\Cache\CacheProvider) {
+            /** @noinspection PhpDeprecationInspection */
             $options['cacheProvider'] = new \Symfony\Component\Cache\Psr16Cache(new \Symfony\Component\Cache\Adapter\DoctrineAdapter($this->getUnsafeOption('cacheProvider'))); // @codeCoverageIgnore
         }
 
@@ -2628,9 +2629,8 @@ class Database
 
         // 外部キーオブジェクトの生成
         $fk = new ForeignKeyConstraint(array_keys($columnsMap), $foreignTable, array_values($columnsMap), $fkname);
-        $fk->setLocalTable($this->getSchema()->getTable($localTable));
 
-        return $this->getSchema()->addForeignKey($fk);
+        return $this->getSchema()->addForeignKey($fk, $localTable);
     }
 
     /**
@@ -2650,9 +2650,8 @@ class Database
 
         // 外部キーオブジェクトの生成
         $fk = new ForeignKeyConstraint(array_keys($columnsMap), $foreignTable, array_values($columnsMap));
-        $fk->setLocalTable($this->getSchema()->getTable($localTable));
 
-        return $this->getSchema()->ignoreForeignKey($fk);
+        return $this->getSchema()->ignoreForeignKey($fk, $localTable);
     }
 
     /**
@@ -4680,10 +4679,11 @@ class Database
             $pkcol = $schema->getTablePrimaryColumns($tablename);
             $cols = $pkcol;
             foreach ($allfkeys as $fk) {
-                if ($fk->getLocalTableName() === $tablename) {
-                    $cols += array_flip($fk->getColumns());
+                [$ltable, $ftable] = first_keyvalue($schema->getForeignTable($fk));
+                if ($ltable === $tablename) {
+                    $cols += array_flip($fk->getLocalColumns());
                 }
-                if ($fk->getForeignTableName() === $tablename) {
+                if ($ftable === $tablename) {
                     $cols += array_flip($fk->getForeignColumns());
                 }
             }
@@ -4702,11 +4702,12 @@ class Database
                     }
                     $processed[$fkname] = true;
 
-                    if ($parentive && $fk->getLocalTableName() === $tablename) {
-                        $fkcols[$fk->getName()][$fk->getForeignTableName()][] = $array_rekey($row, array_combine($fk->getLocalColumns(), $fk->getForeignColumns()));
+                    [$ltable, $ftable] = first_keyvalue($schema->getForeignTable($fk));
+                    if ($parentive && $ltable === $tablename) {
+                        $fkcols[$fk->getName()][$ftable][] = $array_rekey($row, array_combine($fk->getLocalColumns(), $fk->getForeignColumns()));
                     }
                     if (!$parentive && $fk->getForeignTableName() === $tablename) {
-                        $fkcols[$fk->getName()][$fk->getLocalTableName()][] = $array_rekey($row, array_combine($fk->getForeignColumns(), $fk->getLocalColumns()));
+                        $fkcols[$fk->getName()][$ltable][] = $array_rekey($row, array_combine($fk->getForeignColumns(), $fk->getLocalColumns()));
                     }
                 }
             }
@@ -5464,7 +5465,7 @@ class Database
 
         $cplatform = $this->getCompatiblePlatform();
         if (!$cplatform->supportsBulkMerge()) {
-            throw new \DomainException($this->getPlatform()->getName() . ' is not support modifyArray.');
+            throw new \DomainException($cplatform->getName() . ' is not support modifyArray.');
         }
 
         $tableName = $this->_preaffect($tableName, $insertData);
@@ -6188,11 +6189,13 @@ class Database
         $tableName = $this->convertTableName($tableName);
         $identifier = $this->_prewhere($tableName, $identifier);
 
-        $fkeys = $this->getSchema()->getForeignKeys($tableName, null);
+        $schema = $this->getSchema();
+        $fkeys = $schema->getForeignKeys($tableName, null);
         foreach ($fkeys as $fkey) {
             $action = strtoupper($fkey->getOption('onDelete') ?: 'RESTRICT');
             if (in_array($action, ['NO ACTION', 'RESTRICT'])) {
-                $notexists = $this->select($fkey->getLocalTableName());
+                $ltable = first_key($schema->getForeignTable($fkey));
+                $notexists = $this->select($ltable);
                 $notexists->setSubwhere($tableName, $aliasName, $fkey->getName());
                 $identifier[] = $notexists->notExists();
             }
@@ -6263,23 +6266,25 @@ class Database
         $identifier = $this->_prewhere($tableName, $identifier);
 
         $affected = [];
-        $fkeys = $this->getSchema()->getForeignKeys($tableName, null);
+        $schema = $this->getSchema();
+        $fkeys = $schema->getForeignKeys($tableName, null);
         foreach ($fkeys as $fkey) {
             $action = strtoupper($fkey->getOption('onDelete') ?: 'RESTRICT');
             if (in_array($action, ['NO ACTION', 'RESTRICT'])) {
+                $ltable = first_key($schema->getForeignTable($fkey));
                 $pselect = $this->select([$tableName => $fkey->getForeignColumns()], $identifier);
                 $subwhere = [];
                 if (array_get($opt, 'in')) {
                     $pvals = $pvals ?? $pselect->array();
                     $pvals2 = array_rmap($pvals, 'array_combine', $fkey->getLocalColumns());
-                    $pcond = $this->getCompatiblePlatform()->getPrimaryCondition($pvals2, $fkey->getLocalTableName());
+                    $pcond = $this->getCompatiblePlatform()->getPrimaryCondition($pvals2, $ltable);
                     $subwhere[] = $this->queryInto($pcond) ?: 'FALSE';
                 }
                 else {
                     $ckey = implode(',', $fkey->getLocalColumns());
                     $subwhere["($ckey)"] = $pselect;
                 }
-                $affected = array_merge($affected, (array) $this->destroy($fkey->getLocalTableName(), $subwhere, $opt));
+                $affected = array_merge($affected, (array) $this->destroy($ltable, $subwhere, $opt));
             }
         }
 

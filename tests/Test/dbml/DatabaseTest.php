@@ -6,9 +6,9 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
-use Doctrine\DBAL\Platforms\PostgreSQL94Platform as PostgreSqlPlatform;
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
-use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
@@ -32,6 +32,7 @@ use function ryunosuke\dbml\array_order;
 use function ryunosuke\dbml\mkdir_p;
 use function ryunosuke\dbml\rm_rf;
 use function ryunosuke\dbml\try_null;
+use function ryunosuke\dbml\try_return;
 
 class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -487,10 +488,14 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $database = new Database([$master, $slave]);
 
-        $this->assertSame($master->getWrappedConnection()->getWrappedConnection(), $database->getPdo());
-        $this->assertSame($master->getWrappedConnection()->getWrappedConnection(), $database->getMasterPdo());
-        $this->assertSame($slave->getWrappedConnection()->getWrappedConnection(), $database->getSlavePdo());
-        $this->assertSame($master->getWrappedConnection()->getWrappedConnection(), $database->setMasterMode(true)->getSlavePdo());
+        /** @var \Doctrine\DBAL\Driver\PDO\Connection $masterPdoConnection */
+        /** @var \Doctrine\DBAL\Driver\PDO\Connection $slavePdoConnection */
+        $masterPdoConnection = $master->getWrappedConnection();
+        $slavePdoConnection = $slave->getWrappedConnection();
+        $this->assertSame($masterPdoConnection->getWrappedConnection(), $database->getPdo());
+        $this->assertSame($masterPdoConnection->getWrappedConnection(), $database->getMasterPdo());
+        $this->assertSame($slavePdoConnection->getWrappedConnection(), $database->getSlavePdo());
+        $this->assertSame($masterPdoConnection->getWrappedConnection(), $database->setMasterMode(true)->getSlavePdo());
     }
 
     function test_setPdoAttribute()
@@ -498,10 +503,13 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
         $slave = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
 
-        /** @var \PDO $mPdo */
-        /** @var \PDO $sPdo */
-        $mPdo = $master->getWrappedConnection()->getWrappedConnection();
-        $sPdo = $slave->getWrappedConnection()->getWrappedConnection();
+        /** @var \Doctrine\DBAL\Driver\PDO\Connection $masterPdoConnection */
+        /** @var \Doctrine\DBAL\Driver\PDO\Connection $slavePdoConnection */
+        $masterPdoConnection = $master->getWrappedConnection();
+        $slavePdoConnection = $slave->getWrappedConnection();
+
+        $mPdo = $masterPdoConnection->getWrappedConnection();
+        $sPdo = $slavePdoConnection->getWrappedConnection();
 
         /// マスターだけモード
 
@@ -584,14 +592,14 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             }
             catch (\Exception $e) {
             }
-            $this->assertSame($expected[$database->getPlatform()->getName()][false], $database->isEmulationMode(true));
+            $this->assertSame($expected[$database->getCompatiblePlatform()->getName()][false], $database->isEmulationMode(true));
 
             try {
                 $database->getPdo()->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
             }
             catch (\Exception $e) {
             }
-            $this->assertSame($expected[$database->getPlatform()->getName()][true], $database->isEmulationMode(true));
+            $this->assertSame($expected[$database->getCompatiblePlatform()->getName()][true], $database->isEmulationMode(true));
         }
         finally {
             try {
@@ -3865,7 +3873,7 @@ INSERT INTO test (name) VALUES
         if ($database->getPlatform() instanceof SqlitePlatform) {
             $expected = 6;
         }
-        if ($database->getPlatform() instanceof PostgreSqlPlatform) {
+        if ($database->getPlatform() instanceof PostgreSQLPlatform) {
             $expected = 6;
         }
         $this->assertEquals($expected, $affected);
@@ -3922,7 +3930,7 @@ INSERT INTO test (name) VALUES
             if ($database->getPlatform() instanceof SqlitePlatform) {
                 $expected = 3;
             }
-            if ($database->getPlatform() instanceof PostgreSqlPlatform) {
+            if ($database->getPlatform() instanceof PostgreSQLPlatform) {
                 $expected = 3;
             }
             $this->assertEquals($expected, $affected);
@@ -3943,7 +3951,7 @@ INSERT INTO test (name) VALUES
             if ($database->getPlatform() instanceof SqlitePlatform) {
                 $expected = 3;
             }
-            if ($database->getPlatform() instanceof PostgreSqlPlatform) {
+            if ($database->getPlatform() instanceof PostgreSQLPlatform) {
                 $expected = 3;
             }
             $this->assertEquals($expected, $affected);
@@ -3965,7 +3973,7 @@ INSERT INTO test (name) VALUES
             if ($database->getPlatform() instanceof SqlitePlatform) {
                 $expected = 4;
             }
-            if ($database->getPlatform() instanceof PostgreSqlPlatform) {
+            if ($database->getPlatform() instanceof PostgreSQLPlatform) {
                 $expected = 4;
             }
             $this->assertEquals($expected, $affected);
@@ -5425,7 +5433,9 @@ INSERT INTO test (id, name) VALUES
         $duplicatest = $database->getSchema()->getTable('test');
         $duplicatest->addColumn('name2', 'string', ['length' => 32, 'default' => '']);
         self::forcedWrite($duplicatest, '_name', 'duplicatest');
-        $database->getConnection()->createSchemaManager()->dropAndCreateTable($duplicatest);
+        $smanager = $database->getConnection()->createSchemaManager();
+        try_return([$smanager, 'dropTable'], $duplicatest);
+        $smanager->createTable($duplicatest);
         $database->getSchema()->refresh();
 
         // 全コピーしたら件数・データ共に等しいはず

@@ -18,7 +18,9 @@ use function ryunosuke\dbml\array_pickup;
 use function ryunosuke\dbml\array_rekey;
 use function ryunosuke\dbml\array_unset;
 use function ryunosuke\dbml\arrayize;
+use function ryunosuke\dbml\first_keyvalue;
 use function ryunosuke\dbml\fnmatch_or;
+use function ryunosuke\dbml\optional;
 
 /**
  * スキーマ情報の収集と保持とキャッシュを行うクラス
@@ -83,11 +85,12 @@ class Schema
 
     private function _invalidateForeignCache(ForeignKeyConstraint $fkey)
     {
+        [$ltable, $ftable] = first_keyvalue($this->getForeignTable($fkey));
         $cacheids = [
-            sprintf($this->foreignCacheId, $fkey->getLocalTableName(), $fkey->getForeignTableName(), $fkey->getName()),
-            sprintf($this->foreignCacheId, $fkey->getForeignTableName(), $fkey->getLocalTableName(), $fkey->getName()),
-            sprintf($this->foreignCacheId, $fkey->getLocalTableName(), $fkey->getForeignTableName(), ''),
-            sprintf($this->foreignCacheId, $fkey->getForeignTableName(), $fkey->getLocalTableName(), ''),
+            sprintf($this->foreignCacheId, $ltable, $ftable, $fkey->getName()),
+            sprintf($this->foreignCacheId, $ftable, $ltable, $fkey->getName()),
+            sprintf($this->foreignCacheId, $ltable, $ftable, ''),
+            sprintf($this->foreignCacheId, $ftable, $ltable, ''),
         ];
         array_unset($this->foreignColumns, $cacheids);
         $this->cache->deleteMultiple($cacheids);
@@ -204,6 +207,7 @@ class Schema
             $this->tableNames = Adhoc::cacheGetOrSet($this->cache, 'Schema-table_names', function () {
                 $table_names = $this->schemaManger->listTableNames();
 
+                /** @noinspection PhpDeprecationInspection */
                 $paths = array_fill_keys($this->schemaManger->getSchemaSearchPaths(), '');
                 $views = array_each($this->schemaManger->listViews(), function (&$carry, View $view) use ($paths) {
                     $ns = $view->getNamespaceName();
@@ -424,7 +428,7 @@ class Schema
         $lazykeys = $this->lazyForeignKeys[$table_name] ?? [];
         $this->lazyForeignKeys[$table_name] = [];
         foreach ($lazykeys ?? [] as $fk) {
-            $this->addForeignKey($fk());
+            $this->addForeignKey(...$fk());
         }
         return $this->foreignKeys[$table_name];
     }
@@ -464,15 +468,16 @@ class Schema
     /**
      * 外部キーから関連テーブルを取得する
      *
-     * @param string $fkeyname 外部キー名
+     * @param string|ForeignKeyConstraint $fkey 外部キー
      * @return array [fromTable => $toTable] の配列
      */
-    public function getForeignTable($fkeyname)
+    public function getForeignTable($fkey)
     {
+        $fkeyname = $fkey instanceof ForeignKeyConstraint ? $fkey->getName() : $fkey;
         foreach ($this->getTableNames() as $from) {
             $fkeys = $this->getTableForeignKeys($from);
             if (isset($fkeys[$fkeyname])) {
-                return [$fkeys[$fkeyname]->getLocalTableName() => $fkeys[$fkeyname]->getForeignTableName()];
+                return [$from => $fkeys[$fkeyname]->getForeignTableName()];
             }
         }
         return [];
@@ -565,8 +570,7 @@ class Schema
         $this->lazyForeignKeys[$localTable][$fkname] = function () use ($localTable, $foreignTable, $columnsMap, $fkname) {
             $columnsMap = array_rekey(arrayize($columnsMap), function ($k, $v) { return is_int($k) ? $v : $k; });
             $fk = new ForeignKeyConstraint(array_keys($columnsMap), $foreignTable, array_values($columnsMap), $fkname);
-            $fk->setLocalTable($this->getTable($localTable));
-            return $fk;
+            return [$fk, $localTable];
         };
         return $fkname;
     }
@@ -578,16 +582,17 @@ class Schema
      * あくまで「アプリ的にちょっとリレーションが欲しい」といったときに使用する想定。
      *
      * @param ForeignKeyConstraint $fkey 追加する外部キーオブジェクト
+     * @param string $lTable 追加するテーブル名
      * @return ForeignKeyConstraint 追加した外部キーオブジェクト
      */
-    public function addForeignKey($fkey)
+    public function addForeignKey($fkey, $lTable = null)
     {
-        // 引数チェック(LocalTable は必須じゃないので未セットの場合がある)
-        if ($fkey->getLocalTable() === null) {
+        /** @noinspection PhpDeprecationInspection */
+        $lTable ??= optional($fkey->getLocalTable())->getName();
+        if ($lTable === null) {
             throw new \InvalidArgumentException('$fkey\'s localTable is not set.');
         }
 
-        $lTable = $fkey->getLocalTableName();
         $fTable = $fkey->getForeignTableName();
         $lCols = $fkey->getLocalColumns();
         $fCols = $fkey->getForeignColumns();
@@ -624,9 +629,10 @@ class Schema
      * あくまで「アプリ的にちょっとリレーションを外したい」といったときに使用する想定。
      *
      * @param ForeignKeyConstraint|string $fkey 削除する外部キーオブジェクトあるいは外部キー文字列
+     * @param string $lTable 削除するテーブル名
      * @return ForeignKeyConstraint 削除した外部キーオブジェクト
      */
-    public function ignoreForeignKey($fkey)
+    public function ignoreForeignKey($fkey, $lTable = null)
     {
         // 文字列指定ならオブジェクト化
         if (is_string($fkey)) {
@@ -637,12 +643,12 @@ class Schema
             $fkey = $all[$fkey];
         }
 
-        // 引数チェック(LocalTable は必須じゃないので未セットの場合がある)
-        if ($fkey->getLocalTable() === null) {
+        /** @noinspection PhpDeprecationInspection */
+        $lTable ??= optional($fkey->getLocalTable())->getName();
+        if ($lTable === null) {
             throw new \InvalidArgumentException('$fkey\'s localTable is not set.');
         }
 
-        $lTable = $fkey->getLocalTableName();
         $fTable = $fkey->getForeignTableName();
         $lCols = $fkey->getLocalColumns();
         $fCols = $fkey->getForeignColumns();
@@ -665,8 +671,8 @@ class Schema
         }
 
         // 再キャッシュすれば「なにを無視するか」を覚えておく必要がない
+        $this->_invalidateForeignCache($deleted);
         $this->foreignKeys[$lTable] = $fkeys;
-        $this->_invalidateForeignCache($fkey);
 
         return $deleted;
     }
@@ -682,8 +688,7 @@ class Schema
     public function getRelation()
     {
         return array_each($this->getForeignKeys(), function (&$carry, ForeignKeyConstraint $fkey) {
-            $ltable = $fkey->getLocalTableName();
-            $ftable = $fkey->getForeignTableName();
+            [$ltable, $ftable] = first_keyvalue($this->getForeignTable($fkey));
             $lcolumns = $fkey->getLocalColumns();
             $fcolumns = $fkey->getForeignColumns();
             foreach ($fcolumns as $n => $fcolumn) {

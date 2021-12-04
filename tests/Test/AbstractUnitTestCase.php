@@ -5,6 +5,7 @@ namespace ryunosuke\Test;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\SQLServer2012Platform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\AbstractAsset;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\SkippedTestError;
 use PHPUnit\Framework\TestCase;
 use function ryunosuke\dbml\cacheobject;
 use function ryunosuke\dbml\class_shorten;
+use function ryunosuke\dbml\pascal_case;
 
 abstract class AbstractUnitTestCase extends TestCase
 {
@@ -49,7 +51,9 @@ abstract class AbstractUnitTestCase extends TestCase
             $mparam = DriverManager::getConnection($config)->getParams();
             $dbname = isset($mparam['dbname']) ? $mparam['dbname'] : (isset($mparam['path']) ? $mparam['path'] : '');
             unset($mparam['url'], $mparam['dbname'], $mparam['path']);
-            DriverManager::getConnection($mparam)->createSchemaManager()->dropAndCreateDatabase($dbname);
+            $schemaManager = DriverManager::getConnection($mparam)->createSchemaManager();
+            $schemaManager->dropDatabase($dbname);
+            $schemaManager->createDatabase($dbname);
         }
 
         $connection = DriverManager::getConnection($config + [
@@ -120,12 +124,6 @@ abstract class AbstractUnitTestCase extends TestCase
                             [new Index('PRIMARY', ['id'], true, true)],
                             [],
                             [],
-                            // Doctrine で Sqlite の「本当の意味」での AUTOINCREMENT な列を作成することは出来ない(ので、置換する)
-                            [
-                                'create_sql' => [
-                                    'sqlite' => 'CREATE TABLE auto (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(32) NOT NULL)',
-                                ],
-                            ]
                         ),
                         new Table('noauto',
                             [
@@ -391,6 +389,13 @@ abstract class AbstractUnitTestCase extends TestCase
                             [],
                             [new ForeignKeyConstraint(['id'], 'horizontal1', ['id'], 'fkey_horizontal')]
                         ),
+                        new Table('heavy',
+                            [
+                                new Column('id', Type::getType('integer'), ['autoincrement' => true]),
+                                new Column('data', Type::getType('text')),
+                            ],
+                            [new Index('PRIMARY', ['id'], true, true)]
+                        ),
                         new Table('t_article',
                             [
                                 new Column('article_id', Type::getType('integer')),
@@ -469,6 +474,7 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                         ];
                     }
+                    return $tablename;
                 },
             ]);
             $database->declareVirtualTable('v_article_comment', [
@@ -558,7 +564,7 @@ abstract class AbstractUnitTestCase extends TestCase
         foreach (array_column(self::provideDatabase(), 0) as $db) {
             $db->clean(function (Database $db) {
                 // http://blogs.wankuma.com/naka/archive/2005/10/10/18641.aspx
-                if ($db->getPlatform()->getName() === 'mssql') {
+                if ($db->getPlatform() instanceof SQLServerPlatform) {
                     $db->delete('t_comment');
                     $db->delete('t_article');
                     $db->insert('t_article', ['article_id' => 1, 'title' => '', 'checks' => '']);
@@ -751,32 +757,27 @@ abstract class AbstractUnitTestCase extends TestCase
     {
         /** @var AbstractAsset $tableorview */
 
+        $schemeManager = $connection->createSchemaManager();
+
         // 外部キーのつらみがあるので逆順で drop
         foreach (array_reverse($tableorviews) as $tableorview) {
             if ($tableorview instanceof \Closure) {
                 continue;
             }
-            $method = 'drop' . class_shorten($tableorview);
-            $connection->createSchemaManager()->tryMethod($method, $tableorview->getQuotedName($connection->getDatabasePlatform()));
+            $tablename = $tableorview->getQuotedName($connection->getDatabasePlatform());
+            if ($schemeManager->tablesExist($tablename)) {
+                $method = 'drop' . class_shorten($tableorview);
+                $schemeManager->$method($tablename);
+            }
         }
         // そのあと create
         foreach ($tableorviews as $tableorview) {
-            if ($tableorview instanceof Table) {
-                /** @var Table $tableorview */
-                $options = $tableorview->getOptions();
-                $platname = $connection->getDatabasePlatform()->getName();
-                if (isset($options['create_sql'][$platname])) {
-                    $sql = $options['create_sql'][$platname];
-                    $connection->executeStatement($sql);
-                    continue;
-                }
-            }
             if ($tableorview instanceof \Closure) {
                 $tableorview($connection);
                 continue;
             }
             $method = 'create' . class_shorten($tableorview);
-            $connection->createSchemaManager()->$method($tableorview);
+            $schemeManager->$method($tableorview);
         }
     }
 

@@ -37,7 +37,7 @@ namespace {
 
 namespace ryunosuke\Test {
 
-    use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
+    use Doctrine\DBAL\Platforms\SQLServerPlatform;
 
     /**
      * テスト用 Database

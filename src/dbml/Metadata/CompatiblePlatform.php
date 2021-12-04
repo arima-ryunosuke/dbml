@@ -6,9 +6,9 @@ use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
-use Doctrine\DBAL\Platforms\PostgreSQL94Platform as PostgreSQLPlatform;
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
-use Doctrine\DBAL\Platforms\SQLServer2012Platform as SQLServerPlatform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\SelectOption;
 use ryunosuke\dbml\Query\Queryable;
@@ -17,6 +17,7 @@ use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_sprintf;
 use function ryunosuke\dbml\array_strpad;
 use function ryunosuke\dbml\arrayize;
+use function ryunosuke\dbml\class_shorten;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\first_keyvalue;
 
@@ -55,6 +56,29 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * platform 名を取得する
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        if ($this->platform instanceof SqlitePlatform) {
+            return 'sqlite';
+        }
+        if ($this->platform instanceof MySQLPlatform) {
+            return 'mysql';
+        }
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            return 'postgresql';
+        }
+        if ($this->platform instanceof SQLServerPlatform) {
+            return 'mssql';
+        }
+
+        return strtolower(preg_replace('#Platform$#', '', class_shorten($this->platform)));
+    }
+
+    /**
      * AUTO_INCREMENT な列に null を与えると自動採番が働くかどうか
      *
      * @return bool AUTO_INCREMENT な列に null を与えると自動採番が働くなら true
@@ -70,7 +94,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof MySQLPlatform) {
             return true;
         }
-        if ($this->platform instanceof PostgreSqlPlatform) {
+        if ($this->platform instanceof PostgreSQLPlatform) {
             return false;
         }
         if ($this->platform instanceof SQLServerPlatform) {
@@ -145,7 +169,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof MySQLPlatform) {
             return true;
         }
-        if ($this->platform instanceof PostgreSqlPlatform) {
+        if ($this->platform instanceof PostgreSQLPlatform) {
             return true;
         }
         return false;
@@ -164,7 +188,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof MySQLPlatform) {
             return true;
         }
-        if ($this->platform instanceof PostgreSqlPlatform) {
+        if ($this->platform instanceof PostgreSQLPlatform) {
             return true;
         }
         return false;
@@ -331,7 +355,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         }
 
         // PostgreSql は識別子が小文字に正規化されるのでエイリアスがブレる
-        if ($this->platform instanceof PostgreSqlPlatform && strtolower($word) !== $word) {
+        if ($this->platform instanceof PostgreSQLPlatform && strtolower($word) !== $word) {
             return $this->platform->quoteSingleIdentifier($word);
         }
 
@@ -412,7 +436,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof MySQLPlatform) {
             return "ON DUPLICATE KEY UPDATE";
         }
-        if ($this->platform instanceof PostgreSqlPlatform) {
+        if ($this->platform instanceof PostgreSQLPlatform) {
             $constraint = implode(',', $columns);
             return "ON CONFLICT($constraint) DO UPDATE SET";
         }
@@ -433,7 +457,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof MySQLPlatform) {
             return "VALUES($column)";
         }
-        if ($this->platform instanceof PostgreSqlPlatform) {
+        if ($this->platform instanceof PostgreSQLPlatform) {
             return "EXCLUDED.$column";
         }
         return false;
@@ -466,7 +490,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getTruncateTableSQL($tableName, $cascade = false)
     {
         // PostgreSql は他に合わせるため RESTART IDENTITY を付加する
-        if ($this->platform instanceof PostgreSqlPlatform) {
+        if ($this->platform instanceof PostgreSQLPlatform) {
             $tableName .= ' RESTART IDENTITY';
         }
 
@@ -692,7 +716,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
             return $query;
         }
-        if ($this->platform instanceof PostgreSqlPlatform) {
+        if ($this->platform instanceof PostgreSQLPlatform) {
             $query = "ARRAY_AGG($expr)";
             if ($separator !== null) {
                 $query = "ARRAY_TO_STRING($query, $qseparator)";
@@ -728,7 +752,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getCountExpression($column)
     {
         // avg 以外は移譲
-        return new Expression($this->platform->getCountExpression($column));
+        return new Expression("COUNT($column)");
     }
 
     /**
@@ -740,7 +764,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getMinExpression($column)
     {
         // avg 以外は移譲
-        return new Expression($this->platform->getMinExpression($column));
+        return new Expression("MIN({$column})");
     }
 
     /**
@@ -752,7 +776,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getMaxExpression($column)
     {
         // avg 以外は移譲
-        return new Expression($this->platform->getMaxExpression($column));
+        return new Expression("MAX({$column})");
     }
 
     /**
@@ -764,7 +788,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getSumExpression($column)
     {
         // avg 以外は移譲
-        return new Expression($this->platform->getSumExpression($column));
+        return new Expression("SUM({$column})");
     }
 
     /**
@@ -779,7 +803,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof SQLServerPlatform) {
             $column = "CAST($column AS float)";
         }
-        return new Expression($this->platform->getAvgExpression($column));
+        return new Expression("AVG({$column})");
     }
 
     /**
@@ -832,7 +856,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof MySQLPlatform) {
             return ["ALTER TABLE $tableName AUTO_INCREMENT = $seq"];
         }
-        if ($this->platform instanceof PostgreSqlPlatform) {
+        if ($this->platform instanceof PostgreSQLPlatform) {
             $sequenceName = $this->platform->getIdentitySequenceName($tableName, $columnName);
             return ["SELECT setval('$sequenceName', $seq, false)"];
         }
@@ -841,7 +865,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return ["DBCC CHECKIDENT($tableName, RESEED, $seq)"];
         }
 
-        throw new \DomainException($this->platform->getName() . ' is not supported');
+        throw new \DomainException($this->getName() . ' is not supported');
     }
 
     /**
@@ -858,7 +882,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return 'IGNORE';
         }
 
-        throw new \DomainException($this->platform->getName() . ' is not supported');
+        throw new \DomainException($this->getName() . ' is not supported');
     }
 
     /**
@@ -876,8 +900,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             $e = '*/';
         }
         else {
-            $s = $this->platform->getSqlCommentStartString();
-            $e = $this->platform->getSqlCommentEndString();
+            $s = "--";
+            $e = "\n";
         }
         $comment = str_replace($e, ' ', $comment);
         return "$s $comment $e";
@@ -943,7 +967,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if (count($froms) === 1 || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $this->platform instanceof MySQLPlatform) {
             // SQLServerPlatform はエイリアス指定の update をサポートしていない
             if ($from['alias'] !== $from['table'] && $this->platform instanceof SQLServerPlatform) {
-                throw new \DomainException($this->platform->getName() . ' is not supported');
+                throw new \DomainException($this->getName() . ' is not supported');
             }
             // select 化してクエリを取得して戻す
             $builder->select('__dbml_from_maker');
@@ -961,7 +985,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
         // 上記以外は join update をサポートしていない
         // 正確に言えば PostgreSql は using 構文をサポートしているが、select クエリから単純に変換できるものではない
-        throw new \DomainException($this->platform->getName() . ' is not supported');
+        throw new \DomainException($this->getName() . ' is not supported');
     }
 
     /**
@@ -983,7 +1007,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             if ($targets) {
                 // SQLServerPlatform は複数指定 delete をサポートしていない
                 if (count($targets) > 1 && $this->platform instanceof SQLServerPlatform) {
-                    throw new \DomainException($this->platform->getName() . ' is not supported');
+                    throw new \DomainException($this->getName() . ' is not supported');
                 }
                 $alias = implode(', ', $targets);
             }
@@ -1003,6 +1027,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
         // 上記以外は join delete をサポートしていない
         // 正確に言えば PostgreSql は using 構文をサポートしているが、select クエリから単純に変換できるものではない
-        throw new \DomainException($this->platform->getName() . ' is not supported');
+        throw new \DomainException($this->getName() . ' is not supported');
     }
 }
