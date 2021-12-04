@@ -125,8 +125,6 @@ class Yielder implements \Iterator
      *
      * @param bool|null $mode バッファモード/非バッファモード
      * @return $this 自分自身
-     *
-     * @codeCoverageIgnore mysql でしか動かない
      */
     public function setBufferMode($mode)
     {
@@ -135,12 +133,15 @@ class Yielder implements \Iterator
         }
 
         // 非バッファモードは pdo_mysql しか対応していない（それすら非推奨の流れがあるが…）
-        $pdo = $this->connection->getWrappedConnection();
-        if ($pdo instanceof \PDO && $pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'mysql') {
-            if ($this->bufferedMode === null) {
-                $this->bufferedMode = $pdo->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY);
-            }
+        $conn = $this->connection->getWrappedConnection();
+        if ($conn instanceof \Doctrine\DBAL\Driver\PDO\Connection) {
+            $pdo = $conn->getWrappedConnection();
+        }
+        if (isset($pdo) && $pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'mysql') {
+            // @codeCoverageIgnoreStart
+            $this->bufferedMode = $this->bufferedMode ?? $pdo->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY);
             $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $mode);
+            // @codeCoverageIgnoreEnd
         }
 
         return $this;

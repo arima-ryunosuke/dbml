@@ -3,11 +3,6 @@
 namespace ryunosuke\Test\dbml\Generator;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Schema\Column;
-use Doctrine\DBAL\Schema\Index;
-use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Generator\Yielder;
 use ryunosuke\Test\Database;
 
@@ -173,70 +168,43 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
         ], $actual);
     }
 
-    static function provideHeavy()
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_buffered($database)
     {
-        $dsn = ['url' => 'sqlite:///' . sys_get_temp_dir() . '/heavy'];
-        $database = new Database(DriverManager::getConnection($dsn));
-        $database->getConnection()->createSchemaManager()->dropAndCreateTable(
-            new Table('t_heavy',
-                [
-                    new Column('id', Type::getType('integer'), ['autoincrement' => true]),
-                    new Column('data', Type::getType('text')),
-                ],
-                [new Index('PRIMARY', ['id'], true, true)]
-            )
-        );
-        $database->getSchema()->refresh();
-
         // 100KB のレコードを100行用意（10MB）
-        $database->begin();
-        $database->insertArray('t_heavy', call_user_func(function () {
-            foreach (range(1, 100) as $n) {
-                yield ['data' => $n . str_repeat('x', 1024 * 100)];
+        $database->insertArray('heavy', call_user_func(function () {
+            foreach (range(1, 100) as $ignored) {
+                yield [
+                    'data' => str_repeat('x', 1000 * 100),
+                ];
             }
         }));
-        $database->commit();
-
-        return [
-            [$dsn],
-        ];
-    }
-
-    /**
-     * @runInSeparateProcess
-     * @dataProvider provideHeavy
-     * @param array $dsn
-     */
-    function test_buffered($dsn)
-    {
-        $database = new Database(DriverManager::getConnection($dsn));
 
         // 暖機運転
-        $database->yieldArray('select * from t_heavy limit 1');
-        $database->fetchArray('select * from t_heavy limit 1');
-
-        $initial = memory_get_usage();
-
-        // yieldArray なら最大値が穏やか
-        gc_collect_cycles();
-        $count = 0;
-        foreach ($database->yieldArray('select * from t_heavy') as $row) {
-            /** @noinspection PhpUnusedLocalVariableInspection */
-            $dummy = $row;
-            $count++;
-        }
-        $this->assertEquals(100, $count);
-        $this->assertLessThan(7 * 1024 * 1024, memory_get_peak_usage() - $initial);
+        $database->fetchArray('select * from heavy');
+        $database->yieldArray('select * from heavy');
 
         // fetchArray だと最大値が不穏
         gc_collect_cycles();
-        $count = 0;
-        foreach ($database->fetchArray('select * from t_heavy') as $row) {
-            /** @noinspection PhpUnusedLocalVariableInspection */
-            $dummy = $row;
-            $count++;
+        $initial = memory_get_usage();
+        $size = 0;
+        foreach ($database->fetchArray('select * from heavy') as $row) {
+            $size += strlen($row['data']);
+            $this->assertGreaterThan(100 * 1000 * 100, memory_get_usage() - $initial);
         }
-        $this->assertEquals(100, $count);
-        $this->assertGreaterThan(10 * 1024 * 1024, memory_get_peak_usage() - $initial);
+        $this->assertEquals(100 * 1000 * 100, $size);
+
+        // yieldArray なら最大値が穏やか
+        gc_collect_cycles();
+        $initial = memory_get_usage();
+        $size = 0;
+        foreach ($database->yieldArray('select * from heavy')->setBufferMode(false) as $row) {
+            $size += strlen($row['data']);
+            $this->assertLessThan(100 * 1000 * 100, memory_get_usage() - $initial);
+        }
+        $this->assertEquals(100 * 1000 * 100, $size);
     }
 }
