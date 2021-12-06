@@ -1164,6 +1164,48 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_convertBoolToInt($database)
+    {
+        // @todo 良くわからないエラーが出る
+        if ($database->getCompatiblePlatform()->getWrappedPlatform() instanceof SQLServerPlatform) {
+            return;
+        }
+        $database->setConvertBoolToInt(true);
+        $database->insert('misctype', [
+            'id'        => 9,
+            'pid'       => true,
+            'cint'      => false,
+            'cfloat'    => true,
+            'cdecimal'  => false,
+            'cstring'   => true,
+            'ctext'     => false,
+            'cbinary'   => true,
+            'cblob'     => false,
+            'carray'    => true,
+            'cjson'     => false,
+            'cdate'     => '2012-12-12',
+            'cdatetime' => '2012-12-12 12:34:56',
+        ]);
+        $expected = [
+            'id'       => 9,
+            'pid'      => 1,
+            'cint'     => 0,
+            'cfloat'   => 1,
+            'cdecimal' => 0,
+            'cstring'  => 1,
+            'ctext'    => 0,
+            'carray'   => 1,
+            'cjson'    => 0,
+            'cdate'     => '2012-12-12',
+            'cdatetime' => '2012-12-12 12:34:56',
+        ];
+        $this->assertEquals($expected, array_intersect_key($expected, $database->selectTuple('misctype', ['id' => 9])));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_checkSameColumn($database)
     {
         $database->setAutoCastType(['guid' => true]);

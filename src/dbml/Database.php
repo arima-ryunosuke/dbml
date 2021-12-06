@@ -166,6 +166,14 @@ use ryunosuke\dbml\Utility\Adhoc;
  *
  *     @param bool $bool 空文字を NULL に変換するなら true
  * }
+ * @method bool                   getConvertBoolToInt()
+ * @method $this                  setConvertBoolToInt($bool) {
+ *     数値系カラムに真偽値が来たときの挙動を指定する
+ *
+ *     この設定を true にすると、数値系カラムに真偽値が来た場合に自動で int に変換されるようになる。
+ *
+ *     @param bool $bool 真偽値を int に変換するなら true
+ * }
  * @method callable               getYamlParser()
  * @method $this                  setYamlParser($callable)
  * @method array                  getAutoCastType()
@@ -714,6 +722,8 @@ class Database
             'filterNoExistsColumn' => true,
             // insert 時などに NULLABLE NUMERIC カラムは 空文字を null として扱うか否か
             'convertEmptyToNull'   => true,
+            // insert 時などに数値系カラムは真偽値を int として扱うか否か
+            'convertBoolToInt'     => false, // for compatible
             // modify 時にエラーとならないようにレコードを select するか否か
             'modifyAutoSelect'     => true, // for compatible
             // 埋め込み条件の yaml パーサ
@@ -1471,6 +1481,20 @@ class Database
                     // AUTO_INCREMENT か NULLABLE な文字列系以外の型なら null にする
                     if ($cname === $autocolumn || (!isset($targets[$column->getType()->getName()]) && !$column->getNotnull())) {
                         $row[$cname] = null;
+                    }
+                }
+            }
+        }
+
+        if ($this->getUnsafeOption('convertBoolToInt')) {
+            // 対象とする型（要するに数値系）
+            $targets = [Types::BOOLEAN => true, Types::DECIMAL => true, Types::FLOAT => true, Types::INTEGER => true, Types::SMALLINT => true, Types::BIGINT => true];
+            foreach ($columns as $cname => $column) {
+                // 値が真偽値で・・・
+                if (array_key_exists($cname, $row) && is_bool($row[$cname])) {
+                    // 数値系の型なら int にする
+                    if (isset($targets[$column->getType()->getName()])) {
+                        $row[$cname] = (int) $row[$cname];
                     }
                 }
             }
