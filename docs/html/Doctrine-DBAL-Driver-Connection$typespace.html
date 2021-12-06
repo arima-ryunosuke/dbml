@@ -54,7 +54,7 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="#L7-L81" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="#L7-L84" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>interface <span class="category-name">Doctrine\DBAL\Driver\Connection</span></h2>
@@ -202,13 +202,15 @@ Driver connections must implement this interface.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L27-L35" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L27-L38" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Driver\Connection::quote()" tabindex="-1" class="structure-title ">
                         quote                        	<small>($value, $type = Doctrine\DBAL\ParameterType::STRING) : mixed</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Quotes a string for use in a query.</p>
+<p>The usage of this method is discouraged. Use prepared statements<br />
+or <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='AbstractPlatform::quoteStringLiteral()' data-type-array='0' data-type-nullable='' data-description='AbstractPlatform::quoteStringLiteral()'>AbstractPlatform::quoteStringLiteral()</tag_link> instead.</p>
 </div>
                         	<table class="table">
 		<caption>Parameters</caption>
@@ -252,7 +254,7 @@ Driver connections must implement this interface.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L37-L42" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L40-L45" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Driver\Connection::exec()" tabindex="-1" class="structure-title ">
                         exec                        	<small>($sql) : int</small>
@@ -306,7 +308,7 @@ Driver connections must implement this interface.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L44-L53" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L47-L56" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Driver\Connection::lastInsertId()" tabindex="-1" class="structure-title ">
                         lastInsertId                        	<small>($name = null) : string<span class="type-separator"></span><wbr>int<span class="type-separator"></span><wbr>false</small>
@@ -360,7 +362,7 @@ Driver connections must implement this interface.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L55-L62" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L58-L65" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Driver\Connection::beginTransaction()" tabindex="-1" class="structure-title ">
                         beginTransaction                        	<small>() : bool</small>
@@ -410,7 +412,7 @@ Driver connections must implement this interface.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L64-L71" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L67-L74" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Driver\Connection::commit()" tabindex="-1" class="structure-title ">
                         commit                        	<small>() : bool</small>
@@ -460,7 +462,7 @@ Driver connections must implement this interface.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L73-L80" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L76-L83" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Driver\Connection::rollBack()" tabindex="-1" class="structure-title ">
                         rollBack                        	<small>() : bool</small>

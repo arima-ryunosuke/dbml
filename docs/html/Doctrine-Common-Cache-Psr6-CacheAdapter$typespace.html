@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html>
+<head>	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/styles/foundation.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js-bootstrap-css/1.2.1/typeaheadjs.min.css">
+	<link rel="stylesheet" type="text/css" data-href="common.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/3.1.1/bootstrap3-typeahead.min.js"></script>
+	<script data-src="common.js"></script>
+
+	<script>
+        (function () {
+            var cachekey;
+            try {
+                cachekey = window.parent.CACHEKEY;
+            }
+            catch (e) {
+                cachekey = 'nocache';
+            }
+            $('link[data-href]').attr('href', function () {
+                return this.dataset.href + '?' + cachekey;
+            });
+            $('script[data-src]').attr('src', function () {
+                return this.dataset.src + '?' + cachekey;
+            });
+
+            $(document).on('click', 'a[href]:not([target="_blank"]):not(.cachekey)', function () {
+                this.classList.add('cachekey');
+                this.href = this.href.replace('.html', '.html?' + cachekey);
+            });
+        })();
+	</script>
+    </head>
+<body class="typespace">
+<a id="anchor" href="./" style="display: none"></a>
+<h1 class="ellipsis fixed">
+	<span class="pull-left">
+	Structure
+	<small class="ellipsis-text">(Doctrine\Common\Cache\Psr6\CacheAdapter)</small>
+	</span>
+	<span class="pull-right">
+		<small class="frame-switch">
+		<a target="_parent">frame</a> | <a target="_parent">noframe</a>
+		</small>
+	</span>
+</h1>
+<div class="main-wrapper">
+	<div class="attribute">
+		<span class="label label-danger">final</span>
+		<span class="label label-warning"></span>
+		<span class="label label-info"></span>
+		<span class="label label-info"></span>
+		<span class="label label-deprecated"></span>
+        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L28-L340" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                    	</div>
+
+	<h2>class <span class="category-name">Doctrine\Common\Cache\Psr6\CacheAdapter</span></h2>
+
+	<div class="description"></div>
+
+	<h3>Construction</h3>
+        	<table class="table">
+		<caption>Implements</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface</a></td>
+				<td class="desc">CacheItemPoolInterface generates CacheItemInterface objects.</td>
+			</tr>
+        		</tbody>
+	</table>
+            
+	<h3>Hierarchy</h3>
+	<div class="hierarchy"></div>
+
+	<h3>Constants</h3>
+    
+	<h3>Properties</h3>
+    
+	<h3>Methods</h3>
+    		<ul>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L38-L54" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::wrap()" tabindex="-1" class="structure-title ">
+                        wrap                        	<small>($cache) : <a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-Common-Cache-Cache$typespace.html#Doctrine\Common\Cache\Cache" class="fqsen "><small>Doctrine\Common\Cache\</small><wbr>Cache</a></td>
+				<td class="rest">$cache</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default">internal</span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L61-L65" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::getCache()" tabindex="-1" class="structure-title ">
+                        getCache                        	<small>() : <a href="Doctrine-Common-Cache-Cache$typespace.html#Doctrine\Common\Cache\Cache" class="fqsen "><small>Doctrine\Common\Cache\</small><wbr>Cache</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-Common-Cache-Cache$typespace.html#Doctrine\Common\Cache\Cache" class="fqsen "><small>Doctrine\Common\Cache\</small><wbr>Cache</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L67-L93" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::getItem()" tabindex="-1" class="structure-title ">
+                        getItem                        	<small>($key) : <a href="Psr-Cache-CacheItemInterface$typespace.html#Psr\Cache\CacheItemInterface" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemInterface</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns a Cache Item representing the specified key.</p>
+<p>This method must always return a CacheItemInterface object, even in case of<br />
+a cache miss. It MUST NOT return null.</tag_inheritdoc></p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$key</td>
+				<td class="desc"><p>The key for which to return the corresponding Cache Item.</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Psr-Cache-CacheItemInterface$typespace.html#Psr\Cache\CacheItemInterface" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemInterface</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-InvalidArgumentException$typespace.html#Psr\Cache\InvalidArgumentException" class="fqsen "><small>Psr\Cache\</small><wbr>InvalidArgumentException</a></td>
+				<td class="desc">If the $key string is not a legal value a \Psr\Cache\InvalidArgumentException</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface::getItem()" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface::getItem()</a></td>
+				<td class="desc">Returns a Cache Item representing the specified key.</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L95-L130" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::getItems()" tabindex="-1" class="structure-title ">
+                        getItems                        	<small>($keys = []) : array</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns a traversable set of cache items.</tag_inheritdoc></p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string[]</td>
+				<td class="rest">$keys = []</td>
+				<td class="desc"><p>An indexed array of keys of items to retrieve.</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">array</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-InvalidArgumentException$typespace.html#Psr\Cache\InvalidArgumentException" class="fqsen "><small>Psr\Cache\</small><wbr>InvalidArgumentException</a></td>
+				<td class="desc">If any of the keys in $keys are not a legal value a \Psr\Cache\InvalidArgumentException</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface::getItems()" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface::getItems()</a></td>
+				<td class="desc">Returns a traversable set of cache items.</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L132-L144" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::hasItem()" tabindex="-1" class="structure-title ">
+                        hasItem                        	<small>($key) : bool</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Confirms if the cache contains specified cache item.</p>
+<p>Note: This method MAY avoid retrieving the cached value for performance reasons.<br />
+This could result in a race condition with CacheItemInterface::get(). To avoid<br />
+such situation use CacheItemInterface::isHit() instead.</tag_inheritdoc></p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$key</td>
+				<td class="desc"><p>The key for which to check existence.</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">bool</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-InvalidArgumentException$typespace.html#Psr\Cache\InvalidArgumentException" class="fqsen "><small>Psr\Cache\</small><wbr>InvalidArgumentException</a></td>
+				<td class="desc">If the $key string is not a legal value a \Psr\Cache\InvalidArgumentException</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface::hasItem()" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface::hasItem()</a></td>
+				<td class="desc">Confirms if the cache contains specified cache item.</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L146-L155" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::clear()" tabindex="-1" class="structure-title ">
+                        clear                        	<small>() : bool</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Deletes all items in the pool.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">bool</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface::clear()" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface::clear()</a></td>
+				<td class="desc">Deletes all items in the pool.</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L157-L166" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::deleteItem()" tabindex="-1" class="structure-title ">
+                        deleteItem                        	<small>($key) : bool</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Removes the item from the pool.</tag_inheritdoc></p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$key</td>
+				<td class="desc"><p>The key to delete.</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">bool</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-InvalidArgumentException$typespace.html#Psr\Cache\InvalidArgumentException" class="fqsen "><small>Psr\Cache\</small><wbr>InvalidArgumentException</a></td>
+				<td class="desc">If the $key string is not a legal value a \Psr\Cache\InvalidArgumentException</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface::deleteItem()" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface::deleteItem()</a></td>
+				<td class="desc">Removes the item from the pool.</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L168-L179" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::deleteItems()" tabindex="-1" class="structure-title ">
+                        deleteItems                        	<small>($keys) : bool</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Removes multiple items from the pool.</tag_inheritdoc></p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string[]</td>
+				<td class="rest">$keys</td>
+				<td class="desc"><p>An array of keys that should be removed from the pool.</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">bool</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-InvalidArgumentException$typespace.html#Psr\Cache\InvalidArgumentException" class="fqsen "><small>Psr\Cache\</small><wbr>InvalidArgumentException</a></td>
+				<td class="desc">If any of the keys in $keys are not a legal value a \Psr\Cache\InvalidArgumentException</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface::deleteItems()" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface::deleteItems()</a></td>
+				<td class="desc">Removes multiple items from the pool.</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L181-L184" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::save()" tabindex="-1" class="structure-title ">
+                        save                        	<small>($item) : bool</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Persists a cache item immediately.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemInterface$typespace.html#Psr\Cache\CacheItemInterface" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemInterface</a></td>
+				<td class="rest">$item</td>
+				<td class="desc"><p>The cache item to save.</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">bool</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface::save()" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface::save()</a></td>
+				<td class="desc">Persists a cache item immediately.</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L186-L195" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::saveDeferred()" tabindex="-1" class="structure-title ">
+                        saveDeferred                        	<small>($item) : bool</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Sets a cache item to be persisted later.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemInterface$typespace.html#Psr\Cache\CacheItemInterface" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemInterface</a></td>
+				<td class="rest">$item</td>
+				<td class="desc"><p>The cache item to save.</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">bool</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface::saveDeferred()" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface::saveDeferred()</a></td>
+				<td class="desc">Sets a cache item to be persisted later.</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L197-L244" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::commit()" tabindex="-1" class="structure-title ">
+                        commit                        	<small>() : bool</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Persists any deferred cache items.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">bool</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Cache-CacheItemPoolInterface$typespace.html#Psr\Cache\CacheItemPoolInterface::commit()" class="fqsen "><small>Psr\Cache\</small><wbr>CacheItemPoolInterface::commit()</a></td>
+				<td class="desc">Persists any deferred cache items.</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/doctrine/cache/blob/2.1.1/lib/Doctrine/Common/Cache/Psr6/CacheAdapter.php#L246-L249" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\Cache\Psr6\CacheAdapter::__destruct()" tabindex="-1" class="structure-title ">
+                        __destruct                        	<small>() : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            		</ul>
+    
+	<div class="attribute">
+		<span class="label label-default"></span>
+		<span class="label label-default"></span>
+	</div>
+	<div class="clearfix"></div>
+</div>
+</body>
+</html>
