@@ -22,6 +22,13 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.16
+
+- [fixbug][Yielder] setBufferMode が動いていない不具合を修正
+- [fixbug][Database] checkSameColumn 指定時に export するとエラーになる不具合を修正
+- [feature][Database] convertBoolToInt を新設
+- [refactor] composer update
+
 ## 2.0.15
 
 - [change][Database] echoAnnotation の出力を変更
