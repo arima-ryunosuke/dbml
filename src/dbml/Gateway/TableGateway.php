@@ -15,6 +15,7 @@ use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_get;
+use function ryunosuke\dbml\array_unset;
 use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\parameter_length;
@@ -2074,7 +2075,15 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         // スコープを順に適用
         $sargs = ['column' => $column] + self::$defargs;
         foreach ($scopes as $scope) {
+            $nonames = null;
+            if (is_array($scope['column']) && isset($scope['column'][''])) {
+                $nonames = array_unset($scope['column'], '');
+            }
+
             $scope['column'] = [$aname => $scope['column']];
+            if ($nonames) {
+                $scope['column'][''] = $nonames;
+            }
 
             $sargs = array_merge_recursive($sargs, $scope);
 

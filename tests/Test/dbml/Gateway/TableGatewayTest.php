@@ -661,8 +661,8 @@ AND ((flag=1))", "$gw");
         $select = $gateway->scoping('NOW(1)', '1=1')->scoping('NOW(2)', '2=2')->scoping('NOW(3)', '3=3')->select();
         $this->assertEquals('SELECT NOW(1), NOW(2), NOW(3) FROM test WHERE (1=1) AND (2=2) AND (3=3)', (string) $select);
 
-        $select = $gateway->where(['' => [1, 2]])->select();
-        $this->assertEquals('SELECT * FROM test WHERE test.id IN (?, ?)', (string) $select);
+        $select = $gateway->scoping(['' => ['other.column']], ['' => [1, 2]])->select();
+        $this->assertEquals('SELECT other.column FROM test WHERE test.id IN (?, ?)', (string) $select);
     }
 
     /**
@@ -682,13 +682,14 @@ AND ((flag=1))", "$gw");
             ->column(['c' => new Expression('NOW(?)', 9)])
             ->where(['c3' => 3])
             ->column('NOW(1)')
-            ->orderBy(['id' => [true, 'min']])
+            ->orderBy(['data' => [true, 'min']])
             ->column(['now' => 'NOW(2)'])
             ->where([['c1' => 1, 'c2' => 2]])
             ->limit(2)
+            ->orderBy(true)
             ->select([]);
 
-        $this->assertEquals('SELECT NOW(?) AS c, NOW(1), NOW(2) AS now FROM test T WHERE (1=1) AND (T.c3 = ?) AND ((T.c1 = ?) OR (T.c2 = ?)) ORDER BY T.name DESC, CASE WHEN T.id IS NULL THEN 0 ELSE 1 END ASC, T.id ASC LIMIT 2', (string) $select);
+        $this->assertEquals('SELECT NOW(?) AS c, NOW(1), NOW(2) AS now FROM test T WHERE (1=1) AND (T.c3 = ?) AND ((T.c1 = ?) OR (T.c2 = ?)) ORDER BY T.name DESC, CASE WHEN T.data IS NULL THEN 0 ELSE 1 END ASC, T.data ASC, T.id ASC LIMIT 2', (string) $select);
         $this->assertEquals([9, 3, 1, 2], $select->getParams());
     }
 
@@ -705,6 +706,10 @@ AND ((flag=1))", "$gw");
 
         $select = $gateway->select('id', ['!id' => 1]);
         $this->assertEquals('SELECT test.id FROM test WHERE test.id = ?', (string) $select);
+        $this->assertEquals([1], $select->getParams());
+
+        $select = $gateway->select(['' => 'id'], ['!id' => 1]);
+        $this->assertEquals('SELECT id FROM test WHERE test.id = ?', (string) $select);
         $this->assertEquals([1], $select->getParams());
 
         $select = $gateway->select('id', ['id' => 1]);
