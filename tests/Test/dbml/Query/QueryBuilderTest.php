@@ -1973,6 +1973,8 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
     {
         $builder->column('test');
 
+        $this->assertQuery('SELECT test.* FROM test ORDER BY test.id ASC', $builder->orderBy(true));
+        $this->assertQuery('SELECT test.* FROM test ORDER BY test.id DESC', $builder->orderBy(false));
         $this->assertQuery('SELECT test.* FROM test ORDER BY id1 ASC, id2 DESC, id3 DESC', $builder->orderBy([['id1', 'ASC'], ['id2', false], ['id3']], false));
         $this->assertQuery('SELECT test.* FROM test ORDER BY id ASC', $builder->orderBy('id'));
         $this->assertQuery('SELECT test.* FROM test ORDER BY id DESC', $builder->orderBy('-id'));

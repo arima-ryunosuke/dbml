@@ -2613,6 +2613,11 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function addOrderBy($sort, $order = null, $nullsOrder = null)
     {
+        // bool は特別扱いで主キーとする
+        if (is_bool($sort)) {
+            return $this->orderByPrimary($sort, true);
+        }
+
         // クロージャは行自体の比較関数
         if ($sort instanceof \Closure) {
             $this->phpOrders = $sort;
