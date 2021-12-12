@@ -172,6 +172,16 @@ select 4, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
         $logger->log('select ?', [9]);
 
         $this->assertEquals(['select 9'], $logs);
+
+        $logs = [];
+        $logger = new Logger([
+            'destination' => function ($sql, $params) use (&$logs) { $logs[] = compact('sql', 'params'); },
+            'buffer'      => 1024 * 10,
+        ]);
+
+        $logger->log('select ?', [9]);
+
+        $this->assertEquals([['sql' => 'select ?', 'params' => [9]]], $logs);
     }
 
     function test_buffer_resource()

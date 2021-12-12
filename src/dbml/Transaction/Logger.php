@@ -7,6 +7,7 @@ use ryunosuke\dbml\Mixin\OptionTrait;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\date_convert;
 use function ryunosuke\dbml\is_stringable;
+use function ryunosuke\dbml\parameter_length;
 use function ryunosuke\dbml\sql_bind;
 use function ryunosuke\dbml\sql_format;
 use function ryunosuke\dbml\str_ellipsis;
@@ -241,6 +242,13 @@ class Logger implements SQLLogger
         elseif ($buffer) {
             $this->arrayBuffer = [];
         }
+
+        if ($this->handle instanceof \Closure && parameter_length($this->handle) <= 1) {
+            $handle = $this->handle;
+            $this->handle = function () use ($handle) {
+                $handle($this->_stringify(...func_get_args()));
+            };
+        }
     }
 
     public function __destruct()
@@ -307,7 +315,7 @@ class Logger implements SQLLogger
             fwrite($this->handle, $this->_stringify($sql, $params, $types, $metadata) . "\n");
         }
         else {
-            ($this->handle)($this->_stringify($sql, $params, $types, $metadata));
+            ($this->handle)($sql, $params, $types, $metadata);
         }
 
         if ($this->bufferLimit) {
