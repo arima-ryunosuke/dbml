@@ -236,7 +236,9 @@ class Schema
             }
 
             $this->tables[$table_name] = Adhoc::cacheGetOrSet($this->cache, "Table-$table_name", function () use ($table_name) {
-                return $this->schemaManger->listTableDetails($table_name);
+                $table = $this->schemaManger->listTableDetails($table_name);
+                $table->setSchemaConfig($this->schemaManger->createSchemaConfig());
+                return $table;
             });
         }
         return $this->tables[$table_name];
