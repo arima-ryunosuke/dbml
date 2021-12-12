@@ -22,6 +22,13 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.17
+
+- [feature][Logger] シグネチャで渡ってくる引数が可変になる機能
+- [feature][TableGateway] 空文字でテーブルに紐付かないカラム指定ができる機能
+- [feature][QueryBuilder] bool で主キーの order by ができる機能
+- [feature][Schema] テーブルに SchemaConfig を設定する
+
 ## 2.0.16
 
 - [fixbug][Yielder] setBufferMode が動いていない不具合を修正
