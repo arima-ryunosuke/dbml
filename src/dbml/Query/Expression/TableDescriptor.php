@@ -10,6 +10,7 @@ use function ryunosuke\dbml\array_put;
 use function ryunosuke\dbml\array_rekey;
 use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\concat;
+use function ryunosuke\dbml\first_key;
 use function ryunosuke\dbml\paml_import;
 use function ryunosuke\dbml\preg_splice;
 use function ryunosuke\dbml\quoteexplode;
@@ -394,10 +395,12 @@ class TableDescriptor
         /// e.g. +tablename@scope(1, 2):fkeyname[condition]#1-3 AS T.col1, col2 AS C2
 
         $schema = $database->getSchema();
+        $alnumscore = "[_0-9a-z]";
+        $identifier = "[_a-z]$alnumscore";
 
         // テーブルに紐付かないカラムのための下ごしらえ
         if (true
-            && preg_match('#^[_a-z0-9]+$#i', $descriptor)
+            && preg_match("#^$alnumscore+$#i", $descriptor)
             && !$schema->hasTable($database->convertTableName($descriptor))
         ) {
             $cols = [$descriptor => $cols];
@@ -407,28 +410,28 @@ class TableDescriptor
         $this->descriptor = $descriptor;
 
         $joinsigns = preg_quote(implode('', Database::JOIN_MAPPER), '`');
-        $descriptor = preg_splice("`^([$joinsigns]?)\s*([_0-9a-z]+)`ui", '', trim($descriptor), $m);
+        $descriptor = preg_splice("`^([$joinsigns]?)\s*($alnumscore+)`ui", '', trim($descriptor), $m);
         $joinsign = $m[1] ?? null;
         $table = $m[2] ?? null;
 
-        $descriptor = preg_splice("`(\[.*\])`ui", '', trim($descriptor), $m);
+        $descriptor = preg_splice("`(\[.*])`ui", '', trim($descriptor), $m);
         $condition1 = $m[1] ?? null;
-        $descriptor = preg_splice("`(\{.+\})`ui", '', trim($descriptor), $m);
+        $descriptor = preg_splice("`({.+})`ui", '', trim($descriptor), $m);
         $condition2 = $m[1] ?? null;
 
-        $descriptor = preg_splice("`(\<.+\>)`ui", '', trim($descriptor), $m);
+        $descriptor = preg_splice("`(<.+>)`ui", '', trim($descriptor), $m);
         $group = $m[1] ?? null;
 
         $descriptor = preg_splice("`(:[_0-9a-z]*)`ui", '', trim($descriptor), $m);
         $fkeyname = $m[1] ?? null;
 
-        $descriptor = preg_splice('`(@[_0-9a-z]*(\((?:[^()]+|(?1))*\))?)+`ui', '', trim($descriptor), $m);
+        $descriptor = preg_splice("`(@$alnumscore*(\((?:[^()]+|(?1))*\))?)+`ui", '', trim($descriptor), $m);
         $scope = $m[0] ?? null;
 
         $descriptor = preg_splice("`(\(.*\))`ui", '', trim($descriptor), $m);
         $primary = $m[1] ?? null;
 
-        $descriptor = preg_splice("`(\s*[+-][_a-z][_a-z0-9]*)+`ui", '', trim($descriptor), $m);
+        $descriptor = preg_splice("`(\s*[+-]$identifier*)+`ui", '', trim($descriptor), $m);
         if ($m) {
             foreach (preg_split('#(?=[+-])#u', $m[0], -1, PREG_SPLIT_NO_EMPTY) as $order) {
                 $sign = $order[0];
@@ -437,7 +440,7 @@ class TableDescriptor
             }
         }
 
-        $descriptor = preg_splice('`#((\d+)?\-?(\d+)?)`ui', '', trim($descriptor), $m);
+        $descriptor = preg_splice('`#((\d+)?-?(\d+)?)`ui', '', trim($descriptor), $m);
         if (isset($m[1])) {
             [$offset, $limit] = explode('-', $m[1]) + [1 => ''];
             if (strlen($offset) && strlen($limit)) {
@@ -454,7 +457,7 @@ class TableDescriptor
             }
         }
 
-        $descriptor = preg_splice('`^(as\s+)?([_0-9a-z]+)?`ui', '', trim($descriptor), $m);
+        $descriptor = preg_splice("`^(as\s+)?($alnumscore+)?`ui", '', trim($descriptor), $m);
         $alias = $m[2] ?? null;
 
         $descriptor = preg_splice('`(\.(.+))?`ui', '', trim($descriptor), $m);
@@ -533,7 +536,7 @@ class TableDescriptor
                 $this->condition = array_merge($this->condition, $c);
             }
             // ['columname' => '+othertable.columname'] モード
-            elseif (is_string($c) && preg_match("#^[$joinsigns][_a-z][_a-z0-9]*#ui", trim($c), $m)) {
+            elseif (is_string($c) && preg_match("#^[$joinsigns]$identifier*#ui", trim($c), $m)) {
                 $join = new self($database, $c, []);
                 foreach ($join->column as $c2) {
                     $this->column[] = new Alias(...Alias::split($join->accessor . '.' . $c2, is_int($k) ? null : $k));
@@ -574,7 +577,7 @@ class TableDescriptor
 
             // 自身を親とする外部キーが対象
             foreach ($schema->getForeignKeys($this->table) as $fkey) {
-                $ltable = $fkey->getLocalTableName();
+                $ltable = first_key($schema->getForeignTable($fkey));
 
                 // 取得カラム内に含まれているならそちらを優先するためスキップ
                 if (array_key_exists($ltable, $this->column)) {

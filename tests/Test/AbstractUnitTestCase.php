@@ -19,7 +19,6 @@ use PHPUnit\Framework\SkippedTestError;
 use PHPUnit\Framework\TestCase;
 use function ryunosuke\dbml\cacheobject;
 use function ryunosuke\dbml\class_shorten;
-use function ryunosuke\dbml\pascal_case;
 
 abstract class AbstractUnitTestCase extends TestCase
 {

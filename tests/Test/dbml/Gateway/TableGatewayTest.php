@@ -2,13 +2,13 @@
 
 namespace ryunosuke\Test\dbml\Gateway;
 
-use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Statement;
+use ryunosuke\dbml\Transaction\Logger;
 use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Platforms\SqlitePlatform;
@@ -1180,26 +1180,32 @@ AND ((flag=1))", "$gw");
         if ($database->getCompatiblePlatform()->getWrappedPlatform() instanceof SqlitePlatform) {
             $database->setAutoOrder(false);
 
-            $logger = new DebugStack();
+            $logs = [];
+            $logger = new Logger([
+                'destination' => function ($sql, $params) use (&$logs) {
+                    $logs[] = compact('sql', 'params');
+                },
+                'metadata'    => [],
+            ]);
             $current = $database->getConnection()->getConfiguration()->getSQLLogger();
             $database->getConnection()->getConfiguration()->setSQLLogger($logger);
 
             $gateway->arrayForUpdate('*');
-            $log = $logger->queries[1];
+            $log = $logs[0];
             $this->assertEquals('SELECT test.* FROM test /* lock for write */', $log['sql']);
 
             $gateway->findForUpdate(1);
-            $log = $logger->queries[2];
+            $log = $logs[1];
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for write */', $log['sql']);
             $this->assertEquals([1], $log['params']);
 
             $this->assertException('record', L($gateway)->findInShareOrThrow(0));
-            $log = $logger->queries[3];
+            $log = $logs[2];
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for read */', $log['sql']);
             $this->assertEquals([0], $log['params']);
 
             $this->assertException('record', L($gateway)->findForAffect(0));
-            $log = $logger->queries[4];
+            $log = $logs[3];
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for write */', $log['sql']);
             $this->assertEquals([0], $log['params']);
 
@@ -1568,9 +1574,15 @@ AND ((flag=1))", "$gw");
      */
     function test_scoped_affect($gateway, $database)
     {
-        $logger = new DebugStack();
-        $lastsql = function () use ($logger) {
-            $last = end($logger->queries);
+        $logs = [];
+        $logger = new Logger([
+            'destination' => function ($sql, $params) use (&$logs) {
+                $logs[] = compact('sql', 'params');
+            },
+            'metadata'    => [],
+        ]);
+        $lastsql = function () use (&$logs) {
+            $last = end($logs);
             return [$last['sql'] => $last['params']];
         };
         $database->getConnection()->getConfiguration()->setSQLLogger($logger);

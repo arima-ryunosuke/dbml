@@ -4,7 +4,7 @@ namespace ryunosuke\Test\dbml\Transaction;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Logging\DebugStack;
+use ryunosuke\dbml\Transaction\Logger;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\Test\Database;
 
@@ -404,8 +404,20 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         // 無駄なメタクエリが検出されないようにあらかじめ投げておく
         $database->getSchema()->getTable('test');
 
-        $loggerT = new DebugStack();
-        $loggerC = new DebugStack();
+        $logsT = [];
+        $loggerT = new Logger([
+            'destination' => function ($sql, $params) use (&$logsT) {
+                $logsT[] = compact('sql', 'params');
+            },
+            'metadata'    => [],
+        ]);
+        $logsC = [];
+        $loggerC = new Logger([
+            'destination' => function ($sql, $params) use (&$logsC) {
+                $logsC[] = compact('sql', 'params');
+            },
+            'metadata'    => [],
+        ]);
         $transaction->logger($loggerT);
         $database->getMasterConnection()->getConfiguration()->setSQLLogger($loggerC);
 
@@ -415,14 +427,14 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // preview では 参照引数に集約されるので一切ログられない
         $transaction->preview($queries);
-        $this->assertCount(0, $loggerT->queries);
-        $this->assertCount(0, $loggerC->queries);
+        $this->assertCount(0, $logsT);
+        $this->assertCount(0, $logsC);
         $this->assertCount(3, $queries);
 
         // perform は共にログられる
         $transaction->perform();
-        $this->assertCount(3, $loggerT->queries);
-        $this->assertCount(3, $loggerC->queries);
+        $this->assertCount(3, $logsT);
+        $this->assertCount(3, $logsC);
     }
 
     /**
@@ -432,8 +444,20 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_preview($transaction, $database)
     {
-        $loggerT = new DebugStack();
-        $loggerC = new DebugStack();
+        $logsT = [];
+        $loggerT = new Logger([
+            'destination' => function ($sql, $params) use (&$logsT) {
+                $logsT[] = compact('sql', 'params');
+            },
+            'metadata'    => [],
+        ]);
+        $logsC = [];
+        $loggerC = new Logger([
+            'destination' => function ($sql, $params) use (&$logsC) {
+                $logsC[] = compact('sql', 'params');
+            },
+            'metadata'    => [],
+        ]);
         $transaction->logger($loggerT);
         $database->getMasterConnection()->getConfiguration()->setSQLLogger($loggerC);
 
@@ -447,9 +471,9 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         // クエリ取得に logger を使用してるのでもとに戻っているか担保する
         $this->assertSame($loggerT, $transaction->logger);
         // かつ元の logger にはログられていない（あくまでプレビューなので本家にログられても困る）
-        $this->assertCount(0, $loggerT->queries);
+        $this->assertCount(0, $logsT);
         // さらに元 connection のロガーにもログられていない（preview = 内部でトランザクションしているという前提を剥き出しにするのはよくない）
-        $this->assertCount(0, $loggerC->queries);
+        $this->assertCount(0, $logsC);
         // $return に実行結果が入っているはず（id:2 は消してるので1件だけ）
         $this->assertCount(1, $return);
         $this->assertEquals(['name' => 'a'], $return[0]);
@@ -487,8 +511,20 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_presview_ex($transaction, $database)
     {
-        $loggerT = new DebugStack();
-        $loggerC = new DebugStack();
+        $logsT = [];
+        $loggerT = new Logger([
+            'destination' => function ($sql, $params) use (&$logsT) {
+                $logsT[] = compact('sql', 'params');
+            },
+            'metadata'    => [],
+        ]);
+        $logsC = [];
+        $loggerC = new Logger([
+            'destination' => function ($sql, $params) use (&$logsC) {
+                $logsC[] = compact('sql', 'params');
+            },
+            'metadata'    => [],
+        ]);
         $transaction->logger($loggerT);
         $database->getMasterConnection()->getConfiguration()->setSQLLogger($loggerC);
 
@@ -501,9 +537,9 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         // クエリ取得に logger を使用してるのでもとに戻っているか担保する
         $this->assertSame($loggerT, $transaction->logger);
         // かつ元の logger にはログられていない（あくまでプレビューなので本家にログられても困る）
-        $this->assertCount(0, $loggerT->queries);
+        $this->assertCount(0, $logsT);
         // さらに元 connection のロガーにもログられていない（preview = 内部でトランザクションしているという前提を剥き出しにするのはよくない）
-        $this->assertCount(0, $loggerC->queries);
+        $this->assertCount(0, $logsC);
         // $queries に実行ログが入っているはず
         $subset = [
             "START TRANSACTION",

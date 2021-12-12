@@ -4,7 +4,6 @@ namespace ryunosuke\Test\dbml;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
@@ -1289,30 +1288,36 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_injectCallStack($database)
     {
-        $logger = new DebugStack();
+        $logs = [];
+        $logger = new Logger([
+            'destination' => function ($sql, $params) use (&$logs) {
+                $logs[] = compact('sql', 'params');
+            },
+            'metadata'    => [],
+        ]);
         $database->getConnection()->getConfiguration()->setSQLLogger($logger);
 
         $database->setInjectCallStack('DatabaseTest.php');
         $database->executeSelect('select * from test');
-        $this->assertStringContainsString(__FILE__, $logger->queries[1]['sql']);
+        $this->assertStringContainsString(__FILE__, $logs[0]['sql']);
 
         $database->setInjectCallStack('!vendor');
         $database->executeSelect('select * from test');
-        $this->assertStringContainsString('Database.php#', $logger->queries[2]['sql']);
-        $this->assertStringNotContainsString('phpunit', $logger->queries[2]['sql']);
+        $this->assertStringContainsString('Database.php#', $logs[1]['sql']);
+        $this->assertStringNotContainsString('phpunit', $logs[1]['sql']);
 
         $database->setInjectCallStack(['DatabaseTest.php', '!phpunit']);
         $database->executeSelect('select * from test');
-        $this->assertStringContainsString(__FILE__, $logger->queries[3]['sql']);
-        $this->assertStringNotContainsString('phpunit', $logger->queries[3]['sql']);
+        $this->assertStringContainsString(__FILE__, $logs[2]['sql']);
+        $this->assertStringNotContainsString('phpunit', $logs[2]['sql']);
 
         $database->setInjectCallStack('DatabaseTest.php');
         $database->executeAffect("update test set name='hoge'");
-        $this->assertStringContainsString(__FILE__, $logger->queries[4]['sql']);
+        $this->assertStringContainsString(__FILE__, $logs[3]['sql']);
 
         $database->setInjectCallStack(function ($path) { return preg_match('/phpunit$/', $path); });
         $database->executeAffect("update test set name='hoge'");
-        $this->assertStringContainsString('phpunit#', $logger->queries[5]['sql']);
+        $this->assertStringContainsString('phpunit#', $logs[4]['sql']);
 
         $database->setInjectCallStack(null);
         $database->getConnection()->getConfiguration()->setSQLLogger(null);
@@ -4525,13 +4530,19 @@ INSERT INTO test (id, name) VALUES
         ], $database->selectArray('foreign_p'));
 
         if ($database->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
-            $logger = new DebugStack();
+            $logs = [];
+            $logger = new Logger([
+                'destination' => function ($sql, $params) use (&$logs) {
+                    $logs[] = compact('sql', 'params');
+                },
+                'metadata'    => [],
+            ]);
             try {
                 $database->getConnection()->getConfiguration()->setSQLLogger($logger);
                 $database->remove('foreign_p P < foreign_c1 C', ['C.id' => 99]);
             }
             catch (\Exception $ex) {
-                $last = reset($logger->queries);
+                $last = reset($logs);
                 $this->assertEquals('DELETE P FROM foreign_p P LEFT JOIN foreign_c1 C ON C.id = P.id WHERE (C.id = ?) AND ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = P.id))) AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = P.id)))', $last['sql']);
                 $this->assertEquals([99], $last['params']);
             }
