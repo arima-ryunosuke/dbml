@@ -171,6 +171,16 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             [new Index('PRIMARY', ['id'], true, true)]
                         ),
+                        new Table('notnulls',
+                            [
+                                new Column('id', Type::getType('integer'), ['autoincrement' => true]),
+                                new Column('name', Type::getType('string'), ['length' => 32, 'notnull' => true, 'default' => '']),
+                                new Column('cint', Type::getType('integer'), ['notnull' => true, 'default' => 1]),
+                                new Column('cfloat', Type::getType('float'), ['notnull' => true, 'default' => 2.3]),
+                                new Column('cdecimal', Type::getType('decimal'), ['notnull' => true, 'scale' => 2, 'precision' => 3, 'default' => 4.56]),
+                            ],
+                            [new Index('PRIMARY', ['id'], true, true)]
+                        ),
                         new Table('multiprimary',
                             [
                                 new Column('mainid', Type::getType('integer')),

@@ -1154,6 +1154,39 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_filterNullAtNotNullColumn($database)
+    {
+        // false だとまっとうな DBMS なら怒られる
+        $database = $database->context(['filterNullAtNotNullColumn' => false]);
+        $this->assertException('null', L($database)->insert('notnulls', [
+            'name'     => null,
+            'cint'     => null,
+            'cfloat'   => null,
+            'cdecimal' => null,
+        ]));
+
+        // true なら not null な列に null を設定しても怒られない
+        $database = $database->context(['filterNullAtNotNullColumn' => true]);
+        $pk = $database->create('notnulls', [
+            'id'       => 1,
+            'name'     => null,
+            'cint'     => null,
+            'cfloat'   => null,
+            'cdecimal' => null,
+        ]);
+        $this->assertEquals([
+            'id'       => 1,
+            'name'     => '',
+            'cint'     => 1,
+            'cfloat'   => 2.3,
+            'cdecimal' => 4.56,
+        ], $database->selectTuple('notnulls', $pk));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_convertEmptyToNull($database)
     {
         $database->setConvertEmptyToNull(true);

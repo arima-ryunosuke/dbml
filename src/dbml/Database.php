@@ -151,6 +151,18 @@ use ryunosuke\dbml\Utility\Adhoc;
  *
  *     @param bool $bool 存在しないカラムをフィルタするなら true
  * }
+ * @method bool                   getFilterNullAtNotNullColumn()
+ * @method $this                  setFilterNullAtNotNullColumn($bool) {
+ *     not null なカラムの null をフィルタするか指定する
+ *
+ *     この設定を true にすると INSERT/UPDATE 時に「not null なのに null が来たカラム」が自動で伏せられるようになる。
+ *     呼び出し側の都合などで null を予約的に扱い、キーとして存在してしまうことはよくある。
+ *     どうせエラーになるので、結局呼び出し直前に if 分岐で unset したりするのでいっそのこと自動で伏せてしまったほうが便利なことは多い。
+ *
+ *     なお、デフォルトは false だが、互換性のためであり将来のバージョンでは true になる想定。
+ *
+ *     @param bool $bool not null なカラムの null をフィルタするなら true
+ * }
  * @method bool                   getConvertEmptyToNull()
  * @method $this                  setConvertEmptyToNull($bool) {
  *     NULLABLE に空文字が来たときの挙動を指定する
@@ -711,25 +723,27 @@ class Database
     {
         $default_options = [
             // キャッシュオブジェクト
-            'cacheProvider'        => null,
+            'cacheProvider'             => null,
             // 初期化後の SQL コマンド（mysql@PDO でいう MYSQL_ATTR_INIT_COMMAND）
-            'initCommand'          => null,
+            'initCommand'               => null,
             // テーブル名 => Entity クラス名のコンバータ
-            'tableMapper'          => function ($table) { return pascal_case($table); },
+            'tableMapper'               => function ($table) { return pascal_case($table); },
             // 拡張 INSERT SET 構文を使うか否か（mysql 以外は無視される）
-            'insertSet'            => false,
+            'insertSet'                 => false,
             // insert 時などにテーブルに存在しないカラムを自動でフィルタするか否か
-            'filterNoExistsColumn' => true,
+            'filterNoExistsColumn'      => true,
+            // insert 時などに not null な列に null が来た場合に自動でフィルタするか否か
+            'filterNullAtNotNullColumn' => false, // for compatible
             // insert 時などに NULLABLE NUMERIC カラムは 空文字を null として扱うか否か
-            'convertEmptyToNull'   => true,
+            'convertEmptyToNull'        => true,
             // insert 時などに数値系カラムは真偽値を int として扱うか否か
-            'convertBoolToInt'     => false, // for compatible
+            'convertBoolToInt'          => false, // for compatible
             // modify 時にエラーとならないようにレコードを select するか否か
-            'modifyAutoSelect'     => true, // for compatible
+            'modifyAutoSelect'          => true, // for compatible
             // 埋め込み条件の yaml パーサ
-            'yamlParser'           => function ($yaml) { return \ryunosuke\dbml\paml_import($yaml)[0]; },
+            'yamlParser'                => function ($yaml) { return \ryunosuke\dbml\paml_import($yaml)[0]; },
             // DB型で自動キャストする型設定。select,affect 要素を持つ（多少無駄になるがサンプルも兼ねて冗長に記述してある）
-            'autoCastType'         => [
+            'autoCastType'              => [
                 // 正式な与え方。select は取得（SELECT）時、affect は設定（INSERT/UPDATE）時を表す
                 // 個人的には DATETIME で設定したい。出すときは DateTime で返ってくれると便利だけど、入れるときは文字列で入れたい
                 'hoge'                  => [
@@ -754,17 +768,17 @@ class Database
                 // いずれにせよ上記の hoge,fuga,piyo のようにそもそも Type::hasType ではないものは無視される
             ],
             // 同名カラムがあった時どう振る舞うか[null, 'noallow', 'strict', 'loose']
-            'checkSameColumn'      => null,
+            'checkSameColumn'           => null,
             // SQL 実行時にコールスタックを埋め込むか(パスを渡す。!プレフィックスで否定、 null で無効化)
-            'injectCallStack'      => null,
+            'injectCallStack'           => null,
             // 更新クエリを実行せずクエリ文字列を返すようにするか
-            'dryrun'               => false,
+            'dryrun'                    => false,
             // 更新クエリを実行せずプリペアされたステートメントを返すようにするか
-            'preparing'            => false,
+            'preparing'                 => false,
             // 参照系クエリをマスターで実行するか(「スレーブに書き込みたい」はまずあり得ないが「マスターから読み込みたい」はままある)
-            'masterMode'           => false,
+            'masterMode'                => false,
             // anywhere のデフォルトオプション
-            'anywhereOption'       => [
+            'anywhereOption'            => [
                 // そもそも有効か否か
                 'enable'         => true,
                 // 強欲にマッチさせるか（false にすると文字列 LIKE されづらくなる）
@@ -795,15 +809,15 @@ class Database
                 ],
             ],
             // CompatiblePlatform のクラス名 or インスタンス
-            'compatiblePlatform'   => CompatiblePlatform::class,
+            'compatiblePlatform'        => CompatiblePlatform::class,
             // exportXXX 呼び出し時にどのクラスを使用するか
-            'exportClass'          => [
+            'exportClass'               => [
                 'array' => ArrayGenerator::class,
                 'csv'   => CsvGenerator::class,
                 'json'  => JsonGenerator::class,
             ],
             // ロギングオブジェクト（SQLLogger）
-            'logger'               => null,
+            'logger'                    => null,
         ];
 
         // 他クラスのオプションをマージ
@@ -1479,6 +1493,18 @@ class Database
 
         if ($this->getUnsafeOption('filterNoExistsColumn')) {
             $row = array_intersect_key($row, $columns);
+        }
+
+        if ($this->getUnsafeOption('filterNullAtNotNullColumn')) {
+            foreach ($columns as $cname => $column) {
+                // 値が null で・・・
+                if (array_key_exists($cname, $row) && $row[$cname] === null) {
+                    // not null なら伏せる
+                    if ($column->getNotnull()) {
+                        unset($row[$cname]);
+                    }
+                }
+            }
         }
 
         if ($this->getUnsafeOption('convertEmptyToNull')) {
