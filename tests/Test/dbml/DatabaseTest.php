@@ -3760,6 +3760,48 @@ INSERT INTO test (name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_updateArray_chunk($database)
+    {
+        // ログを見たいので全体を preview で囲む
+        $logs = $database->preview(function (Database $database) {
+            $data = [
+                ['id' => 1, 'name' => 'A'],
+                ['id' => 2, 'name' => new Expression('UPPER(\'b\')')],
+                ['id' => 3, 'name' => new Expression('UPPER(?)', 'c')],
+                ['id' => 4, 'name' => $database->select('test1.UPPER(name1)', ['id' => 4])],
+                ['id' => 5, 'name' => 'nothing'],
+                ['id' => 6, 'name' => 'f'],
+            ];
+
+            $affected = $database->updateArray('test', $data, ['id <> ?' => 5], 2);
+
+            // 6件与えているが、変更されるのは4件のはず(mysql の場合。他DBMSは5件)
+            $expected = $database->getPlatform() instanceof MySQLPlatform ? 4 : 5;
+            $this->assertEquals($expected, $affected);
+
+            // 実際に取得して変わっている/いないを確認
+            $this->assertEquals([
+                'A',
+                'B',
+                'C',
+                'D',
+                'e',
+                'f',
+            ], $database->selectLists('test.name', [
+                'id' => [1, 2, 3, 4, 5, 6],
+            ]));
+        });
+        $this->assertEquals([
+            "UPDATE test SET name = CASE id WHEN 1 THEN 'A' WHEN 2 THEN UPPER('b') ELSE name END WHERE (id <> 5) AND (test.id IN (1, 2))",
+            "UPDATE test SET name = CASE id WHEN 3 THEN UPPER('c') WHEN 4 THEN (SELECT UPPER(name1) FROM test1 WHERE id = 4) ELSE name END WHERE (id <> 5) AND (test.id IN (3, 4))",
+            "UPDATE test SET name = CASE id WHEN 5 THEN 'nothing' WHEN 6 THEN 'f' ELSE name END WHERE (id <> 5) AND (test.id IN (5, 6))",
+        ], array_values(preg_grep('#^UPDATE#', $logs)));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_updateArray_multiple($database)
     {
         $data = [

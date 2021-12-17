@@ -2410,10 +2410,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::updateArray()
      */
-    public function updateArray($data, $identifier = [])
+    public function updateArray($data, $identifier = [], $chunk = 0)
     {
         $this->resetResult();
-        return $this->database->updateArray($this->tableName, $data, $identifier, ...array_slice(func_get_args(), 2));
+        return $this->database->updateArray($this->tableName, $data, $identifier, $chunk, ...array_slice(func_get_args(), 3));
     }
 
     /**

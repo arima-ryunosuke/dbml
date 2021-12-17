@@ -5408,12 +5408,13 @@ class Database
      * @param string $tableName テーブル名
      * @param array|callable|\Generator $data カラムデータあるいは Generator あるいは Generator を返す callable
      * @param array|mixed $identifier 束縛条件
+     * @param int $chunk 分割 update する場合はそのチャンクサイズ
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function updateArray($tableName, $data, $identifier = [])
+    public function updateArray($tableName, $data, $identifier = [], $chunk = 0)
     {
         // 隠し引数 $opt
-        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
+        $opt = func_num_args() === 5 ? func_get_arg(4) : [];
 
         $tableName = $this->_preaffect($tableName, $data);
         if (is_array($tableName)) {
@@ -5422,20 +5423,31 @@ class Database
         $tableName = $this->convertTableName($tableName);
 
         $pkey = $this->getSchema()->getTablePrimaryColumns($tableName);
-        $columns = $this->_normalizes($tableName, $data, array_keys($pkey));
-        $pkcols = array_intersect_key($columns, $pkey);
-        $cvcols = array_diff_key($columns, $pkey);
-
-        $params = [];
-        $set = $this->bindInto($cvcols, $params);
-        $sets = array_sprintf($set, '%2$s = %1$s', ', ');
+        $pcols = array_keys($pkey);
+        $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
 
         $condition = $this->_prewhere($tableName, $identifier);
-        $condition[] = $this->getCompatiblePlatform()->getPrimaryCondition(array_uncolumns($pkcols), $tableName);
-        $criteria = $this->whereInto($condition, $params);
 
-        $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        return $this->executeAffect("UPDATE {$ignore}$tableName SET $sets" . ' WHERE ' . implode(' AND ', Adhoc::wrapParentheses($criteria)), $params);
+        $affected = [];
+        foreach ($chunk ? array_chunk($data, $chunk) : [$data] as $block) {
+            $columns = $this->_normalizes($tableName, $block, $pcols);
+            $pkcols = array_intersect_key($columns, $pkey);
+            $cvcols = array_diff_key($columns, $pkey);
+
+            $params = [];
+            $set = $this->bindInto($cvcols, $params);
+            $sets = array_sprintf($set, '%2$s = %1$s', ', ');
+
+            $pkcond = $this->getCompatiblePlatform()->getPrimaryCondition(array_uncolumns($pkcols), $tableName);
+            $criteria = $this->whereInto(array_merge($condition, [$pkcond]), $params);
+
+            $affected[] = $this->executeAffect("UPDATE {$ignore}$tableName SET $sets" . ' WHERE ' . implode(' AND ', Adhoc::wrapParentheses($criteria)), $params);
+        }
+
+        if ($this->getUnsafeOption('dryrun') || $this->getUnsafeOption('preparing')) {
+            return $chunk ? $affected : reset($affected);
+        }
+        return array_sum($affected);
     }
 
     /**
