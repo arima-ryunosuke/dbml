@@ -4968,6 +4968,179 @@ class Database
     }
 
     /**
+     * データ移行用 SQL を発行する
+     *
+     * 要するに与えられたファイル・配列を SQL 文に変換する。
+     * csv,json,php などを手元で（マクロなどで） sql に変換する作業は多々あるが、それを簡易化できる。
+     *
+     * ただし、 dryrun: true のときのみであり false だと実際に実行され、affected rows を返す。
+     * 特に change や delete を指定したときは致命的な事態になるので注意。
+     *
+     * $dml には下記が指定できる。
+     *
+     * - select:
+     *   - dryrun なら主キーで WHERE して該当列を返すような SQL を返す
+     *   - dryrun でないなら実行してレコード配列を返す（実質的に入力配列と（型以外は）ほぼ同じものを返す）
+     * - insert:
+     *   - dryrun なら実行されるであろう INSERT な SQL を返す
+     *   - dryrun でないなら実行してレコード配列を INSERT する（追加のみで更新・削除は行われない）
+     * - update:
+     *   - dryrun なら実行されるであろう UPDATE な SQL を返す
+     *   - dryrun でないなら実行してレコード配列に UPDATE する（更新のみで追加・削除は行われない）
+     * - delete:
+     *   - dryrun なら実行されるであろう DELETE な SQL を返す
+     *   - dryrun でないなら実行してレコード配列を DELETE する（削除のみで追加・更新は行われない）
+     * - modify:
+     *   - dryrun なら実行されるであろう UPSERT(MODIFY) な SQL を返す
+     *   - dryrun でないなら実行してレコード配列を MODIFY する（追加・更新のみで削除は行われない）
+     * - change:
+     *   - dryrun なら実行されるであろう INSERT/UPDATE/DELETE な SQL を返す
+     *   - dryrun でないなら実行してレコード配列の状態に「持っていく」（追加・更新・削除が行われる）
+     * - save:
+     *   - dryrun なら実行されるであろう INSERT/UPDATE/DELETE な SQL を返す
+     *   - dryrun でないなら実行してレコード配列の状態に「再帰的に持っていく」（再帰的に追加・更新・削除が行われる）
+     *
+     * どの方法を選んだとしてもレコード配列に主キーは必須となる（値は null でも構わない）。
+     *
+     * $opt で chunk や ignore オプションが指定できる。
+     * 特に chunk/bulk は返り値の SQL が大幅に変化する。
+     *
+     * @param string $tableName テーブル名
+     * @param string $dml 処理名
+     * @param array|string $recordsOrFilename レコード配列かそれが書かれたファイル名
+     * @param array $opt オプション引数
+     * @return array|int sql 文。dryrun でないなら affected rows
+     */
+    public function migrate($tableName, $dml, $recordsOrFilename, $opt = [])
+    {
+        $opt += [
+            'dryrun' => true,
+            'ignore' => false,
+            'bulk'   => false,
+            'chunk'  => 0,
+        ];
+
+        $tableName = $this->convertTableName($tableName);
+        $table = $this->getSchema()->getTable($tableName);
+
+        $primary = $table->getPrimaryKeyColumns();
+        $columns = $table->getColumns();
+
+        $records = is_iterable($recordsOrFilename) ? $recordsOrFilename : file_get_arrays($recordsOrFilename);
+        foreach ($records as $n => $record) {
+            foreach ($primary as $cname => $pk) {
+                if (!array_key_exists($cname, $record)) {
+                    throw new \RuntimeException("undefined primary key at $n:$cname");
+                }
+            }
+        }
+
+        // memo 重複コードが多いが、下手に共通化しないほうが良い（不具合が致命的な事態になるので）
+
+        $results = [];
+        switch (strtolower($dml)) {
+            default:
+                throw new \InvalidArgumentException("dml '$dml' is not supported.");
+            case 'select':
+                $keys = array_map(fn($record) => array_intersect_key($record, $primary), $records);
+                if ($opt['bulk'] || !$opt['dryrun']) {
+                    $cols = array_intersect_key($columns, array_add(...$records));
+                    $select = $this->select([$tableName => array_keys($cols)], [$keys]);
+                    if (!$opt['dryrun']) {
+                        return $select->array();
+                    }
+                    $results[] = $select->queryInto();
+                }
+                else {
+                    foreach ($keys as $n => $key) {
+                        $results[] = $this->select([$tableName => array_keys(array_intersect_key($columns, $records[$n]))], $key)->queryInto();
+                    }
+                }
+                break;
+            case 'insert':
+                $db = $opt['dryrun'] ? $this->dryrun() : $this;
+                if ($opt['bulk']) {
+                    $results[] = $db->insertArray($tableName, $records, $opt['chunk'], $opt);
+                }
+                else {
+                    foreach ($records as $record) {
+                        $results[] = $db->insert($tableName, $record, $opt);
+                    }
+                }
+                break;
+            case 'update':
+                $db = $opt['dryrun'] ? $this->dryrun() : $this;
+                if ($opt['bulk']) {
+                    $results[] = $db->updateArray($tableName, $records, [], $opt['chunk'], $opt);
+                }
+                else {
+                    $keys = array_map(fn($record) => array_intersect_key($record, $primary), $records);
+                    foreach ($keys as $n => $key) {
+                        $results[] = $db->update($tableName, array_diff_key($records[$n], $key), $key, $opt);
+                    }
+                }
+                break;
+            case 'delete':
+                $db = $opt['dryrun'] ? $this->dryrun() : $this;
+                $keys = array_map(fn($record) => array_intersect_key($record, $primary), $records);
+                if ($opt['bulk']) {
+                    $results[] = $db->delete($tableName, [$keys], $opt);
+                }
+                else {
+                    foreach ($keys as $key) {
+                        $results[] = $db->delete($tableName, $key, $opt);
+                    }
+                }
+                break;
+            case 'modify':
+                $db = $opt['dryrun'] ? $this->dryrun() : $this;
+                if ($opt['bulk']) {
+                    $results[] = $db->modifyArray($tableName, $records, [], $opt['chunk'], $opt);
+                }
+                else {
+                    foreach ($records as $record) {
+                        $results[] = $db->modify($tableName, $record, [], $opt);
+                    }
+                }
+                break;
+            case 'change':
+                $db = $opt['dryrun'] ? $this->dryrun() : $this;
+                $result = $db->changeArray($tableName, $records, [], $opt);
+                if ($opt['dryrun']) {
+                    $results[] = $result[1];
+                }
+                else {
+                    $results[] = count($result);
+                }
+                break;
+            case 'save':
+                $db = $opt['dryrun'] ? $this->dryrun() : $this;
+                $result = [];
+                if ($opt['bulk']) {
+                    $result[] = $db->save($tableName, $records, $opt);
+                }
+                else {
+                    foreach ($records as $record) {
+                        $result[] = $db->save($tableName, $record, $opt);
+                    }
+                }
+                if ($opt['dryrun']) {
+                    $results[] = $result;
+                }
+                else {
+                    $results[] = array_count($result, fn($v) => is_array($v) && !is_indexarray($v), true);
+                }
+                break;
+        }
+
+        $result = array_flatten($results);
+        if (!$opt['dryrun']) {
+            return array_sum($result);
+        }
+        return $result;
+    }
+
+    /**
      * ツリー構造の配列を一括で取り込む
      *
      * ツリー配列を水平的に走査して {@link changeArray()} でまとめて更新する。

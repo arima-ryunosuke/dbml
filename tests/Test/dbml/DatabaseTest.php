@@ -28,10 +28,12 @@ use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\Comment;
 use ryunosuke\Test\Entity\ManagedComment;
 use function ryunosuke\dbml\array_order;
+use function ryunosuke\dbml\array_remove;
 use function ryunosuke\dbml\mkdir_p;
 use function ryunosuke\dbml\rm_rf;
 use function ryunosuke\dbml\try_null;
 use function ryunosuke\dbml\try_return;
+use function ryunosuke\dbml\var_export2;
 
 class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -1227,15 +1229,15 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cdatetime' => '2012-12-12 12:34:56',
         ]);
         $expected = [
-            'id'       => 9,
-            'pid'      => 1,
-            'cint'     => 0,
-            'cfloat'   => 1,
-            'cdecimal' => 0,
-            'cstring'  => 1,
-            'ctext'    => 0,
-            'carray'   => 1,
-            'cjson'    => 0,
+            'id'        => 9,
+            'pid'       => 1,
+            'cint'      => 0,
+            'cfloat'    => 1,
+            'cdecimal'  => 0,
+            'cstring'   => 1,
+            'ctext'     => 0,
+            'carray'    => 1,
+            'cjson'     => 0,
             'cdate'     => '2012-12-12',
             'cdatetime' => '2012-12-12 12:34:56',
         ];
@@ -2759,6 +2761,345 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $this->assertCount(1, $database->selectArray('noauto', ['id' => false]));
         $this->assertCount(1, $database->selectArray('test', ['id' => true]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_migrate($database)
+    {
+        $records = [
+            [
+                'id'         => '11',
+                'name'       => 'hoge',
+                'foreign_c1' => [
+                    [
+                        'seq'  => 1,
+                        'name' => 'c1',
+                    ],
+                ],
+            ],
+            [
+                'id'         => '12',
+                'name'       => 'fuga',
+                'foreign_c2' => [
+                    [
+                        'seq'  => 1,
+                        'name' => 'c2',
+                    ],
+                ],
+            ],
+            [
+                'id'         => '13',
+                'name'       => 'piyo',
+                'foreign_c1' => [
+                    [
+                        'seq'  => 2,
+                        'name' => 'cc1',
+                    ],
+                ],
+                'foreign_c2' => [
+                    [
+                        'seq'  => 2,
+                        'name' => 'cc2',
+                    ],
+                ],
+            ],
+        ];
+        $opt = ['dryrun' => false];
+
+        // INSERT
+        $result = $database->migrate('foreign_p', 'insert', $records, $opt + ['bulk' => false]);
+        $this->assertEquals(3, $result);
+
+        // SELECT
+        $result = $database->migrate('foreign_p', 'select', $records, $opt + ['bulk' => false]);
+        $this->assertEquals(array_map(fn($v) => array_remove($v, ['foreign_c1', 'foreign_c2']), $records), $result);
+
+        // UPDATE
+        array_walk($records, fn(&$r) => $r['name'] = 'x' . $r['name']);
+        $result = $database->migrate('foreign_p', 'update', $records, $opt + ['bulk' => false]);
+        $this->assertEquals(3, $result);
+
+        // DELETE
+        $result = $database->migrate('foreign_p', 'delete', $records, $opt + ['bulk' => false]);
+        $this->assertEquals(3, $result);
+
+        if ($database->getCompatiblePlatform()->supportsMerge()) {
+            // MODIFY
+            array_walk($records, fn(&$r) => $r['name'] = 'y' . $r['name']);
+            $result = $database->migrate('foreign_p', 'modify', $records, $opt + ['bulk' => false]);
+            $this->assertEquals(3, $result);
+
+            // CHANGE
+            array_walk($records, fn(&$r) => $r['name'] = 'z' . $r['name']);
+            $result = $database->migrate('foreign_p', 'change', $records, $opt + ['bulk' => false]);
+            $this->assertEquals(3, $result);
+
+            // SAVE
+            $result = $database->migrate('foreign_p', 'save', $records, $opt + ['bulk' => false]);
+            $this->assertEquals(7, $result);
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_migrate_bulk($database)
+    {
+        // SqlServer はいろいろと辛いので除外（ID 列さえ除けば多分動くはず）
+        if (!$database->getCompatiblePlatform()->supportsIdentityUpdate()) {
+            return;
+        }
+
+        $records = [
+            [
+                'id'         => '11',
+                'name'       => 'hoge',
+                'foreign_c1' => [
+                    [
+                        'seq'  => 1,
+                        'name' => 'c1',
+                    ],
+                ],
+            ],
+            [
+                'id'         => '12',
+                'name'       => 'fuga',
+                'foreign_c2' => [
+                    [
+                        'seq'  => 1,
+                        'name' => 'c2',
+                    ],
+                ],
+            ],
+            [
+                'id'         => '13',
+                'name'       => 'piyo',
+                'foreign_c1' => [
+                    [
+                        'seq'  => 2,
+                        'name' => 'cc1',
+                    ],
+                ],
+                'foreign_c2' => [
+                    [
+                        'seq'  => 2,
+                        'name' => 'cc2',
+                    ],
+                ],
+            ],
+        ];
+        $opt = ['dryrun' => false];
+
+        // INSERT
+        $result = $database->migrate('foreign_p', 'insert', $records, $opt + ['bulk' => true]);
+        $this->assertEquals(3, $result);
+
+        // SELECT
+        $result = $database->migrate('foreign_p', 'select', $records, $opt + ['bulk' => true]);
+        $this->assertEquals(array_map(fn($v) => array_remove($v, ['foreign_c1', 'foreign_c2']), $records), $result);
+
+        // UPDATE
+        array_walk($records, fn(&$r) => $r['name'] = 'x' . $r['name']);
+        $result = $database->migrate('foreign_p', 'update', $records, $opt + ['bulk' => true]);
+        $this->assertEquals(3, $result);
+
+        // DELETE
+        $result = $database->migrate('foreign_p', 'delete', $records, $opt + ['bulk' => true]);
+        $this->assertEquals(3, $result);
+
+        if ($database->getCompatiblePlatform()->supportsMerge()) {
+            // MODIFY
+            array_walk($records, fn(&$r) => $r['name'] = 'y' . $r['name']);
+            $result = $database->migrate('foreign_p', 'modify', $records, $opt + ['bulk' => true]);
+            $this->assertEquals(3, $result);
+
+            // CHANGE
+            array_walk($records, fn(&$r) => $r['name'] = 'z' . $r['name']);
+            $result = $database->migrate('foreign_p', 'change', $records, $opt + ['bulk' => true]);
+            $this->assertEquals(3, $result);
+
+            // SAVE
+            $result = $database->migrate('foreign_p', 'save', $records, $opt + ['bulk' => true]);
+            $this->assertEquals(7, $result);
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_migrate_dryrun($database)
+    {
+        $records = [
+            [
+                'id'         => '11',
+                'name'       => 'hoge',
+                'foreign_c1' => [
+                    [
+                        'seq'  => 1,
+                        'name' => 'c1',
+                    ],
+                ],
+            ],
+            [
+                'id'         => '12',
+                'name'       => 'fuga',
+                'foreign_c2' => [
+                    [
+                        'seq'  => 1,
+                        'name' => 'c2',
+                    ],
+                ],
+            ],
+            [
+                'id'         => '13',
+                'name'       => 'piyo',
+                'foreign_c1' => [
+                    [
+                        'seq'  => 2,
+                        'name' => 'cc1',
+                    ],
+                ],
+                'foreign_c2' => [
+                    [
+                        'seq'  => 2,
+                        'name' => 'cc2',
+                    ],
+                ],
+            ],
+        ];
+        $opt = ['dryrun' => true];
+
+        // INSERT
+        $result = $database->migrate('foreign_p', 'insert', $records, $opt + ['bulk' => false]);
+        $this->assertEquals([
+            "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge')",
+            "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga')",
+            "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo')",
+        ], $result);
+        $result = $database->migrate('foreign_p', 'insert', $records, $opt + ['bulk' => true]);
+        $this->assertEquals([
+            "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo')",
+        ], $result);
+
+        // SELECT
+        $result = $database->migrate('foreign_p', 'select', $records, $opt + ['bulk' => false]);
+        $this->assertEquals([
+            "SELECT foreign_p.id, foreign_p.name FROM foreign_p WHERE id = '11'",
+            "SELECT foreign_p.id, foreign_p.name FROM foreign_p WHERE id = '12'",
+            "SELECT foreign_p.id, foreign_p.name FROM foreign_p WHERE id = '13'",
+        ], $result);
+        $result = $database->migrate('foreign_p', 'select', $records, $opt + ['bulk' => true]);
+        $this->assertEquals([
+            "SELECT foreign_p.id, foreign_p.name FROM foreign_p WHERE (id = '11') OR (id = '12') OR (id = '13')",
+        ], $result);
+
+        // UPDATE
+        $result = $database->migrate('foreign_p', 'update', $records, $opt + ['bulk' => false]);
+        $this->assertEquals([
+            "UPDATE foreign_p SET name = 'hoge' WHERE id = '11'",
+            "UPDATE foreign_p SET name = 'fuga' WHERE id = '12'",
+            "UPDATE foreign_p SET name = 'piyo' WHERE id = '13'",
+        ], $result);
+        $result = $database->migrate('foreign_p', 'update', $records, $opt + ['bulk' => true]);
+        $this->assertEquals([
+            "UPDATE foreign_p SET name = CASE id WHEN '11' THEN 'hoge' WHEN '12' THEN 'fuga' WHEN '13' THEN 'piyo' ELSE name END WHERE foreign_p.id IN ('11', '12', '13')",
+        ], $result);
+
+        // DELETE
+        $result = $database->migrate('foreign_p', 'delete', $records, $opt + ['bulk' => false]);
+        $this->assertEquals([
+            "DELETE FROM foreign_p WHERE id = '11'",
+            "DELETE FROM foreign_p WHERE id = '12'",
+            "DELETE FROM foreign_p WHERE id = '13'",
+        ], $result);
+        $result = $database->migrate('foreign_p', 'delete', $records, $opt + ['bulk' => true]);
+        $this->assertEquals([
+            "DELETE FROM foreign_p WHERE (id = '11') OR (id = '12') OR (id = '13')",
+        ], $result);
+
+        if ($database->getCompatiblePlatform()->supportsMerge()) {
+            // MODIFY
+            $result = $database->migrate('foreign_p', 'modify', $records, $opt + ['bulk' => false]);
+            $this->assertCount(3, $result);
+            $this->assertArrayStartsWith([
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') ON",
+                "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') ON",
+                "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') ON",
+            ], $result);
+            $result = $database->migrate('foreign_p', 'modify', $records, $opt + ['bulk' => true]);
+            $this->assertCount(1, $result);
+            $this->assertArrayStartsWith([
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
+            ], $result);
+
+            // CHANGE
+            $result = $database->migrate('foreign_p', 'change', $records, $opt + ['bulk' => false]);
+            $this->assertCount(4, $result);
+            $this->assertArrayStartsWith([
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') ON",
+                "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') ON",
+                "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') ON",
+                "DELETE FROM foreign_p WHERE NOT (foreign_p.id IN ('11', '12', '13'))",
+            ], $result);
+            $result = $database->migrate('foreign_p', 'change', $records, $opt + ['bulk' => true]);
+            $this->assertCount(2, $result);
+            $this->assertArrayStartsWith([
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
+                "DELETE FROM foreign_p WHERE NOT (foreign_p.id IN ('11', '12', '13'))",
+            ], $result);
+
+            // SAVE
+            $result = $database->migrate('foreign_p', 'save', $records, $opt + ['bulk' => false]);
+            $this->assertCount(11, $result);
+            $this->assertArrayStartsWith([
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') ON",
+                "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11') ON",
+                "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('11')) AND (NOT ((foreign_c1.seq = '1' AND foreign_c1.id = '11')))",
+                "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') ON",
+                "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12') ON",
+                "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('12')) AND (NOT ((foreign_c2.seq = '1' AND foreign_c2.cid = '12')))",
+                "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') ON",
+                "INSERT INTO foreign_c1 (seq, name, id) VALUES ('2', 'cc1', '13') ON",
+                "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('13')) AND (NOT ((foreign_c1.seq = '2' AND foreign_c1.id = '13')))",
+                "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('2', 'cc2', '13') ON",
+                "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('13')) AND (NOT ((foreign_c2.seq = '2' AND foreign_c2.cid = '13')))",
+            ], $result);
+            $result = $database->migrate('foreign_p', 'save', $records, $opt + ['bulk' => true]);
+            $this->assertCount(5, $result);
+            if ($database->getCompatiblePlatform()->supportsRowConstructor()) {
+                $this->assertArrayStartsWith([
+                    "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
+                    "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11'), ('2', 'cc1', '13') ON",
+                    "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('11','13')) AND (NOT ((foreign_c1.seq, foreign_c1.id) IN (('1', '11'), ('2', '13'))))",
+                    "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12'), ('2', 'cc2', '13') ON",
+                    "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('12','13')) AND (NOT ((foreign_c2.seq, foreign_c2.cid) IN (('1', '12'), ('2', '13'))))",
+                ], $result);
+            }
+            else {
+                $this->assertArrayStartsWith([
+                    "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
+                    "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11'), ('2', 'cc1', '13') ON",
+                    "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('11','13')) AND (NOT ((foreign_c1.seq = '1' AND foreign_c1.id = '11') OR (foreign_c1.seq = '2' AND foreign_c1.id = '13')))",
+                    "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12'), ('2', 'cc2', '13') ON",
+                    "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('12','13')) AND (NOT ((foreign_c2.seq = '1' AND foreign_c2.cid = '12') OR (foreign_c2.seq = '2' AND foreign_c2.cid = '13')))",
+                ], $result);
+            }
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_migrate_misc($database)
+    {
+        $this->assertException('undefined primary key at', L($database)->migrate('foreign_p', 'insert', [['name' => 'hoge']]));
+        $this->assertException('is not supported', L($database)->migrate('foreign_p', 'undefined', []));
     }
 
     /**
