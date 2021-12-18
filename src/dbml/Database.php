@@ -1159,7 +1159,9 @@ class Database
             $defaultEntity = namespace_split(Entity::class)[0];
             $defaultGateway = namespace_split(TableGateway::class)[0];
             $tableMapper = $this->getUnsafeOption('tableMapper');
-            foreach ($this->getSchema()->getTableNames() as $tablename) {
+            $tables = $this->getSchema()->getTableNames();
+            usort($tables, fn($a, $b) => $a <=> $b);
+            foreach ($tables as $tablename) {
                 $map = $tableMapper($tablename);
                 if ($map === null) {
                     continue;
