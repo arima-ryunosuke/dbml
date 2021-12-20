@@ -5832,7 +5832,7 @@ class Database
                     [$cname,] = explode($INDEX_SEPARATOR, $keyn);
                     foreach ($schema->getForeignColumns($cname, $tname) as $ck => $pk) {
                         if (isset($primaries[$cname][$key][$pk])) {
-                            $rows[$id][$ck] = $parents["$tname.$pk"][$key] = $primaries[$cname][$key][$pk];
+                            $rows[$id][$ck] = $parents["$tname.$ck"][$key] = $primaries[$cname][$key][$pk];
                         }
                     }
                     $key .= $TABLE_SEPARATOR;
