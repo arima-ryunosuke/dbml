@@ -5670,8 +5670,8 @@ class Database
         $autocolumn = optional($this->getSchema()->getTableAutoIncrement($tableName))->getName();
 
         // modifyArray や prepareModify が使えるか
-        $bulkable = $this->getCompatiblePlatform()->supportsBulkMerge();
-        $preparable = $this->getCompatiblePlatform()->supportsMerge() && !$this->isEmulationMode() && !$dryrun;
+        $bulkable = array_get($opt, 'bulk', true) && $this->getCompatiblePlatform()->supportsBulkMerge();
+        $preparable = !$dryrun && array_get($opt, 'prepare', true) && $this->getCompatiblePlatform()->supportsMerge() && !$this->isEmulationMode();
 
         // カラムの種類でグルーピングする
         $primaries = [];

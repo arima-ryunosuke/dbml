@@ -5474,7 +5474,7 @@ INSERT INTO test (id, name) VALUES
             ['mainid' => 1, 'subid' => 1, 'name' => 'X'],
             ['mainid' => 1, 'subid' => 2, 'name' => 'Y'],
             ['mainid' => 1, 'subid' => 3, 'name' => 'Z'],
-        ], ['mainid' => 1]);
+        ], ['mainid' => 1], ['bulk' => false]);
 
         $this->assertEquals([
             ['mainid' => 1, 'subid' => 1],
@@ -5484,6 +5484,8 @@ INSERT INTO test (id, name) VALUES
 
         if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
             $this->assertArrayStartsWith([
+                'INSERT INTO multiprimary',
+                'INSERT INTO multiprimary',
                 'INSERT INTO multiprimary',
                 'DELETE FROM multiprimary',
             ], $changed[1]);
