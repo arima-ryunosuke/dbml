@@ -5991,11 +5991,11 @@ class Database
             $fromDual = concat(' FROM ', $cplatform->getDualTable());
             $sql .= sprintf("(%s) SELECT %s$fromDual WHERE $condition", implode(', ', array_keys($set)), implode(', ', $set));
         }
-        elseif ((!$cplatform->supportsInsertSet() || !$this->getUnsafeOption('insertSet'))) {
-            $sql .= sprintf("(%s) VALUES (%s)", implode(', ', array_keys($set)), implode(', ', $set));
+        elseif (count($data) && $cplatform->supportsInsertSet() && $this->getUnsafeOption('insertSet')) {
+            $sql .= "SET " . array_sprintf($set, '%2$s = %1$s', ', ');
         }
         else {
-            $sql .= "SET " . array_sprintf($set, '%2$s = %1$s', ', ');
+            $sql .= sprintf("(%s) VALUES (%s)", implode(', ', array_keys($set)), implode(', ', $set));
         }
         $affected = $this->executeAffect($sql, $params);
         if (!is_int($affected)) {
@@ -6623,11 +6623,11 @@ class Database
             $fromDual = concat(' FROM ', $cplatform->getDualTable());
             $sql .= sprintf("(%s) SELECT %s$fromDual WHERE $condition", implode(', ', array_keys($sets1)), implode(', ', $sets1));
         }
-        elseif ((!$cplatform->supportsInsertSet() || !$this->getUnsafeOption('insertSet'))) {
-            $sql .= sprintf("(%s) VALUES (%s)", implode(', ', array_keys($sets1)), implode(', ', $sets1));
+        elseif (count($insertData) && $cplatform->supportsInsertSet() && $this->getUnsafeOption('insertSet')) {
+            $sql .= "SET " . array_sprintf($sets1, '%2$s = %1$s', ', ');
         }
         else {
-            $sql .= "SET " . array_sprintf($sets1, '%2$s = %1$s', ', ');
+            $sql .= sprintf("(%s) VALUES (%s)", implode(', ', array_keys($sets1)), implode(', ', $sets1));
         }
         $sql .= ' ' . $cplatform->getMergeSyntax(array_keys($pkcols)) . ' ' . array_sprintf($sets2, '%2$s = %1$s', ', ');
         $affected = $this->executeAffect($sql, $params);
