@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Gateway;
 
+use Doctrine\DBAL\Schema\Column;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Generator\Yielder;
@@ -2094,14 +2095,17 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         }
 
         // 修飾子を付加して返す（$column はビルダ側で付けてくれるので不要）
+        $columns = array_filter($this->database->getSchema()->getTableColumns($this->tableName), function (Column $column) {
+            return !($column->getCustomSchemaOptions()['virtual'] ?? false);
+        });
         $alias = $that->modifier();
         return array_combine(QueryBuilder::CLAUSES, [
             $sargs['column'],
-            Adhoc::modifier($alias, $sargs['where']),
-            Adhoc::modifier($alias, $sargs['orderBy']),
+            Adhoc::modifier($alias, $columns, $sargs['where']),
+            Adhoc::modifier($alias, $columns, $sargs['orderBy']),
             $sargs['limit'],
-            Adhoc::modifier($alias, $sargs['groupBy']),
-            Adhoc::modifier($alias, $sargs['having']),
+            Adhoc::modifier($alias, $columns, $sargs['groupBy']),
+            Adhoc::modifier($alias, $columns, $sargs['having']),
         ]);
     }
 

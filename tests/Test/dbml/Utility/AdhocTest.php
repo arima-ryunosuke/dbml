@@ -105,25 +105,26 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test_modifier()
     {
-        $this->assertEquals(['column'], Adhoc::modifier('', ['column']));
-        $this->assertEquals(['c' => 'column'], Adhoc::modifier('', ['c' => 'column']));
+        $this->assertEquals(['column'], Adhoc::modifier('', [], ['column']));
+        $this->assertEquals(['c' => 'column'], Adhoc::modifier('', [], ['c' => 'column']));
 
-        $this->assertEquals(['column'], Adhoc::modifier('T', ['column']));
-        $this->assertEquals(['UPPER(column)' => 'hoge'], Adhoc::modifier('T', ['UPPER(column)' => 'hoge']));
-        $this->assertEquals(['!T.c' => 'column'], Adhoc::modifier('T', ['!c' => 'column']));
-        $this->assertEquals(['T.c' => 'column'], Adhoc::modifier('T', ['c' => 'column']));
-        $this->assertEquals(['!T.c' => 'column'], Adhoc::modifier('T', ['!c' => 'column']));
-        $this->assertEquals(['T.a' => 'columnA', ['T.b' => 'columnB']], Adhoc::modifier('T', ['a' => 'columnA', ['b' => 'columnB']]));
+        $this->assertEquals(['column'], Adhoc::modifier('T', [], ['column']));
+        $this->assertEquals(['UPPER(column)' => 'hoge'], Adhoc::modifier('T', [], ['UPPER(column)' => 'hoge']));
+        $this->assertEquals(['!T.c' => 'column'], Adhoc::modifier('T', ['c' => true], ['!c' => 'column']));
+        $this->assertEquals(['T.c' => 'column'], Adhoc::modifier('T', ['c' => true], ['c' => 'column']));
+        $this->assertEquals(['!T.c' => 'column'], Adhoc::modifier('T', ['c' => true], ['!c' => 'column']));
+        $this->assertEquals(['-T.a <> ?' => 'column', '+T.b = ?' => 'column'], Adhoc::modifier('T', ['a' => true, 'b' => true], ['-a <> ?' => 'column', '+b = ?' => 'column']));
+        $this->assertEquals(['T.a' => 'columnA', ['T.b' => 'columnB'], 'c' => 'columnC'], Adhoc::modifier('T', ['a' => true, 'b' => true], ['a' => 'columnA', ['b' => 'columnB'], 'c' => 'columnC']));
 
         $qb = self::getDummyDatabase()->subexists('t', ['id' => 1]);
-        $this->assertEquals(['c' => $qb], Adhoc::modifier('T', ['c' => $qb]));
+        $this->assertEquals(['c' => $qb], Adhoc::modifier('T', ['c' => true], ['c' => $qb]));
 
         $qb = self::getDummyDatabase()->subquery('t', ['id' => 1]);
-        $this->assertEquals(['T.c' => $qb], Adhoc::modifier('T', ['c' => $qb]));
+        $this->assertEquals(['T.c' => $qb], Adhoc::modifier('T', ['c' => true], ['c' => $qb]));
 
         $e = self::getDummyDatabase()->raw('column');
-        $this->assertEquals(['T.c' => $e], Adhoc::modifier('T', ['c' => $e]));
-        $this->assertEquals(['c' => [$e]], Adhoc::modifier('T', ['c' => [$e]]));
+        $this->assertEquals(['T.c' => $e], Adhoc::modifier('T', ['c' => true], ['c' => $e]));
+        $this->assertEquals(['c' => [$e]], Adhoc::modifier('T', ['c' => true], ['c' => [$e]]));
     }
 
     function test_cacheGetOrSet()

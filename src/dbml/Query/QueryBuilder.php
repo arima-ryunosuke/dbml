@@ -2129,6 +2129,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
         }
 
+        $columns = is_string($table) && $schema->hasTable($table) ? array_filter($schema->getTableColumns($table), function (Column $column) {
+            return !($column->getCustomSchemaOptions()['virtual'] ?? false);
+        }) : [];
+
         // $fkeyname, $fromAlias の解決（大抵はどちらか一方が決まればどちらか一方も決まる）
         if (empty($fromAlias)) {
             if ($fkeyname !== '') {
@@ -2190,7 +2194,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         }
         $condition = array_merge(array_sprintf($fcols, function ($v, $k) use ($joinAlias, $fromAlias) {
             return sprintf('%s.%s = %s.%s', $joinAlias, $v, $fromAlias, $k);
-        }), Adhoc::modifier($joinAlias, $condition));
+        }), Adhoc::modifier($joinAlias, $columns, $condition));
 
         // $type の解決
         if (strcasecmp($type, 'AUTO') === 0) {

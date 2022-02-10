@@ -146,10 +146,10 @@ class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_offsetGet_desccriptor($gateway, $database)
     {
-        $gw = $database->t_comment['(1)@scope1@scope2(9)[flag1 = 1, flag2: 2]-comment_id AS C.comment_id']('comment');
+        $gw = $database->t_comment['(1)@scope1@scope2(9)[flag1 = 1, comment: "hoge"]-comment_id AS C.comment_id']('comment');
         $this->assertStringIgnoreBreak("SELECT NOW(), C.comment_id, C.comment
 FROM t_comment C
-WHERE (C.comment_id = '9') AND (C.comment_id = '1') AND (flag1 = 1) AND (C.flag2 = '2')
+WHERE (C.comment_id = '9') AND (C.comment_id = '1') AND (flag1 = 1) AND (C.comment = 'hoge')
 ORDER BY C.comment_id DESC", "$gw");
 
         $gw = $database->t_article->as('A')->t_comment['(2)@scope1@scope2(9):fk_articlecomment AS C.comment_id']('comment', '(flag=1)');
@@ -163,8 +163,8 @@ AND (C.comment_id = '2')
 AND ((flag=1))", "$gw");
 
         // [] は省略できる
-        $this->assertEquals("SELECT * FROM t_article WHERE t_article.id = '1'", (string) $database->t_article['id: 1']);
-        $this->assertEquals("SELECT * FROM t_article WHERE id = 1", (string) $database->t_article['id = 1']);
+        $this->assertEquals("SELECT * FROM t_article WHERE t_article.article_id = '1'", (string) $database->t_article['article_id: 1']);
+        $this->assertEquals("SELECT * FROM t_article WHERE article_id = 1", (string) $database->t_article['article_id = 1']);
 
         // #offset-limit（方言が有るので実際に取得する）
         $this->assertEquals(['b', 'c'], $database->test['#1-3']->lists('name'));
@@ -302,11 +302,11 @@ AND ((flag=1))", "$gw");
 
         // パラメータが適用されるはず
         $select = $gateway->as('T')->scope('piyo', 'col1', 1)->select('col2', ['name' => 'a']);
-        $this->assertEquals('SELECT NOW(), T.col1, T.col2 FROM test T WHERE (T.id <> ?) AND (T.name = ?)', $select);
+        $this->assertEquals('SELECT NOW(), T.col1, T.col2 FROM test T WHERE (T.id <> ?) AND (T.name = ?)', (string) $select);
         $this->assertEquals([1, 'a'], $select->getParams());
         // デフォルト引数が適用されるはず
         $select = $gateway->as('T')->scope('piyo', 'col1')->select('col2', ['name' => 'a']);
-        $this->assertEquals('SELECT NOW(), T.col1, T.col2 FROM test T WHERE (T.id <> ?) AND (T.name = ?)', $select);
+        $this->assertEquals('SELECT NOW(), T.col1, T.col2 FROM test T WHERE (T.id <> ?) AND (T.name = ?)', (string) $select);
         $this->assertEquals([-1, 'a'], $select->getParams());
 
         // スコーピングが適用されるはず
@@ -589,8 +589,8 @@ AND ((flag=1))", "$gw");
 
         // scope クロージャ内の $this はそれ自身になる
         $params = $gateway->as('hogera')->scope('this')->getScopeParams();
-        $this->assertEquals(TableGateway::class, $params['where']['hogera.class']);
-        $this->assertEquals('hogera', $params['where']['hogera.alias']);
+        $this->assertEquals(TableGateway::class, $params['where']['class']);
+        $this->assertEquals('hogera', $params['where']['alias']);
     }
 
     /**
@@ -684,12 +684,12 @@ AND ((flag=1))", "$gw");
             ->column('NOW(1)')
             ->orderBy(['data' => [true, 'min']])
             ->column(['now' => 'NOW(2)'])
-            ->where([['c1' => 1, 'c2' => 2]])
+            ->where([['id' => 1, 'c2' => 2]])
             ->limit(2)
             ->orderBy(true)
             ->select([]);
 
-        $this->assertEquals('SELECT NOW(?) AS c, NOW(1), NOW(2) AS now FROM test T WHERE (1=1) AND (T.c3 = ?) AND ((T.c1 = ?) OR (T.c2 = ?)) ORDER BY T.name DESC, CASE WHEN T.data IS NULL THEN 0 ELSE 1 END ASC, T.data ASC, T.id ASC LIMIT 2', (string) $select);
+        $this->assertEquals('SELECT NOW(?) AS c, NOW(1), NOW(2) AS now FROM test T WHERE (1=1) AND (c3 = ?) AND ((T.id = ?) OR (c2 = ?)) ORDER BY T.name DESC, CASE WHEN T.data IS NULL THEN 0 ELSE 1 END ASC, T.data ASC, T.id ASC LIMIT 2', (string) $select);
         $this->assertEquals([9, 3, 1, 2], $select->getParams());
     }
 
@@ -2061,7 +2061,7 @@ FROM t_article Article", $Article->column([
 
         // rightOn where/groupBy
         $select = $Article->rightJoinOn($t_comment->as('C')->scoping([], ['a' => 1, ['b' => 2, 'c' => 3]], [], [], 'comment_id'), '1=1')->select();
-        $this->assertEquals('SELECT * FROM t_article Article RIGHT JOIN (SELECT * FROM t_comment C WHERE (C.a = ?) AND ((C.b = ?) OR (C.c = ?)) GROUP BY comment_id) C ON 1=1', "$select");
+        $this->assertEquals('SELECT * FROM t_article Article RIGHT JOIN (SELECT * FROM t_comment C WHERE (a = ?) AND ((b = ?) OR (c = ?)) GROUP BY comment_id) C ON 1=1', "$select");
 
         // magic join
         $select = $database->t_article('article_id', 'article_id=1')->as('A')->t_comment(['comment_id'], ['comment_id' => 1])->select([]);

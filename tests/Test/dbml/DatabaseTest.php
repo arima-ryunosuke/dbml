@@ -6099,19 +6099,19 @@ AND (g_parent.ancestor_id = g_ancestor.ancestor_id)))
             $database->subexists('t_comment[delete_flg: 0] C'),
         ]);
         $this->assertStringIgnoreBreak("SELECT A.* FROM t_article A WHERE
-(EXISTS (SELECT * FROM t_comment C WHERE (C.delete_flg = '0') AND (C.article_id = A.article_id)))", $select->queryInto());
+(EXISTS (SELECT * FROM t_comment C WHERE (delete_flg = '0') AND (C.article_id = A.article_id)))", $select->queryInto());
 
         $select = $database->select('t_article A', [
             $database->subexists('t_comment:[delete_flg: 0] C'),
         ]);
         $this->assertStringIgnoreBreak("SELECT A.* FROM t_article A WHERE
-(EXISTS (SELECT * FROM t_comment C WHERE C.delete_flg = '0'))", $select->queryInto());
+(EXISTS (SELECT * FROM t_comment C WHERE delete_flg = '0'))", $select->queryInto());
 
         $select = $database->select('test1 T1', [
             $database->subexists('test2[delete_flg: 0] T2'),
         ]);
         $this->assertStringIgnoreBreak("SELECT T1.* FROM test1 T1 WHERE
-(EXISTS (SELECT * FROM test2 T2 WHERE T2.delete_flg = '0'))", $select->queryInto());
+(EXISTS (SELECT * FROM test2 T2 WHERE delete_flg = '0'))", $select->queryInto());
 
         $select = $database->select('foreign_p P', [
             $database->subexists('foreign_c1:{id1: id2} C1'),
@@ -6132,7 +6132,7 @@ AND
             $database->subexists('t_comment:@scope2(9){article_id: id}[delete_flg: 0] C'),
         ]);
         $this->assertStringIgnoreBreak("SELECT A.* FROM t_article A WHERE
-(EXISTS (SELECT * FROM t_comment C WHERE (C.delete_flg = '0') AND (C.comment_id = '9') AND (C.article_id = A.id)))", $select->queryInto());
+(EXISTS (SELECT * FROM t_comment C WHERE (delete_flg = '0') AND (C.comment_id = '9') AND (C.article_id = A.id)))", $select->queryInto());
     }
 
     /**

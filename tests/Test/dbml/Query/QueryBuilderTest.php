@@ -1045,7 +1045,7 @@ GREATEST(1,2,3) FROM test1', $builder);
                 '<c1.id' => $database->foreign_c1()->scoping('name', ['a' => 1, ['b' => 2, 'c' => 3]]),
             ],
         ]);
-        $this->assertQuery("SELECT c1.id, c1.name FROM foreign_p P LEFT JOIN foreign_c1 c1 ON (c1.id = P.id) AND (c1.a = ?) AND ((c1.b = ?) OR (c1.c = ?))", $builder);
+        $this->assertQuery("SELECT c1.id, c1.name FROM foreign_p P LEFT JOIN foreign_c1 c1 ON (c1.id = P.id) AND (a = ?) AND ((b = ?) OR (c = ?))", $builder);
         $this->assertEquals([1, 2, 3], $builder->getParams());
 
         $builder->detectAutoOrder(true);
@@ -1059,13 +1059,13 @@ GREATEST(1,2,3) FROM test1', $builder);
         $builder->column([
             'foreign_p P' => [
                 '<c1{col1: col1, col2: col2}' => $database->foreign_c1()->scoping('*', '1=1', ['id' => 'DESC'], [], 'c1.id'),
-                '<c2[col1: 1]'                => $database->foreign_c2()->scoping('*', '1=1', ['id' => 'DESC'], [], 'c1.id'),
+                '<c2[seq: 1]'                => $database->foreign_c2()->scoping('*', '1=1', ['cid' => 'DESC'], [], 'c1.id'),
             ],
         ]);
         $builder->orderBy(['P.id' => 'DESC']);
         $this->assertStringIgnoreBreak("SELECT * FROM foreign_p P
 LEFT JOIN (SELECT c1.* FROM foreign_c1 c1 WHERE 1=1 GROUP BY c1.id ORDER BY c1.id DESC) c1 ON (c1.col1 = P.col1) AND (c1.col2 = P.col2)
-LEFT JOIN (SELECT c2.* FROM foreign_c2 c2 WHERE 1=1 GROUP BY c1.id ORDER BY c2.id DESC) c2 ON c2.col1 = '1'
+LEFT JOIN (SELECT c2.* FROM foreign_c2 c2 WHERE 1=1 GROUP BY c1.id ORDER BY c2.cid DESC) c2 ON seq = '1'
 ORDER BY P.id DESC
 ", $builder->queryInto());
     }
@@ -1612,11 +1612,11 @@ AND
                     'implicit'   => true,
                 ],
                 'count_child' => [
-                    'expression' => $database->foreign_c1->as('C1')->subcount('*', ['flag' => 0]),
+                    'expression' => $database->foreign_c1->as('C1')->subcount('*', ['id' => 0]),
                     'implicit'   => true,
                 ],
                 'has_child'   => [
-                    'expression' => $database->foreign_c2->as('C2')->subexists('*', ['flag' => 0]),
+                    'expression' => $database->foreign_c2->as('C2')->subexists('*', ['cid' => 0]),
                     'implicit'   => true,
                 ],
                 'children'    => [
@@ -1656,16 +1656,16 @@ SELECT P.* FROM foreign_p P WHERE
 AND (/* vcolumn raw1-2 */ UPPER(P.name))
 AND (/* vcolumn raw1-k */ UPPER(P.name) LIKE '%X%')
 AND (/* vcolumn raw2-3 */ id + 9 = '10')
-AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.flag = '0') AND (C1.id = P.id)) = '0')
-AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.flag = '0') AND (C1.id = P.id)) > '1')
-AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.flag = '0') AND (C1.id = P.id)) BETWEEN '7' AND '9')
-AND (/* vcolumn has_child-4 */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.flag = '0') AND (C2.cid = P.id))))
-AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.flag = '0') AND (C2.cid = P.id))) = '0')
-AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.flag = '0') AND (C2.cid = P.id))) IN ('0','1'))
+AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) = '0')
+AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) > '1')
+AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) BETWEEN '7' AND '9')
+AND (/* vcolumn has_child-4 */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))))
+AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) = '0')
+AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) IN ('0','1'))
 AND (/* vcolumn children-k */ (EXISTS (SELECT * FROM foreign_c2 WHERE (foreign_c2.cid = P.id) AND (name = 'hoge'))) = 1)
 AND ('99' AND /* vcolumn raw1-k */ UPPER(P.name) = 'Y'
-AND /* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.flag = '0') AND (C1.id = P.id)) = '2'
-AND /* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.flag = '0') AND (C2.cid = P.id))) IN('7','8','9'))
+AND /* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) = '2'
+AND /* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) IN('7','8','9'))
 SQL
             , $builder->queryInto());
 
@@ -2495,11 +2495,11 @@ SELECT test.* FROM test", $builder);
         $database->overrideColumns([
             'foreign_p' => [
                 'count_child' => function (Database $database) {
-                    return $database->foreign_c1->as('C1')->subcount('*', ['flag' => 0]);
+                    return $database->foreign_c1->as('C1')->subcount('*', ['id' => 0]);
                 },
                 'has_child'   => [
                     'expression' => function () use ($database) {
-                        return $database->foreign_c2->as('C2')->subexists('*', ['flag' => 0]);
+                        return $database->foreign_c2->as('C2')->subexists('*', ['cid' => 0]);
                     },
                     'lazy'       => true,
                 ],
@@ -2521,16 +2521,16 @@ SELECT test.* FROM test", $builder);
             return $database->getPlatform()->quoteSingleIdentifier($str);
         };
         $exists = $database->getPlatform() instanceof SQLServerPlatform
-            ? "CASE WHEN (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.flag = '0') AND (C2.cid = P.id))) THEN 1 ELSE 0 END"
-            : "EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.flag = '0') AND (C2.cid = P.id))";
+            ? "CASE WHEN (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) THEN 1 ELSE 0 END"
+            : "EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))";
         $this->assertStringIgnoreBreak(<<<SQL
 SELECT
-(SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.flag = '0') AND (C1.id = P.id)) AS alias1,
+(SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) AS alias1,
 $exists AS alias2
 FROM foreign_p P
 WHERE (1)
-AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.flag = '0') AND (C1.id = P.id)) = '0')
-AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.flag = '0') AND (C2.cid = P.id))) = '1')
+AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) = '0')
+AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) = '1')
 SQL
             , $builder->queryInto());
 

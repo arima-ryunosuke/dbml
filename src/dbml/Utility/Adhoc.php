@@ -6,6 +6,7 @@ use Psr\SimpleCache\CacheInterface;
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
 use function ryunosuke\dbml\array_unset;
+use function ryunosuke\dbml\preg_capture;
 use function ryunosuke\dbml\reflect_callable;
 
 /**
@@ -128,10 +129,11 @@ class Adhoc
      * テーブル修飾子を付与する
      *
      * @param string $tablename テーブル名
+     * @param array $tablecolumns テーブルカラム
      * @param array $array 修飾する配列
      * @return array 修飾された配列
      */
-    public static function modifier($tablename, $array)
+    public static function modifier($tablename, $tablecolumns, $array)
     {
         if (!strlen($tablename)) {
             return $array;
@@ -155,15 +157,20 @@ class Adhoc
                 continue;
             }
             if (is_string($key) && isset($key[0]) && strpos($key, '.') === false) {
-                if ($key[0] === '!') {
-                    $key = '!' . $tablename . '.' . ltrim($key, '!');
+                $colname = preg_capture('#^[!\-+]?([_a-z][_0-9a-z]*)#i', $key, [1 => ''])[1];
+                if (in_array($key[0] ?? '', ['!', '+', '-'])) {
+                    if (isset($tablecolumns[$colname])) {
+                        $key = substr($key, 0, 1) . $tablename . '.' . substr($key, 1);
+                    }
                 }
                 else {
-                    $key = $tablename . '.' . $key;
+                    if (isset($tablecolumns[$colname])) {
+                        $key = $tablename . '.' . $key;
+                    }
                 }
             }
             if (is_array($val)) {
-                $val = self::modifier($tablename, $val);
+                $val = self::modifier($tablename, $tablecolumns, $val);
             }
             $result[$key] = $val;
         }
