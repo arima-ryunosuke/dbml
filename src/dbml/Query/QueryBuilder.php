@@ -3922,7 +3922,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
     public function getQuery()
     {
-        return "($this)" . concat(' ', trim($this->sqlParts['operator']));
+        return "($this)" . concat(' ', trim($this->sqlParts['operator'] ?? ''));
     }
 
     public function getParams($queryPartName = null)

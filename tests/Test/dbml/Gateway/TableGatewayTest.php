@@ -1053,8 +1053,8 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(false, $database->multiprimary()->pk([99, 99])->value('name'));
         $this->assertEquals(['a', 'b', 'c', 'd', 'e', 'f'], $database->multiprimary()->pk([1], [2, 6])->lists('name'));
 
-        @$this->assertException('is not match primary columns', L($gateway)->pk([1, 2]));
-        @$this->assertException('is not match primary columns', L($database->multiprimary())->pk([1, 2, 3]));
+        @$this->assertException('array_combine', L($gateway)->pk([1, 2]));
+        @$this->assertException('array_combine', L($database->multiprimary())->pk([1, 2, 3]));
     }
 
     /**

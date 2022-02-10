@@ -1140,7 +1140,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         $pcols = $this->database->getSchema()->getTablePrimaryKey($this->tableName)->getColumns();
         $pvals = array_values((array) $pkval);
-        return array_combine(array_slice($pcols, 0, count($pvals)), $pvals) ?: throws(new \InvalidArgumentException("argument's length is not match primary columns."));
+        return array_combine(array_slice($pcols, 0, count($pvals)), $pvals) ?: throws(new \InvalidArgumentException("array_combine: argument's length is not match primary columns."));
     }
 
     private function _accessor($name, $value)

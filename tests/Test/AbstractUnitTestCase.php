@@ -803,17 +803,6 @@ abstract class AbstractUnitTestCase extends TestCase
 
     public static function assertException($e, $callback)
     {
-        $check_code = true;
-        if (is_string($e)) {
-            $check_code = false;
-            if (class_exists($e)) {
-                $e = (new \ReflectionClass($e))->newInstanceWithoutConstructor();
-            }
-            else {
-                $e = new \Exception($e);
-            }
-        }
-
         $callback = self::forcedCallize($callback);
 
         try {
@@ -826,6 +815,22 @@ abstract class AbstractUnitTestCase extends TestCase
             throw $ex;
         }
         catch (\Throwable $ex) {
+            $check_code = true;
+            if (is_string($e)) {
+                $check_code = false;
+                if (class_exists($e)) {
+                    $e = (new \ReflectionClass($e))->newInstanceWithoutConstructor();
+                }
+                else {
+                    if ($ex instanceof \Exception) {
+                        $e = new \Exception($e);
+                    }
+                    if ($ex instanceof \Error) {
+                        $e = new \Error($e);
+                    }
+                }
+            }
+
             self::assertInstanceOf(get_class($e), $ex);
             if ($check_code) {
                 self::assertEquals($e->getCode(), $ex->getCode());

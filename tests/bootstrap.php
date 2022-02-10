@@ -1,6 +1,6 @@
 <?php
 
-error_reporting(-1);
+error_reporting(~E_DEPRECATED);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/classess.php';
