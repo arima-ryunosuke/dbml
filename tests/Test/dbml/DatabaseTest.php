@@ -4837,6 +4837,14 @@ INSERT INTO test (id, name) VALUES
     function test_reduce_misc($database)
     {
         $database->begin();
+        $this->assertEquals(165, $database->reduce('oprlog', 0, 'id'));
+        $database->rollback();
+
+        $database->begin();
+        $this->assertEquals(135, $database->reduce('oprlog', 0, '-log_date', ['category'], ['log_date < ?' => '2009-06-01']));
+        $database->rollback();
+
+        $database->begin();
         $this->assertEquals(40, $database->reduce('oprlog', 5, 'id', [], ['category' => 'category-9']));
         $database->rollback();
 
@@ -4852,7 +4860,7 @@ INSERT INTO test (id, name) VALUES
         $this->assertEquals(10, $database->reduce('oprlog', 5, '-log_date', ['category', 'primary_id'], ['category' => 'category-9']));
         $database->rollback();
 
-        $this->assertException('must be > 0', L($database)->reduceOrThrow('oprlog', 0));
+        $this->assertException('must be >= 0', L($database)->reduceOrThrow('oprlog', -1));
         $this->assertException('must be === 1', L($database)->reduceOrThrow('oprlog', 1, ['a' => true, 'b' => false]));
         $this->assertException('affected row is nothing', L($database)->reduceOrThrow('oprlog', 5, 'log_date', [], ['1=0']));
     }

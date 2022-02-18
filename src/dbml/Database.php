@@ -6370,8 +6370,8 @@ class Database
         }
 
         $limit = intval($limit);
-        if ($limit < 1) {
-            throw new \InvalidArgumentException("\$limit must be > 0 ($limit).");
+        if ($limit < 0) {
+            throw new \InvalidArgumentException("\$limit must be >= 0 ($limit).");
         }
 
         $orderBy = array_kmap($orderBy, function ($v, $k) use ($simplize) {
@@ -6399,7 +6399,7 @@ class Database
 
         $pcols = $this->getSchema()->getTablePrimaryKey($tableName)->getColumns();
         $ascdesc = $orderBy[0] !== '-';
-        $glsign = ($ascdesc ? '>' : '<');
+        $glsign = ($ascdesc ? '>=' : '<=');
         $orderBy = ltrim($orderBy, '-+');
 
         // 境界値が得られるサブクエリ
@@ -6407,7 +6407,7 @@ class Database
             ->where($identifier)
             ->andWhere(array_map(function ($gk) use ($GROUPTABLE, $VALUETABLE) { return "$GROUPTABLE.$gk = $VALUETABLE.$gk"; }, $groupBy))
             ->orderBy($groupBy + [$orderBy => $ascdesc])
-            ->limit(1, $limit - 1);
+            ->limit(1, $limit);
 
         // グルーピングしないなら主キー指定で消す必要はなく、直接比較で消すことができる（結果は変わらないがパフォーマンスが劇的に違う）
         if (!$groupBy) {
