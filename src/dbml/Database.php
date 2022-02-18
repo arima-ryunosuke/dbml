@@ -5630,18 +5630,19 @@ class Database
         // 主キー情報を漁っておく
         $pcols = $this->getSchema()->getTablePrimaryColumns($tableName);
         $autocolumn = optional($this->getSchema()->getTableAutoIncrement($tableName))->getName();
-        $primaries = array_map(function ($row) use ($pcols) { return array_intersect_key($row, $pcols); }, $dataarray);
 
         // modifyArray や prepareModify が使えるか
         $bulkable = $this->getCompatiblePlatform()->supportsBulkMerge();
         $preparable = $this->getCompatiblePlatform()->supportsMerge() && !$this->isEmulationMode() && !$dryrun;
 
         // カラムの種類でグルーピングする
+        $primaries = [];
         $col_group = [];
         foreach ($dataarray as $n => $row) {
             // prepare する可能性があるのでこの段階で normalize する必要がある
             // prepare しなかった場合に2回呼ばれることになって無駄だがそもそもバラバラのカラムで呼ぶことをあまり想定していない
             $row = $this->_normalize($tableName, $row);
+            $primaries[$n] = array_intersect_key($row, $pcols);
 
             $cols = array_keys($row);
             $gid = implode('+', $cols);
