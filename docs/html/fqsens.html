@@ -1275,6 +1275,11 @@ or <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Abst
 		</h4>
 	<div class="description"><p>Rolls back the current transaction, as initiated by beginTransaction().</p>
 </div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection::getNativeConnection()">
+                                    Doctrine\DBAL\Driver::getNativeConnection		</a>	<small>() : resource<span class="type-separator"></span><wbr>object</small>
+		</h4>
+	<div class="description"></div>
             	<h4 class="fqsen-title">interface		<small></small>
 		<a href="Doctrine-DBAL-Driver-ServerInfoAwareConnection$typespace.html#Doctrine\DBAL\Driver\ServerInfoAwareConnection">
                                     Doctrine\DBAL\Driver::ServerInfoAwareConnection		</a>	</h4>
@@ -1284,7 +1289,7 @@ or <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Abst
 		<a href="Doctrine-DBAL-Driver-ServerInfoAwareConnection$typespace.html#Doctrine\DBAL\Driver\ServerInfoAwareConnection::getServerVersion()">
                                     Doctrine\DBAL\Driver\ServerInfoAwareConnection::getServerVersion		</a>	<small>() : string</small>
 		</h4>
-	<div class="description"><p>Returns the version number of the database server connected to.</p>
+	<div class="description"><p>Returns information about the version of the database server connected to.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Driver-ServerInfoAwareConnection$typespace.html#Doctrine\DBAL\Driver\ServerInfoAwareConnection::prepare()">
@@ -4569,9 +4574,8 @@ operator.</p>
             	<h4 class="fqsen-title">class		<small></small>
 		<a href="Doctrine-DBAL-Platforms-MySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\MySQLPlatform">
                                     Doctrine\DBAL\Platforms::MySQLPlatform		</a>	</h4>
-	<div class="description"><p>The MySQLPlatform provides the behavior, features and SQL dialect of the<br />
-MySQL database platform. This platform represents a MySQL 5.0 or greater platform that<br />
-uses the InnoDB storage engine.</p>
+	<div class="description"><p>Provides the behavior, features and SQL dialect of the Oracle MySQL database platform<br />
+of the oldest supported version.</p>
 </div>
         	<h4 class="fqsen-title">classconstant		<small>integer</small>
 		<a href="Doctrine-DBAL-Platforms-MySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\MySQLPlatform::LENGTH_LIMIT_TINYTEXT">
@@ -4773,8 +4777,6 @@ like CREATE TABLE.</tag_inheritdoc></p>
 		</h4>
 	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Whether the platform prefers identity columns (eg. autoincrement) for ID generation.<br />
 Subclasses should override this method to return TRUE if they prefer identity columns.</tag_inheritdoc></p>
-<p>MySQL prefers "autoincrement" identity columns since sequences can only<br />
-be emulated with a table.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Platforms-MySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\MySQLPlatform::supportsIdentityColumns()">
@@ -6047,6 +6049,1486 @@ operator.</p>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Platforms-MySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\MySQLPlatform::columnsEqual()">
                                     Doctrine\DBAL\Platforms\MySQLPlatform::columnsEqual		</a>	<small>($column1, $column2) : bool</small>
+		</h4>
+	<div class="description"><p>Compares the definitions of the given columns in the context of this platform.</p>
+</div>
+            	<h4 class="fqsen-title">class		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform">
+                                    Doctrine\DBAL\Platforms::AbstractMySQLPlatform		</a>	</h4>
+	<div class="description"><p>Provides the base implementation for the lowest versions of supported MySQL-like database platforms.</p>
+</div>
+        	<h4 class="fqsen-title">classconstant		<small>integer</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_TINYTEXT">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_TINYTEXT		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">classconstant		<small>integer</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_TEXT">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_TEXT		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">classconstant		<small>integer</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_MEDIUMTEXT">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_MEDIUMTEXT		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">classconstant		<small>integer</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_TINYBLOB">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_TINYBLOB		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">classconstant		<small>integer</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_BLOB">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_BLOB		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">classconstant		<small>integer</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_MEDIUMBLOB">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::LENGTH_LIMIT_MEDIUMBLOB		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">classconstant		<small>integer</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::CREATE_INDEXES">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::CREATE_INDEXES		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">classconstant		<small>integer</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::CREATE_FOREIGNKEYS">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::CREATE_FOREIGNKEYS		</a>	</h4>
+	<div class="description"></div>
+        	<h4 class="fqsen-title">property		<small>string[]<span class="type-separator"></span><wbr>null</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::$doctrineTypeMapping">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::doctrineTypeMapping		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">property		<small>string[]<span class="type-separator"></span><wbr>null</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::$doctrineTypeComments">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::doctrineTypeComments		</a>	</h4>
+	<div class="description"><p>Contains a list of all columns that should generate parseable column comments for type-detection<br />
+in reverse engineering scenarios.</p>
+</div>
+    	<h4 class="fqsen-title">property		<small><a href="Doctrine-Common-EventManager$typespace.html#Doctrine\Common\EventManager" class="fqsen "><small>Doctrine\Common\</small><wbr>EventManager</a><span class="type-separator"></span><wbr>null</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::$_eventManager">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::_eventManager		</a>	</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">property		<small><a href="Doctrine-DBAL-Platforms-Keywords-KeywordList$typespace.html#Doctrine\DBAL\Platforms\Keywords\KeywordList" class="fqsen "><small>Doctrine\DBAL\Platforms\Keywords\</small><wbr>KeywordList</a><span class="type-separator"></span><wbr>null</small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::$_keywords">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::_keywords		</a>	</h4>
+	<div class="description"><p>Holds the KeywordList instance for the current platform.</p>
+</div>
+        	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::doModifyLimitQuery()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::doModifyLimitQuery		</a>	<small>($query, $limit, $offset) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Adds an platform-specific LIMIT clause to the query.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIdentifierQuoteCharacter()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIdentifierQuoteCharacter		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the character used for identifier quoting.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getRegexpExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getRegexpExpression		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the regular expression operator.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getLocateExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getLocateExpression		</a>	<small>($str, $substr, $startPos = false) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet to get the position of the first occurrence of substring $substr in string $str.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getConcatExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getConcatExpression		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns a SQL snippet to concatenate the given expressions.</p>
+<p>Accepts an arbitrary number of string parameters. Each parameter must contain an expression.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateArithmeticIntervalExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateArithmeticIntervalExpression		</a>	<small>($date, $operator, $interval, $unit) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL for a date arithmetic expression.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateDiffExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateDiffExpression		</a>	<small>($date1, $date2) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL to calculate the difference in days between the two passed dates.</p>
+<p>Computes diff = date1 - date2.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCurrentDatabaseExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCurrentDatabaseExpression		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL expression which represents the currently selected database.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getLengthExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getLengthExpression		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet to get the length of a text column in characters.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListDatabasesSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListDatabasesSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''></tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTableConstraintsSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTableConstraintsSQL		</a>	<small>($table) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''></tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTableIndexesSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTableIndexesSQL		</a>	<small>($table, $database = null) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the list of indexes for the current database.</p>
+<p>The current database parameter is optional but will always be passed<br />
+when using the SchemaManager API and is the database the given table is in.</p>
+<p>Attention: Some platforms only support currentDatabase when they<br />
+are connected with that database. Cross-database information schema<br />
+requests may be impossible.</tag_inheritdoc></p>
+<p>Two approaches to listing the table indexes. The information_schema is<br />
+preferred, because it doesn't cause problems with SQL keywords such as "order" or "table".</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListViewsSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListViewsSQL		</a>	<small>($database) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL to list all views of a database or user.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTableForeignKeysSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTableForeignKeysSQL		</a>	<small>($table, $database = null) : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getVarcharTypeDeclarationSQLSnippet()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getVarcharTypeDeclarationSQLSnippet		</a>	<small>($length, $fixed) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''></tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBinaryTypeDeclarationSQLSnippet()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBinaryTypeDeclarationSQLSnippet		</a>	<small>($length, $fixed) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet used to declare a BINARY/VARBINARY column type.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getClobTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getClobTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Gets the SQL snippet used to declare a CLOB column type.</p>
+<pre><code>TINYTEXT   : 2 ^  8 - 1 = 255
+TEXT       : 2 ^ 16 - 1 = 65535
+MEDIUMTEXT : 2 ^ 24 - 1 = 16777215
+LONGTEXT   : 2 ^ 32 - 1 = 4294967295
+</code></pre>
+<p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet used to declare a CLOB column type.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateTimeTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateTimeTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Obtains DBMS specific SQL to be used to create datetime columns in<br />
+statements like CREATE TABLE.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Obtains DBMS specific SQL to be used to create date columns in statements<br />
+like CREATE TABLE.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTimeTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTimeTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Obtains DBMS specific SQL to be used to create time columns in statements<br />
+like CREATE TABLE.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBooleanTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBooleanTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet that declares a boolean column.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::prefersIdentityColumns()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::prefersIdentityColumns		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Whether the platform prefers identity columns (eg. autoincrement) for ID generation.<br />
+Subclasses should override this method to return TRUE if they prefer identity columns.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsIdentityColumns()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsIdentityColumns		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Whether the platform supports identity columns.</p>
+<p>Identity columns are columns that receive an auto-generated value from the<br />
+database on insert of a row.</tag_inheritdoc></p>
+<p>MySQL supports this through AUTO_INCREMENT columns.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsInlineColumnComments()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsInlineColumnComments		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Whether this platform support to add inline column comments as postfix.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsColumnCollation()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsColumnCollation		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Does this platform support column collation?</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTablesSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTablesSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''></tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTableColumnsSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTableColumnsSQL		</a>	<small>($table, $database = null) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''></tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTableMetadataSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListTableMetadataSQL		</a>	<small>($table, $database = null) : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::_getCreateTableSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::_getCreateTableSQL		</a>	<small>($name, $columns, $options = []) : string[]</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL used to create a table.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDefaultValueDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDefaultValueDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Obtains DBMS specific SQL code portion needed to set a default value<br />
+declaration to be used in statements like CREATE TABLE.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAlterTableSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAlterTableSQL		</a>	<small>($diff) : string[]</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the SQL statements for altering an existing table.</p>
+<p>This method returns an array of SQL statements, since some platforms need several statements.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPreAlterTableIndexForeignKeySQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPreAlterTableIndexForeignKeySQL		</a>	<small>($diff) : string[]</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''></tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPreAlterTableRenameIndexForeignKeySQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPreAlterTableRenameIndexForeignKeySQL		</a>	<small>($diff) : string[]</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPostAlterTableIndexForeignKeySQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPostAlterTableIndexForeignKeySQL		</a>	<small>($diff) : string[]</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''></tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPostAlterTableRenameIndexForeignKeySQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPostAlterTableRenameIndexForeignKeySQL		</a>	<small>($diff) : string[]</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateIndexSQLFlags()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateIndexSQLFlags		</a>	<small>($index) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Adds additional flags for index generation.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIntegerTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIntegerTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet that declares a 4 byte integer column.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBigIntTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBigIntTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet that declares an 8 byte integer column.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSmallIntTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSmallIntTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet that declares a 2 byte integer column.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getFloatDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getFloatDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''></tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDecimalTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDecimalTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet that declares a floating point column of arbitrary precision.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::_getCommonIntegerTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::_getCommonIntegerTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet that declares common properties of an integer column.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnCharsetDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnCharsetDeclarationSQL		</a>	<small>($charset) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Obtains DBMS specific SQL code portion needed to set the CHARACTER SET<br />
+of a column declaration to be used in statements like CREATE TABLE.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnCollationDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnCollationDeclarationSQL		</a>	<small>($collation) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Obtains DBMS specific SQL code portion needed to set the COLLATION<br />
+of a column declaration to be used in statements like CREATE TABLE.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAdvancedForeignKeyOptionsSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAdvancedForeignKeyOptionsSQL		</a>	<small>($foreignKey) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the FOREIGN KEY query section dealing with non-standard options<br />
+as MATCH, INITIALLY DEFERRED, ON UPDATE, ...</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropIndexSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropIndexSQL		</a>	<small>($index, $table = null) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL to drop an index from a table.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropPrimaryKeySQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropPrimaryKeySQL		</a>	<small>($table) : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropUniqueConstraintSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropUniqueConstraintSQL		</a>	<small>($name, $tableName) : string</small>
+		</h4>
+	<div class="description"><p>The <code>ALTER TABLE ... DROP CONSTRAINT</code> syntax is only available as of MySQL 8.0.19.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSetTransactionIsolationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSetTransactionIsolationSQL		</a>	<small>($level) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL to set the transaction isolation level.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getName()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getName		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the name of the platform.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getReadLockSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getReadLockSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL snippet to append to any SELECT statement which locks rows in shared read lock.</p>
+<p>This defaults to the ANSI SQL "FOR UPDATE", which is an exclusive lock (Write). Some database<br />
+vendors allow to lighten this constraint up to be a real read lock.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::initializeDoctrineTypeMappings()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::initializeDoctrineTypeMappings		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Lazy load Doctrine Type Mappings.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getVarcharMaxLength()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getVarcharMaxLength		</a>	<small>() : int</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the maximum length of a varchar column.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBinaryMaxLength()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBinaryMaxLength		</a>	<small>() : int</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the maximum length of a binary column.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getReservedKeywordsClass()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getReservedKeywordsClass		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the class name of the reserved keywords list.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropTemporaryTableSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropTemporaryTableSQL		</a>	<small>($table) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns the SQL to safely drop a temporary table WITHOUT implicitly committing an open transaction.</tag_inheritdoc></p>
+<p>MySQL commits a transaction implicitly when DROP TABLE is executed, however not<br />
+if DROP TEMPORARY TABLE is executed.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBlobTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBlobTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Gets the SQL Snippet used to declare a BLOB column type.</p>
+<pre><code>TINYBLOB   : 2 ^  8 - 1 = 255
+BLOB       : 2 ^ 16 - 1 = 65535
+MEDIUMBLOB : 2 ^ 24 - 1 = 16777215
+LONGBLOB   : 2 ^ 32 - 1 = 4294967295
+</code></pre>
+<p><tag_inheritdoc data-type='' data-description=''>Returns the SQL Snippet used to declare a BLOB column type.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::quoteStringLiteral()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::quoteStringLiteral		</a>	<small>($str) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Quotes a literal string.<br />
+This method is NOT meant to fix SQL injections!<br />
+It is only meant to escape this platform's string literal<br />
+quote character inside the given literal string.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDefaultTransactionIsolationLevel()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDefaultTransactionIsolationLevel		</a>	<small>() : int</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the default transaction isolation level of the platform.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsColumnLengthIndexes()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsColumnLengthIndexes		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports indexes with column length definitions.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::setEventManager()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::setEventManager		</a>	<small>($eventManager) : void</small>
+		</h4>
+	<div class="description"><p>Sets the EventManager used by the Platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getEventManager()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getEventManager		</a>	<small>() : <a href="Doctrine-Common-EventManager$typespace.html#Doctrine\Common\EventManager" class="fqsen "><small>Doctrine\Common\</small><wbr>EventManager</a><span class="type-separator"></span><wbr>null</small>
+		</h4>
+	<div class="description"><p>Gets the EventManager used by the Platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAsciiStringTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAsciiStringTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet used to declare a column that can<br />
+store characters in the ASCII character set</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getVarcharTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getVarcharTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet used to declare a VARCHAR column type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBinaryTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBinaryTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet used to declare a BINARY/VARBINARY column type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getGuidTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getGuidTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to declare a GUID/UUID column.</p>
+<p>By default this maps directly to a CHAR(36) and only maps to more<br />
+special datatypes when the underlying databases support this datatype.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getJsonTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getJsonTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to declare a JSON column.</p>
+<p>By default this maps directly to a CLOB and only maps to more<br />
+special datatypes when the underlying databases support this datatype.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::registerDoctrineTypeMapping()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::registerDoctrineTypeMapping		</a>	<small>($dbType, $doctrineType) : void</small>
+		</h4>
+	<div class="description"><p>Registers a doctrine type to be used in conjunction with a column type of this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDoctrineTypeMapping()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDoctrineTypeMapping		</a>	<small>($dbType) : string</small>
+		</h4>
+	<div class="description"><p>Gets the Doctrine type that is mapped for the given database column type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::hasDoctrineTypeMappingFor()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::hasDoctrineTypeMappingFor		</a>	<small>($dbType) : bool</small>
+		</h4>
+	<div class="description"><p>Checks if a database type is currently supported by this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::initializeCommentedDoctrineTypes()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::initializeCommentedDoctrineTypes		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"><p>Initializes the Doctrine Type comments instance variable for in_array() checks.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::isCommentedDoctrineType()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::isCommentedDoctrineType		</a>	<small>($doctrineType) : bool</small>
+		</h4>
+	<div class="description"><p>Is it necessary for the platform to add a parsable type comment to allow reverse engineering the given type?</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::markDoctrineTypeCommented()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::markDoctrineTypeCommented		</a>	<small>($doctrineType) : void</small>
+		</h4>
+	<div class="description"><p>Marks this type as to be commented in ALTER TABLE and CREATE TABLE statements.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDoctrineTypeComment()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDoctrineTypeComment		</a>	<small>($doctrineType) : string</small>
+		</h4>
+	<div class="description"><p>Gets the comment to append to a column comment that helps parsing this type in reverse engineering.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnComment()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnComment		</a>	<small>($column) : string<span class="type-separator"></span><wbr>null</small>
+		</h4>
+	<div class="description"><p>Gets the comment of a passed column modified by potential doctrine type comment hints.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSqlCommentStartString()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSqlCommentStartString		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Gets the string portion that starts an SQL comment.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSqlCommentEndString()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSqlCommentEndString		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Gets the string portion that ends an SQL comment.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCharMaxLength()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCharMaxLength		</a>	<small>() : int</small>
+		</h4>
+	<div class="description"><p>Gets the maximum length of a char column.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getVarcharDefaultLength()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getVarcharDefaultLength		</a>	<small>() : int</small>
+		</h4>
+	<div class="description"><p>Gets the default length of a varchar column.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBinaryDefaultLength()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBinaryDefaultLength		</a>	<small>() : int</small>
+		</h4>
+	<div class="description"><p>Gets the default length of a binary column.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getWildcards()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getWildcards		</a>	<small>() : string[]</small>
+		</h4>
+	<div class="description"><p>Gets all SQL wildcard characters of the platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAvgExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAvgExpression		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to get the average value of a column.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCountExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCountExpression		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to get the number of rows (without a NULL value) of a column.</p>
+<p>If a '*' is used instead of a column the number of selected rows is returned.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getMaxExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getMaxExpression		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to get the highest value of a column.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getMinExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getMinExpression		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to get the lowest value of a column.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSumExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSumExpression		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to get the total sum of a column.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getMd5Expression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getMd5Expression		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to get the md5 sum of a column.</p>
+<p>Note: Not SQL92, but common functionality.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSqrtExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSqrtExpression		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to get the squared value of a column.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getRoundExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getRoundExpression		</a>	<small>($column, $decimals = 0) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to round a numeric column to the number of decimals specified.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getModExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getModExpression		</a>	<small>($expression1, $expression2) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to get the remainder of the division operation $expression1 / $expression2.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTrimExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTrimExpression		</a>	<small>($str, $mode = Doctrine\DBAL\Platforms\TrimMode::UNSPECIFIED, $char = false) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to trim a string.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getRtrimExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getRtrimExpression		</a>	<small>($str) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to trim trailing space characters from the expression.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getLtrimExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getLtrimExpression		</a>	<small>($str) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to trim leading space characters from the expression.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getUpperExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getUpperExpression		</a>	<small>($str) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to change all characters from the expression to uppercase,<br />
+according to the current character set mapping.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getLowerExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getLowerExpression		</a>	<small>($str) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to change all characters from the expression to lowercase,<br />
+according to the current character set mapping.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getNowExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getNowExpression		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to get the current system date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSubstringExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSubstringExpression		</a>	<small>($string, $start, $length = null) : string</small>
+		</h4>
+	<div class="description"><p>Returns a SQL snippet to get a substring inside an SQL statement.</p>
+<p>Note: Not SQL92, but common functionality.</p>
+<p>SQLite only supports the 2 parameter variant of this function.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getNotExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getNotExpression		</a>	<small>($expression) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL for a logical not.</p>
+<p>Example:<br />
+<code><br />
+$q = new Doctrine_Query();<br />
+$e = $q-&gt;expr;<br />
+$q-&gt;select('*')-&gt;from('table')<br />
+  -&gt;where($e-&gt;eq('id', $e-&gt;not('null'));<br />
+</code></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIsNullExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIsNullExpression		</a>	<small>($expression) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL that checks if an expression is null.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIsNotNullExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIsNotNullExpression		</a>	<small>($expression) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL that checks if an expression is not null.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBetweenExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBetweenExpression		</a>	<small>($expression, $value1, $value2) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL that checks if an expression evaluates to a value between two values.</p>
+<p>The parameter $expression is checked if it is between $value1 and $value2.</p>
+<p>Note: There is a slight difference in the way BETWEEN works on some databases.<br />
+<a href="http://www.w3schools.com/sql/sql_between.asp">http://www.w3schools.com/sql/sql_between.asp</a>. If you want complete database<br />
+independence you should avoid using between().</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAcosExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAcosExpression		</a>	<small>($value) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to get the arccosine of a value.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSinExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSinExpression		</a>	<small>($value) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to get the sine of a value.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPiExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPiExpression		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to get the PI value.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCosExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCosExpression		</a>	<small>($value) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to get the cosine of a value.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddSecondsExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddSecondsExpression		</a>	<small>($date, $seconds) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to add the number of given seconds to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubSecondsExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubSecondsExpression		</a>	<small>($date, $seconds) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to subtract the number of given seconds from a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddMinutesExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddMinutesExpression		</a>	<small>($date, $minutes) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to add the number of given minutes to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubMinutesExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubMinutesExpression		</a>	<small>($date, $minutes) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to subtract the number of given minutes from a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddHourExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddHourExpression		</a>	<small>($date, $hours) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to add the number of given hours to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubHourExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubHourExpression		</a>	<small>($date, $hours) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to subtract the number of given hours to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddDaysExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddDaysExpression		</a>	<small>($date, $days) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to add the number of given days to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubDaysExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubDaysExpression		</a>	<small>($date, $days) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to subtract the number of given days to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddWeeksExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddWeeksExpression		</a>	<small>($date, $weeks) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to add the number of given weeks to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubWeeksExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubWeeksExpression		</a>	<small>($date, $weeks) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to subtract the number of given weeks from a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddMonthExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddMonthExpression		</a>	<small>($date, $months) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to add the number of given months to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubMonthExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubMonthExpression		</a>	<small>($date, $months) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to subtract the number of given months to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddQuartersExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddQuartersExpression		</a>	<small>($date, $quarters) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to add the number of given quarters to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubQuartersExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubQuartersExpression		</a>	<small>($date, $quarters) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to subtract the number of given quarters from a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddYearsExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateAddYearsExpression		</a>	<small>($date, $years) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to add the number of given years to a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubYearsExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateSubYearsExpression		</a>	<small>($date, $years) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to subtract the number of given years from a date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBitAndComparisonExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBitAndComparisonExpression		</a>	<small>($value1, $value2) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL bit AND comparison expression.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBitOrComparisonExpression()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getBitOrComparisonExpression		</a>	<small>($value1, $value2) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL bit OR comparison expression.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getForUpdateSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getForUpdateSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the FOR UPDATE expression.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::appendLockHint()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::appendLockHint		</a>	<small>($fromClause, $lockMode) : string</small>
+		</h4>
+	<div class="description"><p>Honors that some SQL vendors such as MsSql use table hints for locking instead of the<br />
+ANSI SQL FOR UPDATE specification.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getWriteLockSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getWriteLockSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to append to any SELECT statement which obtains an exclusive lock on the rows.</p>
+<p>The semantics of this lock mode should equal the SELECT .. FOR UPDATE of the ANSI SQL standard.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropTableSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropTableSQL		</a>	<small>($table) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to drop an existing table.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropConstraintSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropConstraintSQL		</a>	<small>($constraint, $table) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to drop a constraint.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropForeignKeySQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropForeignKeySQL		</a>	<small>($foreignKey, $table) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to drop a foreign key.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateTableSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateTableSQL		</a>	<small>($table, $createFlags = self::CREATE_INDEXES) : string[]</small>
+		</h4>
+	<div class="description"><p>Returns the SQL statement(s) to create a table with the specified name, columns and constraints<br />
+on this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCommentOnTableSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCommentOnTableSQL		</a>	<small>($tableName, $comment) : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCommentOnColumnSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCommentOnColumnSQL		</a>	<small>($tableName, $columnName, $comment) : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getInlineColumnCommentSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getInlineColumnCommentSQL		</a>	<small>($comment) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to create inline comment on a column.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateTemporaryTableSnippetSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateTemporaryTableSnippetSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateSequenceSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateSequenceSQL		</a>	<small>($sequence) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to create a sequence on this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAlterSequenceSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getAlterSequenceSQL		</a>	<small>($sequence) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to change a sequence on this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropSequenceSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropSequenceSQL		</a>	<small>($sequence) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to drop an existing sequence.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateConstraintSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateConstraintSQL		</a>	<small>($constraint, $table) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to create a constraint on a table on this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateIndexSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateIndexSQL		</a>	<small>($index, $table) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to create an index on a table on this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPartialIndexSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getPartialIndexSQL		</a>	<small>($index) : string</small>
+		</h4>
+	<div class="description"><p>Adds condition for partial index.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreatePrimaryKeySQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreatePrimaryKeySQL		</a>	<small>($index, $table) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to create an unnamed primary key constraint.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateSchemaSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateSchemaSQL		</a>	<small>($schemaName) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to create a named schema.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateUniqueConstraintSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateUniqueConstraintSQL		</a>	<small>($constraint, $tableName) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to create a unique constraint on a table on this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropSchemaSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropSchemaSQL		</a>	<small>($schemaName) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to drop a schema.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::quoteIdentifier()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::quoteIdentifier		</a>	<small>($str) : string</small>
+		</h4>
+	<div class="description"><p>Quotes a string so that it can be safely used as a table or column name,<br />
+even if it is a reserved word of the platform. This also detects identifier<br />
+chains separated by dot and quotes them independently.</p>
+<p>NOTE: Just because you CAN use quoted identifiers doesn't mean<br />
+you SHOULD use them. In general, they end up causing way more<br />
+problems than they solve.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::quoteSingleIdentifier()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::quoteSingleIdentifier		</a>	<small>($str) : string</small>
+		</h4>
+	<div class="description"><p>Quotes a single identifier (no dot chain separation).</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateForeignKeySQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateForeignKeySQL		</a>	<small>($foreignKey, $table) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to create a new foreign key.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::onSchemaAlterTableAddColumn()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::onSchemaAlterTableAddColumn		</a>	<small>($column, $diff, &amp;$columnSql) : bool</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::onSchemaAlterTableRemoveColumn()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::onSchemaAlterTableRemoveColumn		</a>	<small>($column, $diff, &amp;$columnSql) : bool</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::onSchemaAlterTableChangeColumn()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::onSchemaAlterTableChangeColumn		</a>	<small>($columnDiff, $diff, &amp;$columnSql) : bool</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::onSchemaAlterTableRenameColumn()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::onSchemaAlterTableRenameColumn		</a>	<small>($oldColumnName, $column, $diff, &amp;$columnSql) : bool</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::onSchemaAlterTable()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::onSchemaAlterTable		</a>	<small>($diff, &amp;$sql) : bool</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getRenameIndexSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getRenameIndexSQL		</a>	<small>($oldIndexName, $index, $tableName) : string[]</small>
+		</h4>
+	<div class="description"><p>Returns the SQL for renaming an index on a table.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnDeclarationListSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnDeclarationListSQL		</a>	<small>($columns) : string</small>
+		</h4>
+	<div class="description"><p>Gets declaration of a number of columns in bulk.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnDeclarationSQL		</a>	<small>($name, $column) : string</small>
+		</h4>
+	<div class="description"><p>Obtains DBMS specific SQL code portion needed to declare a generic type<br />
+column to be used in statements like CREATE TABLE.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCheckDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCheckDeclarationSQL		</a>	<small>($definition) : string</small>
+		</h4>
+	<div class="description"><p>Obtains DBMS specific SQL code portion needed to set a CHECK constraint<br />
+declaration to be used in statements like CREATE TABLE.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getUniqueConstraintDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getUniqueConstraintDeclarationSQL		</a>	<small>($name, $constraint) : string</small>
+		</h4>
+	<div class="description"><p>Obtains DBMS specific SQL code portion needed to set a unique<br />
+constraint declaration to be used in statements like CREATE TABLE.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIndexDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIndexDeclarationSQL		</a>	<small>($name, $index) : string</small>
+		</h4>
+	<div class="description"><p>Obtains DBMS specific SQL code portion needed to set an index<br />
+declaration to be used in statements like CREATE TABLE.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCustomTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCustomTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Obtains SQL code portion needed to create a custom column,<br />
+e.g. when a column has the "columnDefinition" keyword.<br />
+Only "AUTOINCREMENT" and "PRIMARY KEY" are added if appropriate.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIndexFieldDeclarationListSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIndexFieldDeclarationListSQL		</a>	<small>($index) : string</small>
+		</h4>
+	<div class="description"><p>Obtains DBMS specific SQL code portion needed to set an index<br />
+declaration to be used in statements like CREATE TABLE.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnsFieldDeclarationListSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getColumnsFieldDeclarationListSQL		</a>	<small>($columns) : string</small>
+		</h4>
+	<div class="description"><p>Obtains DBMS specific SQL code portion needed to set an index<br />
+declaration to be used in statements like CREATE TABLE.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTemporaryTableSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTemporaryTableSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the required SQL string that fits between CREATE ... TABLE<br />
+to create the table as a temporary table.</p>
+<p>Should be overridden in driver classes to return the correct string for the<br />
+specific database type.</p>
+<p>The default is to return the string "TEMPORARY" - this will result in a<br />
+SQL error for any database that does not support temporary tables, or that<br />
+requires a different SQL command from "CREATE TEMPORARY TABLE".</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTemporaryTableName()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTemporaryTableName		</a>	<small>($tableName) : string</small>
+		</h4>
+	<div class="description"><p>Some vendors require temporary table names to be qualified specially.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getForeignKeyDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getForeignKeyDeclarationSQL		</a>	<small>($foreignKey) : string</small>
+		</h4>
+	<div class="description"><p>Obtain DBMS specific SQL code portion needed to set the FOREIGN KEY constraint<br />
+of a column declaration to be used in statements like CREATE TABLE.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getForeignKeyReferentialActionSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getForeignKeyReferentialActionSQL		</a>	<small>($action) : string</small>
+		</h4>
+	<div class="description"><p>Returns the given referential action in uppercase if valid, otherwise throws an exception.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getForeignKeyBaseDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getForeignKeyBaseDeclarationSQL		</a>	<small>($foreignKey) : string</small>
+		</h4>
+	<div class="description"><p>Obtains DBMS specific SQL code portion needed to set the FOREIGN KEY constraint<br />
+of a column declaration to be used in statements like CREATE TABLE.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getUniqueFieldDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getUniqueFieldDeclarationSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Obtains DBMS specific SQL code portion needed to set the UNIQUE constraint<br />
+of a column declaration to be used in statements like CREATE TABLE.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::convertBooleans()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::convertBooleans		</a>	<small>($item) : mixed</small>
+		</h4>
+	<div class="description"><p>Some platforms need the boolean values to be converted.</p>
+<p>The default conversion in this implementation converts to integers (false =&gt; 0, true =&gt; 1).</p>
+<p>Note: if the input is not a boolean the original input might be returned.</p>
+<p>There are two contexts when converting booleans: Literals and Prepared Statements.<br />
+This method should handle the literal case</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::convertFromBoolean()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::convertFromBoolean		</a>	<small>($item) : bool<span class="type-separator"></span><wbr>null</small>
+		</h4>
+	<div class="description"><p>Some platforms have boolean literals that needs to be correctly converted</p>
+<p>The default conversion tries to convert value into bool "(bool)$item"</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::convertBooleansToDatabaseValue()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::convertBooleansToDatabaseValue		</a>	<small>($item) : mixed</small>
+		</h4>
+	<div class="description"><p>This method should handle the prepared statements case. When there is no<br />
+distinction, it's OK to use the same method.</p>
+<p>Note: if the input is not a boolean the original input might be returned.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCurrentDateSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCurrentDateSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL specific for the platform to get the current date.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCurrentTimeSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCurrentTimeSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL specific for the platform to get the current time.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCurrentTimestampSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCurrentTimestampSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL specific for the platform to get the current timestamp</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::_getTransactionIsolationLevelSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::_getTransactionIsolationLevelSQL		</a>	<small>($level) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL for a given transaction isolation level Connection constant.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListNamespacesSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListNamespacesSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL statement for retrieving the namespaces defined in the database.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListSequencesSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListSequencesSQL		</a>	<small>($database) : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListUsersSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getListUsersSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateViewSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateViewSQL		</a>	<small>($name, $sql) : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropViewSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropViewSQL		</a>	<small>($name) : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSequenceNextValSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getSequenceNextValSQL		</a>	<small>($sequence) : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateDatabaseSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getCreateDatabaseSQL		</a>	<small>($name) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to create a new database.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropDatabaseSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDropDatabaseSQL		</a>	<small>($name) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL snippet to drop an existing database.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateTimeTzTypeDeclarationSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateTimeTzTypeDeclarationSQL		</a>	<small>($column) : string</small>
+		</h4>
+	<div class="description"><p>Obtains DBMS specific SQL to be used to create datetime with timezone offset columns.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsSequences()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsSequences		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports sequences.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::usesSequenceEmulatedIdentityColumns()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::usesSequenceEmulatedIdentityColumns		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform emulates identity columns through sequences.</p>
+<p>Some platforms that do not support identity columns natively<br />
+but support sequences can emulate identity columns by using<br />
+sequences.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIdentitySequenceName()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getIdentitySequenceName		</a>	<small>($tableName, $columnName) : string</small>
+		</h4>
+	<div class="description"><p>Returns the name of the sequence for a particular identity column in a particular table.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsIndexes()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsIndexes		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports indexes.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsPartialIndexes()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsPartialIndexes		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports partial indexes.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsAlterTable()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsAlterTable		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports altering tables.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsTransactions()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsTransactions		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports transactions.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsSavepoints()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsSavepoints		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports savepoints.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsReleaseSavepoints()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsReleaseSavepoints		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports releasing savepoints.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsPrimaryConstraints()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsPrimaryConstraints		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports primary key constraints.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsForeignKeyConstraints()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsForeignKeyConstraints		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports foreign key constraints.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsSchemas()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsSchemas		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports database schemas.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::canEmulateSchemas()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::canEmulateSchemas		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether this platform can emulate schemas.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDefaultSchemaName()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDefaultSchemaName		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Returns the default schema name.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsCreateDropDatabase()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsCreateDropDatabase		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether this platform supports create database.</p>
+<p>Some databases don't allow to create and drop databases at all or only with certain tools.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsGettingAffectedRows()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsGettingAffectedRows		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the platform supports getting the affected rows of a recent update/delete type query.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsCommentOnStatement()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsCommentOnStatement		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether this platform support the proprietary syntax "COMMENT ON asset".</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::hasNativeGuidType()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::hasNativeGuidType		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Does this platform have native guid type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::hasNativeJsonType()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::hasNativeJsonType		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Does this platform have native JSON type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsViews()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsViews		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether this platform supports views.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateTimeFormatString()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateTimeFormatString		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Gets the format string, as accepted by the date() function, that describes<br />
+the format of a stored datetime value of this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateTimeTzFormatString()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateTimeTzFormatString		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Gets the format string, as accepted by the date() function, that describes<br />
+the format of a stored datetime with timezone value of this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateFormatString()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDateFormatString		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Gets the format string, as accepted by the date() function, that describes<br />
+the format of a stored date value of this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTimeFormatString()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTimeFormatString		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Gets the format string, as accepted by the date() function, that describes<br />
+the format of a stored time value of this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::modifyLimitQuery()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::modifyLimitQuery		</a>	<small>($query, $limit, $offset = 0) : string</small>
+		</h4>
+	<div class="description"><p>Adds an driver-specific LIMIT clause to the query.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsLimitOffset()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::supportsLimitOffset		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Whether the database platform support offsets in modify limit clauses.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getMaxIdentifierLength()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getMaxIdentifierLength		</a>	<small>() : int</small>
+		</h4>
+	<div class="description"><p>Maximum length of any given database identifier, like tables or column names.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getEmptyIdentityInsertSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getEmptyIdentityInsertSQL		</a>	<small>($quotedTableName, $quotedIdentifierColumnName) : string</small>
+		</h4>
+	<div class="description"><p>Returns the insert SQL for an empty insert statement.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTruncateTableSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getTruncateTableSQL		</a>	<small>($tableName, $cascade = false) : string</small>
+		</h4>
+	<div class="description"><p>Generates a Truncate Table SQL statement for a given table.</p>
+<p>Cascade is not supported on many platforms but would optionally cascade the truncate by<br />
+following the foreign keys.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDummySelectSQL()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getDummySelectSQL		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>This is for test reasons, many vendors have special requirements for dummy statements.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::createSavePoint()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::createSavePoint		</a>	<small>($savepoint) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to create a new savepoint.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::releaseSavePoint()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::releaseSavePoint		</a>	<small>($savepoint) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to release a savepoint.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::rollbackSavePoint()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::rollbackSavePoint		</a>	<small>($savepoint) : string</small>
+		</h4>
+	<div class="description"><p>Returns the SQL to rollback a savepoint.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getReservedKeywordsList()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getReservedKeywordsList		</a>	<small>() : <a href="Doctrine-DBAL-Platforms-Keywords-KeywordList$typespace.html#Doctrine\DBAL\Platforms\Keywords\KeywordList" class="fqsen "><small>Doctrine\DBAL\Platforms\Keywords\</small><wbr>KeywordList</a></small>
+		</h4>
+	<div class="description"><p>Returns the keyword list instance of this platform.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::createReservedKeywordsList()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::createReservedKeywordsList		</a>	<small>() : <a href="Doctrine-DBAL-Platforms-Keywords-KeywordList$typespace.html#Doctrine\DBAL\Platforms\Keywords\KeywordList" class="fqsen "><small>Doctrine\DBAL\Platforms\Keywords\</small><wbr>KeywordList</a></small>
+		</h4>
+	<div class="description"><p>Creates an instance of the reserved keyword list of this platform.</p>
+<p>This method will become @abstract in DBAL 4.0.0.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getStringLiteralQuoteCharacter()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getStringLiteralQuoteCharacter		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p>Gets the character used for string literal quoting.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::escapeStringForLike()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::escapeStringForLike		</a>	<small>($inputString, $escapeChar) : string</small>
+		</h4>
+	<div class="description"><p>Escapes metacharacters in a string intended to be used with a LIKE<br />
+operator.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::createSQLParser()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::createSQLParser		</a>	<small>() : <a href="Doctrine-DBAL-SQL-Parser$typespace.html#Doctrine\DBAL\SQL\Parser" class="fqsen "><small>Doctrine\DBAL\SQL\</small><wbr>Parser</a></small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getLikeWildcardCharacters()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::getLikeWildcardCharacters		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Platforms-AbstractMySQLPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractMySQLPlatform::columnsEqual()">
+                                    Doctrine\DBAL\Platforms\AbstractMySQLPlatform::columnsEqual		</a>	<small>($column1, $column2) : bool</small>
 		</h4>
 	<div class="description"><p>Compares the definitions of the given columns in the context of this platform.</p>
 </div>
@@ -15448,12 +16930,15 @@ to a target schema.</p>
 		</h4>
 	<div class="description"></div>
     	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Schema-Comparator$typespace.html#Doctrine\DBAL\Schema\Comparator::compareSchemas()">
-                                    Doctrine\DBAL\Schema\Comparator::compareSchemas		</a>	<small>($fromSchema, $toSchema) : <a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></small>
+		<a href="Doctrine-DBAL-Schema-Comparator$typespace.html#Doctrine\DBAL\Schema\Comparator::__call()">
+                                    Doctrine\DBAL\Schema\Comparator::__call		</a>	<small>($method, $args) : <a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></small>
 		</h4>
-	<div class="description"><p>Returns a SchemaDiff object containing the differences between the schemas $fromSchema and $toSchema.</p>
-<p>This method should be called non-statically since it will be declared as non-static in the next major release.</p>
-</div>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Schema-Comparator$typespace.html#Doctrine\DBAL\Schema\Comparator::__callStatic()">
+                                    Doctrine\DBAL\Schema\Comparator::__callStatic		</a>	<small>($method, $args) : <a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></small>
+		</h4>
+	<div class="description"></div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Schema-Comparator$typespace.html#Doctrine\DBAL\Schema\Comparator::compare()">
                                     Doctrine\DBAL\Schema\Comparator::compare		</a>	<small>($fromSchema, $toSchema) : <a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></small>
@@ -15498,6 +16983,11 @@ string array, otherwise an empty array gets returned.</p>
 <p>Compares $index1 with $index2 and returns $index2 if there are any<br />
 differences or false in case there are no differences.</p>
 </div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Schema-Comparator$typespace.html#Doctrine\DBAL\Schema\Comparator::compareSchemas()">
+                                    Doctrine\DBAL\Schema::compareSchemas		</a>	<small>($fromSchema, $toSchema) : <a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></small>
+		</h4>
+	<div class="description"></div>
                     	<h4 class="fqsen-title">interface		<small></small>
 		<a href="Doctrine-DBAL-Schema-Constraint$typespace.html#Doctrine\DBAL\Schema\Constraint">
                                     Doctrine\DBAL\Schema::Constraint		</a>	</h4>
@@ -15613,7 +17103,7 @@ can be used when binding parameters to prepared statements.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Types-Type$typespace.html#Doctrine\DBAL\Types\Type::getTypesMap()">
-                                    Doctrine\DBAL\Types\Type::getTypesMap		</a>	<small>() : string[]</small>
+                                    Doctrine\DBAL\Types\Type::getTypesMap		</a>	<small>() : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
 		</h4>
 	<div class="description"><p>Gets the types array map which holds all registered types and the corresponding<br />
 type class</p>
@@ -15761,242 +17251,6 @@ comment to typehint the actual Doctrine Type.</p>
                                     Doctrine\DBAL\Types\Types::TIME_IMMUTABLE		</a>	</h4>
 	<div class="description"></div>
                     	<h4 class="fqsen-title">class		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType">
-                                    Doctrine\DBAL\Types::BlobType		</a>	</h4>
-	<div class="description"><p>Type that maps an SQL BLOB to a PHP resource stream.</p>
-</div>
-                	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getSQLDeclaration()">
-                                    Doctrine\DBAL\Types\BlobType::getSQLDeclaration		</a>	<small>($column, $platform) : string</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the SQL declaration snippet for a column of this type.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::convertToPHPValue()">
-                                    Doctrine\DBAL\Types\BlobType::convertToPHPValue		</a>	<small>($value, $platform) : mixed</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Converts a value from its database representation to its PHP representation<br />
-of this type.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getName()">
-                                    Doctrine\DBAL\Types\BlobType::getName		</a>	<small>() : string</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the name of this type.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getBindingType()">
-                                    Doctrine\DBAL\Types\BlobType::getBindingType		</a>	<small>() : int</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the (preferred) binding type for values of this type that<br />
-can be used when binding parameters to prepared statements.</p>
-<p>This method should return one of the <tag_link data-kind='fqsen' data-type-category='class' data-type-fqsen='Doctrine\DBAL\ParameterType' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\ParameterType'>Doctrine\DBAL\ParameterType</tag_link> constants.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::__construct()">
-                                    Doctrine\DBAL\Types\BlobType::__construct		</a>	<small>() : void</small>
-		</h4>
-	<div class="description"></div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::convertToDatabaseValue()">
-                                    Doctrine\DBAL\Types\BlobType::convertToDatabaseValue		</a>	<small>($value, $platform) : mixed</small>
-		</h4>
-	<div class="description"><p>Converts a value from its PHP representation to its database representation<br />
-of this type.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getTypeRegistry()">
-                                    Doctrine\DBAL\Types\BlobType::getTypeRegistry		</a>	<small>() : <a href="Doctrine-DBAL-Types-TypeRegistry$typespace.html#Doctrine\DBAL\Types\TypeRegistry" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>TypeRegistry</a></small>
-		</h4>
-	<div class="description"></div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getType()">
-                                    Doctrine\DBAL\Types\BlobType::getType		</a>	<small>($name) : <a href="Doctrine-DBAL-Types-Type$typespace.html#Doctrine\DBAL\Types\Type" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>Type</a></small>
-		</h4>
-	<div class="description"><p>Factory method to create type instances.<br />
-Type instances are implemented as flyweights.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::addType()">
-                                    Doctrine\DBAL\Types\BlobType::addType		</a>	<small>($name, $className) : void</small>
-		</h4>
-	<div class="description"><p>Adds a custom type to the type map.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::hasType()">
-                                    Doctrine\DBAL\Types\BlobType::hasType		</a>	<small>($name) : bool</small>
-		</h4>
-	<div class="description"><p>Checks if exists support for a type.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::overrideType()">
-                                    Doctrine\DBAL\Types\BlobType::overrideType		</a>	<small>($name, $className) : void</small>
-		</h4>
-	<div class="description"><p>Overrides an already defined type to use a different implementation.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getTypesMap()">
-                                    Doctrine\DBAL\Types\BlobType::getTypesMap		</a>	<small>() : string[]</small>
-		</h4>
-	<div class="description"><p>Gets the types array map which holds all registered types and the corresponding<br />
-type class</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::canRequireSQLConversion()">
-                                    Doctrine\DBAL\Types\BlobType::canRequireSQLConversion		</a>	<small>() : bool</small>
-		</h4>
-	<div class="description"><p>Does working with this column require SQL conversion functions?</p>
-<p>This is a metadata function that is required for example in the ORM.<br />
-Usage of <tag_link data-kind='fqsen' data-type-category='type' data-type-fqsen='convertToDatabaseValueSQL' data-type-array='0' data-type-nullable='' data-description='convertToDatabaseValueSQL'>convertToDatabaseValueSQL</tag_link> and<br />
-<tag_link data-kind='fqsen' data-type-category='type' data-type-fqsen='convertToPHPValueSQL' data-type-array='0' data-type-nullable='' data-description='convertToPHPValueSQL'>convertToPHPValueSQL</tag_link> works for any type and mostly<br />
-does nothing. This method can additionally be used for optimization purposes.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::convertToDatabaseValueSQL()">
-                                    Doctrine\DBAL\Types\BlobType::convertToDatabaseValueSQL		</a>	<small>($sqlExpr, $platform) : string</small>
-		</h4>
-	<div class="description"><p>Modifies the SQL expression (identifier, parameter) to convert to a database value.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::convertToPHPValueSQL()">
-                                    Doctrine\DBAL\Types\BlobType::convertToPHPValueSQL		</a>	<small>($sqlExpr, $platform) : string</small>
-		</h4>
-	<div class="description"><p>Modifies the SQL expression (identifier, parameter) to convert to a PHP value.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getMappedDatabaseTypes()">
-                                    Doctrine\DBAL\Types\BlobType::getMappedDatabaseTypes		</a>	<small>($platform) : string[]</small>
-		</h4>
-	<div class="description"><p>Gets an array of database types that map to this Doctrine type.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::requiresSQLCommentHint()">
-                                    Doctrine\DBAL\Types\BlobType::requiresSQLCommentHint		</a>	<small>($platform) : bool</small>
-		</h4>
-	<div class="description"><p>If this Doctrine Type maps to an already mapped database type,<br />
-reverse schema engineering can't tell them apart. You need to mark<br />
-one of those types as commented, which will have Doctrine use an SQL<br />
-comment to typehint the actual Doctrine Type.</p>
-</div>
-            	<h4 class="fqsen-title">class		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType">
-                                    Doctrine\DBAL\Types::TextType		</a>	</h4>
-	<div class="description"><p>Type that maps an SQL CLOB to a PHP string.</p>
-</div>
-                	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getSQLDeclaration()">
-                                    Doctrine\DBAL\Types\TextType::getSQLDeclaration		</a>	<small>($column, $platform) : string</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the SQL declaration snippet for a column of this type.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::convertToPHPValue()">
-                                    Doctrine\DBAL\Types\TextType::convertToPHPValue		</a>	<small>($value, $platform) : mixed</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Converts a value from its database representation to its PHP representation<br />
-of this type.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getName()">
-                                    Doctrine\DBAL\Types\TextType::getName		</a>	<small>() : string</small>
-		</h4>
-	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the name of this type.</tag_inheritdoc></p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::__construct()">
-                                    Doctrine\DBAL\Types\TextType::__construct		</a>	<small>() : void</small>
-		</h4>
-	<div class="description"></div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::convertToDatabaseValue()">
-                                    Doctrine\DBAL\Types\TextType::convertToDatabaseValue		</a>	<small>($value, $platform) : mixed</small>
-		</h4>
-	<div class="description"><p>Converts a value from its PHP representation to its database representation<br />
-of this type.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getTypeRegistry()">
-                                    Doctrine\DBAL\Types\TextType::getTypeRegistry		</a>	<small>() : <a href="Doctrine-DBAL-Types-TypeRegistry$typespace.html#Doctrine\DBAL\Types\TypeRegistry" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>TypeRegistry</a></small>
-		</h4>
-	<div class="description"></div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getType()">
-                                    Doctrine\DBAL\Types\TextType::getType		</a>	<small>($name) : <a href="Doctrine-DBAL-Types-Type$typespace.html#Doctrine\DBAL\Types\Type" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>Type</a></small>
-		</h4>
-	<div class="description"><p>Factory method to create type instances.<br />
-Type instances are implemented as flyweights.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::addType()">
-                                    Doctrine\DBAL\Types\TextType::addType		</a>	<small>($name, $className) : void</small>
-		</h4>
-	<div class="description"><p>Adds a custom type to the type map.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::hasType()">
-                                    Doctrine\DBAL\Types\TextType::hasType		</a>	<small>($name) : bool</small>
-		</h4>
-	<div class="description"><p>Checks if exists support for a type.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::overrideType()">
-                                    Doctrine\DBAL\Types\TextType::overrideType		</a>	<small>($name, $className) : void</small>
-		</h4>
-	<div class="description"><p>Overrides an already defined type to use a different implementation.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getBindingType()">
-                                    Doctrine\DBAL\Types\TextType::getBindingType		</a>	<small>() : int</small>
-		</h4>
-	<div class="description"><p>Gets the (preferred) binding type for values of this type that<br />
-can be used when binding parameters to prepared statements.</p>
-<p>This method should return one of the <tag_link data-kind='fqsen' data-type-category='class' data-type-fqsen='Doctrine\DBAL\ParameterType' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\ParameterType'>Doctrine\DBAL\ParameterType</tag_link> constants.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getTypesMap()">
-                                    Doctrine\DBAL\Types\TextType::getTypesMap		</a>	<small>() : string[]</small>
-		</h4>
-	<div class="description"><p>Gets the types array map which holds all registered types and the corresponding<br />
-type class</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::canRequireSQLConversion()">
-                                    Doctrine\DBAL\Types\TextType::canRequireSQLConversion		</a>	<small>() : bool</small>
-		</h4>
-	<div class="description"><p>Does working with this column require SQL conversion functions?</p>
-<p>This is a metadata function that is required for example in the ORM.<br />
-Usage of <tag_link data-kind='fqsen' data-type-category='type' data-type-fqsen='convertToDatabaseValueSQL' data-type-array='0' data-type-nullable='' data-description='convertToDatabaseValueSQL'>convertToDatabaseValueSQL</tag_link> and<br />
-<tag_link data-kind='fqsen' data-type-category='type' data-type-fqsen='convertToPHPValueSQL' data-type-array='0' data-type-nullable='' data-description='convertToPHPValueSQL'>convertToPHPValueSQL</tag_link> works for any type and mostly<br />
-does nothing. This method can additionally be used for optimization purposes.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::convertToDatabaseValueSQL()">
-                                    Doctrine\DBAL\Types\TextType::convertToDatabaseValueSQL		</a>	<small>($sqlExpr, $platform) : string</small>
-		</h4>
-	<div class="description"><p>Modifies the SQL expression (identifier, parameter) to convert to a database value.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::convertToPHPValueSQL()">
-                                    Doctrine\DBAL\Types\TextType::convertToPHPValueSQL		</a>	<small>($sqlExpr, $platform) : string</small>
-		</h4>
-	<div class="description"><p>Modifies the SQL expression (identifier, parameter) to convert to a PHP value.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getMappedDatabaseTypes()">
-                                    Doctrine\DBAL\Types\TextType::getMappedDatabaseTypes		</a>	<small>($platform) : string[]</small>
-		</h4>
-	<div class="description"><p>Gets an array of database types that map to this Doctrine type.</p>
-</div>
-    	<h4 class="fqsen-title">method		<small></small>
-		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::requiresSQLCommentHint()">
-                                    Doctrine\DBAL\Types\TextType::requiresSQLCommentHint		</a>	<small>($platform) : bool</small>
-		</h4>
-	<div class="description"><p>If this Doctrine Type maps to an already mapped database type,<br />
-reverse schema engineering can't tell them apart. You need to mark<br />
-one of those types as commented, which will have Doctrine use an SQL<br />
-comment to typehint the actual Doctrine Type.</p>
-</div>
-            	<h4 class="fqsen-title">class		<small></small>
 		<a href="Doctrine-DBAL-Types-BigIntType$typespace.html#Doctrine\DBAL\Types\BigIntType">
                                     Doctrine\DBAL\Types::BigIntType		</a>	</h4>
 	<div class="description"><p>Type that maps a database BIGINT to a PHP string.</p>
@@ -16072,7 +17326,7 @@ Type instances are implemented as flyweights.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Types-BigIntType$typespace.html#Doctrine\DBAL\Types\BigIntType::getTypesMap()">
-                                    Doctrine\DBAL\Types\BigIntType::getTypesMap		</a>	<small>() : string[]</small>
+                                    Doctrine\DBAL\Types\BigIntType::getTypesMap		</a>	<small>() : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
 		</h4>
 	<div class="description"><p>Gets the types array map which holds all registered types and the corresponding<br />
 type class</p>
@@ -16190,7 +17444,7 @@ Type instances are implemented as flyweights.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Types-BinaryType$typespace.html#Doctrine\DBAL\Types\BinaryType::getTypesMap()">
-                                    Doctrine\DBAL\Types\BinaryType::getTypesMap		</a>	<small>() : string[]</small>
+                                    Doctrine\DBAL\Types\BinaryType::getTypesMap		</a>	<small>() : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
 		</h4>
 	<div class="description"><p>Gets the types array map which holds all registered types and the corresponding<br />
 type class</p>
@@ -16226,6 +17480,124 @@ does nothing. This method can additionally be used for optimization purposes.</p
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Types-BinaryType$typespace.html#Doctrine\DBAL\Types\BinaryType::requiresSQLCommentHint()">
                                     Doctrine\DBAL\Types\BinaryType::requiresSQLCommentHint		</a>	<small>($platform) : bool</small>
+		</h4>
+	<div class="description"><p>If this Doctrine Type maps to an already mapped database type,<br />
+reverse schema engineering can't tell them apart. You need to mark<br />
+one of those types as commented, which will have Doctrine use an SQL<br />
+comment to typehint the actual Doctrine Type.</p>
+</div>
+            	<h4 class="fqsen-title">class		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType">
+                                    Doctrine\DBAL\Types::BlobType		</a>	</h4>
+	<div class="description"><p>Type that maps an SQL BLOB to a PHP resource stream.</p>
+</div>
+                	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getSQLDeclaration()">
+                                    Doctrine\DBAL\Types\BlobType::getSQLDeclaration		</a>	<small>($column, $platform) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the SQL declaration snippet for a column of this type.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::convertToPHPValue()">
+                                    Doctrine\DBAL\Types\BlobType::convertToPHPValue		</a>	<small>($value, $platform) : mixed</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Converts a value from its database representation to its PHP representation<br />
+of this type.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getName()">
+                                    Doctrine\DBAL\Types\BlobType::getName		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the name of this type.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getBindingType()">
+                                    Doctrine\DBAL\Types\BlobType::getBindingType		</a>	<small>() : int</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the (preferred) binding type for values of this type that<br />
+can be used when binding parameters to prepared statements.</p>
+<p>This method should return one of the <tag_link data-kind='fqsen' data-type-category='class' data-type-fqsen='Doctrine\DBAL\ParameterType' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\ParameterType'>Doctrine\DBAL\ParameterType</tag_link> constants.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::__construct()">
+                                    Doctrine\DBAL\Types\BlobType::__construct		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::convertToDatabaseValue()">
+                                    Doctrine\DBAL\Types\BlobType::convertToDatabaseValue		</a>	<small>($value, $platform) : mixed</small>
+		</h4>
+	<div class="description"><p>Converts a value from its PHP representation to its database representation<br />
+of this type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getTypeRegistry()">
+                                    Doctrine\DBAL\Types\BlobType::getTypeRegistry		</a>	<small>() : <a href="Doctrine-DBAL-Types-TypeRegistry$typespace.html#Doctrine\DBAL\Types\TypeRegistry" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>TypeRegistry</a></small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getType()">
+                                    Doctrine\DBAL\Types\BlobType::getType		</a>	<small>($name) : <a href="Doctrine-DBAL-Types-Type$typespace.html#Doctrine\DBAL\Types\Type" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>Type</a></small>
+		</h4>
+	<div class="description"><p>Factory method to create type instances.<br />
+Type instances are implemented as flyweights.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::addType()">
+                                    Doctrine\DBAL\Types\BlobType::addType		</a>	<small>($name, $className) : void</small>
+		</h4>
+	<div class="description"><p>Adds a custom type to the type map.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::hasType()">
+                                    Doctrine\DBAL\Types\BlobType::hasType		</a>	<small>($name) : bool</small>
+		</h4>
+	<div class="description"><p>Checks if exists support for a type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::overrideType()">
+                                    Doctrine\DBAL\Types\BlobType::overrideType		</a>	<small>($name, $className) : void</small>
+		</h4>
+	<div class="description"><p>Overrides an already defined type to use a different implementation.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getTypesMap()">
+                                    Doctrine\DBAL\Types\BlobType::getTypesMap		</a>	<small>() : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
+		</h4>
+	<div class="description"><p>Gets the types array map which holds all registered types and the corresponding<br />
+type class</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::canRequireSQLConversion()">
+                                    Doctrine\DBAL\Types\BlobType::canRequireSQLConversion		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Does working with this column require SQL conversion functions?</p>
+<p>This is a metadata function that is required for example in the ORM.<br />
+Usage of <tag_link data-kind='fqsen' data-type-category='type' data-type-fqsen='convertToDatabaseValueSQL' data-type-array='0' data-type-nullable='' data-description='convertToDatabaseValueSQL'>convertToDatabaseValueSQL</tag_link> and<br />
+<tag_link data-kind='fqsen' data-type-category='type' data-type-fqsen='convertToPHPValueSQL' data-type-array='0' data-type-nullable='' data-description='convertToPHPValueSQL'>convertToPHPValueSQL</tag_link> works for any type and mostly<br />
+does nothing. This method can additionally be used for optimization purposes.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::convertToDatabaseValueSQL()">
+                                    Doctrine\DBAL\Types\BlobType::convertToDatabaseValueSQL		</a>	<small>($sqlExpr, $platform) : string</small>
+		</h4>
+	<div class="description"><p>Modifies the SQL expression (identifier, parameter) to convert to a database value.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::convertToPHPValueSQL()">
+                                    Doctrine\DBAL\Types\BlobType::convertToPHPValueSQL		</a>	<small>($sqlExpr, $platform) : string</small>
+		</h4>
+	<div class="description"><p>Modifies the SQL expression (identifier, parameter) to convert to a PHP value.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::getMappedDatabaseTypes()">
+                                    Doctrine\DBAL\Types\BlobType::getMappedDatabaseTypes		</a>	<small>($platform) : string[]</small>
+		</h4>
+	<div class="description"><p>Gets an array of database types that map to this Doctrine type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType::requiresSQLCommentHint()">
+                                    Doctrine\DBAL\Types\BlobType::requiresSQLCommentHint		</a>	<small>($platform) : bool</small>
 		</h4>
 	<div class="description"><p>If this Doctrine Type maps to an already mapped database type,<br />
 reverse schema engineering can't tell them apart. You need to mark<br />
@@ -16308,7 +17680,7 @@ Type instances are implemented as flyweights.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Types-IntegerType$typespace.html#Doctrine\DBAL\Types\IntegerType::getTypesMap()">
-                                    Doctrine\DBAL\Types\IntegerType::getTypesMap		</a>	<small>() : string[]</small>
+                                    Doctrine\DBAL\Types\IntegerType::getTypesMap		</a>	<small>() : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
 		</h4>
 	<div class="description"><p>Gets the types array map which holds all registered types and the corresponding<br />
 type class</p>
@@ -16563,6 +17935,124 @@ about the expected format.</p>
                                     Doctrine\DBAL\Types\ConversionException::__toString		</a>	<small>() : void</small>
 		</h4>
 	<div class="description"></div>
+            	<h4 class="fqsen-title">class		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType">
+                                    Doctrine\DBAL\Types::TextType		</a>	</h4>
+	<div class="description"><p>Type that maps an SQL CLOB to a PHP string.</p>
+</div>
+                	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getSQLDeclaration()">
+                                    Doctrine\DBAL\Types\TextType::getSQLDeclaration		</a>	<small>($column, $platform) : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the SQL declaration snippet for a column of this type.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::convertToPHPValue()">
+                                    Doctrine\DBAL\Types\TextType::convertToPHPValue		</a>	<small>($value, $platform) : mixed</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Converts a value from its database representation to its PHP representation<br />
+of this type.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getName()">
+                                    Doctrine\DBAL\Types\TextType::getName		</a>	<small>() : string</small>
+		</h4>
+	<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Gets the name of this type.</tag_inheritdoc></p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::__construct()">
+                                    Doctrine\DBAL\Types\TextType::__construct		</a>	<small>() : void</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::convertToDatabaseValue()">
+                                    Doctrine\DBAL\Types\TextType::convertToDatabaseValue		</a>	<small>($value, $platform) : mixed</small>
+		</h4>
+	<div class="description"><p>Converts a value from its PHP representation to its database representation<br />
+of this type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getTypeRegistry()">
+                                    Doctrine\DBAL\Types\TextType::getTypeRegistry		</a>	<small>() : <a href="Doctrine-DBAL-Types-TypeRegistry$typespace.html#Doctrine\DBAL\Types\TypeRegistry" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>TypeRegistry</a></small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getType()">
+                                    Doctrine\DBAL\Types\TextType::getType		</a>	<small>($name) : <a href="Doctrine-DBAL-Types-Type$typespace.html#Doctrine\DBAL\Types\Type" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>Type</a></small>
+		</h4>
+	<div class="description"><p>Factory method to create type instances.<br />
+Type instances are implemented as flyweights.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::addType()">
+                                    Doctrine\DBAL\Types\TextType::addType		</a>	<small>($name, $className) : void</small>
+		</h4>
+	<div class="description"><p>Adds a custom type to the type map.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::hasType()">
+                                    Doctrine\DBAL\Types\TextType::hasType		</a>	<small>($name) : bool</small>
+		</h4>
+	<div class="description"><p>Checks if exists support for a type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::overrideType()">
+                                    Doctrine\DBAL\Types\TextType::overrideType		</a>	<small>($name, $className) : void</small>
+		</h4>
+	<div class="description"><p>Overrides an already defined type to use a different implementation.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getBindingType()">
+                                    Doctrine\DBAL\Types\TextType::getBindingType		</a>	<small>() : int</small>
+		</h4>
+	<div class="description"><p>Gets the (preferred) binding type for values of this type that<br />
+can be used when binding parameters to prepared statements.</p>
+<p>This method should return one of the <tag_link data-kind='fqsen' data-type-category='class' data-type-fqsen='Doctrine\DBAL\ParameterType' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\ParameterType'>Doctrine\DBAL\ParameterType</tag_link> constants.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getTypesMap()">
+                                    Doctrine\DBAL\Types\TextType::getTypesMap		</a>	<small>() : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
+		</h4>
+	<div class="description"><p>Gets the types array map which holds all registered types and the corresponding<br />
+type class</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::canRequireSQLConversion()">
+                                    Doctrine\DBAL\Types\TextType::canRequireSQLConversion		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"><p>Does working with this column require SQL conversion functions?</p>
+<p>This is a metadata function that is required for example in the ORM.<br />
+Usage of <tag_link data-kind='fqsen' data-type-category='type' data-type-fqsen='convertToDatabaseValueSQL' data-type-array='0' data-type-nullable='' data-description='convertToDatabaseValueSQL'>convertToDatabaseValueSQL</tag_link> and<br />
+<tag_link data-kind='fqsen' data-type-category='type' data-type-fqsen='convertToPHPValueSQL' data-type-array='0' data-type-nullable='' data-description='convertToPHPValueSQL'>convertToPHPValueSQL</tag_link> works for any type and mostly<br />
+does nothing. This method can additionally be used for optimization purposes.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::convertToDatabaseValueSQL()">
+                                    Doctrine\DBAL\Types\TextType::convertToDatabaseValueSQL		</a>	<small>($sqlExpr, $platform) : string</small>
+		</h4>
+	<div class="description"><p>Modifies the SQL expression (identifier, parameter) to convert to a database value.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::convertToPHPValueSQL()">
+                                    Doctrine\DBAL\Types\TextType::convertToPHPValueSQL		</a>	<small>($sqlExpr, $platform) : string</small>
+		</h4>
+	<div class="description"><p>Modifies the SQL expression (identifier, parameter) to convert to a PHP value.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::getMappedDatabaseTypes()">
+                                    Doctrine\DBAL\Types\TextType::getMappedDatabaseTypes		</a>	<small>($platform) : string[]</small>
+		</h4>
+	<div class="description"><p>Gets an array of database types that map to this Doctrine type.</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType::requiresSQLCommentHint()">
+                                    Doctrine\DBAL\Types\TextType::requiresSQLCommentHint		</a>	<small>($platform) : bool</small>
+		</h4>
+	<div class="description"><p>If this Doctrine Type maps to an already mapped database type,<br />
+reverse schema engineering can't tell them apart. You need to mark<br />
+one of those types as commented, which will have Doctrine use an SQL<br />
+comment to typehint the actual Doctrine Type.</p>
+</div>
                     	<h4 class="fqsen-title">interface		<small></small>
 		<a href="Doctrine-DBAL-Types-PhpIntegerMappingType$typespace.html#Doctrine\DBAL\Types\PhpIntegerMappingType">
                                     Doctrine\DBAL\Types::PhpIntegerMappingType		</a>	</h4>
@@ -16585,6 +18075,11 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 		<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::PARAM_STR_ARRAY">
                                     Doctrine\DBAL\Connection::PARAM_STR_ARRAY		</a>	</h4>
 	<div class="description"><p>Represents an array of strings to be expanded by Doctrine SQL parsing.</p>
+</div>
+    	<h4 class="fqsen-title">classconstant		<small>integer</small>
+		<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::PARAM_ASCII_STR_ARRAY">
+                                    Doctrine\DBAL\Connection::PARAM_ASCII_STR_ARRAY		</a>	</h4>
+	<div class="description"><p>Represents an array of ascii strings to be expanded by Doctrine SQL parsing.</p>
 </div>
     	<h4 class="fqsen-title">classconstant		<small>integer</small>
 		<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::ARRAY_PARAM_OFFSET">
@@ -16704,7 +18199,7 @@ as an associative array.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::fetchNumeric()">
-                                    Doctrine\DBAL\Connection::fetchNumeric		</a>	<small>($query, $params = [], $types = []) : <a href="list&lt;$typespace.html#list&lt;" class="fqsen ">list&lt;</a></small>
+                                    Doctrine\DBAL\Connection::fetchNumeric		</a>	<small>($query, $params = [], $types = []) : <a href="list&lt;mixed&gt;$typespace.html#list&lt;mixed&gt;" class="fqsen ">list&lt;mixed&gt;</a><span class="type-separator"></span><wbr>false</small>
 		</h4>
 	<div class="description"><p>Prepares and executes an SQL query and returns the first row of the result<br />
 as a numerically indexed array.</p>
@@ -16926,10 +18421,9 @@ the transaction is rolled back and the exception re-thrown.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::_getNestedTransactionSavePointName()">
-                                    Doctrine\DBAL\Connection::_getNestedTransactionSavePointName		</a>	<small>() : mixed</small>
+                                    Doctrine\DBAL\Connection::_getNestedTransactionSavePointName		</a>	<small>() : string</small>
 		</h4>
-	<div class="description"><p>Returns the savepoint name to use for nested transactions are false if they are not supported<br />
-"savepointFormat" parameter is not set</p>
+	<div class="description"><p>Returns the savepoint name to use for nested transactions.</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::beginTransaction()">
@@ -16971,6 +18465,11 @@ the transaction is rolled back and the exception re-thrown.</p>
 		</h4>
 	<div class="description"><p>Gets the wrapped driver connection.</p>
 </div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::getNativeConnection()">
+                                    Doctrine\DBAL\Connection::getNativeConnection		</a>	<small>() : resource<span class="type-separator"></span><wbr>object</small>
+		</h4>
+	<div class="description"></div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::createSchemaManager()">
                                     Doctrine\DBAL\Connection::createSchemaManager		</a>	<small>() : <a href="Doctrine-DBAL-Schema-AbstractSchemaManager$typespace.html#Doctrine\DBAL\Schema\AbstractSchemaManager" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>AbstractSchemaManager</a></small>
@@ -19722,7 +21221,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway::updateArray()">
-                                    ryunosuke\dbml\Gateway\TableGateway::updateArray		</a>	<small>($data, $identifier = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
+                                    ryunosuke\dbml\Gateway\TableGateway::updateArray		</a>	<small>($data, $identifier = [], $chunk = 0) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 		</h4>
 	<div class="description"><p>駆動表を省略できる <tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::updateArray()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::updateArray()'>ryunosuke\dbml\Database::updateArray()</tag_link></p>
 </div>
@@ -26867,6 +28366,57 @@ $entity = $db-&gt;getEmptyRecord('Article');
 </code></pre>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
+		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::migrate()">
+                                    ryunosuke\dbml\Database::migrate		</a>	<small>($tableName, $dml, $recordsOrFilename, $opt = []) : array<span class="type-separator"></span><wbr>int</small>
+		</h4>
+	<div class="description"><p>データ移行用 SQL を発行する</p>
+<p>要するに与えられたファイル・配列を SQL 文に変換する。<br />
+csv,json,php などを手元で（マクロなどで） sql に変換する作業は多々あるが、それを簡易化できる。</p>
+<p>ただし、 dryrun: true のときのみであり false だと実際に実行され、affected rows を返す。<br />
+特に change や delete を指定したときは致命的な事態になるので注意。</p>
+<p>$dml には下記が指定できる。</p>
+<ul>
+<li>select:<ul>
+<li>dryrun なら主キーで WHERE して該当列を返すような SQL を返す</li>
+<li>dryrun でないなら実行してレコード配列を返す（実質的に入力配列と（型以外は）ほぼ同じものを返す）</li>
+</ul>
+</li>
+<li>insert:<ul>
+<li>dryrun なら実行されるであろう INSERT な SQL を返す</li>
+<li>dryrun でないなら実行してレコード配列を INSERT する（追加のみで更新・削除は行われない）</li>
+</ul>
+</li>
+<li>update:<ul>
+<li>dryrun なら実行されるであろう UPDATE な SQL を返す</li>
+<li>dryrun でないなら実行してレコード配列に UPDATE する（更新のみで追加・削除は行われない）</li>
+</ul>
+</li>
+<li>delete:<ul>
+<li>dryrun なら実行されるであろう DELETE な SQL を返す</li>
+<li>dryrun でないなら実行してレコード配列を DELETE する（削除のみで追加・更新は行われない）</li>
+</ul>
+</li>
+<li>modify:<ul>
+<li>dryrun なら実行されるであろう UPSERT(MODIFY) な SQL を返す</li>
+<li>dryrun でないなら実行してレコード配列を MODIFY する（追加・更新のみで削除は行われない）</li>
+</ul>
+</li>
+<li>change:<ul>
+<li>dryrun なら実行されるであろう INSERT/UPDATE/DELETE な SQL を返す</li>
+<li>dryrun でないなら実行してレコード配列の状態に「持っていく」（追加・更新・削除が行われる）</li>
+</ul>
+</li>
+<li>save:<ul>
+<li>dryrun なら実行されるであろう INSERT/UPDATE/DELETE な SQL を返す</li>
+<li>dryrun でないなら実行してレコード配列の状態に「再帰的に持っていく」（再帰的に追加・更新・削除が行われる）</li>
+</ul>
+</li>
+</ul>
+<p>どの方法を選んだとしてもレコード配列に主キーは必須となる（値は null でも構わない）。</p>
+<p>$opt で chunk や ignore オプションが指定できる。<br />
+特に chunk/bulk は返り値の SQL が大幅に変化する。</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::import()">
                                     ryunosuke\dbml\Database::import		</a>	<small>($datatree) : int</small>
 		</h4>
@@ -27025,7 +28575,7 @@ $db-&gt;insertSelect('t_destination', $db-&gt;select('t_source'));
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::updateArray()">
-                                    ryunosuke\dbml\Database::updateArray		</a>	<small>($tableName, $data, $identifier = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
+                                    ryunosuke\dbml\Database::updateArray		</a>	<small>($tableName, $data, $identifier = [], $chunk = 0) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
 		</h4>
 	<div class="description"><p>BULK UPDATE 構文</p>
 <p>指定配列でバルクアップデートする。<br />
@@ -27653,6 +29203,21 @@ $db-&gt;duplicate('tablename', [
 余計なキーが有るだけでエラーになるのは多くの場合めんどくさいだけなので true にするのは有用。</p>
 <p>ただし、スペルミスなどでキーの指定を誤ると何も言わずに伏せてしまうので気づきにくい不具合になるので注意。</p>
 <p>なお、デフォルトは true。</p>
+</div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::getFilterNullAtNotNullColumn()">
+                                    ryunosuke\dbml::getFilterNullAtNotNullColumn		</a>	<small>() : bool</small>
+		</h4>
+	<div class="description"></div>
+    	<h4 class="fqsen-title">method		<small></small>
+		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::setFilterNullAtNotNullColumn()">
+                                    ryunosuke\dbml::setFilterNullAtNotNullColumn		</a>	<small>($bool) : <a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database" class="fqsen "><small>ryunosuke\dbml\</small><wbr>Database</a></small>
+		</h4>
+	<div class="description"><p>not null なカラムの null をフィルタするか指定する</p>
+<p>この設定を true にすると INSERT/UPDATE 時に「not null なのに null が来たカラム」が自動で伏せられるようになる。<br />
+呼び出し側の都合などで null を予約的に扱い、キーとして存在してしまうことはよくある。<br />
+どうせエラーになるので、結局呼び出し直前に if 分岐で unset したりするのでいっそのこと自動で伏せてしまったほうが便利なことは多い。</p>
+<p>なお、デフォルトは false だが、互換性のためであり将来のバージョンでは true になる想定。</p>
 </div>
     	<h4 class="fqsen-title">method		<small></small>
 		<a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database::getConvertEmptyToNull()">

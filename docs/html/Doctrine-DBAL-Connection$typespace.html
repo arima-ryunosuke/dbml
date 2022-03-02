@@ -54,7 +54,7 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="#L38-L1809" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="#L41-L1856" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">Doctrine\DBAL\Connection</span></h2>
@@ -73,7 +73,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="#L46-L49" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L50-L53" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::PARAM_INT_ARRAY" tabindex="-1" class="structure-title">
 						<small>integer</small>
@@ -88,7 +88,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="#L51-L54" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L55-L58" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::PARAM_STR_ARRAY" tabindex="-1" class="structure-title">
 						<small>integer</small>
@@ -103,7 +103,22 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-public">public</span>
-                        			<a href="#L56-L59" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L60-L63" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Connection::PARAM_ASCII_STR_ARRAY" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        PARAM_ASCII_STR_ARRAY						<var> = 117</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"><p>Represents an array of ascii strings to be expanded by Doctrine SQL parsing.</p>
+</div>
+
+                                                					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L65-L68" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::ARRAY_PARAM_OFFSET" tabindex="-1" class="structure-title">
 						<small>integer</small>
@@ -124,7 +139,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="#L61-L66" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L70-L75" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_conn" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection</a><span class="type-separator"></span><wbr>null</small>
@@ -140,7 +155,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="#L68-L69" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L77-L78" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_config" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-DBAL-Configuration$typespace.html#Doctrine\DBAL\Configuration" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Configuration</a></small>
@@ -155,7 +170,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="#L71-L72" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L80-L81" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_eventManager" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-Common-EventManager$typespace.html#Doctrine\Common\EventManager" class="fqsen "><small>Doctrine\Common\</small><wbr>EventManager</a></small>
@@ -170,7 +185,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="#L74-L79" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L83-L88" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_expr" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-DBAL-Query-Expression-ExpressionBuilder$typespace.html#Doctrine\DBAL\Query\Expression\ExpressionBuilder" class="fqsen "><small>Doctrine\DBAL\Query\Expression\</small><wbr>ExpressionBuilder</a></small>
@@ -178,14 +193,24 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 					</h4>
 					<div class="inner-item">
 						<div class="description"></div>
-                                                					</div>
+                                                	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::createExpressionBuilder()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection::createExpressionBuilder()</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
 				</li>
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="#L131-L138" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L140-L147" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_schemaManager" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-DBAL-Schema-AbstractSchemaManager$typespace.html#Doctrine\DBAL\Schema\AbstractSchemaManager" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>AbstractSchemaManager</a><span class="type-separator"></span><wbr>null</small>
@@ -194,14 +219,24 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 					<div class="inner-item">
 						<div class="description"><p>The schema manager.</p>
 </div>
-                                                					</div>
+                                                	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::createSchemaManager()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection::createSchemaManager()</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
 				</li>
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-primary"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="#L140-L145" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L149-L154" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::$_driver" tabindex="-1" class="structure-title">
 						<small><a href="Doctrine-DBAL-Driver$typespace.html#Doctrine\DBAL\Driver" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Driver</a></small>
@@ -226,7 +261,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L154-L200" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L163-L209" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::__construct()" tabindex="-1" class="structure-title ">
                         __construct                        	<small>($params, $driver, $config = null, $eventManager = null) : void</small>
@@ -299,7 +334,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L202-L214" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L211-L223" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getParams()" tabindex="-1" class="structure-title ">
                         getParams                        	<small>() : <a href="array&lt;string,mixed&gt;$typespace.html#array&lt;string,mixed&gt;" class="fqsen ">array&lt;string,mixed&gt;</a></small>
@@ -339,7 +374,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L216-L234" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L225-L243" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getDatabase()" tabindex="-1" class="structure-title ">
                         getDatabase                        	<small>() : string<span class="type-separator"></span><wbr>null</small>
@@ -392,7 +427,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L236-L244" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L245-L253" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getDriver()" tabindex="-1" class="structure-title ">
                         getDriver                        	<small>() : <a href="Doctrine-DBAL-Driver$typespace.html#Doctrine\DBAL\Driver" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Driver</a></small>
@@ -432,7 +467,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L246-L254" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L255-L263" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getConfiguration()" tabindex="-1" class="structure-title ">
                         getConfiguration                        	<small>() : <a href="Doctrine-DBAL-Configuration$typespace.html#Doctrine\DBAL\Configuration" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Configuration</a></small>
@@ -472,7 +507,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L256-L264" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L265-L273" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getEventManager()" tabindex="-1" class="structure-title ">
                         getEventManager                        	<small>() : <a href="Doctrine-Common-EventManager$typespace.html#Doctrine\Common\EventManager" class="fqsen "><small>Doctrine\Common\</small><wbr>EventManager</a></small>
@@ -512,7 +547,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L266-L281" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L275-L290" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getDatabasePlatform()" tabindex="-1" class="structure-title ">
                         getDatabasePlatform                        	<small>() : <a href="Doctrine-DBAL-Platforms-AbstractPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractPlatform" class="fqsen "><small>Doctrine\DBAL\Platforms\</small><wbr>AbstractPlatform</a></small>
@@ -561,7 +596,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L283-L289" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L292-L298" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::createExpressionBuilder()" tabindex="-1" class="structure-title ">
                         createExpressionBuilder                        	<small>() : <a href="Doctrine-DBAL-Query-Expression-ExpressionBuilder$typespace.html#Doctrine\DBAL\Query\Expression\ExpressionBuilder" class="fqsen "><small>Doctrine\DBAL\Query\Expression\</small><wbr>ExpressionBuilder</a></small>
@@ -601,7 +636,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="#L291-L308" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L300-L317" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getExpressionBuilder()" tabindex="-1" class="structure-title strike">
                         getExpressionBuilder                        	<small>() : <a href="Doctrine-DBAL-Query-Expression-ExpressionBuilder$typespace.html#Doctrine\DBAL\Query\Expression\ExpressionBuilder" class="fqsen "><small>Doctrine\DBAL\Query\Expression\</small><wbr>ExpressionBuilder</a></small>
@@ -624,7 +659,17 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                                                                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::createExpressionBuilder()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection::createExpressionBuilder()</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -637,11 +682,11 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-magic"></span>
 						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
+						<span class="label label-default">internal</span>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L310-L340" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L319-L357" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::connect()" tabindex="-1" class="structure-title ">
                         connect                        	<small>() : bool</small>
@@ -693,7 +738,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L454-L464" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L471-L481" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::isAutoCommit()" tabindex="-1" class="structure-title ">
                         isAutoCommit                        	<small>() : bool</small>
@@ -744,7 +789,7 @@ configuration, emulated transaction nesting, lazy connecting and more.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L466-L499" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L483-L516" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::setAutoCommit()" tabindex="-1" class="structure-title ">
                         setAutoCommit                        	<small>($autoCommit) : void</small>
@@ -805,7 +850,7 @@ committed. If this method is called and the auto-commit mode is not changed, the
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L501-L516" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L518-L533" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchAssociative()" tabindex="-1" class="structure-title ">
                         fetchAssociative                        	<small>($query, $params = [], $types = []) : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
@@ -872,10 +917,10 @@ as an associative array.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L518-L533" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L535-L550" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchNumeric()" tabindex="-1" class="structure-title ">
-                        fetchNumeric                        	<small>($query, $params = [], $types = []) : <a href="list&lt;$typespace.html#list&lt;" class="fqsen ">list&lt;</a></small>
+                        fetchNumeric                        	<small>($query, $params = [], $types = []) : <a href="list&lt;mixed&gt;$typespace.html#list&lt;mixed&gt;" class="fqsen ">list&lt;mixed&gt;</a><span class="type-separator"></span><wbr>false</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the first row of the result<br />
@@ -906,8 +951,8 @@ as a numerically indexed array.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="list&lt;$typespace.html#list&lt;" class="fqsen ">list&lt;</a></td>
-			<td class="desc"><p>mixed&gt;|false False is returned if no rows are found.</p>
+			<td class="type"><a href="list&lt;mixed&gt;$typespace.html#list&lt;mixed&gt;" class="fqsen ">list&lt;mixed&gt;</a><span class="type-separator"></span><wbr>false</td>
+			<td class="desc"><p>False is returned if no rows are found.</p>
 </td>
 			<td class="rest"></td>
 		</tr>
@@ -939,7 +984,7 @@ as a numerically indexed array.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L535-L550" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L552-L567" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchOne()" tabindex="-1" class="structure-title ">
                         fetchOne                        	<small>($query, $params = [], $types = []) : mixed<span class="type-separator"></span><wbr>false</small>
@@ -1006,7 +1051,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L552-L560" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L569-L577" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::isConnected()" tabindex="-1" class="structure-title ">
                         isConnected                        	<small>() : bool</small>
@@ -1046,7 +1091,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L562-L570" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L579-L587" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::isTransactionActive()" tabindex="-1" class="structure-title ">
                         isTransactionActive                        	<small>() : bool</small>
@@ -1087,7 +1132,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L602-L630" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L619-L647" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::delete()" tabindex="-1" class="structure-title ">
                         delete                        	<small>($table, $criteria, $types = []) : int</small>
@@ -1154,7 +1199,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L632-L641" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L649-L658" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::close()" tabindex="-1" class="structure-title ">
                         close                        	<small>() : void</small>
@@ -1194,7 +1239,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L643-L657" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L660-L674" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::setTransactionIsolation()" tabindex="-1" class="structure-title ">
                         setTransactionIsolation                        	<small>($level) : int</small>
@@ -1249,7 +1294,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L659-L673" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L676-L690" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getTransactionIsolation()" tabindex="-1" class="structure-title ">
                         getTransactionIsolation                        	<small>() : int</small>
@@ -1299,7 +1344,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L675-L709" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L692-L726" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::update()" tabindex="-1" class="structure-title ">
                         update                        	<small>($table, $data, $criteria, $types = []) : int</small>
@@ -1371,7 +1416,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L711-L746" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L728-L763" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::insert()" tabindex="-1" class="structure-title ">
                         insert                        	<small>($table, $data, $types = []) : int</small>
@@ -1438,7 +1483,7 @@ of the first row of the result.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L767-L784" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L784-L801" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::quoteIdentifier()" tabindex="-1" class="structure-title ">
                         quoteIdentifier                        	<small>($str) : string</small>
@@ -1490,7 +1535,7 @@ problems than they solve.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L786-L802" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L803-L819" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::quote()" tabindex="-1" class="structure-title ">
                         quote                        	<small>($value, $type = Doctrine\DBAL\ParameterType::STRING) : mixed</small>
@@ -1524,7 +1569,17 @@ or <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Doct
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                                                                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Platforms-AbstractPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractPlatform::quoteStringLiteral()" class="fqsen "><small>Doctrine\DBAL\Platforms\</small><wbr>AbstractPlatform::quoteStringLiteral()</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -1541,7 +1596,7 @@ or <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Doct
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L804-L818" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L821-L835" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchAllNumeric()" tabindex="-1" class="structure-title ">
                         fetchAllNumeric                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="list&lt;list&lt;mixed&gt;&gt;$typespace.html#list&lt;list&lt;mixed&gt;&gt;" class="fqsen ">list&lt;list&lt;mixed&gt;&gt;</a></small>
@@ -1606,7 +1661,7 @@ or <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Doct
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L820-L834" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L837-L851" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchAllAssociative()" tabindex="-1" class="structure-title ">
                         fetchAllAssociative                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="list&lt;array&lt;string,mixed&gt;&gt;$typespace.html#list&lt;array&lt;string,mixed&gt;&gt;" class="fqsen ">list&lt;array&lt;string,mixed&gt;&gt;</a></small>
@@ -1671,7 +1726,7 @@ or <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Doct
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L836-L851" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L853-L868" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchAllKeyValue()" tabindex="-1" class="structure-title ">
                         fetchAllKeyValue                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="array&lt;mixed,mixed&gt;$typespace.html#array&lt;mixed,mixed&gt;" class="fqsen ">array&lt;mixed,mixed&gt;</a></small>
@@ -1737,7 +1792,7 @@ mapped to the first column and the values mapped to the second column.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L853-L869" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L870-L886" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchAllAssociativeIndexed()" tabindex="-1" class="structure-title ">
                         fetchAllAssociativeIndexed                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="array&lt;mixed,array&lt;string,mixed&gt;&gt;$typespace.html#array&lt;mixed,array&lt;string,mixed&gt;&gt;" class="fqsen ">array&lt;mixed,array&lt;string,mixed&gt;&gt;</a></small>
@@ -1804,7 +1859,7 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L871-L885" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L888-L902" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::fetchFirstColumn()" tabindex="-1" class="structure-title ">
                         fetchFirstColumn                        	<small>($query, $params = [], $types = []) : array<span class="type-separator"></span><wbr><a href="list&lt;mixed&gt;$typespace.html#list&lt;mixed&gt;" class="fqsen ">list&lt;mixed&gt;</a></small>
@@ -1869,7 +1924,7 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L887-L901" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L904-L918" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::iterateNumeric()" tabindex="-1" class="structure-title ">
                         iterateNumeric                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;int,list&lt;mixed&gt;&gt;$typespace.html#Traversable&lt;int,list&lt;mixed&gt;&gt;" class="fqsen ">Traversable&lt;int,list&lt;mixed&gt;&gt;</a></small>
@@ -1934,7 +1989,7 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L903-L918" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L920-L935" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::iterateAssociative()" tabindex="-1" class="structure-title ">
                         iterateAssociative                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;int,array&lt;string,mixed&gt;&gt;$typespace.html#Traversable&lt;int,array&lt;string,mixed&gt;&gt;" class="fqsen ">Traversable&lt;int,array&lt;string,mixed&gt;&gt;</a></small>
@@ -2000,7 +2055,7 @@ as associative arrays.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L920-L935" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L937-L952" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::iterateKeyValue()" tabindex="-1" class="structure-title ">
                         iterateKeyValue                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;mixed,mixed&gt;$typespace.html#Traversable&lt;mixed,mixed&gt;" class="fqsen ">Traversable&lt;mixed,mixed&gt;</a></small>
@@ -2066,7 +2121,7 @@ mapped to the first column and the values mapped to the second column.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L937-L953" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L954-L970" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::iterateAssociativeIndexed()" tabindex="-1" class="structure-title ">
                         iterateAssociativeIndexed                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;mixed,array&lt;string,mixed&gt;&gt;$typespace.html#Traversable&lt;mixed,array&lt;string,mixed&gt;&gt;" class="fqsen ">Traversable&lt;mixed,array&lt;string,mixed&gt;&gt;</a></small>
@@ -2133,7 +2188,7 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L955-L969" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L972-L986" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::iterateColumn()" tabindex="-1" class="structure-title ">
                         iterateColumn                        	<small>($query, $params = [], $types = []) : <a href="http://php.net/manual/ja/class.traversable.php" class="fqsen" target="_blank">\Traversable</a><span class="type-separator"></span><wbr><a href="Traversable&lt;int,mixed&gt;$typespace.html#Traversable&lt;int,mixed&gt;" class="fqsen ">Traversable&lt;int,mixed&gt;</a></small>
@@ -2198,7 +2253,7 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L971-L989" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L988-L1006" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::prepare()" tabindex="-1" class="structure-title ">
                         prepare                        	<small>($sql) : <a href="Doctrine-DBAL-Statement$typespace.html#Doctrine\DBAL\Statement" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Statement</a></small>
@@ -2253,7 +2308,7 @@ and their values.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L991-L1045" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1008-L1062" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::executeQuery()" tabindex="-1" class="structure-title ">
                         executeQuery                        	<small>($sql, $params = [], $types = [], $qcp = null) : <a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></small>
@@ -2325,7 +2380,7 @@ If an SQLLogger is configured, the execution is logged.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1047-L1095" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1064-L1112" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::executeCacheQuery()" tabindex="-1" class="structure-title ">
                         executeCacheQuery                        	<small>($sql, $params, $types, $qcp) : <a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></small>
@@ -2399,7 +2454,7 @@ If an SQLLogger is configured, the execution is logged.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1097-L1153" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1114-L1170" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::executeStatement()" tabindex="-1" class="structure-title ">
                         executeStatement                        	<small>($sql, $params = [], $types = []) : int</small>
@@ -2474,7 +2529,7 @@ If an SQLLogger is configured, the execution is logged.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1155-L1163" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1172-L1180" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getTransactionNestingLevel()" tabindex="-1" class="structure-title ">
                         getTransactionNestingLevel                        	<small>() : int</small>
@@ -2515,7 +2570,7 @@ If an SQLLogger is configured, the execution is logged.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1165-L1194" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1182-L1211" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::lastInsertId()" tabindex="-1" class="structure-title ">
                         lastInsertId                        	<small>($name = null) : string<span class="type-separator"></span><wbr>int<span class="type-separator"></span><wbr>false</small>
@@ -2575,7 +2630,7 @@ columns or sequences.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1196-L1223" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1213-L1240" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::transactional()" tabindex="-1" class="structure-title ">
                         transactional                        	<small>($func) : mixed</small>
@@ -2634,7 +2689,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1225-L1245" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1242-L1262" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::setNestTransactionsWithSavepoints()" tabindex="-1" class="structure-title ">
                         setNestTransactionsWithSavepoints                        	<small>($nestTransactionsWithSavepoints) : void</small>
@@ -2688,7 +2743,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1247-L1255" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1264-L1272" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getNestTransactionsWithSavepoints()" tabindex="-1" class="structure-title ">
                         getNestTransactionsWithSavepoints                        	<small>() : bool</small>
@@ -2728,14 +2783,13 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-protected">protected</span>
-                        			<a href="#L1257-L1266" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1274-L1282" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::_getNestedTransactionSavePointName()" tabindex="-1" class="structure-title ">
-                        _getNestedTransactionSavePointName                        	<small>() : mixed</small>
+                        _getNestedTransactionSavePointName                        	<small>() : string</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"><p>Returns the savepoint name to use for nested transactions are false if they are not supported<br />
-"savepointFormat" parameter is not set</p>
+						<div class="description"><p>Returns the savepoint name to use for nested transactions.</p>
 </div>
                         	<table class="table">
 		<caption>Parameters</caption>
@@ -2746,9 +2800,8 @@ the transaction is rolled back and the exception re-thrown.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">mixed</td>
-			<td class="desc"><p>A string with the savepoint name or false.</p>
-</td>
+			<td class="type">string</td>
+			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
@@ -2770,7 +2823,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1268-L1305" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1284-L1321" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::beginTransaction()" tabindex="-1" class="structure-title ">
                         beginTransaction                        	<small>() : bool</small>
@@ -2818,7 +2871,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1307-L1360" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1323-L1376" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::commit()" tabindex="-1" class="structure-title ">
                         commit                        	<small>() : bool</small>
@@ -2866,7 +2919,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1382-L1432" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1398-L1448" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::rollBack()" tabindex="-1" class="structure-title ">
                         rollBack                        	<small>() : bool</small>
@@ -2915,7 +2968,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1434-L1452" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1450-L1468" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::createSavepoint()" tabindex="-1" class="structure-title ">
                         createSavepoint                        	<small>($savepoint) : void</small>
@@ -2970,7 +3023,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1454-L1476" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1470-L1492" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::releaseSavepoint()" tabindex="-1" class="structure-title ">
                         releaseSavepoint                        	<small>($savepoint) : void</small>
@@ -3025,7 +3078,7 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1478-L1496" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1494-L1512" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::rollbackSavepoint()" tabindex="-1" class="structure-title ">
                         rollbackSavepoint                        	<small>($savepoint) : void</small>
@@ -3078,11 +3131,11 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
+						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1498-L1512" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1514-L1537" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Connection::getWrappedConnection()" tabindex="-1" class="structure-title ">
+					<h4 id="Doctrine\DBAL\Connection::getWrappedConnection()" tabindex="-1" class="structure-title strike">
                         getWrappedConnection                        	<small>() : <a href="Doctrine-DBAL-Driver-Connection$typespace.html#Doctrine\DBAL\Driver\Connection" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Connection</a></small>
 						</h4>
 					<div class="inner-item">
@@ -3129,7 +3182,46 @@ the transaction is rolled back and the exception re-thrown.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1514-L1526" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1539-L1555" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Connection::getNativeConnection()" tabindex="-1" class="structure-title ">
+                        getNativeConnection                        	<small>() : resource<span class="type-separator"></span><wbr>object</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">resource<span class="type-separator"></span><wbr>object</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L1557-L1569" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::createSchemaManager()" tabindex="-1" class="structure-title ">
                         createSchemaManager                        	<small>() : <a href="Doctrine-DBAL-Schema-AbstractSchemaManager$typespace.html#Doctrine\DBAL\Schema\AbstractSchemaManager" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>AbstractSchemaManager</a></small>
@@ -3179,7 +3271,7 @@ database schema through the connection.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1528-L1551" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1571-L1594" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::getSchemaManager()" tabindex="-1" class="structure-title strike">
                         getSchemaManager                        	<small>() : <a href="Doctrine-DBAL-Schema-AbstractSchemaManager$typespace.html#Doctrine\DBAL\Schema\AbstractSchemaManager" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>AbstractSchemaManager</a></small>
@@ -3212,7 +3304,17 @@ database schema through the connection.</p>
 			</tr>
         		</tbody>
 	</table>
-                                                    					</div>
+                                                    	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection::createSchemaManager()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection::createSchemaManager()</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -3229,7 +3331,7 @@ database schema through the connection.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1553-L1568" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1596-L1611" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::setRollbackOnly()" tabindex="-1" class="structure-title ">
                         setRollbackOnly                        	<small>() : void</small>
@@ -3279,7 +3381,7 @@ outcome for the transaction to be rolled back.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1570-L1584" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1613-L1627" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::isRollbackOnly()" tabindex="-1" class="structure-title ">
                         isRollbackOnly                        	<small>() : bool</small>
@@ -3328,7 +3430,7 @@ outcome for the transaction to be rolled back.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1586-L1600" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1629-L1643" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::convertToDatabaseValue()" tabindex="-1" class="structure-title ">
                         convertToDatabaseValue                        	<small>($value, $type) : mixed</small>
@@ -3391,7 +3493,7 @@ rules of a specific DBAL mapping type.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1602-L1616" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1645-L1659" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::convertToPHPValue()" tabindex="-1" class="structure-title ">
                         convertToPHPValue                        	<small>($value, $type) : mixed</small>
@@ -3454,7 +3556,7 @@ rules of a specific DBAL mapping type.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1685-L1693" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1728-L1736" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::createQueryBuilder()" tabindex="-1" class="structure-title ">
                         createQueryBuilder                        	<small>() : <a href="Doctrine-DBAL-Query-QueryBuilder$typespace.html#Doctrine\DBAL\Query\QueryBuilder" class="fqsen "><small>Doctrine\DBAL\Query\</small><wbr>QueryBuilder</a></small>
@@ -3494,7 +3596,7 @@ rules of a specific DBAL mapping type.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1695-L1708" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1738-L1751" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::convertExceptionDuringQuery()" tabindex="-1" class="structure-title ">
                         convertExceptionDuringQuery                        	<small>($e, $sql, $params = [], $types = []) : <a href="Doctrine-DBAL-Exception-DriverException$typespace.html#Doctrine\DBAL\Exception\DriverException" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>DriverException</a></small>
@@ -3553,7 +3655,7 @@ rules of a specific DBAL mapping type.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1710-L1716" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1753-L1759" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::convertException()" tabindex="-1" class="structure-title ">
                         convertException                        	<small>($e) : <a href="Doctrine-DBAL-Exception-DriverException$typespace.html#Doctrine\DBAL\Exception\DriverException" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>DriverException</a></small>
@@ -3597,7 +3699,7 @@ rules of a specific DBAL mapping type.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1777-L1788" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1824-L1835" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::executeUpdate()" tabindex="-1" class="structure-title strike">
                         executeUpdate                        	<small>($sql, $params = [], $types = []) : int</small>
@@ -3654,7 +3756,7 @@ rules of a specific DBAL mapping type.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1790-L1798" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1837-L1845" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::query()" tabindex="-1" class="structure-title strike">
                         query                        	<small>($sql) : <a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></small>
@@ -3699,7 +3801,7 @@ rules of a specific DBAL mapping type.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="#L1800-L1808" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L1847-L1855" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Connection::exec()" tabindex="-1" class="structure-title strike">
                         exec                        	<small>($sql) : int</small>

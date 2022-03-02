@@ -54,7 +54,7 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="#L21-L586" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="#L23-L615" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">Doctrine\DBAL\Schema\Comparator</span></h2>
@@ -83,7 +83,7 @@
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L29-L45" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L33-L49" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Schema\Comparator::__construct()" tabindex="-1" class="structure-title ">
                         __construct                        	<small>($platform = null) : void</small>
@@ -120,33 +120,31 @@
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-danger"></span>
-						<span class="label label-default">static</span>
+						<span class="label label-default"></span>
 						<span class="label label-magic"></span>
 						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L47-L175" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L51-L61" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Schema\Comparator::compareSchemas()" tabindex="-1" class="structure-title ">
-                        compareSchemas                        	<small>($fromSchema, $toSchema) : <a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></small>
+					<h4 id="Doctrine\DBAL\Schema\Comparator::__call()" tabindex="-1" class="structure-title ">
+                        __call                        	<small>($method, $args) : <a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"><p>Returns a SchemaDiff object containing the differences between the schemas $fromSchema and $toSchema.</p>
-<p>This method should be called non-statically since it will be declared as non-static in the next major release.</p>
-</div>
+						<div class="description"></div>
                         	<table class="table">
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Schema-Schema$typespace.html#Doctrine\DBAL\Schema\Schema" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>Schema</a></td>
-				<td class="rest">$fromSchema</td>
+				<td class="type">string</td>
+				<td class="rest">$method</td>
 				<td class="desc"></td>
 			</tr>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Schema-Schema$typespace.html#Doctrine\DBAL\Schema\Schema" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>Schema</a></td>
-				<td class="rest">$toSchema</td>
+				<td class="type">array<span class="type-separator"></span><wbr><a href="list&lt;mixed&gt;$typespace.html#list&lt;mixed&gt;" class="fqsen ">list&lt;mixed&gt;</a></td>
+				<td class="rest">$args</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -161,16 +159,56 @@
 		</tr>
 		</tbody>
 	</table>
-                            	<table class="table">
-		<caption>Throws</caption>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L63-L75" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Comparator::__callStatic()" tabindex="-1" class="structure-title ">
+                        __callStatic                        	<small>($method, $args) : <a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+				<td class="type">string</td>
+				<td class="rest">$method</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr><a href="list&lt;mixed&gt;$typespace.html#list&lt;mixed&gt;" class="fqsen ">list&lt;mixed&gt;</a></td>
+				<td class="rest">$args</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-                                                    					</div>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -187,7 +225,7 @@
 						<span class="label label-default"></span>
 						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="#L177-L193" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L206-L222" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Schema\Comparator::compare()" tabindex="-1" class="structure-title strike">
                         compare                        	<small>($fromSchema, $toSchema) : <a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></small>
@@ -228,7 +266,17 @@
 			</tr>
         		</tbody>
 	</table>
-                                                    					</div>
+                                                    	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Comparator$typespace.html#Doctrine\DBAL\Schema\Comparator::compareSchemas()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>Comparator::compareSchemas()</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -245,7 +293,7 @@
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L210-L220" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L239-L249" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Schema\Comparator::diffSequence()" tabindex="-1" class="structure-title ">
                         diffSequence                        	<small>($sequence1, $sequence2) : bool</small>
@@ -294,7 +342,7 @@
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L222-L351" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L251-L380" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Schema\Comparator::diffTable()" tabindex="-1" class="structure-title ">
                         diffTable                        	<small>($fromTable, $toTable) : <a href="Doctrine-DBAL-Schema-TableDiff$typespace.html#Doctrine\DBAL\Schema\TableDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>TableDiff</a><span class="type-separator"></span><wbr>false</small>
@@ -354,7 +402,7 @@
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L436-L464" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L465-L493" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Schema\Comparator::diffForeignKey()" tabindex="-1" class="structure-title ">
                         diffForeignKey                        	<small>($key1, $key2) : bool</small>
@@ -403,7 +451,7 @@
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L466-L478" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L495-L507" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Schema\Comparator::columnsEqual()" tabindex="-1" class="structure-title ">
                         columnsEqual                        	<small>($column1, $column2) : bool</small>
@@ -462,7 +510,7 @@
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L480-L572" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L509-L601" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Schema\Comparator::diffColumn()" tabindex="-1" class="structure-title ">
                         diffColumn                        	<small>($column1, $column2) : string[]</small>
@@ -514,7 +562,7 @@ string array, otherwise an empty array gets returned.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L574-L585" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L603-L614" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Schema\Comparator::diffIndex()" tabindex="-1" class="structure-title ">
                         diffIndex                        	<small>($index1, $index2) : bool</small>
@@ -544,6 +592,55 @@ differences or false in case there are no differences.</p>
 		<tbody>
 		<tr>
 			<td class="type">bool</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic">magic</span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L26-L26" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Comparator::compareSchemas()" tabindex="-1" class="structure-title ">
+                        compareSchemas                        	<small>($fromSchema, $toSchema) : <a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-Schema$typespace.html#Doctrine\DBAL\Schema\Schema" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>Schema</a></td>
+				<td class="rest">$fromSchema</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-Schema$typespace.html#Doctrine\DBAL\Schema\Schema" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>Schema</a></td>
+				<td class="rest">$toSchema</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaDiff$typespace.html#Doctrine\DBAL\Schema\SchemaDiff" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaDiff</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>

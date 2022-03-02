@@ -77,6 +77,9 @@ trait TableGatewayProvider
     /** @var noprimaryTableGateway */
     public $noprimary;
 
+    /** @var notnullsTableGateway */
+    public $notnulls;
+
     /** @var nullableTableGateway */
     public $nullable;
 
@@ -181,6 +184,9 @@ trait TableGatewayProvider
 
     /** @return noprimaryTableGateway */
     public function noprimary($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsTableGateway */
+    public function notnulls($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableTableGateway */
     public function nullable($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
@@ -1788,6 +1794,74 @@ class noprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function neighbor($predicates = [], $limit = 1) { }
 }
 
+class notnullsTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
+{
+    use TableGatewayProvider;
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
+    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
+    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
+    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
+    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
+    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
+    public function find($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
+    public function findInShare($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
+    public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
+    public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
+    public function findForAffect($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
+    public function neighbor($predicates = [], $limit = 1) { }
+}
+
 class nullableTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
@@ -2781,6 +2855,24 @@ class noprimaryEntity extends \ryunosuke\dbml\Entity\Entity
 {
     /** @var int */
     public $id;
+}
+
+class notnullsEntity extends \ryunosuke\dbml\Entity\Entity
+{
+    /** @var int */
+    public $id;
+
+    /** @var string */
+    public $name;
+
+    /** @var int */
+    public $cint;
+
+    /** @var float */
+    public $cfloat;
+
+    /** @var float|string */
+    public $cdecimal;
 }
 
 class nullableEntity extends \ryunosuke\dbml\Entity\Entity

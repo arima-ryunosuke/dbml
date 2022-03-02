@@ -89,15 +89,15 @@
                 <a href="Doctrine-DBAL-Types-Type$typespace.html#Doctrine\DBAL\Types\Type" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>Type</a>                
 	<ul class="has-indent">
         			<li class="indent">
-                <a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>BlobType</a>                			</li>
-        			<li class="indent">
-                <a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>TextType</a>                			</li>
-        			<li class="indent">
                 <a href="Doctrine-DBAL-Types-BigIntType$typespace.html#Doctrine\DBAL\Types\BigIntType" class="fqsen bold"><small>Doctrine\DBAL\Types\</small><wbr>BigIntType</a>                			</li>
         			<li class="indent">
                 <a href="Doctrine-DBAL-Types-BinaryType$typespace.html#Doctrine\DBAL\Types\BinaryType" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>BinaryType</a>                			</li>
         			<li class="indent">
+                <a href="Doctrine-DBAL-Types-BlobType$typespace.html#Doctrine\DBAL\Types\BlobType" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>BlobType</a>                			</li>
+        			<li class="indent">
                 <a href="Doctrine-DBAL-Types-IntegerType$typespace.html#Doctrine\DBAL\Types\IntegerType" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>IntegerType</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Types-TextType$typespace.html#Doctrine\DBAL\Types\TextType" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>TextType</a>                			</li>
         	</ul>
     			</li>
         	</ul>
@@ -266,7 +266,17 @@ can be used when binding parameters to prepared statements.</p>
 			</tr>
         		</tbody>
 	</table>
-                            					</div>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-ParameterType$typespace.html#Doctrine\DBAL\ParameterType" class="fqsen "><small>Doctrine\DBAL\</small><wbr>ParameterType</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -803,7 +813,7 @@ Type instances are implemented as flyweights.</p>
                         			<a href="#L201-L215" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Types\BigIntType::getTypesMap()" tabindex="-1" class="structure-title ">
-                        getTypesMap                        	<small>() : string[]</small>
+                        getTypesMap                        	<small>() : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Gets the types array map which holds all registered types and the corresponding<br />
@@ -818,8 +828,9 @@ type class</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">string[]</td>
-			<td class="desc"></td>
+			<td class="type"><a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></td>
+			<td class="desc"><p>string&gt;</p>
+</td>
 			<td class="rest"></td>
 		</tr>
 		</tbody>
@@ -849,11 +860,11 @@ type class</p>
 						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
+						<span class="label label-deprecated">deprecated </span>
 						<span class="label label-public">public</span>
-                        			<a href="#L217-L230" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L217-L233" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Types\BigIntType::canRequireSQLConversion()" tabindex="-1" class="structure-title ">
+					<h4 id="Doctrine\DBAL\Types\BigIntType::canRequireSQLConversion()" tabindex="-1" class="structure-title strike">
                         canRequireSQLConversion                        	<small>() : bool</small>
 						</h4>
 					<div class="inner-item">
@@ -888,7 +899,32 @@ does nothing. This method can additionally be used for optimization purposes.</p
 			</tr>
         		</tbody>
 	</table>
-                            					</div>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="convertToDatabaseValueSQL$typespace.html#convertToDatabaseValueSQL" class="fqsen ">convertToDatabaseValueSQL</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">
+                                            <a href="convertToPHPValueSQL$typespace.html#convertToPHPValueSQL" class="fqsen ">convertToPHPValueSQL</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">
+                                            <a href="convertToDatabaseValueSQL$typespace.html#convertToDatabaseValueSQL" class="fqsen ">convertToDatabaseValueSQL</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">
+                                            <a href="convertToPHPValueSQL$typespace.html#convertToPHPValueSQL" class="fqsen ">convertToPHPValueSQL</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -905,7 +941,7 @@ does nothing. This method can additionally be used for optimization purposes.</p
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L232-L242" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L235-L245" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Types\BigIntType::convertToDatabaseValueSQL()" tabindex="-1" class="structure-title ">
                         convertToDatabaseValueSQL                        	<small>($sqlExpr, $platform) : string</small>
@@ -965,7 +1001,7 @@ does nothing. This method can additionally be used for optimization purposes.</p
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L244-L255" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L247-L258" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Types\BigIntType::convertToPHPValueSQL()" tabindex="-1" class="structure-title ">
                         convertToPHPValueSQL                        	<small>($sqlExpr, $platform) : string</small>
@@ -1025,7 +1061,7 @@ does nothing. This method can additionally be used for optimization purposes.</p
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L257-L265" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L260-L268" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Types\BigIntType::getMappedDatabaseTypes()" tabindex="-1" class="structure-title ">
                         getMappedDatabaseTypes                        	<small>($platform) : string[]</small>
@@ -1080,7 +1116,7 @@ does nothing. This method can additionally be used for optimization purposes.</p
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L267-L278" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L270-L281" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Types\BigIntType::requiresSQLCommentHint()" tabindex="-1" class="structure-title ">
                         requiresSQLCommentHint                        	<small>($platform) : bool</small>
