@@ -22,6 +22,19 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.18
+
+- [fixbug][Adhoc] modifier で実在しないカラムにも付与されていた不具合を修正
+- [feature][Database] データ配列を SQL に変換する migrate メソッドを追加
+- [feature][Database] changeArray で bulk や prepare を明示的に指定できるように変更
+- [feature][Database] updateArray に chunk 引数を追加
+- [feature][Database] not null に null を入れようとしたときにフィルタする FilterNullAtNotNullColumn オプションを追加
+- [fixbug][Database] changeArray に空文字主キーが来た場合に更新外削除が不正になる不具合を修正
+- [fixbug][Database] reduce が 0 で呼べない不具合を修正
+- [fixbug][Database] パラメータが空のときに INSERT SET 構文を使うとエラーになる不具合を修正
+- [fixbug][Database] save で親外部キーと子外部キーの名前が違うとエラーになる不具合を修正
+- [fixbug][Database] 状況によっては tablemap の例外が飛ばない不具合を修正
+
 ## 2.0.17
 
 - [feature][Logger] シグネチャで渡ってくる引数が可変になる機能
