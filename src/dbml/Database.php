@@ -726,6 +726,8 @@ class Database
             'cacheProvider'             => null,
             // 初期化後の SQL コマンド（mysql@PDO でいう MYSQL_ATTR_INIT_COMMAND）
             'initCommand'               => null,
+            // スキーマを必要としたときのコールバック
+            'onRequireSchema'           => function (Database $db) { },
             // テーブル名 => Entity クラス名のコンバータ
             'tableMapper'               => function ($table) { return pascal_case($table); },
             // 拡張 INSERT SET 構文を使うか否か（mysql 以外は無視される）
@@ -2295,7 +2297,13 @@ class Database
      */
     public function getSchema()
     {
-        return $this->cache['schema'] ?? $this->cache['schema'] = new Schema($this->connections['slave']->createSchemaManager(), $this->getUnsafeOption('cacheProvider'));
+        if (!isset($this->cache['schema'])) {
+            $cacher = $this->getUnsafeOption('cacheProvider');
+            $callback = $this->getUnsafeOption('onRequireSchema');
+            $this->cache['schema'] = new Schema($this->connections['slave']->createSchemaManager(), $cacher);
+            $callback($this);
+        }
+        return $this->cache['schema'];
     }
 
     /**

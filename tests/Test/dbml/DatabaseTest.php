@@ -478,8 +478,18 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test_getSchema()
     {
-        $database = self::getDummyDatabase();
+        $connection = DriverManager::getConnection([
+            'url' => 'sqlite:///:memory:',
+        ]);
+        $callcount = 0;
+        $database = new Database($connection, [
+            'onRequireSchema' => function () use (&$callcount) {
+                $callcount++;
+            },
+        ]);
+        $this->assertSame($database->getSchema(), $database->getSchema());
         $this->assertSame($database->dryrun()->getSchema(), $database->getSchema());
+        $this->assertEquals(1, $callcount);
     }
 
     function test_getPdo()
