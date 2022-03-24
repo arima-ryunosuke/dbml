@@ -22,6 +22,12 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.19
+
+- [feature][Gateway] nomalize フックを実装
+- [feature][Database] スキーマ漁りのコールバックを実装
+- [fixbug][QueryBuilder] callback で静的クロージャを bind しようとする不具合を修正
+
 ## 2.0.18
 
 - [fixbug][Adhoc] modifier で実在しないカラムにも付与されていた不具合を修正
