@@ -824,6 +824,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             'defaultJoinMethod'     => 'auto',
             // affect 系で無視するスコープ
             'ignoreAffectScope'     => [], // for compatible. In the future the default will be ['']
+            // 行の正規化に nomalize メソッドを使うか
+            'normalization'         => false, // for compatible. In the future the default will be true or delete
             // bindScope が上書きか累積か
             'overrideBindScope'     => false, // for compatible. In the future the default will be true or delete
             // スコープや仮想カラムのメソッドを自動登録するか

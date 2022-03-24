@@ -210,6 +210,14 @@ namespace ryunosuke\Test\Gateway {
         {
             return $db->subcount('t_comment');
         }
+
+        public function normalize($row)
+        {
+            if (isset($row['checks'])) {
+                $row['checks'] = strtoupper($row['checks']);
+            }
+            return $row;
+        }
     }
 
     class Comment extends TableGateway

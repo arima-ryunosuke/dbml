@@ -1561,6 +1561,11 @@ class Database
             unset($row[$autocolumn]);
         }
 
+        $gateway = $this->$table->clone();
+        if ($gateway->getOption('normalization') && method_exists($gateway, 'normalize')) {
+            $row = $gateway->normalize($row);
+        }
+
         return $row;
     }
 

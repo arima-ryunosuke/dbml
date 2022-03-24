@@ -2122,6 +2122,32 @@ FROM t_article Article", $Article->column([
 
     /**
      * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_normalization($gateway, $database)
+    {
+        $database->t_article->setOption('normalization', false);
+
+        $database->t_article->pk(1)->update([
+            'checks' => 'lower string',
+        ]);
+        $this->assertEquals([
+            'checks' => 'lower string',
+        ], $database->t_article->pk(1)->tuple(['checks']));
+
+        $database->t_article->setOption('normalization', true);
+
+        $database->t_article->pk(1)->update([
+            'checks' => 'lower string',
+        ]);
+        $this->assertEquals([
+            'checks' => 'LOWER STRING',
+        ], $database->t_article->pk(1)->tuple(['checks']));
+    }
+
+    /**
+     * @dataProvider provideGateway
      * @param TableGateway $_
      * @param Database $database
      */
