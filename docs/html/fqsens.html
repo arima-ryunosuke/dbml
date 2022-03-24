@@ -24332,12 +24332,15 @@ $qb-&gt;column([
 # No.27： クロージャを返すクロージャ
 $tuple = $qb-&gt;column([
     't_article.*' =&gt; [
-        // クロージャ内の $this は行そのものを表す ArrayAccess なオブジェクトで bind される
-        'func' =&gt; function(){return function($prefix){return $prefix . $this['name'];};},
+        // クロージャ内の $this は行そのものを表す ArrayAccess なオブジェクト（現実装は ArrayObject）で bind される
+        'func'   =&gt; function(){return function($prefix){return $prefix . $this['name'];};},
+        // 静的クロージャは bind されない
+        'static' =&gt; function($row){return function($prefix)use($row){return $prefix . $row['name'];};},
     ],
 ])-&gt;tuple();
-// 'func' にはクロージャが格納されているので呼び出しが可能
-$tuple['func']('prefix-'); // =&gt; 'prefix-hogehoge'
+// 'func' や 'static' にはクロージャが格納されているので呼び出しが可能
+$tuple['func']('prefix-');   // =&gt; 'prefix-hogehoge'
+$tuple['static']('prefix-'); // =&gt; 'prefix-hogehoge'
 
 # No.30, 31：配列で指定する箇所は Gateway も指定できる
 $qb-&gt;column([
