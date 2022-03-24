@@ -38,6 +38,7 @@ use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\first_key;
 use function ryunosuke\dbml\first_keyvalue;
 use function ryunosuke\dbml\first_value;
+use function ryunosuke\dbml\is_bindable_closure;
 use function ryunosuke\dbml\is_hasharray;
 use function ryunosuke\dbml\is_primitive;
 use function ryunosuke\dbml\optional;
@@ -1887,12 +1888,15 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * # No.27： クロージャを返すクロージャ
      * $tuple = $qb->column([
      *     't_article.*' => [
-     *         // クロージャ内の $this は行そのものを表す ArrayAccess なオブジェクトで bind される
-     *         'func' => function(){return function($prefix){return $prefix . $this['name'];};},
+     *         // クロージャ内の $this は行そのものを表す ArrayAccess なオブジェクト（現実装は ArrayObject）で bind される
+     *         'func'   => function(){return function($prefix){return $prefix . $this['name'];};},
+     *         // 静的クロージャは bind されない
+     *         'static' => function($row){return function($prefix)use($row){return $prefix . $row['name'];};},
      *     ],
      * ])->tuple();
-     * // 'func' にはクロージャが格納されているので呼び出しが可能
-     * $tuple['func']('prefix-'); // => 'prefix-hogehoge'
+     * // 'func' や 'static' にはクロージャが格納されているので呼び出しが可能
+     * $tuple['func']('prefix-');   // => 'prefix-hogehoge'
+     * $tuple['static']('prefix-'); // => 'prefix-hogehoge'
      *
      * # No.30, 31：配列で指定する箇所は Gateway も指定できる
      * $qb->column([
@@ -3369,15 +3373,17 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     // 親行がスカラーなのは何かがおかしい
                     assert(!is_primitive(first_value($parents)));
 
-                    if ($row_class === null) {
-                        if ($parents[$n] instanceof Entityable) {
-                            $row_class = $parents[$n];
+                    if (is_bindable_closure($parents[$n][$name])) {
+                        if ($row_class === null) {
+                            if ($parents[$n] instanceof Entityable) {
+                                $row_class = $parents[$n];
+                            }
+                            else {
+                                $row_class = new \ArrayObject($parents[$n], \ArrayObject::ARRAY_AS_PROPS);
+                            }
                         }
-                        else {
-                            $row_class = new \ArrayObject($parents[$n], \ArrayObject::ARRAY_AS_PROPS);
-                        }
+                        $parents[$n][$name] = $parents[$n][$name]->bindTo($row_class);
                     }
-                    $parents[$n][$name] = $parents[$n][$name]->bindTo($row_class);
                 }
             }
         }

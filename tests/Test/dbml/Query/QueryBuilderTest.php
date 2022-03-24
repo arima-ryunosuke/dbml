@@ -3205,15 +3205,26 @@ SQL
     {
         $builder->column([
             'test.*' => [
-                'func' => function () { return function ($arg) { return $this['id'] * $arg; }; },
+                'func'   => function () { return function ($arg) { return $this['id'] * $arg; }; },
+                'this'   => function () { return function () { return $this; }; },
+                'static' => function () { return static function () { return $this; }; },
             ],
         ]);
         $actual = $builder->limit(1)->tuple();
         $this->assertEquals(10, $actual['func'](10));
+        $this->assertInstanceOf(\ArrayObject::class, $actual['this']());
+        $this->assertException('Using $this when not in object context', $actual['static']);
 
-        $actual = $builder->limit(1)->cast()->tuple();
-        /** @noinspection PhpUndefinedMethodInspection */
-        $this->assertEquals(10, $actual->func(10));
+        /**
+         * @noinspection PhpUndefinedFieldInspection
+         * @noinspection PhpUndefinedMethodInspection
+         */
+        {
+            $actual = $builder->limit(1)->cast()->tuple();
+            $this->assertEquals(10, $actual->func(10));
+            $this->assertInstanceOf(Entity::class, $actual->this());
+            $this->assertException('Using $this when not in object context', $actual->static);
+        }
 
         $builder->column([
             'test' => [
