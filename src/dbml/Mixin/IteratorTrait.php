@@ -122,7 +122,7 @@ trait IteratorTrait
      *
      * @return \ArrayIterator 結果セットのイテレータ
      */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         return new \ArrayIterator($this->getResult());
     }
@@ -135,7 +135,7 @@ trait IteratorTrait
      *
      * @return int 結果セットの件数
      */
-    public function count()
+    public function count(): int
     {
         return count($this->getResult());
     }

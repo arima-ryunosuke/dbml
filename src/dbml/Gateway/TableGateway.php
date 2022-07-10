@@ -1133,7 +1133,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @return string クエリ文字列
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->select([])->queryInto();
     }
@@ -1193,7 +1193,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string $offset カラム名
      * @return bool 存在するなら true
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
             return $this->exists($this->_primary($offset));
@@ -1249,6 +1249,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string $offset カラム名あるいはテーブル記法
      * @return $this|array|Entityable|mixed レコード・カラム値・自分自身
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
@@ -1316,6 +1317,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param mixed $value カラム値
      * @return int|array 作用行
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         if ($offset === null) {
@@ -1342,6 +1344,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param mixed $offset
      * @return int|array 作用行
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
@@ -1396,7 +1399,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function as($alias)
     {
-        if (strlen($alias) === 0) {
+        if ("$alias" === "") {
             return $this;
         }
         $that = $this->clone();
@@ -2316,7 +2319,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string|array $having HAVING 句
      * @return int レコード件数
      */
-    public function count($column = [], $where = [], $groupBy = [], $having = [])
+    public function count($column = [], $where = [], $groupBy = [], $having = []): int
     {
         // 引数が来ているならメソッド（Countable::count は引数が来ない）
         if (func_num_args() > 0) {

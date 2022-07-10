@@ -1743,7 +1743,7 @@ class Database
     {
         $schema = $this->getSchema();
 
-        if (!strlen($objectname)) {
+        if ("$objectname" === "") {
             return $this->getSlaveConnection()->createSchemaManager()->createSchema();
         }
 

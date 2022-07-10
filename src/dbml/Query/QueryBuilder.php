@@ -2180,7 +2180,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $direction = null;
         if ($type !== null && $fkeyname !== '') {
             $fcols = $schema->getForeignColumns($table, $fromTable, $fkeyname, $direction) ?: [];
-            if (!$fcols && $fromTable !== null && strlen($fkeyname)) {
+            if (!$fcols && $fromTable !== null && "$fkeyname" !== "") {
                 throw new \UnexpectedValueException("foreign key '$fkeyname' is not exists between $table<->$fromTable.");
             }
         }
@@ -2201,7 +2201,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         }), Adhoc::modifier($joinAlias, $columns, $condition));
 
         // $type の解決
-        if (strcasecmp($type, 'AUTO') === 0) {
+        if (strcasecmp($type ?? '', 'AUTO') === 0) {
             $type = $condition ? 'LEFT' : null;
             if ($fcols) {
                 $cols1 = array_flip(array_values($fcols));
@@ -3128,7 +3128,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $sequencer = new Sequencer($this);
         $items = [];
         do {
-            $n = end($items)[$column] ?? null;
+            $n = end($items)[$column] ?? 0;
             $sequencer->sequence([$column => $n], $chunk, $orderasc, null);
             $items = $sequencer->getItems();
             yield from $items;
@@ -3553,7 +3553,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function hint($hint, $talias = null)
     {
-        if (!strlen($hint)) {
+        if ("$hint" === "") {
             return $this;
         }
         if ($talias === null) {

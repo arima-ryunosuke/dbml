@@ -372,7 +372,7 @@ class TableDescriptor
                 }
                 // それ以外はテーブル指定なしのただのカラム
                 else {
-                    $tables[] = new self($database, null, $val);
+                    $tables[] = new self($database, '', $val);
                 }
             }
             // キー付きなら テーブル名 => カラム名 として扱う
@@ -404,7 +404,7 @@ class TableDescriptor
             && !$schema->hasTable($database->convertTableName($descriptor))
         ) {
             $cols = [$descriptor => $cols];
-            $descriptor = null;
+            $descriptor = '';
         }
 
         $this->descriptor = $descriptor;
@@ -529,7 +529,7 @@ class TableDescriptor
             $this->group = split_noempty(',', preg_replace('#^<|>$#u', '', $group));
         }
 
-        $this->column = split_noempty(',', $column);
+        $this->column = split_noempty(',', "$column");
         foreach (arrayize($cols) as $k => $c) {
             // 素の配列が来たら JOIN 条件
             if (is_int($k) && is_array($c)) {
@@ -612,7 +612,7 @@ class TableDescriptor
             return $this->alias ?: $this->table;
         }
         if (strcasecmp($name, 'jointype') === 0) {
-            if (strlen($this->joinsign) === 0) {
+            if ("$this->joinsign" === "") {
                 return null;
             }
             return array_search($this->joinsign, Database::JOIN_MAPPER, true) ?: throws(new \UnexpectedValueException('undefined joinsign.'));

@@ -37,32 +37,33 @@ class Entity implements Entityable, \IteratorAggregate, JsonSerializable
         return $this->offsetSet($name, $value);
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return array_key_exists($offset, $this->fields);
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         unset($this->fields[$offset]);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->fields[$offset];
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         $this->fields[$offset] = $value;
     }
 
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         yield from $this->fields;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->fields;
     }

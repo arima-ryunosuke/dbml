@@ -77,7 +77,10 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_getDefaultOptions()
     {
         $this->assertException(new \DomainException(), function () {
-            OptionTrait::getDefaultOptions();
+            $stub = new class {
+                use OptionTrait;
+            };
+            $stub::getDefaultOptions();
         });
     }
 

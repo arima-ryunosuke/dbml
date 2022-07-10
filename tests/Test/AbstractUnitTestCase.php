@@ -55,11 +55,13 @@ abstract class AbstractUnitTestCase extends TestCase
             $schemaManager->createDatabase($dbname);
         }
 
+        $driverOptions = [];
+        if ($dbms === 'mysql') {
+            $driverOptions[\PDO::MYSQL_ATTR_LOCAL_INFILE] = true;
+        }
+
         $connection = DriverManager::getConnection($config + [
-                'driverOptions' => [
-                    // for mysql
-                    \PDO::MYSQL_ATTR_LOCAL_INFILE => true,
-                ],
+                'driverOptions' => $driverOptions,
             ]
         );
         $connection->connect();

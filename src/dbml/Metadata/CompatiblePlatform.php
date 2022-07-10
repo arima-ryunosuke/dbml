@@ -689,10 +689,11 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function getGroupConcatSyntax($expr, $separator = null, $order = null)
     {
+        $separator = (string) $separator;
         $qseparator = $this->platform->quoteStringLiteral($separator);
 
         if ($this->platform instanceof SqlitePlatform) {
-            if ($separator === null) {
+            if ($separator === "") {
                 return "GROUP_CONCAT($expr)";
             }
             return "GROUP_CONCAT($expr, $qseparator)";
@@ -708,7 +709,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
                 $query .= " ORDER BY " . implode(', ', $by);
             }
 
-            if ($separator !== null) {
+            if ($separator !== "") {
                 $query .= " SEPARATOR $qseparator";
             }
 
@@ -718,7 +719,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         }
         if ($this->platform instanceof PostgreSQLPlatform) {
             $query = "ARRAY_AGG($expr)";
-            if ($separator !== null) {
+            if ($separator !== "") {
                 $query = "ARRAY_TO_STRING($query, $qseparator)";
             }
             return $query;

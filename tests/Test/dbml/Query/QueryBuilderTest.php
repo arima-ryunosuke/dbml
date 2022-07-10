@@ -3746,9 +3746,9 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
      */
     function test_setSubmethod($builder)
     {
-        $this->assertQuery(null, $builder->reset()->column('foreign_p P')->getSubmethod());
+        $this->assertQuery('', $builder->reset()->column('foreign_p P')->getSubmethod());
         $this->assertQuery('max', $builder->reset()->column('foreign_p P')->setSubmethod('max')->getSubmethod());
-        $this->assertQuery(null, $builder->setSubmethod(null)->getSubmethod());
+        $this->assertQuery('', $builder->setSubmethod(null)->getSubmethod());
 
         $builder->reset();
         $this->assertException('submethod is invalid', L($builder)->setSubmethod(123));

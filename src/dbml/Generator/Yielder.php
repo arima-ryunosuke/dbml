@@ -175,7 +175,7 @@ class Yielder implements \Iterator
     /**
      * @ignore
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->position = 0;
         $this->current = $this->_fetch();
@@ -184,7 +184,7 @@ class Yielder implements \Iterator
     /**
      * @ignore
      */
-    public function next()
+    public function next(): void
     {
         $this->position++;
         $this->current = $this->_fetch();
@@ -193,7 +193,7 @@ class Yielder implements \Iterator
     /**
      * @ignore
      */
-    public function valid()
+    public function valid(): bool
     {
         // 現在行が終わってるなら掃除して終了（false）
         if ($this->current === false) {
@@ -219,12 +219,13 @@ class Yielder implements \Iterator
             }
         }
 
-        return $this->current;
+        return !!$this->current;
     }
 
     /**
      * @ignore
      */
+    #[\ReturnTypeWillChange]
     public function key()
     {
         switch ($this->method) {
@@ -245,6 +246,7 @@ class Yielder implements \Iterator
     /**
      * @ignore
      */
+    #[\ReturnTypeWillChange]
     public function current()
     {
         switch ($this->method) {

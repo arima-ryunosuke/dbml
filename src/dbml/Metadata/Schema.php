@@ -300,7 +300,7 @@ class Schema
     {
         // for compatible
         $parse_ini = function ($inistring) use (&$parse_ini) {
-            $entries = @parse_ini_string($inistring);
+            $entries = @parse_ini_string($inistring ?? '');
             if ($entries === false) {
                 $entries = [];
                 // エラー起因の行を吹き飛ばして再帰（なんかここまでするなら自前パースのほうが楽な気が・・・）
