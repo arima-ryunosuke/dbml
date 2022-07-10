@@ -2,9 +2,14 @@
 
 namespace {
 
+    /**
+     * @template T
+     * @param T $object
+     * @return T
+     */
     function L($object)
     {
-        $dummy = new class($object) {
+        return new class($object) {
             private $object;
 
             public function __construct($object)
@@ -30,8 +35,6 @@ namespace {
                 };
             }
         };
-        /** @var object $dummy */
-        return $dummy ?: $object;
     }
 }
 

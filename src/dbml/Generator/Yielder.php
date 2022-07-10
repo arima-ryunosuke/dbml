@@ -133,11 +133,8 @@ class Yielder implements \Iterator
         }
 
         // 非バッファモードは pdo_mysql しか対応していない（それすら非推奨の流れがあるが…）
-        $conn = $this->connection->getWrappedConnection();
-        if ($conn instanceof \Doctrine\DBAL\Driver\PDO\Connection) {
-            $pdo = $conn->getWrappedConnection();
-        }
-        if (isset($pdo) && $pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'mysql') {
+        $pdo = $this->connection->getNativeConnection();
+        if ($pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'mysql') {
             // @codeCoverageIgnoreStart
             $this->bufferedMode = $this->bufferedMode ?? $pdo->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY);
             $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $mode);

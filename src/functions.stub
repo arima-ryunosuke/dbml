@@ -724,6 +724,9 @@ if (!isset($excluded_functions["arrayize"]) && (!function_exists("ryunosuke\\dbm
     }
 }
 if (function_exists("ryunosuke\\dbml\\arrayize") && !defined("ryunosuke\\dbml\\arrayize")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\arrayize", "ryunosuke\\dbml\\arrayize");
 }
 
@@ -759,6 +762,9 @@ if (!isset($excluded_functions["is_indexarray"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\is_indexarray") && !defined("ryunosuke\\dbml\\is_indexarray")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\is_indexarray", "ryunosuke\\dbml\\is_indexarray");
 }
 
@@ -790,6 +796,9 @@ if (!isset($excluded_functions["is_hasharray"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\is_hasharray") && !defined("ryunosuke\\dbml\\is_hasharray")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\is_hasharray", "ryunosuke\\dbml\\is_hasharray");
 }
 
@@ -820,6 +829,9 @@ if (!isset($excluded_functions["first_key"]) && (!function_exists("ryunosuke\\db
     }
 }
 if (function_exists("ryunosuke\\dbml\\first_key") && !defined("ryunosuke\\dbml\\first_key")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\first_key", "ryunosuke\\dbml\\first_key");
 }
 
@@ -850,6 +862,9 @@ if (!isset($excluded_functions["first_value"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\first_value") && !defined("ryunosuke\\dbml\\first_value")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\first_value", "ryunosuke\\dbml\\first_value");
 }
 
@@ -878,6 +893,9 @@ if (!isset($excluded_functions["first_keyvalue"]) && (!function_exists("ryunosuk
     }
 }
 if (function_exists("ryunosuke\\dbml\\first_keyvalue") && !defined("ryunosuke\\dbml\\first_keyvalue")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\first_keyvalue", "ryunosuke\\dbml\\first_keyvalue");
 }
 
@@ -908,6 +926,9 @@ if (!isset($excluded_functions["last_key"]) && (!function_exists("ryunosuke\\dbm
     }
 }
 if (function_exists("ryunosuke\\dbml\\last_key") && !defined("ryunosuke\\dbml\\last_key")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\last_key", "ryunosuke\\dbml\\last_key");
 }
 
@@ -938,6 +959,9 @@ if (!isset($excluded_functions["last_value"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\last_value") && !defined("ryunosuke\\dbml\\last_value")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\last_value", "ryunosuke\\dbml\\last_value");
 }
 
@@ -963,15 +987,8 @@ if (!isset($excluded_functions["last_keyvalue"]) && (!function_exists("ryunosuke
             return $default;
         }
         if (is_array($array)) {
-            if (function_exists('array_key_last')) {
-                $k = array_key_last($array);
-                return [$k, $array[$k]];
-            }
-            // @codeCoverageIgnoreStart
-            $v = end($array);
-            $k = key($array);
-            return [$k, $v];
-            // @codeCoverageIgnoreEnd
+            $k = array_key_last($array);
+            return [$k, $array[$k]];
         }
         /** @noinspection PhpStatementHasEmptyBodyInspection */
         foreach ($array as $k => $v) {
@@ -986,6 +1003,9 @@ if (!isset($excluded_functions["last_keyvalue"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\last_keyvalue") && !defined("ryunosuke\\dbml\\last_keyvalue")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\last_keyvalue", "ryunosuke\\dbml\\last_keyvalue");
 }
 
@@ -1014,6 +1034,9 @@ if (!isset($excluded_functions["array_add"]) && (!function_exists("ryunosuke\\db
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_add") && !defined("ryunosuke\\dbml\\array_add")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_add", "ryunosuke\\dbml\\array_add");
 }
 
@@ -1060,6 +1083,9 @@ if (!isset($excluded_functions["array_implode"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_implode") && !defined("ryunosuke\\dbml\\array_implode")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_implode", "ryunosuke\\dbml\\array_implode");
 }
 
@@ -1081,7 +1107,7 @@ if (!isset($excluded_functions["array_explode"]) && (!function_exists("ryunosuke
      * // null 要素で分割
      * that(array_explode(['a', null, 'b', 'c'], null))->isSame([['a'], [2 => 'b', 3 => 'c']]);
      * // クロージャで分割（大文字で分割）
-     * that(array_explode(['a', 'B', 'c', 'D', 'e'], function($v){return ctype_upper($v);}))->isSame([['a'], [2 => 'c'], [4 => 'e']]);
+     * that(array_explode(['a', 'B', 'c', 'D', 'e'], fn($v) => ctype_upper($v)))->isSame([['a'], [2 => 'c'], [4 => 'e']]);
      * // 負数指定
      * that(array_explode(['a', null, 'b', null, 'c'], null, -2))->isSame([[0 => 'a', 1 => null, 2 => 'b'], [4 => 'c']]);
      * ```
@@ -1099,7 +1125,7 @@ if (!isset($excluded_functions["array_explode"]) && (!function_exists("ryunosuke
         if ($limit < 0) {
             // キーまで考慮するとかなりややこしくなるので富豪的にやる
             $reverse = array_explode(array_reverse($array, true), $condition, -$limit);
-            $reverse = array_map(function ($v) { return array_reverse($v, true); }, $reverse);
+            $reverse = array_map(fn($v) => array_reverse($v, true), $reverse);
             return array_reverse($reverse);
         }
         // explode において 0 は 1 と等しい
@@ -1139,6 +1165,9 @@ if (!isset($excluded_functions["array_explode"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_explode") && !defined("ryunosuke\\dbml\\array_explode")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_explode", "ryunosuke\\dbml\\array_explode");
 }
 
@@ -1161,7 +1190,7 @@ if (!isset($excluded_functions["array_sprintf"]) && (!function_exists("ryunosuke
      * // 第3引数を与えるとさらに implode される
      * that(array_sprintf($array, '%2$s=%1$s', ' '))->isSame('key1=val1 key2=val2');
      * // クロージャを与えるとコールバック動作になる
-     * $closure = function($v, $k){return "$k=" . strtoupper($v);};
+     * $closure = fn($v, $k) => "$k=" . strtoupper($v);
      * that(array_sprintf($array, $closure, ' '))->isSame('key1=VAL1 key2=VAL2');
      * // 省略すると vsprintf になる
      * that(array_sprintf([
@@ -1181,10 +1210,10 @@ if (!isset($excluded_functions["array_sprintf"]) && (!function_exists("ryunosuke
             $callback = func_user_func_array($format);
         }
         elseif ($format === null) {
-            $callback = function ($v, $k, $n) { return vsprintf($k, is_array($v) ? $v : [$v]); };
+            $callback = fn($v, $k, $n) => vsprintf($k, is_array($v) ? $v : [$v]);
         }
         else {
-            $callback = function ($v, $k, $n) use ($format) { return sprintf($format, $v, $k); };
+            $callback = fn($v, $k, $n) => sprintf($format, $v, $k);
         }
 
         $result = [];
@@ -1201,6 +1230,9 @@ if (!isset($excluded_functions["array_sprintf"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_sprintf") && !defined("ryunosuke\\dbml\\array_sprintf")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_sprintf", "ryunosuke\\dbml\\array_sprintf");
 }
 
@@ -1254,6 +1286,9 @@ if (!isset($excluded_functions["array_strpad"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_strpad") && !defined("ryunosuke\\dbml\\array_strpad")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_strpad", "ryunosuke\\dbml\\array_strpad");
 }
 
@@ -1284,9 +1319,9 @@ if (!isset($excluded_functions["array_get"]) && (!function_exists("ryunosuke\\db
      * // 配列デフォルト（null ではなく [] を返す）
      * that(array_get(['a', 'b', 'c'], [9]))->isSame([]);
      * // クロージャ指定＆単値（コールバックが true を返す最初の要素）
-     * that(array_get(['a', 'b', 'c'], function($v){return in_array($v, ['b', 'c']);}))->isSame('b');
+     * that(array_get(['a', 'b', 'c'], fn($v) => in_array($v, ['b', 'c'])))->isSame('b');
      * // クロージャ指定＆配列（コールバックが true を返すもの）
-     * that(array_get(['a', 'b', 'c'], function($v){return in_array($v, ['b', 'c']);}, []))->isSame([1 => 'b', 2 => 'c']);
+     * that(array_get(['a', 'b', 'c'], fn($v) => in_array($v, ['b', 'c']), []))->isSame([1 => 'b', 2 => 'c']);
      * ```
      *
      * @param array $array 配列
@@ -1338,6 +1373,9 @@ if (!isset($excluded_functions["array_get"]) && (!function_exists("ryunosuke\\db
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_get") && !defined("ryunosuke\\dbml\\array_get")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_get", "ryunosuke\\dbml\\array_get");
 }
 
@@ -1397,6 +1435,9 @@ if (!isset($excluded_functions["array_set"]) && (!function_exists("ryunosuke\\db
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_set") && !defined("ryunosuke\\dbml\\array_set")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_set", "ryunosuke\\dbml\\array_set");
 }
 
@@ -1433,9 +1474,9 @@ if (!isset($excluded_functions["array_put"]) && (!function_exists("ryunosuke\\db
      * that(array_put($array, 'Z', ['x', 'y', 'z']))->isSame('z');
      * that($array)->isSame(['a' => 'A', 'B', 'Z', 'Z', 'z' => 'Z', 'x' => ['y' => ['z' => 'Z']]]);
      * // 第4引数で条件を指定（キーが存在するなら追加しない）
-     * that(array_put($array, 'Z', 'z', function ($v, $k, $array){return !isset($array[$k]);}))->isSame(false);
+     * that(array_put($array, 'Z', 'z', fn($v, $k, $array) => !isset($array[$k])))->isSame(false);
      * // 第4引数で条件を指定（値が存在するなら追加しない）
-     * that(array_put($array, 'Z', null, function ($v, $k, $array){return !in_array($v, $array);}))->isSame(false);
+     * that(array_put($array, 'Z', null, fn($v, $k, $array) => !in_array($v, $array)))->isSame(false);
      * ```
      *
      * @param array $array 配列
@@ -1467,9 +1508,7 @@ if (!isset($excluded_functions["array_put"]) && (!function_exists("ryunosuke\\db
 
         if ($key === null || is_int($key)) {
             $array[] = $value;
-            // compatible array_key_last under 7.3
-            end($array);
-            $key = key($array);
+            $key = array_key_last($array);
         }
         else {
             $array[$key] = $value;
@@ -1478,6 +1517,9 @@ if (!isset($excluded_functions["array_put"]) && (!function_exists("ryunosuke\\db
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_put") && !defined("ryunosuke\\dbml\\array_put")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_put", "ryunosuke\\dbml\\array_put");
 }
 
@@ -1516,7 +1558,7 @@ if (!isset($excluded_functions["array_unset"]) && (!function_exists("ryunosuke\\
      *
      * $array = ['hoge' => 'HOGE', 'fuga' => 'FUGA', 'piyo' => 'PIYO'];
      * // 値に "G" を含むものを返す。その要素は伏せられている
-     * that(array_unset($array, function($v){return strpos($v, 'G') !== false;}))->isSame(['hoge' => 'HOGE', 'fuga' => 'FUGA']);
+     * that(array_unset($array, fn($v) => strpos($v, 'G') !== false))->isSame(['hoge' => 'HOGE', 'fuga' => 'FUGA']);
      * that($array)->isSame(['piyo' => 'PIYO']);
      * ```
      *
@@ -1569,6 +1611,9 @@ if (!isset($excluded_functions["array_unset"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_unset") && !defined("ryunosuke\\dbml\\array_unset")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_unset", "ryunosuke\\dbml\\array_unset");
 }
 
@@ -1629,6 +1674,9 @@ if (!isset($excluded_functions["array_keys_exist"]) && (!function_exists("ryunos
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_keys_exist") && !defined("ryunosuke\\dbml\\array_keys_exist")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_keys_exist", "ryunosuke\\dbml\\array_keys_exist");
 }
 
@@ -1646,9 +1694,9 @@ if (!isset($excluded_functions["array_find"]) && (!function_exists("ryunosuke\\d
      * ```php
      * // 最初に見つかったキーを返す
      * that(array_find(['a', 'b', '9'], 'ctype_digit'))->isSame(2);
-     * that(array_find(['a', 'b', '9'], function($v){return $v === 'b';}))->isSame(1);
+     * that(array_find(['a', 'b', '9'], fn($v) => $v === 'b'))->isSame(1);
      * // 最初に見つかったコールバック結果を返す（最初の数字の2乗を返す）
-     * $ifnumeric2power = function($v){return ctype_digit($v) ? $v * $v : false;};
+     * $ifnumeric2power = fn($v) => ctype_digit($v) ? $v * $v : false;
      * that(array_find(['a', 'b', '9'], $ifnumeric2power, false))->isSame(81);
      * ```
      *
@@ -1675,6 +1723,9 @@ if (!isset($excluded_functions["array_find"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_find") && !defined("ryunosuke\\dbml\\array_find")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_find", "ryunosuke\\dbml\\array_find");
 }
 
@@ -1735,6 +1786,9 @@ if (!isset($excluded_functions["array_rekey"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_rekey") && !defined("ryunosuke\\dbml\\array_rekey")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_rekey", "ryunosuke\\dbml\\array_rekey");
 }
 
@@ -1778,7 +1832,7 @@ if (!isset($excluded_functions["array_map_recursive"]) && (!function_exists("ryu
      * ]);
      *
      * // さらに、自身にも適用できる（呼び出しは子が先で、本当の意味で「すべての要素」で呼び出される）
-     * that((array_map_recursive)([
+     * that(array_map_recursive([
      *     'k' => 'v',
      *     'c' => [
      *         'k1' => 'v1',
@@ -1828,6 +1882,9 @@ if (!isset($excluded_functions["array_map_recursive"]) && (!function_exists("ryu
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_map_recursive") && !defined("ryunosuke\\dbml\\array_map_recursive")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_map_recursive", "ryunosuke\\dbml\\array_map_recursive");
 }
 
@@ -1840,7 +1897,7 @@ if (!isset($excluded_functions["array_map_key"]) && (!function_exists("ryunosuke
      * Example:
      * ```php
      * that(array_map_key(['a' => 'A', 'b' => 'B'], 'strtoupper'))->isSame(['A' => 'A', 'B' => 'B']);
-     * that(array_map_key(['a' => 'A', 'b' => 'B'], function(){}))->isSame([]);
+     * that(array_map_key(['a' => 'A', 'b' => 'B'], function () { }))->isSame([]);
      * ```
      *
      * @param iterable $array 対象配列
@@ -1862,6 +1919,9 @@ if (!isset($excluded_functions["array_map_key"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_map_key") && !defined("ryunosuke\\dbml\\array_map_key")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_map_key", "ryunosuke\\dbml\\array_map_key");
 }
 
@@ -1883,7 +1943,7 @@ if (!isset($excluded_functions["array_maps"]) && (!function_exists("ryunosuke\\d
      * // 値を3乗したあと16進表記にして大文字化する
      * that(array_maps([1, 2, 3, 4, 5], rbind('pow', 3), 'dechex', 'strtoupper'))->isSame(['1', '8', '1B', '40', '7D']);
      * // キーも渡ってくる
-     * that(array_maps(['a' => 'A', 'b' => 'B'], function($v, $k){return "$k:$v";}))->isSame(['a' => 'a:A', 'b' => 'b:B']);
+     * that(array_maps(['a' => 'A', 'b' => 'B'], fn($v, $k) => "$k:$v"))->isSame(['a' => 'a:A', 'b' => 'b:B']);
      * // ... で可変引数コール
      * that(array_maps([[1, 3], [1, 5, 2]], '...range'))->isSame([[1, 2, 3], [1, 3, 5]]);
      * // メソッドコールもできる（引数不要なら `@method` でも同じ）
@@ -1936,6 +1996,9 @@ if (!isset($excluded_functions["array_maps"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_maps") && !defined("ryunosuke\\dbml\\array_maps")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_maps", "ryunosuke\\dbml\\array_maps");
 }
 
@@ -1962,7 +2025,7 @@ if (!isset($excluded_functions["array_kvmap"]) && (!function_exists("ryunosuke\\
      *    'd' => 'D',
      * ];
      * // キーに '_' 、値に 'prefix-' を付与。'b' は一切何もしない。'c' は値のみ。'd' はそれ自体伏せる
-     * that(array_kvmap($array, function($k, $v){
+     * that(array_kvmap($array, function ($k, $v) {
      *     if ($k === 'b') return null;
      *     if ($k === 'd') return [];
      *     if ($k !== 'c') $k = "_$k";
@@ -1974,12 +2037,10 @@ if (!isset($excluded_functions["array_kvmap"]) && (!function_exists("ryunosuke\\
      * ]);
      *
      * // 複数返せばその分増える（要素の水増し）
-     * that(array_kvmap($array, function($k, $v){
-     *     return [
-     *         "{$k}1" => "{$v}1",
-     *         "{$k}2" => "{$v}2",
-     *     ];
-     * }))->isSame([
+     * that(array_kvmap($array, fn($k, $v) => [
+     *     "{$k}1" => "{$v}1",
+     *     "{$k}2" => "{$v}2",
+     * ]))->isSame([
      *    'a1' => 'A1',
      *    'a2' => 'A2',
      *    'b1' => 'B1',
@@ -1999,7 +2060,7 @@ if (!isset($excluded_functions["array_kvmap"]) && (!function_exists("ryunosuke\\
      *             'z' => ['Z'],
      *         ],
      *     ],
-     * ], function($k, $v, $callback){
+     * ], function ($k, $v, $callback) {
      *     // 配列だったら再帰する
      *     return ["_$k" => is_array($v) ? array_kvmap($v, $callback) : "prefix-$v"];
      * }))->isSame([
@@ -2041,6 +2102,9 @@ if (!isset($excluded_functions["array_kvmap"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_kvmap") && !defined("ryunosuke\\dbml\\array_kvmap")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_kvmap", "ryunosuke\\dbml\\array_kvmap");
 }
 
@@ -2063,7 +2127,7 @@ if (!isset($excluded_functions["array_kmap"]) && (!function_exists("ryunosuke\\d
      *     'k1' => 'v1',
      *     'k2' => 'v2',
      *     'k3' => 'v3',
-     * ], function($v, $k){return "$k:$v";}))->isSame([
+     * ], fn($v, $k) => "$k:$v"))->isSame([
      *     'k1' => 'k1:v1',
      *     'k2' => 'k2:v2',
      *     'k3' => 'k3:v3',
@@ -2087,6 +2151,9 @@ if (!isset($excluded_functions["array_kmap"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_kmap") && !defined("ryunosuke\\dbml\\array_kmap")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_kmap", "ryunosuke\\dbml\\array_kmap");
 }
 
@@ -2100,10 +2167,10 @@ if (!isset($excluded_functions["array_nmap"]) && (!function_exists("ryunosuke\\d
      * Example:
      * ```php
      * // 1番目に値を渡して map
-     * $sprintf = function(){return vsprintf('%s%s%s', func_get_args());};
+     * $sprintf = fn() => vsprintf('%s%s%s', func_get_args());
      * that(array_nmap(['a', 'b'], $sprintf, 1, 'prefix-', '-suffix'))->isSame(['prefix-a-suffix', 'prefix-b-suffix']);
      * // 1番目にキー、2番目に値を渡して map
-     * $sprintf = function(){return vsprintf('%s %s %s %s %s', func_get_args());};
+     * $sprintf = fn() => vsprintf('%s %s %s %s %s', func_get_args());
      * that(array_nmap(['k' => 'v'], $sprintf, [1 => 2], 'a', 'b', 'c'))->isSame(['k' => 'a k b v c']);
      * ```
      *
@@ -2164,6 +2231,9 @@ if (!isset($excluded_functions["array_nmap"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_nmap") && !defined("ryunosuke\\dbml\\array_nmap")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_nmap", "ryunosuke\\dbml\\array_nmap");
 }
 
@@ -2173,7 +2243,7 @@ if (!isset($excluded_functions["array_rmap"]) && (!function_exists("ryunosuke\\d
      *
      * Example:
      * ```php
-     * $sprintf = function(){return vsprintf('%s%s', func_get_args());};
+     * $sprintf = fn() => vsprintf('%s%s', func_get_args());
      * that(array_rmap(['a', 'b'], $sprintf, 'prefix-'))->isSame(['prefix-a', 'prefix-b']);
      * ```
      *
@@ -2188,6 +2258,9 @@ if (!isset($excluded_functions["array_rmap"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_rmap") && !defined("ryunosuke\\dbml\\array_rmap")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_rmap", "ryunosuke\\dbml\\array_rmap");
 }
 
@@ -2216,9 +2289,9 @@ if (!isset($excluded_functions["array_each"]) && (!function_exists("ryunosuke\\d
      * Example:
      * ```php
      * // 全要素を文字列的に足し合わせる
-     * that(array_each([1, 2, 3, 4, 5], function(&$carry, $v){$carry .= $v;}, ''))->isSame('12345');
+     * that(array_each([1, 2, 3, 4, 5], function (&$carry, $v) {$carry .= $v;}, ''))->isSame('12345');
      * // 値をキーにして要素を2乗値にする
-     * that(array_each([1, 2, 3, 4, 5], function(&$carry, $v){$carry[$v] = $v * $v;}, []))->isSame([
+     * that(array_each([1, 2, 3, 4, 5], function (&$carry, $v) {$carry[$v] = $v * $v;}, []))->isSame([
      *     1 => 1,
      *     2 => 4,
      *     3 => 9,
@@ -2226,7 +2299,7 @@ if (!isset($excluded_functions["array_each"]) && (!function_exists("ryunosuke\\d
      *     5 => 25,
      * ]);
      * // 上記と同じ。ただし、3 で break する
-     * that(array_each([1, 2, 3, 4, 5], function(&$carry, $v, $k){
+     * that(array_each([1, 2, 3, 4, 5], function (&$carry, $v, $k){
      *     if ($k === 3) return false;
      *     $carry[$v] = $v * $v;
      * }, []))->isSame([
@@ -2236,9 +2309,9 @@ if (!isset($excluded_functions["array_each"]) && (!function_exists("ryunosuke\\d
      * ]);
      *
      * // 下記は完全に同じ（第3引数の代わりにデフォルト引数を使っている）
-     * that(array_each([1, 2, 3], function(&$carry = [], $v = null) {
+     * that(array_each([1, 2, 3], function (&$carry = [], $v = null) {
      *         $carry[$v] = $v * $v;
-     *     }))->isSame(array_each([1, 2, 3], function(&$carry, $v) {
+     *     }))->isSame(array_each([1, 2, 3], function (&$carry, $v) {
      *         $carry[$v] = $v * $v;
      *     }, [])
      *     // 個人的に↑のようなぶら下がり引数があまり好きではない（クロージャを最後の引数にしたい）
@@ -2272,6 +2345,9 @@ if (!isset($excluded_functions["array_each"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_each") && !defined("ryunosuke\\dbml\\array_each")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_each", "ryunosuke\\dbml\\array_each");
 }
 
@@ -2315,13 +2391,16 @@ if (!isset($excluded_functions["array_depth"]) && (!function_exists("ryunosuke\\
             }
 
             // 配下の内で最大を返す
-            return 1 + max(array_map(function ($v) use ($main, $depth) { return $main($v, $depth + 1); }, $arrays));
+            return 1 + max(array_map(fn($v) => $main($v, $depth + 1), $arrays));
         };
 
         return $main($array, 1);
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_depth") && !defined("ryunosuke\\dbml\\array_depth")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_depth", "ryunosuke\\dbml\\array_depth");
 }
 
@@ -2359,6 +2438,9 @@ if (!isset($excluded_functions["array_insert"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_insert") && !defined("ryunosuke\\dbml\\array_insert")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_insert", "ryunosuke\\dbml\\array_insert");
 }
 
@@ -2379,11 +2461,11 @@ if (!isset($excluded_functions["array_count"]) && (!function_exists("ryunosuke\\
      * ```php
      * $array = ['hoge', 'fuga', 'piyo'];
      * // 'o' を含むものの数（2個）
-     * that(array_count($array, function($s){return strpos($s, 'o') !== false;}))->isSame(2);
+     * that(array_count($array, fn($s) => strpos($s, 'o') !== false))->isSame(2);
      * // 'a' と 'o' を含むものをそれぞれ（1個と2個）
      * that(array_count($array, [
-     *     'a' => function($s){return strpos($s, 'a') !== false;},
-     *     'o' => function($s){return strpos($s, 'o') !== false;},
+     *     'a' => fn($s) => strpos($s, 'a') !== false,
+     *     'o' => fn($s) => strpos($s, 'o') !== false,
      * ]))->isSame([
      *     'a' => 1,
      *     'o' => 2,
@@ -2396,10 +2478,10 @@ if (!isset($excluded_functions["array_count"]) && (!function_exists("ryunosuke\\
      *     ['X', 'Y', 'Z'],
      *     [[[['a', 'M', 'Z']]]],
      * ];
-     * that((array_count)($array, [
-     *     'lower' => function ($v) { return !is_array($v) && ctype_lower($v);},
-     *     'upper' => function ($v) { return !is_array($v) && ctype_upper($v);},
-     *     'array' => function ($v) { return is_array($v);},
+     * that(array_count($array, [
+     *     'lower' => fn($v) => !is_array($v) && ctype_lower($v),
+     *     'upper' => fn($v) => !is_array($v) && ctype_upper($v),
+     *     'array' => fn($v) => is_array($v),
      * ], true))->is([
      *     'lower' => 4, // 小文字の数
      *     'upper' => 5, // 大文字の数
@@ -2447,6 +2529,9 @@ if (!isset($excluded_functions["array_count"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_count") && !defined("ryunosuke\\dbml\\array_count")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_count", "ryunosuke\\dbml\\array_count");
 }
 
@@ -2486,6 +2571,9 @@ if (!isset($excluded_functions["array_all"]) && (!function_exists("ryunosuke\\db
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_all") && !defined("ryunosuke\\dbml\\array_all")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_all", "ryunosuke\\dbml\\array_all");
 }
 
@@ -2501,11 +2589,11 @@ if (!isset($excluded_functions["array_order"]) && (!function_exists("ryunosuke\\
      *
      * ```php
      * $orders = [
-     *     'col1' => true,                               // true: 昇順, false: 降順。照合は型に依存
-     *     'col2' => SORT_NATURAL,                       // SORT_NATURAL, SORT_REGULAR などで照合。正数で昇順、負数で降順
-     *     'col3' => ['sort', 'this', 'order'],          // 指定した配列順で昇順
-     *     'col4' => function($v) {return $v;},          // クロージャを通した値で昇順。照合は返り値の型に依存
-     *     'col5' => function($a, $b) {return $a - $b;}, // クロージャで比較して昇順（いわゆる比較関数を渡す）
+     *     'col1' => true,                      // true: 昇順, false: 降順。照合は型に依存
+     *     'col2' => SORT_NATURAL,              // SORT_NATURAL, SORT_REGULAR などで照合。正数で昇順、負数で降順
+     *     'col3' => ['sort', 'this', 'order'], // 指定した配列順で昇順
+     *     'col4' => fn($v) => $v,              // クロージャを通した値で昇順。照合は返り値の型に依存
+     *     'col5' => fn($a, $b) => $a - $b,     // クロージャで比較して昇順（いわゆる比較関数を渡す）
      * ];
      * ```
      *
@@ -2534,12 +2622,10 @@ if (!isset($excluded_functions["array_order"]) && (!function_exists("ryunosuke\\
         }
 
         // 配列内の位置をマップして返すクロージャ
-        $position = function ($columns, $order) {
-            return array_map(function ($v) use ($order) {
-                $ndx = array_search($v, $order, true);
-                return $ndx === false ? count($order) : $ndx;
-            }, $columns);
-        };
+        $position = fn($columns, $order) => array_map(function ($v) use ($order) {
+            $ndx = array_search($v, $order, true);
+            return $ndx === false ? count($order) : $ndx;
+        }, $columns);
 
         // 全要素は舐めてられないので最初の要素を代表選手としてピックアップ
         $first = reset($array);
@@ -2626,6 +2712,9 @@ if (!isset($excluded_functions["array_order"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_order") && !defined("ryunosuke\\dbml\\array_order")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_order", "ryunosuke\\dbml\\array_order");
 }
 
@@ -2674,6 +2763,9 @@ if (!isset($excluded_functions["array_pickup"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_pickup") && !defined("ryunosuke\\dbml\\array_pickup")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_pickup", "ryunosuke\\dbml\\array_pickup");
 }
 
@@ -2701,7 +2793,7 @@ if (!isset($excluded_functions["array_lookup"]) && (!function_exists("ryunosuke\
      *     13 => 'name3',
      * ]);
      * // クロージャを指定すればキーが生成される
-     * that(array_lookup($array, 'name', function ($v, $k) {return $k * 2;}))->isSame([
+     * that(array_lookup($array, 'name', fn($v, $k) => $k * 2))->isSame([
      *     22 => 'name1',
      *     24 => 'name2',
      *     26 => 'name3',
@@ -2727,6 +2819,9 @@ if (!isset($excluded_functions["array_lookup"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_lookup") && !defined("ryunosuke\\dbml\\array_lookup")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_lookup", "ryunosuke\\dbml\\array_lookup");
 }
 
@@ -2776,6 +2871,9 @@ if (!isset($excluded_functions["array_uncolumns"]) && (!function_exists("ryunosu
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_uncolumns") && !defined("ryunosuke\\dbml\\array_uncolumns")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_uncolumns", "ryunosuke\\dbml\\array_uncolumns");
 }
 
@@ -2816,7 +2914,7 @@ if (!isset($excluded_functions["array_convert"]) && (!function_exists("ryunosuke
      *    ],
      * ];
      * // 全要素に 'prefix-' を付与する。キーには '_' をつける。ただし 'k21' はそのままとする。さらに 'k22' はまるごと伏せる。 'k23' は数値キーになる
-     * $callback = function($k, &$v){
+     * $callback = function ($k, &$v) {
      *     if ($k === 'k21') return null;
      *     if ($k === 'k22') return false;
      *     if ($k === 'k23') return true;
@@ -2906,6 +3004,9 @@ if (!isset($excluded_functions["array_convert"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_convert") && !defined("ryunosuke\\dbml\\array_convert")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_convert", "ryunosuke\\dbml\\array_convert");
 }
 
@@ -2985,6 +3086,9 @@ if (!isset($excluded_functions["array_flatten"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_flatten") && !defined("ryunosuke\\dbml\\array_flatten")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_flatten", "ryunosuke\\dbml\\array_flatten");
 }
 
@@ -3066,6 +3170,9 @@ if (!isset($excluded_functions["array_nest"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\array_nest") && !defined("ryunosuke\\dbml\\array_nest")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\array_nest", "ryunosuke\\dbml\\array_nest");
 }
 
@@ -3092,6 +3199,9 @@ if (!isset($excluded_functions["class_shorten"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\class_shorten") && !defined("ryunosuke\\dbml\\class_shorten")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\class_shorten", "ryunosuke\\dbml\\class_shorten");
 }
 
@@ -3215,23 +3325,25 @@ if (!isset($excluded_functions["reflect_types"]) && (!function_exists("ryunosuke
                 return implode('|', $this->toStrings(true, true));
             }
 
-            public function getIterator()
+            public function getIterator(): \Traversable
             {
                 // yield from $this->getTypes();
                 return new \ArrayIterator($this->getTypes());
             }
 
-            public function offsetExists($offset)
+            public function offsetExists($offset): bool
             {
                 return isset($this->$offset);
             }
 
+            /** @noinspection PhpLanguageLevelInspection */
+            #[\ReturnTypeWillChange]
             public function offsetGet($offset)
             {
                 return $this->$offset;
             }
 
-            public function offsetSet($offset, $value)
+            public function offsetSet($offset, $value): void
             {
                 // for debug
                 if (is_string($value)) {
@@ -3247,13 +3359,13 @@ if (!isset($excluded_functions["reflect_types"]) && (!function_exists("ryunosuke
                             $this->builtins = $builtins;
                         }
 
-                        public function getName() { return $this->typename; }
+                        public function getName(): string { return $this->typename; }
 
-                        public function allowsNull() { return $this->nullable; }
+                        public function allowsNull(): bool { return $this->nullable; }
 
-                        public function isBuiltin() { return isset($this->builtins[$this->typename]); }
+                        public function isBuiltin(): bool { return isset($this->builtins[$this->typename]); }
 
-                        public function __toString() { return $this->getName(); }
+                        public function __toString(): string { return $this->getName(); }
                     };
                 }
 
@@ -3264,17 +3376,17 @@ if (!isset($excluded_functions["reflect_types"]) && (!function_exists("ryunosuke
                 $this->$offset = $value;
             }
 
-            public function offsetUnset($offset)
+            public function offsetUnset($offset): void
             {
                 unset($this->$offset);
             }
 
-            public function count()
+            public function count(): int
             {
                 return count($this->toStrings(true, false));
             }
 
-            public function jsonSerialize()
+            public function jsonSerialize(): array
             {
                 return $this->toStrings(true, true);
             }
@@ -3367,7 +3479,7 @@ if (!isset($excluded_functions["reflect_types"]) && (!function_exists("ryunosuke
 
                 if ($sort) {
                     static $orders = null;
-                    $orders = $orders ?? array_flip(array_keys(self::PSEUDO));
+                    $orders ??= array_flip(array_keys(self::PSEUDO));
                     uksort($types, function ($a, $b) use ($orders) {
                         $issetA = isset($orders[$a]);
                         $issetB = isset($orders[$b]);
@@ -3389,6 +3501,9 @@ if (!isset($excluded_functions["reflect_types"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\reflect_types") && !defined("ryunosuke\\dbml\\reflect_types")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\reflect_types", "ryunosuke\\dbml\\reflect_types");
 }
 
@@ -3397,6 +3512,7 @@ if (!isset($excluded_functions["get_object_properties"]) && (!function_exists("r
      * オブジェクトのプロパティを可視・不可視を問わず取得する
      *
      * get_object_vars + no public プロパティを返すイメージ。
+     * クロージャだけは特別扱いで this + use 変数を返す。
      *
      * Example:
      * ```php
@@ -3415,6 +3531,12 @@ if (!isset($excluded_functions["get_object_properties"]) && (!function_exists("r
      *     'code'    => 42,
      *     'oreore'  => 'oreore',
      * ]);
+     *
+     * // クロージャは this と use 変数を返す
+     * that(get_object_properties(fn() => $object))->is([
+     *     'this'   => $this,
+     *     'object' => $object,
+     * ]);
      * ```
      *
      * @param object $object オブジェクト
@@ -3423,24 +3545,48 @@ if (!isset($excluded_functions["get_object_properties"]) && (!function_exists("r
      */
     function get_object_properties($object, &$privates = [])
     {
+        if ($object instanceof \Closure) {
+            $ref = new \ReflectionFunction($object);
+            $uses = method_exists($ref, 'getClosureUsedVariables') ? $ref->getClosureUsedVariables() : $ref->getStaticVariables();
+            return ['this' => $ref->getClosureThis()] + $uses;
+        }
+
         $fields = [];
         foreach ((array) $object as $name => $field) {
+            $cname = '';
             $names = explode("\0", $name);
             if (count($names) > 1) {
                 $name = array_pop($names);
                 $cname = $names[1];
-                if ($cname !== '*' && $cname !== get_class($object)) {
+            }
+            $fields[$cname][$name] = $field;
+        }
+
+        $classname = get_class($object);
+        $parents = array_values(['', '*', $classname] + class_parents($object));
+        uksort($fields, function ($a, $b) use ($parents) {
+            return array_search($a, $parents, true) <=> array_search($b, $parents, true);
+        });
+
+        $result = [];
+        foreach ($fields as $cname => $props) {
+            foreach ($props as $name => $field) {
+                if ($cname !== '' && $cname !== '*' && $classname !== $cname) {
                     $privates[$cname][$name] = $field;
                 }
-            }
-            if (!array_key_exists($name, $fields)) {
-                $fields[$name] = $field;
+                if (!array_key_exists($name, $result)) {
+                    $result[$name] = $field;
+                }
             }
         }
-        return $fields;
+
+        return $result;
     }
 }
 if (function_exists("ryunosuke\\dbml\\get_object_properties") && !defined("ryunosuke\\dbml\\get_object_properties")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\get_object_properties", "ryunosuke\\dbml\\get_object_properties");
 }
 
@@ -3528,7 +3674,7 @@ if (!isset($excluded_functions["date_timestamp"]) && (!function_exists("ryunosuk
             if (!isset($parts['relative'])) {
                 return null;
             }
-            $baseTimestamp = $baseTimestamp ?? time();
+            $baseTimestamp ??= time();
             $parts['year'] = idate('Y', $baseTimestamp);
             $parts['month'] = idate('m', $baseTimestamp);
             $parts['day'] = idate('d', $baseTimestamp);
@@ -3567,6 +3713,9 @@ if (!isset($excluded_functions["date_timestamp"]) && (!function_exists("ryunosuk
     }
 }
 if (function_exists("ryunosuke\\dbml\\date_timestamp") && !defined("ryunosuke\\dbml\\date_timestamp")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\date_timestamp", "ryunosuke\\dbml\\date_timestamp");
 }
 
@@ -3609,7 +3758,7 @@ if (!isset($excluded_functions["date_convert"]) && (!function_exists("ryunosuke\
 
         $replace = function ($string, $char, $replace) {
             $string = preg_replace('/(?<!\\\)' . $char . '/', '${1}' . $replace, $string);
-            return preg_replace('/\\\\' . $char . '/', $char, $string);
+            return preg_replace('/\\\\' . $char . '/', $char, preg_replace('/(?<!\\\)' . $char . '/', '${1}' . $replace, $string));
         };
 
         if (preg_match('/[JbKk]/', $format)) {
@@ -3622,25 +3771,28 @@ if (!isset($excluded_functions["date_convert"]) && (!function_exists("ryunosuke\
                 throw new \InvalidArgumentException("notfound JP_ERA '$datetimedata'");
             }
 
-            $y = idate('Y', $timestamp) - idate('Y', $era['since']) + 1;
+            $y = idate('Y', (int) $timestamp) - idate('Y', $era['since']) + 1;
             $format = $replace($format, 'J', $era['name']);
             $format = $replace($format, 'b', $era['abbr']);
             $format = $replace($format, 'K', $y === 1 ? '元' : $y);
             $format = $replace($format, 'k', $y);
         }
 
-        $format = $replace($format, 'x', ['日', '月', '火', '水', '木', '金', '土'][idate('w', $timestamp)]);
+        $format = $replace($format, 'x', ['日', '月', '火', '水', '木', '金', '土'][idate('w', (int) $timestamp)]);
 
         if (is_float($timestamp)) {
             // datetime パラメータが UNIX タイムスタンプ (例: 946684800) だったり、タイムゾーンを含んでいたり (例: 2010-01-28T15:00:00+02:00) する場合は、 timezone パラメータや現在のタイムゾーンは無視します
             static $dtz = null;
-            $dtz = $dtz ?? new \DateTimeZone(date_default_timezone_get());
+            $dtz ??= new \DateTimeZone(date_default_timezone_get());
             return \DateTime::createFromFormat('U.u', sprintf('%f', $timestamp))->setTimezone($dtz)->format($format);
         }
         return date($format, $timestamp);
     }
 }
 if (function_exists("ryunosuke\\dbml\\date_convert") && !defined("ryunosuke\\dbml\\date_convert")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\date_convert", "ryunosuke\\dbml\\date_convert");
 }
 
@@ -3681,11 +3833,11 @@ if (!isset($excluded_functions["date_fromto"]) && (!function_exists("ryunosuke\\
         [$h, $i, $s] = preg_split('#[^\d]+#u', $time, -1, PREG_SPLIT_NO_EMPTY) + [0 => null, 1 => null, 2 => null];
 
         // "2014/12" と "12/24" の区別はつかないので字数で判断
-        if (strlen($y) <= 2) {
+        if (strlen($y ?? '') <= 2) {
             [$y, $m, $d] = [null, $y, $m];
         }
         // 時刻区切りなし
-        if (strlen($h) > 2) {
+        if (strlen($h ?? '') > 2) {
             [$h, $i, $s] = str_split($h, 2) + [0 => null, 1 => null, 2 => null];
         }
 
@@ -3696,7 +3848,7 @@ if (!isset($excluded_functions["date_fromto"]) && (!function_exists("ryunosuke\\
             return null;
         }
 
-        $y = $y ?? idate('Y');
+        $y ??= idate('Y');
         $ld = $d ?? idate('t', mktime(0, 0, 0, $m ?? 12, 1, $y));
 
         $min = mktime($h ?? 0, $i ?? 0, $s ?? 0, $m ?? 1, $d ?? 1, $y);
@@ -3708,6 +3860,9 @@ if (!isset($excluded_functions["date_fromto"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\date_fromto") && !defined("ryunosuke\\dbml\\date_fromto")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\date_fromto", "ryunosuke\\dbml\\date_fromto");
 }
 
@@ -3751,6 +3906,11 @@ if (!isset($excluded_functions["file_get_arrays"]) && (!function_exists("ryunosu
      */
     function file_get_arrays($filename, $options = [])
     {
+        static $supported_encodings = null;
+        if ($supported_encodings === null) {
+            $supported_encodings = array_combine(array_map('strtolower', mb_list_encodings()), mb_list_encodings());
+        }
+
         if (!file_exists($filename)) {
             throw new \InvalidArgumentException("$filename is not exists");
         }
@@ -3764,7 +3924,8 @@ if (!isset($excluded_functions["file_get_arrays"]) && (!function_exists("ryunosu
         };
 
         $pathinfo = pathinfo($filename);
-        $encoding = pathinfo($pathinfo['filename'], PATHINFO_EXTENSION) ?: $internal_encoding;
+        $encoding = pathinfo($pathinfo['filename'], PATHINFO_EXTENSION);
+        $encoding = $supported_encodings[strtolower($encoding)] ?? $internal_encoding;
         $extension = $pathinfo['extension'] ?? '';
 
         switch (strtolower($extension)) {
@@ -3779,18 +3940,21 @@ if (!isset($excluded_functions["file_get_arrays"]) && (!function_exists("ryunosu
                 return (array) json_import($mb_convert_encoding($encoding, file_get_contents($filename)), $options);
             case 'jsonl':
             case 'jsonl5':
-                return (array) array_map(function ($json) use ($options) { return json_import($json, $options); }, $mb_convert_encoding($encoding, array_filter(file($filename, FILE_IGNORE_NEW_LINES), 'strlen')));
+                return (array) array_map(fn($json) => json_import($json, $options), $mb_convert_encoding($encoding, array_filter(file($filename, FILE_IGNORE_NEW_LINES), 'strlen')));
             case 'yml':
             case 'yaml':
                 return (array) yaml_parse($mb_convert_encoding($encoding, file_get_contents($filename)), 0, $ndocs, $options);
             case 'xml':
                 throw new \DomainException("ext '$extension' is supported in the future.");
             case 'ltsv':
-                return (array) array_map(function ($ltsv) use ($options) { return ltsv_import($ltsv, $options); }, $mb_convert_encoding($encoding, array_filter(file($filename, FILE_IGNORE_NEW_LINES), 'strlen')));
+                return (array) array_map(fn($ltsv) => ltsv_import($ltsv, $options), $mb_convert_encoding($encoding, array_filter(file($filename, FILE_IGNORE_NEW_LINES), 'strlen')));
         }
     }
 }
 if (function_exists("ryunosuke\\dbml\\file_get_arrays") && !defined("ryunosuke\\dbml\\file_get_arrays")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\file_get_arrays", "ryunosuke\\dbml\\file_get_arrays");
 }
 
@@ -3837,6 +4001,9 @@ if (!isset($excluded_functions["file_set_contents"]) && (!function_exists("ryuno
     }
 }
 if (function_exists("ryunosuke\\dbml\\file_set_contents") && !defined("ryunosuke\\dbml\\file_set_contents")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\file_set_contents", "ryunosuke\\dbml\\file_set_contents");
 }
 
@@ -3864,6 +4031,9 @@ if (!isset($excluded_functions["mkdir_p"]) && (!function_exists("ryunosuke\\dbml
     }
 }
 if (function_exists("ryunosuke\\dbml\\mkdir_p") && !defined("ryunosuke\\dbml\\mkdir_p")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\mkdir_p", "ryunosuke\\dbml\\mkdir_p");
 }
 
@@ -3903,6 +4073,9 @@ if (!isset($excluded_functions["fnmatch_or"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\fnmatch_or") && !defined("ryunosuke\\dbml\\fnmatch_or")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\fnmatch_or", "ryunosuke\\dbml\\fnmatch_or");
 }
 
@@ -3952,6 +4125,9 @@ if (!isset($excluded_functions["path_normalize"]) && (!function_exists("ryunosuk
     }
 }
 if (function_exists("ryunosuke\\dbml\\path_normalize") && !defined("ryunosuke\\dbml\\path_normalize")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\path_normalize", "ryunosuke\\dbml\\path_normalize");
 }
 
@@ -4001,6 +4177,9 @@ if (!isset($excluded_functions["rm_rf"]) && (!function_exists("ryunosuke\\dbml\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\rm_rf") && !defined("ryunosuke\\dbml\\rm_rf")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\rm_rf", "ryunosuke\\dbml\\rm_rf");
 }
 
@@ -4051,9 +4230,6 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
                 private $entry;
                 private $id;
                 private $position;
-                // compatible: 下記は php7.4 以降では標準でエラーになるようにあったため基本的に不要
-                private $readable;
-                private $writable;
                 private $appendable;
 
                 public $context;
@@ -4108,7 +4284,7 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
                 public function stream_open(string $path, string $mode, int $options, &$opened_path): bool
                 {
                     assert(is_int($options));
-                    assert(!strlen($opened_path));
+                    assert(is_null($opened_path) || !strlen($opened_path));
                     $this->id = parse_url($path, PHP_URL_HOST);
 
                     // t フラグはクソなので実装しない（デフォルトで b フラグとする）
@@ -4118,8 +4294,6 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
                             throw new \InvalidArgumentException("'$path' is not exist.");
                         }
                         $this->position = 0;
-                        $this->readable = true;
-                        $this->writable = strpos($mode, '+') !== false;
                         $this->appendable = false;
                     }
                     elseif (strpos($mode, 'w') !== false) {
@@ -4127,8 +4301,6 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
                         // ファイルが存在しない場合には、作成を試みます。
                         self::$entries[$this->id] = self::create();
                         $this->position = 0;
-                        $this->readable = strpos($mode, '+') !== false;
-                        $this->writable = true;
                         $this->appendable = false;
                     }
                     elseif (strpos($mode, 'a') !== false) {
@@ -4138,8 +4310,6 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
                             self::$entries[$this->id] = self::create();
                         }
                         $this->position = 0;
-                        $this->readable = strpos($mode, '+') !== false;
-                        $this->writable = true;
                         $this->appendable = true;
                     }
                     elseif (strpos($mode, 'x') !== false) {
@@ -4151,8 +4321,6 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
                         }
                         self::$entries[$this->id] = self::create();
                         $this->position = 0;
-                        $this->readable = strpos($mode, '+') !== false;
-                        $this->writable = true;
                         $this->appendable = false;
                     }
                     elseif (strpos($mode, 'c') !== false) {
@@ -4163,8 +4331,6 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
                             self::$entries[$this->id] = self::create();
                         }
                         $this->position = 0;
-                        $this->readable = strpos($mode, '+') !== false;
-                        $this->writable = true;
                         $this->appendable = false;
                     }
 
@@ -4197,7 +4363,6 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
 
                 public function stream_read(int $count): string
                 {
-                    assert($this->readable);
                     $result = substr($this->entry->content, $this->position, $count);
                     $this->position += strlen($result);
                     return $result;
@@ -4205,7 +4370,6 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
 
                 public function stream_write(string $data): int
                 {
-                    assert($this->writable);
                     $datalen = strlen($data);
                     $posision = $this->position;
                     // このモードは、fseek() では何の効果もありません。書き込みは、常に追記となります。
@@ -4222,7 +4386,6 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
 
                 public function stream_truncate(int $new_size): bool
                 {
-                    assert($this->writable);
                     $current = substr($this->entry->content, 0, $new_size);
                     $this->entry->content = str_pad($current, $new_size, "\0", STR_PAD_RIGHT);
                     return true;
@@ -4364,6 +4527,9 @@ if (!isset($excluded_functions["memory_path"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\memory_path") && !defined("ryunosuke\\dbml\\memory_path")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\memory_path", "ryunosuke\\dbml\\memory_path");
 }
 
@@ -4380,11 +4546,11 @@ if (!isset($excluded_functions["delegate"]) && (!function_exists("ryunosuke\\dbm
      */
     function delegate($invoker, $callable, $arity = null)
     {
-        $arity = $arity ?? parameter_length($callable, true, true);
+        $arity ??= parameter_length($callable, true, true);
 
         if (reflect_callable($callable)->isInternal()) {
             static $cache = [];
-            $cache[$arity] = $cache[$arity] ?? evaluate('return new class()
+            $cache[(string) $arity] ??= evaluate('return new class()
             {
                 private $invoker, $callable;
 
@@ -4397,39 +4563,42 @@ if (!isset($excluded_functions["delegate"]) && (!function_exists("ryunosuke\\dbm
                 }
 
                 public function __invoke(' . implode(',', is_infinite($arity)
-                        ? ['...$_']
-                        : array_map(function ($v) { return '$_' . $v; }, array_keys(array_fill(1, $arity, null)))
-                    ) . ')
+                    ? ['...$_']
+                    : array_map(fn($v) => '$_' . $v, array_keys(array_fill(1, $arity, null)))
+                ) . ')
                 {
                     return ($this->invoker)($this->callable, func_get_args());
                 }
             };');
-            return $cache[$arity]->spawn($invoker, $callable);
+            return $cache[(string) $arity]->spawn($invoker, $callable);
         }
 
         switch (true) {
             case $arity === 0:
-                return function () use ($invoker, $callable) { return $invoker($callable, func_get_args()); };
+                return fn() => $invoker($callable, func_get_args());
             case $arity === 1:
-                return function ($_1) use ($invoker, $callable) { return $invoker($callable, func_get_args()); };
+                return fn($_1) => $invoker($callable, func_get_args());
             case $arity === 2:
-                return function ($_1, $_2) use ($invoker, $callable) { return $invoker($callable, func_get_args()); };
+                return fn($_1, $_2) => $invoker($callable, func_get_args());
             case $arity === 3:
-                return function ($_1, $_2, $_3) use ($invoker, $callable) { return $invoker($callable, func_get_args()); };
+                return fn($_1, $_2, $_3) => $invoker($callable, func_get_args());
             case $arity === 4:
-                return function ($_1, $_2, $_3, $_4) use ($invoker, $callable) { return $invoker($callable, func_get_args()); };
+                return fn($_1, $_2, $_3, $_4) => $invoker($callable, func_get_args());
             case $arity === 5:
-                return function ($_1, $_2, $_3, $_4, $_5) use ($invoker, $callable) { return $invoker($callable, func_get_args()); };
+                return fn($_1, $_2, $_3, $_4, $_5) => $invoker($callable, func_get_args());
             case is_infinite($arity):
-                return function (...$_) use ($invoker, $callable) { return $invoker($callable, func_get_args()); };
+                return fn(...$_) => $invoker($callable, func_get_args());
             default:
-                $args = implode(',', array_map(function ($v) { return '$_' . $v; }, array_keys(array_fill(1, $arity, null))));
+                $args = implode(',', array_map(fn($v) => '$_' . $v, array_keys(array_fill(1, $arity, null))));
                 $stmt = 'return function (' . $args . ') use ($invoker, $callable) { return $invoker($callable, func_get_args()); };';
                 return eval($stmt);
         }
     }
 }
 if (function_exists("ryunosuke\\dbml\\delegate") && !defined("ryunosuke\\dbml\\delegate")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\delegate", "ryunosuke\\dbml\\delegate");
 }
 
@@ -4456,6 +4625,9 @@ if (!isset($excluded_functions["nbind"]) && (!function_exists("ryunosuke\\dbml\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\nbind") && !defined("ryunosuke\\dbml\\nbind")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\nbind", "ryunosuke\\dbml\\nbind");
 }
 
@@ -4479,6 +4651,9 @@ if (!isset($excluded_functions["rbind"]) && (!function_exists("ryunosuke\\dbml\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\rbind") && !defined("ryunosuke\\dbml\\rbind")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\rbind", "ryunosuke\\dbml\\rbind");
 }
 
@@ -4517,6 +4692,9 @@ if (!isset($excluded_functions["reflect_callable"]) && (!function_exists("ryunos
     }
 }
 if (function_exists("ryunosuke\\dbml\\reflect_callable") && !defined("ryunosuke\\dbml\\reflect_callable")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\reflect_callable", "ryunosuke\\dbml\\reflect_callable");
 }
 
@@ -4528,13 +4706,13 @@ if (!isset($excluded_functions["callable_code"]) && (!function_exists("ryunosuke
      *
      * Example:
      * ```php
-     * list($meta, $body) = callable_code(function(...$args){return true;});
-     * that($meta)->isSame('function(...$args)');
+     * list($meta, $body) = callable_code(function (...$args) {return true;});
+     * that($meta)->isSame('function (...$args)');
      * that($body)->isSame('{return true;}');
      *
      * // ReflectionFunctionAbstract を渡しても動作する
-     * list($meta, $body) = callable_code(new \ReflectionFunction(function(...$args){return true;}));
-     * that($meta)->isSame('function(...$args)');
+     * list($meta, $body) = callable_code(new \ReflectionFunction(function (...$args) {return true;}));
+     * that($meta)->isSame('function (...$args)');
      * that($body)->isSame('{return true;}');
      * ```
      *
@@ -4565,6 +4743,9 @@ if (!isset($excluded_functions["callable_code"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\callable_code") && !defined("ryunosuke\\dbml\\callable_code")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\callable_code", "ryunosuke\\dbml\\callable_code");
 }
 
@@ -4575,7 +4756,7 @@ if (!isset($excluded_functions["call_safely"]) && (!function_exists("ryunosuke\\
      * Example:
      * ```php
      * try {
-     *     call_safely(function(){return []['dummy'];});
+     *     call_safely(fn() => []['dummy']);
      * }
      * catch (\Exception $ex) {
      *     that($ex->getMessage())->containsAll(['Undefined', 'dummy']);
@@ -4604,6 +4785,9 @@ if (!isset($excluded_functions["call_safely"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\call_safely") && !defined("ryunosuke\\dbml\\call_safely")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\call_safely", "ryunosuke\\dbml\\call_safely");
 }
 
@@ -4613,8 +4797,8 @@ if (!isset($excluded_functions["is_bindable_closure"]) && (!function_exists("ryu
      *
      * Example:
      * ```php
-     * that(is_bindable_closure(function(){}))->isTrue();
-     * that(is_bindable_closure(static function(){}))->isFalse();
+     * that(is_bindable_closure(function () {}))->isTrue();
+     * that(is_bindable_closure(static function () {}))->isFalse();
      * ```
      *
      * @param \Closure $closure 調べるクロージャ
@@ -4626,6 +4810,9 @@ if (!isset($excluded_functions["is_bindable_closure"]) && (!function_exists("ryu
     }
 }
 if (function_exists("ryunosuke\\dbml\\is_bindable_closure") && !defined("ryunosuke\\dbml\\is_bindable_closure")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\is_bindable_closure", "ryunosuke\\dbml\\is_bindable_closure");
 }
 
@@ -4684,6 +4871,9 @@ if (!isset($excluded_functions["parameter_length"]) && (!function_exists("ryunos
     }
 }
 if (function_exists("ryunosuke\\dbml\\parameter_length") && !defined("ryunosuke\\dbml\\parameter_length")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\parameter_length", "ryunosuke\\dbml\\parameter_length");
 }
 
@@ -4711,7 +4901,7 @@ if (!isset($excluded_functions["func_user_func_array"]) && (!function_exists("ry
     {
         // null は第1引数を返す特殊仕様
         if ($callback === null) {
-            return function ($v) { return $v; };
+            return fn($v) => $v;
         }
         // クロージャはユーザ定義しかありえないので調べる必要がない
         if ($callback instanceof \Closure) {
@@ -4732,6 +4922,9 @@ if (!isset($excluded_functions["func_user_func_array"]) && (!function_exists("ry
     }
 }
 if (function_exists("ryunosuke\\dbml\\func_user_func_array") && !defined("ryunosuke\\dbml\\func_user_func_array")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\func_user_func_array", "ryunosuke\\dbml\\func_user_func_array");
 }
 
@@ -4773,6 +4966,9 @@ if (!isset($excluded_functions["sql_quote"]) && (!function_exists("ryunosuke\\db
     }
 }
 if (function_exists("ryunosuke\\dbml\\sql_quote") && !defined("ryunosuke\\dbml\\sql_quote")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\sql_quote", "ryunosuke\\dbml\\sql_quote");
 }
 
@@ -4817,6 +5013,9 @@ if (!isset($excluded_functions["sql_bind"]) && (!function_exists("ryunosuke\\dbm
     }
 }
 if (function_exists("ryunosuke\\dbml\\sql_bind") && !defined("ryunosuke\\dbml\\sql_bind")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\sql_bind", "ryunosuke\\dbml\\sql_bind");
 }
 
@@ -4837,7 +5036,7 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
     function sql_format($sql, $options = [])
     {
         static $keywords;
-        $keywords = $keywords ?? array_flip(KEYWORDS);
+        $keywords ??= array_flip(KEYWORDS);
 
         $options += [
             // インデント文字
@@ -4864,16 +5063,16 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
         if (is_string($options['highlight'])) {
             $rules = [
                 'cli'  => [
-                    'KEYWORD' => function ($token) { return "\e[1m" . $token . "\e[m"; },
-                    'COMMENT' => function ($token) { return "\e[33m" . $token . "\e[m"; },
-                    'STRING'  => function ($token) { return "\e[31m" . $token . "\e[m"; },
-                    'NUMBER'  => function ($token) { return "\e[36m" . $token . "\e[m"; },
+                    'KEYWORD' => fn($token) => "\e[1m" . $token . "\e[m",
+                    'COMMENT' => fn($token) => "\e[33m" . $token . "\e[m",
+                    'STRING'  => fn($token) => "\e[31m" . $token . "\e[m",
+                    'NUMBER'  => fn($token) => "\e[36m" . $token . "\e[m",
                 ],
                 'html' => [
-                    'KEYWORD' => function ($token) { return "<span style='font-weight:bold;'>" . htmlspecialchars($token) . "</span>"; },
-                    'COMMENT' => function ($token) { return "<span style='color:#FF8000;'>" . htmlspecialchars($token) . "</span>"; },
-                    'STRING'  => function ($token) { return "<span style='color:#DD0000;'>" . htmlspecialchars($token) . "</span>"; },
-                    'NUMBER'  => function ($token) { return "<span style='color:#0000BB;'>" . htmlspecialchars($token) . "</span>"; },
+                    'KEYWORD' => fn($token) => "<span style='font-weight:bold;'>" . htmlspecialchars($token, ENT_QUOTES) . "</span>",
+                    'COMMENT' => fn($token) => "<span style='color:#FF8000;'>" . htmlspecialchars($token, ENT_QUOTES) . "</span>",
+                    'STRING'  => fn($token) => "<span style='color:#DD0000;'>" . htmlspecialchars($token, ENT_QUOTES) . "</span>",
+                    'NUMBER'  => fn($token) => "<span style='color:#0000BB;'>" . htmlspecialchars($token, ENT_QUOTES) . "</span>",
                 ],
             ];
             $rule = $rules[$options['highlight']] ?? throws(new \InvalidArgumentException('highlight must be "cli" or "html".'));
@@ -5256,9 +5455,7 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                 "(?<R>$MARK_R)",
                 "(?<N>$MARK_N)",
             ]) . "#u", [
-            'indent' => function ($str) use ($options, $MARK_NT, $MARK_SP) {
-                return "\n" . str_repeat($options['indent'], (substr_count($str, $MARK_NT) + substr_count($str, $MARK_SP)));
-            },
+            'indent' => fn($str) => "\n" . str_repeat($options['indent'], (substr_count($str, $MARK_NT) + substr_count($str, $MARK_SP))),
             'cs1'    => "\n" . $options['indent'],
             'cs2'    => "",
             'br'     => "\n",
@@ -5274,6 +5471,9 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\sql_format") && !defined("ryunosuke\\dbml\\sql_format")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\sql_format", "ryunosuke\\dbml\\sql_format");
 }
 
@@ -5299,7 +5499,7 @@ if (!isset($excluded_functions["concat"]) && (!function_exists("ryunosuke\\dbml\
     {
         $result = '';
         foreach ($variadic as $s) {
-            if (strlen($s) === 0) {
+            if (strlen($s = (string) $s) === 0) {
                 return '';
             }
             $result .= $s;
@@ -5308,6 +5508,9 @@ if (!isset($excluded_functions["concat"]) && (!function_exists("ryunosuke\\dbml\
     }
 }
 if (function_exists("ryunosuke\\dbml\\concat") && !defined("ryunosuke\\dbml\\concat")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\concat", "ryunosuke\\dbml\\concat");
 }
 
@@ -5350,6 +5553,9 @@ if (!isset($excluded_functions["split_noempty"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\split_noempty") && !defined("ryunosuke\\dbml\\split_noempty")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\split_noempty", "ryunosuke\\dbml\\split_noempty");
 }
 
@@ -5358,8 +5564,6 @@ if (!isset($excluded_functions["quoteexplode"]) && (!function_exists("ryunosuke\
      * エスケープやクオートに対応した explode
      *
      * $enclosures は配列で開始・終了文字が別々に指定できるが、実装上の都合で今のところ1文字ずつのみ。
-     *
-     * 歴史的な理由により第3引数は $limit でも $enclosures でもどちらでも渡すことができる。
      *
      * Example:
      * ```php
@@ -5372,16 +5576,10 @@ if (!isset($excluded_functions["quoteexplode"]) && (!function_exists("ryunosuke\
      * ]);
      *
      * // $enclosures で囲い文字の開始・終了文字を明示できる
-     * that(quoteexplode(',', 'a,b,{e,f}', ['{' => '}']))->isSame([
+     * that(quoteexplode(',', 'a,b,{e,f}', null, ['{' => '}']))->isSame([
      *     'a', // 普通に分割される
      *     'b', // 普通に分割される
      *     '{e,f}', // { } で囲まれているので区切り文字とみなされない
-     * ]);
-     *
-     * // このように第3引数に $limit 引数を差し込むことができる
-     * that(quoteexplode(',', 'a,b,{e,f}', 2, ['{' => '}']))->isSame([
-     *     'a',
-     *     'b,{e,f}',
      * ]);
      * ```
      *
@@ -5394,15 +5592,6 @@ if (!isset($excluded_functions["quoteexplode"]) && (!function_exists("ryunosuke\
      */
     function quoteexplode($delimiter, $string, $limit = null, $enclosures = "'\"", $escape = '\\')
     {
-        // for compatible 1.3.x
-        if (!is_int($limit) && $limit !== null) {
-            if (func_num_args() > 3) {
-                $escape = $enclosures;
-            }
-            $enclosures = $limit;
-            $limit = PHP_INT_MAX;
-        }
-
         if ($limit === null) {
             $limit = PHP_INT_MAX;
         }
@@ -5434,6 +5623,9 @@ if (!isset($excluded_functions["quoteexplode"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\quoteexplode") && !defined("ryunosuke\\dbml\\quoteexplode")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\quoteexplode", "ryunosuke\\dbml\\quoteexplode");
 }
 
@@ -5479,6 +5671,9 @@ if (!isset($excluded_functions["strpos_array"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\strpos_array") && !defined("ryunosuke\\dbml\\strpos_array")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\strpos_array", "ryunosuke\\dbml\\strpos_array");
 }
 
@@ -5503,7 +5698,7 @@ if (!isset($excluded_functions["strpos_quoted"]) && (!function_exists("ryunosuke
      */
     function strpos_quoted($haystack, $needle, $offset = 0, $enclosure = "'\"", $escape = '\\')
     {
-        if (is_string($enclosure) || is_null($enclosure)) {
+        if (is_string($enclosure)) {
             if (strlen($enclosure)) {
                 $chars = str_split($enclosure);
                 $enclosure = array_combine($chars, $chars);
@@ -5552,6 +5747,9 @@ if (!isset($excluded_functions["strpos_quoted"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\strpos_quoted") && !defined("ryunosuke\\dbml\\strpos_quoted")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\strpos_quoted", "ryunosuke\\dbml\\strpos_quoted");
 }
 
@@ -5599,6 +5797,9 @@ if (!isset($excluded_functions["str_exists"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\str_exists") && !defined("ryunosuke\\dbml\\str_exists")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\str_exists", "ryunosuke\\dbml\\str_exists");
 }
 
@@ -5614,12 +5815,12 @@ if (!isset($excluded_functions["str_chop"]) && (!function_exists("ryunosuke\\dbm
      * ```
      *
      * @param string $string 対象文字列
-     * @param ?string $prefix 削ぎ落とす先頭文字列
-     * @param ?string $suffix 削ぎ落とす末尾文字列
+     * @param string $prefix 削ぎ落とす先頭文字列
+     * @param string $suffix 削ぎ落とす末尾文字列
      * @param bool $case_insensitivity 大文字小文字を無視するか
      * @return string 削ぎ落とした文字列
      */
-    function str_chop($string, $prefix = null, $suffix = null, $case_insensitivity = false)
+    function str_chop($string, $prefix = '', $suffix = '', $case_insensitivity = false)
     {
         $pattern = [];
         if (strlen($prefix)) {
@@ -5633,6 +5834,9 @@ if (!isset($excluded_functions["str_chop"]) && (!function_exists("ryunosuke\\dbm
     }
 }
 if (function_exists("ryunosuke\\dbml\\str_chop") && !defined("ryunosuke\\dbml\\str_chop")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\str_chop", "ryunosuke\\dbml\\str_chop");
 }
 
@@ -5654,10 +5858,13 @@ if (!isset($excluded_functions["str_lchop"]) && (!function_exists("ryunosuke\\db
      */
     function str_lchop($string, $prefix, $case_insensitivity = false)
     {
-        return str_chop($string, $prefix, null, $case_insensitivity);
+        return str_chop($string, $prefix, '', $case_insensitivity);
     }
 }
 if (function_exists("ryunosuke\\dbml\\str_lchop") && !defined("ryunosuke\\dbml\\str_lchop")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\str_lchop", "ryunosuke\\dbml\\str_lchop");
 }
 
@@ -5739,6 +5946,9 @@ if (!isset($excluded_functions["str_subreplace"]) && (!function_exists("ryunosuk
     }
 }
 if (function_exists("ryunosuke\\dbml\\str_subreplace") && !defined("ryunosuke\\dbml\\str_subreplace")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\str_subreplace", "ryunosuke\\dbml\\str_subreplace");
 }
 
@@ -5788,7 +5998,7 @@ if (!isset($excluded_functions["str_embed"]) && (!function_exists("ryunosuke\\db
 
         // 長いキーから処理するためソートしておく
         $replacemap = arrayval($replacemap, false);
-        uksort($replacemap, function ($a, $b) { return strlen($b) - strlen($a); });
+        uksort($replacemap, fn($a, $b) => strlen($b) - strlen($a));
         $srcs = array_keys($replacemap);
 
         $counter = array_fill_keys(array_keys($replacemap), 0);
@@ -5821,6 +6031,9 @@ if (!isset($excluded_functions["str_embed"]) && (!function_exists("ryunosuke\\db
     }
 }
 if (function_exists("ryunosuke\\dbml\\str_embed") && !defined("ryunosuke\\dbml\\str_embed")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\str_embed", "ryunosuke\\dbml\\str_embed");
 }
 
@@ -5891,14 +6104,17 @@ if (!isset($excluded_functions["str_between"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\str_between") && !defined("ryunosuke\\dbml\\str_between")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\str_between", "ryunosuke\\dbml\\str_between");
 }
 
 if (!isset($excluded_functions["str_ellipsis"]) && (!function_exists("ryunosuke\\dbml\\str_ellipsis") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\str_ellipsis"))->isInternal()))) {
     /**
-     * 文字列を指定幅に丸める
+     * 文字列を指定数に丸める
      *
-     * mb_strimwidth と機能的には同じだが、省略文字の差し込み位置を $pos で指定できる。
+     * mb_strimwidth と似ているが、省略文字の差し込み位置を $pos で指定できる。
      * $pos は負数が指定できる。負数の場合後ろから数えられる。
      * 省略した場合は真ん中となる。
      *
@@ -5933,7 +6149,7 @@ if (!isset($excluded_functions["str_ellipsis"]) && (!function_exists("ryunosuke\
         }
 
         $length = $width - $markerlen;
-        $pos = $pos ?? $length / 2;
+        $pos ??= (int) ($length / 2);
         if ($pos < 0) {
             $pos += $length;
         }
@@ -5943,6 +6159,9 @@ if (!isset($excluded_functions["str_ellipsis"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\str_ellipsis") && !defined("ryunosuke\\dbml\\str_ellipsis")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\str_ellipsis", "ryunosuke\\dbml\\str_ellipsis");
 }
 
@@ -5965,6 +6184,9 @@ if (!isset($excluded_functions["pascal_case"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\pascal_case") && !defined("ryunosuke\\dbml\\pascal_case")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\pascal_case", "ryunosuke\\dbml\\pascal_case");
 }
 
@@ -5987,6 +6209,9 @@ if (!isset($excluded_functions["snake_case"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\snake_case") && !defined("ryunosuke\\dbml\\snake_case")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\snake_case", "ryunosuke\\dbml\\snake_case");
 }
 
@@ -6023,6 +6248,9 @@ if (!isset($excluded_functions["namespace_split"]) && (!function_exists("ryunosu
     }
 }
 if (function_exists("ryunosuke\\dbml\\namespace_split") && !defined("ryunosuke\\dbml\\namespace_split")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\namespace_split", "ryunosuke\\dbml\\namespace_split");
 }
 
@@ -6188,6 +6416,9 @@ if (!isset($excluded_functions["csv_import"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\csv_import") && !defined("ryunosuke\\dbml\\csv_import")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\csv_import", "ryunosuke\\dbml\\csv_import");
 }
 
@@ -6214,9 +6445,6 @@ if (!isset($excluded_functions["json_import"]) && (!function_exists("ryunosuke\\
      * that(json_import('{a: "A", b: "B", }'))->is(['a' => 'A', 'b' => 'B']);
      * ```
      *
-     * @license MIT https://github.com/colinodell/json5
-     * @copyright Copyright (c) 2017-2019 Colin O'Dell colinodell@gmail.com. Based on https://github.com/json5/json5; Copyright (c) 2012-2016 Aseem Kishore, and others.
-     *
      * @param string $value JSON 文字列
      * @param array $options JSON_*** をキーにした連想配列。値が false は指定されていないとみなされる
      * @return mixed decode された値
@@ -6224,7 +6452,7 @@ if (!isset($excluded_functions["json_import"]) && (!function_exists("ryunosuke\\
     function json_import($value, $options = [])
     {
         $specials = [
-            JSON_OBJECT_AS_ARRAY => true, // 個人的嗜好だが連想配列のほうが扱いやすい
+            JSON_OBJECT_AS_ARRAY          => true, // 個人的嗜好だが連想配列のほうが扱いやすい
             JSON_MAX_DEPTH       => 512,
             JSON_ES5             => null,
             JSON_INT_AS_STRING   => false,
@@ -6255,436 +6483,273 @@ if (!isset($excluded_functions["json_import"]) && (!function_exists("ryunosuke\\
         }
 
         // 上記を通り抜けたら json5 で試行
-        $json5_decoder = new class() {
-            private $json;
-            private $associative;
-            private $maxDepth;
-            private $bigIntToString;
-            private $intToString;
-            private $floatToString;
+        $parser = new class($value) {
+            private $json_string;
+            private $type;
+            private $begin_position;
+            private $end_position;
+            private $keys;
+            private $values;
 
-            private $currentByte;
-            private $lineNumber          = 1;
-            private $currentLineStartsAt = 0;
-            private $at                  = 0;
-            private $depth               = 1;
-
-            public function __invoke($json, $options)
+            public function __construct($json_string)
             {
-                $this->json = $json;
-                $this->associative = !!$options[JSON_OBJECT_AS_ARRAY];
-                $this->maxDepth = (int) $options[JSON_MAX_DEPTH];
-                $this->bigIntToString = !!$options[JSON_BIGINT_AS_STRING];
-                $this->intToString = !!$options[JSON_INT_AS_STRING];
-                $this->floatToString = !!$options[JSON_FLOAT_AS_STRING];
-
-                $this->currentByte = $this->json[0] ?? null;
-
-                $result = $this->value();
-                $this->white();
-                if ($this->currentByte) {
-                    throw $this->exception('Syntax error');
-                }
-                return $result;
+                $this->json_string = "[$json_string]";
             }
 
-            private function next()
+            public function parse($options)
             {
-                // Get the next character. When there are no more characters, return the empty string.
-                if ($this->peek("\n") || $this->peek("\r", "\n")) {
-                    $this->lineNumber++;
-                    $this->currentLineStartsAt = $this->at + 1;
+                error_clear_last();
+                $tokens = @parse_php($this->json_string, [
+                    'cache' => false,
+                ]);
+                $error = error_get_last();
+                if (strpos($error['message'] ?? '', 'Unterminated comment') !== false) {
+                    throw new \ErrorException(sprintf('%s at line %d of the JSON5 data', "Unterminated block comment", $error['line']));
                 }
+                array_shift($tokens);
 
-                return $this->currentByte = $this->json[++$this->at] ?? null;
-            }
-
-            private function nextOrFail(...$chars)
-            {
-                foreach ($chars as $char) {
-                    $char = is_int($char) ? chr($char) : $char;
-                    if ($char !== $this->currentByte) {
-                        throw $this->exception(sprintf('Expected %s instead of %s', $this->renderChar($char), $this->renderChar($this->currentChar())));
+                $braces = [];
+                for ($i = 0; $i < count($tokens); $i++) {
+                    $token = $tokens[$i];
+                    if ($token[1] === '{' || $token[1] === '[') {
+                        if ($options[JSON_MAX_DEPTH] <= count($braces) + 1) {
+                            throw $this->exception("Maximum stack depth exceeded", $token);
+                        }
+                        $braces[] = $i;
                     }
-                    $this->next();
-                }
-                return $this->currentByte;
-            }
-
-            private function peek(...$chars)
-            {
-                foreach ($chars as $i => $char) {
-                    $char = is_int($char) ? chr($char) : $char;
-                    if ($char !== ($this->json[$this->at + $i] ?? null)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            private function match($regex)
-            {
-                $subject = substr($this->json, $this->at);
-                // Only match on the current line
-                if ($pos = strpos($subject, "\n")) {
-                    $subject = substr($subject, 0, $pos);
-                }
-
-                if (!preg_match($regex, $subject, $matches, PREG_OFFSET_CAPTURE)) {
-                    return null;
-                }
-
-                $this->at += $matches[0][1] + strlen($matches[0][0]);
-                $this->currentByte = $this->json[$this->at] ?? null;
-
-                return $matches[0][0];
-            }
-
-            private function white()
-            {
-                while ($this->currentByte !== null) {
-                    // Comments always begin with a / character.
-                    if ($this->currentByte === '/') {
-                        $this->next();
-
-                        if ($this->currentByte === '/') {
-                            do {
-                                $this->next();
-                                if ($this->currentByte === "\n" || $this->currentByte === "\r") {
-                                    $this->next();
-                                    continue 2;
+                    elseif ($token[1] === '}' || $token[1] === ']') {
+                        if (!$braces) {
+                            throw $this->exception("Mismatch", $token);
+                        }
+                        $brace = array_pop($braces);
+                        if ($tokens[$brace][1] !== '{' && $token[1] === '}' || $tokens[$brace][1] !== '[' && $token[1] === ']') {
+                            throw $this->exception("Mismatch", $token);
+                        }
+                        $block = array_filter(array_slice(array_splice($tokens, $brace + 1, $i - $brace, []), 0, -1), fn($token) => !(is_array($token) && in_array($token[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT, T_BAD_CHARACTER], true)));
+                        $elements = array_explode($block, fn($token) => is_array($token) && $token[1] === ',');
+                        // for trailing comma
+                        if ($elements && !$elements[count($elements) - 1]) {
+                            array_pop($elements);
+                        }
+                        // check consecutive comma (e.g. [1,,3])
+                        if (count(array_filter($elements)) !== count($elements)) {
+                            throw $this->exception("Missing element", $token);
+                        }
+                        $i = $brace;
+                        if ($token[1] === '}') {
+                            $object = $this->token('object', $tokens[$brace][3], $token[3] + strlen($token[1]));
+                            foreach ($elements as $element) {
+                                $keyandval = array_explode($element, fn($token) => is_array($token) && $token[1] === ':');
+                                // check no colon (e.g. {123})
+                                if (count($keyandval) !== 2) {
+                                    throw $this->exception("Missing object key", first_value($keyandval[0]));
                                 }
-                            } while ($this->currentByte !== null);
-                        }
-                        elseif ($this->currentByte === '*') {
-                            do {
-                                $this->next();
-                                if ($this->peek('*', '/')) {
-                                    $this->next();
-                                    $this->next();
-                                    continue 2;
+                                // check objective key (e.g. {[1]: 123})
+                                if (($k = array_find($keyandval[0], 'is_object')) !== false) {
+                                    throw $this->exception("Unexpected object key", $keyandval[0][$k]);
                                 }
-                            } while ($this->currentByte !== null);
-
-                            throw $this->exception('Unterminated block comment');
-                        }
-                        throw $this->exception('Unrecognized comment');
-                    }
-                    elseif (preg_match('/^[ \t\r\n\v\f\xA0]/', $this->currentByte) === 1) {
-                        $this->next();
-                    }
-                    elseif ($this->peek(0xC2, 0xA0)) {
-                        // Non-breaking space in UTF-8
-                        $this->next();
-                        $this->next();
-                    }
-                    else {
-                        return $this->currentByte;
-                    }
-                }
-            }
-
-            private function value()
-            {
-                $this->white();
-
-                switch ($this->currentByte) {
-                    case '{':
-                        return $this->associative ? (array) $this->object() : $this->object();
-                    case '[':
-                        return $this->array();
-                    case '"':
-                    case "'":
-                        return $this->string();
-                    case '-':
-                    case '+':
-                    case '.':
-                        return $this->number();
-                    default:
-                        return is_numeric($this->currentByte) ? $this->number() : $this->word();
-                }
-            }
-
-            private function identifier()
-            {
-                // Be careful when editing this regex, there are a couple Unicode characters in between here -------------vv
-                $match = $this->match('/^(?:[\$_\p{L}\p{Nl}]|\\\\u[0-9A-Fa-f]{4})(?:[\$_\p{L}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}‌‍]|\\\\u[0-9A-Fa-f]{4})*/u');
-
-                if ($match === null) {
-                    throw $this->exception('Bad identifier as unquoted key');
-                }
-
-                // Un-escape escaped Unicode chars
-                $unescaped = preg_replace_callback('/(?:\\\\u[0-9A-Fa-f]{4})+/', function ($m) {
-                    return json_decode('"' . $m[0] . '"');
-                }, $match);
-
-                return $unescaped;
-            }
-
-            private function word()
-            {
-                $consts = [
-                    'true'     => true,
-                    'false'    => false,
-                    'null'     => null,
-                    'Infinity' => INF,
-                    'NaN'      => NAN,
-                ];
-
-                foreach ($consts as $const => $value) {
-                    if ($this->currentByte === $const[0]) {
-                        $this->nextOrFail(...str_split($const));
-                        return $value;
-                    }
-                }
-
-                throw $this->exception('Unexpected ' . $this->renderChar($this->currentChar()));
-            }
-
-            private function number()
-            {
-                $number = null;
-                $sign = '';
-                $string = '';
-                $base = 10;
-
-                if ($this->currentByte === '-' || $this->currentByte === '+') {
-                    $sign = $this->currentByte;
-                    $this->next();
-                }
-
-                // support for Infinity
-                if ($this->currentByte === 'I') {
-                    $this->word();
-
-                    return ($sign === '-') ? -INF : INF;
-                }
-
-                // support for NaN
-                if ($this->currentByte === 'N') {
-                    $number = $this->word();
-
-                    // ignore sign as -NaN also is NaN
-                    return $number;
-                }
-
-                if ($this->currentByte === '0') {
-                    $string .= $this->currentByte;
-                    $this->next();
-                    if ($this->currentByte === 'x' || $this->currentByte === 'X') {
-                        $string .= $this->currentByte;
-                        $this->next();
-                        $base = 16;
-                    }
-                    elseif (is_numeric($this->currentByte)) {
-                        throw $this->exception('Octal literal');
-                    }
-                }
-
-                switch ($base) {
-                    case 10:
-                        if ((is_numeric($this->currentByte) || $this->currentByte === '.') && ($match = $this->match('/^\d*\.?\d*/')) !== null) {
-                            $string .= $match;
-                        }
-                        if (($this->currentByte === 'E' || $this->currentByte === 'e') && ($match = $this->match('/^[Ee][-+]?\d*/')) !== null) {
-                            $string .= $match;
-                        }
-                        $number = $string;
-                        break;
-                    case 16:
-                        if (($match = $this->match('/^[A-Fa-f0-9]+/')) !== null) {
-                            $string .= $match;
-                            $number = hexdec($string);
-                            break;
-                        }
-                        throw $this->exception('Bad hex number');
-                }
-
-                if (!is_numeric($number) || !is_finite($number)) {
-                    throw $this->exception('Bad number');
-                }
-
-                if (false
-                    || ($this->intToString && ctype_digit("$number"))
-                    || ($this->floatToString && !ctype_digit("$number"))
-                    || ($this->bigIntToString && ctype_digit("$number") && is_float(($number + 0)))
-                ) {
-                    return $sign === '-' ? '-' . $number : $number;
-                }
-
-                if ($sign === '-') {
-                    $number = -1 * $number;
-                }
-
-                // Adding 0 will automatically cast this to an int or float
-                return $number + 0;
-            }
-
-            private function string()
-            {
-                $escapees = [
-                    "'"  => "'",
-                    '"'  => '"',
-                    '\\' => '\\',
-                    '/'  => '/',
-                    "\n" => '',
-                    'b'  => chr(8),
-                    'f'  => "\f",
-                    'n'  => "\n",
-                    'r'  => "\r",
-                    't'  => "\t",
-                ];
-
-                $string = '';
-
-                $delim = $this->currentByte;
-                $this->next();
-                while ($this->currentByte !== null) {
-                    if ($this->currentByte === $delim) {
-                        $this->next();
-
-                        return $string;
-                    }
-
-                    if ($this->peek('\\', 'u') && $unicodeEscaped = $this->match('/^(?:\\\\u[0-9A-Fa-f]{4})+/')) {
-                        $string .= \json_decode('"' . $unicodeEscaped . '"');
-                        continue;
-                    }
-                    if ($this->currentByte === '\\') {
-                        $this->next();
-
-                        if ($this->currentByte === "\r") {
-                            if ($this->peek("\r", "\n")) {
-                                $this->next();
+                                // check consecutive objective value (e.g. {k: 123 [1]})
+                                if (!(count($keyandval[1]) === 1 && count(array_filter($keyandval[1], 'is_object')) === 1 || count(array_filter($keyandval[1], 'is_array')) === count($keyandval[1]))) {
+                                    throw $this->exception("Unexpected object value", $token);
+                                }
+                                $key = first_value($keyandval[0]);
+                                $lastkey = last_value($keyandval[0]);
+                                $val = first_value($keyandval[1]);
+                                $lastval = last_value($keyandval[1]);
+                                if (!is_object($val)) {
+                                    $val = $this->token('value', $val[3], $lastval[3] + strlen($lastval[1]));
+                                }
+                                $object->append($this->token('key', $key[3], $lastkey[3] + strlen($lastkey[1])), $val);
                             }
+                            $tokens[$brace] = $object;
                         }
-                        elseif (($escapee = ($escapees[$this->currentByte] ?? null)) !== null) {
-                            $string .= $escapee;
+                        if ($token[1] === ']') {
+                            $array = $this->token('array', $tokens[$brace][3], $token[3] + strlen($token[1]));
+                            foreach ($elements as $element) {
+                                // check consecutive objective value (e.g. [123 [1]])
+                                if (!(count($element) === 1 && count(array_filter($element, 'is_object')) === 1 || count(array_filter($element, 'is_array')) === count($element))) {
+                                    throw $this->exception("Unexpected array value", $token);
+                                }
+                                $val = first_value($element);
+                                $lastval = last_value($element);
+                                if (!is_object($val)) {
+                                    $val = $this->token('value', $val[3], $lastval[3] + strlen($lastval[1]));
+                                }
+                                $array->append(null, $val);
+                            }
+                            $tokens[$brace] = $array;
                         }
-                        else {
-                            break;
+                    }
+                }
+
+                if ($braces) {
+                    throw $this->exception("Mismatch", $tokens[$braces[count($braces) - 1]]);
+                }
+
+                /** @var self $root */
+                $root = $tokens[0];
+                $result = $root->value($options);
+
+                if (count($result) !== 1) {
+                    throw $this->exception("Mismatch", $tokens[0]);
+                }
+                return $result[0];
+            }
+
+            private function token($type, $begin_position, $end_position)
+            {
+                $clone = clone $this;
+                $clone->type = $type;
+                $clone->begin_position = $begin_position;
+                $clone->end_position = $end_position;
+                $clone->keys = [];
+                $clone->values = [];
+                return $clone;
+            }
+
+            private function append($key, $value)
+            {
+                assert(($key !== null && $this->type === 'object') || ($key === null && $this->type === 'array'));
+                $this->keys[] = $key ?? count($this->keys);
+                $this->values[] = $value;
+            }
+
+            private function value($options = [])
+            {
+                $numberify = function ($token) use ($options) {
+                    if (is_numeric($token[0]) || $token[0] === '-' || $token[0] === '+' || $token[0] === '.') {
+                        $sign = 1;
+                        if ($token[0] === '+' || $token[0] === '-') {
+                            $sign = substr($token, 0, 1) === '-' ? -1 : 1;
+                            $token = substr($token, 1);
                         }
-                    }
-                    elseif ($this->currentByte === "\n") {
-                        // unescaped newlines are invalid; see:
-                        // https://github.com/json5/json5/issues/24
-                        // @todo this feels special-cased; are there other invalid unescaped chars?
-                        break;
-                    }
-                    else {
-                        $string .= $this->currentByte;
-                    }
+                        if (($token[0] ?? null) === '0' && isset($token[1]) && $token[1] !== '.') {
+                            if (!($token[1] === 'x' || $token[1] === 'X')) {
+                                throw $this->exception("Octal literal", $this);
+                            }
+                            $token = substr($token, 2);
+                            if (!ctype_xdigit($token)) {
+                                throw $this->exception("Bad hex number", $this);
+                            }
+                            $token = hexdec($token);
+                        }
+                        if (!is_numeric($token) || !is_finite($token)) {
+                            throw $this->exception("Bad number", $this);
+                        }
+                        if (false
+                            || ($options[JSON_INT_AS_STRING] && ctype_digit("$token"))
+                            || ($options[JSON_FLOAT_AS_STRING] && !ctype_digit("$token"))
+                            || ($options[JSON_BIGINT_AS_STRING] && ctype_digit("$token") && is_float(($token + 0)))
+                        ) {
+                            return $sign === -1 ? "-$token" : $token;
+                        }
 
-                    $this->next();
+                        return 0 + $sign * $token;
+                    }
+                    return null;
+                };
+                $stringify = function ($token) {
+                    if (strlen($token) > 1 && ($token[0] === '"' || $token[0] === "'")) {
+                        if ($token[0] !== $token[-1]) {
+                            throw $this->exception("Bad string", $this);
+                        }
+                        $token = substr($token, 1, -1);
+                        $token = preg_replace_callback('/(?:\\\\u[0-9A-Fa-f]{4})+/u', function ($m) { return json_decode('"' . $m[0] . '"'); }, $token);
+                        $token = strtr($token, [
+                            "\\'"    => "'",
+                            '\\"'    => '"',
+                            '\\\\'   => '\\',
+                            '\\/'    => '/',
+                            "\\\n"   => "",
+                            "\\\r"   => "",
+                            "\\\r\n" => "",
+                            '\\b'    => chr(8),
+                            '\\f'    => "\f",
+                            '\\n'    => "\n",
+                            '\\r'    => "\r",
+                            '\\t'    => "\t",
+                        ]);
+                        return $token;
+                    }
+                    return null;
+                };
+
+                switch ($this->type) {
+                    default:
+                        throw new \DomainException(); // @codeCoverageIgnore
+                    case 'array':
+                        return array_map(fn($value) => $value->value($options), $this->values);
+                    case 'object':
+                        $array = array_combine(
+                            array_map(fn($value) => $value->value($options), $this->keys),
+                            array_map(fn($value) => $value->value($options), $this->values)
+                        );
+                        return $options[JSON_OBJECT_AS_ARRAY] ? $array : (object) $array;
+                    case 'key':
+                        $token = substr($this->json_string, $this->begin_position, $this->end_position - $this->begin_position);
+                        $token = trim($token, chr(0xC2) . chr(0xA0) . " \n\r\t\v\x00\x0c");
+                        if (preg_match('/^(?:[\$_\p{L}\p{Nl}]|\\\\u[0-9A-Fa-f]{4})(?:[\$_\p{L}\p{Nl}\p{Mn}\p{Mc}\p{Nd}\p{Pc}‌‍]|\\\\u[0-9A-Fa-f]{4})*/u', $token)) {
+                            $token = preg_replace_callback('/(?:\\\\u[0-9A-Fa-f]{4})+/u', fn($m) => json_decode('"' . $m[0] . '"'), $token);
+                            return $token;
+                        }
+                        if (($string = $stringify($token)) !== null) {
+                            return $string;
+                        }
+                        throw $this->exception("Bad identifier", $this);
+                    case 'value':
+                        $token = substr($this->json_string, $this->begin_position, $this->end_position - $this->begin_position);
+                        $token = trim($token, chr(0xC2) . chr(0xA0) . " \n\r\t\v\x00\x0c");
+                        $literals = [
+                            'null'      => null,
+                            'false'     => false,
+                            'true'      => true,
+                            'Infinity'  => INF,
+                            '+Infinity' => +INF,
+                            '-Infinity' => -INF,
+                            'NaN'       => NAN,
+                            '+NaN'      => +NAN,
+                            '-NaN'      => -NAN,
+                        ];
+                        // literals
+                        if (array_key_exists($token, $literals)) {
+                            return $literals[$token];
+                        }
+                        // numbers
+                        if (($number = $numberify($token)) !== null) {
+                            return $number;
+                        }
+                        // strings
+                        if (($string = $stringify($token)) !== null) {
+                            return $string;
+                        }
+                        throw $this->exception("Bad value", $this);
                 }
-
-                throw $this->exception('Bad string');
             }
 
-            private function array()
+            private function exception($message, $token)
             {
-                $array = [];
-
-                if (++$this->depth > $this->maxDepth) {
-                    throw $this->exception('Maximum stack depth exceeded');
+                $line = $column = $word = null;
+                if (is_array($token)) {
+                    $line = $token[2];
+                    $column = $token[3] - strrpos($this->json_string, "\n", $token[3] - strlen($this->json_string));
+                    $word = $token[1];
                 }
-
-                $this->nextOrFail('[');
-                $this->white();
-                while ($this->currentByte !== null) {
-                    if ($this->currentByte === ']') {
-                        $this->next();
-                        $this->depth--;
-                        return $array; // Potentially empty array
-                    }
-                    // ES5 allows omitting elements in arrays, e.g. [,] and [,null]. We don't allow this in JSON5.
-                    if ($this->currentByte === ',') {
-                        throw $this->exception('Missing array element');
-                    }
-
-                    $array[] = $this->value();
-
-                    $this->white();
-                    // If there's no comma after this value, this needs to be the end of the array.
-                    if ($this->currentByte !== ',') {
-                        $this->nextOrFail(']');
-                        $this->depth--;
-                        return $array;
-                    }
-                    $this->nextOrFail(',');
-                    $this->white();
+                if (is_object($token)) {
+                    $line = substr_count($token->json_string, "\n", 0, $token->begin_position) + 1;
+                    $column = $token->begin_position - strrpos($token->json_string, "\n", $token->begin_position - strlen($token->json_string));
+                    $word = substr($token->json_string, $token->begin_position, $token->end_position - $token->begin_position);
                 }
-
-                throw $this->exception('Invalid array');
-            }
-
-            private function object()
-            {
-                $object = new \stdClass;
-
-                if (++$this->depth > $this->maxDepth) {
-                    throw $this->exception('Maximum stack depth exceeded');
-                }
-
-                $this->nextOrFail('{');
-                $this->white();
-                while ($this->currentByte !== null) {
-                    if ($this->currentByte === '}') {
-                        $this->next();
-                        $this->depth--;
-                        return $object; // Potentially empty object
-                    }
-
-                    // Keys can be unquoted. If they are, they need to be valid JS identifiers.
-                    if ($this->currentByte === '"' || $this->currentByte === "'") {
-                        $key = $this->string();
-                    }
-                    else {
-                        $key = $this->identifier();
-                    }
-
-                    $this->white();
-                    $this->nextOrFail(':');
-                    $object->{$key} = $this->value();
-                    $this->white();
-                    // If there's no comma after this pair, this needs to be the end of the object.
-                    if ($this->currentByte !== ',') {
-                        $this->nextOrFail('}');
-                        $this->depth--;
-                        return $object;
-                    }
-                    $this->nextOrFail(',');
-                    $this->white();
-                }
-
-                throw $this->exception('Invalid object');
-            }
-
-            private function exception($message)
-            {
-                // Calculate the column number
-                $str = substr($this->json, $this->currentLineStartsAt, $this->at - $this->currentLineStartsAt);
-                $column = mb_strlen($str) + 1;
-
-                $message = sprintf('%s at line %d column %d of the JSON5 data', $message, $this->lineNumber, $column);
-                return new \ErrorException($message);
-            }
-
-            private function currentChar()
-            {
-                return $this->currentByte === null ? null : mb_substr(substr($this->json, $this->at, 4), 0, 1);
-            }
-
-            private function renderChar($char)
-            {
-                return $char === null ? 'EOF' : "'" . $char . "'";
+                return new \ErrorException(sprintf("%s '%s' at line %d column %d of the JSON5 data", $message, $word, $line, $column));
             }
         };
-        return $json5_decoder($value, $specials);
+
+        return $parser->parse($specials);
     }
 }
 if (function_exists("ryunosuke\\dbml\\json_import") && !defined("ryunosuke\\dbml\\json_import")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\json_import", "ryunosuke\\dbml\\json_import");
 }
 
@@ -6761,7 +6826,7 @@ if (!isset($excluded_functions["paml_import"]) && (!function_exists("ryunosuke\\
         static $caches = [];
         if ($options['cache']) {
             $key = $pamlstring . json_encode($options);
-            return $caches[$key] = $caches[$key] ?? paml_import($pamlstring, ['cache' => false] + $options);
+            return $caches[$key] ??= paml_import($pamlstring, ['cache' => false] + $options);
         }
 
         $resolve = function (&$value) use ($options) {
@@ -6797,7 +6862,7 @@ if (!isset($excluded_functions["paml_import"]) && (!function_exists("ryunosuke\\
                 $value = constant($value);
                 return true;
             }
-            [$class, $cname] = explode('::', $value, 2) + [1 => null];
+            [$class, $cname] = explode('::', $value, 2) + [1 => ''];
             if (class_exists($class) && strtolower($cname) === 'class') {
                 $value = ltrim($class, '\\');
                 return true;
@@ -6845,6 +6910,9 @@ if (!isset($excluded_functions["paml_import"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\paml_import") && !defined("ryunosuke\\dbml\\paml_import")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\paml_import", "ryunosuke\\dbml\\paml_import");
 }
 
@@ -6890,7 +6958,7 @@ if (!isset($excluded_functions["ltsv_import"]) && (!function_exists("ryunosuke\\
     {
         $options += [
             'escape' => '\\',
-            'decode' => function ($v) { return json_decode($v, true); },
+            'decode' => fn($v) => json_decode($v, true),
         ];
         $escape = $options['escape'];
         $decode = $options['decode'];
@@ -6925,6 +6993,9 @@ if (!isset($excluded_functions["ltsv_import"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\ltsv_import") && !defined("ryunosuke\\dbml\\ltsv_import")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\ltsv_import", "ryunosuke\\dbml\\ltsv_import");
 }
 
@@ -6989,6 +7060,9 @@ if (!isset($excluded_functions["unique_string"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\unique_string") && !defined("ryunosuke\\dbml\\unique_string")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\unique_string", "ryunosuke\\dbml\\unique_string");
 }
 
@@ -7033,6 +7107,9 @@ if (!isset($excluded_functions["preg_capture"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\preg_capture") && !defined("ryunosuke\\dbml\\preg_capture")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\preg_capture", "ryunosuke\\dbml\\preg_capture");
 }
 
@@ -7053,7 +7130,7 @@ if (!isset($excluded_functions["preg_splice"]) && (!function_exists("ryunosuke\\
      * that($m)->isSame(['123']);
      *
      * // callable だと preg_replace_callback が呼ばれる
-     * that(preg_splice('#[a-z]+#', function($m){return strtoupper($m[0]);}, 'abc123', $m))->isSame('ABC123');
+     * that(preg_splice('#[a-z]+#', fn($m) => strtoupper($m[0]), 'abc123', $m))->isSame('ABC123');
      * that($m)->isSame(['abc']);
      *
      * // ただし、 文字列 callable は文字列として扱う
@@ -7081,6 +7158,9 @@ if (!isset($excluded_functions["preg_splice"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\preg_splice") && !defined("ryunosuke\\dbml\\preg_splice")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\preg_splice", "ryunosuke\\dbml\\preg_splice");
 }
 
@@ -7101,11 +7181,11 @@ if (!isset($excluded_functions["preg_replaces"]) && (!function_exists("ryunosuke
      * // 名前付きキャプチャも指定できる
      * that(preg_replaces('#a(?<digit>\d+)z#', ['digit' => 'XXX'], 'a123z'))->isSame('aXXXz');
      * // クロージャを渡すと元文字列を引数としてコールバックされる
-     * that(preg_replaces('#a(?<digit>\d+)z#', ['digit' => function($src){return $src * 2;}], 'a123z'))->isSame('a246z');
+     * that(preg_replaces('#a(?<digit>\d+)z#', ['digit' => fn($src) => $src * 2], 'a123z'))->isSame('a246z');
      * // 複合的なサンプル（a タグの href と target 属性を書き換える）
      * that(preg_replaces('#<a\s+href="(?<href>.*)"\s+target="(?<target>.*)">#', [
-     *     'href'   => function($href){return strtoupper($href);},
-     *     'target' => function($target){return strtoupper($target);},
+     *     'href'   => fn($href) => strtoupper($href),
+     *     'target' => fn($target) => strtoupper($target),
      * ], '<a href="hoge" target="fuga">inner text</a>'))->isSame('<a href="HOGE" target="FUGA">inner text</a>');
      * ```
      *
@@ -7151,6 +7231,9 @@ if (!isset($excluded_functions["preg_replaces"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\preg_replaces") && !defined("ryunosuke\\dbml\\preg_replaces")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\preg_replaces", "ryunosuke\\dbml\\preg_replaces");
 }
 
@@ -7191,6 +7274,9 @@ if (!isset($excluded_functions["mb_substr_replace"]) && (!function_exists("ryuno
     }
 }
 if (function_exists("ryunosuke\\dbml\\mb_substr_replace") && !defined("ryunosuke\\dbml\\mb_substr_replace")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\mb_substr_replace", "ryunosuke\\dbml\\mb_substr_replace");
 }
 
@@ -7266,6 +7352,9 @@ if (!isset($excluded_functions["evaluate"]) && (!function_exists("ryunosuke\\dbm
     }
 }
 if (function_exists("ryunosuke\\dbml\\evaluate") && !defined("ryunosuke\\dbml\\evaluate")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\evaluate", "ryunosuke\\dbml\\evaluate");
 }
 
@@ -7378,9 +7467,7 @@ if (!isset($excluded_functions["parse_php"]) && (!function_exists("ryunosuke\\db
                             break;
                         }
                     }
-                    $html = implode('', array_map(function ($token) {
-                        return is_array($token) ? $token[1] : $token;
-                    }, array_slice($tmp, $i, $j - $i + 1)));
+                    $html = implode('', array_map(fn($token) => is_array($token) ? $token[1] : $token, array_slice($tmp, $i, $j - $i + 1)));
                     array_splice($tmp, $i + 1, $j - $i, [[T_INLINE_HTML, $html, $token[2]]]);
                     continue;
                 }
@@ -7469,6 +7556,9 @@ if (!isset($excluded_functions["parse_php"]) && (!function_exists("ryunosuke\\db
     }
 }
 if (function_exists("ryunosuke\\dbml\\parse_php") && !defined("ryunosuke\\dbml\\parse_php")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\parse_php", "ryunosuke\\dbml\\parse_php");
 }
 
@@ -7509,7 +7599,7 @@ if (!isset($excluded_functions["indent_php"]) && (!function_exists("ryunosuke\\d
      *     'baseline'  => 1,    // 基準インデントの行番号（負数で下からの指定になる）
      *     'indent'    => 4,    // インデント指定（上記の数値・文字列指定はこれの糖衣構文）
      *     'trimempty' => true, // 空行を trim するか
-     *     'heredoc'   => true, // php7.3 の Flexible Heredoc もインデントするか
+     *     'heredoc'   => true, // Flexible Heredoc もインデントするか
      * ]))->isSame('
      *     echo 123;
      *
@@ -7532,7 +7622,7 @@ if (!isset($excluded_functions["indent_php"]) && (!function_exists("ryunosuke\\d
             'baseline'  => 1,
             'indent'    => 0,
             'trimempty' => true,
-            'heredoc'   => version_compare(PHP_VERSION, '7.3.0') < 0,
+            'heredoc'   => true,
         ];
         if (is_int($options['indent'])) {
             $options['indent'] = str_repeat(' ', $options['indent']);
@@ -7616,6 +7706,9 @@ if (!isset($excluded_functions["indent_php"]) && (!function_exists("ryunosuke\\d
     }
 }
 if (function_exists("ryunosuke\\dbml\\indent_php") && !defined("ryunosuke\\dbml\\indent_php")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\indent_php", "ryunosuke\\dbml\\indent_php");
 }
 
@@ -7632,7 +7725,7 @@ if (!isset($excluded_functions["optional"]) && (!function_exists("ryunosuke\\dbm
      * Example:
      * ```php
      * // null を返すかもしれないステートメント
-     * $getobject = function () {return null;};
+     * $getobject = fn () => null;
      * // メソッド呼び出しは null を返す
      * that(optional($getobject())->method())->isSame(null);
      * // プロパティアクセスは null を返す
@@ -7654,9 +7747,10 @@ if (!isset($excluded_functions["optional"]) && (!function_exists("ryunosuke\\dbm
      * that(optional(new \ArrayObject([1]), 'stdClass')->count())->isSame(null);
      * ```
      *
-     * @param object|null $object オブジェクト
+     * @template T
+     * @param T|null $object オブジェクト
      * @param ?string $expected 期待するクラス名。指定した場合は is_a される
-     * @return object $object がオブジェクトならそのまま返し、違うなら NullObject を返す
+     * @return T $object がオブジェクトならそのまま返し、違うなら NullObject を返す
      */
     function optional($object, $expected = null)
     {
@@ -7677,19 +7771,21 @@ if (!isset($excluded_functions["optional"]) && (!function_exists("ryunosuke\\dbm
                 public function __call($name, $arguments) { return null; }
                 public function __invoke() { return null; }
                 public function __toString() { return ''; }
-                public function offsetExists($offset) { return false; }
-                public function offsetGet($offset) { return null; }
-                public function offsetSet($offset, $value) { throw new \DomainException('called NullObject#' . __FUNCTION__); }
-                public function offsetUnset($offset) { throw new \DomainException('called NullObject#' . __FUNCTION__); }
-                public function getIterator() { return new \ArrayIterator([]); }
+                public function offsetExists($offset): bool { return false; }
+                public function offsetGet($offset): ?string { return null; }
+                public function offsetSet($offset, $value): void { throw new \DomainException('called NullObject#' . __FUNCTION__); }
+                public function offsetUnset($offset): void { throw new \DomainException('called NullObject#' . __FUNCTION__); }
+                public function getIterator(): \Traversable { return new \ArrayIterator([]); }
                 // @formatter:on
             };
         }
-        /** @var object $nullobject */
         return $nullobject;
     }
 }
 if (function_exists("ryunosuke\\dbml\\optional") && !defined("ryunosuke\\dbml\\optional")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\optional", "ryunosuke\\dbml\\optional");
 }
 
@@ -7718,6 +7814,9 @@ if (!isset($excluded_functions["throws"]) && (!function_exists("ryunosuke\\dbml\
     }
 }
 if (function_exists("ryunosuke\\dbml\\throws") && !defined("ryunosuke\\dbml\\throws")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\throws", "ryunosuke\\dbml\\throws");
 }
 
@@ -7730,13 +7829,13 @@ if (!isset($excluded_functions["try_finally"]) && (!function_exists("ryunosuke\\
      * Example:
      * ```php
      * $finally_count = 0;
-     * $finally = function()use(&$finally_count){$finally_count++;};
+     * $finally = function () use (&$finally_count) {$finally_count++;};
      * // 例外が飛ぼうと飛ぶまいと $finally は実行される
-     * $try = function($a, $b, $c){return [$a, $b, $c];};
+     * $try = function ($a, $b, $c) {return [$a, $b, $c];};
      * that(try_finally($try, $finally, 1, 2, 3))->isSame([1, 2, 3]);
      * that($finally_count)->isSame(1); // 呼ばれている
      * // 例外は投げっぱなすが、 $finally は実行される
-     * $try = function(){throw new \Exception('tried');};
+     * $try = function () {throw new \Exception('tried');};
      * try {try_finally($try, $finally, 1, 2, 3);} catch(\Exception $e){}
      * that($finally_count)->isSame(2); // 呼ばれている
      * ```
@@ -7752,6 +7851,9 @@ if (!isset($excluded_functions["try_finally"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\try_finally") && !defined("ryunosuke\\dbml\\try_finally")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\try_finally", "ryunosuke\\dbml\\try_finally");
 }
 
@@ -7764,13 +7866,13 @@ if (!isset($excluded_functions["try_catch_finally"]) && (!function_exists("ryuno
      * Example:
      * ```php
      * $finally_count = 0;
-     * $finally = function()use(&$finally_count){$finally_count++;};
+     * $finally = function () use (&$finally_count) {$finally_count++;};
      * // 例外が飛ぼうと飛ぶまいと $finally は実行される
-     * $try = function($a, $b, $c){return [$a, $b, $c];};
+     * $try = function ($a, $b, $c) {return [$a, $b, $c];};
      * that(try_catch_finally($try, null, $finally, 1, 2, 3))->isSame([1, 2, 3]);
      * that($finally_count)->isSame(1); // 呼ばれている
      * // 例外を投げるが、 $catch で握りつぶす
-     * $try = function(){throw new \Exception('tried');};
+     * $try = function () {throw new \Exception('tried');};
      * that(try_catch_finally($try, null, $finally, 1, 2, 3)->getMessage())->isSame('tried');
      * that($finally_count)->isSame(2); // 呼ばれている
      * ```
@@ -7784,7 +7886,7 @@ if (!isset($excluded_functions["try_catch_finally"]) && (!function_exists("ryuno
     function try_catch_finally($try, $catch = null, $finally = null, ...$variadic)
     {
         if ($catch === null) {
-            $catch = function ($v) { return $v; };
+            $catch = fn($v) => $v;
         }
 
         try {
@@ -7806,6 +7908,9 @@ if (!isset($excluded_functions["try_catch_finally"]) && (!function_exists("ryuno
     }
 }
 if (function_exists("ryunosuke\\dbml\\try_catch_finally") && !defined("ryunosuke\\dbml\\try_catch_finally")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\try_catch_finally", "ryunosuke\\dbml\\try_catch_finally");
 }
 
@@ -7890,7 +7995,7 @@ if (!isset($excluded_functions["cacheobject"]) && (!function_exists("ryunosuke\\
             {
                 $result = $this->getMultiple(array_keys($providers));
                 foreach ($providers as $key => $provider) {
-                    $result[$key] = $result[$key] ?? $this->fetch($key, $provider, $ttl);
+                    $result[$key] ??= $this->fetch($key, $provider, $ttl);
                 }
                 return $result;
             }
@@ -7990,6 +8095,9 @@ if (!isset($excluded_functions["cacheobject"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\cacheobject") && !defined("ryunosuke\\dbml\\cacheobject")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\cacheobject", "ryunosuke\\dbml\\cacheobject");
 }
 
@@ -8021,6 +8129,9 @@ if (!isset($excluded_functions["cachedir"]) && (!function_exists("ryunosuke\\dbm
     }
 }
 if (function_exists("ryunosuke\\dbml\\cachedir") && !defined("ryunosuke\\dbml\\cachedir")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\cachedir", "ryunosuke\\dbml\\cachedir");
 }
 
@@ -8035,7 +8146,7 @@ if (!isset($excluded_functions["cache"]) && (!function_exists("ryunosuke\\dbml\\
      *
      * Example:
      * ```php
-     * $provider = function(){return rand();};
+     * $provider = fn() => rand();
      * // 乱数を返す処理だが、キャッシュされるので同じ値になる
      * $rand1 = cache('rand', $provider);
      * $rand2 = cache('rand', $provider);
@@ -8054,92 +8165,92 @@ if (!isset($excluded_functions["cache"]) && (!function_exists("ryunosuke\\dbml\\
     function cache($key, $provider, $namespace = null)
     {
         static $cacheobject;
-        $cacheobject = $cacheobject ?? new class(cachedir()) {
-                const CACHE_EXT = '.php-cache';
+        $cacheobject ??= new class(cachedir()) {
+            const CACHE_EXT = '.php-cache';
 
-                /** @var string キャッシュディレクトリ */
-                private $cachedir;
+            /** @var string キャッシュディレクトリ */
+            private $cachedir;
 
-                /** @var array 内部キャッシュ */
-                private $cache;
+            /** @var array 内部キャッシュ */
+            private $cache;
 
-                /** @var array 変更感知配列 */
-                private $changed;
+            /** @var array 変更感知配列 */
+            private $changed;
 
-                public function __construct($cachedir)
-                {
-                    $this->cachedir = $cachedir;
-                    $this->cache = [];
-                    $this->changed = [];
-                }
+            public function __construct($cachedir)
+            {
+                $this->cachedir = $cachedir;
+                $this->cache = [];
+                $this->changed = [];
+            }
 
-                public function __destruct()
-                {
-                    // 変更されているもののみ保存
-                    foreach ($this->changed as $namespace => $dummy) {
-                        $filepath = $this->cachedir . '/' . rawurlencode($namespace) . self::CACHE_EXT;
-                        $content = "<?php\nreturn " . var_export($this->cache[$namespace], true) . ";\n";
+            public function __destruct()
+            {
+                // 変更されているもののみ保存
+                foreach ($this->changed as $namespace => $dummy) {
+                    $filepath = $this->cachedir . '/' . rawurlencode($namespace) . self::CACHE_EXT;
+                    $content = "<?php\nreturn " . var_export($this->cache[$namespace], true) . ";\n";
 
-                        $temppath = tempnam(sys_get_temp_dir(), 'cache');
-                        if (file_put_contents($temppath, $content) !== false) {
-                            @chmod($temppath, 0644);
-                            if (!@rename($temppath, $filepath)) {
-                                @unlink($temppath); // @codeCoverageIgnore
-                            }
+                    $temppath = tempnam(sys_get_temp_dir(), 'cache');
+                    if (file_put_contents($temppath, $content) !== false) {
+                        @chmod($temppath, 0644);
+                        if (!@rename($temppath, $filepath)) {
+                            @unlink($temppath); // @codeCoverageIgnore
                         }
                     }
                 }
+            }
 
-                public function has($namespace, $key)
-                {
-                    // ファイルから読み込む必要があるので get しておく
-                    $this->get($namespace, $key);
-                    return array_key_exists($key, $this->cache[$namespace]);
-                }
+            public function has($namespace, $key)
+            {
+                // ファイルから読み込む必要があるので get しておく
+                $this->get($namespace, $key);
+                return array_key_exists($key, $this->cache[$namespace]);
+            }
 
-                public function get($namespace, $key)
-                {
-                    // 名前空間自体がないなら作る or 読む
-                    if (!isset($this->cache[$namespace])) {
-                        $nsarray = [];
-                        $cachpath = $this->cachedir . '/' . rawurldecode($namespace) . self::CACHE_EXT;
-                        if (file_exists($cachpath)) {
-                            $nsarray = require $cachpath;
-                        }
-                        $this->cache[$namespace] = $nsarray;
+            public function get($namespace, $key)
+            {
+                // 名前空間自体がないなら作る or 読む
+                if (!isset($this->cache[$namespace])) {
+                    $nsarray = [];
+                    $cachpath = $this->cachedir . '/' . rawurldecode($namespace) . self::CACHE_EXT;
+                    if (file_exists($cachpath)) {
+                        $nsarray = require $cachpath;
                     }
-
-                    return $this->cache[$namespace][$key] ?? null;
+                    $this->cache[$namespace] = $nsarray;
                 }
 
-                public function set($namespace, $key, $value)
-                {
-                    // 新しい値が来たら変更フラグを立てる
-                    if (!isset($this->cache[$namespace]) || !array_key_exists($key, $this->cache[$namespace]) || $this->cache[$namespace][$key] !== $value) {
-                        $this->changed[$namespace] = true;
-                    }
+                return $this->cache[$namespace][$key] ?? null;
+            }
 
-                    $this->cache[$namespace][$key] = $value;
-                }
-
-                public function delete($namespace, $key)
-                {
+            public function set($namespace, $key, $value)
+            {
+                // 新しい値が来たら変更フラグを立てる
+                if (!isset($this->cache[$namespace]) || !array_key_exists($key, $this->cache[$namespace]) || $this->cache[$namespace][$key] !== $value) {
                     $this->changed[$namespace] = true;
-                    unset($this->cache[$namespace][$key]);
                 }
 
-                public function clear()
-                {
-                    // インメモリ情報をクリアして・・・
-                    $this->cache = [];
-                    $this->changed = [];
+                $this->cache[$namespace][$key] = $value;
+            }
 
-                    // ファイルも消す
-                    foreach (glob($this->cachedir . '/*' . self::CACHE_EXT) as $file) {
-                        unlink($file);
-                    }
+            public function delete($namespace, $key)
+            {
+                $this->changed[$namespace] = true;
+                unset($this->cache[$namespace][$key]);
+            }
+
+            public function clear()
+            {
+                // インメモリ情報をクリアして・・・
+                $this->cache = [];
+                $this->changed = [];
+
+                // ファイルも消す
+                foreach (glob($this->cachedir . '/*' . self::CACHE_EXT) as $file) {
+                    unlink($file);
                 }
-            };
+            }
+        };
 
         // flush (for test)
         if ($key === null) {
@@ -8150,7 +8261,7 @@ if (!isset($excluded_functions["cache"]) && (!function_exists("ryunosuke\\dbml\\
             return;
         }
 
-        $namespace = $namespace ?? __FILE__;
+        $namespace ??= __FILE__;
 
         $exist = $cacheobject->has($namespace, $key);
         if ($provider === null) {
@@ -8164,6 +8275,9 @@ if (!isset($excluded_functions["cache"]) && (!function_exists("ryunosuke\\dbml\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\cache") && !defined("ryunosuke\\dbml\\cache")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\cache", "ryunosuke\\dbml\\cache");
 }
 
@@ -8285,7 +8399,8 @@ if (!isset($excluded_functions["parse_namespace"]) && (!function_exists("ryunosu
                         'end'    => [T_CONSTANT_ENCAPSED_STRING],
                         'offset' => last_key($tokens),
                     ]);
-                    $define = trim(json_decode(implode('', array_column($tokens, 1))), '\\');
+                    $cname = substr(implode('', array_column($tokens, 1)), 1, -1);
+                    $define = trim(json_decode("\"$cname\""), '\\');
                     [$ns, $nm] = namespace_split($define);
                     if (!isset($result[$ns])) {
                         $result[$ns] = [
@@ -8306,9 +8421,7 @@ if (!isset($excluded_functions["parse_namespace"]) && (!function_exists("ryunosu
                         ];
                         break;
                     case T_USE:
-                        $tokenCorF = array_find($tokens, function ($token) {
-                            return ($token[0] === T_CONST || $token[0] === T_FUNCTION) ? $token[0] : 0;
-                        }, false);
+                        $tokenCorF = array_find($tokens, fn($token) => ($token[0] === T_CONST || $token[0] === T_FUNCTION) ? $token[0] : 0, false);
 
                         $prefix = '';
                         if (end($tokens)[1] === '{') {
@@ -8321,9 +8434,9 @@ if (!isset($excluded_functions["parse_namespace"]) && (!function_exists("ryunosu
                             ]);
                         }
 
-                        $multi = array_explode($tokens, function ($token) { return $token[1] === ','; });
+                        $multi = array_explode($tokens, fn($token) => $token[1] === ',');
                         foreach ($multi as $ttt) {
-                            $as = array_explode($ttt, function ($token) { return $token[0] === T_AS; });
+                            $as = array_explode($ttt, fn($token) => $token[0] === T_AS);
 
                             $alias = $stringify($as[0]);
                             if (isset($as[1])) {
@@ -8360,6 +8473,9 @@ if (!isset($excluded_functions["parse_namespace"]) && (!function_exists("ryunosu
     }
 }
 if (function_exists("ryunosuke\\dbml\\parse_namespace") && !defined("ryunosuke\\dbml\\parse_namespace")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\parse_namespace", "ryunosuke\\dbml\\parse_namespace");
 }
 
@@ -8411,7 +8527,7 @@ if (!isset($excluded_functions["resolve_symbol"]) && (!function_exists("ryunosuk
 
         $targets = (array) $targets;
         foreach ($nsfiles as $filename => $namespaces) {
-            $namespaces = array_flip(array_map(function ($n) { return trim($n, '\\'); }, (array) $namespaces));
+            $namespaces = array_flip(array_map(fn($n) => trim($n, '\\'), (array) $namespaces));
             foreach (parse_namespace($filename) as $namespace => $ns) {
                 /** @noinspection PhpIllegalArrayKeyTypeInspection */
                 if (!$namespaces || isset($namespaces[$namespace])) {
@@ -8430,6 +8546,9 @@ if (!isset($excluded_functions["resolve_symbol"]) && (!function_exists("ryunosuk
     }
 }
 if (function_exists("ryunosuke\\dbml\\resolve_symbol") && !defined("ryunosuke\\dbml\\resolve_symbol")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\resolve_symbol", "ryunosuke\\dbml\\resolve_symbol");
 }
 
@@ -8485,7 +8604,7 @@ if (!isset($excluded_functions["parse_annotation"]) && (!function_exists("ryunos
      * @same this is same value3
      * ', [
      *     'single'  => true,
-     *     'closure' => function ($value) { return explode(' ', strtoupper($value)); },
+     *     'closure' => fn($value) => explode(' ', strtoupper($value)),
      * ]);
      * that($annotations)->is([
      *     'noval'       => null,                        // 値なしは null になる
@@ -8612,7 +8731,7 @@ if (!isset($excluded_functions["parse_annotation"]) && (!function_exists("ryunos
                 $multiples[$name] = true;
                 $result[$name] = [$result[$name]];
             }
-            if (strlen($key)) {
+            if (strlen($key ?? '')) {
                 $multiples[$name] = true;
                 $result[$name][$key] = $value;
             }
@@ -8628,6 +8747,9 @@ if (!isset($excluded_functions["parse_annotation"]) && (!function_exists("ryunos
     }
 }
 if (function_exists("ryunosuke\\dbml\\parse_annotation") && !defined("ryunosuke\\dbml\\parse_annotation")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\parse_annotation", "ryunosuke\\dbml\\parse_annotation");
 }
 
@@ -8682,6 +8804,9 @@ if (!isset($excluded_functions["arrayval"]) && (!function_exists("ryunosuke\\dbm
     }
 }
 if (function_exists("ryunosuke\\dbml\\arrayval") && !defined("ryunosuke\\dbml\\arrayval")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\arrayval", "ryunosuke\\dbml\\arrayval");
 }
 
@@ -8751,6 +8876,9 @@ if (!isset($excluded_functions["is_empty"]) && (!function_exists("ryunosuke\\dbm
     }
 }
 if (function_exists("ryunosuke\\dbml\\is_empty") && !defined("ryunosuke\\dbml\\is_empty")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\is_empty", "ryunosuke\\dbml\\is_empty");
 }
 
@@ -8784,6 +8912,9 @@ if (!isset($excluded_functions["is_primitive"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\is_primitive") && !defined("ryunosuke\\dbml\\is_primitive")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\is_primitive", "ryunosuke\\dbml\\is_primitive");
 }
 
@@ -8822,6 +8953,9 @@ if (!isset($excluded_functions["is_stringable"]) && (!function_exists("ryunosuke
     }
 }
 if (function_exists("ryunosuke\\dbml\\is_stringable") && !defined("ryunosuke\\dbml\\is_stringable")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\is_stringable", "ryunosuke\\dbml\\is_stringable");
 }
 
@@ -8845,36 +8979,10 @@ if (!isset($excluded_functions["is_arrayable"]) && (!function_exists("ryunosuke\
     }
 }
 if (function_exists("ryunosuke\\dbml\\is_arrayable") && !defined("ryunosuke\\dbml\\is_arrayable")) {
-    define("ryunosuke\\dbml\\is_arrayable", "ryunosuke\\dbml\\is_arrayable");
-}
-
-if (!isset($excluded_functions["is_countable"]) && (!function_exists("ryunosuke\\dbml\\is_countable") || (!true && (new \ReflectionFunction("ryunosuke\\dbml\\is_countable"))->isInternal()))) {
     /**
-     * 変数が count でカウントできるか調べる
      *
-     * 要するに {@link http://php.net/manual/function.is-countable.php is_countable} の polyfill。
-     *
-     * Example:
-     * ```php
-     * that(is_countable([1, 2, 3]))->isTrue();
-     * that(is_countable(new \ArrayObject()))->isTrue();
-     * that(is_countable((function () { yield 1; })()))->isFalse();
-     * that(is_countable(1))->isFalse();
-     * that(is_countable(new \stdClass()))->isFalse();
-     * ```
-     *
-     * @polyfill
-     *
-     * @param mixed $var 調べる値
-     * @return bool count でカウントできるなら true
      */
-    function is_countable($var)
-    {
-        return is_array($var) || $var instanceof \Countable;
-    }
-}
-if (function_exists("ryunosuke\\dbml\\is_countable") && !defined("ryunosuke\\dbml\\is_countable")) {
-    define("ryunosuke\\dbml\\is_countable", "ryunosuke\\dbml\\is_countable");
+    define("ryunosuke\\dbml\\is_arrayable", "ryunosuke\\dbml\\is_arrayable");
 }
 
 if (!isset($excluded_functions["var_hash"]) && (!function_exists("ryunosuke\\dbml\\var_hash") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\var_hash"))->isInternal()))) {
@@ -8920,6 +9028,9 @@ if (!isset($excluded_functions["var_hash"]) && (!function_exists("ryunosuke\\dbm
     }
 }
 if (function_exists("ryunosuke\\dbml\\var_hash") && !defined("ryunosuke\\dbml\\var_hash")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\var_hash", "ryunosuke\\dbml\\var_hash");
 }
 
@@ -8964,6 +9075,9 @@ if (!isset($excluded_functions["var_apply"]) && (!function_exists("ryunosuke\\db
     }
 }
 if (function_exists("ryunosuke\\dbml\\var_apply") && !defined("ryunosuke\\dbml\\var_apply")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\var_apply", "ryunosuke\\dbml\\var_apply");
 }
 
@@ -8971,16 +9085,15 @@ if (!isset($excluded_functions["var_export3"]) && (!function_exists("ryunosuke\\
     /**
      * var_export を色々と出力できるようにしたもの
      *
-     * php のコードに落とし込むことで serialize と比較してかなり高速に動作する。ただし、要 php7.4.
+     * php のコードに落とし込むことで serialize と比較してかなり高速に動作する。
      *
      * 各種オブジェクトやクロージャ、循環参照を含む配列など様々なものが出力できる。
      * ただし、下記は不可能あるいは復元不可（今度も対応するかは未定）。
      *
-     * - 無名クラス
      * - Generator クラス
      * - 特定の内部クラス（PDO など）
      * - リソース
-     * - php7.4 以降のアロー関数によるクロージャ
+     * - アロー関数によるクロージャ
      *
      * オブジェクトは「リフレクションを用いてコンストラクタなしで生成してプロパティを代入する」という手法で復元する。
      * のでクラスによってはおかしな状態で復元されることがある（大体はリソース型のせいだが…）。
@@ -9011,7 +9124,7 @@ if (!isset($excluded_functions["var_export3"]) && (!function_exists("ryunosuke\\
             'format'  => 'pretty', // pretty or minify
             'outmode' => null,     // null: 本体のみ, 'eval': return ...;, 'file': <?php return ...;
         ];
-        $options['return'] = $options['return'] ?? !!$options['outmode'];
+        $options['return'] ??= !!$options['outmode'];
 
         $var_manager = new class() {
             private $vars = [];
@@ -9096,7 +9209,7 @@ if (!isset($excluded_functions["var_export3"]) && (!function_exists("ryunosuke\\
                 }
                 return $token;
             };
-            $var_export = function ($v) { return var_export($v, true); };
+            $var_export = fn($v) => var_export($v, true);
             $spacer0 = str_repeat(" ", 4 * ($nest + 0));
             $spacer1 = str_repeat(" ", 4 * ($nest + 1));
 
@@ -9404,5 +9517,8 @@ if (!isset($excluded_functions["var_export3"]) && (!function_exists("ryunosuke\\
     }
 }
 if (function_exists("ryunosuke\\dbml\\var_export3") && !defined("ryunosuke\\dbml\\var_export3")) {
+    /**
+     *
+     */
     define("ryunosuke\\dbml\\var_export3", "ryunosuke\\dbml\\var_export3");
 }

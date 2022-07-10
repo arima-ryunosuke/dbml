@@ -33,7 +33,6 @@ use function ryunosuke\dbml\mkdir_p;
 use function ryunosuke\dbml\rm_rf;
 use function ryunosuke\dbml\try_null;
 use function ryunosuke\dbml\try_return;
-use function ryunosuke\dbml\var_export2;
 
 class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -499,14 +498,10 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $database = new Database([$master, $slave]);
 
-        /** @var \Doctrine\DBAL\Driver\PDO\Connection $masterPdoConnection */
-        /** @var \Doctrine\DBAL\Driver\PDO\Connection $slavePdoConnection */
-        $masterPdoConnection = $master->getWrappedConnection();
-        $slavePdoConnection = $slave->getWrappedConnection();
-        $this->assertSame($masterPdoConnection->getWrappedConnection(), $database->getPdo());
-        $this->assertSame($masterPdoConnection->getWrappedConnection(), $database->getMasterPdo());
-        $this->assertSame($slavePdoConnection->getWrappedConnection(), $database->getSlavePdo());
-        $this->assertSame($masterPdoConnection->getWrappedConnection(), $database->setMasterMode(true)->getSlavePdo());
+        $this->assertSame($master->getNativeConnection(), $database->getPdo());
+        $this->assertSame($master->getNativeConnection(), $database->getMasterPdo());
+        $this->assertSame($slave->getNativeConnection(), $database->getSlavePdo());
+        $this->assertSame($master->getNativeConnection(), $database->setMasterMode(true)->getSlavePdo());
     }
 
     function test_setPdoAttribute()
@@ -514,13 +509,10 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
         $slave = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
 
-        /** @var \Doctrine\DBAL\Driver\PDO\Connection $masterPdoConnection */
-        /** @var \Doctrine\DBAL\Driver\PDO\Connection $slavePdoConnection */
-        $masterPdoConnection = $master->getWrappedConnection();
-        $slavePdoConnection = $slave->getWrappedConnection();
-
-        $mPdo = $masterPdoConnection->getWrappedConnection();
-        $sPdo = $slavePdoConnection->getWrappedConnection();
+        /** @var \PDO $mPdo */
+        /** @var \PDO $sPdo */
+        $mPdo = $master->getNativeConnection();
+        $sPdo = $slave->getNativeConnection();
 
         /// マスターだけモード
 

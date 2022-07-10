@@ -1402,7 +1402,8 @@ class Database
         // @codeCoverageIgnoreStart
         // \PDO::ATTR_FETCH_TABLE_NAMES をサポートしてるならそれで（そっちのほうが汎用性が高い）
         if ($this->getCompatiblePlatform()->supportsTableNameAttribute()) {
-            $pdo = $this->getSlavePdo();
+            /** @var \PDO $pdo */
+            $pdo = $this->getSlaveConnection()->getNativeConnection();
             $pdo->setAttribute(\PDO::ATTR_FETCH_TABLE_NAMES, true);
             return function () use ($pdo) {
                 $pdo->setAttribute(\PDO::ATTR_FETCH_TABLE_NAMES, false);
@@ -2166,9 +2167,8 @@ class Database
      */
     public function getPdo()
     {
-        /** @var \Doctrine\DBAL\Driver\PDO\Connection $conn */
-        $conn = $this->getConnection()->getWrappedConnection();
-        return $conn->getWrappedConnection();
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getConnection()->getNativeConnection();
     }
 
     /**
@@ -2178,9 +2178,8 @@ class Database
      */
     public function getMasterPdo()
     {
-        /** @var \Doctrine\DBAL\Driver\PDO\Connection $conn */
-        $conn = $this->getMasterConnection()->getWrappedConnection();
-        return $conn->getWrappedConnection();
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getMasterConnection()->getNativeConnection();
     }
 
     /**
@@ -2190,9 +2189,8 @@ class Database
      */
     public function getSlavePdo()
     {
-        /** @var \Doctrine\DBAL\Driver\PDO\Connection $conn */
-        $conn = $this->getSlaveConnection()->getWrappedConnection();
-        return $conn->getWrappedConnection();
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getSlaveConnection()->getNativeConnection();
     }
 
     /**

@@ -1,8 +1,7 @@
 <?php
 
-error_reporting(~E_DEPRECATED);
-
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/ryunosuke/phpunit-extension/inc/bootstrap.php';
 require_once __DIR__ . '/classess.php';
 
 function var_pretty(...$args)

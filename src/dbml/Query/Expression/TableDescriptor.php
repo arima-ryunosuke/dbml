@@ -505,7 +505,7 @@ class TableDescriptor
         if ($primary) {
             $primary = preg_replace('#^\(|\)$#u', '', $primary);
             $pcols = $schema->getTablePrimaryKey($this->table)->getColumns();
-            $pvals = array_each(quoteexplode(',', $primary, ['(' => ')']), function (&$carry, $pval) use ($pcols) {
+            $pvals = array_each(quoteexplode(',', $primary, null, ['(' => ')']), function (&$carry, $pval) use ($pcols) {
                 $pvals = explode(',', str_between($pval, '(', ')') ?: $pval);
                 if (count($pcols) !== count($pvals)) {
                     throw new \InvalidArgumentException('argument\'s length is not match primary columns.');

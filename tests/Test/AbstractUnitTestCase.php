@@ -4,7 +4,6 @@ namespace ryunosuke\Test;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Platforms\SQLServer2012Platform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\AbstractAsset;
 use Doctrine\DBAL\Schema\Column;
@@ -19,6 +18,7 @@ use PHPUnit\Framework\SkippedTestError;
 use PHPUnit\Framework\TestCase;
 use function ryunosuke\dbml\cacheobject;
 use function ryunosuke\dbml\class_shorten;
+use function ryunosuke\dbml\try_null;
 
 abstract class AbstractUnitTestCase extends TestCase
 {
@@ -51,7 +51,7 @@ abstract class AbstractUnitTestCase extends TestCase
             $dbname = isset($mparam['dbname']) ? $mparam['dbname'] : (isset($mparam['path']) ? $mparam['path'] : '');
             unset($mparam['url'], $mparam['dbname'], $mparam['path']);
             $schemaManager = DriverManager::getConnection($mparam)->createSchemaManager();
-            $schemaManager->dropDatabase($dbname);
+            try_null(fn() => $schemaManager->dropDatabase($dbname));
             $schemaManager->createDatabase($dbname);
         }
 
@@ -363,7 +363,7 @@ abstract class AbstractUnitTestCase extends TestCase
                         ),
                         function (Connection $connection) {
                             // 謎のエラーが出るのでさしあたり除外
-                            if ($connection->getDatabasePlatform() instanceof SQLServer2012Platform) {
+                            if ($connection->getDatabasePlatform() instanceof SQLServerPlatform) {
                                 return;
                             }
                             $connection->createSchemaManager()->createTable(new Table('g_grand2',

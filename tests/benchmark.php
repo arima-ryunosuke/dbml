@@ -29,10 +29,10 @@ $cmd = $phpunit->xpath('/phpunit/php/const[contains(@name, "' . $dbms . '_INITCO
 
 // 接続とアダプタを用意
 $connection = DriverManager::getConnection([
-    'url' => $url[0]['value'],
+    'url' => (string) $url[0]['value'],
 ]);
 if (strlen($cmd[0]['value'])) {
-    $connection->exec($cmd[0]['value']);
+    $connection->executeStatement((string) $cmd[0]['value']);
 }
 $database = new Database($connection);
 
@@ -40,7 +40,13 @@ $database = new Database($connection);
 if ($initdb) {
     // 適当なテーブルを用意
     call_user_func(function (AbstractSchemaManager $schemar) {
-        $schemar->dropAndCreateTable(new Table(
+        $dropAndCreateTable = function (Table $table) use ($schemar) {
+            if ($schemar->tablesExist([$table->getName()])) {
+                $schemar->dropTable($table->getName());
+            }
+            $schemar->createTable($table);
+        };
+        $dropAndCreateTable(new Table(
             'article',
             [
                 new Column('article_id', Type::getType('integer')),
@@ -51,7 +57,7 @@ if ($initdb) {
                 new Index('PRIMARY', ['article_id'], true, true),
             ]
         ));
-        $schemar->dropAndCreateTable(new Table(
+        $dropAndCreateTable(new Table(
             'comment',
             [
                 new Column('article_id', Type::getType('integer')),
@@ -62,7 +68,7 @@ if ($initdb) {
                 new Index('PRIMARY', ['article_id', 'seq'], true, true),
             ]
         ));
-        $schemar->dropAndCreateTable(new Table(
+        $dropAndCreateTable(new Table(
             'heavy',
             [
                 new Column('heavy_id', Type::getType('integer')),
@@ -72,12 +78,12 @@ if ($initdb) {
                 new Index('PRIMARY', ['heavy_id'], true, true),
             ]
         ));
-    }, $connection->getSchemaManager());
+    }, $connection->createSchemaManager());
 
     // 適当なレコードを用意
     $database->transact(function (Database $database) {
         $ARTICLE_COUNT = 300;
-        $COMMENT_COUNT = 20;
+        $COMMENT_COUNT = 2;
         foreach (range(1, $ARTICLE_COUNT) as $article_id) {
             $database->insert('article', [
                 'article_id' => $article_id,
@@ -101,9 +107,12 @@ $database->addForeignKey('comment', 'article', 'article_id');
 echo "select: ";
 benchmark([
     'dbal' => function () use ($connection) {
-        $articles = $connection->executeQuery('SELECT article_id, article.* FROM article')->fetchAll(\PDO::FETCH_ASSOC | \PDO::FETCH_UNIQUE);
+        $articles = $connection->fetchAllAssociativeIndexed('SELECT article_id as id, article.* FROM article');
         $article_ids = implode(',', array_map([$connection, 'quote'], array_keys($articles)));
-        $comments = $connection->executeQuery("SELECT article_id, comment.* FROM comment WHERE article_id IN ($article_ids)")->fetchAll(\PDO::FETCH_ASSOC | \PDO::FETCH_GROUP);
+        $comments = [];
+        foreach ($connection->fetchAllAssociative("SELECT comment.* FROM comment WHERE article_id IN ($article_ids)") as $comment) {
+            $comments[$comment['article_id']][] = $comment;
+        }
         foreach ($articles as $n => $article) {
             $articles[$n]['title'] = strtoupper($article['title']);
             foreach ($comments[$article['article_id']] as $comment) {
@@ -128,7 +137,7 @@ benchmark([
 echo "insert: ";
 benchmark([
     'dbal' => function () use ($connection) {
-        $connection->executeUpdate($connection->getDatabasePlatform()->getTruncateTableSQL('heavy'));
+        $connection->executeStatement($connection->getDatabasePlatform()->getTruncateTableSQL('heavy'));
         $connection->beginTransaction();
         foreach (range(1, 10) as $i) {
             $connection->insert('heavy', [
@@ -137,10 +146,10 @@ benchmark([
             ]);
         }
         $connection->commit();
-        return $connection->fetchAll('SELECT * FROM heavy');
+        return $connection->fetchAllAssociative('SELECT * FROM heavy');
     },
     'dbml' => function () use ($database) {
-        $database->getConnection()->executeUpdate($database->getPlatform()->getTruncateTableSQL('heavy'));
+        $database->getConnection()->executeStatement($database->getPlatform()->getTruncateTableSQL('heavy'));
         $database->begin();
         foreach (range(1, 10) as $i) {
             $database->insert('heavy', [
@@ -149,7 +158,7 @@ benchmark([
             ]);
         }
         $database->commit();
-        return $database->getConnection()->fetchAll('SELECT * FROM heavy');
+        return $database->getConnection()->fetchAllAssociative('SELECT * FROM heavy');
     },
 ]);
 
@@ -165,7 +174,7 @@ benchmark([
             ]);
         }
         $connection->commit();
-        return $connection->fetchAll('SELECT * FROM heavy');
+        return $connection->fetchAllAssociative('SELECT * FROM heavy');
     },
     'dbml' => function () use ($database) {
         $database->begin();
@@ -177,7 +186,7 @@ benchmark([
             ]);
         }
         $database->commit();
-        return $database->getConnection()->fetchAll('SELECT * FROM heavy');
+        return $database->getConnection()->fetchAllAssociative('SELECT * FROM heavy');
     },
 ]);
 
@@ -191,7 +200,7 @@ benchmark([
             ]);
         }
         $connection->commit();
-        return $connection->fetchAll('SELECT * FROM heavy');
+        return $connection->fetchAllAssociative('SELECT * FROM heavy');
     },
     'dbml' => function () use ($database) {
         $database->begin();
@@ -201,6 +210,6 @@ benchmark([
             ]);
         }
         $database->commit();
-        return $database->getConnection()->fetchAll('SELECT * FROM heavy');
+        return $database->getConnection()->fetchAllAssociative('SELECT * FROM heavy');
     },
 ]);

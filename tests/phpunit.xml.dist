@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.github.com/sebastianbergmann/phpunit/master/phpunit.xsd" bootstrap="bootstrap.php">
+<phpunit bootstrap="bootstrap.php" printerClass="\ryunosuke\PHPUnit\Printer\ProgressPrinter">
     <testsuites>
         <testsuite name="tests">
             <directory>./Test/</directory>
@@ -24,9 +23,9 @@
         <const name="MSSQL_INITCOMMAND" value=""/>
     </php>
 
-    <filter>
-        <whitelist>
+    <coverage>
+        <include>
             <directory suffix=".php">../src/dbml</directory>
-        </whitelist>
-    </filter>
+        </include>
+    </coverage>
 </phpunit>
