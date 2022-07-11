@@ -68,7 +68,16 @@ even if some vendors such as MySQL support it.</p>
 </div>
 
 	<h3>Construction</h3>
-                
+        	<table class="table">
+		<caption>Implements</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/class.stringable.php" class="fqsen" target="_blank">\Stringable</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+            
 	<h3>Hierarchy</h3>
 	<div class="hierarchy"></div>
 
@@ -394,7 +403,7 @@ builder object in a local variable.</p>
                         			<a href="#L201-L212" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryBuilder::fetchAssociative()" tabindex="-1" class="structure-title ">
-                        fetchAssociative                        	<small>() : <a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
+                        fetchAssociative                        	<small>() : array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the first row of the result<br />
@@ -409,7 +418,7 @@ as an associative array.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></td>
+			<td class="type">array</td>
 			<td class="desc"><p>mixed&gt;|false False is returned if no rows are found.</p>
 </td>
 			<td class="rest"></td>
@@ -445,7 +454,7 @@ as an associative array.</p>
                         			<a href="#L214-L225" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryBuilder::fetchNumeric()" tabindex="-1" class="structure-title ">
-                        fetchNumeric                        	<small>() : <a href="array&lt;int,$typespace.html#array&lt;int," class="fqsen ">array&lt;int,</a></small>
+                        fetchNumeric                        	<small>() : array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the first row of the result<br />
@@ -460,7 +469,7 @@ as a numerically indexed array.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="array&lt;int,$typespace.html#array&lt;int," class="fqsen ">array&lt;int,</a></td>
+			<td class="type">array</td>
 			<td class="desc"><p>mixed&gt;|false False is returned if no rows are found.</p>
 </td>
 			<td class="rest"></td>
@@ -547,7 +556,7 @@ of the first row of the result.</p>
                         			<a href="#L240-L250" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryBuilder::fetchAllNumeric()" tabindex="-1" class="structure-title ">
-                        fetchAllNumeric                        	<small>() : array<span class="type-separator"></span><wbr><a href="array&lt;int,array&lt;int,mixed&gt;&gt;$typespace.html#array&lt;int,array&lt;int,mixed&gt;&gt;" class="fqsen ">array&lt;int,array&lt;int,mixed&gt;&gt;</a></small>
+                        fetchAllNumeric                        	<small>() : array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the result as an array of numeric arrays.</p>
@@ -561,7 +570,7 @@ of the first row of the result.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;int,array&lt;int,mixed&gt;&gt;$typespace.html#array&lt;int,array&lt;int,mixed&gt;&gt;" class="fqsen ">array&lt;int,array&lt;int,mixed&gt;&gt;</a></td>
+			<td class="type">array</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -596,7 +605,7 @@ of the first row of the result.</p>
                         			<a href="#L252-L262" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryBuilder::fetchAllAssociative()" tabindex="-1" class="structure-title ">
-                        fetchAllAssociative                        	<small>() : array<span class="type-separator"></span><wbr><a href="array&lt;int,array&lt;string,mixed&gt;&gt;$typespace.html#array&lt;int,array&lt;string,mixed&gt;&gt;" class="fqsen ">array&lt;int,array&lt;string,mixed&gt;&gt;</a></small>
+                        fetchAllAssociative                        	<small>() : array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the result as an array of associative arrays.</p>
@@ -610,7 +619,7 @@ of the first row of the result.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;int,array&lt;string,mixed&gt;&gt;$typespace.html#array&lt;int,array&lt;string,mixed&gt;&gt;" class="fqsen ">array&lt;int,array&lt;string,mixed&gt;&gt;</a></td>
+			<td class="type">array</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -645,7 +654,7 @@ of the first row of the result.</p>
                         			<a href="#L264-L275" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryBuilder::fetchAllKeyValue()" tabindex="-1" class="structure-title ">
-                        fetchAllKeyValue                        	<small>() : array<span class="type-separator"></span><wbr><a href="array&lt;mixed,mixed&gt;$typespace.html#array&lt;mixed,mixed&gt;" class="fqsen ">array&lt;mixed,mixed&gt;</a></small>
+                        fetchAllKeyValue                        	<small>() : array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the result as an associative array with the keys<br />
@@ -660,7 +669,7 @@ mapped to the first column and the values mapped to the second column.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;mixed,mixed&gt;$typespace.html#array&lt;mixed,mixed&gt;" class="fqsen ">array&lt;mixed,mixed&gt;</a></td>
+			<td class="type">array</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -695,7 +704,7 @@ mapped to the first column and the values mapped to the second column.</p>
                         			<a href="#L277-L289" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryBuilder::fetchAllAssociativeIndexed()" tabindex="-1" class="structure-title ">
-                        fetchAllAssociativeIndexed                        	<small>() : array<span class="type-separator"></span><wbr><a href="array&lt;mixed,array&lt;string,mixed&gt;&gt;$typespace.html#array&lt;mixed,array&lt;string,mixed&gt;&gt;" class="fqsen ">array&lt;mixed,array&lt;string,mixed&gt;&gt;</a></small>
+                        fetchAllAssociativeIndexed                        	<small>() : array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the result as an associative array with the keys mapped<br />
@@ -711,7 +720,7 @@ and their values.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;mixed,array&lt;string,mixed&gt;&gt;$typespace.html#array&lt;mixed,array&lt;string,mixed&gt;&gt;" class="fqsen ">array&lt;mixed,array&lt;string,mixed&gt;&gt;</a></td>
+			<td class="type">array</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -746,7 +755,7 @@ and their values.</p>
                         			<a href="#L291-L301" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryBuilder::fetchFirstColumn()" tabindex="-1" class="structure-title ">
-                        fetchFirstColumn                        	<small>() : array<span class="type-separator"></span><wbr><a href="array&lt;int,mixed&gt;$typespace.html#array&lt;int,mixed&gt;" class="fqsen ">array&lt;int,mixed&gt;</a></small>
+                        fetchFirstColumn                        	<small>() : array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Prepares and executes an SQL query and returns the result as an array of the first column values.</p>
@@ -760,7 +769,7 @@ and their values.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">array<span class="type-separator"></span><wbr><a href="array&lt;int,mixed&gt;$typespace.html#array&lt;int,mixed&gt;" class="fqsen ">array&lt;int,mixed&gt;</a></td>
+			<td class="type">array</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -895,7 +904,7 @@ and their values.</p>
                         			<a href="#L327-L355" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryBuilder::execute()" tabindex="-1" class="structure-title strike">
-                        execute                        	<small>() : <a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a><span class="type-separator"></span><wbr>int</small>
+                        execute                        	<small>() : <a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a><span class="type-separator"></span><wbr>int<span class="type-separator"></span><wbr>string</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Executes this query using the bound parameters and their types.</p>
@@ -909,7 +918,7 @@ and their values.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a><span class="type-separator"></span><wbr>int</td>
+			<td class="type"><a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a><span class="type-separator"></span><wbr>int<span class="type-separator"></span><wbr>string</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -1136,7 +1145,7 @@ echo $qb-&gt;getSQL(); // SELECT u FROM User u
                         			<a href="#L455-L463" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryBuilder::getParameters()" tabindex="-1" class="structure-title ">
-                        getParameters                        	<small>() : <a href="list&lt;mixed&gt;$typespace.html#list&lt;mixed&gt;" class="fqsen ">list&lt;mixed&gt;</a><span class="type-separator"></span><wbr><a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></small>
+                        getParameters                        	<small>() : <a href="list$typespace.html#list" class="fqsen ">list</a><span class="type-separator"></span><wbr>array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Gets all defined query parameters for the query being constructed indexed by parameter index or name.</p>
@@ -1150,7 +1159,7 @@ echo $qb-&gt;getSQL(); // SELECT u FROM User u
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="list&lt;mixed&gt;$typespace.html#list&lt;mixed&gt;" class="fqsen ">list&lt;mixed&gt;</a><span class="type-separator"></span><wbr><a href="array&lt;string,$typespace.html#array&lt;string," class="fqsen ">array&lt;string,</a></td>
+			<td class="type"><a href="list$typespace.html#list" class="fqsen ">list</a><span class="type-separator"></span><wbr>array</td>
 			<td class="desc"><p>mixed&gt; The currently defined query parameters</p>
 </td>
 			<td class="rest"></td>
@@ -1224,7 +1233,7 @@ echo $qb-&gt;getSQL(); // SELECT u FROM User u
                         			<a href="#L477-L486" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryBuilder::getParameterTypes()" tabindex="-1" class="structure-title ">
-                        getParameterTypes                        	<small>() : <a href="array&lt;int,$typespace.html#array&lt;int," class="fqsen ">array&lt;int,</a></small>
+                        getParameterTypes                        	<small>() : array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"><p>Gets all defined query parameter types for the query being constructed indexed by parameter index or name.</p>
@@ -1238,7 +1247,7 @@ echo $qb-&gt;getSQL(); // SELECT u FROM User u
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type"><a href="array&lt;int,$typespace.html#array&lt;int," class="fqsen ">array&lt;int,</a></td>
+			<td class="type">array</td>
 			<td class="desc"><p>int|string|Type|null&gt;|array&lt;string, int|string|Type|null&gt; The currently defined</p>
 <pre><code>                                                                         query parameter types
 </code></pre>
@@ -3189,7 +3198,17 @@ the final SQL query being constructed.</p>
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/stringable.tostring.php" class="fqsen" target="_blank">\Stringable::__toString()</a></td>
+				<td class="desc"></td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>

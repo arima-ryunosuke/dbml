@@ -82,6 +82,10 @@
 				<td class="type"><a href="http://php.net/manual/ja/class.throwable.php" class="fqsen" target="_blank">\Throwable</a></td>
 				<td class="desc"></td>
 			</tr>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/class.stringable.php" class="fqsen" target="_blank">\Stringable</a></td>
+				<td class="desc"></td>
+			</tr>
         		</tbody>
 	</table>
             
@@ -1071,7 +1075,7 @@
                         			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryException::__construct()" tabindex="-1" class="structure-title ">
-                        __construct                        	<small>($message, $code, $previous) : void</small>
+                        __construct                        	<small>($message = &quot;&quot;, $code = 0, $previous = null) : void</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -1079,18 +1083,18 @@
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type"></td>
-				<td class="rest">$message</td>
+				<td class="type">string</td>
+				<td class="rest">$message = &quot;&quot;</td>
 				<td class="desc"></td>
 			</tr>
         			<tr>
-				<td class="type"></td>
-				<td class="rest">$code</td>
+				<td class="type">int</td>
+				<td class="rest">$code = 0</td>
 				<td class="desc"></td>
 			</tr>
         			<tr>
-				<td class="type"></td>
-				<td class="rest">$previous</td>
+				<td class="type">?<a href="http://php.net/manual/ja/class.throwable.php" class="fqsen" target="_blank">\Throwable</a></td>
+				<td class="rest">$previous = null</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -1184,7 +1188,7 @@
                         			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryException::getMessage()" tabindex="-1" class="structure-title ">
-                        getMessage                        	<small>() : void</small>
+                        getMessage                        	<small>() : string</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -1197,7 +1201,7 @@
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">void</td>
+			<td class="type">string</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -1282,7 +1286,7 @@
                         			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryException::getFile()" tabindex="-1" class="structure-title ">
-                        getFile                        	<small>() : void</small>
+                        getFile                        	<small>() : string</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -1295,7 +1299,7 @@
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">void</td>
+			<td class="type">string</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -1331,7 +1335,7 @@
                         			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryException::getLine()" tabindex="-1" class="structure-title ">
-                        getLine                        	<small>() : void</small>
+                        getLine                        	<small>() : int</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -1344,7 +1348,7 @@
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">void</td>
+			<td class="type">int</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -1380,7 +1384,7 @@
                         			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryException::getTrace()" tabindex="-1" class="structure-title ">
-                        getTrace                        	<small>() : void</small>
+                        getTrace                        	<small>() : array</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -1393,7 +1397,7 @@
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">void</td>
+			<td class="type">array</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -1429,7 +1433,7 @@
                         			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryException::getPrevious()" tabindex="-1" class="structure-title ">
-                        getPrevious                        	<small>() : void</small>
+                        getPrevious                        	<small>() : ?<a href="http://php.net/manual/ja/class.throwable.php" class="fqsen" target="_blank">\Throwable</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -1442,7 +1446,7 @@
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">void</td>
+			<td class="type">?<a href="http://php.net/manual/ja/class.throwable.php" class="fqsen" target="_blank">\Throwable</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -1478,7 +1482,7 @@
                         			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryException::getTraceAsString()" tabindex="-1" class="structure-title ">
-                        getTraceAsString                        	<small>() : void</small>
+                        getTraceAsString                        	<small>() : string</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -1491,7 +1495,7 @@
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">void</td>
+			<td class="type">string</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -1527,7 +1531,7 @@
                         			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\DBAL\Query\QueryException::__toString()" tabindex="-1" class="structure-title ">
-                        __toString                        	<small>() : void</small>
+                        __toString                        	<small>() : string</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -1540,7 +1544,7 @@
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">void</td>
+			<td class="type">string</td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>

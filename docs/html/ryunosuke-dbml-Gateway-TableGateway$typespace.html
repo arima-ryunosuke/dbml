@@ -54,7 +54,7 @@
 		<span class="label label-info"></span>
 		<span class="label label-info">iterateable</span>
 		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L32-L2613" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L32-L2616" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">ryunosuke\dbml\Gateway\TableGateway</span></h2>
@@ -296,6 +296,10 @@ $defaultJoinMethod に INNER, LEFT などの文字列を設定するとそれで
 			</tr>
         			<tr>
 				<td class="type"><a href="http://php.net/manual/ja/class.countable.php" class="fqsen" target="_blank">\Countable</a></td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/class.stringable.php" class="fqsen" target="_blank">\Stringable</a></td>
 				<td class="desc"></td>
 			</tr>
         			<tr>
@@ -692,7 +696,17 @@ echo $gw-&gt;as('T')-&gt;column(['id', 'title'])-&gt;where(['create_at' =&gt; '2
 		</tr>
 		</tbody>
 	</table>
-                                                                            					</div>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/stringable.tostring.php" class="fqsen" target="_blank">\Stringable::__toString()</a></td>
+				<td class="desc"></td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>
@@ -776,7 +790,7 @@ $exists2 = isset($gw['undefined_column']); // false
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1204-L1289" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1205-L1290" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::offsetGet()" tabindex="-1" class="structure-title ">
                         offsetGet                        	<small>($offset) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a><span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Entity-Entityable$typespace.html#ryunosuke\dbml\Entity\Entityable" class="fqsen "><small>ryunosuke\dbml\Entity\</small><wbr>Entityable</a><span class="type-separator"></span><wbr>mixed</small>
@@ -872,7 +886,7 @@ $db-&gt;t_article-&gt;t_comment['@scope1@scope2 AS C']($column, $where);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1291-L1328" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1293-L1330" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::offsetSet()" tabindex="-1" class="structure-title ">
                         offsetSet                        	<small>($offset, $value) : int<span class="type-separator"></span><wbr>array</small>
@@ -953,7 +967,7 @@ $gw[1]['article_title'] = 'タイトル';
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1330-L1351" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1333-L1354" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::offsetUnset()" tabindex="-1" class="structure-title ">
                         offsetUnset                        	<small>($offset) : int<span class="type-separator"></span><wbr>array</small>
@@ -1015,7 +1029,7 @@ unset($gw[[1, 2]]); // 複合主キー値[1, 2]のレコードを削除する
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1353-L1372" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1356-L1375" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::clone()" tabindex="-1" class="structure-title ">
                         clone                        	<small>($force = false) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -1065,7 +1079,7 @@ unset($gw[[1, 2]]); // 複合主キー値[1, 2]のレコードを削除する
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1374-L1384" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1377-L1387" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::describe()" tabindex="-1" class="structure-title ">
                         describe                        	<small>() : <a href="Doctrine-DBAL-Schema-Table$typespace.html#Doctrine\DBAL\Schema\Table" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>Table</a></small>
@@ -1106,7 +1120,7 @@ unset($gw[[1, 2]]); // 複合主キー値[1, 2]のレコードを削除する
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1386-L1405" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1389-L1408" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::as()" tabindex="-1" class="structure-title ">
                         as                        	<small>($alias) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -1156,7 +1170,7 @@ echo $gw-&gt;as('hoge_alias');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1433-L1461" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1436-L1464" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::end()" tabindex="-1" class="structure-title ">
                         end                        	<small>($back = 0) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -1214,7 +1228,7 @@ $select = $db-&gt;t_parent-&gt;t_child-&gt;t_grand-&gt;end(1)-&gt;select();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1463-L1471" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1466-L1474" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::tableName()" tabindex="-1" class="structure-title ">
                         tableName                        	<small>() : string</small>
@@ -1255,7 +1269,7 @@ $select = $db-&gt;t_parent-&gt;t_child-&gt;t_grand-&gt;end(1)-&gt;select();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1473-L1485" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1476-L1488" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::alias()" tabindex="-1" class="structure-title ">
                         alias                        	<small>($alias = null) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a><span class="type-separator"></span><wbr>string</small>
@@ -1304,7 +1318,7 @@ setter の場合は自分自身を返す。</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1487-L1499" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1490-L1502" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::foreign()" tabindex="-1" class="structure-title ">
                         foreign                        	<small>($foreign = null) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a><span class="type-separator"></span><wbr>string</small>
@@ -1353,7 +1367,7 @@ setter の場合は自分自身を返す。</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1501-L1513" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1504-L1516" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::hint()" tabindex="-1" class="structure-title ">
                         hint                        	<small>($hint = null) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a><span class="type-separator"></span><wbr>string</small>
@@ -1402,7 +1416,7 @@ setter の場合は自分自身を返す。</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1525-L1540" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1528-L1543" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::modifier()" tabindex="-1" class="structure-title ">
                         modifier                        	<small>() : string</small>
@@ -1448,7 +1462,7 @@ echo $gw-&gt;as('T')-&gt;modifier();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1542-L1609" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1545-L1612" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::join()" tabindex="-1" class="structure-title ">
                         join                        	<small>($type, $gateway, $on = [], $fkeyname = null) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -2175,7 +2189,7 @@ $db-&gt;t_from-&gt;leftJoinForeignOn($db-&gt;t_join, ['hoge = fuga']);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1611-L1623" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1614-L1626" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::dryrun()" tabindex="-1" class="structure-title ">
                         dryrun                        	<small>() : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -2217,7 +2231,7 @@ $db-&gt;t_from-&gt;leftJoinForeignOn($db-&gt;t_join, ['hoge = fuga']);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1625-L1665" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1628-L1668" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::addScope()" tabindex="-1" class="structure-title ">
                         addScope                        	<small>($name = &quot;&quot;, $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -2307,7 +2321,7 @@ $gw2 = $db-&gt;t_article-&gt;scope('scopename');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1667-L1747" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1670-L1750" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::mixScope()" tabindex="-1" class="structure-title ">
                         mixScope                        	<small>($name, $sourceScopes, ...$newscopes) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -2386,7 +2400,7 @@ $gw-&gt;scope('a b c')-&gt;array();
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1749-L1817" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1752-L1820" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::bindScope()" tabindex="-1" class="structure-title ">
                         bindScope                        	<small>($name, $binding) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -2459,7 +2473,7 @@ $gw-&gt;scope('abc', 'a', 'y', 'z');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1819-L1846" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1822-L1849" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::scoping()" tabindex="-1" class="structure-title ">
                         scoping                        	<small>($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -2835,7 +2849,7 @@ echo $gw-&gt;having(['id' =&gt; 99]);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1848-L1895" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1851-L1898" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::scope()" tabindex="-1" class="structure-title ">
                         scope                        	<small>($name = &quot;&quot;, $variadic_parameters = []) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -2905,7 +2919,7 @@ $gw-&gt;scope([
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1897-L1925" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1900-L1928" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::unscope()" tabindex="-1" class="structure-title ">
                         unscope                        	<small>($name = &quot;&quot;) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -2956,7 +2970,7 @@ $gw-&gt;scope('scope1 scope2')-&gt;unscope('scope1 scope2');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1927-L1937" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1930-L1940" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::noscope()" tabindex="-1" class="structure-title ">
                         noscope                        	<small>() : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -2997,7 +3011,7 @@ $gw-&gt;scope('scope1 scope2')-&gt;unscope('scope1 scope2');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1939-L1964" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1942-L1967" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::definedScope()" tabindex="-1" class="structure-title ">
                         definedScope                        	<small>($name) : array<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>null</small>
@@ -3046,7 +3060,7 @@ $gw-&gt;scope('scope1 scope2')-&gt;unscope('scope1 scope2');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1966-L1974" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1969-L1977" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::getScopes()" tabindex="-1" class="structure-title ">
                         getScopes                        	<small>() : array</small>
@@ -3087,7 +3101,7 @@ $gw-&gt;scope('scope1 scope2')-&gt;unscope('scope1 scope2');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1976-L2051" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L1979-L2054" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::getScopeParts()" tabindex="-1" class="structure-title ">
                         getScopeParts                        	<small>($name = &quot;&quot;, $variadic_parameters = []) : array</small>
@@ -3174,7 +3188,7 @@ $gw-&gt;getScopeParts('scope2', 123);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2053-L2112" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2056-L2115" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::getScopeParams()" tabindex="-1" class="structure-title ">
                         getScopeParams                        	<small>($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) : array</small>
@@ -3253,7 +3267,7 @@ $gw-&gt;getScopeParts('scope2', 123);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2114-L2134" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2117-L2137" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::getScopeParamsForAffect()" tabindex="-1" class="structure-title ">
                         getScopeParamsForAffect                        	<small>($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) : array</small>
@@ -3330,7 +3344,7 @@ $gw-&gt;getScopeParts('scope2', 123);
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2136-L2194" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2139-L2197" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::pk()" tabindex="-1" class="structure-title ">
                         pk                        	<small>(...$variadic) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -3417,7 +3431,7 @@ $gw-&gt;where([       // where で指定
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2196-L2292" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2199-L2295" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::uk()" tabindex="-1" class="structure-title ">
                         uk                        	<small>(...$variadic) : <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a></small>
@@ -3484,7 +3498,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2294-L2329" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2297-L2332" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::count()" tabindex="-1" class="structure-title ">
                         count                        	<small>($column = [], $where = [], $groupBy = [], $having = []) : int</small>
@@ -3829,7 +3843,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2331-L2341" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2334-L2344" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::paginate()" tabindex="-1" class="structure-title ">
                         paginate                        	<small>($currentpage, $countperpage, $shownpage = null) : <a href="ryunosuke-dbml-Query-Pagination-Paginator$typespace.html#ryunosuke\dbml\Query\Pagination\Paginator" class="fqsen "><small>ryunosuke\dbml\Query\Pagination\</small><wbr>Paginator</a></small>
@@ -3889,7 +3903,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2343-L2353" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2346-L2356" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::sequence()" tabindex="-1" class="structure-title ">
                         sequence                        	<small>($condition, $count, $orderbyasc = null, $bidirection = true) : <a href="ryunosuke-dbml-Query-Pagination-Sequencer$typespace.html#ryunosuke\dbml\Query\Pagination\Sequencer" class="fqsen "><small>ryunosuke\dbml\Query\Pagination\</small><wbr>Sequencer</a></small>
@@ -3954,7 +3968,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2355-L2365" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2358-L2368" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::chunk()" tabindex="-1" class="structure-title ">
                         chunk                        	<small>($count, $column = null) : <a href="http://php.net/manual/ja/class.generator.php" class="fqsen" target="_blank">\Generator</a></small>
@@ -4007,7 +4021,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2367-L2377" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2370-L2380" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::getEmptyRecord()" tabindex="-1" class="structure-title ">
                         getEmptyRecord                        	<small>($default = []) : array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Entity-Entityable$typespace.html#ryunosuke\dbml\Entity\Entityable" class="fqsen "><small>ryunosuke\dbml\Entity\</small><wbr>Entityable</a></small>
@@ -4055,7 +4069,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2379-L2390" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2382-L2393" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::gather()" tabindex="-1" class="structure-title ">
                         gather                        	<small>($wheres = [], $other_wheres = [], $parentive = false) : array</small>
@@ -4115,7 +4129,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2392-L2401" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2395-L2404" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::insertSelect()" tabindex="-1" class="structure-title ">
                         insertSelect                        	<small>($sql, $columns = [], $params = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4174,7 +4188,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2403-L2412" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2406-L2415" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::insertArray()" tabindex="-1" class="structure-title ">
                         insertArray                        	<small>($data, $chunk = 0) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4227,7 +4241,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2414-L2423" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2417-L2426" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::updateArray()" tabindex="-1" class="structure-title ">
                         updateArray                        	<small>($data, $identifier = [], $chunk = 0) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4286,7 +4300,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2425-L2434" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2428-L2437" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::modifyArray()" tabindex="-1" class="structure-title ">
                         modifyArray                        	<small>($insertData, $updateData = [], $chunk = 0) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>string[]<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4345,7 +4359,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2436-L2445" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2439-L2448" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::changeArray()" tabindex="-1" class="structure-title ">
                         changeArray                        	<small>($dataarray, $identifier) : array</small>
@@ -4398,7 +4412,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2447-L2456" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2450-L2459" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::save()" tabindex="-1" class="structure-title ">
                         save                        	<small>($data) : array<span class="type-separator"></span><wbr>string[]</small>
@@ -4445,7 +4459,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2458-L2478" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2461-L2481" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::insert()" tabindex="-1" class="structure-title ">
                         insert                        	<small>($data) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4492,7 +4506,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2480-L2489" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2483-L2492" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::update()" tabindex="-1" class="structure-title ">
                         update                        	<small>($data, $identifier = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4545,7 +4559,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2491-L2500" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2494-L2503" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::delete()" tabindex="-1" class="structure-title ">
                         delete                        	<small>($identifier = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4592,7 +4606,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2502-L2511" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2505-L2514" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::remove()" tabindex="-1" class="structure-title ">
                         remove                        	<small>($identifier = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4639,7 +4653,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2513-L2522" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2516-L2525" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::destroy()" tabindex="-1" class="structure-title ">
                         destroy                        	<small>($identifier = []) : int<span class="type-separator"></span><wbr>string[]</small>
@@ -4686,7 +4700,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2524-L2533" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2527-L2536" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::reduce()" tabindex="-1" class="structure-title ">
                         reduce                        	<small>($limit = null, $orderBy = [], $groupBy = [], $identifier = []) : int<span class="type-separator"></span><wbr>string</small>
@@ -4751,7 +4765,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2535-L2544" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2538-L2547" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::create()" tabindex="-1" class="structure-title ">
                         create                        	<small>($data) : string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4798,7 +4812,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2546-L2555" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2549-L2558" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::upsert()" tabindex="-1" class="structure-title ">
                         upsert                        	<small>($insertData, $updateData = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array</small>
@@ -4851,7 +4865,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2557-L2566" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2560-L2569" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::modify()" tabindex="-1" class="structure-title ">
                         modify                        	<small>($insertData, $updateData = []) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4904,7 +4918,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2568-L2577" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2571-L2580" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::replace()" tabindex="-1" class="structure-title ">
                         replace                        	<small>($insertData) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>array<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4950,7 +4964,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2579-L2588" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2582-L2591" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::truncate()" tabindex="-1" class="structure-title ">
                         truncate                        	<small>($cascade = false) : int<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr><a href="ryunosuke-dbml-Query-Statement$typespace.html#ryunosuke\dbml\Query\Statement" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>Statement</a></small>
@@ -4997,7 +5011,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2590-L2600" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2593-L2603" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::getLastInsertId()" tabindex="-1" class="structure-title ">
                         getLastInsertId                        	<small>($columnname = null) : null<span class="type-separator"></span><wbr>string</small>
@@ -5044,7 +5058,7 @@ $gw-&gt;uk('mail1@address', 'mail2@address');
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2602-L2612" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L2605-L2615" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Gateway\TableGateway::resetAutoIncrement()" tabindex="-1" class="structure-title ">
                         resetAutoIncrement                        	<small>($seq = 1) : void</small>
