@@ -22,6 +22,11 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.20
+
+- [all] php8.1 対応
+- [all] update 対応
+
 ## 2.0.19
 
 - [feature][Gateway] nomalize フックを実装
