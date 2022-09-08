@@ -152,6 +152,15 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test___set($database)
+    {
+        $this->assertException('is not supported', fn() => $database->test = 123);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test___call($database)
     {
         // aggregate 系

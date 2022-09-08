@@ -44,6 +44,8 @@ class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(false, $gateway->where(['id' => 999])['name']);
 
         $this->assertNull($gateway->hogera);
+
+        $this->assertException('is not supported', fn() => $gateway->test = 123);
     }
 
     /**

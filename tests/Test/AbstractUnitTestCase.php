@@ -497,6 +497,9 @@ abstract class AbstractUnitTestCase extends TestCase
                 ],
             ], [
                 'C.comment_id IS NOT NULL',
+            ], [
+                'C.article_id',
+                'C.comment_id',
             ]);
             return [$database];
         }, self::provideConnection());
