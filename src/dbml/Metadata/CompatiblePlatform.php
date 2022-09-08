@@ -541,7 +541,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      * クエリにロック構文を付加して返す
      *
      * @param string $query クエリ
-     * @param int $lockmode ロック構文
+     * @param ?int $lockmode ロック構文
      * @param string $lockoption ロックオプション
      * @return string クエリにロック構文を付加した文字列
      */

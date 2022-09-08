@@ -144,7 +144,7 @@ class Operator implements Queryable
     /** @var \Closure[] 外部注入演算子 */
     private static $registereds = [];
 
-    /** @var CompatiblePlatform */
+    /** @var ?CompatiblePlatform */
     private $platform;
 
     /** @var string 演算子 */
@@ -228,7 +228,7 @@ class Operator implements Queryable
     /**
      * コンストラクタ
      *
-     * @param CompatiblePlatform $platform プラットフォーム
+     * @param ?CompatiblePlatform $platform プラットフォーム
      * @param string $operator 演算子
      * @param string $operand1 演算値1
      * @param string|array $operand2 演算値2

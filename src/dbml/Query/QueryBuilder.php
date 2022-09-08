@@ -404,9 +404,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $this->setDefault($database->getOptions());
         // $this だと gc されずに参照が残り続けるので無名クラスのコンテキストにする（どうせ実行時に再バインドされる）
         $this->setProvider(\Closure::bind(function () {
+            /** @var QueryBuilder $this */
             return $this->array();
-        }, new class() {
-        }));
+        }, new class ( ) { }));
     }
 
     /**
@@ -772,11 +772,11 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             // 上記で確定しなかったら相関のある外部キーを漁る
             if (!isset($fcols)) {
                 $from = $from ?? array_find($subbuiler->getFromPart(), function ($from) use ($table) {
-                        $fcols = $this->database->getSchema()->getForeignColumns($table, $from['table'], $from['fkeyname']);
-                        if ($fcols) {
-                            return $from;
-                        }
-                    }, false);
+                    $fcols = $this->database->getSchema()->getForeignColumns($table, $from['table'], $from['fkeyname']);
+                    if ($fcols) {
+                        return $from;
+                    }
+                }, false);
                 $fcols = $from
                     ? $this->database->getSchema()->getForeignColumns($table, $from['table'], $from['fkeyname'] ?? $parsed->fkeyname)
                     : null;
@@ -2793,7 +2793,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * ]);
      * ```
      *
-     * @param int|array $count 最大件数、あるいは[オフセット => 最大件数]な配列
+     * @param int|array|null $count 最大件数、あるいは[オフセット => 最大件数]な配列
      * @param ?int $offset オフセット。オプショナル
      * @return $this 自分自身
      */

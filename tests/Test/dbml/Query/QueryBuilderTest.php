@@ -1059,7 +1059,7 @@ GREATEST(1,2,3) FROM test1', $builder);
         $builder->column([
             'foreign_p P' => [
                 '<c1{col1: col1, col2: col2}' => $database->foreign_c1()->scoping('*', '1=1', ['id' => 'DESC'], [], 'c1.id'),
-                '<c2[seq: 1]'                => $database->foreign_c2()->scoping('*', '1=1', ['cid' => 'DESC'], [], 'c1.id'),
+                '<c2[seq: 1]'                 => $database->foreign_c2()->scoping('*', '1=1', ['cid' => 'DESC'], [], 'c1.id'),
             ],
         ]);
         $builder->orderBy(['P.id' => 'DESC']);
