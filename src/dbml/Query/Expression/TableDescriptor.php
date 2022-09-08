@@ -297,7 +297,7 @@ class TableDescriptor
             $tables = [];
             $lasttable = null;
             foreach ($split(",$joinsigns", $column, false) as $col) {
-                $parts = array_map('trim', $split('.', $col, true));
+                $parts = array_filter(array_map('trim', $split('.', $col, true)), 'strlen');
                 // 1つ（カラムだけ指定）の場合は最後のテーブルを使用する
                 if (count($parts) === 1) {
                     // ただし、最後のテーブルがない場合はテーブル名として扱う
