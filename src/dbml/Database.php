@@ -3813,18 +3813,20 @@ class Database
             case self::METHOD_ARRAY:
                 $result = [];
                 foreach ($row_provider as $row) {
-                    $result[] = $converter ? $converter($row) : $row;
+                    $row = $converter ? $converter($row) : $row;
+                    $result[] = $row;
                 }
                 return $result;
             case self::METHOD_ASSOC:
                 $result = [];
                 foreach ($row_provider as $row) {
+                    $row = $converter ? $converter($row) : $row;
                     foreach ($row as $e) {
                         $key = $e;
                         break;
                     }
                     /** @noinspection PhpUndefinedVariableInspection */
-                    $result[$key] = $converter ? $converter($row) : $row;
+                    $result[$key] = $row;
                 }
                 return $result;
 
@@ -3844,17 +3846,14 @@ class Database
             case self::METHOD_PAIRS:
                 $result = [];
                 foreach ($row_provider as $row) {
-                    foreach ($row as $e) {
-                        $key = $e;
-                        break;
-                    }
-                    $i = 0;
                     $row = $converter ? $converter($row) : $row;
+                    $i = 0;
                     foreach ($row as $e) {
                         if ($i++ === 1) {
                             $val = $e;
                             break;
                         }
+                        $key = $e;
                     }
                     /** @noinspection PhpUndefinedVariableInspection */
                     $result[$key] = $val;
@@ -3866,9 +3865,10 @@ class Database
                 $result = false;
                 $first = true;
                 foreach ($row_provider as $row) {
+                    $row = $converter ? $converter($row) : $row;
                     if ($first) {
                         $first = false;
-                        $result = $converter ? $converter($row) : $row;
+                        $result = $row;
                     }
                     else {
                         throw new TooManyException('record is too many.');
@@ -3879,9 +3879,9 @@ class Database
                 $result = false;
                 $first = true;
                 foreach ($row_provider as $row) {
+                    $row = $converter ? $converter($row) : $row;
                     if ($first) {
                         $first = false;
-                        $row = $converter ? $converter($row) : $row;
                         foreach ($row as $e) {
                             $result = $e;
                             break;
