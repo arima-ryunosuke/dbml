@@ -22,6 +22,12 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.21
+
+- [refactor] fix format/inspection
+- [fixbug][Database] convert の順番に差異がありメソッドによって結果が変わったり notice が出ることがある不具合を修正
+- [fixbug][TableDescriptor] column に空文字が紛れている場合があり notice が出ていた不具合を修正
+
 ## 2.0.20
 
 - [all] php8.1 対応
