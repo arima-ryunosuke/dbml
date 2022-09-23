@@ -273,15 +273,10 @@ namespace ryunosuke\Test\Entity {
 namespace ryunosuke\Test\Platforms {
 
     /**
-     * 特定条件下において sqlite は外部キー制約を持てるのでオーバーライドする Platform
+     * テスト用 Platform
      */
     class SqlitePlatform extends \Doctrine\DBAL\Platforms\SqlitePlatform
     {
-        public function supportsForeignKeyConstraints()
-        {
-            return true;
-        }
-
         public function getReadLockSQL()
         {
             return '/* lock for read */';

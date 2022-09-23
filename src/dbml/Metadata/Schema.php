@@ -237,6 +237,17 @@ class Schema
 
             $this->tables[$table_name] = Adhoc::cacheGetOrSet($this->cache, "Table-$table_name", function () use ($table_name) {
                 $table = $this->schemaManger->listTableDetails($table_name);
+                // doctrine 4.4 から view のカラムが得られなくなっている？ ようなのでかなりアドホックだが暫定対応
+                if (!$table->getColumns()) {
+                    $columns = \Closure::bind(function ($table) {
+                        $database = $this->_conn->getDatabase();
+                        /** @noinspection PhpDeprecationInspection */
+                        $sql = $this->_platform->getListTableColumnsSQL($table, $database);
+                        $tableColumns = $this->_conn->fetchAllAssociative($sql);
+                        return $this->_getPortableTableColumnList($table, $database, $tableColumns);
+                    }, $this->schemaManger, $this->schemaManger)($table_name);
+                    $table = new Table($table_name, $columns);
+                }
                 $table->setSchemaConfig($this->schemaManger->createSchemaConfig());
                 return $table;
             });
