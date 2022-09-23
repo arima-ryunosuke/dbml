@@ -16,7 +16,7 @@
   ],
   "require": {
     "php": ">=7.4",
-    "doctrine/dbal": "3.*",
+    "doctrine/dbal": "^3.5",
     "psr/simple-cache": "1.*"
   },
   "require-dev": {
