@@ -4,9 +4,9 @@ namespace ryunosuke\dbml;
 
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Event\Listeners\SQLSessionInit;
-use Doctrine\DBAL\Events;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\AbstractAsset;
 use Doctrine\DBAL\Schema\Column;
@@ -916,12 +916,44 @@ class Database
      */
     public function __construct($dbconfig, $options = [])
     {
-        $configure = function (Configuration $configuration) {
+        $configure = function (Configuration $configuration) use ($options) {
             $middlewares = $configuration->getMiddlewares();
             if (array_find($middlewares, fn($middleware) => $middleware instanceof LoggingMiddleware) === false) {
                 $middlewares[] = new LoggingMiddleware(new LoggerChain());
                 $configuration->setMiddlewares($middlewares);
             }
+            // for compatible
+            if (isset($options['initCommand'])) {
+                $middlewares[] = new class($options['initCommand']) implements \Doctrine\DBAL\Driver\Middleware {
+                    private $initCommand;
+
+                    public function __construct($initCommand)
+                    {
+                        $this->initCommand = $initCommand;
+                    }
+
+                    public function wrap(Driver $driver): Driver
+                    {
+                        return new class ($driver, $this->initCommand) extends AbstractDriverMiddleware {
+                            private $initCommand;
+
+                            public function __construct(Driver $wrappedDriver, $initCommand)
+                            {
+                                parent::__construct($wrappedDriver);
+                                $this->initCommand = $initCommand;
+                            }
+
+                            public function connect(array $params): \Doctrine\DBAL\Driver\Connection
+                            {
+                                $connection = parent::connect($params);
+                                $connection->exec($this->initCommand);
+                                return $connection;
+                            }
+                        };
+                    }
+                };
+            }
+            $configuration->setMiddlewares($middlewares);
             return $configuration;
         };
 
@@ -973,15 +1005,6 @@ class Database
         }
 
         $this->setDefault($options);
-
-        foreach ($this->getConnections() as $con) {
-            $commands = (array) $this->getUnsafeOption('initCommand');
-            foreach ($commands as $command) {
-                if ($command) {
-                    $con->getEventManager()->addEventListener(Events::postConnect, new SQLSessionInit($command));
-                }
-            }
-        }
 
         $this->setLogger($this->getUnsafeOption('logger'));
         $this->setAutoCastType($this->getUnsafeOption('autoCastType')); // デフォルト兼サンプルの正規化の必要があるので無駄に呼んでおく
