@@ -157,7 +157,7 @@ class Schema
 
         if ($table->hasColumn($column_name)) {
             $column = $table->getColumn($column_name);
-            $definitation['virtual'] = $column->getCustomSchemaOptions()['virtual'] ?? false;
+            $definitation['virtual'] = $column->getPlatformOptions()['virtual'] ?? false;
             $definitation['implicit'] = $definitation['virtual'] ? $definitation['implicit'] ?? false : true;
         }
         else {
@@ -171,7 +171,7 @@ class Schema
             $column->setType($type instanceof Type ? $type : Type::getType($type));
         }
         foreach ($definitation as $name => $value) {
-            $column->setCustomSchemaOption($name, $value);
+            $column->setPlatformOption($name, $value);
         }
 
         // 再キャッシュ
@@ -356,15 +356,15 @@ class Schema
         if ($column === null) {
             return null;
         }
-        if (!$column->hasCustomSchemaOption($type)) {
+        if (!$column->hasPlatformOption($type)) {
             return null;
         }
 
-        $expression = $column->getCustomSchemaOption($type);
-        if ($type === 'select' && $column->hasCustomSchemaOption('lazy') && $column->getCustomSchemaOption('lazy')) {
+        $expression = $column->getPlatformOption($type);
+        if ($type === 'select' && $column->hasPlatformOption('lazy') && $column->getPlatformOption('lazy')) {
             $expression = $expression(...$args);
-            $column->setCustomSchemaOption('lazy', false);
-            $column->setCustomSchemaOption($type, $expression);
+            $column->setPlatformOption('lazy', false);
+            $column->setPlatformOption($type, $expression);
         }
         return $expression;
     }

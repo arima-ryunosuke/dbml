@@ -725,7 +725,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $prefix = $accessor ? $accessor . '.' : '';
 
         $actuals = $schema->hasTable($table) ? array_each($schema->getTableColumns($table), function (&$carry, Column $col, $key) {
-            if (!($col->getCustomSchemaOptions()['virtual'] ?? false)) {
+            if (!($col->getPlatformOptions()['virtual'] ?? false)) {
                 $carry[$key] = $col;
             }
         }, []) : [];
@@ -742,7 +742,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
             if ($ignores) {
                 $allcolumns = array_filter($schema->getTableColumns($table), function (Column $column) {
-                    return !($column->getCustomSchemaOptions()['virtual'] ?? false) || $column->getCustomSchemaOptions()['implicit'];
+                    return !($column->getPlatformOptions()['virtual'] ?? false) || $column->getPlatformOptions()['implicit'];
                 });
                 foreach ($ignores as $ignore) {
                     // 無視しようとしているカラムが存在しない場合（テーブル定義を変更した時とかの対策）
@@ -1049,7 +1049,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 $tablename = $froms[$modifier]['table'] ?? $modifier;
                 if ($this->database->getSchema()->hasTable($tablename)) {
                     $vcolumns = array_filter($this->database->getSchema()->getTableColumns($tablename), function (Column $col) {
-                        return $col->hasCustomSchemaOption('select');
+                        return $col->hasPlatformOption('select');
                     });
                     if ($vcolumns) {
                         $newparam = $is_int ? [] : $param;
@@ -2134,7 +2134,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         }
 
         $columns = is_string($table) && $schema->hasTable($table) ? array_filter($schema->getTableColumns($table), function (Column $column) {
-            return !($column->getCustomSchemaOptions()['virtual'] ?? false);
+            return !($column->getPlatformOptions()['virtual'] ?? false);
         }) : [];
 
         // $fkeyname, $fromAlias の解決（大抵はどちらか一方が決まればどちらか一方も決まる）

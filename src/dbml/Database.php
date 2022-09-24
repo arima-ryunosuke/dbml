@@ -1516,7 +1516,7 @@ class Database
             if (array_key_exists($cname, $row) && ($vaffect = $this->getSchema()->getTableColumnExpression($table, $cname, 'affect'))) {
                 $row = $vaffect($row[$cname], $row) + $row;
             }
-            if ($column->getCustomSchemaOptions()['virtual'] ?? null) {
+            if ($column->getPlatformOptions()['virtual'] ?? null) {
                 unset($columns[$cname]);
             }
         }
@@ -5425,7 +5425,7 @@ class Database
             $file->setCsvControl($options['delimiter'], $options['enclosure'], $options['escape']);
 
             $columns = $column ?: array_keys(array_filter($this->getSchema()->getTableColumns($tableName), function (Column $column) {
-                return !($column->getCustomSchemaOptions()['virtual'] ?? false);
+                return !($column->getPlatformOptions()['virtual'] ?? false);
             }));
             $colnames = array_filter(array_keys(array_rekey($columns, function ($k, $v) { return is_int($k) ? $v : $k; })), 'strlen');
             $template = "INSERT INTO $tableName (%s) VALUES %s";
@@ -6959,7 +6959,7 @@ class Database
 
         $primary = $this->getSchema()->getTablePrimaryColumns($tableName);
         $columns = array_filter($this->getSchema()->getTableColumns($tableName), function (Column $column) {
-            return !($column->getCustomSchemaOptions()['virtual'] ?? false);
+            return !($column->getPlatformOptions()['virtual'] ?? false);
         });
 
         $selects = [];
@@ -7016,7 +7016,7 @@ class Database
         $sourceTable = $this->convertTableName($sourceTable);
 
         $metatarget = array_filter($this->getSchema()->getTableColumns($targetTable), function (Column $column) {
-            return !($column->getCustomSchemaOptions()['virtual'] ?? false);
+            return !($column->getPlatformOptions()['virtual'] ?? false);
         });
         $metasource = $this->getSchema()->getTableColumns($sourceTable);
 

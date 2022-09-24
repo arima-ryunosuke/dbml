@@ -2101,7 +2101,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
         // 修飾子を付加して返す（$column はビルダ側で付けてくれるので不要）
         $columns = array_filter($this->database->getSchema()->getTableColumns($this->tableName), function (Column $column) {
-            return !($column->getCustomSchemaOptions()['virtual'] ?? false);
+            return !($column->getPlatformOptions()['virtual'] ?? false);
         });
         $alias = $that->modifier();
         return array_combine(QueryBuilder::CLAUSES, [

@@ -290,7 +290,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals([
             'virtual'  => false,
             'implicit' => true,
-        ], $column->getCustomSchemaOptions());
+        ], $column->getPlatformOptions());
         $this->assertEquals('string', $column->getType()->getName());
         $this->assertEquals('string', $schema->getTableColumns('metasample')['id']->getType()->getName());
 
@@ -310,7 +310,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             'others'   => [
                 'hoge' => 'HOGE',
             ],
-        ], $column->getCustomSchemaOptions());
+        ], $column->getPlatformOptions());
         $this->assertEquals('integer', $column->getType()->getName());
         $this->assertEquals('integer', $schema->getTableColumns('metasample')['dummy']->getType()->getName());
 
@@ -330,7 +330,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             'others'   => [
                 'fuga' => 'FUGA',
             ],
-        ], $column->getCustomSchemaOptions());
+        ], $column->getPlatformOptions());
         $this->assertEquals('string', $column->getType()->getName());
         $this->assertEquals('string', $schema->getTableColumns('metasample')['dummy']->getType()->getName());
 
@@ -354,10 +354,10 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             'lazy'   => true,
             'select' => function ($arg) { return strtoupper($arg); },
         ]);
-        $this->assertEquals(true, $schema->getTableColumns('metasample')['dummy']->getCustomSchemaOption('lazy')); // この時点では true
+        $this->assertEquals(true, $schema->getTableColumns('metasample')['dummy']->getPlatformOption('lazy')); // この時点では true
         $this->assertEquals('HOGE', $schema->getTableColumnExpression('metasample', 'dummy', 'select', 'hoge'));
         $this->assertEquals('HOGE', $schema->getTableColumnExpression('metasample', 'dummy', 'select', 'fuga'));    // キャッシュされるのでコールバックされない
-        $this->assertEquals(false, $schema->getTableColumns('metasample')['dummy']->getCustomSchemaOption('lazy')); // 呼ばれたので false
+        $this->assertEquals(false, $schema->getTableColumns('metasample')['dummy']->getPlatformOption('lazy')); // 呼ばれたので false
     }
 
     /**
