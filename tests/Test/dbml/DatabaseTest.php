@@ -2,6 +2,7 @@
 
 namespace ryunosuke\Test\dbml;
 
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
@@ -17,11 +18,13 @@ use ryunosuke\dbml\Exception\NonAffectedException;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Generator\Yielder;
+use ryunosuke\dbml\Logging\LoggerChain;
+use ryunosuke\dbml\Logging\Logger;
+use ryunosuke\dbml\Logging\Middleware;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\QueryBuilder;
-use ryunosuke\dbml\Transaction\Logger;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
@@ -109,7 +112,12 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $db->getSlaveConnection()->connect();
         unset($db);
         gc_collect_cycles();
-        $this->assertStringEqualsFile("$tmpdir/log.txt", "PRAGMA cache_size = 1000\n");
+        $this->assertStringEqualsFile("$tmpdir/log.txt", <<<LOG
+        Connecting
+        PRAGMA cache_size = 1000
+        Disconnecting
+        
+        LOG,);
 
         $this->assertException('$dbconfig must be', function () { new Database(null); });
     }
@@ -676,8 +684,12 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test_setLogger()
     {
-        $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
-        $slave = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
+        $configuration = new Configuration();
+        $configuration->setMiddlewares([new Middleware(new LoggerChain())]);
+        $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:'], $configuration);
+        $configuration = new Configuration();
+        $configuration->setMiddlewares([new Middleware(new LoggerChain())]);
+        $slave = DriverManager::getConnection(['url' => 'sqlite:///:memory:'], $configuration);
 
         $master->executeStatement('CREATE TABLE test(id integer)');
         $slave->executeStatement('CREATE TABLE test(id integer)');
@@ -698,7 +710,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $database->rollback();
 
         $this->assertEquals([
-            'START TRANSACTION',
+            'BEGIN',
             'INSERT INTO test (id) VALUES (1)',
             'SELECT test.* FROM test WHERE id = 1',
             'ROLLBACK',
@@ -724,7 +736,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $database->rollback();
 
         $this->assertEquals([
-            'START TRANSACTION',
+            'BEGIN',
             'INSERT INTO test (id) VALUES (1)',
             'ROLLBACK',
         ], $masterlogs);
@@ -1341,7 +1353,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             },
             'metadata'    => [],
         ]);
-        $database->getConnection()->getConfiguration()->setSQLLogger($logger);
+        $database->setLogger($logger);
 
         $database->setInjectCallStack('DatabaseTest.php');
         $database->executeSelect('select * from test');
@@ -1366,7 +1378,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertStringContainsString('phpunit#', $logs[4]['sql']);
 
         $database->setInjectCallStack(null);
-        $database->getConnection()->getConfiguration()->setSQLLogger(null);
+        $database->setLogger(null);
     }
 
     function test_tx_method()
@@ -4962,18 +4974,18 @@ INSERT INTO test (id, name) VALUES
                 'destination' => function ($sql, $params) use (&$logs) {
                     $logs[] = compact('sql', 'params');
                 },
+                'level'       => 'debug',
                 'metadata'    => [],
             ]);
             try {
-                $database->getConnection()->getConfiguration()->setSQLLogger($logger);
+                $database->setLogger($logger);
                 $database->remove('foreign_p P < foreign_c1 C', ['C.id' => 99]);
             }
             catch (\Exception $ex) {
                 $last = reset($logs);
                 $this->assertEquals('DELETE P FROM foreign_p P LEFT JOIN foreign_c1 C ON C.id = P.id WHERE (C.id = ?) AND ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = P.id))) AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = P.id)))', $last['sql']);
-                $this->assertEquals([99], $last['params']);
             }
-            $database->getConnection()->getConfiguration()->setSQLLogger(null);
+            $database->setLogger(null);
         }
 
         // 相互外部キー

@@ -6,9 +6,9 @@ use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
+use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Statement;
-use ryunosuke\dbml\Transaction\Logger;
 use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Platforms\SqlitePlatform;
@@ -1189,8 +1189,7 @@ AND ((flag=1))", "$gw");
                 },
                 'metadata'    => [],
             ]);
-            $current = $database->getConnection()->getConfiguration()->getSQLLogger();
-            $database->getConnection()->getConfiguration()->setSQLLogger($logger);
+            $database->setLogger($logger);
 
             $gateway->arrayForUpdate('*');
             $log = $logs[0];
@@ -1211,7 +1210,7 @@ AND ((flag=1))", "$gw");
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for write */', $log['sql']);
             $this->assertEquals([0], $log['params']);
 
-            $database->getConnection()->getConfiguration()->setSQLLogger($current);
+            $database->setLogger([]);
             $database->setAutoOrder(true);
         }
     }
@@ -1581,13 +1580,14 @@ AND ((flag=1))", "$gw");
             'destination' => function ($sql, $params) use (&$logs) {
                 $logs[] = compact('sql', 'params');
             },
+            'level'       => 'debug',
             'metadata'    => [],
         ]);
         $lastsql = function () use (&$logs) {
             $last = end($logs);
             return [$last['sql'] => $last['params']];
         };
-        $database->getConnection()->getConfiguration()->setSQLLogger($logger);
+        $database->setLogger($logger);
         $database->setAutoOrder(false);
 
         // for SQLServer
@@ -1621,7 +1621,7 @@ AND ((flag=1))", "$gw");
                 $gateway->where(['id' => 1])->orderBy('id')->limit(1)->update(['name' => 'XXX']);
             }
             catch (\Exception $ex) {
-                $this->assertEquals(['UPDATE test SET name = ? WHERE test.id = ? ORDER BY id ASC LIMIT 1' => ['XXX', 1]], $lastsql());
+                $this->assertEquals(['UPDATE test SET name = ? WHERE test.id = ? ORDER BY id ASC LIMIT 1' => []], $lastsql());
             }
         }
 
@@ -1631,7 +1631,7 @@ AND ((flag=1))", "$gw");
                 $gateway->where(['id' => 1])->orderBy('id')->limit(1)->delete();
             }
             catch (\Exception $ex) {
-                $this->assertEquals(['DELETE FROM test WHERE test.id = ? ORDER BY id ASC LIMIT 1' => [1]], $lastsql());
+                $this->assertEquals(['DELETE FROM test WHERE test.id = ? ORDER BY id ASC LIMIT 1' => []], $lastsql());
             }
         }
 
@@ -1672,7 +1672,7 @@ AND ((flag=1))", "$gw");
         $this->assertException('not allow affect query', L($gateway->having('1=1'))->update([]));
         $this->assertException('not allow affect query', L($gateway->having('1=1'))->delete([]));
 
-        $database->getConnection()->getConfiguration()->setSQLLogger(null);
+        $database->setLogger([]);
         $database->setAutoOrder(true);
 
         // for SQLServer

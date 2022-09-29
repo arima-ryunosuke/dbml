@@ -2,17 +2,18 @@
 
 namespace ryunosuke\dbml;
 
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Event\Listeners\SQLSessionInit;
 use Doctrine\DBAL\Events;
-use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\AbstractAsset;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
+use Psr\Log\LoggerInterface;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Exception\NonAffectedException;
@@ -24,6 +25,8 @@ use ryunosuke\dbml\Generator\ArrayGenerator;
 use ryunosuke\dbml\Generator\CsvGenerator;
 use ryunosuke\dbml\Generator\JsonGenerator;
 use ryunosuke\dbml\Generator\Yielder;
+use ryunosuke\dbml\Logging\LoggerChain;
+use ryunosuke\dbml\Logging\Middleware as LoggingMiddleware;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Metadata\Schema;
 use ryunosuke\dbml\Mixin\OptionTrait;
@@ -818,7 +821,7 @@ class Database
                 'csv'   => CsvGenerator::class,
                 'json'  => JsonGenerator::class,
             ],
-            // ロギングオブジェクト（SQLLogger）
+            // ロギングオブジェクト（LoggerInterface）
             'logger'                    => null,
         ];
 
@@ -913,6 +916,15 @@ class Database
      */
     public function __construct($dbconfig, $options = [])
     {
+        $configure = function (Configuration $configuration) {
+            $middlewares = $configuration->getMiddlewares();
+            if (array_find($middlewares, fn($middleware) => $middleware instanceof LoggingMiddleware) === false) {
+                $middlewares[] = new LoggingMiddleware(new LoggerChain());
+                $configuration->setMiddlewares($middlewares);
+            }
+            return $configuration;
+        };
+
         if ($dbconfig instanceof Connection) {
             $connections = array_fill(0, 2, $dbconfig);
         }
@@ -931,10 +943,13 @@ class Database
                 }
             }
             if ($master === $slave) {
-                $connections = array_fill(0, 2, DriverManager::getConnection($dbconfig));
+                $connections = array_fill(0, 2, DriverManager::getConnection($dbconfig, $configure(new Configuration())));
             }
             else {
-                $connections = [DriverManager::getConnection($master), DriverManager::getConnection($slave)];
+                $connections = [
+                    DriverManager::getConnection($master, $configure(new Configuration())),
+                    DriverManager::getConnection($slave, $configure(new Configuration())),
+                ];
             }
         }
 
@@ -1976,7 +1991,7 @@ class Database
      *
      * 単一のインスタンスを渡した場合は両方に設定される。
      *
-     * @param SQLLogger|SQLLogger[] $logger ロガー
+     * @param LoggerInterface|LoggerInterface[]|null $logger ロガー
      * @return $this 自分自身
      */
     public function setLogger($logger)
@@ -1995,8 +2010,21 @@ class Database
         }
 
         foreach ($this->getConnections() as $n => $con) {
-            if (isset($loggers[$n])) {
+            // for compatible
+            /** @noinspection PhpDeprecationInspection */
+            if (isset($loggers[$n]) && $loggers[$n] instanceof \Doctrine\DBAL\Logging\SQLLogger) {
+                /** @noinspection PhpDeprecationInspection */
                 $con->getConfiguration()->setSQLLogger($loggers[$n]);
+                continue;
+            }
+
+            foreach ($con->getConfiguration()->getMiddlewares() as $middleware) {
+                if ($middleware instanceof LoggingMiddleware) {
+                    $logger = $middleware->getLogger();
+                    if ($logger instanceof LoggerChain) {
+                        $logger->resetLoggers(array_filter([$loggers[$n]], fn($v) => $v !== null));
+                    }
+                }
             }
         }
         return $this;

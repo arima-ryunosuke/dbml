@@ -2,6 +2,7 @@
 
 namespace ryunosuke\Test;
 
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
@@ -16,6 +17,8 @@ use PHPUnit\Framework\Error\Error;
 use PHPUnit\Framework\Exception;
 use PHPUnit\Framework\SkippedTestError;
 use PHPUnit\Framework\TestCase;
+use ryunosuke\dbml\Logging\LoggerChain;
+use ryunosuke\dbml\Logging\Middleware;
 use function ryunosuke\dbml\cacheobject;
 use function ryunosuke\dbml\class_shorten;
 use function ryunosuke\dbml\try_null;
@@ -60,9 +63,12 @@ abstract class AbstractUnitTestCase extends TestCase
             $driverOptions[\PDO::MYSQL_ATTR_LOCAL_INFILE] = true;
         }
 
+        $configuration = new Configuration();
+        $configuration->setMiddlewares([new Middleware(new LoggerChain())]);
         $connection = DriverManager::getConnection($config + [
                 'driverOptions' => $driverOptions,
-            ]
+            ],
+            $configuration
         );
         $connection->connect();
 
@@ -513,10 +519,12 @@ abstract class AbstractUnitTestCase extends TestCase
     public static function getDummyDatabase()
     {
         if (self::$database === null) {
+            $configuration = new Configuration();
+            $configuration->setMiddlewares([new Middleware(new LoggerChain())]);
             $connection = DriverManager::getConnection([
                 'url'      => 'sqlite:///:memory:',
                 'platform' => new \ryunosuke\Test\Platforms\SqlitePlatform(),
-            ]);
+            ], $configuration);
             self::createTables($connection, [
                 new Table('t',
                     [

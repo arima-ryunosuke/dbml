@@ -4,10 +4,12 @@ namespace ryunosuke\dbml\Transaction;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\RetryableException;
-use Doctrine\DBAL\Logging\LoggerChain;
-use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\DBAL\TransactionIsolationLevel;
+use Psr\Log\LoggerInterface;
 use ryunosuke\dbml\Database;
+use ryunosuke\dbml\Logging\LoggerChain;
+use ryunosuke\dbml\Logging\Logger;
+use ryunosuke\dbml\Logging\Middleware;
 use ryunosuke\dbml\Mixin\OptionTrait;
 use function ryunosuke\dbml\array_set;
 use function ryunosuke\dbml\arrayize;
@@ -115,7 +117,7 @@ use function ryunosuke\dbml\arrayize;
  *   - finish
  *
  * @property int $isolationLevel トランザクション分離レベル
- * @property SQLLogger $logger ロガーインスタンス
+ * @property LoggerInterface $logger ロガーインスタンス
  * @property \Closure[] $begin begin イベント配列
  * @property \Closure[] $commit commit イベント配列
  * @property \Closure[] $rollback rollback イベント配列
@@ -132,9 +134,9 @@ use function ryunosuke\dbml\arrayize;
  * @method $this|int       isolationLevel($int = null) トランザクション分離レベルを設定・取得する
  * @method int             getIsolationLevel()  トランザクション分離レベルを取得する
  * @method $this           setIsolationLevel($int) トランザクション分離レベルを設定する
- * @method $this|int       logger(SQLLogger $logger = null) ロガーインスタンスを設定・取得する
- * @method SQLLogger       getLogger() ロガーインスタンスを取得する
- * @method $this           setLogger(SQLLogger $logger) ロガーインスタンスを設定する
+ * @method $this|int       logger(LoggerInterface $logger = null) ロガーインスタンスを設定・取得する
+ * @method LoggerInterface getLogger() ロガーインスタンスを取得する
+ * @method $this           setLogger(LoggerInterface $logger) ロガーインスタンスを設定する
  * @method \Closure[]      getBegin() begin イベント配列を取得する
  * @method $this           setBegin(array $closure) begin イベント配列を設定する
  * @method \Closure[]      getCommit() commit イベント配列を取得する
@@ -296,19 +298,36 @@ class Transaction
         }
         $this->retryCount = 0;
 
+        $chain_logger = null;
+        foreach ($connection->getConfiguration()->getMiddlewares() as $middleware) {
+            if ($middleware instanceof Middleware) {
+                $logger = $middleware->getLogger();
+                if ($logger instanceof LoggerChain) {
+                    $chain_logger = $logger;
+                }
+            }
+        }
+
         // ロガー設定
         $current_logger = null;
         if ($this->logger !== null) {
-            $current_logger = $connection->getConfiguration()->getSQLLogger();
-            if ($previewMode) {
-                $connection->getConfiguration()->setSQLLogger($this->logger);
+            // for compatible
+            /** @noinspection PhpDeprecationInspection */
+            if ($this->logger instanceof \Doctrine\DBAL\Logging\SQLLogger) {
+                /** @noinspection PhpDeprecationInspection */
+                $current_logger = $connection->getConfiguration()->getSQLLogger();
+                $loggers = array_filter([$current_logger, $this->logger], fn($logger) => $logger !== null);
+                /** @noinspection PhpDeprecationInspection */
+                $connection->getConfiguration()->setSQLLogger(new \Doctrine\DBAL\Logging\LoggerChain($loggers));
             }
-            else {
-                $loggers = [$this->logger];
-                if ($current_logger) {
-                    array_unshift($loggers, $current_logger);
+            elseif ($this->logger instanceof LoggerInterface) {
+                assert($chain_logger !== null, 'must be LoggerChain to use transaction logger');
+                if ($previewMode) {
+                    $current_logger = $chain_logger->resetLoggers([$this->logger]);
                 }
-                $connection->getConfiguration()->setSQLLogger(new LoggerChain($loggers));
+                else {
+                    $current_logger = $chain_logger->addLogger($this->logger);
+                }
             }
         }
 
@@ -327,10 +346,18 @@ class Transaction
         }
 
         // 変更を戻す(finally 句を模倣)
-        return function () use ($connection, $current_connection, $current_logger, $current_mode, $current_level, $current_savepoint) {
+        return function () use ($connection, $current_connection, $chain_logger, $current_logger, $current_mode, $current_level, $current_savepoint) {
             $this->database->setConnection($current_connection);
             $this->database->setMasterMode($current_mode);
-            $connection->getConfiguration()->setSQLLogger($current_logger);
+            // for compatible
+            /** @noinspection PhpDeprecationInspection */
+            if ($current_logger instanceof \Doctrine\DBAL\Logging\SQLLogger) {
+                /** @noinspection PhpDeprecationInspection */
+                $connection->getConfiguration()->setSQLLogger($current_logger);
+            }
+            elseif ($chain_logger && $current_logger) {
+                $chain_logger->resetLoggers($current_logger);
+            }
             if ($current_level !== null) {
                 $connection->setTransactionIsolation($current_level);
             }

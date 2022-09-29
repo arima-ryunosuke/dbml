@@ -4,7 +4,7 @@ namespace ryunosuke\Test\dbml\Transaction;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use ryunosuke\dbml\Transaction\Logger;
+use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\Test\Database;
 
@@ -419,7 +419,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
             'metadata'    => [],
         ]);
         $transaction->logger($loggerT);
-        $database->getMasterConnection()->getConfiguration()->setSQLLogger($loggerC);
+        $database->setLogger($loggerC);
 
         $transaction->main(function (Database $db) {
             $db->delete('test', ['id' => 2]);
@@ -459,7 +459,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
             'metadata'    => [],
         ]);
         $transaction->logger($loggerT);
-        $database->getMasterConnection()->getConfiguration()->setSQLLogger($loggerC);
+        $database->setLogger($loggerC);
 
         $return = $transaction->main(function (Database $db) {
             $db->insert('test', ['name' => 'HOGE']);
@@ -479,7 +479,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['name' => 'a'], $return[0]);
         // $queries に実行ログが入っているはず
         $this->assertEquals([
-            "START TRANSACTION",
+            "BEGIN",
             "INSERT INTO test (name) VALUES ('HOGE')",
             "INSERT INTO test (name) VALUES ('HOGE')",
             "DELETE FROM test WHERE id = 2",
@@ -493,7 +493,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
             },
         ])->preview($queries);
         $this->assertEquals([
-            "START TRANSACTION",
+            "BEGIN",
             "DELETE FROM test WHERE id = 1",
             "ROLLBACK",
         ], $queries);
@@ -501,7 +501,51 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         // あくまでプレビューなのでロールバックされてるはず
         $this->assertEquals(10, $database->count('test'));
 
-        $database->getMasterConnection()->getConfiguration()->setSQLLogger(null);
+        $database->setLogger([]);
+    }
+
+    /**
+     * @dataProvider provideTransaction
+     * @param Transaction $transaction
+     * @param Database $database
+     */
+    function test_preview_compatible($transaction, $database)
+    {
+        $logsT = [];
+        /** @noinspection PhpDeprecationInspection */
+        $loggerT = new \ryunosuke\dbml\Transaction\Logger([
+            'destination' => function ($sql, $params) use (&$logsT) {
+                $logsT[] = compact('sql', 'params');
+            },
+        ]);
+        $logsC = [];
+        /** @noinspection PhpDeprecationInspection */
+        $loggerC = new \ryunosuke\dbml\Transaction\Logger([
+            'destination' => function ($sql, $params) use (&$logsC) {
+                $logsC[] = compact('sql', 'params');
+            },
+        ]);
+        $transaction->logger($loggerT);
+        $database->setLogger($loggerC);
+
+        $return = $transaction->main(function (Database $db) {
+            $db->insert('test', ['name' => 'HOGE']);
+            $db->insert('test', ['name' => 'HOGE']);
+            $db->delete('test', ['id' => 2]);
+            return $db->selectArray('test.name', ['id' => [1, 2]]);
+        })->perform();
+
+        // クエリ取得に logger を使用してるのでもとに戻っているか担保する
+        $this->assertSame($loggerT, $transaction->logger);
+        // かつ元の logger にはログられていない（あくまでプレビューなので本家にログられても困る）
+        $this->assertCount(0, $logsT);
+        // さらに元 connection のロガーにもログられていない（preview = 内部でトランザクションしているという前提を剥き出しにするのはよくない）
+        $this->assertCount(0, $logsC);
+        // $return に実行結果が入っているはず（id:2 は消してるので1件だけ）
+        $this->assertCount(1, $return);
+        $this->assertEquals(['name' => 'a'], $return[0]);
+
+        $database->setLogger([]);
     }
 
     /**
@@ -526,7 +570,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
             'metadata'    => [],
         ]);
         $transaction->logger($loggerT);
-        $database->getMasterConnection()->getConfiguration()->setSQLLogger($loggerC);
+        $database->setLogger($loggerC);
 
         $transaction->main(function (Database $db) {
             $db->insert('test', ['name' => 'HOGE']);
@@ -542,7 +586,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertCount(0, $logsC);
         // $queries に実行ログが入っているはず
         $subset = [
-            "START TRANSACTION",
+            "BEGIN",
             "INSERT INTO test (name) VALUES ('HOGE')",
             "INSERT INTO test (name) VALUES ('HOGE')",
             "DELETE FROM test WHERE id = 2",
@@ -550,7 +594,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         ];
         $this->assertEquals($subset, array_values(array_intersect($subset, $queries)));
 
-        $database->getMasterConnection()->getConfiguration()->setSQLLogger(null);
+        $database->setLogger([]);
     }
 
     function test_masterslave()
