@@ -1782,7 +1782,7 @@ class Database
         $schema = $this->getSchema();
 
         if ("$objectname" === "") {
-            return $this->getSlaveConnection()->createSchemaManager()->createSchema();
+            return $this->getSlaveConnection()->createSchemaManager()->introspectSchema();
         }
 
         [$parentname, $childname] = explode('.', $objectname) + [1 => null];
@@ -5083,10 +5083,9 @@ class Database
         ];
 
         $tableName = $this->convertTableName($tableName);
-        $table = $this->getSchema()->getTable($tableName);
 
-        $primary = $table->getPrimaryKeyColumns();
-        $columns = $table->getColumns();
+        $primary = $this->getSchema()->getTablePrimaryColumns($tableName);
+        $columns = $this->getSchema()->getTableColumns($tableName);
 
         $records = is_iterable($recordsOrFilename) ? $recordsOrFilename : file_get_arrays($recordsOrFilename);
         foreach ($records as $n => $record) {

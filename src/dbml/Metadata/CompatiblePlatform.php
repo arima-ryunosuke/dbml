@@ -6,6 +6,7 @@ use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\DBAL\Platforms\OraclePlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
@@ -123,7 +124,10 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsIdentityAutoUpdate()
     {
-        return !$this->platform->usesSequenceEmulatedIdentityColumns();
+        if ($this->platform instanceof PostgreSQLPlatform || $this->platform instanceof OraclePlatform) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -506,11 +510,12 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function getIdentitySequenceName($tableName, $columnName)
     {
-        // PostgreSql は table_id_seq で自動シーケンスされる
-        if ($this->platform->usesSequenceEmulatedIdentityColumns()) {
-            return $this->platform->getIdentitySequenceName($tableName, $columnName);
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            return $tableName . '_' . $columnName . '_seq';
         }
-
+        if ($this->platform instanceof OraclePlatform) {
+            return strtoupper($tableName) . '_SEQ';
+        }
         return null;
     }
 
@@ -858,7 +863,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return ["ALTER TABLE $tableName AUTO_INCREMENT = $seq"];
         }
         if ($this->platform instanceof PostgreSQLPlatform) {
-            $sequenceName = $this->platform->getIdentitySequenceName($tableName, $columnName);
+            $sequenceName = $this->getIdentitySequenceName($tableName, $columnName);
             return ["SELECT setval('$sequenceName', $seq, false)"];
         }
         if ($this->platform instanceof SQLServerPlatform) {
