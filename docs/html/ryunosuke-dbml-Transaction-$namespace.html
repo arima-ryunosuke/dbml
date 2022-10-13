@@ -61,7 +61,7 @@
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Transaction.php#L15-L570" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Transaction.php#L17-L597" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="ryunosuke\dbml\Transaction\Transaction" tabindex="-1" class="structure-title ">
 							<a href="ryunosuke-dbml-Transaction-Transaction$typespace.html#ryunosuke\dbml\Transaction\Transaction">Transaction</a>
@@ -206,59 +206,14 @@ $tx-&gt;perform(); // =3
 							<span class="label label-warning"></span>
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
-							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L15-L351" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+							<span class="label label-deprecated">deprecated </span>
+                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L5-L50" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
-						<h4 id="ryunosuke\dbml\Transaction\Logger" tabindex="-1" class="structure-title ">
+						<h4 id="ryunosuke\dbml\Transaction\Logger" tabindex="-1" class="structure-title strike">
 							<a href="ryunosuke-dbml-Transaction-Logger$typespace.html#ryunosuke\dbml\Transaction\Logger">Logger</a>
 						</h4>
 						<div class="inner-item">
-							<div class="description"><p>スタンダードな SQL ロガー</p>
-<p>Database の logger オプションにこのインスタンスを渡すとクエリがログられるようになる。</p>
-<pre><code class="language-php"># 標準出力にログる
-$db = new Database($connection, [
-    'logger' =&gt; new Logger([
-        'destination' =&gt; STDOUT
-    ]),
-]);
-# /var/log/query.log にログる
-$db = new Database($connection, [
-    'logger' =&gt; new Logger([
-        'destination' =&gt; '/var/log/query.log'
-    ]),
-]);
-# クロージャでログる
-$db = new Database($connection, [
-    'logger' =&gt; new Logger([
-        'destination' =&gt; function ($log) { echo $log; }
-    ]),
-]);
-</code></pre>
-<p>Transaction 名前空間に居るのは少し小細工をしているから（癒着している）＋「クエリログは膨大なのでログらない（RDBMS のログに任せる）がトランザクションログはアプリで取っておきたい」という要件が多いため。<br />
-別にグローバルなロガーとして設定しても問題はない。</p>
-<h3>buffer オプションについて</h3>
-<p>コンストラクタオプションで buffer を渡すと下記のような動作モードになる。<br />
-fastcgi_finish_request など、クライアントに速度を意識させない方法があるなら基本的には array を推奨する。<br />
-BLOB INSERT が多いとか、軽めのクエリの数が多いとか、バッチで動いているとか、要件・状況に応じて適時変更したほうが良い。</p>
-<h4>false</h4>
-<p>逐次書き込む。</p>
-<p>逐次変換処理は行われるがメモリは一切消費しないし、ロックも伴わない。<br />
-ただし、逐次書き込むので<strong>ログがリクエスト単位にならない</strong>（別リクエストの割り込みログが発生する）。</p>
-<h4>int</h4>
-<p>指定されたサイズでバッファリングして終了時に書き込む（超えた分は一時ファイル書き出し）。</p>
-<p>メモリには優しいが、逐次ログの変換処理が発生するため、場合によっては動作速度があまりよろしくない。<br />
-終了時にロックして書き込むので<strong>ログがリクエスト単位になる</strong>（別リクエストの割り込みログが発生しない）。</p>
-<h4>true</h4>
-<p>配列に溜め込んで終了時に書き込む。</p>
-<p>ログの変換処理が逐次行われず、終了時に変換と書き込みを行うので、 fastcgi_finish_request があるなら（クライアントの）動作速度に一切の影響を与えない。<br />
-ただし、 長大なクエリや BLOB INSERT などもすべて蓄えるのでメモリには優しくない。<br />
-終了時にロックして書き込むので<strong>ログがリクエスト単位になる</strong>（別リクエストの割り込みログが発生しない）。</p>
-<h4>array</h4>
-<p>指定されたサイズまでは配列に溜め込んで、それ以上はバッファリングして終了時に書き込む。</p>
-<p>上記の int と true の合わせ技（2要素の配列で指定する）。<br />
-http のときは全部配列に収まるように、 batch のときは溢れてもいいようなサイズを設定すれば共通の設定を使い回せる。<br />
-終了時にロックして書き込むので<strong>ログがリクエスト単位になる</strong>（別リクエストの割り込みログが発生しない）。</p>
-</div>
+							<div class="description"></div>
 						</div>
 						<div class="attribute">
 							<span class="label label-default"></span>

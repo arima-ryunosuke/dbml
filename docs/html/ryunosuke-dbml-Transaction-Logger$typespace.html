@@ -53,81 +53,71 @@
 		<span class="label label-warning"></span>
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
-		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L15-L351" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+		<span class="label label-deprecated">deprecated </span>
+        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L5-L50" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">ryunosuke\dbml\Transaction\Logger</span></h2>
 
-	<div class="description"><p>スタンダードな SQL ロガー</p>
-<p>Database の logger オプションにこのインスタンスを渡すとクエリがログられるようになる。</p>
-<pre><code class="language-php"># 標準出力にログる
-$db = new Database($connection, [
-    'logger' =&gt; new Logger([
-        'destination' =&gt; STDOUT
-    ]),
-]);
-# /var/log/query.log にログる
-$db = new Database($connection, [
-    'logger' =&gt; new Logger([
-        'destination' =&gt; '/var/log/query.log'
-    ]),
-]);
-# クロージャでログる
-$db = new Database($connection, [
-    'logger' =&gt; new Logger([
-        'destination' =&gt; function ($log) { echo $log; }
-    ]),
-]);
-</code></pre>
-<p>Transaction 名前空間に居るのは少し小細工をしているから（癒着している）＋「クエリログは膨大なのでログらない（RDBMS のログに任せる）がトランザクションログはアプリで取っておきたい」という要件が多いため。<br />
-別にグローバルなロガーとして設定しても問題はない。</p>
-<h3>buffer オプションについて</h3>
-<p>コンストラクタオプションで buffer を渡すと下記のような動作モードになる。<br />
-fastcgi_finish_request など、クライアントに速度を意識させない方法があるなら基本的には array を推奨する。<br />
-BLOB INSERT が多いとか、軽めのクエリの数が多いとか、バッチで動いているとか、要件・状況に応じて適時変更したほうが良い。</p>
-<h4>false</h4>
-<p>逐次書き込む。</p>
-<p>逐次変換処理は行われるがメモリは一切消費しないし、ロックも伴わない。<br />
-ただし、逐次書き込むので<strong>ログがリクエスト単位にならない</strong>（別リクエストの割り込みログが発生する）。</p>
-<h4>int</h4>
-<p>指定されたサイズでバッファリングして終了時に書き込む（超えた分は一時ファイル書き出し）。</p>
-<p>メモリには優しいが、逐次ログの変換処理が発生するため、場合によっては動作速度があまりよろしくない。<br />
-終了時にロックして書き込むので<strong>ログがリクエスト単位になる</strong>（別リクエストの割り込みログが発生しない）。</p>
-<h4>true</h4>
-<p>配列に溜め込んで終了時に書き込む。</p>
-<p>ログの変換処理が逐次行われず、終了時に変換と書き込みを行うので、 fastcgi_finish_request があるなら（クライアントの）動作速度に一切の影響を与えない。<br />
-ただし、 長大なクエリや BLOB INSERT などもすべて蓄えるのでメモリには優しくない。<br />
-終了時にロックして書き込むので<strong>ログがリクエスト単位になる</strong>（別リクエストの割り込みログが発生しない）。</p>
-<h4>array</h4>
-<p>指定されたサイズまでは配列に溜め込んで、それ以上はバッファリングして終了時に書き込む。</p>
-<p>上記の int と true の合わせ技（2要素の配列で指定する）。<br />
-http のときは全部配列に収まるように、 batch のときは溢れてもいいようなサイズを設定すれば共通の設定を使い回せる。<br />
-終了時にロックして書き込むので<strong>ログがリクエスト単位になる</strong>（別リクエストの割り込みログが発生しない）。</p>
-</div>
+	<div class="description"></div>
 
 	<h3>Construction</h3>
+    	<table class="table">
+		<caption>Parents</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="ryunosuke-dbml-Logging-Logger$typespace.html#ryunosuke\dbml\Logging\Logger" class="fqsen "><small>ryunosuke\dbml\Logging\</small><wbr>Logger</a></td>
+				<td class="desc">スタンダードな SQL ロガー</td>
+			</tr>
+        			<tr>
+				<td class="type"><a href="Psr-Log-AbstractLogger$typespace.html#Psr\Log\AbstractLogger" class="fqsen "><small>Psr\Log\</small><wbr>AbstractLogger</a></td>
+				<td class="desc">This is a simple Logger implementation that other Loggers can inherit from.</td>
+			</tr>
+        		</tbody>
+	</table>
         	<table class="table">
 		<caption>Implements</caption>
 		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-LoggerInterface$typespace.html#Psr\Log\LoggerInterface" class="fqsen "><small>Psr\Log\</small><wbr>LoggerInterface</a></td>
+				<td class="desc">Describes a logger instance.</td>
+			</tr>
         			<tr>
 				<td class="type"><a href="Doctrine-DBAL-Logging-SQLLogger$typespace.html#Doctrine\DBAL\Logging\SQLLogger" class="fqsen "><small>Doctrine\DBAL\Logging\</small><wbr>SQLLogger</a></td>
 				<td class="desc">Interface for SQL loggers.</td>
 			</tr>
         		</tbody>
 	</table>
-        	<table class="table">
-		<caption>Uses</caption>
+            	<table class="table">
+		<caption>See</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="ryunosuke-dbml-Mixin-OptionTrait$typespace.html#ryunosuke\dbml\Mixin\OptionTrait" class="fqsen "><small>ryunosuke\dbml\Mixin\</small><wbr>OptionTrait</a></td>
-				<td class="desc">オプションを保持し、get/set できるようにする trait</td>
+				<td class="type">
+                                            <a href="ryunosuke-dbml-Transaction-Logger$typespace.html#ryunosuke\dbml\Transaction\Logger" class="fqsen "><small>ryunosuke\dbml\Transaction\</small><wbr>Logger</a>                    				</td>
+				<td class="desc"></td>
 			</tr>
         		</tbody>
 	</table>
-        
+    
 	<h3>Hierarchy</h3>
-	<div class="hierarchy"></div>
+	<div class="hierarchy">
+	<ul class="">
+        			<li class="">
+                <a href="Psr-Log-AbstractLogger$typespace.html#Psr\Log\AbstractLogger" class="fqsen "><small>Psr\Log\</small><wbr>AbstractLogger</a>                
+	<ul class="has-indent">
+        			<li class="indent">
+                <a href="ryunosuke-dbml-Logging-LoggerChain$typespace.html#ryunosuke\dbml\Logging\LoggerChain" class="fqsen "><small>ryunosuke\dbml\Logging\</small><wbr>LoggerChain</a>                			</li>
+        			<li class="indent">
+                <a href="ryunosuke-dbml-Logging-Logger$typespace.html#ryunosuke\dbml\Logging\Logger" class="fqsen "><small>ryunosuke\dbml\Logging\</small><wbr>Logger</a>                
+	<ul class="has-indent">
+        			<li class="indent">
+                <a href="ryunosuke-dbml-Transaction-Logger$typespace.html#ryunosuke\dbml\Transaction\Logger" class="fqsen bold"><small>ryunosuke\dbml\Transaction\</small><wbr>Logger</a>                			</li>
+        	</ul>
+    			</li>
+        	</ul>
+    			</li>
+        	</ul>
+    </div>
 
 	<h3>Constants</h3>
     
@@ -145,7 +135,7 @@ http のときは全部配列に収まるように、 batch のときは溢れ�
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L102-L130" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L14-L25" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Transaction\Logger::getDefaultOptions()" tabindex="-1" class="structure-title ">
                         getDefaultOptions                        	<small>() : array</small>
@@ -173,7 +163,7 @@ http のときは全部配列に収まるように、 batch のときは溢れ�
 		<caption>Prototype</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="ryunosuke-dbml-Mixin-OptionTrait$typespace.html#ryunosuke\dbml\Mixin\OptionTrait::getDefaultOptions()" class="fqsen "><small>ryunosuke\dbml\Mixin\</small><wbr>OptionTrait::getDefaultOptions()</a></td>
+				<td class="type"><a href="ryunosuke-dbml-Logging-Logger$typespace.html#ryunosuke\dbml\Logging\Logger::getDefaultOptions()" class="fqsen "><small>ryunosuke\dbml\Logging\</small><wbr>Logger::getDefaultOptions()</a></td>
 				<td class="desc">オプションのデフォルト値を返す static メソッド</td>
 				<td class="rest">override</td>
 			</tr>
@@ -189,147 +179,6 @@ http のときは全部配列に収まるように、 batch のときは溢れ�
             				<li class="structure-item">
 					<div class="attribute">
 						<span class="label label-danger"></span>
-						<span class="label label-default">static</span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L132-L159" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="ryunosuke\dbml\Transaction\Logger::simple()" tabindex="-1" class="structure-title ">
-                        simple                        	<small>($trimsize = null) : <a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>シンプルに値の埋め込みだけを行うコールバックを返す</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">int<span class="type-separator"></span><wbr>null</td>
-				<td class="rest">$trimsize = null</td>
-				<td class="desc"><p>bind パラメータの切り詰めサイズ</p>
-</td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type"><a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></td>
-			<td class="desc"><p>文字列化コールバック</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default">static</span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L161-L173" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="ryunosuke\dbml\Transaction\Logger::pretty()" tabindex="-1" class="structure-title ">
-                        pretty                        	<small>($trimsize = null) : <a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>値を埋め込んだ上で sql フォーマットするコールバックを返す</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">int<span class="type-separator"></span><wbr>null</td>
-				<td class="rest">$trimsize = null</td>
-				<td class="desc"><p>bind パラメータの切り詰めサイズ</p>
-</td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type"><a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></td>
-			<td class="desc"><p>文字列化コールバック</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default">static</span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L175-L203" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="ryunosuke\dbml\Transaction\Logger::oneline()" tabindex="-1" class="structure-title ">
-                        oneline                        	<small>($trimsize = null) : <a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>連続する空白をまとめて1行化するコールバックを返す</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">int<span class="type-separator"></span><wbr>null</td>
-				<td class="rest">$trimsize = null</td>
-				<td class="desc"><p>bind パラメータの切り詰めサイズ</p>
-</td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type"><a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></td>
-			<td class="desc"><p>文字列化コールバック</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
 						<span class="label label-default"></span>
 						<span class="label label-magic"></span>
 						<span class="label label-danger"></span>
@@ -337,170 +186,7 @@ http のときは全部配列に収まるように、 batch のときは溢れ�
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L205-L252" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="ryunosuke\dbml\Transaction\Logger::__construct()" tabindex="-1" class="structure-title ">
-                        __construct                        	<small>($destination = null, $options = []) : void</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>コンストラクタ</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">mixed</td>
-				<td class="rest">$destination = null</td>
-				<td class="desc"><p>出力場所だけはほぼ必須かつ単一で与えることも多いため別引数で与え<strong>られる</strong></p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$options = []</td>
-				<td class="desc"><p>オプション</p>
-</td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">void</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L254-L282" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="ryunosuke\dbml\Transaction\Logger::__destruct()" tabindex="-1" class="structure-title ">
-                        __destruct                        	<small>() : void</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>デストラクタのデフォルト実装</p>
-<p>デストラクタはコンストラクタに比べてそれほど実装されないので trait 側で定義してしまって良いと判断。<br />
-use 側でデストラクタを定義したい場合は OptionTrait__destruct を呼ぶようにすること。</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">void</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="ryunosuke-dbml-Mixin-OptionTrait$typespace.html#ryunosuke\dbml\Mixin\OptionTrait::__destruct()" class="fqsen "><small>ryunosuke\dbml\Mixin\</small><wbr>OptionTrait::__destruct()</a></td>
-				<td class="desc">デストラクタのデフォルト実装</td>
-				<td class="rest">override</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L305-L331" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="ryunosuke\dbml\Transaction\Logger::log()" tabindex="-1" class="structure-title ">
-                        log                        	<small>($sql, $params = [], $types = [], $metadata = []) : void</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"></div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type"></td>
-				<td class="rest">$sql</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$params = []</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$types = []</td>
-				<td class="desc"></td>
-			</tr>
-        			<tr>
-				<td class="type">array</td>
-				<td class="rest">$metadata = []</td>
-				<td class="desc"></td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">void</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L333-L343" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L27-L37" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Transaction\Logger::startQuery()" tabindex="-1" class="structure-title ">
                         startQuery                        	<small>($sql, $params = null, $types = null) : void</small>
@@ -566,7 +252,7 @@ use 側でデストラクタを定義したい場合は OptionTrait__destruct �
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L345-L350" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Transaction/Logger.php#L39-L49" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Transaction\Logger::stopQuery()" tabindex="-1" class="structure-title ">
                         stopQuery                        	<small>() : void</small>
@@ -596,6 +282,800 @@ use 側でデストラクタを定義したい場合は OptionTrait__destruct �
 				<td class="type"><a href="Doctrine-DBAL-Logging-SQLLogger$typespace.html#Doctrine\DBAL\Logging\SQLLogger::stopQuery()" class="fqsen "><small>Doctrine\DBAL\Logging\</small><wbr>SQLLogger::stopQuery()</a></td>
 				<td class="desc">Marks the last started query as stopped. This can be used for timing of queries.</td>
 				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Logging/Logger.php#L136-L163" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::simple()" tabindex="-1" class="structure-title ">
+                        simple                        	<small>($trimsize = null) : <a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>シンプルに値の埋め込みだけを行うコールバックを返す</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">int<span class="type-separator"></span><wbr>null</td>
+				<td class="rest">$trimsize = null</td>
+				<td class="desc"><p>bind パラメータの切り詰めサイズ</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></td>
+			<td class="desc"><p>文字列化コールバック</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="ryunosuke-dbml-Logging-Logger$typespace.html#ryunosuke\dbml\Logging\Logger::simple()" class="fqsen "><small>ryunosuke\dbml\Logging\</small><wbr>Logger::simple()</a></td>
+				<td class="desc">シンプルに値の埋め込みだけを行うコールバックを返す</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Logging/Logger.php#L165-L177" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::pretty()" tabindex="-1" class="structure-title ">
+                        pretty                        	<small>($trimsize = null) : <a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>値を埋め込んだ上で sql フォーマットするコールバックを返す</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">int<span class="type-separator"></span><wbr>null</td>
+				<td class="rest">$trimsize = null</td>
+				<td class="desc"><p>bind パラメータの切り詰めサイズ</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></td>
+			<td class="desc"><p>文字列化コールバック</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="ryunosuke-dbml-Logging-Logger$typespace.html#ryunosuke\dbml\Logging\Logger::pretty()" class="fqsen "><small>ryunosuke\dbml\Logging\</small><wbr>Logger::pretty()</a></td>
+				<td class="desc">値を埋め込んだ上で sql フォーマットするコールバックを返す</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Logging/Logger.php#L179-L207" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::oneline()" tabindex="-1" class="structure-title ">
+                        oneline                        	<small>($trimsize = null) : <a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>連続する空白をまとめて1行化するコールバックを返す</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">int<span class="type-separator"></span><wbr>null</td>
+				<td class="rest">$trimsize = null</td>
+				<td class="desc"><p>bind パラメータの切り詰めサイズ</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="http://php.net/manual/ja/class.closure.php" class="fqsen" target="_blank">\Closure</a></td>
+			<td class="desc"><p>文字列化コールバック</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="ryunosuke-dbml-Logging-Logger$typespace.html#ryunosuke\dbml\Logging\Logger::oneline()" class="fqsen "><small>ryunosuke\dbml\Logging\</small><wbr>Logger::oneline()</a></td>
+				<td class="desc">連続する空白をまとめて1行化するコールバックを返す</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Logging/Logger.php#L209-L256" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::__construct()" tabindex="-1" class="structure-title ">
+                        __construct                        	<small>($destination = null, $options = []) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>コンストラクタ</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$destination = null</td>
+				<td class="desc"><p>出力場所だけはほぼ必須かつ単一で与えることも多いため別引数で与え<strong>られる</strong></p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">array</td>
+				<td class="rest">$options = []</td>
+				<td class="desc"><p>オプション</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="ryunosuke-dbml-Logging-Logger$typespace.html#ryunosuke\dbml\Logging\Logger::__construct()" class="fqsen "><small>ryunosuke\dbml\Logging\</small><wbr>Logger::__construct()</a></td>
+				<td class="desc">コンストラクタ</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Logging/Logger.php#L312-L352" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::log()" tabindex="-1" class="structure-title ">
+                        log                        	<small>($level, $message, $context = []) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Logs with an arbitrary level.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$level</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
+				<td class="rest">$context = []</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-InvalidArgumentException$typespace.html#Psr\Log\InvalidArgumentException" class="fqsen "><small>Psr\Log\</small><wbr>InvalidArgumentException</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="ryunosuke-dbml-Logging-Logger$typespace.html#ryunosuke\dbml\Logging\Logger::log()" class="fqsen "><small>ryunosuke\dbml\Logging\</small><wbr>Logger::log()</a></td>
+				<td class="desc">Logs with an arbitrary level.</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L14-L25" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::emergency()" tabindex="-1" class="structure-title ">
+                        emergency                        	<small>($message, $context = []) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>System is unusable.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
+				<td class="rest">$context = []</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-AbstractLogger$typespace.html#Psr\Log\AbstractLogger::emergency()" class="fqsen "><small>Psr\Log\</small><wbr>AbstractLogger::emergency()</a></td>
+				<td class="desc">System is unusable.</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L27-L41" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::alert()" tabindex="-1" class="structure-title ">
+                        alert                        	<small>($message, $context = []) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Action must be taken immediately.</p>
+<p>Example: Entire website down, database unavailable, etc. This should<br />
+trigger the SMS alerts and wake you up.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
+				<td class="rest">$context = []</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-AbstractLogger$typespace.html#Psr\Log\AbstractLogger::alert()" class="fqsen "><small>Psr\Log\</small><wbr>AbstractLogger::alert()</a></td>
+				<td class="desc">Action must be taken immediately.</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L43-L56" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::critical()" tabindex="-1" class="structure-title ">
+                        critical                        	<small>($message, $context = []) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Critical conditions.</p>
+<p>Example: Application component unavailable, unexpected exception.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
+				<td class="rest">$context = []</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-AbstractLogger$typespace.html#Psr\Log\AbstractLogger::critical()" class="fqsen "><small>Psr\Log\</small><wbr>AbstractLogger::critical()</a></td>
+				<td class="desc">Critical conditions.</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L58-L70" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::error()" tabindex="-1" class="structure-title ">
+                        error                        	<small>($message, $context = []) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Runtime errors that do not require immediate action but should typically<br />
+be logged and monitored.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
+				<td class="rest">$context = []</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-AbstractLogger$typespace.html#Psr\Log\AbstractLogger::error()" class="fqsen "><small>Psr\Log\</small><wbr>AbstractLogger::error()</a></td>
+				<td class="desc">Runtime errors that do not require immediate action but should typically</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L72-L86" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::warning()" tabindex="-1" class="structure-title ">
+                        warning                        	<small>($message, $context = []) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Exceptional occurrences that are not errors.</p>
+<p>Example: Use of deprecated APIs, poor use of an API, undesirable things<br />
+that are not necessarily wrong.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
+				<td class="rest">$context = []</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-AbstractLogger$typespace.html#Psr\Log\AbstractLogger::warning()" class="fqsen "><small>Psr\Log\</small><wbr>AbstractLogger::warning()</a></td>
+				<td class="desc">Exceptional occurrences that are not errors.</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L88-L99" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::notice()" tabindex="-1" class="structure-title ">
+                        notice                        	<small>($message, $context = []) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Normal but significant events.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
+				<td class="rest">$context = []</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-AbstractLogger$typespace.html#Psr\Log\AbstractLogger::notice()" class="fqsen "><small>Psr\Log\</small><wbr>AbstractLogger::notice()</a></td>
+				<td class="desc">Normal but significant events.</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L101-L114" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::info()" tabindex="-1" class="structure-title ">
+                        info                        	<small>($message, $context = []) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Interesting events.</p>
+<p>Example: User logs in, SQL logs.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
+				<td class="rest">$context = []</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-AbstractLogger$typespace.html#Psr\Log\AbstractLogger::info()" class="fqsen "><small>Psr\Log\</small><wbr>AbstractLogger::info()</a></td>
+				<td class="desc">Interesting events.</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L116-L127" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Transaction\Logger::debug()" tabindex="-1" class="structure-title ">
+                        debug                        	<small>($message, $context = []) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Detailed debug information.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>mixed[]</td>
+				<td class="rest">$context = []</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Psr-Log-AbstractLogger$typespace.html#Psr\Log\AbstractLogger::debug()" class="fqsen "><small>Psr\Log\</small><wbr>AbstractLogger::debug()</a></td>
+				<td class="desc">Detailed debug information.</td>
+				<td class="rest">inherit</td>
 			</tr>
         		</tbody>
 	</table>

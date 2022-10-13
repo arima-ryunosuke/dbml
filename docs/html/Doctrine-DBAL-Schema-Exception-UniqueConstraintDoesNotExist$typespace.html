@@ -1,0 +1,2763 @@
+<!DOCTYPE html>
+<html>
+<head>	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/styles/foundation.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js-bootstrap-css/1.2.1/typeaheadjs.min.css">
+	<link rel="stylesheet" type="text/css" data-href="common.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/3.1.1/bootstrap3-typeahead.min.js"></script>
+	<script data-src="common.js"></script>
+
+	<script>
+        (function () {
+            var cachekey;
+            try {
+                cachekey = window.parent.CACHEKEY;
+            }
+            catch (e) {
+                cachekey = 'nocache';
+            }
+            $('link[data-href]').attr('href', function () {
+                return this.dataset.href + '?' + cachekey;
+            });
+            $('script[data-src]').attr('src', function () {
+                return this.dataset.src + '?' + cachekey;
+            });
+
+            $(document).on('click', 'a[href]:not([target="_blank"]):not(.cachekey)', function () {
+                this.classList.add('cachekey');
+                this.href = this.href.replace('.html', '.html?' + cachekey);
+            });
+        })();
+	</script>
+    </head>
+<body class="typespace">
+<a id="anchor" href="./" style="display: none"></a>
+<h1 class="ellipsis fixed">
+	<span class="pull-left">
+	Structure
+	<small class="ellipsis-text">(Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist)</small>
+	</span>
+	<span class="pull-right">
+		<small class="frame-switch">
+		<a target="_parent">frame</a> | <a target="_parent">noframe</a>
+		</small>
+	</span>
+</h1>
+<div class="main-wrapper">
+	<div class="attribute">
+		<span class="label label-danger">final</span>
+		<span class="label label-warning"></span>
+		<span class="label label-info"></span>
+		<span class="label label-info"></span>
+		<span class="label label-deprecated"></span>
+        			<a href="#L11-L21" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                    	</div>
+
+	<h2>class <span class="category-name">Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist</span></h2>
+
+	<div class="description"></div>
+
+	<h3>Construction</h3>
+    	<table class="table">
+		<caption>Parents</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/class.exception.php" class="fqsen" target="_blank">\Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+        	<table class="table">
+		<caption>Implements</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/class.stringable.php" class="fqsen" target="_blank">\Stringable</a></td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/class.throwable.php" class="fqsen" target="_blank">\Throwable</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+            
+	<h3>Hierarchy</h3>
+	<div class="hierarchy">
+	<ul class="">
+        			<li class="">
+                <a href="http://php.net/manual/ja/class.exception.php" class="fqsen" target="_blank">\Exception</a>                
+	<ul class="has-indent">
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a>                
+	<ul class="has-indent">
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Exception-DriverException$typespace.html#Doctrine\DBAL\Exception\DriverException" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>DriverException</a>                
+	<ul class="has-indent">
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Exception-ConnectionException$typespace.html#Doctrine\DBAL\Exception\ConnectionException" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>ConnectionException</a>                
+	<ul class="has-indent">
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Exception-ConnectionLost$typespace.html#Doctrine\DBAL\Exception\ConnectionLost" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>ConnectionLost</a>                			</li>
+        	</ul>
+    			</li>
+        	</ul>
+    			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Cache-CacheException$typespace.html#Doctrine\DBAL\Cache\CacheException" class="fqsen "><small>Doctrine\DBAL\Cache\</small><wbr>CacheException</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Exception-InvalidArgumentException$typespace.html#Doctrine\DBAL\Exception\InvalidArgumentException" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>InvalidArgumentException</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Exception-NoKeyValue$typespace.html#Doctrine\DBAL\Exception\NoKeyValue" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>NoKeyValue</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a>                
+	<ul class="has-indent">
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-UnknownColumnOption$typespace.html#Doctrine\DBAL\Schema\Exception\UnknownColumnOption" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>UnknownColumnOption</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-ColumnAlreadyExists$typespace.html#Doctrine\DBAL\Schema\Exception\ColumnAlreadyExists" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>ColumnAlreadyExists</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-ColumnDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\ColumnDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>ColumnDoesNotExist</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-ForeignKeyDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\ForeignKeyDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>ForeignKeyDoesNotExist</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-IndexAlreadyExists$typespace.html#Doctrine\DBAL\Schema\Exception\IndexAlreadyExists" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>IndexAlreadyExists</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-IndexDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\IndexDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>IndexDoesNotExist</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-IndexNameInvalid$typespace.html#Doctrine\DBAL\Schema\Exception\IndexNameInvalid" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>IndexNameInvalid</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-NamedForeignKeyRequired$typespace.html#Doctrine\DBAL\Schema\Exception\NamedForeignKeyRequired" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>NamedForeignKeyRequired</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-InvalidTableName$typespace.html#Doctrine\DBAL\Schema\Exception\InvalidTableName" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>InvalidTableName</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-NamespaceAlreadyExists$typespace.html#Doctrine\DBAL\Schema\Exception\NamespaceAlreadyExists" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>NamespaceAlreadyExists</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-SequenceAlreadyExists$typespace.html#Doctrine\DBAL\Schema\Exception\SequenceAlreadyExists" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>SequenceAlreadyExists</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-SequenceDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\SequenceDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>SequenceDoesNotExist</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-TableAlreadyExists$typespace.html#Doctrine\DBAL\Schema\Exception\TableAlreadyExists" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>TableAlreadyExists</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-TableDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\TableDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>TableDoesNotExist</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Schema-Exception-UniqueConstraintDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist" class="fqsen bold"><small>Doctrine\DBAL\Schema\Exception\</small><wbr>UniqueConstraintDoesNotExist</a>                			</li>
+        	</ul>
+    			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Exception-DatabaseRequired$typespace.html#Doctrine\DBAL\Exception\DatabaseRequired" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>DatabaseRequired</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Exception-InvalidLockMode$typespace.html#Doctrine\DBAL\Exception\InvalidLockMode" class="fqsen "><small>Doctrine\DBAL\Exception\</small><wbr>InvalidLockMode</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-ConnectionException$typespace.html#Doctrine\DBAL\ConnectionException" class="fqsen "><small>Doctrine\DBAL\</small><wbr>ConnectionException</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Types-ConversionException$typespace.html#Doctrine\DBAL\Types\ConversionException" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>ConversionException</a>                			</li>
+        			<li class="indent">
+                <a href="Doctrine-DBAL-Query-QueryException$typespace.html#Doctrine\DBAL\Query\QueryException" class="fqsen "><small>Doctrine\DBAL\Query\</small><wbr>QueryException</a>                			</li>
+        	</ul>
+    			</li>
+        	</ul>
+    			</li>
+        	</ul>
+    </div>
+
+	<h3>Constants</h3>
+    		<ul>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L25-L26" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::TABLE_DOESNT_EXIST" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        TABLE_DOESNT_EXIST						<var> = 10</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::TABLE_DOESNT_EXIST" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::TABLE_DOESNT_EXIST</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-TableDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\TableDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>TableDoesNotExist</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L28-L29" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::TABLE_ALREADY_EXISTS" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        TABLE_ALREADY_EXISTS						<var> = 20</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::TABLE_ALREADY_EXISTS" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::TABLE_ALREADY_EXISTS</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-TableAlreadyExists$typespace.html#Doctrine\DBAL\Schema\Exception\TableAlreadyExists" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>TableAlreadyExists</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L31-L32" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::COLUMN_DOESNT_EXIST" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        COLUMN_DOESNT_EXIST						<var> = 30</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::COLUMN_DOESNT_EXIST" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::COLUMN_DOESNT_EXIST</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-ColumnDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\ColumnDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>ColumnDoesNotExist</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L34-L35" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::COLUMN_ALREADY_EXISTS" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        COLUMN_ALREADY_EXISTS						<var> = 40</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::COLUMN_ALREADY_EXISTS" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::COLUMN_ALREADY_EXISTS</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-ColumnAlreadyExists$typespace.html#Doctrine\DBAL\Schema\Exception\ColumnAlreadyExists" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>ColumnAlreadyExists</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L37-L38" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::INDEX_DOESNT_EXIST" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        INDEX_DOESNT_EXIST						<var> = 50</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::INDEX_DOESNT_EXIST" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::INDEX_DOESNT_EXIST</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-IndexDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\IndexDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>IndexDoesNotExist</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L40-L41" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::INDEX_ALREADY_EXISTS" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        INDEX_ALREADY_EXISTS						<var> = 60</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::INDEX_ALREADY_EXISTS" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::INDEX_ALREADY_EXISTS</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-IndexAlreadyExists$typespace.html#Doctrine\DBAL\Schema\Exception\IndexAlreadyExists" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>IndexAlreadyExists</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L43-L44" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::SEQUENCE_DOENST_EXIST" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        SEQUENCE_DOENST_EXIST						<var> = 70</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::SEQUENCE_DOENST_EXIST" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::SEQUENCE_DOENST_EXIST</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-SequenceDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\SequenceDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>SequenceDoesNotExist</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L46-L47" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::SEQUENCE_ALREADY_EXISTS" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        SEQUENCE_ALREADY_EXISTS						<var> = 80</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::SEQUENCE_ALREADY_EXISTS" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::SEQUENCE_ALREADY_EXISTS</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-SequenceAlreadyExists$typespace.html#Doctrine\DBAL\Schema\Exception\SequenceAlreadyExists" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>SequenceAlreadyExists</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L49-L50" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::INDEX_INVALID_NAME" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        INDEX_INVALID_NAME						<var> = 90</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::INDEX_INVALID_NAME" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::INDEX_INVALID_NAME</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-IndexNameInvalid$typespace.html#Doctrine\DBAL\Schema\Exception\IndexNameInvalid" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>IndexNameInvalid</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L52-L53" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::FOREIGNKEY_DOESNT_EXIST" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        FOREIGNKEY_DOESNT_EXIST						<var> = 100</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::FOREIGNKEY_DOESNT_EXIST" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::FOREIGNKEY_DOESNT_EXIST</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-ForeignKeyDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\ForeignKeyDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>ForeignKeyDoesNotExist</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L55-L56" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::CONSTRAINT_DOESNT_EXIST" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        CONSTRAINT_DOESNT_EXIST						<var> = 110</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::CONSTRAINT_DOESNT_EXIST" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::CONSTRAINT_DOESNT_EXIST</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-UniqueConstraintDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>UniqueConstraintDoesNotExist</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-public">public</span>
+                        			<a href="#L58-L59" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::NAMESPACE_ALREADY_EXISTS" tabindex="-1" class="structure-title">
+						<small>integer</small>
+                        NAMESPACE_ALREADY_EXISTS						<var> = 120</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::NAMESPACE_ALREADY_EXISTS" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::NAMESPACE_ALREADY_EXISTS</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Schema-Exception-NamespaceAlreadyExists$typespace.html#Doctrine\DBAL\Schema\Exception\NamespaceAlreadyExists" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>NamespaceAlreadyExists</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+				</li>
+            		</ul>
+    
+	<h3>Properties</h3>
+    		<ul>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-primary"></span>
+						<span class="label label-protected">protected</span>
+                        			<a href="#L-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::$message" tabindex="-1" class="structure-title">
+						<small>string</small>
+						$message						<var> = &quot;&quot;</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/class.exception.php#exception.props.message" class="fqsen" target="_blank">\Exception::$message</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-primary"></span>
+						<span class="label label-protected">protected</span>
+                        			<a href="#L-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::$code" tabindex="-1" class="structure-title">
+						<small>integer</small>
+						$code						<var></var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/class.exception.php#exception.props.code" class="fqsen" target="_blank">\Exception::$code</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-primary"></span>
+						<span class="label label-protected">protected</span>
+                        			<a href="#L-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::$file" tabindex="-1" class="structure-title">
+						<small>NULL</small>
+						$file						<var> = null</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/class.exception.php#exception.props.file" class="fqsen" target="_blank">\Exception::$file</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-primary"></span>
+						<span class="label label-protected">protected</span>
+                        			<a href="#L-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::$line" tabindex="-1" class="structure-title">
+						<small>NULL</small>
+						$line						<var> = null</var>
+					</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/class.exception.php#exception.props.line" class="fqsen" target="_blank">\Exception::$line</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+				</li>
+            		</ul>
+    
+	<h3>Methods</h3>
+    		<ul>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L14-L20" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::new()" tabindex="-1" class="structure-title ">
+                        new                        	<small>($constraintName, $table) : <a href="Doctrine-DBAL-Schema-Exception-UniqueConstraintDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>UniqueConstraintDoesNotExist</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$constraintName</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$table</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-Exception-UniqueConstraintDoesNotExist$typespace.html#Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist" class="fqsen "><small>Doctrine\DBAL\Schema\Exception\</small><wbr>UniqueConstraintDoesNotExist</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L61-L69" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::tableDoesNotExist()" tabindex="-1" class="structure-title ">
+                        tableDoesNotExist                        	<small>($tableName) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$tableName</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::tableDoesNotExist()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::tableDoesNotExist()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L71-L79" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::indexNameInvalid()" tabindex="-1" class="structure-title ">
+                        indexNameInvalid                        	<small>($indexName) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$indexName</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::indexNameInvalid()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::indexNameInvalid()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L81-L90" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::indexDoesNotExist()" tabindex="-1" class="structure-title ">
+                        indexDoesNotExist                        	<small>($indexName, $table) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$indexName</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$table</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::indexDoesNotExist()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::indexDoesNotExist()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L92-L101" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::indexAlreadyExists()" tabindex="-1" class="structure-title ">
+                        indexAlreadyExists                        	<small>($indexName, $table) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$indexName</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$table</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::indexAlreadyExists()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::indexAlreadyExists()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L103-L112" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::columnDoesNotExist()" tabindex="-1" class="structure-title ">
+                        columnDoesNotExist                        	<small>($columnName, $table) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$columnName</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$table</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::columnDoesNotExist()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::columnDoesNotExist()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L114-L122" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::namespaceAlreadyExists()" tabindex="-1" class="structure-title ">
+                        namespaceAlreadyExists                        	<small>($namespaceName) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$namespaceName</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::namespaceAlreadyExists()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::namespaceAlreadyExists()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L124-L132" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::tableAlreadyExists()" tabindex="-1" class="structure-title ">
+                        tableAlreadyExists                        	<small>($tableName) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$tableName</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::tableAlreadyExists()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::tableAlreadyExists()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L134-L143" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::columnAlreadyExists()" tabindex="-1" class="structure-title ">
+                        columnAlreadyExists                        	<small>($tableName, $columnName) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$tableName</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$columnName</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::columnAlreadyExists()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::columnAlreadyExists()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L145-L153" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::sequenceAlreadyExists()" tabindex="-1" class="structure-title ">
+                        sequenceAlreadyExists                        	<small>($name) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$name</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::sequenceAlreadyExists()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::sequenceAlreadyExists()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L155-L163" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::sequenceDoesNotExist()" tabindex="-1" class="structure-title ">
+                        sequenceDoesNotExist                        	<small>($name) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$name</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::sequenceDoesNotExist()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::sequenceDoesNotExist()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L165-L174" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::uniqueConstraintDoesNotExist()" tabindex="-1" class="structure-title ">
+                        uniqueConstraintDoesNotExist                        	<small>($constraintName, $table) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$constraintName</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$table</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::uniqueConstraintDoesNotExist()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::uniqueConstraintDoesNotExist()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L176-L185" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::foreignKeyDoesNotExist()" tabindex="-1" class="structure-title ">
+                        foreignKeyDoesNotExist                        	<small>($fkName, $table) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$fkName</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$table</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::foreignKeyDoesNotExist()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::foreignKeyDoesNotExist()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L187-L191" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::namedForeignKeyRequired()" tabindex="-1" class="structure-title ">
+                        namedForeignKeyRequired                        	<small>($localTable, $foreignKey) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-Table$typespace.html#Doctrine\DBAL\Schema\Table" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>Table</a></td>
+				<td class="rest">$localTable</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-ForeignKeyConstraint$typespace.html#Doctrine\DBAL\Schema\ForeignKeyConstraint" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>ForeignKeyConstraint</a></td>
+				<td class="rest">$foreignKey</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::namedForeignKeyRequired()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::namedForeignKeyRequired()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L193-L203" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::alterTableChangeNotSupported()" tabindex="-1" class="structure-title ">
+                        alterTableChangeNotSupported                        	<small>($changeName) : <a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$changeName</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Schema-SchemaException$typespace.html#Doctrine\DBAL\Schema\SchemaException::alterTableChangeNotSupported()" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>SchemaException::alterTableChangeNotSupported()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L18-L21" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::notSupported()" tabindex="-1" class="structure-title ">
+                        notSupported                        	<small>($method) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$method</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::notSupported()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::notSupported()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L23-L43" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::invalidPlatformType()" tabindex="-1" class="structure-title ">
+                        invalidPlatformType                        	<small>($invalidPlatform) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$invalidPlatform</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::invalidPlatformType()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::invalidPlatformType()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L45-L61" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::invalidPlatformVersionSpecified()" tabindex="-1" class="structure-title ">
+                        invalidPlatformVersionSpecified                        	<small>($version, $expectedFormat) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Returns a new instance for an invalid specified platform version.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$version</td>
+				<td class="desc"><p>The invalid platform version given.</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$expectedFormat</td>
+				<td class="desc"><p>The expected platform version format.</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::invalidPlatformVersionSpecified()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::invalidPlatformVersionSpecified()</a></td>
+				<td class="desc">Returns a new instance for an invalid specified platform version.</td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L63-L78" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::driverRequired()" tabindex="-1" class="structure-title ">
+                        driverRequired                        	<small>($url = null) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">?string<span class="type-separator"></span><wbr>string<span class="type-separator"></span><wbr>null</td>
+				<td class="rest">$url = null</td>
+				<td class="desc"><p>The URL that was provided in the connection parameters (if any).</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::driverRequired()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::driverRequired()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L80-L85" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::unknownDriver()" tabindex="-1" class="structure-title ">
+                        unknownDriver                        	<small>($unknownDriverName, $knownDrivers) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$unknownDriverName</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string[]</td>
+				<td class="rest">$knownDrivers</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::unknownDriver()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::unknownDriver()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L87-L91" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::invalidWrapperClass()" tabindex="-1" class="structure-title ">
+                        invalidWrapperClass                        	<small>($wrapperClass) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$wrapperClass</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::invalidWrapperClass()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::invalidWrapperClass()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L93-L98" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::invalidDriverClass()" tabindex="-1" class="structure-title ">
+                        invalidDriverClass                        	<small>($driverClass) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$driverClass</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::invalidDriverClass()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::invalidDriverClass()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L100-L103" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::noColumnsSpecifiedForTable()" tabindex="-1" class="structure-title ">
+                        noColumnsSpecifiedForTable                        	<small>($tableName) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$tableName</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::noColumnsSpecifiedForTable()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::noColumnsSpecifiedForTable()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L105-L108" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::typeExists()" tabindex="-1" class="structure-title ">
+                        typeExists                        	<small>($name) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$name</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::typeExists()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::typeExists()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L110-L119" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::unknownColumnType()" tabindex="-1" class="structure-title ">
+                        unknownColumnType                        	<small>($name) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$name</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::unknownColumnType()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::unknownColumnType()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L121-L124" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::typeNotFound()" tabindex="-1" class="structure-title ">
+                        typeNotFound                        	<small>($name) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$name</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::typeNotFound()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::typeNotFound()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L126-L131" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::typeNotRegistered()" tabindex="-1" class="structure-title ">
+                        typeNotRegistered                        	<small>($type) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Types-Type$typespace.html#Doctrine\DBAL\Types\Type" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>Type</a></td>
+				<td class="rest">$type</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::typeNotRegistered()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::typeNotRegistered()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default">static</span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L133-L138" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::typeAlreadyRegistered()" tabindex="-1" class="structure-title ">
+                        typeAlreadyRegistered                        	<small>($type) : <a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Types-Type$typespace.html#Doctrine\DBAL\Types\Type" class="fqsen "><small>Doctrine\DBAL\Types\</small><wbr>Type</a></td>
+				<td class="rest">$type</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Exception$typespace.html#Doctrine\DBAL\Exception::typeAlreadyRegistered()" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Exception::typeAlreadyRegistered()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::__construct()" tabindex="-1" class="structure-title ">
+                        __construct                        	<small>($message = &quot;&quot;, $code = 0, $previous = null) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string</td>
+				<td class="rest">$message = &quot;&quot;</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">int</td>
+				<td class="rest">$code = 0</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">?<a href="http://php.net/manual/ja/class.throwable.php" class="fqsen" target="_blank">\Throwable</a></td>
+				<td class="rest">$previous = null</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/exception.construct.php" class="fqsen" target="_blank">\Exception::__construct()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::__wakeup()" tabindex="-1" class="structure-title ">
+                        __wakeup                        	<small>() : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/exception.wakeup.php" class="fqsen" target="_blank">\Exception::__wakeup()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger">final</span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::getMessage()" tabindex="-1" class="structure-title ">
+                        getMessage                        	<small>() : string</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">string</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/exception.getmessage.php" class="fqsen" target="_blank">\Exception::getMessage()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger">final</span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::getCode()" tabindex="-1" class="structure-title ">
+                        getCode                        	<small>() : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/exception.getcode.php" class="fqsen" target="_blank">\Exception::getCode()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger">final</span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::getFile()" tabindex="-1" class="structure-title ">
+                        getFile                        	<small>() : string</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">string</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/exception.getfile.php" class="fqsen" target="_blank">\Exception::getFile()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger">final</span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::getLine()" tabindex="-1" class="structure-title ">
+                        getLine                        	<small>() : int</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">int</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/exception.getline.php" class="fqsen" target="_blank">\Exception::getLine()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger">final</span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::getTrace()" tabindex="-1" class="structure-title ">
+                        getTrace                        	<small>() : array</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">array</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/exception.gettrace.php" class="fqsen" target="_blank">\Exception::getTrace()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger">final</span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::getPrevious()" tabindex="-1" class="structure-title ">
+                        getPrevious                        	<small>() : ?<a href="http://php.net/manual/ja/class.throwable.php" class="fqsen" target="_blank">\Throwable</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">?<a href="http://php.net/manual/ja/class.throwable.php" class="fqsen" target="_blank">\Throwable</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/exception.getprevious.php" class="fqsen" target="_blank">\Exception::getPrevious()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger">final</span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::getTraceAsString()" tabindex="-1" class="structure-title ">
+                        getTraceAsString                        	<small>() : string</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">string</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/exception.gettraceasstring.php" class="fqsen" target="_blank">\Exception::getTraceAsString()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L0-L" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Schema\Exception\UniqueConstraintDoesNotExist::__toString()" tabindex="-1" class="structure-title ">
+                        __toString                        	<small>() : string</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">string</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                    	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="http://php.net/manual/ja/exception.tostring.php" class="fqsen" target="_blank">\Exception::__toString()</a></td>
+				<td class="desc"></td>
+				<td class="rest">inherit</td>
+			</tr>
+        		</tbody>
+	</table>
+                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            		</ul>
+    
+	<div class="attribute">
+		<span class="label label-default"></span>
+		<span class="label label-default"></span>
+	</div>
+	<div class="clearfix"></div>
+</div>
+</body>
+</html>

@@ -54,7 +54,7 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/doctrine/event-manager/blob/1.1.1/lib/Doctrine/Common/EventManager.php#L7-L132" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="#L9-L156" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">Doctrine\Common\EventManager</span></h2>
@@ -85,7 +85,7 @@ manager.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/event-manager/blob/1.1.1/lib/Doctrine/Common/EventManager.php#L22-L43" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L24-L45" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\Common\EventManager::dispatchEvent()" tabindex="-1" class="structure-title ">
                         dispatchEvent                        	<small>($eventName, $eventArgs = null) : void</small>
@@ -141,13 +141,13 @@ manager.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/event-manager/blob/1.1.1/lib/Doctrine/Common/EventManager.php#L45-L55" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L47-L69" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\Common\EventManager::getListeners()" tabindex="-1" class="structure-title ">
-                        getListeners                        	<small>($event = null) : object[]<span class="type-separator"></span><wbr>object[][]</small>
+                        getListeners                        	<small>($event = null) : object[]<span class="type-separator"></span><wbr>array</small>
 						</h4>
 					<div class="inner-item">
-						<div class="description"><p>Gets the listeners of a specific event or all listeners.</p>
+						<div class="description"><p>Gets the listeners of a specific event.</p>
 </div>
                         	<table class="table">
 		<caption>Parameters</caption>
@@ -164,8 +164,8 @@ manager.</p>
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">object[]<span class="type-separator"></span><wbr>object[][]</td>
-			<td class="desc"><p>The event listeners for the specified event, or all event listeners.</p>
+			<td class="type">object[]<span class="type-separator"></span><wbr>array</td>
+			<td class="desc"><p>object[]&gt; The event listeners for the specified event, or all event listeners.</p>
 </td>
 			<td class="rest"></td>
 		</tr>
@@ -188,7 +188,48 @@ manager.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/event-manager/blob/1.1.1/lib/Doctrine/Common/EventManager.php#L57-L67" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L71-L79" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\Common\EventManager::getAllListeners()" tabindex="-1" class="structure-title ">
+                        getAllListeners                        	<small>() : array</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>Gets all listeners keyed by event name.</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">array</td>
+			<td class="desc"><p>object[]&gt; The event listeners for the specified event, or all event listeners.</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L81-L91" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\Common\EventManager::hasListeners()" tabindex="-1" class="structure-title ">
                         hasListeners                        	<small>($event) : bool</small>
@@ -234,7 +275,7 @@ manager.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/event-manager/blob/1.1.1/lib/Doctrine/Common/EventManager.php#L69-L87" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L93-L111" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\Common\EventManager::addEventListener()" tabindex="-1" class="structure-title ">
                         addEventListener                        	<small>($events, $listener) : void</small>
@@ -286,7 +327,7 @@ manager.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/event-manager/blob/1.1.1/lib/Doctrine/Common/EventManager.php#L89-L105" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L113-L129" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\Common\EventManager::removeEventListener()" tabindex="-1" class="structure-title ">
                         removeEventListener                        	<small>($events, $listener) : void</small>
@@ -336,7 +377,7 @@ manager.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/event-manager/blob/1.1.1/lib/Doctrine/Common/EventManager.php#L107-L118" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L131-L142" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\Common\EventManager::addEventSubscriber()" tabindex="-1" class="structure-title ">
                         addEventSubscriber                        	<small>($subscriber) : void</small>
@@ -383,7 +424,7 @@ interested in and added as a listener for these events.</p>
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/doctrine/event-manager/blob/1.1.1/lib/Doctrine/Common/EventManager.php#L120-L131" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L144-L155" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="Doctrine\Common\EventManager::removeEventSubscriber()" tabindex="-1" class="structure-title ">
                         removeEventSubscriber                        	<small>($subscriber) : void</small>

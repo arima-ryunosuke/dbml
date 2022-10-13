@@ -39,7 +39,7 @@
 <h1 class="ellipsis fixed">
 	<span class="pull-left">
 	Structure
-	<small class="ellipsis-text">(Doctrine\DBAL\Event\Listeners\SQLSessionInit)</small>
+	<small class="ellipsis-text">(Doctrine\DBAL\SQL\Builder\DropSchemaObjectsSQLBuilder)</small>
 	</span>
 	<span class="pull-right">
 		<small class="frame-switch">
@@ -49,53 +49,26 @@
 </h1>
 <div class="main-wrapper">
 	<div class="attribute">
-		<span class="label label-danger"></span>
+		<span class="label label-danger">final</span>
 		<span class="label label-warning"></span>
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="#L10-L43" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="#L13-L62" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
-	<h2>class <span class="category-name">Doctrine\DBAL\Event\Listeners\SQLSessionInit</span></h2>
+	<h2>class <span class="category-name">Doctrine\DBAL\SQL\Builder\DropSchemaObjectsSQLBuilder</span></h2>
 
-	<div class="description"><p>Session init listener for executing a single SQL statement right after a connection is opened.</p>
-</div>
+	<div class="description"></div>
 
 	<h3>Construction</h3>
-        	<table class="table">
-		<caption>Implements</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-Common-EventSubscriber$typespace.html#Doctrine\Common\EventSubscriber" class="fqsen "><small>Doctrine\Common\</small><wbr>EventSubscriber</a></td>
-				<td class="desc">An EventSubscriber knows himself what events he is interested in.</td>
-			</tr>
-        		</tbody>
-	</table>
-            
+                
 	<h3>Hierarchy</h3>
 	<div class="hierarchy"></div>
 
 	<h3>Constants</h3>
     
 	<h3>Properties</h3>
-    		<ul>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-primary"></span>
-						<span class="label label-protected">protected</span>
-                        			<a href="#L15-L16" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Event\Listeners\SQLSessionInit::$sql" tabindex="-1" class="structure-title">
-						<small>string</small>
-						$sql						<var> = null</var>
-					</h4>
-					<div class="inner-item">
-						<div class="description"></div>
-                                                					</div>
-				</li>
-            		</ul>
     
 	<h3>Methods</h3>
     		<ul>
@@ -109,10 +82,10 @@
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L18-L24" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L17-L20" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Event\Listeners\SQLSessionInit::__construct()" tabindex="-1" class="structure-title ">
-                        __construct                        	<small>($sql) : void</small>
+					<h4 id="Doctrine\DBAL\SQL\Builder\DropSchemaObjectsSQLBuilder::__construct()" tabindex="-1" class="structure-title ">
+                        __construct                        	<small>($platform) : void</small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -120,8 +93,8 @@
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type">string</td>
-				<td class="rest">$sql</td>
+				<td class="type"><a href="Doctrine-DBAL-Platforms-AbstractPlatform$typespace.html#Doctrine\DBAL\Platforms\AbstractPlatform" class="fqsen "><small>Doctrine\DBAL\Platforms\</small><wbr>AbstractPlatform</a></td>
+				<td class="rest">$platform</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -153,10 +126,10 @@
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="#L26-L34" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="#L22-L33" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
-					<h4 id="Doctrine\DBAL\Event\Listeners\SQLSessionInit::postConnect()" tabindex="-1" class="structure-title ">
-                        postConnect                        	<small>($args) : void</small>
+					<h4 id="Doctrine\DBAL\SQL\Builder\DropSchemaObjectsSQLBuilder::buildSQL()" tabindex="-1" class="structure-title ">
+                        buildSQL                        	<small>($schema) : array<span class="type-separator"></span><wbr><a href="list$typespace.html#list" class="fqsen ">list</a></small>
 						</h4>
 					<div class="inner-item">
 						<div class="description"></div>
@@ -164,8 +137,8 @@
 		<caption>Parameters</caption>
 		<tbody>
         			<tr>
-				<td class="type"><a href="Doctrine-DBAL-Event-ConnectionEventArgs$typespace.html#Doctrine\DBAL\Event\ConnectionEventArgs" class="fqsen "><small>Doctrine\DBAL\Event\</small><wbr>ConnectionEventArgs</a></td>
-				<td class="rest">$args</td>
+				<td class="type"><a href="Doctrine-DBAL-Schema-Schema$typespace.html#Doctrine\DBAL\Schema\Schema" class="fqsen "><small>Doctrine\DBAL\Schema\</small><wbr>Schema</a></td>
+				<td class="rest">$schema</td>
 				<td class="desc"></td>
 			</tr>
         		</tbody>
@@ -174,7 +147,7 @@
 		<caption>Return</caption>
 		<tbody>
 		<tr>
-			<td class="type">void</td>
+			<td class="type">array<span class="type-separator"></span><wbr><a href="list$typespace.html#list" class="fqsen ">list</a></td>
 			<td class="desc"></td>
 			<td class="rest"></td>
 		</tr>
@@ -190,56 +163,6 @@
         		</tbody>
 	</table>
                                                     					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="#L36-L42" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="Doctrine\DBAL\Event\Listeners\SQLSessionInit::getSubscribedEvents()" tabindex="-1" class="structure-title ">
-                        getSubscribedEvents                        	<small>() : string[]</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Returns an array of events this subscriber wants to listen to.</tag_inheritdoc></p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">string[]</td>
-			<td class="desc"></td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                    	<table class="table">
-		<caption>Prototype</caption>
-		<tbody>
-        			<tr>
-				<td class="type"><a href="Doctrine-Common-EventSubscriber$typespace.html#Doctrine\Common\EventSubscriber::getSubscribedEvents()" class="fqsen "><small>Doctrine\Common\</small><wbr>EventSubscriber::getSubscribedEvents()</a></td>
-				<td class="desc">Returns an array of events this subscriber wants to listen to.</td>
-				<td class="rest">implement</td>
-			</tr>
-        		</tbody>
-	</table>
-                            					</div>
 					<div class="attribute">
 						<span class="label label-default"></span>
 						<span class="label label-default"></span>

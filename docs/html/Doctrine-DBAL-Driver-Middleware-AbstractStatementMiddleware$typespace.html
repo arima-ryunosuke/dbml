@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/styles/foundation.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js-bootstrap-css/1.2.1/typeaheadjs.min.css">
+	<link rel="stylesheet" type="text/css" data-href="common.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/3.1.1/bootstrap3-typeahead.min.js"></script>
+	<script data-src="common.js"></script>
+
+	<script>
+        (function () {
+            var cachekey;
+            try {
+                cachekey = window.parent.CACHEKEY;
+            }
+            catch (e) {
+                cachekey = 'nocache';
+            }
+            $('link[data-href]').attr('href', function () {
+                return this.dataset.href + '?' + cachekey;
+            });
+            $('script[data-src]').attr('src', function () {
+                return this.dataset.src + '?' + cachekey;
+            });
+
+            $(document).on('click', 'a[href]:not([target="_blank"]):not(.cachekey)', function () {
+                this.classList.add('cachekey');
+                this.href = this.href.replace('.html', '.html?' + cachekey);
+            });
+        })();
+	</script>
+    </head>
+<body class="typespace">
+<a id="anchor" href="./" style="display: none"></a>
+<h1 class="ellipsis fixed">
+	<span class="pull-left">
+	Structure
+	<small class="ellipsis-text">(Doctrine\DBAL\Driver\Middleware\AbstractStatementMiddleware)</small>
+	</span>
+	<span class="pull-right">
+		<small class="frame-switch">
+		<a target="_parent">frame</a> | <a target="_parent">noframe</a>
+		</small>
+	</span>
+</h1>
+<div class="main-wrapper">
+	<div class="attribute">
+		<span class="label label-danger"></span>
+		<span class="label label-warning">abstract</span>
+		<span class="label label-info"></span>
+		<span class="label label-info"></span>
+		<span class="label label-deprecated"></span>
+        			<a href="#L12-L71" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                    	</div>
+
+	<h2>class <span class="category-name">Doctrine\DBAL\Driver\Middleware\AbstractStatementMiddleware</span></h2>
+
+	<div class="description"></div>
+
+	<h3>Construction</h3>
+        	<table class="table">
+		<caption>Implements</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Statement</a></td>
+				<td class="desc">Driver-level statement</td>
+			</tr>
+        		</tbody>
+	</table>
+            
+	<h3>Hierarchy</h3>
+	<div class="hierarchy">
+	<ul class="">
+        			<li class="">
+                <a href="Doctrine-DBAL-Driver-Middleware-AbstractStatementMiddleware$typespace.html#Doctrine\DBAL\Driver\Middleware\AbstractStatementMiddleware" class="fqsen bold"><small>Doctrine\DBAL\Driver\Middleware\</small><wbr>AbstractStatementMiddleware</a>                
+	<ul class="has-indent">
+        			<li class="indent">
+                <a href="ryunosuke-dbml-Logging-Statement$typespace.html#ryunosuke\dbml\Logging\Statement" class="fqsen "><small>ryunosuke\dbml\Logging\</small><wbr>Statement</a>                			</li>
+        	</ul>
+    			</li>
+        	</ul>
+    </div>
+
+	<h3>Constants</h3>
+    
+	<h3>Properties</h3>
+    
+	<h3>Methods</h3>
+    		<ul>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L16-L19" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Driver\Middleware\AbstractStatementMiddleware::__construct()" tabindex="-1" class="structure-title ">
+                        __construct                        	<small>($wrappedStatement) : void</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"></div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Statement</a></td>
+				<td class="rest">$wrappedStatement</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">void</td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L21-L36" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Driver\Middleware\AbstractStatementMiddleware::bindValue()" tabindex="-1" class="structure-title ">
+                        bindValue                        	<small>($param, $value, $type = Doctrine\DBAL\ParameterType::STRING) : bool</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Binds a value to a corresponding named (not supported by mysqli driver, see comment below) or positional<br />
+placeholder in the SQL statement that was used to prepare the statement.</p>
+<p>As mentioned above, the named parameters are not natively supported by the mysqli driver, use executeQuery(),<br />
+fetchAll(), fetchArray(), fetchColumn(), fetchAssoc() methods to have the named parameter emulated by doctrine.</tag_inheritdoc></p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string<span class="type-separator"></span><wbr>int</td>
+				<td class="rest">$param</td>
+				<td class="desc"><p>Parameter identifier. For a prepared statement using named placeholders,</p>
+<pre><code>                     this will be a parameter name of the form :name. For a prepared statement
+                     using question mark placeholders, this will be the 1-indexed position of the parameter.
+</code></pre>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$value</td>
+				<td class="desc"><p>The value to bind to the parameter.</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">int</td>
+				<td class="rest">$type = Doctrine\DBAL\ParameterType::STRING</td>
+				<td class="desc"><p>Explicit data type for the parameter using the <tag_link data-kind='fqsen' data-type-category='class' data-type-fqsen='Doctrine\DBAL\ParameterType' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\ParameterType'>Doctrine\DBAL\ParameterType</tag_link></p>
+<pre><code>                     constants.
+</code></pre>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">bool</td>
+			<td class="desc"><p>TRUE on success or FALSE on failure.</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Exception$typespace.html#Doctrine\DBAL\Driver\Exception" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement::bindValue()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Statement::bindValue()</a></td>
+				<td class="desc">Binds a value to a corresponding named (not supported by mysqli driver, see comment below) or positional</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-ParameterType$typespace.html#Doctrine\DBAL\ParameterType" class="fqsen "><small>Doctrine\DBAL\</small><wbr>ParameterType</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated">deprecated </span>
+						<span class="label label-public">public</span>
+                        			<a href="#L38-L62" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Driver\Middleware\AbstractStatementMiddleware::bindParam()" tabindex="-1" class="structure-title strike">
+                        bindParam                        	<small>($param, &amp;$variable, $type = Doctrine\DBAL\ParameterType::STRING, $length = null) : bool</small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Binds a PHP variable to a corresponding named (not supported by mysqli driver, see comment below) or question<br />
+mark placeholder in the SQL statement that was use to prepare the statement. Unlike <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Doctrine\DBAL\Driver\Statement::bindValue()' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\Driver\Statement::bindValue()'>Doctrine\DBAL\Driver\Statement::bindValue()</tag_link>,<br />
+the variable is bound as a reference and will only be evaluated at the time<br />
+that PDOStatement-&gt;execute() is called.</p>
+<p>As mentioned above, the named parameters are not natively supported by the mysqli driver, use executeQuery(),<br />
+fetchAll(), fetchArray(), fetchColumn(), fetchAssoc() methods to have the named parameter emulated by doctrine.</p>
+<p>Most parameters are input parameters, that is, parameters that are<br />
+used in a read-only fashion to build up the query. Some drivers support the invocation<br />
+of stored procedures that return data as output parameters, and some also as input/output<br />
+parameters that both send in data and are updated to receive it.</tag_inheritdoc></p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">string<span class="type-separator"></span><wbr>int</td>
+				<td class="rest">$param</td>
+				<td class="desc"><p>Parameter identifier. For a prepared statement using named placeholders,</p>
+<pre><code>                        this will be a parameter name of the form :name. For a prepared statement using
+                        question mark placeholders, this will be the 1-indexed position of the parameter.
+</code></pre>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">&amp;$variable</td>
+				<td class="desc"><p>Name of the PHP variable to bind to the SQL statement parameter.</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">int</td>
+				<td class="rest">$type = Doctrine\DBAL\ParameterType::STRING</td>
+				<td class="desc"><p>Explicit data type for the parameter using the <tag_link data-kind='fqsen' data-type-category='class' data-type-fqsen='Doctrine\DBAL\ParameterType' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\ParameterType'>Doctrine\DBAL\ParameterType</tag_link></p>
+<pre><code>                        constants.
+</code></pre>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">int<span class="type-separator"></span><wbr>null</td>
+				<td class="rest">$length = null</td>
+				<td class="desc"><p>You must specify maxlength when using an OUT bind</p>
+<pre><code>                        so that PHP allocates enough memory to hold the returned value.
+</code></pre>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type">bool</td>
+			<td class="desc"><p>TRUE on success or FALSE on failure.</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Exception$typespace.html#Doctrine\DBAL\Driver\Exception" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement::bindParam()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Statement::bindParam()</a></td>
+				<td class="desc">Binds a PHP variable to a corresponding named (not supported by mysqli driver, see comment below) or question</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement::bindValue()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Statement::bindValue()</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement::bindValue()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Statement::bindValue()</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-ParameterType$typespace.html#Doctrine\DBAL\ParameterType" class="fqsen "><small>Doctrine\DBAL\</small><wbr>ParameterType</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="#L64-L70" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="Doctrine\DBAL\Driver\Middleware\AbstractStatementMiddleware::execute()" tabindex="-1" class="structure-title ">
+                        execute                        	<small>($params = null) : <a href="Doctrine-DBAL-Driver-Result$typespace.html#Doctrine\DBAL\Driver\Result" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Result</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_inheritdoc data-type='' data-description=''>Executes a prepared statement</p>
+<p>If the prepared statement included parameter markers, you must either:<br />
+call <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='Doctrine\DBAL\Driver\Statement::bindParam()' data-type-array='0' data-type-nullable='' data-description='Doctrine\DBAL\Driver\Statement::bindParam()'>Doctrine\DBAL\Driver\Statement::bindParam()</tag_link> to bind PHP variables to the parameter markers:<br />
+bound variables pass their value as input and receive the output value,<br />
+if any, of their associated parameter markers or pass an array of input-only<br />
+parameter values.</tag_inheritdoc></p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">mixed[]<span class="type-separator"></span><wbr>null</td>
+				<td class="rest">$params = null</td>
+				<td class="desc"><p>A numeric array of values with as many elements as there are</p>
+<pre><code>                        bound parameters in the SQL statement being executed.
+</code></pre>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="Doctrine-DBAL-Driver-Result$typespace.html#Doctrine\DBAL\Driver\Result" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Result</a></td>
+			<td class="desc"></td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Throws</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Exception$typespace.html#Doctrine\DBAL\Driver\Exception" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Exception</a></td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Prototype</caption>
+		<tbody>
+        			<tr>
+				<td class="type"><a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement::execute()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Statement::execute()</a></td>
+				<td class="desc">Executes a prepared statement</td>
+				<td class="rest">implement</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>See</caption>
+		<tbody>
+        			<tr>
+				<td class="type">
+                                            <a href="Doctrine-DBAL-Driver-Statement$typespace.html#Doctrine\DBAL\Driver\Statement::bindParam()" class="fqsen "><small>Doctrine\DBAL\Driver\</small><wbr>Statement::bindParam()</a>                    				</td>
+				<td class="desc"></td>
+			</tr>
+        		</tbody>
+	</table>
+    					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            		</ul>
+    
+	<div class="attribute">
+		<span class="label label-default"></span>
+		<span class="label label-default"></span>
+	</div>
+	<div class="clearfix"></div>
+</div>
+</body>
+</html>
