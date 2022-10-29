@@ -22,6 +22,14 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.0.22
+
+- [change] doctrine:3.5 の対応
+- [change] doctrine:3.4 の対応
+- [change] CustomSchemaOption の非推奨対応
+- [change] Events の非推奨対応
+- [change] SQLLogger の非推奨対応
+
 ## 2.0.21
 
 - [refactor] fix format/inspection
