@@ -2,7 +2,6 @@
 
 namespace ryunosuke\dbml\Utility;
 
-use Psr\SimpleCache\CacheInterface;
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
 use function ryunosuke\dbml\array_unset;
@@ -175,23 +174,5 @@ class Adhoc
             $result[$key] = $val;
         }
         return $result;
-    }
-
-    /**
-     * psr-16 に「無かったらコールバックを実行」する機能がないので付与
-     *
-     * @param CacheInterface $cacher キャッシュオブジェクト
-     * @param string $key キャッシュキー
-     * @param callable $provider データプロバイダ
-     * @return mixed キャッシュデータ
-     */
-    public static function cacheGetOrSet(CacheInterface $cacher, $key, $provider)
-    {
-        $data = $cacher->get($key);
-        if ($data === null) {
-            $data = $provider();
-            $cacher->set($key, $data);
-        }
-        return $data;
     }
 }

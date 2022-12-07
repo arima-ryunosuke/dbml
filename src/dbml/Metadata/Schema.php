@@ -11,13 +11,13 @@ use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
 use Psr\SimpleCache\CacheInterface;
-use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_nest;
 use function ryunosuke\dbml\array_pickup;
 use function ryunosuke\dbml\array_rekey;
 use function ryunosuke\dbml\array_unset;
 use function ryunosuke\dbml\arrayize;
+use function ryunosuke\dbml\cache_fetch;
 use function ryunosuke\dbml\first_keyvalue;
 use function ryunosuke\dbml\fnmatch_or;
 use function ryunosuke\dbml\optional;
@@ -204,7 +204,7 @@ class Schema
     public function getTableNames()
     {
         if (!$this->tableNames) {
-            $this->tableNames = Adhoc::cacheGetOrSet($this->cache, 'Schema-table_names', function () {
+            $this->tableNames = cache_fetch($this->cache, 'Schema-table_names', function () {
                 $table_names = $this->schemaManger->listTableNames();
 
                 /** @noinspection PhpDeprecationInspection */
@@ -235,7 +235,7 @@ class Schema
                 throw SchemaException::tableDoesNotExist($table_name);
             }
 
-            $this->tables[$table_name] = Adhoc::cacheGetOrSet($this->cache, "Table-$table_name", function () use ($table_name) {
+            $this->tables[$table_name] = cache_fetch($this->cache, "Table-$table_name", function () use ($table_name) {
                 // doctrine 4.4 から view のカラムが得られなくなっている？ ようなのでかなりアドホックだが暫定対応
                 if ($this->schemaManger->tablesExist([$table_name])) {
                     $table = $this->schemaManger->introspectTable($table_name);
@@ -516,7 +516,7 @@ class Schema
 
         $cacheid = sprintf($this->foreignCacheId, $table_name1, $table_name2, $fkeyname);
         if (!isset($this->foreignColumns[$cacheid])) {
-            $this->foreignColumns[$cacheid] = Adhoc::cacheGetOrSet($this->cache, $cacheid, function () use ($table_name1, $table_name2, $fkeyname) {
+            $this->foreignColumns[$cacheid] = cache_fetch($this->cache, $cacheid, function () use ($table_name1, $table_name2, $fkeyname) {
                 $fkeys = [];
                 $fkeys += $this->getForeignKeys($table_name1, $table_name2);
                 $fkeys += $this->getForeignKeys($table_name2, $table_name1);

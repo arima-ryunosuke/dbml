@@ -1203,7 +1203,7 @@ class Database
 
     private function _tableMap()
     {
-        $maps = Adhoc::cacheGetOrSet($this->getUnsafeOption('cacheProvider'), 'Database-tableMap', function () {
+        $maps = cache_fetch($this->getUnsafeOption('cacheProvider'), 'Database-tableMap', function () {
             $maps = [
                 'entityClass'  => [],
                 'gatewayClass' => [],

@@ -61,9 +61,9 @@ ACTUAL
         $this->assertEquals(<<<EXPECTED
 select
   'abc...wxyz',
-  2 
+  2
 where
-  'abcdefgh' 
+  'abcdefgh'
   and 1
 EXPECTED
             , $pretty(<<<ACTUAL
