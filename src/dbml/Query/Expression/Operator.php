@@ -13,6 +13,7 @@ use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\arrayval;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\first_keyvalue;
+use function ryunosuke\dbml\glob2regex;
 use function ryunosuke\dbml\quoteexplode;
 use function ryunosuke\dbml\str_subreplace;
 
@@ -34,7 +35,7 @@ use function ryunosuke\dbml\str_subreplace;
  * | `'hoge:[~)' => [null, null]`                   | -                                            | バインド値に両方 null を渡すと条件自体が吹き飛ぶ
  * | `'hoge:LIKE%' => 'wo%rd'`                      | `hoge LIKE 'wo\%rd%'`                        | LIKEエスケープを施した上で右に"%"を付加してLIKEする。他にも `%LIKE` `%LIKE%` がある
  * | `'hoge:LIKEIN%' => ['he%lo', 'wo%rd']`         | `hoge LIKE 'he\%lo%' OR hoge LIKE 'wo\%rd%'` | 上記の配列IN版。構文的には `LIKE ANY('str1', 'str2')` みたいなもの
- * | `'hoge:PHRASE' => 'word phrase'`             | `hoge LIKE '%word%' OR hoge LIKE '%phrase%'`   | いわゆる検索クエリを与えるとよしなに LIKE する。ダブルクォート:セパレータの無効化, ハイフン:NOT, パイプ:優先度高OR, スペース:AND, カンマ:優先度低OR
+ * | `'hoge:PHRASE' => 'hello*world|phrase'`        | `hoge REGEXP 'hello.*world' OR hoge REGEXP 'phrase'`   | LIKEのワイルドカードを正規表現に変換してよしなにREGEXPする。シングルクォート:あらゆるメタ文字を無効化して完全一致検索, ダブルクォート:セパレータの無効化, ハイフン:NOT, スペース:AND, パイプ:OR, カンマ:優先度高OR
  * | `'hoge:NULLIN' => [1, 2, 3, NULL]`             | `hoge IN (1, 2, 3) OR hoge IS NULL`          | NULL を許容できる IN。 `[1, 2, 3, null]` などとすると IN(1, 2, 3) or NULL のようになる
  *
  * ```php
@@ -412,28 +413,39 @@ class Operator implements Queryable
 
     private function _phrase()
     {
+        $regexp = $this->platform->getWrappedPlatform()->getRegexpExpression();
         $split = function ($delimiter, $string) {
-            return array_filter(array_map('trim', quoteexplode($delimiter, $string, null, ['"' => '"'], '\\')), 'strlen');
+            return array_filter(array_map('trim', quoteexplode($delimiter, $string, null)), 'strlen');
         };
 
         $params = [];
-        $likes = [];
-        foreach ($split(',', $this->operand2[0]) as $i => $sentence) {
-            foreach ($split(" ", $sentence) as $j => $phrase) {
-                foreach ($split("|", $phrase) as $k => $word) {
-                    $like = $this->operand1 . ' LIKE ?';
+        $patterns = [];
+        foreach ($split('|', $this->operand2[0]) as $i => $sentence) {
+            foreach ($split([" ", "　", "\t", "\n"], $sentence) as $j => $phrase) {
+                foreach ($split(",", $phrase) as $k => $word) {
+                    $pattern = $this->operand1 . " $regexp ?";
                     if ($word[0] === '-') {
-                        $like = "NOT ($like)";
+                        $pattern = "NOT ($pattern)";
                         $word = substr($word, 1);
                     }
-                    $likes[$i][$j][$k] = $like;
-                    $params[] = '%' . trim(stripslashes(strtr($this->platform->escapeLike($word), [' ' => '%'])), '"') . '%';
+                    if ($word[0] === '"' && $word[-1] === '"') {
+                        $word = glob2regex(trim(stripslashes($word), '"'));
+                    }
+                    elseif ($word[0] === "'" && $word[-1] === "'") {
+                        // @memo \A,\z is from mysql>=8
+                        $word = '^' . preg_quote(trim(stripslashes($word), "'")) . '$';
+                    }
+                    else {
+                        $word = glob2regex($word, GLOB_BRACE);
+                    }
+                    $patterns[$i][$j][$k] = $pattern;
+                    $params[] = $word;
                 }
-                $likes[$i][$j] = implode(' OR ', Adhoc::wrapParentheses($likes[$i][$j]));
+                $patterns[$i][$j] = implode(' OR ', Adhoc::wrapParentheses($patterns[$i][$j]));
             }
-            $likes[$i] = implode(' AND ', Adhoc::wrapParentheses($likes[$i]));
+            $patterns[$i] = implode(' AND ', Adhoc::wrapParentheses($patterns[$i]));
         }
-        $this->string = implode(' OR ', Adhoc::wrapParentheses($likes));
+        $this->string = implode(' OR ', Adhoc::wrapParentheses($patterns));
         $this->params = $params;
     }
 
