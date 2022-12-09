@@ -819,6 +819,45 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_declareCommonTable($database)
+    {
+        // 対応していない？（マニュアル的には対応してそうだけど…）
+        if ($database->getPlatform() instanceof SQLServerPlatform) {
+            return;
+        }
+
+        $database->refresh();
+
+        $database->declareCommonTable([
+            'fibonacci(n0, n)' => 'select 0, 1 union all select n, n0 + n from fibonacci WHERE n < 50',
+            'querybuilder'     => fn() => $database->selectAvg('aggregate.group_id2', [], 'group_id1'),
+            'arrays'           => [
+                'column'  => ['aggregate' => ['group_id1', 'MAX(group_id2)']],
+                'groupBy' => 'group_id1',
+            ],
+        ]);
+
+        $this->assertEquals([1, 1, 2, 3, 5, 8, 13, 21, 34, 55], $database->selectLists('fibonacci.n'));
+        $this->assertEquals([
+            1 => 10.0,
+            2 => 10.0,
+            3 => 15.0,
+            4 => 20.0,
+            5 => 20.0,
+        ], $database->selectPairs('querybuilder'));
+        $this->assertEquals([
+            1 => 10.0,
+            2 => 10.0,
+            3 => 20.0,
+            4 => 20.0,
+            5 => 20.0,
+        ], $database->selectPairs('arrays'));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_overrideColumns($database)
     {
         $database->overrideColumns([

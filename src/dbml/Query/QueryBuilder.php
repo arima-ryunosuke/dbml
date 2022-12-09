@@ -2223,6 +2223,14 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
         }
 
+        if (is_string($table) && $schema->hasTable($table)) {
+            $cte_table = $schema->getTable($table);
+            if ($cte_table->hasOption('cte')) {
+                $cte_option = $cte_table->getOption('cte');
+                $this->with("$table{$cte_option['columns']}", $cte_option['query']);
+            }
+        }
+
         $isfrom = $type === null || (empty($fromAlias) && empty($froms));
 
         if ($isfrom) {

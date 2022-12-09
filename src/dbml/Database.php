@@ -11,6 +11,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\AbstractAsset;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Psr\Log\LoggerInterface;
@@ -2448,6 +2449,59 @@ class Database
     {
         assert(!$this->getSchema()->hasTable($vtableName));
         $this->vtables[$vtableName] = array_combine(QueryBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]);
+        return $this;
+    }
+
+    /**
+     * CTE を宣言する
+     *
+     * ここで宣言された CTE は {@link select()} で使用されたときに自動的に WITH 句に追加されるようになる。
+     * 「共通的に VIEW 的なものを宣言し、後で使用できるようにする」といったイメージ。
+     *
+     * ```php
+     * $db->declareCommonTable([
+     *     'c_table1'    => 'SELECT 1, 2',
+     *     'c_table2(n)' => 'SELECT 1 UNION SELECT n + 1 FROM c_table2 WHERE n < 5',
+     * ]);
+     *
+     * # 追加した CTE は自動で WITH 句に追加される
+     * $db->selectArray('c_table2');
+     * // WITH RECURSIVE c_table2(n) AS(SELECT 1 UNION SELECT n + 1 FROM c_table2 WHERE n < 5)SELECT c_table2.* FROM c_table2
+     * ```
+     *
+     * @param array $expressions CTE 配列
+     * @return $this 自分自身
+     */
+    public function declareCommonTable($expressions)
+    {
+        foreach ($expressions as $name => $expression) {
+            if ($expression instanceof \Closure) {
+                $expression = $expression($this);
+            }
+            if (is_array($expression)) {
+                $expression = $this->createQueryBuilder()->build($expression);
+            }
+
+            $cols = '';
+            $p = strpos($name, '(');
+            if ($p !== false) {
+                $cols = substr($name, $p);
+                $name = trim(substr($name, 0, $p));
+            }
+
+            $columns = [];
+            foreach (split_noempty(',', trim($cols, '()')) as $col) {
+                $columns[] = new Column($col, Type::getType('integer'));
+            }
+
+            $table = new Table($name, $columns);
+            $table->addOption('cte', [
+                'columns' => $cols,
+                'query'   => $expression,
+            ]);
+            $this->getSchema()->addTable($table);
+        }
+
         return $this;
     }
 
