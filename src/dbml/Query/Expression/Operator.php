@@ -373,7 +373,13 @@ class Operator implements Queryable
             throw new \UnexpectedValueException("BETWEEN's operand2 must be array contains 2 elements.");
         }
         $this->string = $this->operand1 . ' ' . strtoupper($this->operator) . ' ? AND ?';
-        $this->params = $this->operand2;
+        $this->params = array_map(function ($value) {
+            // 無限指定は未指定と同じだが、 BETWEEN の構文上未指定は許されないので現実的な最小大値で代替する
+            if (is_float($value) && is_infinite($value)) {
+                return $value > 0 ? PHP_FLOAT_MAX : -PHP_FLOAT_MAX;
+            }
+            return $value;
+        }, $this->operand2);
     }
 
     private function _in($allownull)
@@ -444,7 +450,8 @@ class Operator implements Queryable
                     $placeholder = implode(',', array_fill(0, count($operand), '?'));
                     $carry[$this->operand1 . " $op ($placeholder)"] = $operand;
                 }
-                else {
+                // 0 <= X <= +INF, -INF <= X <= 0 など、無限指定は未指定と同じ
+                elseif (!(is_float($operand) && is_infinite($operand))) {
                     $carry[$this->operand1 . " $op ?"] = $operand;
                 }
             }

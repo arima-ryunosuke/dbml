@@ -145,6 +145,10 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $operator = new Operator(self::$platform, 'BETWEEN', 'a', [1, 2]);
         $this->assertOperator('a BETWEEN ? AND ?', [1, 2], $operator);
         $this->assertOperator('NOT (a BETWEEN ? AND ?)', [1, 2], $operator->not());
+
+        $operator = new Operator(self::$platform, 'BETWEEN', 'a', [-INF, +INF]);
+        $this->assertOperator('a BETWEEN ? AND ?', [-PHP_FLOAT_MAX, +PHP_FLOAT_MAX], $operator);
+
         $this->assertException('contains 2 elements', L(new Operator(self::$platform, 'BETWEEN', 'a', 1))->getQuery());
     }
 
@@ -248,6 +252,18 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
             $operator = new Operator(self::$platform, $ope, 'a', ['', 2]);
             $this->assertOperator("a $ope2 ?", [2], $operator);
             $this->assertOperator("NOT (a $ope2 ?)", [2], $operator->not());
+
+            $operator = new Operator(self::$platform, $ope, 'a', [0, +INF]);
+            $this->assertOperator("a $ope1 ?", [0], $operator);
+            $this->assertOperator("NOT (a $ope1 ?)", [0], $operator->not());
+
+            $operator = new Operator(self::$platform, $ope, 'a', [-INF, 0]);
+            $this->assertOperator("a $ope2 ?", [0], $operator);
+            $this->assertOperator("NOT (a $ope2 ?)", [0], $operator->not());
+
+            $operator = new Operator(self::$platform, $ope, 'a', [-INF, +INF]);
+            $this->assertOperator("", [], $operator);
+            $this->assertOperator("", [], $operator->not());
 
             $operator = new Operator(self::$platform, $ope, 'a', [null, '']);
             $this->assertOperator("", [], $operator);
