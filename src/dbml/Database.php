@@ -7156,7 +7156,7 @@ class Database
     public function refresh()
     {
         $this->getUnsafeOption('cacheProvider')->clear();
-        $this->cache = [];
+        $this->cache = new \ArrayObject();
         $this->txConnection = $this->getMasterConnection();
         $this->affectedRows = null;
         $this->lastInsertIds = [];
