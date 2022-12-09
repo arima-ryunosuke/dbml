@@ -923,7 +923,7 @@ class Database
                 $configuration->setMiddlewares($middlewares);
             }
             // for compatible
-            if (isset($options['initCommand'])) {
+            if (strlen($options['initCommand'] ?? '')) {
                 $middlewares[] = new class($options['initCommand']) implements \Doctrine\DBAL\Driver\Middleware {
                     private $initCommand;
 
