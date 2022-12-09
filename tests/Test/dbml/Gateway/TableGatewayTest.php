@@ -2198,28 +2198,42 @@ FROM t_article Article", $Article->column([
      * @param TableGateway $gateway
      * @param Database $database
      */
-    function test_magic_scope_column($gateway, $database)
+    function test_magic_virtual_column($gateway, $database)
     {
         $database->refresh();
         $database = $database->context(['registerSpecialMethod' => true]);
 
         // set から始まるメソッドで仮想カラムの更新ができる
         $database->t_article->pk(1)->update([
-            'title_checks' => 'hello world:1,2,3',
+            'upper_title' => 'hello world',
         ]);
         // get から始まるメソッドで仮想カラムの取得ができる
         $this->assertEquals([
             'article_id'    => '1',
-            'title'         => 'hello world',
-            'checks'        => '1,2,3',
+            'title'         => 'HELLO WORLD',
+            'checks'        => '',
             'statement'     => 'HELLO WORLD',
-            'closure'       => '1-hello world',
+            'closure'       => '1-HELLO WORLD',
             'query_builder' => '3',
         ], $database->t_article->scope('id', 1)->tuple([
             '*',
             'statement',
             'closure',
             'query_builder',
+        ]));
+
+        // virtual から始まるメソッドで仮想カラムの更新・取得ができる
+        $database->t_article->pk(1)->update([
+            'title_checks' => 'hello world:1,2,3',
+        ]);
+        $this->assertEquals([
+            'article_id'   => '1',
+            'title'        => 'hello world',
+            'title_checks' => 'hello world:1,2,3',
+            'checks'       => '1,2,3',
+        ], $database->t_article->scope('id', 1)->tuple([
+            '*',
+            'title_checks',
         ]));
 
         // statement はアノテーションで implicit を指定してるので ! で引っ張ることができる

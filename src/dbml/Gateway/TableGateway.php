@@ -181,8 +181,9 @@ use function ryunosuke\dbml\try_finally;
  *
  * ### 仮想カラム
  *
- * `(get|set)VirtualNameColumn` というメソッドを定義すると仮想カラムとしてアクセスできるようになる（仮想カラムに関しては {@link Database::overrideColumns()} を参照）。
+ * `(virtual|get|set)VirtualNameColumn` というメソッドを定義すると仮想カラムとしてアクセスできるようになる（仮想カラムに関しては {@link Database::overrideColumns()} を参照）。
  * 参照時は get, 更新時は set が呼ばれる。
+ * virtual の場合は get で引数なし、 set で引数ありでコールされる。
  * 実処理はメソッド本体だが、アノテーションを用いて implicit や type 属性を指定できる（ここでは記述できないのでテストを参照）。
  *
  * ```php
@@ -194,11 +195,17 @@ use function ryunosuke\dbml\try_finally;
  * // full_name という仮想カラムを定義（設定）
  * public function setFullNameColumn($value, $row)
  * {
- *     $parts = explode(' ', $value);
- *     return [
- *         'first_name'  => $parts[0],
- *         'family_name' => $parts[1],
- *     ];
+ *     return array_combine(['first_name', 'family_name'], explode(':', $value, 2));
+ * }
+ * // full_name という仮想カラムを定義（上記2つを定義するのとほぼ同義）
+ * public function virtualFullNameColumn($value=null, $row=null)
+ * {
+ *     if (func_num_args()) {
+ *         return array_combine(['first_name', 'family_name'], explode(':', $value, 2));
+ *     }
+ *     else {
+ *         return 'CONCAT(first_name, " ", family_name)';
+ *     }
  * }
  * ```
  *
@@ -873,17 +880,29 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
                         return $this;
                     });
                 }
-                if (preg_match('#^(get|set)(.+?)Column$#i', $method, $m)) {
+                if (preg_match('#^(virtual|get|set)(.+?)Column$#i', $method, $m)) {
                     $rmethod = new \ReflectionMethod($this, $method);
                     $attrs = parse_annotation($rmethod);
+                    $attrs['lazy'] = flagval($attrs['lazy'] ?? true);
+                    $attrs['implicit'] = flagval($attrs['implicit'] ?? false);
+                    $vname = $column_renamer($m[2]);
+                    $closure = $rmethod->getClosure($this);
+
+                    $vcolumns[$vname] ??= [];
+                    if (strcasecmp($m[1], 'virtual') === 0) {
+                        $vcolumns[$vname] += array_replace($attrs, [
+                            'select' => fn() => $closure(),
+                            'affect' => fn($value, $row) => $closure($value, $row),
+                        ]);
+                    }
                     if (strcasecmp($m[1], 'get') === 0) {
-                        $vcolumns[$column_renamer($m[2])] = array_replace($attrs, [
-                            'select' => $rmethod->getClosure($this),
+                        $vcolumns[$vname] += array_replace($attrs, [
+                            'select' => $closure,
                         ]);
                     }
                     if (strcasecmp($m[1], 'set') === 0) {
-                        $vcolumns[$column_renamer($m[2])] = array_replace($attrs, [
-                            'affect' => $rmethod->getClosure($this),
+                        $vcolumns[$vname] += array_replace($attrs, [
+                            'affect' => $closure,
                         ]);
                     }
                 }

@@ -148,7 +148,7 @@ namespace ryunosuke\Test\Gateway {
     use ryunosuke\dbml\Database;
 
     /**
-     * @mixin \ryunosuke\Test\dbml\Annotation\TableGateway
+     * @mixin \ryunosuke\Test\dbml\Annotation\TableGatewayProvider
      */
     class TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     {
@@ -178,19 +178,20 @@ namespace ryunosuke\Test\Gateway {
             $this->where(['article_id' => $id]);
         }
 
-        public function getTitleChecksColumn()
+        public function virtualTitleChecksColumn($value = null)
         {
-            return function ($row) {
-                return $row['title'] . ':' . $row['checks'];
-            };
+            if (func_num_args()) {
+                return array_combine(['title', 'checks'], explode(':', $value, 2));
+            }
+            else {
+                return fn($row) => $row['title'] . ':' . $row['checks'];
+            }
         }
 
-        public function setTitleChecksColumn($value)
+        public function setUpperTitleColumn($value)
         {
-            $parts = explode(':', $value, 2);
             return [
-                'title'  => $parts[0],
-                'checks' => $parts[1],
+                'title' => strtoupper($value),
             ];
         }
 
