@@ -176,7 +176,7 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_with($builder)
     {
         $builder->reset()->with('cte (col1, col2)', 'SELECT 1, 2 UNION ALL SELECT 3, 4');
-        $this->assertQuery("WITH cte (col1, col2) AS (SELECT 1, 2 UNION ALL SELECT 3, 4) SELECT C.* FROM cte C", $builder->column([
+        $this->assertQuery("WITH RECURSIVE cte (col1, col2) AS (SELECT 1, 2 UNION ALL SELECT 3, 4) SELECT C.* FROM cte C", $builder->column([
             'cte as C' => ['*'],
         ]));
         $builder->with('cte (col1, col2)', null);
@@ -184,21 +184,16 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
             'cte as C' => ['*'],
         ]));
 
-        $builder->reset()->with('RECURSIVE cte (n)', 'SELECT 1 UNION ALL SELECT n + 1 FROM cte WHERE n < 5');
-        $this->assertQuery("WITH RECURSIVE cte (n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM cte WHERE n < 5) SELECT C.* FROM cte C", $builder->column([
-            'cte as C' => ['*'],
-        ]));
-
         $builder->reset()
             ->with('cte1', 'SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4')
             ->with('cte2', 'SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4');
-        $this->assertQuery("WITH cte1 AS (SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4),cte2 AS (SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4) SELECT C1.*, C2.* FROM cte1 C1, cte2 C2", $builder->column([
+        $this->assertQuery("WITH RECURSIVE cte1 AS (SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4),cte2 AS (SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4) SELECT C1.*, C2.* FROM cte1 C1, cte2 C2", $builder->column([
             'cte1 as C1' => ['*'],
             'cte2 as C2' => ['*'],
         ]));
 
         $builder->reset()->with('qb', $builder->getDatabase()->select('test1', ['id > ?' => 0]));
-        $this->assertQuery("WITH qb AS (SELECT test1.* FROM test1 WHERE id > ?) SELECT Q.id AS qid, test2.* FROM qb Q INNER JOIN test2 ON test2.id = Q.id WHERE test2.id = ?", $builder->column([
+        $this->assertQuery("WITH RECURSIVE qb AS (SELECT test1.* FROM test1 WHERE id > ?) SELECT Q.id AS qid, test2.* FROM qb Q INNER JOIN test2 ON test2.id = Q.id WHERE test2.id = ?", $builder->column([
             'qb Q'   => [
                 'qid' => 'id',
             ],

@@ -662,7 +662,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         }, $builder->sqlParts['orderBy']));
 
         // 色々手を加えたやつでクエリ文字列化
-        $sql = concat('WITH ', array_sprintf($builder->sqlParts['with'], '%2$s AS (%1$s)', ','), ' ')
+        $sql = concat('WITH RECURSIVE ', array_sprintf($builder->sqlParts['with'], '%2$s AS (%1$s)', ','), ' ')
             . 'SELECT'
             . concat(' ', implode(' ', $builder->sqlParts['option']))
             . concat(' ', implode(', ', $builder->sqlParts['select']) ?: '*')
@@ -1704,7 +1704,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * WITH 句を設定する
      *
      * $name は何も加工されずにそのままクエリに埋め込まれる。
-     * 今のところ RECURSIVE などもここに含める用途となる。
+     * 今のところ (colname) などもここに含める用途となる。
      *
      * $query に null を指定すると削除として働く。
      *
