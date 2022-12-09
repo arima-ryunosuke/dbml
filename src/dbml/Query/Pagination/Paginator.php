@@ -184,7 +184,7 @@ class Paginator implements \IteratorAggregate, \Countable
                 $this->pageRange = [];
             }
             else {
-                $offset = $this->getPage() - floor($this->shownPage / 2);
+                $offset = $this->getPage() - intval($this->shownPage / 2);
                 $min = 1;
                 $max = $pagecount - $this->shownPage + 1;
                 $offset = max($min, min($max, $offset));

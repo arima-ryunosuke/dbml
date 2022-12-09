@@ -107,11 +107,15 @@ class PaginatorTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         // $shownpage を省略すれば全部のはず
         $paginator->paginate(2, 9);
-        $this->assertEquals(range(1, 12), $paginator->getPageRange());
+        $this->assertSame(range(1, 12), $paginator->getPageRange());
 
         // $shownpage を指定すれば指定分のはず
         $paginator->paginate(2, 9, 5);
-        $this->assertEquals(range(1, 5), $paginator->getPageRange());
+        $this->assertSame(range(1, 5), $paginator->getPageRange());
+
+        // 1ページしか表示しないなら最初のページだけのはず
+        $this->assertSame([2], $paginator->paginate(2, 9, 1)->getPageRange());
+        $this->assertSame([3], $paginator->paginate(3, 9, 1)->getPageRange());
     }
 
     /**
