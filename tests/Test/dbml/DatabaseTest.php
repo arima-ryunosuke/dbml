@@ -5540,24 +5540,7 @@ INSERT INTO test (id, name) VALUES
             $this->assertEquals(['name' => 'repN3', 'data' => 'upD'], $database->selectTuple('test.name,data', ['id' => $id]));
         }
 
-        // modifyAutoSelect
-
-        $manager = $this->scopeManager(function () use ($database) {
-            $database->setOption('modifyAutoSelect', true);
-            return function () use ($database) {
-                $database->setOption('modifyAutoSelect', false);
-            };
-        });
-
-        $database->modify('t_article', ['article_id' => 9, 'title' => 'newN', 'checks' => 'newC']);
-        $this->assertEquals(['title' => 'newN', 'checks' => 'newC'], $database->selectTuple('t_article.title,checks', ['article_id' => 9]));
-
-        $database->modify('t_article', ['article_id' => 9, 'title' => 'repN']);
-        $this->assertEquals(['title' => 'repN', 'checks' => 'newC'], $database->selectTuple('t_article.title,checks', ['article_id' => 9]));
-
         $this->assertException(new \InvalidArgumentException('is not supported Q'), L($database)->modify('test.name', ['X' => 'Y']));
-
-        unset($manager);
     }
 
     /**
