@@ -2638,7 +2638,6 @@ class Database
                         'select' => null,
                         'affect' => null,
                     ];
-                    $def['select'] = $def['select'] ?? $def['expression'] ?? null; // for compatible rename expression -> select
                     if (is_array($def['select'])) {
                         $def['select'] = $this->operator($def['select']);
                     }

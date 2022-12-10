@@ -863,14 +863,14 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $database->overrideColumns([
             'test1'     => [
                 'lower_name' => [
-                    'type'       => 'string',
-                    'expression' => 'LOWER(%s.name1)',
+                    'type'   => 'string',
+                    'select' => 'LOWER(%s.name1)',
                 ],
             ],
             'test2'     => [
                 'lower_name' => 'LOWER(%s.name2)',
                 'is_a'       => [
-                    'expression' => ['name2' => 'A'],
+                    'select' => ['name2' => 'A'],
                 ],
             ],
             'foreign_p' => [

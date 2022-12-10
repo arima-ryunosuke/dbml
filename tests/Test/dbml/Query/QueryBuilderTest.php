@@ -1599,24 +1599,24 @@ AND
         $database->overrideColumns([
             'foreign_p' => [
                 'raw1'        => [
-                    'expression' => 'UPPER(%s.name)',
-                    'implicit'   => true,
+                    'select'   => 'UPPER(%s.name)',
+                    'implicit' => true,
                 ],
                 'raw2'        => [
-                    'expression' => $database->raw('id + 9 = ?', 10),
-                    'implicit'   => true,
+                    'select'   => $database->raw('id + 9 = ?', 10),
+                    'implicit' => true,
                 ],
                 'count_child' => [
-                    'expression' => $database->foreign_c1->as('C1')->subcount('*', ['id' => 0]),
-                    'implicit'   => true,
+                    'select'   => $database->foreign_c1->as('C1')->subcount('*', ['id' => 0]),
+                    'implicit' => true,
                 ],
                 'has_child'   => [
-                    'expression' => $database->foreign_c2->as('C2')->subexists('*', ['cid' => 0]),
-                    'implicit'   => true,
+                    'select'   => $database->foreign_c2->as('C2')->subexists('*', ['cid' => 0]),
+                    'implicit' => true,
                 ],
                 'children'    => [
-                    'expression' => $database->subselect('foreign_c2'),
-                    'implicit'   => true,
+                    'select'   => $database->subselect('foreign_c2'),
+                    'implicit' => true,
                 ],
                 'nam'         => 'NOW()',
             ],
@@ -2493,10 +2493,10 @@ SELECT test.* FROM test", $builder);
                     return $database->foreign_c1->as('C1')->subcount('*', ['id' => 0]);
                 },
                 'has_child'   => [
-                    'expression' => function () use ($database) {
+                    'select' => function () use ($database) {
                         return $database->foreign_c2->as('C2')->subexists('*', ['cid' => 0]);
                     },
-                    'lazy'       => true,
+                    'lazy'   => true,
                 ],
             ],
         ]);
