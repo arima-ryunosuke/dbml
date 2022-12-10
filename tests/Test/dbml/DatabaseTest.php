@@ -241,6 +241,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         // 作用行系(見つからなかった場合に例外が投がることを担保)
         $ex = new NonAffectedException('affected row is nothing');
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
+            $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
             $this->assertException($ex, L($database)->insert('test', ['id' => 9, 'name' => 'hoge'], ['throw' => true, 'ignore' => true]));
             if ($database->getPlatform() instanceof SqlitePlatform) {
                 $this->assertException($ex, L($database)->modify('test', ['id' => 9, 'name' => null], [], ['throw' => true, 'ignore' => true]));

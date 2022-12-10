@@ -186,6 +186,7 @@ class IntegrationTest extends AbstractUnitTestCase
             'article_id' => '9',
             'title'      => 'dummy title',
             'checks'     => [1, 2, 3],
+            'statement'  => 'DUMMY TITLE',
             'title5'     => 'DUMMY TITLE',
         ], $database->t_article->as('A')->select('!', $pk)->tuple());
 

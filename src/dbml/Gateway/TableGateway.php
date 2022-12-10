@@ -19,9 +19,9 @@ use function ryunosuke\dbml\array_get;
 use function ryunosuke\dbml\array_unset;
 use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\concat;
+use function ryunosuke\dbml\flagval;
 use function ryunosuke\dbml\parameter_length;
 use function ryunosuke\dbml\parse_annotation;
-use function ryunosuke\dbml\reflect_callable;
 use function ryunosuke\dbml\snake_case;
 use function ryunosuke\dbml\split_noempty;
 use function ryunosuke\dbml\throws;
@@ -826,21 +826,15 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         return [
             // 直接回した場合のフェッチモード
-            'defaultIteration'      => 'array',
+            'defaultIteration'  => 'array',
             // マジック JOIN 時のデフォルトモード
-            'defaultJoinMethod'     => 'auto',
+            'defaultJoinMethod' => 'auto',
             // affect 系で無視するスコープ
-            'ignoreAffectScope'     => [], // for compatible. In the future the default will be ['']
-            // 行の正規化に nomalize メソッドを使うか
-            'normalization'         => false, // for compatible. In the future the default will be true or delete
-            // bindScope が上書きか累積か
-            'overrideBindScope'     => false, // for compatible. In the future the default will be true or delete
-            // スコープや仮想カラムのメソッドを自動登録するか
-            'registerSpecialMethod' => false, // for compatible. In the future the default will be true or delete
+            'ignoreAffectScope' => [], // for compatible. In the future the default will be ['']
             // メソッドベーススコープの命名規則
-            'scopeRenamer'          => function ($name) { return lcfirst($name); },
+            'scopeRenamer'      => function ($name) { return lcfirst($name); },
             // メソッドベース仮想カラムの命名規則
-            'columnRenamer'         => function ($name) { return snake_case($name); },
+            'columnRenamer'     => function ($name) { return snake_case($name); },
         ];
     }
 
@@ -869,53 +863,49 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         }
         $this->setDefault($default + $database->getOptions());
 
-        if ($this->getUnsafeOption('registerSpecialMethod')) {
-            $scope_renamer = $this->getUnsafeOption('scopeRenamer');
-            $column_renamer = $this->getUnsafeOption('columnRenamer');
-            $vcolumns = [];
-            foreach (get_class_methods($this) as $method) {
-                if (preg_match('#^scope(.+)#i', $method, $m)) {
-                    $this->addScope($scope_renamer($m[1]), function (...$args) use ($method) {
-                        $this->$method(...$args);
-                        return $this;
-                    });
-                }
-                if (preg_match('#^(virtual|get|set)(.+?)Column$#i', $method, $m)) {
-                    $rmethod = new \ReflectionMethod($this, $method);
-                    $attrs = parse_annotation($rmethod);
-                    $attrs['lazy'] = flagval($attrs['lazy'] ?? true);
-                    $attrs['implicit'] = flagval($attrs['implicit'] ?? false);
-                    $vname = $column_renamer($m[2]);
-                    $closure = $rmethod->getClosure($this);
+        $scope_renamer = $this->getUnsafeOption('scopeRenamer');
+        $column_renamer = $this->getUnsafeOption('columnRenamer');
+        $vcolumns = [];
+        foreach (get_class_methods($this) as $method) {
+            if (preg_match('#^scope(.+)#i', $method, $m)) {
+                $this->addScope($scope_renamer($m[1]), function (...$args) use ($method) {
+                    $this->$method(...$args);
+                    return $this;
+                });
+            }
+            if (preg_match('#^(virtual|get|set)(.+?)Column$#i', $method, $m)) {
+                $rmethod = new \ReflectionMethod($this, $method);
+                $attrs = parse_annotation($rmethod, [
+                    'lazy'     => true,
+                    'implicit' => true,
+                ]);
+                $attrs['lazy'] = flagval($attrs['lazy'] ?? true);
+                $attrs['implicit'] = flagval($attrs['implicit'] ?? false);
+                $vname = $column_renamer($m[2]);
+                $closure = $rmethod->getClosure($this);
 
-                    $vcolumns[$vname] ??= [];
-                    if (strcasecmp($m[1], 'virtual') === 0) {
-                        $vcolumns[$vname] += array_replace($attrs, [
-                            'select' => fn() => $closure(),
-                            'affect' => fn($value, $row) => $closure($value, $row),
-                        ]);
-                    }
-                    if (strcasecmp($m[1], 'get') === 0) {
-                        $vcolumns[$vname] += array_replace($attrs, [
-                            'select' => $closure,
-                        ]);
-                    }
-                    if (strcasecmp($m[1], 'set') === 0) {
-                        $vcolumns[$vname] += array_replace($attrs, [
-                            'affect' => $closure,
-                        ]);
-                    }
+                $vcolumns[$vname] ??= [];
+                if (strcasecmp($m[1], 'virtual') === 0) {
+                    $vcolumns[$vname] += array_replace($attrs, [
+                        'select' => fn() => $closure(),
+                        'affect' => fn($value, $row) => $closure($value, $row),
+                    ]);
+                }
+                if (strcasecmp($m[1], 'get') === 0) {
+                    $vcolumns[$vname] += array_replace($attrs, [
+                        'select' => $closure,
+                    ]);
+                }
+                if (strcasecmp($m[1], 'set') === 0) {
+                    $vcolumns[$vname] += array_replace($attrs, [
+                        'affect' => $closure,
+                    ]);
                 }
             }
-            $this->database->overrideColumns([
-                $table_name => array_map(function ($col) {
-                    return array_replace([
-                        'lazy'     => true,
-                        'implicit' => false,
-                    ], $col);
-                }, $vcolumns),
-            ]);
         }
+        $this->database->overrideColumns([
+            $table_name => $vcolumns,
+        ]);
 
         $this->addScope('');
         $this->setProvider(function () {
@@ -1406,6 +1396,18 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * 行を正規化する
+     *
+     * @template T
+     * @param T $row
+     * @return T
+     */
+    public function normalize($row)
+    {
+        return $row;
+    }
+
+    /**
      * テーブルエイリアス名を設定する
      *
      * ```php
@@ -1808,34 +1810,17 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             throw new \InvalidArgumentException("'$name' scope must be closure.");
         }
 
-        if ($this->getUnsafeOption('overrideBindScope')) {
-            $original_name = "binded\0\0$name";
-            if (!isset($this->scopes[$original_name])) {
-                $this->scopes[$original_name] = $this->scopes[$name];
-            }
-            $scope = $this->scopes[$original_name];
-            ksort($binding);
-            $this->scopes[$name] = function (...$args) use ($scope, $binding) {
-                return $scope(...($args + $binding));
-            };
-
-            return $this;
+        $original_name = "binded\0\0$name";
+        if (!isset($this->scopes[$original_name])) {
+            $this->scopes[$original_name] = $this->scopes[$name];
         }
-
-        // @codeCoverageIgnoreStart
-        $scope = $this->scopes[$name];
-        $ref = reflect_callable($scope);
-        $uses = $ref->getStaticVariables();
-        if ($ref->getFileName() === __FILE__ && isset($uses['binding'])) {
-            $binding += $uses['binding'];
-        }
+        $scope = $this->scopes[$original_name];
+        ksort($binding);
         $this->scopes[$name] = function (...$args) use ($scope, $binding) {
-            ksort($binding);
             return $scope(...($args + $binding));
         };
 
         return $this;
-        // @codeCoverageIgnoreEnd
     }
 
     /**

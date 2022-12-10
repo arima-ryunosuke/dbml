@@ -503,8 +503,6 @@ AND ((flag=1))", "$gw");
             ];
         });
 
-        $gateway->setOption('overrideBindScope', true);
-
         $gateway->bindScope('abc', [2 => 'C1']);
         $this->assertEquals(['a', 'b', 'C1'], $gateway->getScopeParts('abc', 'a', 'b')['column']);
         $gateway->bindScope('abc', [1 => 'B', 2 => 'C2']);
@@ -1396,6 +1394,7 @@ AND ((flag=1))", "$gw");
             $this->assertEquals(['id' => '11'], $gateway->saveIgnore(['id' => 11]));
 
             // array 系
+            $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
             $gateway = $database->noauto;
             $gateway->truncate();
             $gateway->insert(['id' => 1, 'name' => '']);
@@ -2129,17 +2128,6 @@ FROM t_article Article", $Article->column([
      */
     function test_normalization($gateway, $database)
     {
-        $database->t_article->setOption('normalization', false);
-
-        $database->t_article->pk(1)->update([
-            'checks' => 'lower string',
-        ]);
-        $this->assertEquals([
-            'checks' => 'lower string',
-        ], $database->t_article->pk(1)->tuple(['checks']));
-
-        $database->t_article->setOption('normalization', true);
-
         $database->t_article->pk(1)->update([
             'checks' => 'lower string',
         ]);

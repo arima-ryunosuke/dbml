@@ -163,8 +163,6 @@ use ryunosuke\dbml\Utility\Adhoc;
  *     呼び出し側の都合などで null を予約的に扱い、キーとして存在してしまうことはよくある。
  *     どうせエラーになるので、結局呼び出し直前に if 分岐で unset したりするのでいっそのこと自動で伏せてしまったほうが便利なことは多い。
  *
- *     なお、デフォルトは false だが、互換性のためであり将来のバージョンでは true になる想定。
- *
  *     @param bool $bool not null なカラムの null をフィルタするなら true
  * }
  * @method bool                   getConvertEmptyToNull()
@@ -739,11 +737,11 @@ class Database
             // insert 時などにテーブルに存在しないカラムを自動でフィルタするか否か
             'filterNoExistsColumn'      => true,
             // insert 時などに not null な列に null が来た場合に自動でフィルタするか否か
-            'filterNullAtNotNullColumn' => false, // for compatible
+            'filterNullAtNotNullColumn' => true,
             // insert 時などに NULLABLE NUMERIC カラムは 空文字を null として扱うか否か
             'convertEmptyToNull'        => true,
             // insert 時などに数値系カラムは真偽値を int として扱うか否か
-            'convertBoolToInt'          => false, // for compatible
+            'convertBoolToInt'          => true,
             // 埋め込み条件の yaml パーサ
             'yamlParser'                => function ($yaml) { return \ryunosuke\dbml\paml_import($yaml)[0]; },
             // DB型で自動キャストする型設定。select,affect 要素を持つ（多少無駄になるがサンプルも兼ねて冗長に記述してある）
@@ -1593,10 +1591,7 @@ class Database
             unset($row[$autocolumn]);
         }
 
-        $gateway = $this->$table->clone();
-        if ($gateway->getOption('normalization') && method_exists($gateway, 'normalize')) {
-            $row = $gateway->normalize($row);
-        }
+        $row = $this->$table->normalize($row);
 
         return $row;
     }
