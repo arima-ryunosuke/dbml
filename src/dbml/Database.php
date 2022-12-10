@@ -999,12 +999,6 @@ class Database
             $options['cacheProvider'] = cacheobject(sys_get_temp_dir() . '/' . sha1(serialize($source)));
         }
 
-        // for compatible
-        if ($options['cacheProvider'] instanceof \Doctrine\Common\Cache\CacheProvider) {
-            /** @noinspection PhpDeprecationInspection */
-            $options['cacheProvider'] = new \Symfony\Component\Cache\Psr16Cache(new \Symfony\Component\Cache\Adapter\DoctrineAdapter($this->getUnsafeOption('cacheProvider'))); // @codeCoverageIgnore
-        }
-
         $this->setDefault($options);
 
         $this->setLogger($this->getUnsafeOption('logger'));
