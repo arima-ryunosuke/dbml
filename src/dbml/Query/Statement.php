@@ -98,8 +98,7 @@ class Statement implements Queryable
      */
     public function executeSelect(iterable $params = [], Connection $connection = null)
     {
-        /** @noinspection PhpDeprecationInspection for compatible */
-        return $this->executeQuery($params, $connection);
+        return $this->_execute('executeQuery', $params, $connection ?: $this->database->getSlaveConnection());
     }
 
     /**
@@ -110,29 +109,6 @@ class Statement implements Queryable
      * @return int affected row
      */
     public function executeAffect(iterable $params = [], Connection $connection = null)
-    {
-        /** @noinspection PhpDeprecationInspection for compatible */
-        return $this->executeUpdate($params, $connection);
-    }
-
-    /**
-     * 取得系クエリとして実行する
-     *
-     * @deprecated for compatible
-     * @inheritdoc executeSelect()
-     */
-    public function executeQuery(iterable $params = [], Connection $connection = null)
-    {
-        return $this->_execute('executeQuery', $params, $connection ?: $this->database->getSlaveConnection());
-    }
-
-    /**
-     * 更新系クエリとして実行する
-     *
-     * @deprecated for compatible
-     * @inheritdoc executeAffect()
-     */
-    public function executeUpdate(iterable $params = [], Connection $connection = null)
     {
         return $this->_execute('executeStatement', $params, $connection ?: $this->database->getMasterConnection());
     }

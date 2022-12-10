@@ -4914,29 +4914,6 @@ class Database
      */
     public function executeSelect($query, iterable $params = [])
     {
-        /** @noinspection PhpDeprecationInspection */
-        return $this->executeQuery($query, $params);
-    }
-
-    /**
-     * 更新系クエリを実行する
-     *
-     * @inheritdoc Connection::executeUpdate()
-     */
-    public function executeAffect($query, iterable $params = [])
-    {
-        /** @noinspection PhpDeprecationInspection for compatible */
-        return $this->executeUpdate($query, $params);
-    }
-
-    /**
-     * 取得系クエリを実行する
-     *
-     * @deprecated for compatible
-     * @inheritdoc executeSelect()
-     */
-    public function executeQuery($query, iterable $params = [])
-    {
         $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
         $params = array_map(function ($p) { return is_bool($p) ? (int) $p : $p; }, $params);
 
@@ -4957,10 +4934,9 @@ class Database
     /**
      * 更新系クエリを実行する
      *
-     * @deprecated for compatible
-     * @inheritdoc executeAffect()
+     * @inheritdoc Connection::executeStatement()
      */
-    public function executeUpdate($query, iterable $params = [])
+    public function executeAffect($query, iterable $params = [])
     {
         $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
         $params = array_map(function ($p) { return is_bool($p) ? (int) $p : $p; }, $params);
