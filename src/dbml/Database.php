@@ -2034,14 +2034,6 @@ class Database
         }
 
         foreach ($this->getConnections() as $n => $con) {
-            // for compatible
-            /** @noinspection PhpDeprecationInspection */
-            if (isset($loggers[$n]) && $loggers[$n] instanceof \Doctrine\DBAL\Logging\SQLLogger) {
-                /** @noinspection PhpDeprecationInspection */
-                $con->getConfiguration()->setSQLLogger($loggers[$n]);
-                continue;
-            }
-
             foreach ($con->getConfiguration()->getMiddlewares() as $middleware) {
                 if ($middleware instanceof LoggingMiddleware) {
                     $logger = $middleware->getLogger();

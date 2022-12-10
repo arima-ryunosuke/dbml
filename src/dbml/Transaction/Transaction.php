@@ -311,16 +311,7 @@ class Transaction
         // ロガー設定
         $current_logger = null;
         if ($this->logger !== null) {
-            // for compatible
-            /** @noinspection PhpDeprecationInspection */
-            if ($this->logger instanceof \Doctrine\DBAL\Logging\SQLLogger) {
-                /** @noinspection PhpDeprecationInspection */
-                $current_logger = $connection->getConfiguration()->getSQLLogger();
-                $loggers = array_filter([$current_logger, $this->logger], fn($logger) => $logger !== null);
-                /** @noinspection PhpDeprecationInspection */
-                $connection->getConfiguration()->setSQLLogger(new \Doctrine\DBAL\Logging\LoggerChain($loggers));
-            }
-            elseif ($this->logger instanceof LoggerInterface) {
+            if ($this->logger instanceof LoggerInterface) {
                 assert($chain_logger !== null, 'must be LoggerChain to use transaction logger');
                 if ($previewMode) {
                     $current_logger = $chain_logger->resetLoggers([$this->logger]);
@@ -349,13 +340,7 @@ class Transaction
         return function () use ($connection, $current_connection, $chain_logger, $current_logger, $current_mode, $current_level, $current_savepoint) {
             $this->database->setConnection($current_connection);
             $this->database->setMasterMode($current_mode);
-            // for compatible
-            /** @noinspection PhpDeprecationInspection */
-            if ($current_logger instanceof \Doctrine\DBAL\Logging\SQLLogger) {
-                /** @noinspection PhpDeprecationInspection */
-                $connection->getConfiguration()->setSQLLogger($current_logger);
-            }
-            elseif ($chain_logger && $current_logger) {
+            if ($chain_logger && $current_logger) {
                 $chain_logger->resetLoggers($current_logger);
             }
             if ($current_level !== null) {
