@@ -12,7 +12,6 @@ use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
 use Psr\SimpleCache\CacheInterface;
 use function ryunosuke\dbml\array_each;
-use function ryunosuke\dbml\array_nest;
 use function ryunosuke\dbml\array_pickup;
 use function ryunosuke\dbml\array_rekey;
 use function ryunosuke\dbml\array_unset;
@@ -58,9 +57,6 @@ class Schema
 
     /** @var Column[][] */
     private $tableColumns = [];
-
-    /** @var array */
-    private $tableColumnMetadata = [];
 
     /** @var ForeignKeyConstraint[][] */
     private $foreignKeys = [], $lazyForeignKeys = [];
@@ -151,7 +147,6 @@ class Schema
         if ($definitation === null) {
             $table->dropColumn($column_name);
             unset($this->tableColumns[$table_name][$column_name]);
-            unset($this->tableColumnMetadata["$table_name.$column_name"]);
             return null;
         }
 
@@ -176,9 +171,7 @@ class Schema
 
         // 再キャッシュ
         $columns = $this->getTableColumns($table_name);
-        $metadata = $this->getTableColumnMetadata($table_name, $column_name);
         $this->tableColumns[$table_name] = array_merge($columns, [$column_name => $column]);
-        $this->tableColumnMetadata["$table_name.$column_name"] = array_merge($metadata, $definitation);
 
         return $column;
     }
@@ -300,58 +293,6 @@ class Schema
             $this->tableColumns[$table_name] = $this->getTable($table_name)->getColumns();
         }
         return $this->tableColumns[$table_name];
-    }
-
-    /**
-     * テーブルのコメントからメタデータを取得する
-     *
-     * @param string $table_name 取得したいテーブル名
-     * @param ?string $column_name 取得したいカラム名。省略時は全カラム
-     * @return array カラムのメタデータ配列
-     */
-    public function getTableColumnMetadata($table_name, $column_name = null)
-    {
-        // for compatible
-        $parse_ini = function ($inistring) use (&$parse_ini) {
-            $entries = @parse_ini_string($inistring ?? '');
-            if ($entries === false) {
-                $entries = [];
-                // エラー起因の行を吹き飛ばして再帰（なんかここまでするなら自前パースのほうが楽な気が・・・）
-                $le = error_get_last();
-                if (preg_match('#on line (\d+)#ui', $le['message'], $m)) {
-                    $lines = preg_split('#\R#u', $inistring);
-                    unset($lines[$m[1] - 1]);
-                    $entries = $parse_ini(implode("\n", $lines));
-                }
-                return $entries;
-            }
-
-            return array_nest($entries, '.');
-        };
-
-        $tid = $table_name . '.';
-        $cid = $tid . $column_name;
-        if (!isset($this->tableColumnMetadata[$cid])) {
-            $table = $this->getTable($table_name);
-
-            if (!isset($this->tableColumnMetadata[$tid])) {
-                $this->tableColumnMetadata[$tid] = Adhoc::cacheGetOrSet($this->cache, "$tid-metaoption", function () use ($table, $parse_ini) {
-                    // for compatible
-                    return $parse_ini($table->hasOption('comment') ? $table->getOption('comment') : '');
-                });
-            }
-
-            if ($column_name) {
-                if (!$table->hasColumn($column_name)) {
-                    throw SchemaException::columnDoesNotExist($column_name, $table_name);
-                }
-                $this->tableColumnMetadata[$cid] = Adhoc::cacheGetOrSet($this->cache, "$cid-metaoption", function () use ($table, $column_name, $parse_ini) {
-                    // for compatible
-                    return $parse_ini($table->getColumn($column_name)->getComment());
-                });
-            }
-        }
-        return $this->tableColumnMetadata[$cid];
     }
 
     /**

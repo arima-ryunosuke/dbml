@@ -3548,7 +3548,7 @@ class Database
 
         // オプションを取得しておく
         $goptions = $this->getUnsafeOption('anywhereOption');
-        $toptions = $schema->getTableColumnMetadata($tname);
+        $toptions = $schema->getTable($tname)->getOptions();
 
         // リレーションを漁る
         $keys = array_fill_keys($schema->getTablePrimaryKey($tname)->getColumns(), true);
@@ -3571,7 +3571,7 @@ class Database
 
         $where = [];
         foreach ($schema->getTableColumns($tname) as $cname => $column) {
-            $coptions = $schema->getTableColumnMetadata($tname, $cname);
+            $coptions = $column->getPlatformOptions();
             $coptions = array_replace_recursive(
                 $goptions,
                 $toptions['anywhere'] ?? [],

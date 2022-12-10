@@ -188,38 +188,6 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideSchema
      * @param Schema $schema
      */
-    function test_getTableColumnSchema($schema)
-    {
-        // sqlite はテーブルコメントもカラムコメントも持てないっぽいのでここで差し込む
-        $m = $schema->getTable('metasample');
-        $m->addOption('comment', "hogefuga.\na=11\nx=X;comment\nc.n=cn\nc.l=cl");
-        $m->getColumn('id')->setComment("hogefuga.\na=1\nb=2\n;comment\nc.n=cn\nc.m=cm\ninvalid===comment(hoge)");
-
-        $this->assertEquals([
-            'a' => '11',
-            'x' => 'X',
-            'c' => [
-                'n' => 'cn',
-                'l' => 'cl',
-            ],
-        ], $schema->getTableColumnMetadata('metasample'));
-
-        $this->assertEquals([
-            'a' => '1',
-            'b' => '2',
-            'c' => [
-                'n' => 'cn',
-                'm' => 'cm',
-            ],
-        ], $schema->getTableColumnMetadata('metasample', 'id'));
-
-        $this->assertException(SchemaException::columnDoesNotExist('cx', 'metasample'), L($schema)->getTableColumnMetadata('metasample', 'cx'));
-    }
-
-    /**
-     * @dataProvider provideSchema
-     * @param Schema $schema
-     */
     function test_getTablePrimaryKey($schema)
     {
         $schema->addTable($this->getDummyTable('metatest'));

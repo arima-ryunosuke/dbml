@@ -6568,24 +6568,27 @@ ORDER BY T.id DESC, name ASC
         $database->getSchema()->refresh();
         $database->addForeignKey('misctype_child', 'misctype', ['cid' => 'pid']);
 
-        // スキーマ変更でテストの修正が大変なのでいくつかを縛る（兼優先順位の担保）
-        $database->getSchema()->getTable('misctype')->addOption('comment', "
-anywhere.enable  = 0
-anywhere.comment =
-");
-        $database->getSchema()->getTable('misctype_child')->addOption('comment', "
-anywhere.enable  = 0
-anywhere.comment =
-");
+        $database->getSchema()->getTable('misctype')->addOption('anywhere', [
+            'enable'  => 0,
+            'comment' => '',
+        ]);
+        $database->getSchema()->getTable('misctype_child')->addOption('anywhere', [
+            'enable'  => 0,
+            'comment' => '',
+        ]);
         foreach (['id', 'pid', 'cint', 'cfloat', 'cdecimal', 'cdate', 'cdatetime', 'cstring', 'ctext'] as $target) {
-            $database->getSchema()->getTable('misctype')->getColumn($target)->setComment("
-anywhere.enable = 1
-");
+            $database->getSchema()->setTableColumn('misctype', $target, [
+                'anywhere' => [
+                    'enable' => 1,
+                ],
+            ]);
         }
         foreach (['id', 'cid'] as $target) {
-            $database->getSchema()->getTable('misctype_child')->getColumn($target)->setComment("
-anywhere.enable = 1
-");
+            $database->getSchema()->setTableColumn('misctype_child', $target, [
+                'anywhere' => [
+                    'enable' => 1,
+                ],
+            ]);
         }
 
         $database = $database->context();
@@ -6716,28 +6719,52 @@ anywhere.enable = 1
 
         // テーブル単位で有効ならいっぱい出てくる
         $database->getSchema()->refresh();
-        $database->getSchema()->getTable('misctype')->addOption('comment', "anywhere.enable = 1");
+        $database->getSchema()->getTable('misctype')->addOption('anywhere', [
+            'enable' => 1,
+        ]);
         $this->assertNotEmpty($database->anywhere('misctype MT', '2000'));
 
         // 「このテーブルだけは greedy: false, keyonly: true にしたい」とか
         $database->getSchema()->refresh();
-        $database->getSchema()->getTable('misctype')->addOption('comment', "anywhere.enable = 1\nanywhere.greedy = 0\nanywhere.keyonly = 1");
+        $database->getSchema()->getTable('misctype')->addOption('anywhere', [
+            'enable'  => 1,
+            'greedy'  => 0,
+            'keyonly' => 1,
+        ]);
         $this->assertEquals([
             '/* anywhere */ MT.id = ?' => '2000',
         ], $database->anywhere('misctype MT', '2000'));
 
         // カラム単位で有効ならそいつのみ
         $database->getSchema()->refresh();
-        $database->getSchema()->getTable('misctype')->getColumn('cstring')->setComment("anywhere.enable = 1");
+        $database->getSchema()->setTableColumn('misctype', 'cstring', [
+            'anywhere' => [
+                'enable' => 1,
+            ],
+        ]);
         $this->assertEquals([
             '/* anywhere */ MT.cstring LIKE ?' => '%2000%',
         ], $database->anywhere('misctype MT', '2000'));
 
         // 「id は文字列的にやりたい / cstring は collate 指定なし / ctext は utf8_unicode_ci で検索」とか
         $database->getSchema()->refresh();
-        $database->getSchema()->getTable('misctype')->getColumn('id')->setComment("anywhere.enable = 1\nanywhere.type = text");
-        $database->getSchema()->getTable('misctype')->getColumn('cstring')->setComment("anywhere.enable = 1");
-        $database->getSchema()->getTable('misctype')->getColumn('ctext')->setComment("anywhere.enable = 1\nanywhere.collate=utf8_unicode_ci");
+        $database->getSchema()->setTableColumn('misctype', 'id', [
+            'anywhere' => [
+                'enable' => 1,
+                'type'   => 'text',
+            ],
+        ]);
+        $database->getSchema()->setTableColumn('misctype', 'cstring', [
+            'anywhere' => [
+                'enable' => 1,
+            ],
+        ]);
+        $database->getSchema()->setTableColumn('misctype', 'ctext', [
+            'anywhere' => [
+                'enable'  => 1,
+                'collate' => 'utf8_unicode_ci',
+            ],
+        ]);
         $this->assertEquals([
             '/* anywhere */ MT.id LIKE ?'                            => '%2000%',
             '/* anywhere */ MT.cstring LIKE ?'                       => '%2000%',
@@ -6746,9 +6773,22 @@ anywhere.enable = 1
 
         // グローバル、テーブル・カラムコメントでゴリゴリに指定されているが「いまだけはこの設定で検索したい」とか
         $database->getSchema()->refresh();
-        $database->getSchema()->getTable('misctype')->addOption('comment', "anywhere.enable = 1\nanywhere.greedy = 0\nanywhere.keyonly = 1");
-        $database->getSchema()->getTable('misctype')->getColumn('id')->setComment("anywhere.enable = 1\nanywhere.type = text");
-        $database->getSchema()->getTable('misctype')->getColumn('cstring')->setComment("anywhere.enable = 0");
+        $database->getSchema()->getTable('misctype')->addOption('anywhere', [
+            'enable'  => 1,
+            'greedy'  => 0,
+            'keyonly' => 1,
+        ]);
+        $database->getSchema()->setTableColumn('misctype', 'id', [
+            'anywhere' => [
+                'enable' => 1,
+                'type'   => 'text',
+            ],
+        ]);
+        $database->getSchema()->setTableColumn('misctype', 'cstring', [
+            'anywhere' => [
+                'enable' => 0,
+            ],
+        ]);
         $database = $database->mergeOption('anywhereOption', [
             'misctype' => [
                 'enable'  => false,
