@@ -54,7 +54,7 @@
 		<span class="label label-info"></span>
 		<span class="label label-info"></span>
 		<span class="label label-deprecated"></span>
-        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L9-L167" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L9-L143" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                     	</div>
 
 	<h2>class <span class="category-name">ryunosuke\dbml\Query\Statement</span></h2>
@@ -158,7 +158,7 @@ $qb-&gt;array(['id' =&gt; 102]); // SELECT t_table.* FROM t_table WHERE id = 102
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L92-L103" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L92-L102" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Statement::executeSelect()" tabindex="-1" class="structure-title ">
                         executeSelect                        	<small>($params = [], $connection = null) : <a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></small>
@@ -211,7 +211,7 @@ $qb-&gt;array(['id' =&gt; 102]); // SELECT t_table.* FROM t_table WHERE id = 102
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L105-L116" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L104-L114" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Statement::executeAffect()" tabindex="-1" class="structure-title ">
                         executeAffect                        	<small>($params = [], $connection = null) : int</small>
@@ -264,113 +264,7 @@ $qb-&gt;array(['id' =&gt; 102]); // SELECT t_table.* FROM t_table WHERE id = 102
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L118-L127" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="ryunosuke\dbml\Query\Statement::executeQuery()" tabindex="-1" class="structure-title ">
-                        executeQuery                        	<small>($params = [], $connection = null) : <a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>取得系クエリとして実行する</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">iterable<span class="type-separator"></span><wbr>array</td>
-				<td class="rest">$params = []</td>
-				<td class="desc"><p>追加パラメータ</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">?<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection</a></td>
-				<td class="rest">$connection = null</td>
-				<td class="desc"><p>コネクション</p>
-</td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type"><a href="Doctrine-DBAL-Result$typespace.html#Doctrine\DBAL\Result" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Result</a></td>
-			<td class="desc"><p>result オブジェクト</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L129-L138" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-                                    					</div>
-					<h4 id="ryunosuke\dbml\Query\Statement::executeUpdate()" tabindex="-1" class="structure-title ">
-                        executeUpdate                        	<small>($params = [], $connection = null) : int</small>
-						</h4>
-					<div class="inner-item">
-						<div class="description"><p>更新系クエリとして実行する</p>
-</div>
-                        	<table class="table">
-		<caption>Parameters</caption>
-		<tbody>
-        			<tr>
-				<td class="type">iterable<span class="type-separator"></span><wbr>array</td>
-				<td class="rest">$params = []</td>
-				<td class="desc"><p>追加パラメータ</p>
-</td>
-			</tr>
-        			<tr>
-				<td class="type">?<a href="Doctrine-DBAL-Connection$typespace.html#Doctrine\DBAL\Connection" class="fqsen "><small>Doctrine\DBAL\</small><wbr>Connection</a></td>
-				<td class="rest">$connection = null</td>
-				<td class="desc"><p>コネクション</p>
-</td>
-			</tr>
-        		</tbody>
-	</table>
-                            	<table class="table">
-		<caption>Return</caption>
-		<tbody>
-		<tr>
-			<td class="type">int</td>
-			<td class="desc"><p>affected row</p>
-</td>
-			<td class="rest"></td>
-		</tr>
-		</tbody>
-	</table>
-                                                                            					</div>
-					<div class="attribute">
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-					</div>
-					<div class="clearfix"></div>
-				</li>
-            				<li class="structure-item">
-					<div class="attribute">
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-magic"></span>
-						<span class="label label-danger"></span>
-						<span class="label label-default"></span>
-						<span class="label label-default"></span>
-						<span class="label label-deprecated"></span>
-						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L140-L146" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L116-L122" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Statement::getQuery()" tabindex="-1" class="structure-title ">
                         getQuery                        	<small>() : string</small>
@@ -421,7 +315,7 @@ $qb-&gt;array(['id' =&gt; 102]); // SELECT t_table.* FROM t_table WHERE id = 102
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L148-L154" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L124-L130" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Statement::getParams()" tabindex="-1" class="structure-title ">
                         getParams                        	<small>() : array</small>
@@ -472,7 +366,7 @@ $qb-&gt;array(['id' =&gt; 102]); // SELECT t_table.* FROM t_table WHERE id = 102
 						<span class="label label-default"></span>
 						<span class="label label-deprecated"></span>
 						<span class="label label-public">public</span>
-                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L156-L166" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Statement.php#L132-L142" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
                                     					</div>
 					<h4 id="ryunosuke\dbml\Query\Statement::merge()" tabindex="-1" class="structure-title ">
                         merge                        	<small>(&amp;$params) : string</small>

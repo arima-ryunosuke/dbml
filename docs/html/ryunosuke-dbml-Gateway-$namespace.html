@@ -61,7 +61,7 @@
 							<span class="label label-info"></span>
 							<span class="label label-info">iterateable</span>
 							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L32-L2616" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Gateway/TableGateway.php#L45-L2510" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="ryunosuke\dbml\Gateway\TableGateway" tabindex="-1" class="structure-title ">
 							<a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway">TableGateway</a>
@@ -203,8 +203,9 @@ $gw-&gt;array();
 $gw-&gt;scope('active')-&gt;array();
 </code></pre>
 <h3>仮想カラム</h3>
-<p><code>(get|set)VirtualNameColumn</code> というメソッドを定義すると仮想カラムとしてアクセスできるようになる（仮想カラムに関しては <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::overrideColumns()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::overrideColumns()'>ryunosuke\dbml\Database::overrideColumns()</tag_link> を参照）。<br />
+<p><code>(virtual|get|set)VirtualNameColumn</code> というメソッドを定義すると仮想カラムとしてアクセスできるようになる（仮想カラムに関しては <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::overrideColumns()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::overrideColumns()'>ryunosuke\dbml\Database::overrideColumns()</tag_link> を参照）。<br />
 参照時は get, 更新時は set が呼ばれる。<br />
+virtual の場合は get で引数なし、 set で引数ありでコールされる。<br />
 実処理はメソッド本体だが、アノテーションを用いて implicit や type 属性を指定できる（ここでは記述できないのでテストを参照）。</p>
 <pre><code class="language-php">// full_name という仮想カラムを定義（取得）
 public function getFullNameColumn()
@@ -214,11 +215,17 @@ public function getFullNameColumn()
 // full_name という仮想カラムを定義（設定）
 public function setFullNameColumn($value, $row)
 {
-    $parts = explode(' ', $value);
-    return [
-        'first_name'  =&gt; $parts[0],
-        'family_name' =&gt; $parts[1],
-    ];
+    return array_combine(['first_name', 'family_name'], explode(':', $value, 2));
+}
+// full_name という仮想カラムを定義（上記2つを定義するのとほぼ同義）
+public function virtualFullNameColumn($value=null, $row=null)
+{
+    if (func_num_args()) {
+        return array_combine(['first_name', 'family_name'], explode(':', $value, 2));
+    }
+    else {
+        return 'CONCAT(first_name, " ", family_name)';
+    }
 }
 </code></pre>
 <h3>Traversable, Countable</h3>

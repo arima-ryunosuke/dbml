@@ -1073,6 +1073,72 @@ if (function_exists("ryunosuke\\dbml\\array_add") && !defined("ryunosuke\\dbml\\
     define("ryunosuke\\dbml\\array_add", "ryunosuke\\dbml\\array_add");
 }
 
+if (!isset($excluded_functions["array_merge2"]) && (!function_exists("ryunosuke\\dbml\\array_merge2") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\array_merge2"))->isInternal()))) {
+    /**
+     * 配列をマージして通常配列＋αで返す
+     *
+     * キー・値が維持される点で array_merge とは異なる（振り直しをせず数値配列で返す）。
+     * きちんと0からの連番で構成される点で配列の加算とは異なる。
+     * 要するに「できるだけキーが自然数（の並び）になるように」マージする。
+     *
+     * 歯抜けはそのまま維持され、文字キーは後ろに追加される（負数キーも同様）。
+     *
+     * Example:
+     * ```php
+     * // キーが入り乱れているがよく見ると通し番号が振られている配列をマージ
+     * that(array_merge2([4 => 4, 1 => 1], [0 => 0], [5 => 5, 2 => 2, 3 => 3]))->isSame([0, 1, 2, 3, 4, 5]);
+     * // 歯抜けの配列をマージ
+     * that(array_merge2([4 => 4, 1 => 1], [0 => 0], [5 => 5, 3 => 3]))->isSame([0, 1, 3 => 3, 4 => 4, 5 => 5]);
+     * // 負数や文字キーは後ろに追いやられる
+     * that(array_merge2(['a' => 'A', 1 => 1], [0 => 0], [-1 => 'X', 2 => 2, 3 => 3]))->isSame([0, 1, 2, 3, -1 => 'X', 'a' => 'A']);
+     * // 同じキーは後ろ優先
+     * that(array_merge2([0, 'a' => 'A0'], [1, 'a' => 'A1'], [2, 'a' => 'A2']))->isSame([2, 'a' => 'A2']);
+     * ```
+     *
+     * @param array ...$arrays マージする配列
+     * @return array マージされた配列
+     */
+    function array_merge2(...$arrays)
+    {
+        // array_merge を模倣するため前方優先
+        $arrays = array_reverse($arrays);
+
+        // 最大値の導出（負数は考慮せず文字キーとして扱う）
+        $max = -1;
+        foreach ($arrays as $array) {
+            foreach ($array as $k => $v) {
+                if (is_int($k) && $k > $max) {
+                    $max = $k;
+                }
+            }
+        }
+
+        // 最大値までを埋める
+        $result = [];
+        for ($i = 0; $i <= $max; $i++) {
+            foreach ($arrays as $array) {
+                if (isset($array[$i]) && array_key_exists($i, $array)) {
+                    $result[$i] = $array[$i];
+                    break;
+                }
+            }
+        }
+
+        // 上記は数値キーだけなので負数や文字キーを補完する
+        foreach ($arrays as $arg) {
+            $result += $arg;
+        }
+
+        return $result;
+    }
+}
+if (function_exists("ryunosuke\\dbml\\array_merge2") && !defined("ryunosuke\\dbml\\array_merge2")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\array_merge2", "ryunosuke\\dbml\\array_merge2");
+}
+
 if (!isset($excluded_functions["array_implode"]) && (!function_exists("ryunosuke\\dbml\\array_implode") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\array_implode"))->isInternal()))) {
     /**
      * 配列の各要素の間に要素を差し込む
@@ -2759,6 +2825,7 @@ if (!isset($excluded_functions["array_pickup"]) && (!function_exists("ryunosuke\
      * 違いは Traversable を渡せることと、結果配列の順番が $keys に従うこと。
      *
      * $keys に連想配列を渡すとキーを読み替えて動作する（Example を参照）。
+     * さらにその時クロージャを渡すと($key, $value)でコールされた結果が新しいキーになる。
      *
      * Example:
      * ```php
@@ -2769,6 +2836,8 @@ if (!isset($excluded_functions["array_pickup"]) && (!function_exists("ryunosuke\
      * that(array_pickup($array, ['c', 'a']))->isSame(['c' => 'C', 'a' => 'A']);
      * // 連想配列を渡すと読み替えて返す
      * that(array_pickup($array, ['c' => 'cX', 'a' => 'aX']))->isSame(['cX' => 'C', 'aX' => 'A']);
+     * // コールバックを渡せる
+     * that(array_pickup($array, ['c' => fn($k, $v) => "$k-$v"]))->isSame(['c-C' => 'C']);
      * ```
      *
      * @param iterable $array 対象配列
@@ -2788,6 +2857,9 @@ if (!isset($excluded_functions["array_pickup"]) && (!function_exists("ryunosuke\
             }
             else {
                 if (array_key_exists($k, $array)) {
+                    if (is_callback($key)) {
+                        $key = $key($k, $array[$k]);
+                    }
                     $result[$key] = $array[$k];
                 }
             }
@@ -3123,90 +3195,6 @@ if (function_exists("ryunosuke\\dbml\\array_flatten") && !defined("ryunosuke\\db
      *
      */
     define("ryunosuke\\dbml\\array_flatten", "ryunosuke\\dbml\\array_flatten");
-}
-
-if (!isset($excluded_functions["array_nest"]) && (!function_exists("ryunosuke\\dbml\\array_nest") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\array_nest"))->isInternal()))) {
-    /**
-     * シンプルな [キー => 値] な配列から階層配列を生成する
-     *
-     * 定義的に array_flatten の逆関数のような扱いになる。
-     * $delimiter で階層を表現する。
-     *
-     * 同名とみなされるキーは上書きされるか例外が飛ぶ。具体的には Example を参照。
-     *
-     * Example:
-     * ```php
-     * // 単純な階層展開
-     * $array = [
-     *    'k1'            => 'v1',
-     *    'k2.k21'        => 'v21',
-     *    'k2.k22.k221'   => 'v221',
-     *    'k2.k22.k222'   => 'v222',
-     *    'k2.k22.k223.0' => 1,
-     *    'k2.k22.k223.1' => 2,
-     *    'k2.k22.k223.2' => 3,
-     * ];
-     * that(array_nest($array))->isSame([
-     *    'k1' => 'v1',
-     *    'k2' => [
-     *        'k21' => 'v21',
-     *        'k22' => [
-     *            'k221' => 'v221',
-     *            'k222' => 'v222',
-     *            'k223' => [1, 2, 3],
-     *        ],
-     *    ],
-     * ]);
-     * // 同名になるようなキーは上書きされる
-     * $array = [
-     *    'k1.k2' => 'v1', // この時点で 'k1' は配列になるが・・・
-     *    'k1'    => 'v2', // この時点で 'k1' は文字列として上書きされる
-     * ];
-     * that(array_nest($array))->isSame([
-     *    'k1' => 'v2',
-     * ]);
-     * // 上書きすら出来ない場合は例外が飛ぶ
-     * $array = [
-     *    'k1'    => 'v1', // この時点で 'k1' は文字列になるが・・・
-     *    'k1.k2' => 'v2', // この時点で 'k1' にインデックスアクセスすることになるので例外が飛ぶ
-     * ];
-     * try {
-     *     array_nest($array);
-     * }
-     * catch (\Exception $e) {
-     *     that($e)->isInstanceOf(\InvalidArgumentException::class);
-     * }
-     * ```
-     *
-     * @param iterable $array 対象配列
-     * @param string $delimiter キーの区切り文字
-     * @return array 階層化された配列
-     */
-    function array_nest($array, $delimiter = '.')
-    {
-        $result = [];
-        foreach ($array as $k => $v) {
-            $keys = explode($delimiter, $k);
-            $rkeys = [];
-            $tmp = &$result;
-            foreach ($keys as $key) {
-                $rkeys[] = $key;
-                if (isset($tmp[$key]) && !is_array($tmp[$key])) {
-                    throw new \InvalidArgumentException("'" . implode($delimiter, $rkeys) . "' of '$k' is already exists.");
-                }
-                $tmp = &$tmp[$key];
-            }
-            $tmp = $v;
-            unset($tmp);
-        }
-        return $result;
-    }
-}
-if (function_exists("ryunosuke\\dbml\\array_nest") && !defined("ryunosuke\\dbml\\array_nest")) {
-    /**
-     *
-     */
-    define("ryunosuke\\dbml\\array_nest", "ryunosuke\\dbml\\array_nest");
 }
 
 if (!isset($excluded_functions["class_shorten"]) && (!function_exists("ryunosuke\\dbml\\class_shorten") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\class_shorten"))->isInternal()))) {
@@ -3559,7 +3547,7 @@ if (!isset($excluded_functions["get_object_properties"]) && (!function_exists("r
      * // var_dump((array) $object);
      *
      * // この関数を使えば不可視プロパティも取得できる
-     * that(get_object_properties($object))->arraySubset([
+     * that(get_object_properties($object))->subsetEquals([
      *     'message' => 'something',
      *     'code'    => 42,
      *     'oreore'  => 'oreore',
@@ -3631,6 +3619,7 @@ if (!isset($excluded_functions["date_timestamp"]) && (!function_exists("ryunosuk
      * また、相対指定の +1 month の月末問題は起きないようにしてある。
      *
      * かなり適当に和暦にも対応している。
+     * さらに必要に迫られてかなり特殊な対応を行っているので Example を参照。
      *
      * Example:
      * ```php
@@ -3643,18 +3632,43 @@ if (!isset($excluded_functions["date_timestamp"]) && (!function_exists("ryunosuk
      * that(date_timestamp('2012/03/31 -1 month'))->isSame(strtotime('2012/02/29'));
      * // マイクロ秒
      * that(date_timestamp('2014/12/24 12:34:56.789'))->isSame(1419392096.789);
+     *
+     * // ベース日時
+     * $baseTimestamp = strtotime('2012/01/31');
+     * // ベース日時の25日（strtotime の序数日付は first/last しか対応していないが、この関数は対応している）
+     * that(date_timestamp('25th of this month', $baseTimestamp))->isSame(strtotime('2012/01/25'));
+     * // ベース日時の第2月曜（strtotime の序数曜日は 1st のような表記に対応していないが、この関数は対応している）
+     * that(date_timestamp('2nd monday of this month', $baseTimestamp))->isSame(strtotime('2012/01/09'));
      * ```
      *
-     * @param string|int|float $datetimedata 日時データ
+     * @param string|int|float|\DateTimeInterface $datetimedata 日時データ
      * @param int|null $baseTimestamp 日時データ
      * @return int|float|null タイムスタンプ。パース失敗時は null
      */
     function date_timestamp($datetimedata, $baseTimestamp = null)
     {
         if ($datetimedata instanceof \DateTimeInterface) {
-            return (float) $datetimedata->format('U.u');
+            return $datetimedata->getTimestamp() + $datetimedata->format('u') / 1000 / 1000;
         }
 
+        $DAY1 = 60 * 60 * 24;
+        $ORDINAL_WORDS = [
+            '1st'  => 'first',
+            '2nd'  => 'second',
+            '3rd'  => 'third',
+            '4th'  => 'fourth',
+            '5th'  => 'fifth',
+            '6th'  => 'sixth',
+            '7th'  => 'seventh',
+            '8th'  => 'eighth',
+            '9th'  => 'ninth',
+            '10th' => 'tenth',
+            '11th' => 'eleventh',
+            '12th' => 'twelfth',
+        ];
+
+        $ordinal_day = null;
+        $oddeven = null;
         if (is_string($datetimedata) || (is_object($datetimedata) && method_exists($datetimedata, '__toString'))) {
             // 全角を含めた trim
             $chars = "[\\x0-\x20\x7f\xc2\xa0\xe3\x80\x80]";
@@ -3684,6 +3698,31 @@ if (!isset($excluded_functions["date_timestamp"]) && (!function_exists("ryunosuk
                 '秒'   => '',
             ]);
             $datetimedata = trim($datetimedata, " \t\n\r\0\x0B:/");
+
+            // 1st, 2nd, 3rd, 4th dayname の対応
+            $datetimedata = preg_replace_callback('#((\d{1,2})(st|nd|rd|th))(\s+(sun|mon|tues?|wed(nes)?|thu(rs)?|fri|sat(ur)?)day)#u', function ($matches) use ($ORDINAL_WORDS) {
+                if (!isset($ORDINAL_WORDS[$matches[1]])) {
+                    return $matches[0];
+                }
+
+                return $ORDINAL_WORDS[$matches[1]] . $matches[4];
+            }, $datetimedata);
+
+            // 1st, 2nd, 3rd, 4th day の対応
+            $datetimedata = preg_replace_callback('#((\d{1,2})(st|nd|rd|th))(\s+day)?#ui', function ($matches) use (&$ordinal_day) {
+                if ($matches[1] !== (new \NumberFormatter('en', \NumberFormatter::ORDINAL))->format($matches[2])) {
+                    return $matches[0];
+                }
+
+                $ordinal_day = $matches[2];
+                return 'first day';
+            }, $datetimedata);
+
+            // odd, even の対応
+            $datetimedata = preg_replace_callback('#(odd|even)\s+#ui', function ($matches) use (&$oddeven) {
+                $oddeven = $matches[1];
+                return 'this ';
+            }, $datetimedata);
         }
 
         // 数値4桁は年と解釈されるように
@@ -3699,13 +3738,11 @@ if (!isset($excluded_functions["date_timestamp"]) && (!function_exists("ryunosuk
             return (float) $datetimedata;
         }
 
-        // date_parse してみる
+        // strtotime と date_parse の合せ技で変換
+        $baseTimestamp ??= time();
+        $timestamp = strtotime($datetimedata, $baseTimestamp);
         $parts = date_parse($datetimedata);
-        if (!$parts) {
-            // ドキュメントに「成功した場合に日付情報を含む配列、失敗した場合に FALSE を返します」とあるが、失敗する気配がない
-            return null; // @codeCoverageIgnore
-        }
-        if ($parts['error_count']) {
+        if ($timestamp === false || $parts['error_count']) {
             return null;
         }
 
@@ -3713,53 +3750,39 @@ if (!isset($excluded_functions["date_timestamp"]) && (!function_exists("ryunosuk
             if (!isset($parts['relative'])) {
                 return null;
             }
-            $baseTimestamp ??= time();
             $parts['year'] = idate('Y', $baseTimestamp);
             $parts['month'] = idate('m', $baseTimestamp);
             $parts['day'] = idate('d', $baseTimestamp);
         }
 
-        if (isset($parts['relative'])) {
-            $relative = $parts['relative'];
-            $parts['year'] += $relative['year'];
+        if ($ordinal_day) {
+            $timestamp += ($ordinal_day - 1) * $DAY1;
+        }
+
+        if ($oddeven !== null) {
+            $idateW2 = idate('W', $timestamp) % 2;
+            if (($oddeven === 'odd' && $idateW2 === 0) || ($oddeven === 'even' && $idateW2 === 1)) {
+                $timestamp += $DAY1 * 7;
+            }
+        }
+
+        $relative = $parts['relative'] ?? [];
+        if (($relative['month'] ?? false)
+            && !isset($relative['weekday'])            // 週指定があるとかなり特殊で初日末日が意味を為さない
+            && !isset($relative['first_day_of_month']) // first day 指定があるなら初日確定
+            && !isset($relative['last_day_of_month'])  // last day 指定があるなら末日確定
+        ) {
             $parts['month'] += $relative['month'];
-            // php の相対指定は割と腐っているので補正する（末日を超えても月は変わらないようにする）
-            if ($parts['month'] > 12) {
-                $parts['year'] += intdiv($parts['month'], 12);
-                $parts['month'] = $parts['month'] % 12;
-            }
-            if ($parts['month'] < 1) {
-                $parts['year'] += intdiv(-12 + $parts['month'], 12);
-                $parts['month'] = 12 + $parts['month'] % 12;
-            }
+            $parts['year'] += intdiv($parts['month'], 12);
+            $parts['month'] %= 12;
+            $parts['month'] += $parts['month'] <= 0 ? 12 : 0;
+
             if (!checkdate($parts['month'], $parts['day'], $parts['year'])) {
-                $parts['day'] = idate('t', mktime(12, 12, 12, $parts['month'], 1, $parts['year']));
-            }
-            $parts['day'] += $relative['day'];
-            $parts['hour'] += $relative['hour'];
-            $parts['minute'] += $relative['minute'];
-            $parts['second'] += $relative['second'];
-        }
-
-        $offset = 0;
-        $timezone = null;
-        if ($parts['is_localtime']) {
-            if ($parts['zone_type'] === 1) {
-                $timezone = new \DateTimeZone('UTC');
-                $offset = $parts['zone'];
-            }
-            elseif ($parts['zone_type'] === 2) {
-                $timezone = new \DateTimeZone($parts['tz_abbr']);
-            }
-            elseif ($parts['zone_type'] === 3) {
-                $timezone = new \DateTimeZone($parts['tz_id']);
+                $timestamp = strtotime(date('Y-m-t H:i:s', $timestamp - $DAY1 * 4));
             }
         }
 
-        $dt = new \DateTime('', $timezone);
-        $dt->setDate($parts['year'], $parts['month'], $parts['day']);
-        $dt->setTime($parts['hour'], $parts['minute'], $parts['second'] - $offset, ($parts['fraction'] ?: 0) * 1000 * 1000);
-        return $parts['fraction'] ? (float) $dt->format('U.u') : $dt->getTimestamp();
+        return $parts['fraction'] ? $timestamp + $parts['fraction'] : $timestamp;
     }
 }
 if (function_exists("ryunosuke\\dbml\\date_timestamp") && !defined("ryunosuke\\dbml\\date_timestamp")) {
@@ -3782,22 +3805,31 @@ if (!isset($excluded_functions["date_convert"]) && (!function_exists("ryunosuke\
      * that(date_convert('Y/m/d H:i:s', '昭和31年12月24日 12時34分56秒'))->isSame('1956/12/24 12:34:56');
      * // 単純に「マイクロ秒が使える date」としても使える
      * $now = 1234567890.123; // テストがしづらいので固定時刻にする
-     * that(date_convert('Y/m/d H:i:s.u', $now))->isSame('2009/02/14 08:31:30.123000');
+     * that(date_convert('Y/m/d H:i:s.u', $now))->isSame('2009/02/14 08:31:30.122999');
+     * // $format に DateTimeInterface 実装クラス名を与えるとそのインスタンスを返す
+     * that(date_convert(\DateTimeImmutable::class, $now))->isInstanceOf(\DateTimeImmutable::class);
+     * // null は DateTime を意味する
+     * that(date_convert(null, $now))->isInstanceOf(\DateTime::class);
      * ```
      *
-     * @param string $format フォーマット
-     * @param string|int|float|\DateTime|null $datetimedata 日時データ。省略時は microtime
-     * @return string 日時文字列
+     * @todo 引数を入れ替えたほうが自然な気がする
+     *
+     * @param ?string $format フォーマット
+     * @param string|int|float|\DateTimeInterface|null $datetimedata 日時データ。省略時は microtime
+     * @return string|\DateTimeInterface 日時文字列。$format が null の場合は DateTime
      */
     function date_convert($format, $datetimedata = null)
     {
+        $format ??= \DateTime::class;
+        $return_object = class_exists($format) && is_subclass_of($format, \DateTimeInterface::class);
+
+        if ($return_object && $datetimedata instanceof \DateTimeInterface) {
+            return $datetimedata;
+        }
+
         // 省略時は microtime
         if ($datetimedata === null) {
             $timestamp = microtime(true);
-        }
-        elseif ($datetimedata instanceof \DateTimeInterface) {
-            // @fixme DateTime オブジェクトって timestamp を float で得られないの？
-            $timestamp = (float) $datetimedata->format('U.u');
         }
         else {
             $timestamp = date_timestamp($datetimedata);
@@ -3806,37 +3838,40 @@ if (!isset($excluded_functions["date_convert"]) && (!function_exists("ryunosuke\
             }
         }
 
-        $replace = function ($string, $char, $replace) {
-            $string = preg_replace('/(?<!\\\)' . $char . '/', '${1}' . $replace, $string);
-            return preg_replace('/\\\\' . $char . '/', $char, preg_replace('/(?<!\\\)' . $char . '/', '${1}' . $replace, $string));
-        };
-
-        if (preg_match('/[JbKk]/', $format)) {
-            $era = array_find(JP_ERA, function ($v) use ($timestamp) {
-                if ($v['since'] <= $timestamp) {
-                    return $v;
+        if (!$return_object) {
+            $era = array_find(JP_ERA, function ($era) use ($timestamp) {
+                if ($era['since'] <= $timestamp) {
+                    $era['year'] = idate('Y', (int) $timestamp) - idate('Y', $era['since']) + 1;
+                    $era['gann'] = $era['year'] === 1 ? '元' : $era['year'];
+                    return $era;
                 }
             }, false);
-            if ($era === false) {
-                throw new \InvalidArgumentException("notfound JP_ERA '$datetimedata'");
-            }
-
-            $y = idate('Y', (int) $timestamp) - idate('Y', $era['since']) + 1;
-            $format = $replace($format, 'J', $era['name']);
-            $format = $replace($format, 'b', $era['abbr']);
-            $format = $replace($format, 'K', $y === 1 ? '元' : $y);
-            $format = $replace($format, 'k', $y);
+            $format = strtr_escaped($format, [
+                'J' => fn() => $era ? $era['name'] : throws(new \InvalidArgumentException("notfound JP_ERA '$datetimedata'")),
+                'b' => fn() => $era ? $era['abbr'] : throws(new \InvalidArgumentException("notfound JP_ERA '$datetimedata'")),
+                'k' => fn() => $era ? $era['year'] : throws(new \InvalidArgumentException("notfound JP_ERA '$datetimedata'")),
+                'K' => fn() => $era ? $era['gann'] : throws(new \InvalidArgumentException("notfound JP_ERA '$datetimedata'")),
+                'x' => fn() => ['日', '月', '火', '水', '木', '金', '土'][idate('w', (int) $timestamp)],
+            ], '\\');
         }
 
-        $format = $replace($format, 'x', ['日', '月', '火', '水', '木', '金', '土'][idate('w', (int) $timestamp)]);
+        if (is_int($timestamp) && !$return_object) {
+            return date($format, $timestamp);
+        }
+
+        $class = $return_object ? $format : \DateTime::class;
+        $dt = new $class();
+        $dt = $dt->setTimestamp((int) $timestamp);
 
         if (is_float($timestamp)) {
-            // datetime パラメータが UNIX タイムスタンプ (例: 946684800) だったり、タイムゾーンを含んでいたり (例: 2010-01-28T15:00:00+02:00) する場合は、 timezone パラメータや現在のタイムゾーンは無視します
-            static $dtz = null;
-            $dtz ??= new \DateTimeZone(date_default_timezone_get());
-            return \DateTime::createFromFormat('U.u', sprintf('%f', $timestamp))->setTimezone($dtz)->format($format);
+            $diff = (int) (($timestamp - (int) $timestamp) * 1000 * 1000);
+            $dt = $dt->modify("$diff microsecond");
         }
-        return date($format, $timestamp);
+
+        if ($return_object) {
+            return $dt;
+        }
+        return $dt->format($format);
     }
 }
 if (function_exists("ryunosuke\\dbml\\date_convert") && !defined("ryunosuke\\dbml\\date_convert")) {
@@ -3965,10 +4000,10 @@ if (!isset($excluded_functions["file_matcher"]) && (!function_exists("ryunosuke\
         ];
 
         foreach ([
-            'mtime'  => date_timestamp,
-            '!mtime' => date_timestamp,
-            'size'   => si_unprefix,
-            '!size'  => si_unprefix,
+            'mtime'  => fn(...$args) => date_timestamp(...$args),
+            '!mtime' => fn(...$args) => date_timestamp(...$args),
+            'size'   => fn(...$args) => si_unprefix(...$args),
+            '!size'  => fn(...$args) => si_unprefix(...$args),
         ] as $key => $map) {
             if (isset($filter_condition[$key])) {
                 $range = $filter_condition[$key];
@@ -5107,17 +5142,36 @@ if (!isset($excluded_functions["callable_code"]) && (!function_exists("ryunosuke
         $end = $ref->getEndLine();
         $codeblock = implode('', array_slice($contents, $start - 1, $end - $start + 1));
 
+        $arrow = true;
         $meta = parse_php("<?php $codeblock", [
-            'begin' => T_FUNCTION,
-            'end'   => '{',
+            'begin' => T_FN,
+            'end'   => T_DOUBLE_ARROW,
         ]);
+        if (!$meta) {
+            $arrow = false;
+            $meta = parse_php("<?php $codeblock", [
+                'begin' => T_FUNCTION,
+                'end'   => '{',
+            ]);
+        }
         array_pop($meta);
 
-        $body = parse_php("<?php $codeblock", [
-            'begin'  => '{',
-            'end'    => '}',
-            'offset' => last_key($meta),
-        ]);
+        if ($arrow) {
+            $body = parse_php("<?php $codeblock", [
+                'begin'  => T_DOUBLE_ARROW,
+                'end'    => [';', ',', ')'],
+                'offset' => last_key($meta),
+                'greedy' => true,
+            ]);
+            $body = array_slice($body, 1, -1);
+        }
+        else {
+            $body = parse_php("<?php $codeblock", [
+                'begin'  => '{',
+                'end'    => '}',
+                'offset' => last_key($meta),
+            ]);
+        }
 
         return [trim(implode('', array_column($meta, 1))), trim(implode('', array_column($body, 1)))];
     }
@@ -5169,6 +5223,57 @@ if (function_exists("ryunosuke\\dbml\\call_safely") && !defined("ryunosuke\\dbml
      *
      */
     define("ryunosuke\\dbml\\call_safely", "ryunosuke\\dbml\\call_safely");
+}
+
+if (!isset($excluded_functions["is_callback"]) && (!function_exists("ryunosuke\\dbml\\is_callback") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\is_callback"))->isInternal()))) {
+    /**
+     * callable のうち、関数文字列を false で返す
+     *
+     * 歴史的な経緯で php の callable は多岐に渡る。
+     *
+     * 1. 単純なコールバック: `"strtolower"`
+     * 2. staticメソッドのコール: `["ClassName", "method"]`
+     * 3. オブジェクトメソッドのコール: `[$object, "method"]`
+     * 4. staticメソッドのコール: `"ClassName::method"`
+     * 5. 相対指定によるstaticメソッドのコール: `["ClassName", "parent::method"]`
+     * 6. __invoke実装オブジェクト: `$object`
+     * 7. クロージャ: `fn() => something()`
+     *
+     * 上記のうち 1 を callable とはみなさず false を返す。
+     * 現代的には `Closure::fromCallable`, `$object->method(...)` などで callable == Closure という概念が浸透しているが、そうでないこともある。
+     * 本ライブラリでも `preg_splice` や `array_sprintf` などで頻出しているので関数として定義する。
+     *
+     * 副作用はなく、クラスのロードや関数の存在チェックなどは行わない。あくまで型と形式で判定する。
+     * 引数は callable でなくても構わない。その場合単に false を返す。
+     *
+     * @param callable $callable 対象 callable
+     * @return bool 関数呼び出しの callable なら false
+     */
+    function is_callback($callable)
+    {
+        // 大前提（不要に思えるが invoke や配列 [1, 2, 3] などを考慮すると必要）
+        if (!is_callable($callable, true)) {
+            return false;
+        }
+
+        // 変なオブジェクト・配列は↑で除かれている
+        if (is_object($callable) || is_array($callable)) {
+            return true;
+        }
+
+        // 文字列で :: を含んだら関数呼び出しではない
+        if (is_string($callable) && strpos($callable, '::') !== false) {
+            return true;
+        }
+
+        return false;
+    }
+}
+if (function_exists("ryunosuke\\dbml\\is_callback") && !defined("ryunosuke\\dbml\\is_callback")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\is_callback", "ryunosuke\\dbml\\is_callback");
 }
 
 if (!isset($excluded_functions["is_bindable_closure"]) && (!function_exists("ryunosuke\\dbml\\is_bindable_closure") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\is_bindable_closure"))->isInternal()))) {
@@ -5257,6 +5362,71 @@ if (function_exists("ryunosuke\\dbml\\parameter_length") && !defined("ryunosuke\
     define("ryunosuke\\dbml\\parameter_length", "ryunosuke\\dbml\\parameter_length");
 }
 
+if (!isset($excluded_functions["parameter_default"]) && (!function_exists("ryunosuke\\dbml\\parameter_default") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\parameter_default"))->isInternal()))) {
+    /**
+     * callable のデフォルト引数を返す
+     *
+     * オプションで指定もできる。
+     * 負数を指定した場合「最後の引数から数えた位置」になる。
+     *
+     * 内部関数には使用できない（リフレクションが対応していない）。
+     *
+     * Example:
+     * ```php
+     * $f = function ($a, $b = 'b') {};
+     * // デフォルト引数である b を返す
+     * that(parameter_default($f))->isSame([1 => 'b']);
+     * // 引数で与えるとそれが優先される
+     * that(parameter_default($f, ['A', 'B']))->isSame(['A', 'B']);
+     * ```
+     *
+     * @param callable $callable 対象 callable
+     * @param iterable|array $arguments デフォルト引数
+     * @return array デフォルト引数
+     */
+    function parameter_default(callable $callable, $arguments = [])
+    {
+        static $cache = [];
+
+        // $call_name でキャッシュ。しかしクロージャはすべて「Closure::__invoke」になるのでキャッシュできない
+        is_callable($callable, true, $call_name);
+        if (!isset($cache[$call_name]) || $callable instanceof \Closure) {
+            /** @var \ReflectionFunctionAbstract $refunc */
+            $refunc = reflect_callable($callable);
+            $cache[$call_name] = [
+                'length'  => $refunc->getNumberOfParameters(),
+                'default' => [],
+            ];
+            foreach ($refunc->getParameters() as $n => $param) {
+                if ($param->isDefaultValueAvailable()) {
+                    $cache[$call_name]['default'][$n] = $param->getDefaultValue();
+                }
+            }
+        }
+
+        // 指定されていないならそのまま返せば良い（高速化）
+        if (is_array($arguments) && !$arguments) {
+            return $cache[$call_name]['default'];
+        }
+
+        $args2 = [];
+        foreach ($arguments as $n => $arg) {
+            if ($n < 0) {
+                $n += $cache[$call_name]['length'];
+            }
+            $args2[$n] = $arg;
+        }
+
+        return array_merge2($cache[$call_name]['default'], $args2);
+    }
+}
+if (function_exists("ryunosuke\\dbml\\parameter_default") && !defined("ryunosuke\\dbml\\parameter_default")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\parameter_default", "ryunosuke\\dbml\\parameter_default");
+}
+
 if (!isset($excluded_functions["func_user_func_array"]) && (!function_exists("ryunosuke\\dbml\\func_user_func_array") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\func_user_func_array"))->isInternal()))) {
     /**
      * パラメータ定義数に応じて呼び出し引数を可変にしてコールする
@@ -5306,6 +5476,36 @@ if (function_exists("ryunosuke\\dbml\\func_user_func_array") && !defined("ryunos
      *
      */
     define("ryunosuke\\dbml\\func_user_func_array", "ryunosuke\\dbml\\func_user_func_array");
+}
+
+if (!isset($excluded_functions["sum"]) && (!function_exists("ryunosuke\\dbml\\sum") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\sum"))->isInternal()))) {
+    /**
+     * 引数の合計値を返す
+     *
+     * - is_numeric でない値は除外される（計算結果に影響しない）
+     * - 配列は個数ではなくフラット展開した要素を対象にする
+     * - 候補がない場合はエラーではなく例外を投げる
+     *
+     * Example:
+     * ```php
+     * that(sum(1, 2, 3, 4, 5, 6))->isSame(21);
+     * ```
+     *
+     * @param mixed ...$variadic 対象の変数・配列・リスト
+     * @return mixed 合計値
+     */
+    function sum(...$variadic)
+    {
+        $args = array_flatten($variadic) or throws(new \LengthException("argument's length is 0."));
+        $args = array_filter($args, 'is_numeric') or throws(new \LengthException("argument's must be contain munber."));
+        return array_sum($args);
+    }
+}
+if (function_exists("ryunosuke\\dbml\\sum") && !defined("ryunosuke\\dbml\\sum")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\sum", "ryunosuke\\dbml\\sum");
 }
 
 if (!isset($excluded_functions["sql_quote"]) && (!function_exists("ryunosuke\\dbml\\sql_quote") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\sql_quote"))->isInternal()))) {
@@ -5421,6 +5621,8 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
         $options += [
             // インデント文字
             'indent'    => "  ",
+            // インラインレベル
+            'inline'    => 999,
             // 括弧の展開レベル
             'nestlevel' => 1,
             // キーワードの大文字/小文字可変換（true だと大文字化。false だと小文字化。あるいは 'ucfirst' 等の文字列関数を直接指定する。クロージャでも良い）
@@ -5430,6 +5632,7 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
             // 最大折返し文字数（未実装）
             'wrapsize'  => false,
         ];
+
         if ($options['case'] === true) {
             $options['case'] = 'strtoupper';
         }
@@ -5471,19 +5674,28 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
             };
         }
         $options['syntaxer'] = function ($token, $ttype) use ($options, $keywords) {
-            if ($options['case'] && isset($keywords[strtoupper($token)])) {
-                $token = $options['case']($token);
+            if (in_array($ttype, [T_COMMENT, T_DOC_COMMENT, T_CONSTANT_ENCAPSED_STRING], true)) {
+                $tokens = [$token];
             }
-            if ($options['highlight']) {
-                $token = $options['highlight']($token, $ttype);
+            else {
+                $tokens = explode(' ', $token);
             }
-            return $token;
+
+            $result = [];
+            foreach ($tokens as $token) {
+                if ($options['case'] && isset($keywords[strtoupper($token)])) {
+                    $token = $options['case']($token);
+                }
+                if ($options['highlight']) {
+                    $token = $options['highlight']($token, $ttype);
+                }
+                $result[] = $token;
+            }
+            return implode(' ', $result);
         };
 
         // 構文解析も先読みもない素朴な実装なので、特定文字列をあとから置換するための目印文字列
         $MARK = unique_string($sql, 8);
-        $MARK_R = "{$MARK}_R:}";   // \r マーク
-        $MARK_N = "{$MARK}_N:}";   // \n マーク
         $MARK_BR = "{$MARK}_BR:}"; // 改行マーク
         $MARK_CS = "{$MARK}_CS:}"; // コメント開始マーク
         $MARK_CE = "{$MARK}_CE:}"; // コメント終了マーク
@@ -5494,6 +5706,7 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
         // 字句にバラす（シンタックスが php に似ているので token_get_all で大幅にサボることができる）
         $tokens = [];
         $comment = '';
+        $last = [];
         foreach (token_get_all("<?php $sql") as $token) {
             // トークンは配列だったり文字列だったりするので -1 トークンとして配列に正規化
             if (is_string($token)) {
@@ -5504,8 +5717,9 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
             if ($token[0] === T_OPEN_TAG) {
                 continue;
             }
+
             // '--' は php ではデクリメントだが sql ではコメントなので特別扱いする
-            elseif ($token[0] === T_DEC) {
+            if ($token[0] === T_DEC) {
                 $comment = $token[1];
             }
             // 改行は '--' コメントの終わり
@@ -5517,6 +5731,10 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
             elseif ($comment) {
                 $comment .= $token[1];
             }
+            // END IF, END LOOP などは一つのトークンとする
+            elseif (strtoupper($last[1] ?? '') === 'END' && in_array(strtoupper($token[1]), ['CASE', 'IF', 'LOOP', 'REPEAT', 'WHILE'], true)) {
+                $tokens[array_key_last($tokens)][1] .= " " . $token[1];
+            }
             // 上記以外はただのトークンとして格納する
             else {
                 // `string` のような文字列は T_ENCAPSED_AND_WHITESPACE として得られる（ただし ` がついていないので付与）
@@ -5526,6 +5744,10 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                 elseif ($token[0] !== T_WHITESPACE && $token[1] !== '`') {
                     $tokens[] = [$token[0], $token[1]];
                 }
+            }
+
+            if ($token[0] !== T_WHITESPACE) {
+                $last = $token;
             }
         }
 
@@ -5548,27 +5770,21 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
             return [$start, '', $comments];
         };
 
-        $interpret = function (&$index = -1) use (&$interpret, $MARK_R, $MARK_N, $MARK_BR, $MARK_CS, $MARK_CE, $MARK_NT, $MARK_SP, $MARK_PT, $tokens, $options, $seek) {
+        $interpret = function (&$index = -1, $context = '', $breaker = '', $nest = 0) use (&$interpret, $MARK_BR, $MARK_CS, $MARK_CE, $MARK_NT, $MARK_SP, $MARK_PT, $tokens, $options, $seek) {
             $index++;
             $beginning = true; // クエリの冒頭か
-            $context = '';     // SELECT, INSERT などの大分類
             $subcontext = '';  // SET, VALUES などのサブ分類
             $modifier = '';    // RIGHT などのキーワード修飾語
             $firstcol = null;  // SELECT における最初の列か
 
             $result = [];
             for ($token_length = count($tokens); $index < $token_length; $index++) {
-                $ttype = $tokens[$index][0];
-                $token = trim($tokens[$index][1]);
+                $token = $tokens[$index];
+                $ttype = $token[0];
 
-                $virttoken = $options['syntaxer']($token, $ttype);
-                $uppertoken = strtoupper($token);
-
-                // 最終的なインデントは「改行＋スペース」で行うのでリテラル内に改行があるとそれもインデントされてしまうので置換して逃がす
-                $token = strtr($token, [
-                    "\r" => $MARK_R,
-                    "\n" => $MARK_N,
-                ]);
+                $rawtoken = trim($token[1]);
+                $virttoken = $options['syntaxer']($rawtoken, $ttype);
+                $uppertoken = strtoupper($rawtoken);
 
                 // SELECT の直後には DISTINCT などのオプションが来ることがあるので特別扱い
                 if ($context === 'SELECT' && $firstcol) {
@@ -5583,18 +5799,17 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                     $result[] = ($beginning ? '' : $MARK_CS) . $virttoken . $MARK_CE . $MARK_BR;
                     continue;
                 }
-                $beginning = false;
+
+                $prev = $seek($index, -1);
+                $next = $seek($index, +1);
 
                 switch ($uppertoken) {
                     default:
                         _DEFAULT:
-                        $prev = $seek($index, -1)[1];
-                        $next = $seek($index, +1)[1];
-
                         // "tablename. columnname" になってしまう
                         // "@ var" になってしまう
                         // ": holder" になってしまう
-                        if ($prev !== '.' && $prev !== '@' && $prev !== ':' && $prev !== ';') {
+                        if (!in_array($prev[1], ['.', '@', ':', ';'])) {
                             $result[] = $MARK_SP;
                         }
 
@@ -5604,7 +5819,7 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                         // "columnname ," になってしまう
                         // mysql において関数呼び出し括弧の前に空白は許されない
                         // ただし、関数呼び出しではなく記号の場合はスペースを入れたい（ colname = (SELECT ～) など）
-                        if (($next !== '.' && $next !== ',' && $next !== '(') || ($next === '(' && !preg_match('#^[a-z0-9_"\'`]+$#i', $token))) {
+                        if (!in_array($next[1], ['.', ',', '(', ';']) || ($next[1] === '(' && !preg_match('#^[a-z0-9_"\'`]+$#i', $rawtoken))) {
                             $result[] = $MARK_SP;
                         }
                         break;
@@ -5612,18 +5827,22 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                     case ":":
                         $result[] = $MARK_SP . $virttoken;
                         break;
-                    case ";":
-                        $result[] = $MARK_BR . $virttoken . $MARK_BR;
-                        break;
                     case ".":
                         $result[] = $virttoken;
                         break;
                     case ",":
+                        if ($subcontext === 'LIMIT') {
+                            $result[] = $virttoken . $MARK_SP;
+                            break;
+                        }
+                        $result[] = $virttoken . $MARK_BR;
+                        break;
+                    case ";":
                         $result[] = $virttoken . $MARK_BR;
                         break;
                     case "WITH":
-                        $result[] = $MARK_BR . $virttoken . $MARK_SP;
-                        $subcontext = $uppertoken;
+                        $result[] = $virttoken;
+                        $result[] = $MARK_BR;
                         break;
                     /** @noinspection PhpMissingBreakStatementInspection */
                     case "BETWEEN":
@@ -5638,8 +5857,8 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                     case "TABLE":
                         // CREATE TABLE tablename は括弧があるので何もしなくて済むが、
                         // ALTER TABLE tablename は括弧がなく ADD などで始まるので特別分岐
-                        [$index, $name, $comments] = $seek($index, +1);
-                        $result[] = $MARK_SP . $virttoken . $MARK_SP . ($MARK_SP . implode('', $comments) . $MARK_CE) . $name . $MARK_SP;
+                        $index = $next[0];
+                        $result[] = $MARK_SP . $virttoken . $MARK_SP . ($MARK_SP . implode('', $next[2]) . $MARK_CE) . $next[1] . $MARK_SP;
                         if ($context !== 'CREATE' && $context !== 'DROP') {
                             $result[] = $MARK_BR;
                         }
@@ -5648,12 +5867,21 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                     case "AND":
                         // BETWEEN A AND B と論理演算子の AND が競合するので分岐後にフォールスルー
                         if ($subcontext === 'BETWEEN') {
-                            $result[] = $MARK_SP . $virttoken . $MARK_SP;
                             $subcontext = '';
+                            $result[] = $MARK_SP . $virttoken . $MARK_SP;
                             break;
                         }
+                        goto _BINARY_OPERATOR_;
+                    /** @noinspection PhpMissingBreakStatementInspection */
                     case "OR":
+                        // CREATE OR REPLACE
+                        if ($context === 'CREATE') {
+                            $result[] = $MARK_SP . $virttoken . $MARK_SP;
+                            break;
+                        }
+                        goto _BINARY_OPERATOR_;
                     case "XOR":
+                        _BINARY_OPERATOR_:
                         // WHEN の条件はカッコがない限り改行しない
                         if ($subcontext === 'WHEN') {
                             $result[] = $MARK_SP . $virttoken . $MARK_SP;
@@ -5669,10 +5897,11 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                         break;
                     case "BY":
                     case "ALL":
-                        $result[] = $MARK_SP . $virttoken . array_pop($result);
+                    case "RECURSIVE":
+                        $result[] = $MARK_SP . $virttoken . $MARK_SP . array_pop($result);
                         break;
                     case "SELECT":
-                        if ($context === 'INSERT') {
+                        if (!$beginning) {
                             $result[] = $MARK_BR;
                         }
                         $result[] = $virttoken;
@@ -5683,7 +5912,7 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                         /** @noinspection PhpMissingBreakStatementInspection */
                     case "RIGHT":
                         // 例えば LEFT や RIGHT は関数呼び出しの場合もあるので分岐後にフォールスルー
-                        if ($seek($index, +1)[1] === '(') {
+                        if ($next[1] === '(') {
                             goto _DEFAULT;
                         }
                     case "CROSS":
@@ -5699,6 +5928,7 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                     case "ORDER":
                     case "LIMIT":
                     case "OFFSET":
+                        $subcontext = $uppertoken;
                         $result[] = $MARK_BR . $modifier . $virttoken;
                         $result[] = $MARK_BR; // のちの BY のために結合はせず後ろに入れるだけにする
                         $modifier = '';
@@ -5709,10 +5939,8 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                         break;
                     case "ON":
                         // ON は ON でも mysql の ON DUPLICATED かもしれない（pgsql の ON CONFLICT も似たようなコンテキスト）
-                        $name = $seek($index, +1)[1];
-                        if (in_array(strtoupper($name), ['DUPLICATE', 'CONFLICT'], true)) {
+                        if (in_array(strtoupper($next[1]), ['DUPLICATE', 'CONFLICT'], true)) {
                             $result[] = $MARK_BR;
-                            $subcontext = '';
                         }
                         else {
                             $result[] = $MARK_SP;
@@ -5720,8 +5948,16 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                         $result[] = $virttoken . $MARK_SP;
                         break;
                     case "SET":
-                        $result[] = $MARK_BR . $virttoken . $MARK_BR;
-                        $subcontext = $uppertoken;
+                        if ($context === "INSERT" || $context === "UPDATE") {
+                            $subcontext = $uppertoken;
+                            $result[] = $MARK_BR . $virttoken . $MARK_BR;
+                        }
+                        elseif ($context === "ALTER" || $subcontext === "REFERENCES") {
+                            $result[] = $MARK_SP . $virttoken;
+                        }
+                        else {
+                            $result[] = $virttoken;
+                        }
                         break;
                     case "INSERT":
                     case "REPLACE":
@@ -5729,6 +5965,9 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                         $context = "INSERT"; // 構文的には INSERT と同じ
                         break;
                     case "INTO":
+                        if ($context === "SELECT") {
+                            $result[] = $MARK_BR;
+                        }
                         $result[] = $virttoken;
                         if ($context === "INSERT") {
                             $result[] = $MARK_BR;
@@ -5749,69 +5988,99 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                     case "UPDATE":
                     case "DELETE":
                         $result[] = $virttoken;
-                        if ($subcontext !== 'REFERENCES') {
+                        if ($context !== 'CREATE' && $subcontext !== 'REFERENCES') {
                             $result[] = $MARK_BR;
                             $context = $uppertoken;
                         }
                         break;
+                    case "IF":
+                        $subcontext = $uppertoken;
+                        $result[] = $virttoken;
+                        break;
                     /** @noinspection PhpMissingBreakStatementInspection */
                     case "WHEN":
                         $subcontext = $uppertoken;
-                    case "ELSE":
                         $result[] = $MARK_BR . $MARK_NT . $virttoken . $MARK_SP;
                         break;
-                    case "THEN":
-                        $subcontext = '';
-                        $result[] = $MARK_SP . $virttoken;
+                    case "ELSE":
+                        if ($context === 'CASE') {
+                            $result[] = $MARK_BR . $MARK_NT . $virttoken . $MARK_SP;
+                            break;
+                        }
+                        $result[] = $virttoken . $MARK_SP;
                         break;
                     case "CASE":
-                        $parts = $interpret($index);
+                        $parts = $interpret($index, $uppertoken, 'END', $nest + 1);
                         $parts = str_replace($MARK_BR, $MARK_BR . $MARK_NT, $parts);
                         $result[] = $MARK_NT . $virttoken . $MARK_SP . $parts;
                         break;
+                    case "BEGIN":
+                        if ($next[1] === ';') {
+                            $result[] = $virttoken;
+                        }
+                        else {
+                            $parts = $interpret($index, $uppertoken, 'END', $nest + 1);
+                            $parts = preg_replace("#^($MARK_SP)+#u", "", $parts);
+                            $parts = preg_replace("#$MARK_BR#u", $MARK_BR . $MARK_NT, $parts, substr_count($parts, $MARK_BR) - 1);
+                            $result[] = $MARK_BR . $virttoken . $MARK_BR . $MARK_NT . $parts;
+                        }
+                        break;
                     case "END":
-                        $result[] = $MARK_BR . $virttoken;
-                        break 2;
+                        if ($context === 'CASE') {
+                            $result[] = $MARK_BR;
+                        }
+                        $result[] = $virttoken;
+                        break;
                     case "(":
-                        $current = $index;
-                        $parts = $MARK_BR . $interpret($index);
+                        if ($next[1] === ')') {
+                            $result[] = $virttoken . implode('', $next[2]) . ')';
+                            $index = $next[0];
+                            break;
+                        }
 
-                        // コメントを含まない指定ネストレベル以下なら改行とインデントを吹き飛ばす
-                        if (strpos($parts, $MARK_CE) === false && substr_count($parts, $MARK_PT) < $options['nestlevel']) {
+                        $parts = $uppertoken . $MARK_BR . $interpret($index, $uppertoken, ')', $nest + 1);
+
+                        // コメントを含まない指定ネストレベルなら改行とインデントを吹き飛ばす
+                        if (strpos($parts, $MARK_CE) === false && ($nest >= $options['inline'] || substr_count($parts, $MARK_PT) < $options['nestlevel'])) {
                             $parts = strtr($parts, [
                                 $MARK_BR => "",
                                 $MARK_NT => "",
                             ]);
-                            $parts = preg_replace("#^($MARK_SP)|($MARK_SP)+$#u", '', $parts);
+                            $parts = preg_replace("#\\(($MARK_SP)+#u", '(', $parts);
+                            $parts = preg_replace("#($MARK_SP)+\\)#u", ')', $parts);
                         }
                         elseif ($context === 'CREATE') {
-                            $parts = $parts . $MARK_BR;
+                            // ???
+                            assert($context === 'CREATE');
                         }
                         else {
-                            $lastnt = $subcontext === 'WITH' ? '' : $MARK_NT;
+                            $lastnt = $MARK_NT;
                             $brnt = $MARK_BR . $MARK_NT;
-                            if ($subcontext !== 'WITH' && strtoupper($seek($current, +1)[1]) === 'SELECT') {
-                                $brnt .= $MARK_NT;
+                            if (strtoupper($next[1]) === 'SELECT') {
+                                $brnt .= $lastnt;
                             }
-                            $parts = preg_replace("#($MARK_BR)+#u", $brnt, $parts) . $MARK_BR . $lastnt;
+                            $parts = preg_replace("#($MARK_BR(?!\\)))+#u", $brnt, $parts) . $lastnt;
+                            $parts = preg_replace("#($MARK_BR(\\)))+#u", "$MARK_BR$MARK_NT)", $parts) . $lastnt;
                             $parts = preg_replace("#$MARK_CS#u", "", $parts);
                         }
 
                         // IN や数式はネストとみなさない
-                        $prev = $seek($current, -1)[1];
                         $suffix = $MARK_PT;
-                        if (strtoupper($prev) === 'IN' || !preg_match('#^[a-z0-9_]+$#i', $prev)) {
+                        if (strtoupper($prev[1]) === 'IN' || !preg_match('#^[a-z0-9_]+$#i', $prev[1])) {
                             $suffix = '';
                         }
-                        if ($subcontext === 'WITH') {
-                            $subcontext = '';
-                            $suffix .= $MARK_BR;
-                        }
 
-                        $result[] = $MARK_NT . "($parts)" . $suffix;
+                        $result[] = $MARK_NT . $parts . $suffix;
                         break;
                     case ")":
-                        break 2;
+                        $result[] = $MARK_BR . $virttoken;
+                        break;
+                }
+
+                $beginning = false;
+
+                if ($uppertoken === $breaker) {
+                    break;
                 }
             }
             return implode('', $result);
@@ -5821,6 +6090,8 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
         $result = preg_replaces("#" . implode('|', [
                 // 改行文字＋インデント文字をインデントとみなす（改行＋連続スペースもついでに）
                 "(?<indent>$MARK_BR(($MARK_NT|$MARK_SP)+))",
+                // 末尾スペースは除去
+                "(?<spbr>($MARK_SP)+(?=$MARK_BR))",
                 // 行末コメントと単一コメント
                 "(?<cs1>$MARK_BR$MARK_CS)",
                 "(?<cs2>$MARK_CS)",
@@ -5832,10 +6103,9 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
                 "(?<ce>$MARK_CE)",
                 "(?<nt>$MARK_NT)",
                 "(?<pt>$MARK_PT)",
-                "(?<R>$MARK_R)",
-                "(?<N>$MARK_N)",
             ]) . "#u", [
             'indent' => fn($str) => "\n" . str_repeat($options['indent'], (substr_count($str, $MARK_NT) + substr_count($str, $MARK_SP))),
+            'spbr'   => "",
             'cs1'    => "\n" . $options['indent'],
             'cs2'    => "",
             'br'     => "\n",
@@ -5843,8 +6113,6 @@ if (!isset($excluded_functions["sql_format"]) && (!function_exists("ryunosuke\\d
             'ce'     => "",
             'nt'     => "",
             'pt'     => "",
-            'R'      => "\r",
-            'N'      => "\n",
         ], $result);
 
         return trim($result);
@@ -6057,6 +6325,86 @@ if (function_exists("ryunosuke\\dbml\\strpos_array") && !defined("ryunosuke\\dbm
     define("ryunosuke\\dbml\\strpos_array", "ryunosuke\\dbml\\strpos_array");
 }
 
+if (!isset($excluded_functions["strpos_escaped"]) && (!function_exists("ryunosuke\\dbml\\strpos_escaped") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\strpos_escaped"))->isInternal()))) {
+    /**
+     * エスケープを考慮して strpos する
+     *
+     * 文字列中のエスケープ中でない生の文字を検索する。
+     * 例えば `"abc\nxyz"` という文字列で `"n"` という文字は存在しないとみなす。
+     * `"\n"` は改行のエスケープシーケンスであり、 `"n"` という文字ではない（エスケープシーケンスとして "n" を流用しているだけ）。
+     * 逆に `"\\n"` はバックスラッシュと `"n"` という文字であり `"n"` が存在する。
+     * 簡単に言えば「直前にバックスラッシュがある場合はヒットしない strpos」である。
+     * バックスラッシュは $escape 引数で指定可能。
+     *
+     * $needle 自体にエスケープ文字を含む場合、反対の意味で検索する。
+     * つまり、「直前にバックスラッシュがある場合のみヒットする strpos」になる。
+     *
+     * $offset 引数を指定するとその位置から探索を開始するが、戻り読みはしないのでエスケープ文字の真っ只中を指定する場合は注意。
+     * 例えば `"\n"` は改行文字だけであるが、offset に 1 に指定して "n" を探すとマッチする。
+     *
+     * Example:
+     * ```php
+     * # 分かりにくいので \ ではなく % をエスケープ文字とする
+     * $defargs = [0, '%'];
+     *
+     * // これは false である（"%d" という文字の列であるため "d" という文字は存在しない）
+     * that(strpos_escaped('%d', 'd', ...$defargs))->isSame(false);
+     * // これは 2 である（"%" "d" という文字の列であるため（d の前の % は更にその前の % に呑まれておりメタ文字ではない））
+     * that(strpos_escaped('%%d', 'd', ...$defargs))->isSame(2);
+     *
+     * // これは 0 である（% をつけて検索するとそのエスケープシーケンス的なものそのものを探すため）
+     * that(strpos_escaped('%d', '%d', ...$defargs))->isSame(0);
+     * // これは false である（"%" "d" という文字の列であるため "%d" という文字は存在しない）
+     * that(strpos_escaped('%%d', '%d', ...$defargs))->isSame(false);
+     * // これは 2 である（"%" "%d" という文字の列であるため）
+     * that(strpos_escaped('%%%d', '%d', ...$defargs))->isSame(2);
+     * ```
+     *
+     * @param string $haystack 対象文字列
+     * @param string|array $needle 探す文字
+     * @param int $offset 開始位置
+     * @param string $escape エスケープ文字
+     * @param ?string $found 見つかった文字が格納される
+     * @return false|int 見つかった位置
+     */
+    function strpos_escaped($haystack, $needle, $offset = 0, $escape = '\\', &$found = null)
+    {
+        $q_escape = preg_quote($escape, '#');
+        if (is_stringable($needle)) {
+            $needle = preg_split("#($q_escape?.)#u", $needle, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        }
+
+        $needles = arrayval($needle);
+        assert(!in_array($escape, $needles, true), sprintf('$needle must not contain only escape charactor ("%s")', implode(', ', $needles)));
+
+        $matched = [];
+        foreach (array_map(fn($c) => preg_quote($c, '#'), $needles) as $need) {
+            if (preg_match_all("#((?:$q_escape)*?)($need)#u", $haystack, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER, $offset)) {
+                foreach ($matches as [, $m_escape, $m_needle]) {
+                    if ((strlen($m_escape[0]) / strlen($escape)) % 2 === 0) {
+                        $matched[$m_needle[1]] ??= $m_needle[0];
+                    }
+                }
+            }
+        }
+        if (!$matched) {
+            $found = null;
+            return false;
+        }
+
+        ksort($matched);
+        $min = array_key_first($matched);
+        $found = $matched[$min];
+        return $min;
+    }
+}
+if (function_exists("ryunosuke\\dbml\\strpos_escaped") && !defined("ryunosuke\\dbml\\strpos_escaped")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\strpos_escaped", "ryunosuke\\dbml\\strpos_escaped");
+}
+
 if (!isset($excluded_functions["strpos_quoted"]) && (!function_exists("ryunosuke\\dbml\\strpos_quoted") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\strpos_quoted"))->isInternal()))) {
     /**
      * クオートを考慮して strpos する
@@ -6134,6 +6482,104 @@ if (function_exists("ryunosuke\\dbml\\strpos_quoted") && !defined("ryunosuke\\db
      *
      */
     define("ryunosuke\\dbml\\strpos_quoted", "ryunosuke\\dbml\\strpos_quoted");
+}
+
+if (!isset($excluded_functions["strtr_escaped"]) && (!function_exists("ryunosuke\\dbml\\strtr_escaped") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\strtr_escaped"))->isInternal()))) {
+    /**
+     * エスケープを考慮して strtr する
+     *
+     * 「エスケープ」についての詳細は strpos_escaped を参照。
+     *
+     * $replace_pairs は [from => to] な配列を指定する。
+     * to がクロージャの場合はキーとオフセットでコールバックされる。
+     *
+     * strtr と同様、最も長いキーから置換を行い、置換後の文字列は対象にならない。
+     *
+     * Example:
+     * ```php
+     * # 分かりにくいので \ ではなく % をエスケープ文字とする
+     * that((strtr_escaped)('XYZ ab %% %s', [
+     *     'ab'  => 'AB',  // 2. 1 で置換された文字は対象にならない
+     *     'A'   => '%a',  // 使われない
+     *     'Z'   => '%z',  // 使われない
+     *     '%%'  => 'p',   // 普通に置換される
+     *     's'   => 'S',   // エスケープが対象なので置換されない（%s は文字 "s" ではない（\n が文字 "n" ではないのと同じ））
+     *     'XYZ' => 'abc', // 1. 後ろにあるがまず置換される
+     * ], '%'))->isSame('abc AB p %s');
+     * ```
+     *
+     * @param string $string 対象文字列
+     * @param array $replace_pairs 置換するペア
+     * @param string $escape エスケープ文字
+     * @return string 置換された文字列
+     */
+    function strtr_escaped($string, $replace_pairs, $escape = '\\')
+    {
+        uksort($replace_pairs, fn($a, $b) => strlen($b) - strlen($a));
+        $froms = array_keys($replace_pairs);
+
+        $offset = 0;
+        while (($pos = strpos_escaped($string, $froms, $offset, $escape, $found)) !== false) {
+            $to = $replace_pairs[$found];
+            $replaced = $to instanceof \Closure ? $to($found, $pos) : $to;
+            $string = substr_replace($string, $replaced, $pos, strlen($found));
+            $offset = $pos + strlen($replaced);
+        }
+        return $string;
+    }
+}
+if (function_exists("ryunosuke\\dbml\\strtr_escaped") && !defined("ryunosuke\\dbml\\strtr_escaped")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\strtr_escaped", "ryunosuke\\dbml\\strtr_escaped");
+}
+
+if (!isset($excluded_functions["str_equals"]) && (!function_exists("ryunosuke\\dbml\\str_equals") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\str_equals"))->isInternal()))) {
+    /**
+     * 文字列比較の関数版
+     *
+     * 文字列以外が与えられた場合は常に false を返す。ただし __toString を実装したオブジェクトは別。
+     *
+     * Example:
+     * ```php
+     * that(str_equals('abc', 'abc'))->isTrue();
+     * that(str_equals('abc', 'ABC', true))->isTrue();
+     * that(str_equals('\0abc', '\0abc'))->isTrue();
+     * ```
+     *
+     * @param string $str1 文字列1
+     * @param string $str2 文字列2
+     * @param bool $case_insensitivity 大文字小文字を無視するか
+     * @return bool 同じ文字列なら true
+     */
+    function str_equals($str1, $str2, $case_insensitivity = false)
+    {
+        // __toString 実装のオブジェクトは文字列化する（strcmp がそうなっているから）
+        if (is_object($str1) && method_exists($str1, '__toString')) {
+            $str1 = (string) $str1;
+        }
+        if (is_object($str2) && method_exists($str2, '__toString')) {
+            $str2 = (string) $str2;
+        }
+
+        // この関数は === の関数版という位置づけなので例外は投げないで不一致とみなす
+        if (!is_string($str1) || !is_string($str2)) {
+            return false;
+        }
+
+        if ($case_insensitivity) {
+            return strcasecmp($str1, $str2) === 0;
+        }
+
+        return $str1 === $str2;
+    }
+}
+if (function_exists("ryunosuke\\dbml\\str_equals") && !defined("ryunosuke\\dbml\\str_equals")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\str_equals", "ryunosuke\\dbml\\str_equals");
 }
 
 if (!isset($excluded_functions["str_exists"]) && (!function_exists("ryunosuke\\dbml\\str_exists") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\str_exists"))->isInternal()))) {
@@ -6548,6 +6994,47 @@ if (function_exists("ryunosuke\\dbml\\str_ellipsis") && !defined("ryunosuke\\dbm
     define("ryunosuke\\dbml\\str_ellipsis", "ryunosuke\\dbml\\str_ellipsis");
 }
 
+if (!isset($excluded_functions["starts_with"]) && (!function_exists("ryunosuke\\dbml\\starts_with") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\starts_with"))->isInternal()))) {
+    /**
+     * 指定文字列で始まるか調べる
+     *
+     * $with に配列を渡すといずれかで始まるときに true を返す。
+     *
+     * Example:
+     * ```php
+     * that(starts_with('abcdef', 'abc'))->isTrue();
+     * that(starts_with('abcdef', 'ABC', true))->isTrue();
+     * that(starts_with('abcdef', 'xyz'))->isFalse();
+     * that(starts_with('abcdef', ['a', 'b', 'c']))->isTrue();
+     * that(starts_with('abcdef', ['x', 'y', 'z']))->isFalse();
+     * ```
+     *
+     * @param string $string 探される文字列
+     * @param string|string[] $with 探す文字列
+     * @param bool $case_insensitivity 大文字小文字を無視するか
+     * @return bool 指定文字列で始まるなら true を返す
+     */
+    function starts_with($string, $with, $case_insensitivity = false)
+    {
+        assert(is_stringable($string));
+
+        foreach ((array) $with as $w) {
+            assert(strlen($w));
+
+            if (str_equals(substr($string, 0, strlen($w)), $w, $case_insensitivity)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+if (function_exists("ryunosuke\\dbml\\starts_with") && !defined("ryunosuke\\dbml\\starts_with")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\starts_with", "ryunosuke\\dbml\\starts_with");
+}
+
 if (!isset($excluded_functions["pascal_case"]) && (!function_exists("ryunosuke\\dbml\\pascal_case") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\pascal_case"))->isInternal()))) {
     /**
      * PascalCase に変換する
@@ -6819,7 +7306,7 @@ if (!isset($excluded_functions["json_import"]) && (!function_exists("ryunosuke\\
      * - JSON_BARE_AS_STRING: bare string を文字列として扱う
      * - JSON_TEMPLATE_LITERAL: テンプレートリテラルが使用可能になる
      *   - あくまで「文字列の括りに ` が使えるようになる」というものでテンプレートリテラルそのものではない
-     *   - 冒頭のインデントがすべて除去され、最終段階で trim される
+     *   - 末尾のインデントと同じインデントがすべて除去され、前後の改行は取り除かれる
      *
      * Example:
      * ```php
@@ -6836,7 +7323,7 @@ if (!isset($excluded_functions["json_import"]) && (!function_exists("ryunosuke\\
      *     1
      *     2
      *     3
-     * `', [
+     *     `', [
      *     JSON_TEMPLATE_LITERAL => true,
      * ]))->is("1\n2\n3");
      * ```
@@ -7049,17 +7536,18 @@ if (!isset($excluded_functions["json_import"]) && (!function_exists("ryunosuke\\
                 };
                 $stringify = function ($token) use ($options) {
                     if (strlen($token) > 1 && ($token[0] === '"' || $token[0] === "'" || ($options[JSON_TEMPLATE_LITERAL] && $token[0] === "`"))) {
-                        if ($token[0] !== $token[-1]) {
+                        if (strlen($token) < 2 || $token[0] !== $token[-1]) {
                             throw $this->exception("Bad string", $this);
                         }
-                        $quotation = $token[0];
+                        $rawtoken = $token;
                         $token = substr($token, 1, -1);
-                        if ($quotation === "`" && preg_match('#^\n( +)#u', $token, $match)) {
-                            $token = trim(preg_replace("#^{$match[1]}#um", '', $token));
+                        if ($rawtoken[0] === "`" && $rawtoken[1] === "\n" && preg_match('#\n( +)`#u', $rawtoken, $match)) {
+                            $token = substr(preg_replace("#\n{$match[1]}#u", "\n", $token), 1, -1);
                         }
                         $token = preg_replace_callback('/(?:\\\\u[0-9A-Fa-f]{4})+/u', function ($m) { return json_decode('"' . $m[0] . '"'); }, $token);
                         $token = strtr($token, [
                             "\\'"    => "'",
+                            "\\`"    => "`",
                             '\\"'    => '"',
                             '\\\\'   => '\\',
                             '\\/'    => '/',
@@ -7481,6 +7969,121 @@ if (function_exists("ryunosuke\\dbml\\unique_string") && !defined("ryunosuke\\db
     define("ryunosuke\\dbml\\unique_string", "ryunosuke\\dbml\\unique_string");
 }
 
+if (!isset($excluded_functions["glob2regex"]) && (!function_exists("ryunosuke\\dbml\\glob2regex") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\glob2regex"))->isInternal()))) {
+    /**
+     * glob 記法を正規表現に変換する
+     *
+     * glob/fnmatch における「パスとしてのマッチ（ディレクトリ区切りの特別扱い）」という性質は失われ、あくまで文字列として扱う。
+     * サポートしている記法は下記（ https://ja.wikipedia.org/wiki/%E3%82%B0%E3%83%AD%E3%83%96 ）。
+     * - `*`: 0文字以上の任意の文字列にマッチ
+     * - `?`: 任意の1文字にマッチ
+     * - `[...]`: 括弧内で列挙されたどれか1文字にマッチ
+     * - `[!...]`: 括弧内で列挙されていない何かの1文字にマッチ
+     * - `[0-9]`: 括弧内で指定された範囲内の1文字にマッチ
+     * - `[!0-9]`: 括弧内で指定されていない範囲内の1文字にマッチ
+     * - `{a,b,c}`: 「a」、「b」あるいは「c」のいずれかにマッチ（要 GLOB_BRACE）
+     *
+     * Example:
+     * ```php
+     * $files = ['hoge.jpg', 'test1.jpg', 'test12.jpg', 'test123.png', 'testA.jpg', 'testAB.jpg', 'testABC.png', 'test.jpg', 'test.jpeg'];
+     * // 先頭一致する jpg
+     * that(preg_grep('#' . glob2regex('test*.jpg') . '#', $files))->isSame([
+     *     1 => 'test1.jpg',
+     *     2 => 'test12.jpg',
+     *     4 => 'testA.jpg',
+     *     5 => 'testAB.jpg',
+     *     7 => 'test.jpg',
+     * ]);
+     * // 先頭一致した2文字の jpg
+     * that(preg_grep('#' . glob2regex('test??.jpg') . '#', $files))->isSame([
+     *     2 => 'test12.jpg',
+     *     5 => 'testAB.jpg',
+     * ]);
+     * // 先頭一致した数値1桁の jpg
+     * that(preg_grep('#' . glob2regex('test[0-9].jpg') . '#', $files))->isSame([
+     *     1 => 'test1.jpg',
+     * ]);
+     * // 先頭一致した数値1桁でない jpg
+     * that(preg_grep('#' . glob2regex('test[!0-9].jpg') . '#', $files))->isSame([
+     *     4 => 'testA.jpg',
+     * ]);
+     * // jpeg, jpg のどちらにもマッチ（GLOB_BRACE 使用）
+     * that(preg_grep('#' . glob2regex('test.jp{e,}g', GLOB_BRACE) . '#', $files))->isSame([
+     *     7 => 'test.jpg',
+     *     8 => 'test.jpeg',
+     * ]);
+     * ```
+     *
+     * @param string $pattern glob パターン文字列
+     * @param int $flags glob フラグ。現在のところ GLOB_BRACE だけが有効
+     * @return string 正規表現パターン文字列
+     */
+    function glob2regex($pattern, $flags = 0)
+    {
+        $replacer = [
+            // target glob character
+            '*'  => '.*',
+            '?'  => '.',
+            '[!' => '[^',
+            // quote regex character
+            '.'  => '\\.',
+            //'\\' => '\\\\',
+            '+'  => '\\+',
+            //'*' => '\\*',
+            //'?' => '\\?',
+            //'[' => '\\[',
+            '^'  => '\\^',
+            //']' => '\\]',
+            '$'  => '\\$',
+            '('  => '\\(',
+            ')'  => '\\)',
+            //'{' => '\\{',
+            //'}' => '\\}',
+            '='  => '\\=',
+            '!'  => '\\!',
+            '<'  => '\\<',
+            '>'  => '\\>',
+            '|'  => '\\|',
+            ':'  => '\\:',
+            //'-' => '\\-',
+            '#'  => '\\#',
+        ];
+
+        if (!($flags & GLOB_BRACE)) {
+            $replacer += [
+                '{' => '\\{',
+                '}' => '\\}',
+            ];
+        }
+
+        $pattern = strtr_escaped($pattern, $replacer);
+
+        if ($flags & GLOB_BRACE) {
+            while (true) {
+                $brace_s = strpos_escaped($pattern, '{');
+                if ($brace_s === false) {
+                    break;
+                }
+                $brace_e = strpos_escaped($pattern, '}', $brace_s);
+                if ($brace_e === false) {
+                    break;
+                }
+                $brace = substr($pattern, $brace_s + 1, $brace_e - $brace_s - 1);
+                $brace = strtr_escaped($brace, [',' => '|']);
+                $pattern = substr_replace($pattern, "($brace)", $brace_s, $brace_e - $brace_s + 1);
+            }
+        }
+
+        return $pattern;
+    }
+}
+if (function_exists("ryunosuke\\dbml\\glob2regex") && !defined("ryunosuke\\dbml\\glob2regex")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\glob2regex", "ryunosuke\\dbml\\glob2regex");
+}
+
 if (!isset($excluded_functions["preg_capture"]) && (!function_exists("ryunosuke\\dbml\\preg_capture") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\preg_capture"))->isInternal()))) {
     /**
      * キャプチャを主軸においた preg_match
@@ -7826,6 +8429,7 @@ if (!isset($excluded_functions["parse_php"]) && (!function_exists("ryunosuke\\db
             'offset'         => 0,    // 開始トークン位置
             'flags'          => 0,    // token_get_all の $flags. TOKEN_PARSE を与えると ParseError が出ることがあるのでデフォルト 0
             'cache'          => true, // キャッシュするか否か
+            'greedy'         => false,// end と nest か一致したときに処理を継続するか
             'nest_token'     => [
                 ')' => '(',
                 '}' => '{',
@@ -7916,6 +8520,7 @@ if (!isset($excluded_functions["parse_php"]) && (!function_exists("ryunosuke\\db
         $begin_tokens = (array) $option['begin'];
         $end_tokens = (array) $option['end'];
         $nest_tokens = $option['nest_token'];
+        $greedy = $option['greedy'];
 
         $result = [];
         $starting = !$begin_tokens;
@@ -7951,16 +8556,21 @@ if (!isset($excluded_functions["parse_php"]) && (!function_exists("ryunosuke\\db
 
             $result[$i] = $token;
 
-            foreach ($end_tokens as $t) {
-                if (isset($nest_tokens[$t])) {
-                    $nest_token = $nest_tokens[$t];
-                    if ($token[0] === $nest_token || $token[1] === $nest_token) {
-                        $nesting++;
-                    }
+            foreach ($nest_tokens as $end_nest => $start_nest) {
+                if ($token[0] === $start_nest || $token[1] === $start_nest) {
+                    $nesting++;
                 }
-                if ($t === $token[0] || $t === $token[1]) {
+                if ($token[0] === $end_nest || $token[1] === $end_nest) {
                     $nesting--;
-                    if ($nesting <= 0) {
+                }
+            }
+
+            foreach ($end_tokens as $t) {
+                if ($t === $token[0] || $t === $token[1]) {
+                    if ($nesting <= 0 || ($nesting === 1 && in_array($t, $nest_tokens, true))) {
+                        if ($nesting === 0 && $greedy && isset($nest_tokens[$t])) {
+                            break;
+                        }
                         break 2;
                     }
                     break;
@@ -8159,7 +8769,7 @@ if (!isset($excluded_functions["optional"]) && (!function_exists("ryunosuke\\dbm
      * that(iterator_to_array(optional($getobject())))->isSame([]);
      *
      * // $expected を与えるとその型以外は NullObject を返す（\ArrayObject はオブジェクトだが stdClass ではない）
-     * that(optional(new \ArrayObject([1]), 'stdClass')->count())->isSame(null);
+     * that(optional(new \ArrayObject([1]), 'stdClass')->count())->is(0);
      * ```
      *
      * @template T
@@ -8177,7 +8787,7 @@ if (!isset($excluded_functions["optional"]) && (!function_exists("ryunosuke\\dbm
 
         static $nullobject = null;
         if ($nullobject === null) {
-            $nullobject = new class implements \ArrayAccess, \IteratorAggregate {
+            $nullobject = new class implements \Countable, \ArrayAccess, \IteratorAggregate, \JsonSerializable {
                 // @formatter:off
                 public function __isset($name) { return false; }
                 public function __get($name) { return null; }
@@ -8186,11 +8796,13 @@ if (!isset($excluded_functions["optional"]) && (!function_exists("ryunosuke\\dbm
                 public function __call($name, $arguments) { return null; }
                 public function __invoke() { return null; }
                 public function __toString() { return ''; }
+                public function count(): int { return 0; }
                 public function offsetExists($offset): bool { return false; }
                 public function offsetGet($offset): ?string { return null; }
                 public function offsetSet($offset, $value): void { throw new \DomainException('called NullObject#' . __FUNCTION__); }
                 public function offsetUnset($offset): void { throw new \DomainException('called NullObject#' . __FUNCTION__); }
                 public function getIterator(): \Traversable { return new \ArrayIterator([]); }
+                public function jsonSerialize(): \stdClass { return (object)[]; }
                 // @formatter:on
             };
         }
@@ -8262,7 +8874,7 @@ if (!isset($excluded_functions["try_finally"]) && (!function_exists("ryunosuke\\
      */
     function try_finally($try, $finally = null, ...$variadic)
     {
-        return try_catch_finally($try, throws, $finally, ...$variadic);
+        return try_catch_finally($try, fn(...$args) => throws(...$args), $finally, ...$variadic);
     }
 }
 if (function_exists("ryunosuke\\dbml\\try_finally") && !defined("ryunosuke\\dbml\\try_finally")) {
@@ -8347,6 +8959,7 @@ if (!isset($excluded_functions["function_configure"]) && (!function_exists("ryun
         $config['placeholder'] ??= '';
         $config['var_stream'] ??= get_cfg_var('rfunc.var_stream') ?: 'VarStreamV010000';          // for compatible
         $config['memory_stream'] ??= get_cfg_var('rfunc.memory_stream') ?: 'MemoryStreamV010000'; // for compatible
+        $config['chain.version'] ??= 1;
         $config['chain.nullsafe'] ??= false;
 
         // setting
@@ -8826,6 +9439,33 @@ if (function_exists("ryunosuke\\dbml\\cache") && !defined("ryunosuke\\dbml\\cach
      *
      */
     define("ryunosuke\\dbml\\cache", "ryunosuke\\dbml\\cache");
+}
+
+if (!isset($excluded_functions["cache_fetch"]) && (!function_exists("ryunosuke\\dbml\\cache_fetch") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\cache_fetch"))->isInternal()))) {
+    /**
+     * psr-16 cache で「無かったらコールバックを実行して set」する
+     *
+     * @param \Psr\SimpleCache\CacheInterface $cacher キャッシュオブジェクト
+     * @param string $key キャッシュキー
+     * @param callable $provider データプロバイダ
+     * @param ?int $ttl キャッシュ時間
+     * @return mixed キャッシュデータ
+     */
+    function cache_fetch($cacher, $key, $provider, $ttl = null)
+    {
+        $data = $cacher->get($key);
+        if ($data === null) {
+            $data = $provider();
+            $cacher->set($key, $data, $ttl);
+        }
+        return $data;
+    }
+}
+if (function_exists("ryunosuke\\dbml\\cache_fetch") && !defined("ryunosuke\\dbml\\cache_fetch")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\cache_fetch", "ryunosuke\\dbml\\cache_fetch");
 }
 
 if (!isset($excluded_functions["parse_namespace"]) && (!function_exists("ryunosuke\\dbml\\parse_namespace") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\parse_namespace"))->isInternal()))) {
@@ -9338,6 +9978,46 @@ if (function_exists("ryunosuke\\dbml\\numval") && !defined("ryunosuke\\dbml\\num
      *
      */
     define("ryunosuke\\dbml\\numval", "ryunosuke\\dbml\\numval");
+}
+
+if (!isset($excluded_functions["flagval"]) && (!function_exists("ryunosuke\\dbml\\flagval") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\flagval"))->isInternal()))) {
+    /**
+     * falsy の範囲を少し拡張した bool キャスト
+     *
+     * 例えば ajax 等で {hoge: false} とすると "false" が飛んできてしまうが、その場合も false 判定されるようになる。
+     * この処理は FILTER_VALIDATE_BOOLEAN で行うので "off", "no", 等も false を返す。
+     *
+     * あとドキュメントには空白文字について言及がないが、どうも trim される模様。
+     * trim するかどうかは呼び元で判断すべきだと思う（" true " が true, "    " が false になるのは果たして正しいのか）ので、第2引数で分岐できるようにしてある。
+     * boolval やキャストでは trim されないようなのでデフォルト false にしてある。
+     *
+     * Example:
+     * ```php
+     * // こういう文字列も false になる
+     * that(flagval('false'))->isFalse();
+     * that(flagval('off'))->isFalse();
+     * that(flagval('no'))->isFalse();
+     * ```
+     *
+     * @param mixed $var bool 化する値
+     * @param bool $trim $var が文字列の場合に trim するか
+     * @return bool bool 化した値
+     */
+    function flagval($var, $trim = false)
+    {
+        if ($trim === false && is_string($var)) {
+            if (strlen(trim($var)) !== strlen($var)) {
+                return true;
+            }
+        }
+        return filter_var($var, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? (bool) $var;
+    }
+}
+if (function_exists("ryunosuke\\dbml\\flagval") && !defined("ryunosuke\\dbml\\flagval")) {
+    /**
+     *
+     */
+    define("ryunosuke\\dbml\\flagval", "ryunosuke\\dbml\\flagval");
 }
 
 if (!isset($excluded_functions["arrayval"]) && (!function_exists("ryunosuke\\dbml\\arrayval") || (!false && (new \ReflectionFunction("ryunosuke\\dbml\\arrayval"))->isInternal()))) {
@@ -9859,7 +10539,7 @@ if (!isset($excluded_functions["var_export3"]) && (!function_exists("ryunosuke\\
 
             if (is_array($value)) {
                 $hashed = is_hasharray($value);
-                if (!$hashed && array_all($value, is_primitive)) {
+                if (!$hashed && array_all($value, fn(...$args) => is_primitive(...$args))) {
                     [$begin, $middle, $end] = ["", ", ", ""];
                 }
                 else {
@@ -9892,10 +10572,12 @@ if (!isset($excluded_functions["var_export3"]) && (!function_exists("ryunosuke\\
                     return "\$this->$vid = \\Closure::fromCallable({$export($callee, $nest)})";
                 }
 
-                $tokens = array_slice(parse_php(implode(' ', callable_code($value)) . ';', TOKEN_PARSE), 1, -1);
+                [$meta, $body] = callable_code($value);
+                $arrow = starts_with($meta, 'fn') ? ' => ' : ' ';
+                $tokens = array_slice(parse_php("$meta{$arrow}$body;", TOKEN_PARSE), 1, -1);
+
                 $uses = "";
                 $context = [
-                    'use'   => false,
                     'class' => 0,
                     'brace' => 0,
                 ];
@@ -9927,19 +10609,13 @@ if (!isset($excluded_functions["var_export3"]) && (!function_exists("ryunosuke\\
                     }
 
                     // use 変数の導出
-                    if ($prev[1] === ')' && $token[0] === T_USE) {
-                        $context['use'] = true;
-                    }
-                    if ($context['use'] && $token[0] === T_VARIABLE) {
+                    if ($token[0] === T_VARIABLE) {
                         $varname = substr($token[1], 1);
                         // クロージャ内クロージャの use に反応してしまうので存在するときのみとする
                         if (array_key_exists($varname, $statics)) {
                             $recurself = $statics[$varname] === $value ? '&' : '';
                             $uses .= "$spacer1\$$varname = $recurself{$export($statics[$varname], $nest + 1)};\n";
                         }
-                    }
-                    if ($context['use'] && $token[1] === ')') {
-                        $context['use'] = false;
                     }
 
                     $tokens[$n] = $resolveSymbol($token, $prev, $next, $ref->getFileName());

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/styles/foundation.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js-bootstrap-css/1.2.1/typeaheadjs.min.css">
+	<link rel="stylesheet" type="text/css" data-href="common.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/3.1.1/bootstrap3-typeahead.min.js"></script>
+	<script data-src="common.js"></script>
+
+	<script>
+        (function () {
+            var cachekey;
+            try {
+                cachekey = window.parent.CACHEKEY;
+            }
+            catch (e) {
+                cachekey = 'nocache';
+            }
+            $('link[data-href]').attr('href', function () {
+                return this.dataset.href + '?' + cachekey;
+            });
+            $('script[data-src]').attr('src', function () {
+                return this.dataset.src + '?' + cachekey;
+            });
+
+            $(document).on('click', 'a[href]:not([target="_blank"]):not(.cachekey)', function () {
+                this.classList.add('cachekey');
+                this.href = this.href.replace('.html', '.html?' + cachekey);
+            });
+        })();
+	</script>
+    </head>
+<body class="typespace">
+<a id="anchor" href="./" style="display: none"></a>
+<h1 class="ellipsis fixed">
+	<span class="pull-left">
+	Structure
+	<small class="ellipsis-text">(ryunosuke\dbml\Mixin\SubAggregateTrait)</small>
+	</span>
+	<span class="pull-right">
+		<small class="frame-switch">
+		<a target="_parent">frame</a> | <a target="_parent">noframe</a>
+		</small>
+	</span>
+</h1>
+<div class="main-wrapper">
+	<div class="attribute">
+		<span class="label label-danger"></span>
+		<span class="label label-warning"></span>
+		<span class="label label-info"></span>
+		<span class="label label-info"></span>
+		<span class="label label-deprecated"></span>
+        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/SubAggregateTrait.php#L8-L117" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                    	</div>
+
+	<h2>trait <span class="category-name">ryunosuke\dbml\Mixin\SubAggregateTrait</span></h2>
+
+	<div class="description"></div>
+
+	<h3>Construction</h3>
+                
+	<h3>Hierarchy</h3>
+	<div class="hierarchy">
+	<ul class="">
+        			<li class="">
+                <a href="ryunosuke-dbml-Mixin-SubAggregateTrait$typespace.html#ryunosuke\dbml\Mixin\SubAggregateTrait" class="fqsen bold"><small>ryunosuke\dbml\Mixin\</small><wbr>SubAggregateTrait</a>                
+	<ul class="has-indent">
+        			<li class="indent">
+                <a href="ryunosuke-dbml-Database$typespace.html#ryunosuke\dbml\Database" class="fqsen "><small>ryunosuke\dbml\</small><wbr>Database</a>                			</li>
+        			<li class="indent">
+                <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a>                			</li>
+        	</ul>
+    			</li>
+        	</ul>
+    </div>
+
+	<h3>Constants</h3>
+    
+	<h3>Properties</h3>
+    
+	<h3>Methods</h3>
+    		<ul>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/SubAggregateTrait.php#L10-L56" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\SubAggregateTrait::subexists()" tabindex="-1" class="structure-title ">
+                        subexists                        	<small>($tableDescriptor = [], $where = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>相関サブクエリの EXISTS を表すビルダを返す</p>
+<pre><code class="language-php">// SELECT 句での使用例
+$db-&gt;select([
+    't_article' =&gt; [
+        // 各 t_article に紐づく t_comment にレコードを持つなら true が返される
+        'has_comment'     =&gt; $db-&gt;subexists('t_comment'),
+        // 各 t_article に紐づく t_comment delete_flg = 0 なレコードを持たないなら true が返される
+        'has_not_comment' =&gt; $db-&gt;notSubexists('t_comment', ['delete_flg' =&gt; 0]),
+    ],
+]);
+// SELECT
+//   EXISTS (SELECT * FROM t_comment WHERE t_comment.article_id = t_article.article_id) AS has_comment,
+//   NOT EXISTS (SELECT * FROM t_comment WHERE (delete_flg = '0') AND (t_comment.article_id = t_article.article_id)) AS has_not_comment
+// FROM t_article
+
+// WHERE 句での使用例
+$db-&gt;select('t_article', [
+    // 「各記事でコメントを持つ記事」を表す WHERE EXISTS になる
+    $db-&gt;subexists('t_comment'),
+]);
+// SELECT
+//   t_article.*
+// FROM t_article
+// WHERE (EXISTS (SELECT * FROM t_comment WHERE t_comment.article_id = t_article.article_id))
+
+// JOIN も含めて複数テーブルがあり、明確に「t_article と t_comment で」結びたい場合はキーで明示する
+$db-&gt;select('t_article, t_something', [
+    // 「何と？」をキーで明示できる
+    't_article'          =&gt; $db-&gt;subexists('t_comment'),
+    // これだと t_something と t_comment での結合となる（外部キーがあれば、だが）
+    't_something'        =&gt; $db-&gt;subexists('t_comment'),
+    // さらに t_something に複数の外部キーがある場合は:で明示できる
+    't_something:fkname' =&gt; $db-&gt;subexists('t_comment'),
+]);
+</code></pre>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string</td>
+				<td class="rest">$tableDescriptor = []</td>
+				<td class="desc"><p>取得テーブルとカラム（<tag_link data-kind='fqsen' data-type-category='type' data-type-fqsen='TableDescriptor' data-type-array='0' data-type-nullable='' data-description='TableDescriptor'>TableDescriptor</tag_link>）</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string</td>
+				<td class="rest">$where = []</td>
+				<td class="desc"><p>WHERE 条件（<tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='ryunosuke\dbml\Query\QueryBuilder::where()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Query\QueryBuilder::where()'>ryunosuke\dbml\Query\QueryBuilder::where()</tag_link>）</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>クエリビルダオブジェクト</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/SubAggregateTrait.php#L58-L66" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\SubAggregateTrait::notSubexists()" tabindex="-1" class="structure-title ">
+                        notSubexists                        	<small>($tableDescriptor = [], $where = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='ryunosuke\dbml\Mixin\SubAggregateTrait::subexists()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Mixin\SubAggregateTrait::subexists()'>ryunosuke\dbml\Mixin\SubAggregateTrait::subexists()</tag_link> の否定版</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string</td>
+				<td class="rest">$tableDescriptor = []</td>
+				<td class="desc"><p>取得テーブルとカラム（<tag_link data-kind='fqsen' data-type-category='type' data-type-fqsen='TableDescriptor' data-type-array='0' data-type-nullable='' data-description='TableDescriptor'>TableDescriptor</tag_link>）</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string</td>
+				<td class="rest">$where = []</td>
+				<td class="desc"><p>WHERE 条件（<tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='ryunosuke\dbml\Query\QueryBuilder::where()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Query\QueryBuilder::where()'>ryunosuke\dbml\Query\QueryBuilder::where()</tag_link>）</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>クエリビルダオブジェクト</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/SubAggregateTrait.php#L68-L76" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\SubAggregateTrait::subcount()" tabindex="-1" class="structure-title ">
+                        subcount                        	<small>($column, $where = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>相関サブクエリの COUNT を表すビルダを返す（<tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::subaggregate()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::subaggregate()'>ryunosuke\dbml\Database::subaggregate()</tag_link> を参照）</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string</td>
+				<td class="rest">$column</td>
+				<td class="desc"><p>サブテーブル名</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">array</td>
+				<td class="rest">$where = []</td>
+				<td class="desc"><p>WHERE 条件</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>クエリビルダオブジェクト</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/SubAggregateTrait.php#L78-L86" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\SubAggregateTrait::submin()" tabindex="-1" class="structure-title ">
+                        submin                        	<small>($column, $where = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>相関サブクエリの MIN を表すビルダを返す（<tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::subaggregate()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::subaggregate()'>ryunosuke\dbml\Database::subaggregate()</tag_link> を参照）</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string</td>
+				<td class="rest">$column</td>
+				<td class="desc"><p>サブテーブル名</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">array</td>
+				<td class="rest">$where = []</td>
+				<td class="desc"><p>WHERE 条件</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>クエリビルダオブジェクト</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/SubAggregateTrait.php#L88-L96" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\SubAggregateTrait::submax()" tabindex="-1" class="structure-title ">
+                        submax                        	<small>($column, $where = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>相関サブクエリの MAX を表すビルダを返す（<tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::subaggregate()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::subaggregate()'>ryunosuke\dbml\Database::subaggregate()</tag_link> を参照）</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string</td>
+				<td class="rest">$column</td>
+				<td class="desc"><p>サブテーブル名</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">array</td>
+				<td class="rest">$where = []</td>
+				<td class="desc"><p>WHERE 条件</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>クエリビルダオブジェクト</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/SubAggregateTrait.php#L98-L106" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\SubAggregateTrait::subsum()" tabindex="-1" class="structure-title ">
+                        subsum                        	<small>($column, $where = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>相関サブクエリの SUM を表すビルダを返す（<tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::subaggregate()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::subaggregate()'>ryunosuke\dbml\Database::subaggregate()</tag_link> を参照）</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string</td>
+				<td class="rest">$column</td>
+				<td class="desc"><p>サブテーブル名</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">array</td>
+				<td class="rest">$where = []</td>
+				<td class="desc"><p>WHERE 条件</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>クエリビルダオブジェクト</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/SubAggregateTrait.php#L108-L116" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\SubAggregateTrait::subavg()" tabindex="-1" class="structure-title ">
+                        subavg                        	<small>($column, $where = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>相関サブクエリの AVG を表すビルダを返す（<tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::subaggregate()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::subaggregate()'>ryunosuke\dbml\Database::subaggregate()</tag_link> を参照）</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">array<span class="type-separator"></span><wbr>string</td>
+				<td class="rest">$column</td>
+				<td class="desc"><p>サブテーブル名</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">array</td>
+				<td class="rest">$where = []</td>
+				<td class="desc"><p>WHERE 条件</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>クエリビルダオブジェクト</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            		</ul>
+    
+	<div class="attribute">
+		<span class="label label-default"></span>
+		<span class="label label-default"></span>
+	</div>
+	<div class="clearfix"></div>
+</div>
+</body>
+</html>

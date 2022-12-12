@@ -61,6 +61,140 @@
 							<span class="label label-info"></span>
 							<span class="label label-info"></span>
 							<span class="label label-deprecated"></span>
+                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Alias.php#L8-L164" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+            						</div>
+						<h4 id="ryunosuke\dbml\Query\Expression\Alias" tabindex="-1" class="structure-title ">
+							<a href="ryunosuke-dbml-Query-Expression-Alias$typespace.html#ryunosuke\dbml\Query\Expression\Alias">Alias</a>
+						</h4>
+						<div class="inner-item">
+							<div class="description"><p>カラムエイリアスを表すクラス</p>
+<p><code>new Alias('alias', 'actual')</code> を select に与えると "actual AS alias" に展開される。</p>
+</div>
+						</div>
+						<div class="attribute">
+							<span class="label label-default"></span>
+							<span class="label label-default"></span>
+						</div>
+						<div class="clearfix"></div>
+					</li>
+                					<li class="structure-item">
+						<div class="attribute">
+							<span class="label label-danger"></span>
+							<span class="label label-warning"></span>
+							<span class="label label-info"></span>
+							<span class="label label-info"></span>
+							<span class="label label-deprecated"></span>
+                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Expression.php#L8-L165" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+            						</div>
+						<h4 id="ryunosuke\dbml\Query\Expression\Expression" tabindex="-1" class="structure-title ">
+							<a href="ryunosuke-dbml-Query-Expression-Expression$typespace.html#ryunosuke\dbml\Query\Expression\Expression">Expression</a>
+						</h4>
+						<div class="inner-item">
+							<div class="description"><p>生クエリを表すクラス</p>
+<p><code>new Expression('NOW()')</code> を select に与えると "NOW()" に展開される（エスケープやサブクエリ化などの余計なことを一切行わない）。</p>
+</div>
+						</div>
+						<div class="attribute">
+							<span class="label label-default"></span>
+							<span class="label label-default"></span>
+						</div>
+						<div class="clearfix"></div>
+					</li>
+                					<li class="structure-item">
+						<div class="attribute">
+							<span class="label label-danger"></span>
+							<span class="label label-warning"></span>
+							<span class="label label-info"></span>
+							<span class="label label-info"></span>
+							<span class="label label-deprecated"></span>
+                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L22-L534" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+            						</div>
+						<h4 id="ryunosuke\dbml\Query\Expression\Operator" tabindex="-1" class="structure-title ">
+							<a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator">Operator</a>
+						</h4>
+						<div class="inner-item">
+							<div class="description"><p>演算子を表すクラス</p>
+<p>内部的に使用されるだけで、明示的に使用する箇所はほとんど無い。<br />
+ただし、下記の演算子登録を使用する場合は <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='ryunosuke\dbml\Query\Expression\Operator::define()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Query\Expression\Operator::define()'>ryunosuke\dbml\Query\Expression\Operator::define()</tag_link> で登録する必要がある。</p>
+<p>組み込みの演算子は下記。これらは何もしなくても <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::whereInto()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::whereInto()'>ryunosuke\dbml\Database::whereInto()</tag_link> で使用することができる。</p>
+<table>
+<thead>
+<tr><th align="left">operator</th><th align="left">result</th><th align="left">説明</th></tr>
+</thead>
+<tbody>
+<tr><td align="left"><code>LIKE</code>, <code>BETWEEN</code>, <code>=</code>, <code>&lt;&gt;</code>, etc...</td><td align="left">略。BETWEEN は値に配列を与える</td><td align="left">大体の RDBMS に備わっている標準的な演算子。想起される通りの動作するので説明は省略。他にも <code>IN</code> や <code>&lt;=&gt;</code> 等がある。</td></tr>
+<tr><td align="left"><code>'hoge:[~)' =&gt; [1, 9]</code></td><td align="left"><code>hoge &gt;= 1 AND hoge &lt; 9</code></td><td align="left">範囲指定。 <code>[~]</code> の <code>[]</code> はイコール有り、<code>()</code> はイコール無しを意味する。つまり、 <code>[~]</code> <code>[~)</code> <code>(~]</code> <code>(~)</code> の4つの演算子がある。順に「以上・以下」「以上・小なり」「大なり・以下」「大なり・小なり」を意味する。</td></tr>
+<tr><td align="left"><code>'hoge:[~)' =&gt; [1, null]</code></td><td align="left"><code>hoge &gt;= 1</code></td><td align="left">上記と同じ。ただし、バインド値に null を渡すと指定した方の条件が吹き飛ぶ</td></tr>
+<tr><td align="left"><code>'hoge:[~)' =&gt; [null, 9]</code></td><td align="left"><code>hoge &lt; 9</code></td><td align="left">上記の後半部分版</td></tr>
+<tr><td align="left"><code>'hoge:[~)' =&gt; [null, null]</code></td><td align="left">-</td><td align="left">バインド値に両方 null を渡すと条件自体が吹き飛ぶ</td></tr>
+<tr><td align="left"><code>'hoge:LIKE%' =&gt; 'wo%rd'</code></td><td align="left"><code>hoge LIKE 'wo\%rd%'</code></td><td align="left">LIKEエスケープを施した上で右に"%"を付加してLIKEする。他にも <code>%LIKE</code> <code>%LIKE%</code> がある</td></tr>
+<tr><td align="left"><code>'hoge:LIKEIN%' =&gt; ['he%lo', 'wo%rd']</code></td><td align="left"><code>hoge LIKE 'he\%lo%' OR hoge LIKE 'wo\%rd%'</code></td><td align="left">上記の配列IN版。構文的には <code>LIKE ANY('str1', 'str2')</code> みたいなもの</td></tr>
+<tr><td align="left"><code>'hoge:PHRASE' =&gt; 'hello*world|phrase'</code></td><td align="left"><code>hoge REGEXP 'hello.*world' OR hoge REGEXP 'phrase'</code></td><td align="left">LIKEのワイルドカードを正規表現に変換してよしなにREGEXPする。シングルクォート:あらゆるメタ文字を無効化して完全一致検索, ダブルクォート:セパレータの無効化, ハイフン:NOT, スペース:AND, パイプ:OR, カンマ:優先度高OR</td></tr>
+<tr><td align="left"><code>'hoge:NULLIN' =&gt; [1, 2, 3, NULL]</code></td><td align="left"><code>hoge IN (1, 2, 3) OR hoge IS NULL</code></td><td align="left">NULL を許容できる IN。 <code>[1, 2, 3, null]</code> などとすると IN(1, 2, 3) or NULL のようになる</td></tr>
+</tbody>
+</table>
+<pre><code class="language-php"># 独自演算子 FISOR を定義する
+Operator::define('FISOR', function ($column, $params) {
+    $conds = array_fill(0, count($params), "FIND_IN_SET(?, $column)");
+    return [implode(' OR ', $conds) =&gt; $params];
+});
+
+# すると whereInto の演算子指定で使用できるようになる
+$db-&gt;whereInto([
+    'col:FISOR' =&gt; [1, 2],
+]);
+// WHERE FIND_IN_SET(1, col) OR FIND_IN_SET(2, col)
+
+# 上記のような定義や is, equal などの組み込みの特殊なメソッドの返り値は whereInto で直接指定できる
+$db-&gt;whereInto([
+    'colA' =&gt; Operator::FISOR(1, 2),
+    'colB' =&gt; Operator::in(1, 2),
+    'colC' =&gt; Operator::between(1, 2),
+]);
+// WHERE FIND_IN_SET(1, colA) OR FIND_IN_SET(2, col) AND colB IN (1, 2) AND colB BETWEEN 1 AND 2
+</code></pre>
+</div>
+						</div>
+						<div class="attribute">
+							<span class="label label-default"></span>
+							<span class="label label-default"></span>
+						</div>
+						<div class="clearfix"></div>
+					</li>
+                					<li class="structure-item">
+						<div class="attribute">
+							<span class="label label-danger"></span>
+							<span class="label label-warning"></span>
+							<span class="label label-info"></span>
+							<span class="label label-info"></span>
+							<span class="label label-deprecated"></span>
+                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/SelectOption.php#L5-L72" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+            						</div>
+						<h4 id="ryunosuke\dbml\Query\Expression\SelectOption" tabindex="-1" class="structure-title ">
+							<a href="ryunosuke-dbml-Query-Expression-SelectOption$typespace.html#ryunosuke\dbml\Query\Expression\SelectOption">SelectOption</a>
+						</h4>
+						<div class="inner-item">
+							<div class="description"><p>SELECT オプションクラス</p>
+<p>このクラスのインスタンスを select すると、カラムとして追加されるのではなく、 SELECT 句の冒頭にカンマ無しで展開される。<br />
+<code>SELECT OPT1 OPT2 column1, column2</code> のような形を実現するためのクラス。</p>
+<pre><code class="language-php">$db-&gt;select('tablename.columname')-&gt;addSelectOption(SelectOption::DISTINCT);
+// SELECT DISTINCT columnname FROM tablename
+</code></pre>
+</div>
+						</div>
+						<div class="attribute">
+							<span class="label label-default"></span>
+							<span class="label label-default"></span>
+						</div>
+						<div class="clearfix"></div>
+					</li>
+                					<li class="structure-item">
+						<div class="attribute">
+							<span class="label label-danger"></span>
+							<span class="label label-warning"></span>
+							<span class="label label-info"></span>
+							<span class="label label-info"></span>
+							<span class="label label-deprecated"></span>
                             			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/TableDescriptor.php#L21-L626" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
             						</div>
 						<h4 id="ryunosuke\dbml\Query\Expression\TableDescriptor" tabindex="-1" class="structure-title ">
@@ -202,140 +336,6 @@
 構文解析までするのは仰々しいため、仕方のない仕様として許容する。</p>
 <p>なお、<strong>テーブル記法に決してユーザ入力を埋め込んではならない</strong>。<br />
 (pkval) などは埋め込みたくなるが、テーブル記法は値のエスケープなどを一切行わないので致命的な脆弱性となりうる。</p>
-</div>
-						</div>
-						<div class="attribute">
-							<span class="label label-default"></span>
-							<span class="label label-default"></span>
-						</div>
-						<div class="clearfix"></div>
-					</li>
-                					<li class="structure-item">
-						<div class="attribute">
-							<span class="label label-danger"></span>
-							<span class="label label-warning"></span>
-							<span class="label label-info"></span>
-							<span class="label label-info"></span>
-							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Alias.php#L8-L164" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-            						</div>
-						<h4 id="ryunosuke\dbml\Query\Expression\Alias" tabindex="-1" class="structure-title ">
-							<a href="ryunosuke-dbml-Query-Expression-Alias$typespace.html#ryunosuke\dbml\Query\Expression\Alias">Alias</a>
-						</h4>
-						<div class="inner-item">
-							<div class="description"><p>カラムエイリアスを表すクラス</p>
-<p><code>new Alias('alias', 'actual')</code> を select に与えると "actual AS alias" に展開される。</p>
-</div>
-						</div>
-						<div class="attribute">
-							<span class="label label-default"></span>
-							<span class="label label-default"></span>
-						</div>
-						<div class="clearfix"></div>
-					</li>
-                					<li class="structure-item">
-						<div class="attribute">
-							<span class="label label-danger"></span>
-							<span class="label label-warning"></span>
-							<span class="label label-info"></span>
-							<span class="label label-info"></span>
-							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Expression.php#L8-L165" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-            						</div>
-						<h4 id="ryunosuke\dbml\Query\Expression\Expression" tabindex="-1" class="structure-title ">
-							<a href="ryunosuke-dbml-Query-Expression-Expression$typespace.html#ryunosuke\dbml\Query\Expression\Expression">Expression</a>
-						</h4>
-						<div class="inner-item">
-							<div class="description"><p>生クエリを表すクラス</p>
-<p><code>new Expression('NOW()')</code> を select に与えると "NOW()" に展開される（エスケープやサブクエリ化などの余計なことを一切行わない）。</p>
-</div>
-						</div>
-						<div class="attribute">
-							<span class="label label-default"></span>
-							<span class="label label-default"></span>
-						</div>
-						<div class="clearfix"></div>
-					</li>
-                					<li class="structure-item">
-						<div class="attribute">
-							<span class="label label-danger"></span>
-							<span class="label label-warning"></span>
-							<span class="label label-info"></span>
-							<span class="label label-info"></span>
-							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/Operator.php#L21-L515" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-            						</div>
-						<h4 id="ryunosuke\dbml\Query\Expression\Operator" tabindex="-1" class="structure-title ">
-							<a href="ryunosuke-dbml-Query-Expression-Operator$typespace.html#ryunosuke\dbml\Query\Expression\Operator">Operator</a>
-						</h4>
-						<div class="inner-item">
-							<div class="description"><p>演算子を表すクラス</p>
-<p>内部的に使用されるだけで、明示的に使用する箇所はほとんど無い。<br />
-ただし、下記の演算子登録を使用する場合は <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='ryunosuke\dbml\Query\Expression\Operator::define()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Query\Expression\Operator::define()'>ryunosuke\dbml\Query\Expression\Operator::define()</tag_link> で登録する必要がある。</p>
-<p>組み込みの演算子は下記。これらは何もしなくても <tag_link data-kind='fqsen' data-type-category='method' data-type-fqsen='ryunosuke\dbml\Database::whereInto()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Database::whereInto()'>ryunosuke\dbml\Database::whereInto()</tag_link> で使用することができる。</p>
-<table>
-<thead>
-<tr><th align="left">operator</th><th align="left">result</th><th align="left">説明</th></tr>
-</thead>
-<tbody>
-<tr><td align="left"><code>LIKE</code>, <code>BETWEEN</code>, <code>=</code>, <code>&lt;&gt;</code>, etc...</td><td align="left">略。BETWEEN は値に配列を与える</td><td align="left">大体の RDBMS に備わっている標準的な演算子。想起される通りの動作するので説明は省略。他にも <code>IN</code> や <code>&lt;=&gt;</code> 等がある。</td></tr>
-<tr><td align="left"><code>'hoge:[~)' =&gt; [1, 9]</code></td><td align="left"><code>hoge &gt;= 1 AND hoge &lt; 9</code></td><td align="left">範囲指定。 <code>[~]</code> の <code>[]</code> はイコール有り、<code>()</code> はイコール無しを意味する。つまり、 <code>[~]</code> <code>[~)</code> <code>(~]</code> <code>(~)</code> の4つの演算子がある。順に「以上・以下」「以上・小なり」「大なり・以下」「大なり・小なり」を意味する。</td></tr>
-<tr><td align="left"><code>'hoge:[~)' =&gt; [1, null]</code></td><td align="left"><code>hoge &gt;= 1</code></td><td align="left">上記と同じ。ただし、バインド値に null を渡すと指定した方の条件が吹き飛ぶ</td></tr>
-<tr><td align="left"><code>'hoge:[~)' =&gt; [null, 9]</code></td><td align="left"><code>hoge &lt; 9</code></td><td align="left">上記の後半部分版</td></tr>
-<tr><td align="left"><code>'hoge:[~)' =&gt; [null, null]</code></td><td align="left">-</td><td align="left">バインド値に両方 null を渡すと条件自体が吹き飛ぶ</td></tr>
-<tr><td align="left"><code>'hoge:LIKE%' =&gt; 'wo%rd'</code></td><td align="left"><code>hoge LIKE 'wo\%rd%'</code></td><td align="left">LIKEエスケープを施した上で右に"%"を付加してLIKEする。他にも <code>%LIKE</code> <code>%LIKE%</code> がある</td></tr>
-<tr><td align="left"><code>'hoge:LIKEIN%' =&gt; ['he%lo', 'wo%rd']</code></td><td align="left"><code>hoge LIKE 'he\%lo%' OR hoge LIKE 'wo\%rd%'</code></td><td align="left">上記の配列IN版。構文的には <code>LIKE ANY('str1', 'str2')</code> みたいなもの</td></tr>
-<tr><td align="left"><code>'hoge:PHRASE' =&gt; 'word phrase'</code></td><td align="left"><code>hoge LIKE '%word%' OR hoge LIKE '%phrase%'</code></td><td align="left">いわゆる検索クエリを与えるとよしなに LIKE する。ダブルクォート:セパレータの無効化, ハイフン:NOT, パイプ:優先度高OR, スペース:AND, カンマ:優先度低OR</td></tr>
-<tr><td align="left"><code>'hoge:NULLIN' =&gt; [1, 2, 3, NULL]</code></td><td align="left"><code>hoge IN (1, 2, 3) OR hoge IS NULL</code></td><td align="left">NULL を許容できる IN。 <code>[1, 2, 3, null]</code> などとすると IN(1, 2, 3) or NULL のようになる</td></tr>
-</tbody>
-</table>
-<pre><code class="language-php"># 独自演算子 FISOR を定義する
-Operator::define('FISOR', function ($column, $params) {
-    $conds = array_fill(0, count($params), "FIND_IN_SET(?, $column)");
-    return [implode(' OR ', $conds) =&gt; $params];
-});
-
-# すると whereInto の演算子指定で使用できるようになる
-$db-&gt;whereInto([
-    'col:FISOR' =&gt; [1, 2],
-]);
-// WHERE FIND_IN_SET(1, col) OR FIND_IN_SET(2, col)
-
-# 上記のような定義や is, equal などの組み込みの特殊なメソッドの返り値は whereInto で直接指定できる
-$db-&gt;whereInto([
-    'colA' =&gt; Operator::FISOR(1, 2),
-    'colB' =&gt; Operator::in(1, 2),
-    'colC' =&gt; Operator::between(1, 2),
-]);
-// WHERE FIND_IN_SET(1, colA) OR FIND_IN_SET(2, col) AND colB IN (1, 2) AND colB BETWEEN 1 AND 2
-</code></pre>
-</div>
-						</div>
-						<div class="attribute">
-							<span class="label label-default"></span>
-							<span class="label label-default"></span>
-						</div>
-						<div class="clearfix"></div>
-					</li>
-                					<li class="structure-item">
-						<div class="attribute">
-							<span class="label label-danger"></span>
-							<span class="label label-warning"></span>
-							<span class="label label-info"></span>
-							<span class="label label-info"></span>
-							<span class="label label-deprecated"></span>
-                            			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Expression/SelectOption.php#L5-L72" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
-            						</div>
-						<h4 id="ryunosuke\dbml\Query\Expression\SelectOption" tabindex="-1" class="structure-title ">
-							<a href="ryunosuke-dbml-Query-Expression-SelectOption$typespace.html#ryunosuke\dbml\Query\Expression\SelectOption">SelectOption</a>
-						</h4>
-						<div class="inner-item">
-							<div class="description"><p>SELECT オプションクラス</p>
-<p>このクラスのインスタンスを select すると、カラムとして追加されるのではなく、 SELECT 句の冒頭にカンマ無しで展開される。<br />
-<code>SELECT OPT1 OPT2 column1, column2</code> のような形を実現するためのクラス。</p>
-<pre><code class="language-php">$db-&gt;select('tablename.columname')-&gt;addSelectOption(SelectOption::DISTINCT);
-// SELECT DISTINCT columnname FROM tablename
-</code></pre>
 </div>
 						</div>
 						<div class="attribute">

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/styles/foundation.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js-bootstrap-css/1.2.1/typeaheadjs.min.css">
+	<link rel="stylesheet" type="text/css" data-href="common.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.6/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/3.1.1/bootstrap3-typeahead.min.js"></script>
+	<script data-src="common.js"></script>
+
+	<script>
+        (function () {
+            var cachekey;
+            try {
+                cachekey = window.parent.CACHEKEY;
+            }
+            catch (e) {
+                cachekey = 'nocache';
+            }
+            $('link[data-href]').attr('href', function () {
+                return this.dataset.href + '?' + cachekey;
+            });
+            $('script[data-src]').attr('src', function () {
+                return this.dataset.src + '?' + cachekey;
+            });
+
+            $(document).on('click', 'a[href]:not([target="_blank"]):not(.cachekey)', function () {
+                this.classList.add('cachekey');
+                this.href = this.href.replace('.html', '.html?' + cachekey);
+            });
+        })();
+	</script>
+    </head>
+<body class="typespace">
+<a id="anchor" href="./" style="display: none"></a>
+<h1 class="ellipsis fixed">
+	<span class="pull-left">
+	Structure
+	<small class="ellipsis-text">(ryunosuke\dbml\Mixin\FindTrait)</small>
+	</span>
+	<span class="pull-right">
+		<small class="frame-switch">
+		<a target="_parent">frame</a> | <a target="_parent">noframe</a>
+		</small>
+	</span>
+</h1>
+<div class="main-wrapper">
+	<div class="attribute">
+		<span class="label label-danger"></span>
+		<span class="label label-warning"></span>
+		<span class="label label-info"></span>
+		<span class="label label-info"></span>
+		<span class="label label-deprecated"></span>
+        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/FindTrait.php#L7-L58" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                    	</div>
+
+	<h2>trait <span class="category-name">ryunosuke\dbml\Mixin\FindTrait</span></h2>
+
+	<div class="description"></div>
+
+	<h3>Construction</h3>
+                
+	<h3>Hierarchy</h3>
+	<div class="hierarchy">
+	<ul class="">
+        			<li class="">
+                <a href="ryunosuke-dbml-Mixin-FindTrait$typespace.html#ryunosuke\dbml\Mixin\FindTrait" class="fqsen bold"><small>ryunosuke\dbml\Mixin\</small><wbr>FindTrait</a>                
+	<ul class="has-indent">
+        			<li class="indent">
+                <a href="ryunosuke-dbml-Gateway-TableGateway$typespace.html#ryunosuke\dbml\Gateway\TableGateway" class="fqsen "><small>ryunosuke\dbml\Gateway\</small><wbr>TableGateway</a>                			</li>
+        	</ul>
+    			</li>
+        	</ul>
+    </div>
+
+	<h3>Constants</h3>
+    
+	<h3>Properties</h3>
+    
+	<h3>Methods</h3>
+    		<ul>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/FindTrait.php#L9-L17" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\FindTrait::find()" tabindex="-1" class="structure-title ">
+                        find                        	<small>($variadic_primary, $tableDescriptor = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p>主キー指定でレコードを取得する</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$variadic_primary</td>
+				<td class="desc"><p>主キー値あるいは配列</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$tableDescriptor = []</td>
+				<td class="desc"><p>取得カラム</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>主キーが指定されたクエリビルダ</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/FindTrait.php#L19-L27" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\FindTrait::findOrThrow()" tabindex="-1" class="structure-title ">
+                        findOrThrow                        	<small>($variadic_primary, $tableDescriptor = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Gateway\TableGateway::find()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Gateway\TableGateway::find()'>ryunosuke\dbml\Gateway\TableGateway::find()</tag_link> の例外送出版</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$variadic_primary</td>
+				<td class="desc"><p>主キー値あるいは配列</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$tableDescriptor = []</td>
+				<td class="desc"><p>取得カラム</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>主キーが指定されたクエリビルダ</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/FindTrait.php#L29-L37" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\FindTrait::findInShare()" tabindex="-1" class="structure-title ">
+                        findInShare                        	<small>($variadic_primary, $tableDescriptor = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Gateway\TableGateway::find()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Gateway\TableGateway::find()'>ryunosuke\dbml\Gateway\TableGateway::find()</tag_link> の共有ロック版</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$variadic_primary</td>
+				<td class="desc"><p>主キー値あるいは配列</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$tableDescriptor = []</td>
+				<td class="desc"><p>取得カラム</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>主キーが指定されたクエリビルダ</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/FindTrait.php#L39-L47" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\FindTrait::findForUpdate()" tabindex="-1" class="structure-title ">
+                        findForUpdate                        	<small>($variadic_primary, $tableDescriptor = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Gateway\TableGateway::find()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Gateway\TableGateway::find()'>ryunosuke\dbml\Gateway\TableGateway::find()</tag_link> の排他ロック版</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$variadic_primary</td>
+				<td class="desc"><p>主キー値あるいは配列</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$tableDescriptor = []</td>
+				<td class="desc"><p>取得カラム</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>主キーが指定されたクエリビルダ</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            				<li class="structure-item">
+					<div class="attribute">
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-magic"></span>
+						<span class="label label-danger"></span>
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+						<span class="label label-deprecated"></span>
+						<span class="label label-public">public</span>
+                        			<a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Mixin/FindTrait.php#L49-L57" class="source-link glyphicon glyphicon-new-window" target="_blank"></a>
+                                    					</div>
+					<h4 id="ryunosuke\dbml\Mixin\FindTrait::findForAffect()" tabindex="-1" class="structure-title ">
+                        findForAffect                        	<small>($variadic_primary, $tableDescriptor = []) : <a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></small>
+						</h4>
+					<div class="inner-item">
+						<div class="description"><p><tag_link data-type-category='method' data-type-fqsen='ryunosuke\dbml\Gateway\TableGateway::find()' data-type-array='0' data-type-nullable='' data-description='ryunosuke\dbml\Gateway\TableGateway::find()'>ryunosuke\dbml\Gateway\TableGateway::find()</tag_link> の排他ロック兼例外送出版</p>
+</div>
+                        	<table class="table">
+		<caption>Parameters</caption>
+		<tbody>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$variadic_primary</td>
+				<td class="desc"><p>主キー値あるいは配列</p>
+</td>
+			</tr>
+        			<tr>
+				<td class="type">mixed</td>
+				<td class="rest">$tableDescriptor = []</td>
+				<td class="desc"><p>取得カラム</p>
+</td>
+			</tr>
+        		</tbody>
+	</table>
+                            	<table class="table">
+		<caption>Return</caption>
+		<tbody>
+		<tr>
+			<td class="type"><a href="ryunosuke-dbml-Query-QueryBuilder$typespace.html#ryunosuke\dbml\Query\QueryBuilder" class="fqsen "><small>ryunosuke\dbml\Query\</small><wbr>QueryBuilder</a></td>
+			<td class="desc"><p>主キーが指定されたクエリビルダ</p>
+</td>
+			<td class="rest"></td>
+		</tr>
+		</tbody>
+	</table>
+                                                                            					</div>
+					<div class="attribute">
+						<span class="label label-default"></span>
+						<span class="label label-default"></span>
+					</div>
+					<div class="clearfix"></div>
+				</li>
+            		</ul>
+    
+	<div class="attribute">
+		<span class="label label-default"></span>
+		<span class="label label-default"></span>
+	</div>
+	<div class="clearfix"></div>
+</div>
+</body>
+</html>
