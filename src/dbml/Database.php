@@ -30,7 +30,26 @@ use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware as LoggingMiddleware;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Metadata\Schema;
+use ryunosuke\dbml\Mixin\AffectConditionallyTrait;
+use ryunosuke\dbml\Mixin\AffectIgnoreTrait;
+use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
+use ryunosuke\dbml\Mixin\AggregateTrait;
+use ryunosuke\dbml\Mixin\EntityForAffectTrait;
+use ryunosuke\dbml\Mixin\EntityForUpdateTrait;
+use ryunosuke\dbml\Mixin\EntityInShareTrait;
+use ryunosuke\dbml\Mixin\EntityOrThrowTrait;
+use ryunosuke\dbml\Mixin\ExportTrait;
+use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\OptionTrait;
+use ryunosuke\dbml\Mixin\PrepareTrait;
+use ryunosuke\dbml\Mixin\SelectAggregateTrait;
+use ryunosuke\dbml\Mixin\SelectForAffectTrait;
+use ryunosuke\dbml\Mixin\SelectForUpdateTrait;
+use ryunosuke\dbml\Mixin\SelectInShareTrait;
+use ryunosuke\dbml\Mixin\SelectOrThrowTrait;
+use ryunosuke\dbml\Mixin\SubAggregateTrait;
+use ryunosuke\dbml\Mixin\SubSelectTrait;
+use ryunosuke\dbml\Mixin\YieldTrait;
 use ryunosuke\dbml\Query\Expression\Alias;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
@@ -254,393 +273,37 @@ use ryunosuke\dbml\Utility\Adhoc;
  * @method $this                  setPropagateLockMode($bool) {{@link QueryBuilder::setPropagateLockMode()} 参照@inheritdoc QueryBuilder::setPropagateLockMode()}
  * @method bool                   getInjectChildColumn() {{@link QueryBuilder::getInjectChildColumn()} 参照@inheritdoc QueryBuilder::getInjectChildColumn()}
  * @method $this                  setInjectChildColumn($bool) {{@link QueryBuilder::setInjectChildColumn()} 参照@inheritdoc QueryBuilder::setInjectChildColumn()}
- *
- * @method array|Entityable[]     fetchArrayOrThrow($sql, iterable $params = []) {
- *     <@uses Database::fetchArray()> の例外送出版
- * }
- * @method array|Entityable[]     fetchAssocOrThrow($sql, iterable $params = []) {
- *     <@uses Database::fetchAssoc()> の例外送出版
- * }
- * @method array                  fetchListsOrThrow($sql, iterable $params = []) {
- *     <@uses Database::fetchLists()> の例外送出版
- * }
- * @method array                  fetchPairsOrThrow($sql, iterable $params = []) {
- *     <@uses Database::fetchPairs()> の例外送出版
- * }
- * @method array|Entityable|false fetchTupleOrThrow($sql, iterable $params = []) {
- *     <@uses Database::fetchTuple()> の例外送出版
- * }
- * @method mixed                  fetchValueOrThrow($sql, iterable $params = []) {
- *     <@uses Database::fetchValue()> の例外送出版
- * }
- *
- * @method array|Entityable[]     selectArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::select()> の array 版（{@link fetchArray()} も参照）
- * }
- * @method array|Entityable[]     selectAssoc($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::select()> の assoc 版（{@link fetchAssoc()} も参照）
- * }
- * @method array                  selectLists($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::select()> の lists 版（{@link fetchLists()} も参照）
- * }
- * @method array                  selectPairs($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::select()> の pairs 版（{@link fetchPairs()} も参照）
- * }
- * @method array|Entityable|false selectTuple($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::select()> の tuple 版（{@link fetchTuple()} も参照）
- * }
- * @method mixed                  selectValue($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::select()> の value 版（{@link fetchValue()} も参照）
- * }
- *
- * @method array|Entityable[]     selectArrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectArray()> の共有ロック版（{@link fetchArray()} も参照）
- * }
- * @method array|Entityable[]     selectAssocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectAssoc()> の共有ロック版（{@link fetchAssoc()} も参照）
- * }
- * @method array                  selectListsInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectLists()> の共有ロック版（{@link fetchLists()} も参照）
- * }
- * @method array                  selectPairsInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectPairs()> の共有ロック版（{@link fetchPairs()} も参照）
- * }
- * @method array|Entityable|false selectTupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectTuple()> の共有ロック版（{@link fetchTuple()} も参照）
- * }
- * @method mixed                  selectValueInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectValue()> の共有ロック版（{@link fetchValue()} も参照）
- * }
- *
- * @method array|Entityable[]     selectArrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectArray()> の排他ロック版（{@link fetchArray()} も参照）
- * }
- * @method array|Entityable[]     selectAssocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectAssoc()> の排他ロック版（{@link fetchAssoc()} も参照）
- * }
- * @method array                  selectListsForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectLists()> の排他ロック版（{@link fetchLists()} も参照）
- * }
- * @method array                  selectPairsForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectPairs()> の排他ロック版（{@link fetchPairs()} も参照）
- * }
- * @method array|Entityable|false selectTupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectTuple()> の排他ロック版（{@link fetchTuple()} も参照）
- * }
- * @method mixed                  selectValueForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectValue()> の排他ロック版（{@link fetchValue()} も参照）
- * }
- *
- * @method array|Entityable[]     selectArrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectArray()> の例外送出版（{@link fetchArray()} も参照）
- * }
- * @method array|Entityable[]     selectAssocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectAssoc()> の例外送出版（{@link fetchAssoc()} も参照）
- * }
- * @method array                  selectListsOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectLists()> の例外送出版（{@link fetchLists()} も参照）
- * }
- * @method array                  selectPairsOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectPairs()> の例外送出版（{@link fetchPairs()} も参照）
- * }
- * @method array|Entityable|false selectTupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectTuple()> の例外送出版（{@link fetchTuple()} も参照）
- * }
- * @method mixed                  selectValueOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectValue()> の例外送出版（{@link fetchValue()} も参照）
- * }
- *
- * @method array|Entityable[]     selectArrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectArray()> の排他ロック兼例外送出版（{@link fetchArray()} も参照）
- * }
- * @method array|Entityable[]     selectAssocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectAssoc()> の排他ロック兼例外送出版（{@link fetchAssoc()} も参照）
- * }
- * @method array                  selectListsForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectLists()> の排他ロック兼例外送出版（{@link fetchLists()} も参照）
- * }
- * @method array                  selectPairsForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectPairs()> の排他ロック兼例外送出版（{@link fetchPairs()} も参照）
- * }
- * @method array|Entityable|false selectTupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectTuple()> の排他ロック兼例外送出版（{@link fetchTuple()} も参照）
- * }
- * @method mixed                  selectValueForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::selectValue()> の排他ロック兼例外送出版（{@link fetchValue()} も参照）
- * }
- *
- * @method array|Entityable[]     entityArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entity()> の array 版
- * }
- * @method array|Entityable[]     entityAssoc($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entity()> の assoc 版
- * }
- * @method array|Entityable|false entityTuple($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entity()> の tuple 版
- * }
- *
- * @method array|Entityable[]     entityArrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityArray()> の共有ロック版
- * }
- * @method array|Entityable[]     entityAssocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityAssoc()> の共有ロック版
- * }
- * @method array|Entityable|false entityTupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityTuple()> の共有ロック版
- * }
- *
- * @method array|Entityable[]     entityArrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityArray()> の排他ロック版
- * }
- * @method array|Entityable[]     entityAssocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityAssoc()> の排他ロック版
- * }
- * @method array|Entityable|false entityTupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityTuple()> の排他ロック版
- * }
- *
- * @method array|Entityable[]     entityArrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityArray()> の例外送出版
- * }
- * @method array|Entityable[]     entityAssocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityAssoc()> の例外送出版
- * }
- * @method array|Entityable       entityTupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityTuple()> の例外送出版
- * }
- *
- * @method array|Entityable[]     entityArrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityArray()> の排他ロック兼例外送出版
- * }
- * @method array|Entityable[]     entityAssocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityAssoc()> の排他ロック兼例外送出版
- * }
- * @method array|Entityable|false entityTupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses Database::entityTuple()> の排他ロック兼例外送出版
- * }
- *
- * @method Yielder                yieldArray($sql, iterable $params = []) {
- *     <@uses Database::yield()> のレコードの配列版
- * }
- * @method Yielder                yieldAssoc($sql, iterable $params = []) {
- *     <@uses Database::yield()> のレコードの連想配列版
- * }
- * @method Yielder                yieldLists($sql, iterable $params = []) {
- *     <@uses Database::yield()> のレコード[1列目の配列]
- * }
- * @method Yielder                yieldPairs($sql, iterable $params = []) {
- *     <@uses Database::yield()> のレコード[1列目=>2列目]の連想配列
- * }
- *
- * @method int                    exportArray($sql, iterable $params = [], array $config = [], $file = null) {
- *     <@uses Database::export()> の ARRAY 版
- * }
- * @method int                    exportCsv($sql, iterable $params = [], array $config = [], $file = null) {
- *     <@uses Database::export()> の CSV 版
- * }
- * @method int                    exportJson($sql, iterable $params = [], array $config = [], $file = null) {
- *     <@uses Database::export()> の JSON 版
- * }
- *
- * @method QueryBuilder        subselectArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（array）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- * @method QueryBuilder        subselectAssoc($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（assoc）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- * @method QueryBuilder        subselectLists($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（lists）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- * @method QueryBuilder        subselectPairs($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（pairs）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- * @method QueryBuilder        subselectTuple($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（tuple）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- * @method QueryBuilder        subselectValue($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（value）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- *
- * @method QueryBuilder           subcount($column, $where = []) {
- *     相関サブクエリの COUNT を表すビルダを返す（<@uses Database::subaggregate()> を参照）
- * }
- * @method QueryBuilder           submin($column, $where = []) {
- *     相関サブクエリの MIN を表すビルダを返す（<@uses Database::subaggregate()> を参照）
- * }
- * @method QueryBuilder           submax($column, $where = []) {
- *     相関サブクエリの MAX を表すビルダを返す（<@uses Database::subaggregate()> を参照）
- * }
- * @method QueryBuilder           subsum($column, $where = []) {
- *     相関サブクエリの SUM を表すビルダを返す（<@uses Database::subaggregate()> を参照）
- * }
- * @method QueryBuilder           subavg($column, $where = []) {
- *     相関サブクエリの AVG を表すビルダを返す（<@uses Database::subaggregate()> を参照）
- * }
- *
- * @method int|float              count($column, $where = [], $groupBy = [], $having = []) {
- *     COUNT クエリを実行する（<@uses Database::aggregate()> を参照）
- * }
- * @method int|float              min($column, $where = [], $groupBy = [], $having = []) {
- *     MIN クエリを実行する（<@uses Database::aggregate()> を参照）
- * }
- * @method int|float              max($column, $where = [], $groupBy = [], $having = []) {
- *     MAX クエリを実行する（<@uses Database::aggregate()> を参照）
- * }
- * @method int|float              sum($column, $where = [], $groupBy = [], $having = []) {
- *     SUM クエリを実行する（<@uses Database::aggregate()> を参照）
- * }
- * @method int|float              avg($column, $where = [], $groupBy = [], $having = []) {
- *     AVG クエリを実行する（<@uses Database::aggregate()> を参照）
- * }
- *
- * @method QueryBuilder           selectCount($column, $where = [], $groupBy = [], $having = []) {
- *     COUNT クエリを返す（<@uses Database::selectAggregate()> を参照）
- * }
- * @method QueryBuilder           selectMin($column, $where = [], $groupBy = [], $having = []) {
- *     MIN クエリを返す（<@uses Database::selectAggregate()> を参照）
- * }
- * @method QueryBuilder           selectMax($column, $where = [], $groupBy = [], $having = []) {
- *     MAX クエリを返す（<@uses Database::selectAggregate()> を参照）
- * }
- * @method QueryBuilder           selectSum($column, $where = [], $groupBy = [], $having = []) {
- *     SUM クエリを返す（<@uses Database::selectAggregate()> を参照）
- * }
- * @method QueryBuilder           selectAvg($column, $where = [], $groupBy = [], $having = []) {
- *     AVG クエリを返す（<@uses Database::selectAggregate()> を参照）
- * }
- *
- * @method array|string           insertOrThrow($tableName, $data) {
- *     <@uses Database::insert()> の例外送出版
- * }
- * @method array|string           updateOrThrow($tableName, $data, array $identifier = []) {
- *     <@uses Database::update()> の例外送出版
- * }
- * @method array|string           deleteOrThrow($tableName, array $identifier = []) {
- *     <@uses Database::delete()> の例外送出版
- * }
- * @method array|string           removeOrThrow($tableName, array $identifier = []) {
- *     <@uses Database::remove()> の例外送出版
- * }
- * @method array|string[]         destroyOrThrow($tableName, array $identifier = []) {
- *     <@uses Database::destroy()> の例外送出版
- * }
- * @method array|string           reduceOrThrow($tableName, $limit = null, $orderBy = [], $groupBy = [], $identifier = []) {
- *     <@uses Database::reduce()> の例外送出版
- * }
- * @method array|string           upsertOrThrow($tableName, $insertData, $updateData = []) {
- *     <@uses Database::upsert()> の例外送出版
- * }
- * @method array|string           modifyOrThrow($tableName, $insertData, $updateData = []) {
- *     <@uses Database::modify()> の例外送出版
- * }
- * @method array|string           replaceOrThrow($tableName, $data) {
- *     <@uses Database::replace()> の例外送出版
- * }
- *
- * @method array|string           insertSelectIgnore($tableName, $sql, $columns = [], iterable $params = []) {
- *     IGNORE 付き <@uses Database::insertSelect()>
- * }
- * @method array|string           insertArrayIgnore($tableName, $data, $chunk = 0) {
- *     IGNORE 付き <@uses Database::insertArray()>
- * }
- * @method array|string           updateArrayIgnore($tableName, $data, $identifier = []) {
- *     IGNORE 付き <@uses Database::updateArray()>
- * }
- * @method array|string           modifyArrayIgnore($tableName, $insertData, $updateData = [], $chunk = 0) {
- *     IGNORE 付き <@uses Database::modifyArray()>
- * }
- * @method array                  changeArrayIgnore($tableName, $dataarray, $identifier) {
- *     IGNORE 付き <@uses Database::changeArray()>
- * }
- * @method array|string[]         saveIgnore($tableName, $data) {
- *     IGNORE 付き <@uses Database::save()>
- * }
- * @method array|string           createIgnore($tableName, $data) {
- *     IGNORE 付き <@uses Database::create()>
- * }
- * @method array|string           insertIgnore($tableName, $data) {
- *     IGNORE 付き <@uses Database::insert()>
- * }
- * @method array|string           updateIgnore($tableName, $data, array $identifier = []) {
- *     IGNORE 付き <@uses Database::update()>
- * }
- * @method array|string           deleteIgnore($tableName, array $identifier = []) {
- *     IGNORE 付き <@uses Database::delete()>
- * }
- * @method array|string           removeIgnore($tableName, array $identifier = []) {
- *     IGNORE 付き <@uses Database::remove()>
- * }
- * @method array|string[]         destroyIgnore($tableName, array $identifier = []) {
- *     IGNORE 付き <@uses Database::destroy()>
- * }
- * @method array|string           modifyIgnore($tableName, $insertData, $updateData = []) {
- *     IGNORE 付き <@uses Database::modify()>
- * }
- *
- * @method array|string           insertConditionally($tableName, $condition, $data) {
- *     条件付き <@uses Database::insert()>
- *
- *     $condition が WHERE 的判定され、合致しないときは insert が行われない。
- *     $condition が配列の場合は $tableName で selectNotExists する。つまり「存在しないとき実行」となる。
- *
- *     実行したら主キー配列を返し、されなかったら空配列を返す。
- *
- *     @param QueryBuilder|string|array $condition WHERE 条件 or Select オブジェクト
- * }
- * @method array|string           createConditionally($tableName, $condition, $data) {
- *     条件付き <@uses Database::create()>
- *
- *     $condition が WHERE 的判定され、合致しないときは create が行われない。
- *     $condition が配列の場合は $tableName で selectNotExists する。つまり「存在しないとき実行」となる。
- *
- *     実行したら主キー配列を返し、されなかったら空配列を返す。
- *
- *     @param QueryBuilder|string|array $condition WHERE 条件 or Select オブジェクト
- * }
- * @method array|string           upsertConditionally($tableName, $condition, $insertData, $updateData = []) {
- *     条件付き <@uses Database::upsert()>
- *
- *     $condition が WHERE 的判定され、合致しないときは upsert が行われない。
- *     $condition が配列の場合は $tableName で selectNotExists する。つまり「存在しないとき実行」となる。
- *
- *     実行したら主キー配列を返し、されなかったら空配列を返す。
- *
- *     @param QueryBuilder|string|array $condition WHERE 条件 or Select オブジェクト
- * }
- * @method array|string           modifyConditionally($tableName, $condition, $insertData, $updateData = []) {
- *     条件付き <@uses Database::modify()>
- *
- *     $condition が WHERE 的判定され、合致しないときは modify が行われない。
- *     $condition が配列の場合は $tableName で selectNotExists する。つまり「存在しないとき実行」となる。
- *
- *     実行したら主キー配列を返し、されなかったら空配列を返す。
- *
- *     @param QueryBuilder|string|array $condition WHERE 条件 or Select オブジェクト
- * }
- *
- * @method Statement              prepareSelect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     クエリビルダ構文で SELECT 用プリペアドステートメント取得する（<@uses Database::prepare()>, <@uses Database::select()> も参照）
- * }
- * @method Statement              prepareInsert($tableName, $data) {
- *     クエリビルダ構文で INSERT 用プリペアドステートメント取得する（<@uses Database::prepare()>, <@uses Database::insert()> も参照）
- * }
- * @method Statement              prepareUpdate($tableName, $data, array $identifier = []) {
- *     クエリビルダ構文で UPDATE 用プリペアドステートメント取得する（<@uses Database::prepare()>, <@uses Database::update()> も参照）
- * }
- * @method Statement              prepareDelete($tableName, array $identifier = []) {
- *     クエリビルダ構文で DELETE 用プリペアドステートメント取得する（<@uses Database::prepare()>, <@uses Database::delete()> も参照）
- * }
- * @method Statement              prepareModify($tableName, $insertData, $updateData = []) {
- *     クエリビルダ構文で MODIFY 用プリペアドステートメント取得する（<@uses Database::prepare()>, <@uses Database::modify()> も参照）
- * }
- * @method Statement              prepareReplace($tableName, $data) {
- *     クエリビルダ構文で REPLACE 用プリペアドステートメント取得する（<@uses Database::prepare()>, <@uses Database::replace()> も参照）
- * }
  */
 // @formatter:on
 class Database
 {
     use OptionTrait;
+
+    use FetchOrThrowTrait;
+    use SelectOrThrowTrait;
+    use SelectInShareTrait;
+    use SelectForUpdateTrait;
+    use SelectForAffectTrait;
+    use EntityInShareTrait;
+    use EntityOrThrowTrait;
+    use EntityForUpdateTrait;
+    use EntityForAffectTrait;
+    use YieldTrait;
+    use ExportTrait;
+    use SelectAggregateTrait;
+
+    use AggregateTrait;
+    use SubSelectTrait;
+    use SubAggregateTrait;
+
+    use AffectIgnoreTrait;
+    use AffectConditionallyTrait;
+    use AffectOrThrowTrait;
+    use PrepareTrait;
+
+    protected function getDatabase() { return $this; }
+
+    protected function getConditionPosition() { return 1; }
 
     /// 内部的に自動付加されるカラム名
     public const AUTO_KEY         = '__dbml_auto_column';
@@ -1075,87 +738,6 @@ class Database
         $result = $this->OptionTrait__callGetSet($name, $arguments, $called);
         if ($called) {
             return $result;
-        }
-
-        // aggregate 系
-        if (in_array(strtolower($name), ['count', 'min', 'max', 'sum', 'avg'], true)) {
-            return $this->aggregate($name, ...$arguments);
-        }
-        // subaggregate 系
-        if (in_array(strtolower($name), ['subcount', 'submin', 'submax', 'subsum', 'subavg'], true)) {
-            return $this->subaggregate(str_lchop($name, 'sub', true), ...$arguments);
-        }
-        // selectAggregate 系
-        if (preg_match('/^select(count|min|max|sum|avg)$/ui', $name, $matches)) {
-            return $this->selectAggregate($matches[1], ...$arguments);
-        }
-        // prepare 系
-        if (preg_match('/^prepare(.+)$/ui', $name, $matches)) {
-            // SELECT 系のみ実装が違うので分岐
-            $method = $matches[1];
-            if (strtolower($method) === 'select') {
-                return $this->prepare($this->select(...$arguments));
-            }
-            $restorer = $this->storeOptions(['preparing' => true]);
-            return try_finally([$this, $method], $restorer, ...$arguments);
-        }
-        // fetch～OrThrow 系
-        if (preg_match('/^fetch(.+?)OrThrow$/ui', $name, $matches)) {
-            $method = 'fetch' . $matches[1];
-            $result = $this->$method(...$arguments);
-            // Value, Tuple は [] を返し得ないし、複数行系も false を返し得ない
-            if ($result === [] || $result === false) {
-                throw new NonSelectedException('record is not found.');
-            }
-            return $result;
-        }
-        // select|entity～ 系
-        if (preg_match('/^(select|entity)(.+?)(ForAffect|ForUpdate|InShare)?(OrThrow)?$/ui', $name, $matches)) {
-            [, $mode, $perform, $lockmode, $orthrow] = array_map('strtolower', $matches + [3 => '', 4 => '']);
-            if ($lockmode === 'foraffect') {
-                $lockmode = 'ForUpdate';
-                $orthrow = 'OrThrow';
-            }
-            $select = $this->$mode(...$arguments);
-            if ($lockmode) {
-                $select->{"lock$lockmode"}();
-            }
-            $method = 'fetch' . $perform . $orthrow;
-            return $this->$method($select);
-        }
-        // yield～ 系
-        if (preg_match('/^yield(.+?)$/ui', $name, $matches)) {
-            return $this->yield(...$arguments)->setFetchMethod(strtolower($matches[1]));
-        }
-        // export～ 系
-        if (preg_match('/^export(.+?)$/ui', $name, $matches)) {
-            return $this->export($matches[1], ...$arguments);
-        }
-        // sub～ 系
-        if (preg_match('/^subselect(.+?)$/ui', $name, $matches)) {
-            [, $perform] = array_map('strtolower', $matches);
-            return $this->subselect(...$arguments)->$perform();
-        }
-        // affect～OrThrow 系
-        if (preg_match('/^(insert|update|delete|remove|destroy|reduce|upsert|modify|replace)OrThrow$/ui', $name, $matches)) {
-            $method = strtolower($matches[1]);
-            Adhoc::reargument($arguments, [$this, $method], []);
-            $arguments[] = ['primary' => 1, 'throw' => true];
-            return $this->$method(...$arguments);
-        }
-        // affect～Ignore 系
-        if (preg_match('/^(insertSelect|insertArray|updateArray|modifyArray|changeArray|save|insert|update|delete|remove|destroy|create|modify)Ignore$/ui', $name, $matches)) {
-            $method = strtolower($matches[1]);
-            Adhoc::reargument($arguments, [$this, $method], []);
-            $arguments[] = ['primary' => 2, 'ignore' => true];
-            return $this->$method(...$arguments);
-        }
-        // affect～Conditionally 系
-        if (preg_match('/^(insert|create|upsert|modify)Conditionally$/ui', $name, $matches)) {
-            $method = strtolower($matches[1]);
-            $opt = Adhoc::reargument($arguments, [$this, $method], [1 => 'where']);
-            $arguments[] = ['primary' => 2] + $opt;
-            return $this->$method(...$arguments);
         }
 
         // Gateway 取得
@@ -3684,6 +3266,118 @@ class Database
     }
 
     /**
+     * foreach で回せる何かとサブメソッド名で結果を構築する
+     *
+     * @ignore 難解過ぎる上内部でしか使われない
+     *
+     * @param \Traversable|array $row_provider foreach で回せる何か
+     * @param string|array $fetch_mode Database::METHOD__XXX
+     * @param ?\Closure $converter 行ごとの変換クロージャ
+     * @return array|bool|mixed クエリ結果
+     */
+    public function perform($row_provider, $fetch_mode, $converter = null)
+    {
+        switch ($fetch_mode) {
+            default:
+                throw new \BadMethodCallException("unknown fetch method '$fetch_mode'.");
+
+            /// 配列の配列系
+            case self::METHOD_ARRAY:
+                $result = [];
+                foreach ($row_provider as $row) {
+                    $row = $converter ? $converter($row) : $row;
+                    $result[] = $row;
+                }
+                return $result;
+            case self::METHOD_ASSOC:
+                $result = [];
+                foreach ($row_provider as $row) {
+                    $row = $converter ? $converter($row) : $row;
+                    foreach ($row as $e) {
+                        $key = $e;
+                        break;
+                    }
+                    /** @noinspection PhpUndefinedVariableInspection */
+                    $result[$key] = $row;
+                }
+                return $result;
+
+            /// 配列系
+            case self::METHOD_LISTS:
+                $result = [];
+                foreach ($row_provider as $row) {
+                    $row = $converter ? $converter($row) : $row;
+                    foreach ($row as $e) {
+                        $val = $e;
+                        break;
+                    }
+                    /** @noinspection PhpUndefinedVariableInspection */
+                    $result[] = $val;
+                }
+                return $result;
+            case self::METHOD_PAIRS:
+                $result = [];
+                foreach ($row_provider as $row) {
+                    $row = $converter ? $converter($row) : $row;
+                    $i = 0;
+                    foreach ($row as $e) {
+                        if ($i++ === 1) {
+                            $val = $e;
+                            break;
+                        }
+                        $key = $e;
+                    }
+                    /** @noinspection PhpUndefinedVariableInspection */
+                    $result[$key] = $val;
+                }
+                return $result;
+
+            /// シンプル系
+            case self::METHOD_TUPLE:
+                $result = false;
+                $first = true;
+                foreach ($row_provider as $row) {
+                    $row = $converter ? $converter($row) : $row;
+                    if ($first) {
+                        $first = false;
+                        $result = $row;
+                    }
+                    else {
+                        throw new TooManyException('record is too many.');
+                    }
+                }
+                return $result;
+            case self::METHOD_VALUE:
+                $result = false;
+                $first = true;
+                foreach ($row_provider as $row) {
+                    $row = $converter ? $converter($row) : $row;
+                    if ($first) {
+                        $first = false;
+                        foreach ($row as $e) {
+                            $result = $e;
+                            break;
+                        }
+                    }
+                    else {
+                        throw new TooManyException('record is too many.');
+                    }
+                }
+                return $result;
+        }
+    }
+
+    public function fetchOrThrow($method, $arguments)
+    {
+        $result = $this->{"fetch$method"}(...$arguments);
+        // Value, Tuple は [] を返し得ないし、複数行系も false を返し得ない
+        if ($result === [] || $result === false) {
+            throw new NonSelectedException('record is not found.');
+        }
+        return $result;
+    }
+
+    /**
      * レコードの配列を返す
      *
      * ```php
@@ -3877,108 +3571,6 @@ class Database
     }
 
     /**
-     * foreach で回せる何かとサブメソッド名で結果を構築する
-     *
-     * @ignore 難解過ぎる上内部でしか使われない
-     *
-     * @param \Traversable|array $row_provider foreach で回せる何か
-     * @param string|array $fetch_mode Database::METHOD__XXX
-     * @param ?\Closure $converter 行ごとの変換クロージャ
-     * @return array|bool|mixed クエリ結果
-     */
-    public function perform($row_provider, $fetch_mode, $converter = null)
-    {
-        switch ($fetch_mode) {
-            default:
-                throw new \BadMethodCallException("unknown fetch method '$fetch_mode'.");
-
-            /// 配列の配列系
-            case self::METHOD_ARRAY:
-                $result = [];
-                foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
-                    $result[] = $row;
-                }
-                return $result;
-            case self::METHOD_ASSOC:
-                $result = [];
-                foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
-                    foreach ($row as $e) {
-                        $key = $e;
-                        break;
-                    }
-                    /** @noinspection PhpUndefinedVariableInspection */
-                    $result[$key] = $row;
-                }
-                return $result;
-
-            /// 配列系
-            case self::METHOD_LISTS:
-                $result = [];
-                foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
-                    foreach ($row as $e) {
-                        $val = $e;
-                        break;
-                    }
-                    /** @noinspection PhpUndefinedVariableInspection */
-                    $result[] = $val;
-                }
-                return $result;
-            case self::METHOD_PAIRS:
-                $result = [];
-                foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
-                    $i = 0;
-                    foreach ($row as $e) {
-                        if ($i++ === 1) {
-                            $val = $e;
-                            break;
-                        }
-                        $key = $e;
-                    }
-                    /** @noinspection PhpUndefinedVariableInspection */
-                    $result[$key] = $val;
-                }
-                return $result;
-
-            /// シンプル系
-            case self::METHOD_TUPLE:
-                $result = false;
-                $first = true;
-                foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
-                    if ($first) {
-                        $first = false;
-                        $result = $row;
-                    }
-                    else {
-                        throw new TooManyException('record is too many.');
-                    }
-                }
-                return $result;
-            case self::METHOD_VALUE:
-                $result = false;
-                $first = true;
-                foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
-                    if ($first) {
-                        $first = false;
-                        foreach ($row as $e) {
-                            $result = $e;
-                            break;
-                        }
-                    }
-                    else {
-                        throw new TooManyException('record is too many.');
-                    }
-                }
-                return $result;
-        }
-    }
-
-    /**
      * 各句を指定してクエリビルダを生成する
      *
      * ```php
@@ -4010,29 +3602,35 @@ class Database
      * - see {@link fetchValue()}
      *
      * @used-by selectArray()
+     * @used-by selectArrayOrThrow()
      * @used-by selectArrayInShare()
      * @used-by selectArrayForUpdate()
-     * @used-by selectArrayOrThrow()
+     * @used-by selectArrayForAffect()
      * @used-by selectAssoc()
+     * @used-by selectAssocOrThrow()
      * @used-by selectAssocInShare()
      * @used-by selectAssocForUpdate()
-     * @used-by selectAssocOrThrow()
+     * @used-by selectAssocForAffect()
      * @used-by selectLists()
+     * @used-by selectListsOrThrow()
      * @used-by selectListsInShare()
      * @used-by selectListsForUpdate()
-     * @used-by selectListsOrThrow()
+     * @used-by selectListsForAffect()
      * @used-by selectPairs()
+     * @used-by selectPairsOrThrow()
      * @used-by selectPairsInShare()
      * @used-by selectPairsForUpdate()
-     * @used-by selectPairsOrThrow()
+     * @used-by selectPairsForAffect()
      * @used-by selectTuple()
+     * @used-by selectTupleOrThrow()
      * @used-by selectTupleInShare()
      * @used-by selectTupleForUpdate()
-     * @used-by selectTupleOrThrow()
+     * @used-by selectTupleForAffect()
      * @used-by selectValue()
+     * @used-by selectValueOrThrow()
      * @used-by selectValueInShare()
      * @used-by selectValueForUpdate()
-     * @used-by selectValueOrThrow()
+     * @used-by selectValueForAffect()
      *
      * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
      * @param array|string $where WHERE 条件（{@link QueryBuilder::where()}）
@@ -4046,6 +3644,72 @@ class Database
     {
         $builder = $this->createQueryBuilder();
         return $builder->build(array_combine(QueryBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]), true);
+    }
+
+    /**
+     * {@uses Database::select()} の array 版（{@link fetchArray()} も参照）
+     *
+     * @inheritdoc Database::select()
+     * @return array|Entityable[]
+     */
+    public function selectArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->fetchArray($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * {@uses Database::select()} の assoc 版（{@link fetchAssoc()} も参照）
+     *
+     * @inheritdoc Database::select()
+     * @return array|Entityable[]
+     */
+    public function selectAssoc($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->fetchAssoc($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * {@uses Database::select()} の lists 版（{@link fetchLists()} も参照）
+     *
+     * @inheritdoc Database::select()
+     * @return array
+     */
+    public function selectLists($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->fetchLists($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * {@uses Database::select()} の pairs 版（{@link fetchPairs()} も参照）
+     *
+     * @inheritdoc Database::select()
+     * @return array
+     */
+    public function selectPairs($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->fetchPairs($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * {@uses Database::select()} の pairs 版（{@link fetchTuple()} も参照）
+     *
+     * @inheritdoc Database::select()
+     * @return array|Entityable|false
+     */
+    public function selectTuple($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->fetchTuple($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * {@uses Database::select()} の pairs 版（{@link fetchValue()} も参照）
+     *
+     * @inheritdoc Database::select()
+     * @return mixed
+     */
+    public function selectValue($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->fetchValue($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
     }
 
     /**
@@ -4074,23 +3738,178 @@ class Database
      * - see {@link QueryBuilder::having()}
      *
      * @used-by entityArray()
+     * @used-by entityArrayOrThrow()
      * @used-by entityArrayInShare()
      * @used-by entityArrayForUpdate()
-     * @used-by entityArrayOrThrow()
+     * @used-by entityArrayForAffect()
      * @used-by entityAssoc()
+     * @used-by entityAssocOrThrow()
      * @used-by entityAssocInShare()
      * @used-by entityAssocForUpdate()
-     * @used-by entityAssocOrThrow()
+     * @used-by entityAssocForAffect()
      * @used-by entityTuple()
+     * @used-by entityTupleOrThrow()
      * @used-by entityTupleInShare()
      * @used-by entityTupleForUpdate()
-     * @used-by entityTupleOrThrow()
+     * @used-by entityTupleForAffect()
      *
      * @inheritdoc select()
      */
     public function entity($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->select(...func_get_args())->cast(null);
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->cast(null);
+    }
+
+    /**
+     * {@uses Database::entity()} の array 版
+     *
+     * @inheritdoc Database::entity()
+     * @return Entityable[]
+     */
+    public function entityArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->fetchArray($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * {@uses Database::entity()} の assoc 版
+     *
+     * @inheritdoc Database::entity()
+     * @return Entityable[]
+     */
+    public function entityAssoc($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->fetchAssoc($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * {@uses Database::entity()} の tuple 版
+     *
+     * @inheritdoc Database::entity()
+     * @return Entityable
+     */
+    public function entityTuple($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->fetchTuple($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * 集約クエリビルダを返す
+     *
+     * {@link selectCount()} などのために存在し、明示的に呼ぶことはほとんど無い。
+     *
+     * ```php
+     * // SELECT COUNT(group_id) FROM t_table
+     * $db->selectCount('t_table.group_id');
+     *
+     * // SELECT MAX(id) FROM t_table WHERE delete_flg = 0 GROUP BY group_id
+     * $db->selectMax('t_table.id', ['delete_flg' => 0], 'group_id');
+     * ```
+     *
+     * @used-by selectExists()
+     * @used-by selectNotExists()
+     * @used-by selectCount()
+     * @used-by selectMin()
+     * @used-by selectMax()
+     * @used-by selectSum()
+     * @used-by selectAvg()
+     *
+     * @param string|array $aggregation 集約関数名
+     * @param array|string $column 取得テーブルとカラム
+     * @param array|string $where 条件
+     * @param array|string $groupBy カラム名かその配列
+     * @param array|string $having 条件
+     * @return QueryBuilder 集約クエリビルダ
+     */
+    public function selectAggregate($aggregation, $column, $where = [], $groupBy = [], $having = [])
+    {
+        return $this->select($column, $where, [], [], $groupBy, $having)->aggregate($aggregation);
+    }
+
+    /**
+     * 行を少しずつ返してくれるオブジェクトを返す
+     *
+     * 返却されたオブジェクトは foreach で回すことができ、かつ `PDO::fetch` で実装されていて省メモリで動作する。
+     * さらにいくつか特殊な事ができるが {@link Yielder::setBufferMode()}, {@link Yielder::setEmulationUnique()} あたりを参照。
+     *
+     * ```php
+     * # シンプルな例
+     * foreach ($db->yieldArray('SELECT * FROM very_many_heavy_table') as $row) {
+     *     // 一気に取得ではなく、逐次処理ができる
+     * }
+     *
+     * # クエリビルダも渡せる
+     * foreach ($db->yieldArray($db->select('very_many_heavy_table')) as $row) {
+     *     // 一気に取得ではなく、逐次処理ができる
+     * }
+     * ```
+     *
+     * @used-by yieldArray()
+     * @used-by yieldAssoc()
+     * @used-by yieldLists()
+     * @used-by yieldPairs()
+     *
+     * @param string|QueryBuilder $sql SQL
+     * @param iterable $params SQL パラメータ
+     * @return Yielder foreach で回せるオブジェクト
+     */
+    public function yield($sql, iterable $params = [])
+    {
+        $converter = $this->_getConverter($sql);
+        $callback = $sql instanceof QueryBuilder ? function ($row) use ($sql, $converter) {
+            return $sql->postselect([$converter($row)], true)[0];
+        } : $converter;
+        return new Yielder(function ($connection) use ($sql, $params) {
+            return $this->_sqlToStmt($sql, $params, $connection);
+        }, $this->getSlaveConnection(), null, $callback);
+    }
+
+    /**
+     * テーブルレコードをエクスポートする
+     *
+     * このメソッドは {@link yield()} を用いて省メモリで動作するように実装されているので、ある程度巨大な結果セットになるクエリでも実行できる。
+     *
+     * このメソッドを直接呼ぶことはほとんど無い。下記の例のように exportXXX 形式で呼び出すことが大半である。
+     *
+     * ```php
+     * // 標準出力に php 配列を書き出す（全部省略のシンプル版）
+     * $db->exportArray('SELECT * FROM tablename');
+     *
+     * // /tmp/tablename.csv に CSV を書き出す（ファイル指定）
+     * $db->exportCsv('SELECT * FROM tablename', [], [
+     *     'bom'       => false,
+     *     'encoding'  => 'SJIS_win',
+     * ], '/tmp/tablename.csv');
+     *
+     * // 標準出力に JSON を書き出す（クエリビルダで親子関係を指定）
+     * $db->exportJson($db->select('t_parent/t_child'), [], [
+     *     'assoc'  => false,
+     *     'option' => JSON_UNESCAPED_UNICODE,
+     * ], null);
+     * ```
+     *
+     * @used-by exportArray()
+     * @used-by exportCsv()
+     * @used-by exportJson()
+     *
+     * @param string|AbstractGenerator $generator 出力タイプ
+     * @param string|QueryBuilder $sql SQL
+     * @param iterable $params SQL パラメータ
+     * @param array $config 出力パラメータ
+     * @param string|resource|null $file 出力先。 null を与えると標準出力に書き出される
+     * @return int 書き込みバイト数
+     */
+    public function export($generator, $sql, iterable $params = [], $config = [], $file = null)
+    {
+        if (is_string($generator)) {
+            $generator = strtolower($generator);
+            $class = $this->getExportClass();
+            if (!isset($class[$generator])) {
+                throw new \BadMethodCallException("export type '$generator' is undefined.");
+            }
+            $generator = new $class[$generator]($config);
+        }
+        return $generator->generate($file, $this->yield($sql, $params));
     }
 
     /**
@@ -4199,6 +4018,9 @@ class Database
      * //   )
      * ```
      *
+     * @used-by subexists()
+     * @used-by notSubexists()
+     *
      * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
      * @param array|string $where WHERE 条件（{@link QueryBuilder::where()}）
      * @param array|string $orderBy 並び順（{@link QueryBuilder::orderBy()}）
@@ -4213,64 +4035,6 @@ class Database
         $builder = $this->createQueryBuilder();
         $builder->setSubmethod('query');
         return $builder->build(array_combine(QueryBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]), true);
-    }
-
-    /**
-     * 相関サブクエリの EXISTS を表すビルダを返す
-     *
-     * ```php
-     * // SELECT 句での使用例
-     * $db->select([
-     *     't_article' => [
-     *         // 各 t_article に紐づく t_comment にレコードを持つなら true が返される
-     *         'has_comment'     => $db->subexists('t_comment'),
-     *         // 各 t_article に紐づく t_comment delete_flg = 0 なレコードを持たないなら true が返される
-     *         'has_not_comment' => $db->notSubexists('t_comment', ['delete_flg' => 0]),
-     *     ],
-     * ]);
-     * // SELECT
-     * //   EXISTS (SELECT * FROM t_comment WHERE t_comment.article_id = t_article.article_id) AS has_comment,
-     * //   NOT EXISTS (SELECT * FROM t_comment WHERE (delete_flg = '0') AND (t_comment.article_id = t_article.article_id)) AS has_not_comment
-     * // FROM t_article
-     *
-     * // WHERE 句での使用例
-     * $db->select('t_article', [
-     *     // 「各記事でコメントを持つ記事」を表す WHERE EXISTS になる
-     *     $db->subexists('t_comment'),
-     * ]);
-     * // SELECT
-     * //   t_article.*
-     * // FROM t_article
-     * // WHERE (EXISTS (SELECT * FROM t_comment WHERE t_comment.article_id = t_article.article_id))
-     *
-     * // JOIN も含めて複数テーブルがあり、明確に「t_article と t_comment で」結びたい場合はキーで明示する
-     * $db->select('t_article, t_something', [
-     *     // 「何と？」をキーで明示できる
-     *     't_article'          => $db->subexists('t_comment'),
-     *     // これだと t_something と t_comment での結合となる（外部キーがあれば、だが）
-     *     't_something'        => $db->subexists('t_comment'),
-     *     // さらに t_something に複数の外部キーがある場合は:で明示できる
-     *     't_something:fkname' => $db->subexists('t_comment'),
-     * ]);
-     * ```
-     *
-     * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
-     * @param array|string $where WHERE 条件（{@link QueryBuilder::where()}）
-     * @return QueryBuilder クエリビルダオブジェクト
-     */
-    public function subexists($tableDescriptor, $where = [])
-    {
-        return $this->select($tableDescriptor, $where)->setSubmethod(true);
-    }
-
-    /**
-     * {@link subexists()} の否定版
-     *
-     * @inheritdoc subexists()
-     */
-    public function notSubexists($tableDescriptor, $where = [])
-    {
-        return $this->select($tableDescriptor, $where)->setSubmethod(false);
     }
 
     /**
@@ -4348,176 +4112,6 @@ class Database
     }
 
     /**
-     * UNION する
-     *
-     * FROM が $unions 節のサブクエリになり、$column や $where はそのサブクエリに対して適用される。
-     *
-     * ```php
-     * $db->union(['SELECT "a"', 'SELECT "b"']);
-     * // → シンプルに `SELECT "a" UNION SELECT "b"` と解釈される
-     *
-     * $db->union(['SELECT "a1" AS c1, "a2" AS c2', 'SELECT "b1" AS c1, "b2" AS c2'], ['c1']);
-     * // → UNION 部が FROM 句に飲み込まれ `SELECT c1 FROM (SELECT "a1" AS c1, "a2" AS c2 UNION SELECT "b1" AS c1, "b2" AS c2) AS T` と解釈される
-     *
-     * $db->union(['SELECT "a1" AS c1, "a2" AS c2', 'SELECT "b1" AS c1, "b2" AS c2'], ['c1'], ['c2' => 'b1']);
-     * // → UNION 部が FROM 句に飲み込まれ `SELECT c1 FROM (SELECT "a1" AS c1, "a2" AS c2 UNION SELECT "b1" AS c1, "b2" AS c2) AS T WHERE c2 = "b1"` と解釈される
-     *
-     * $db->unionAll([$db->select('t_article'), $db->select('t_article')]);
-     * // → クエリビルダも使える（倍の行を取得できる。あくまで例なので意味はない）
-     * ```
-     *
-     * @param array|string|QueryBuilder $unions union サブクエリ
-     * @param array|string $column 取得カラム [column]
-     * @param array|string $where 条件
-     * @param array|string $orderBy 単カラム名か[column=>asc/desc]な連想配列
-     * @param array|int $limit 単数値か[offset=>count]な連想配列
-     * @param array|string $groupBy カラム名かその配列
-     * @param array|string $having 条件
-     * @return QueryBuilder クエリビルダオブジェクト
-     */
-    public function union($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select(['' => $column], $where, $orderBy, $limit, $groupBy, $having)->union($unions);
-    }
-
-    /**
-     * UNION ALL する
-     *
-     * ALL で UNION される以外は {@link union()} と全く同じ。
-     *
-     * @param array|string|QueryBuilder $unions union サブクエリ
-     * @param array|string $column 取得カラム [column]
-     * @param array|string $where 条件
-     * @param array|string $orderBy 単カラム名か[column=>asc/desc]な連想配列
-     * @param array|int $limit 単数値か[offset=>count]な連想配列
-     * @param array|string $groupBy カラム名かその配列
-     * @param array|string $having 条件
-     * @return QueryBuilder クエリビルダオブジェクト
-     */
-    public function unionAll($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select(['' => $column], $where, $orderBy, $limit, $groupBy, $having)->unionAll($unions);
-    }
-
-    /**
-     * レコードの存在を返す
-     *
-     * ```php
-     * # 単純に t_article が存在するか bool で返す
-     * $db->exists('t_article');
-     * // SELECT EXISTS (SELECT * FROM t_article)
-     *
-     * # 有効な t_article が存在するか bool で返す
-     * $db->exists('t_article', ['delete_flg' => 0]);
-     * // SELECT EXISTS (SELECT * FROM t_article WHERE t_article.delete_flg = 0)
-     *
-     * # 有効な t_article が存在するかロックしつつ bool で返す
-     * $db->exists('t_article', ['delete_flg' => 0], true);
-     * // SELECT EXISTS (SELECT * FROM t_article WHERE t_article.delete_flg = 0 FOR UPDATE)
-     * ```
-     *
-     * @inheritdoc select()
-     *
-     * @param bool $for_update EXISTS チェックはしばしばロックを伴うのでそのフラグ
-     * @return bool レコードが存在するなら true
-     */
-    public function exists($tableDescriptor, $where = [], $for_update = false)
-    {
-        $builder = $this->selectExists($tableDescriptor, $where, $for_update);
-        $exists = $this->getCompatiblePlatform()->convertSelectExistsQuery($builder);
-        return !!$this->fetchValue("SELECT $exists", $exists->getParams());
-    }
-
-    /**
-     * EXISTS クエリビルダを返す
-     *
-     * ```php
-     * // EXISTS (SELECT * FROM t_table)
-     * $db->selectExists('t_table');
-     *
-     * // NOT EXISTS (SELECT * FROM t_table WHERE delete_flg = 0)
-     * $db->selectNotExists('t_table', ['delete_flg' => 0]);
-     * ```
-     *
-     * @inheritdoc exists()
-     *
-     * @return QueryBuilder EXISTS クエリビルダ
-     */
-    public function selectExists($tableDescriptor, $where = [], $for_update = false)
-    {
-        $builder = $this->select($tableDescriptor, $where)->exists();
-
-        if ($for_update) {
-            $builder->lockForUpdate();
-        }
-
-        return $builder;
-    }
-
-    /**
-     * {@link selectExists()} の NOT 版
-     *
-     * @inheritdoc exists()
-     *
-     * @return QueryBuilder NOT EXISTS クエリビルダ
-     */
-    public function selectNotExists($tableDescriptor, $where = [], $for_update = false)
-    {
-        $builder = $this->select($tableDescriptor, $where)->notExists();
-
-        if ($for_update) {
-            $builder->lockForUpdate();
-        }
-
-        return $builder;
-    }
-
-    /**
-     * 集約クエリビルダを返す
-     *
-     * {@link selectCount()} などのために存在し、明示的に呼ぶことはほとんど無い。
-     *
-     * ```php
-     * // SELECT COUNT(group_id) FROM t_table
-     * $db->selectCount('t_table.group_id');
-     *
-     * // SELECT MAX(id) FROM t_table WHERE delete_flg = 0 GROUP BY group_id
-     * $db->selectMax('t_table.id', ['delete_flg' => 0], 'group_id');
-     * ```
-     *
-     * @used-by selectCount()
-     * @used-by selectMin()
-     * @used-by selectMax()
-     * @used-by selectSum()
-     * @used-by selectAvg()
-     *
-     * @param string|array $aggregation 集約関数名
-     * @param array|string $column 取得テーブルとカラム
-     * @param array|string $where 条件
-     * @param array|string $groupBy カラム名かその配列
-     * @param array|string $having 条件
-     * @return QueryBuilder 集約クエリビルダ
-     */
-    public function selectAggregate($aggregation, $column, $where = [], $groupBy = [], $having = [])
-    {
-        return $this->select($column, $where, [], [], $groupBy, $having)->aggregate($aggregation);
-    }
-
-    /**
-     * 特定レコードの前後のレコードを返す
-     *
-     * {@link QueryBuilder::neighbor()} へのプロキシメソッド。
-     *
-     * @inheritdoc QueryBuilder::neighbor()
-     *
-     * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
-     */
-    public function neighbor($tableDescriptor, $predicates, $limit = 1)
-    {
-        return $this->select($tableDescriptor)->neighbor($predicates, $limit);
-    }
-
-    /**
      * 集約を実行する
      *
      * - 集約列が0個
@@ -4585,6 +4179,7 @@ class Database
      * // 生成される SQL は同じ
      * ```
      *
+     * @used-by exists()
      * @used-by count()
      * @used-by min()
      * @used-by max()
@@ -4631,89 +4226,69 @@ class Database
     }
 
     /**
-     * 行を少しずつ返してくれるオブジェクトを返す
+     * UNION する
      *
-     * 返却されたオブジェクトは foreach で回すことができ、かつ `PDO::fetch` で実装されていて省メモリで動作する。
-     * さらにいくつか特殊な事ができるが {@link Yielder::setBufferMode()}, {@link Yielder::setEmulationUnique()} あたりを参照。
+     * FROM が $unions 節のサブクエリになり、$column や $where はそのサブクエリに対して適用される。
      *
      * ```php
-     * # シンプルな例
-     * foreach ($db->yieldArray('SELECT * FROM very_many_heavy_table') as $row) {
-     *     // 一気に取得ではなく、逐次処理ができる
-     * }
+     * $db->union(['SELECT "a"', 'SELECT "b"']);
+     * // → シンプルに `SELECT "a" UNION SELECT "b"` と解釈される
      *
-     * # クエリビルダも渡せる
-     * foreach ($db->yieldArray($db->select('very_many_heavy_table')) as $row) {
-     *     // 一気に取得ではなく、逐次処理ができる
-     * }
+     * $db->union(['SELECT "a1" AS c1, "a2" AS c2', 'SELECT "b1" AS c1, "b2" AS c2'], ['c1']);
+     * // → UNION 部が FROM 句に飲み込まれ `SELECT c1 FROM (SELECT "a1" AS c1, "a2" AS c2 UNION SELECT "b1" AS c1, "b2" AS c2) AS T` と解釈される
+     *
+     * $db->union(['SELECT "a1" AS c1, "a2" AS c2', 'SELECT "b1" AS c1, "b2" AS c2'], ['c1'], ['c2' => 'b1']);
+     * // → UNION 部が FROM 句に飲み込まれ `SELECT c1 FROM (SELECT "a1" AS c1, "a2" AS c2 UNION SELECT "b1" AS c1, "b2" AS c2) AS T WHERE c2 = "b1"` と解釈される
+     *
+     * $db->unionAll([$db->select('t_article'), $db->select('t_article')]);
+     * // → クエリビルダも使える（倍の行を取得できる。あくまで例なので意味はない）
      * ```
      *
-     * @used-by yieldArray()
-     * @used-by yieldAssoc()
-     * @used-by yieldLists()
-     * @used-by yieldPairs()
-     *
-     * @param string|QueryBuilder $sql SQL
-     * @param iterable $params SQL パラメータ
-     * @return Yielder foreach で回せるオブジェクト
+     * @param array|string|QueryBuilder $unions union サブクエリ
+     * @param array|string $column 取得カラム [column]
+     * @param array|string $where 条件
+     * @param array|string $orderBy 単カラム名か[column=>asc/desc]な連想配列
+     * @param array|int $limit 単数値か[offset=>count]な連想配列
+     * @param array|string $groupBy カラム名かその配列
+     * @param array|string $having 条件
+     * @return QueryBuilder クエリビルダオブジェクト
      */
-    public function yield($sql, iterable $params = [])
+    public function union($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        $converter = $this->_getConverter($sql);
-        $callback = $sql instanceof QueryBuilder ? function ($row) use ($sql, $converter) {
-            return $sql->postselect([$converter($row)], true)[0];
-        } : $converter;
-        return new Yielder(function ($connection) use ($sql, $params) {
-            return $this->_sqlToStmt($sql, $params, $connection);
-        }, $this->getSlaveConnection(), null, $callback);
+        return $this->select(['' => $column], $where, $orderBy, $limit, $groupBy, $having)->union($unions);
     }
 
     /**
-     * テーブルレコードをエクスポートする
+     * UNION ALL する
      *
-     * このメソッドは {@link yield()} を用いて省メモリで動作するように実装されているので、ある程度巨大な結果セットになるクエリでも実行できる。
+     * ALL で UNION される以外は {@link union()} と全く同じ。
      *
-     * このメソッドを直接呼ぶことはほとんど無い。下記の例のように exportXXX 形式で呼び出すことが大半である。
-     *
-     * ```php
-     * // 標準出力に php 配列を書き出す（全部省略のシンプル版）
-     * $db->exportArray('SELECT * FROM tablename');
-     *
-     * // /tmp/tablename.csv に CSV を書き出す（ファイル指定）
-     * $db->exportCsv('SELECT * FROM tablename', [], [
-     *     'bom'       => false,
-     *     'encoding'  => 'SJIS_win',
-     * ], '/tmp/tablename.csv');
-     *
-     * // 標準出力に JSON を書き出す（クエリビルダで親子関係を指定）
-     * $db->exportJson($db->select('t_parent/t_child'), [], [
-     *     'assoc'  => false,
-     *     'option' => JSON_UNESCAPED_UNICODE,
-     * ], null);
-     * ```
-     *
-     * @used-by exportArray()
-     * @used-by exportCsv()
-     * @used-by exportJson()
-     *
-     * @param string|AbstractGenerator $generator 出力タイプ
-     * @param string|QueryBuilder $sql SQL
-     * @param iterable $params SQL パラメータ
-     * @param array $config 出力パラメータ
-     * @param string|resource|null $file 出力先。 null を与えると標準出力に書き出される
-     * @return int 書き込みバイト数
+     * @param array|string|QueryBuilder $unions union サブクエリ
+     * @param array|string $column 取得カラム [column]
+     * @param array|string $where 条件
+     * @param array|string $orderBy 単カラム名か[column=>asc/desc]な連想配列
+     * @param array|int $limit 単数値か[offset=>count]な連想配列
+     * @param array|string $groupBy カラム名かその配列
+     * @param array|string $having 条件
+     * @return QueryBuilder クエリビルダオブジェクト
      */
-    public function export($generator, $sql, iterable $params = [], $config = [], $file = null)
+    public function unionAll($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        if (is_string($generator)) {
-            $generator = strtolower($generator);
-            $class = $this->getExportClass();
-            if (!isset($class[$generator])) {
-                throw new \BadMethodCallException("export type '$generator' is undefined.");
-            }
-            $generator = new $class[$generator]($config);
-        }
-        return $generator->generate($file, $this->yield($sql, $params));
+        return $this->select(['' => $column], $where, $orderBy, $limit, $groupBy, $having)->unionAll($unions);
+    }
+
+    /**
+     * 特定レコードの前後のレコードを返す
+     *
+     * {@link QueryBuilder::neighbor()} へのプロキシメソッド。
+     *
+     * @inheritdoc QueryBuilder::neighbor()
+     *
+     * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
+     */
+    public function neighbor($tableDescriptor, $predicates, $limit = 1)
+    {
+        return $this->select($tableDescriptor)->neighbor($predicates, $limit);
     }
 
     /**
@@ -6054,6 +5629,8 @@ class Database
      * // changeArray で興味のない行は吹き飛ぶ
      * // DELETE FROM t_grand WHERE (t_grand.child_id IN(1, 2)) AND (NOT(t_grand.grand_id IN(1, 2, 3, 4)))
      * ```
+     *
+     * @used-by saveIgnore()
      *
      * @param string|array $tableName テーブル名
      * @param array $data 階層を持ったデータ配列

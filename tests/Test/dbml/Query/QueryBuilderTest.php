@@ -12,6 +12,7 @@ use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Entity\Entity;
+use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Query\Expression\Alias;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
@@ -59,6 +60,10 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('a', $builder->select('name1')->from('test1')->limit(1)->value());
 
         $this->assertEquals('e', $builder->select('name1')->from('test1')->where('id = ?')->limit(1)->value([5]));
+
+        $this->assertSame($builder, $builder->setLazyMode('eager')->valueOrThrow());
+
+        $this->assertException(new NonSelectedException("record is not found"), L($builder->reset()->from('test1')->where('id = -1'))->valueOrThrow());
     }
 
     /**
@@ -3573,38 +3578,38 @@ SQL
         $builder->getDatabase()->getSchema()->refresh();
 
         // シンプルな ON
-        $builder->reset()->column('ppp P')->innerJoinForeign('ccc C');
-        $this->assertQuery('SELECT P.* FROM ppp P INNER JOIN ccc C ON (C.id = P.id) AND (C.seq = P.seq)', $builder);
+        $builder->reset()->column('ppp P')->autoJoinForeign('ccc C');
+        $this->assertQuery('SELECT P.* FROM ppp P LEFT JOIN ccc C ON (C.id = P.id) AND (C.seq = P.seq)', $builder);
 
         // 結合順を入れ替えてもそれは変わらないはず
         $builder->reset()->column('ccc C')->innerJoinForeign('ppp P');
         $this->assertQuery('SELECT C.* FROM ccc C INNER JOIN ppp P ON (P.id = C.id) AND (P.seq = C.seq)', $builder);
 
         // カラムが違うなら ON が使われるはず
-        $builder->reset()->column('ppp P')->innerJoinForeign('fff F');
-        $this->assertQuery('SELECT P.* FROM ppp P INNER JOIN fff F ON (F.fff_id = P.id) AND (F.fff_seq = P.seq)', $builder);
+        $builder->reset()->column('ppp P')->leftJoinForeign('fff F');
+        $this->assertQuery('SELECT P.* FROM ppp P LEFT JOIN fff F ON (F.fff_id = P.id) AND (F.fff_seq = P.seq)', $builder);
 
         // 結合順を入れ替えてもそれは変わらないはず
-        $builder->reset()->column('fff F')->innerJoinForeign('ppp P');
-        $this->assertQuery('SELECT F.* FROM fff F INNER JOIN ppp P ON (P.id = F.fff_id) AND (P.seq = F.fff_seq)', $builder);
+        $builder->reset()->column('fff F')->rightJoinForeign('ppp P');
+        $this->assertQuery('SELECT F.* FROM fff F RIGHT JOIN ppp P ON (P.id = F.fff_id) AND (P.seq = F.fff_seq)', $builder);
 
         // joinForeignOn で外部キー＋ONされるはず
-        $builder->reset()->column('ccc C')->leftJoinForeignOn('ppp P', '1=1');
-        $this->assertQuery('SELECT C.* FROM ccc C LEFT JOIN ppp P ON (P.id = C.id) AND (P.seq = C.seq) AND (1=1)', $builder);
+        $builder->reset()->column('ccc C')->autoJoinForeignOn('ppp P', '1=1');
+        $this->assertQuery('SELECT C.* FROM ccc C INNER JOIN ppp P ON (P.id = C.id) AND (P.seq = C.seq) AND (1=1)', $builder);
 
         // ccc, ppp, fff という順番でも ppp<->fff が結合されるはず
-        $builder->reset()->column('ccc C')->innerJoinForeign('ppp P')->innerJoinForeign('fff F');
-        $this->assertQuery('SELECT C.* FROM ccc C INNER JOIN ppp P ON (P.id = C.id) AND (P.seq = C.seq) INNER JOIN fff F ON (F.fff_id = P.id) AND (F.fff_seq = P.seq)', $builder);
+        $builder->reset()->column('ccc C')->leftJoinForeignOn('ppp P', '1=1')->rightJoinForeignOn('fff F', '2=2');
+        $this->assertQuery('SELECT C.* FROM ccc C LEFT JOIN ppp P ON (P.id = C.id) AND (P.seq = C.seq) AND (1=1) RIGHT JOIN fff F ON (F.fff_id = P.id) AND (F.fff_seq = P.seq) AND (2=2)', $builder);
 
         // テーブル・外部キーの指定で結合が変わるはず
-        $builder->reset()->column('ccc C')->innerJoinOn('fff F', 'TRUE')->innerJoinForeign('ppp P');
+        $builder->reset()->column('ccc C')->joinOn('fff F', 'TRUE')->innerJoinForeign('ppp P');
         $this->assertQuery('SELECT C.* FROM ccc C INNER JOIN fff F ON TRUE INNER JOIN ppp P ON (P.id = F.fff_id) AND (P.seq = F.fff_seq)', $builder);
-        $builder->reset()->column('ccc C')->innerJoinOn('fff F', 'TRUE')->innerJoinForeign('ppp P', null, 'C');
+        $builder->reset()->column('ccc C')->joinOn('fff F', 'TRUE')->innerJoinForeign('ppp P', null, 'C');
         $this->assertQuery('SELECT C.* FROM ccc C INNER JOIN fff F ON TRUE INNER JOIN ppp P ON (P.id = C.id) AND (P.seq = C.seq)', $builder);
-        $builder->reset()->column('ccc C')->innerJoinOn('fff F', 'TRUE')->innerJoinForeign('ppp P', 'fkey1');
-        $this->assertQuery('SELECT C.* FROM ccc C INNER JOIN fff F ON TRUE INNER JOIN ppp P ON (P.id = C.id) AND (P.seq = C.seq)', $builder);
-        $builder->reset()->column('ccc C')->innerJoinOn('fff F', 'TRUE')->innerJoinForeign('ppp P', 'fkey2');
-        $this->assertQuery('SELECT C.* FROM ccc C INNER JOIN fff F ON TRUE INNER JOIN ppp P ON (P.id = F.fff_id) AND (P.seq = F.fff_seq)', $builder);
+        $builder->reset()->column('ccc C')->leftJoinOn('fff F', 'TRUE')->innerJoinForeign('ppp P', 'fkey1');
+        $this->assertQuery('SELECT C.* FROM ccc C LEFT JOIN fff F ON TRUE INNER JOIN ppp P ON (P.id = C.id) AND (P.seq = C.seq)', $builder);
+        $builder->reset()->column('ccc C')->rightJoinOn('fff F', 'TRUE')->innerJoinForeign('ppp P', 'fkey2');
+        $this->assertQuery('SELECT C.* FROM ccc C RIGHT JOIN fff F ON TRUE INNER JOIN ppp P ON (P.id = F.fff_id) AND (P.seq = F.fff_seq)', $builder);
 
         // 相互参照の外部キーでも名前を指定すれば結合されるはず
         $builder->reset()->column('gg1')->innerJoinForeign('gg2 P', 'fk_gg12');

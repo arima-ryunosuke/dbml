@@ -7,7 +7,9 @@ use Doctrine\DBAL\Schema\Column;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Gateway\TableGateway;
+use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\IteratorTrait;
+use ryunosuke\dbml\Mixin\JoinTrait;
 use ryunosuke\dbml\Mixin\OptionTrait;
 use ryunosuke\dbml\Query\Expression\Alias;
 use ryunosuke\dbml\Query\Expression\Expression;
@@ -187,67 +189,23 @@ use function ryunosuke\dbml\throws;
  * @method $this                  setPropagateLockMode($int)
  * @method bool                   getInjectChildColumn()
  * @method $this                  setInjectChildColumn($bool)
- *
- * @method $this                  innerJoinOn($table, $on, $from = null) {
- *     結合方法が INNER で結合条件指定の <@uses QueryBuilder::join()>
- * }
- * @method $this                  leftJoinOn($table, $on, $from = null) {
- *     結合方法が LEFT で結合条件指定の <@uses QueryBuilder::join()>
- * }
- * @method $this                  rightJoinOn($table, $on, $from = null) {
- *     結合方法が RIGHT で結合条件指定の <@uses QueryBuilder::join()>
- * }
- *
- * @method $this                  autoJoinForeign($table, $fkeyname = null, $from = null) {
- *     結合方法が AUTO で外部キー指定の <@uses QueryBuilder::join()>
- * }
- * @method $this                  innerJoinForeign($table, $fkeyname = null, $from = null) {
- *     結合方法が INNER で外部キー指定の <@uses QueryBuilder::join()>
- * }
- * @method $this                  leftJoinForeign($table, $fkeyname = null, $from = null) {
- *     結合方法が LEFT で外部キー指定の <@uses QueryBuilder::join()>
- * }
- * @method $this                  rightJoinForeign($table, $fkeyname = null, $from = null) {
- *     結合方法が RIGHT で外部キー指定の <@uses QueryBuilder::join()>
- * }
- *
- * @method $this                  autoJoinForeignOn($table, $on, $fkeyname = null, $from = null) {
- *     結合方法が AUTO で結合条件・外部キー指定の <@uses QueryBuilder::join()>
- * }
- * @method $this                  innerJoinForeignOn($table, $on, $fkeyname = null, $from = null) {
- *     結合方法が INNER で結合条件・外部キー指定の <@uses QueryBuilder::join()>
- * }
- * @method $this                  leftJoinForeignOn($table, $on, $fkeyname = null, $from = null) {
- *     結合方法が LEFT で結合条件・外部キー指定の <@uses QueryBuilder::join()>
- * }
- * @method $this                  rightJoinForeignOn($table, $on, $fkeyname = null, $from = null) {
- *     結合方法が RIGHT で結合条件・外部キー指定の <@uses QueryBuilder::join()>
- * }
- *
- * @method $this|array|Entityable[]     array(iterable $params = []) {
- *     自身が保持しているクエリでレコードの配列を返す（<@uses Database::fetchArray()> 参照）
- * }
- * @method $this|array|Entityable[]     assoc(iterable $params = []) {
- *     自身が保持しているクエリでレコードの連想配列を返す（<@uses Database::fetchAssoc()> 参照）
- * }
- * @method $this|array                  lists(iterable $params = []) {
- *     自身が保持しているクエリでレコード[1列目]の配列を返す（<@uses Database::fetchLists()> 参照）
- * }
- * @method $this|array                  pairs(iterable $params = []) {
- *     自身が保持しているクエリでレコード[1列目=>2列目]の連想配列を返す（<@uses Database::fetchPairs()> 参照）
- * }
- * @method $this|array|Entityable|false tuple(iterable $params = []) {
- *     自身が保持しているクエリでレコードを返す（<@uses Database::fetchTuple()> 参照）
- * }
- * @method $this|mixed                  value(iterable $params = []) {
- *     自身が保持しているクエリでレコード[1列目]を返す（<@uses Database::fetchValue()> 参照）
- * }
  */
 // @formatter:on
 class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 {
     use OptionTrait;
     use IteratorTrait;
+
+    use JoinTrait;
+
+    use FetchOrThrowTrait {
+        fetchArrayOrThrow as arrayOrThrow;
+        fetchAssocOrThrow as assocOrThrow;
+        fetchListsOrThrow as listsOrThrow;
+        fetchPairsOrThrow as pairsOrThrow;
+        fetchTupleOrThrow as tupleOrThrow;
+        fetchValueOrThrow as valueOrThrow;
+    }
 
     // 構成要素のキー
     public const CLAUSES = [
@@ -442,29 +400,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $result = $this->OptionTrait__callGetSet($name, $arguments, $called);
         if ($called) {
             return $result;
-        }
-
-        // join 系
-        if (preg_match('/^(inner|left|right)joinOn$/ui', $name, $matches)) {
-            array_splice($arguments, 2, 0, ['']);
-            return $this->join($matches[1], ...$arguments);
-        }
-        if (preg_match('/^(auto|inner|left|right)joinForeign$/ui', $name, $matches)) {
-            array_splice($arguments, 1, 0, [[]]);
-            return $this->join($matches[1], ...$arguments);
-        }
-        if (preg_match('/^(auto|inner|left|right)joinForeignOn$/ui', $name, $matches)) {
-            return $this->join($matches[1], ...$arguments);
-        }
-
-        // perform 系
-        $methods = Database::METHODS;
-        if (isset($methods[strtolower($name)])) {
-            if ($this->lazyMode) {
-                $this->lazyMethod = $name;
-                return $this;
-            }
-            return $this->getDatabase()->{"fetch$name"}($this, ...$arguments);
         }
 
         throw new \BadMethodCallException("'$name' is undefined.");
@@ -3922,6 +3857,106 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     public function getPreparedStatement()
     {
         return $this->statement;
+    }
+
+    /**
+     * 取得方法指定で Database にクエリを投げる
+     *
+     * 実際は下記のようなエイリアスメソッドが定義されているのでそちらを使うことが多く、明示的に呼ぶことはほとんどない。
+     *
+     * @used-by array()
+     * @used-by assoc()
+     * @used-by lists()
+     * @used-by pairs()
+     * @used-by tuple()
+     * @used-by value()
+     *
+     * @param string $method フェッチタイプ
+     * @param iterable $params bind パラメータ
+     * @return $this|array|false|mixed|Entityable[]
+     */
+    public function fetch($method, iterable $params = [])
+    {
+        if ($this->lazyMode) {
+            $this->lazyMethod = $method;
+            return $this;
+        }
+        return $this->getDatabase()->{"fetch$method"}($this, $params);
+    }
+
+    public function fetchOrThrow($method, $arguments)
+    {
+        if ($this->lazyMode) {
+            $this->lazyMethod = $method;
+            return $this;
+        }
+        return $this->getDatabase()->{"fetch{$method}OrThrow"}($this, ...$arguments);
+    }
+
+    /**
+     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchArray()} 参照）
+     *
+     * @inheritdoc Database::fetchArray()
+     * @return $this|array|Entityable[]
+     */
+    public function array(iterable $params = [])
+    {
+        return $this->fetch(__FUNCTION__, $params);
+    }
+
+    /**
+     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchAssoc()} 参照）
+     *
+     * @inheritdoc Database::fetchAssoc()
+     * @return $this|array|Entityable[]
+     */
+    public function assoc(iterable $params = [])
+    {
+        return $this->fetch(__FUNCTION__, $params);
+    }
+
+    /**
+     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchLists()} 参照）
+     *
+     * @inheritdoc Database::fetchLists()
+     * @return $this|array
+     */
+    public function lists(iterable $params = [])
+    {
+        return $this->fetch(__FUNCTION__, $params);
+    }
+
+    /**
+     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchPairs()} 参照）
+     *
+     * @inheritdoc Database::fetchPairs()
+     * @return $this|array
+     */
+    public function pairs(iterable $params = [])
+    {
+        return $this->fetch(__FUNCTION__, $params);
+    }
+
+    /**
+     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchTuple()} 参照）
+     *
+     * @inheritdoc Database::fetchTuple()
+     * @return $this|array|Entityable|false
+     */
+    public function tuple(iterable $params = [])
+    {
+        return $this->fetch(__FUNCTION__, $params);
+    }
+
+    /**
+     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchValue()} 参照）
+     *
+     * @inheritdoc Database::fetchValue()
+     * @return $this|mixed
+     */
+    public function value(iterable $params = [])
+    {
+        return $this->fetch(__FUNCTION__, $params);
     }
 
     /**

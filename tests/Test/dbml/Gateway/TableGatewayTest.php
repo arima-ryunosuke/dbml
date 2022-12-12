@@ -52,6 +52,19 @@ class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideGateway
      * @param TableGateway $gateway
      */
+    function test___call($gateway)
+    {
+        $this->assertEquals('hoge', $gateway->clone()->setDefaultJoinMethod('hoge')->getDefaultJoinMethod());
+        $this->assertEquals('auto', $gateway->getDefaultJoinMethod());
+
+        /** @noinspection PhpUndefinedMethodInspection */
+        $this->assertException('undefined', L($gateway)->hogera());
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     */
     function test___toString($gateway)
     {
         $this->assertEquals("SELECT test.* FROM test WHERE test.id = '2'", (string) $gateway->column('*')->where(['id' => 2]));
@@ -810,8 +823,6 @@ AND ((flag=1))", "$gw");
 
         $gateway->exportJson(['file' => $file], ['name']);
         $this->assertEquals($expected, json_import(file_get_contents($file)));
-
-        $this->assertException("export type 'undefined'", L($gateway)->exportUndefined([]));
     }
 
     /**
@@ -947,8 +958,8 @@ AND ((flag=1))", "$gw");
      */
     function test_exists($gateway)
     {
-        $this->assertTrue($gateway->exists(['id' => 1]));
-        $this->assertFalse($gateway->exists(['id' => 99]));
+        $this->assertTrue($gateway->where(['id' => 1])->exists());
+        $this->assertFalse($gateway->where(['id' => 99])->exists());
     }
 
     /**
@@ -957,11 +968,11 @@ AND ((flag=1))", "$gw");
      */
     function test_selectExists($gateway)
     {
-        $builder = $gateway->selectExists(['id' => 1]);
+        $builder = $gateway->where(['id' => 1])->selectExists();
         $this->assertEquals('EXISTS (SELECT * FROM test WHERE test.id = ?)', "$builder");
         $this->assertEquals([1], $builder->getParams());
 
-        $builder = $gateway->selectNotExists(['id' => 1]);
+        $builder = $gateway->where(['id' => 1])->selectNotExists();
         $this->assertEquals('NOT EXISTS (SELECT * FROM test WHERE test.id = ?)', "$builder");
         $this->assertEquals([1], $builder->getParams());
     }
@@ -979,17 +990,17 @@ AND ((flag=1))", "$gw");
         };
 
         $builder = $gateway->selectCount('id');
-        $this->assertEquals("SELECT COUNT(aggregate.id) AS {$qi('aggregate.id@Count')} FROM aggregate", "$builder");
+        $this->assertEquals("SELECT COUNT(aggregate.id) AS {$qi('aggregate.id@count')} FROM aggregate", "$builder");
         $this->assertEquals([], $builder->getParams());
         $this->assertEquals(10, $builder->value());
 
         $builder = $gateway->selectMax('id');
-        $this->assertEquals("SELECT MAX(aggregate.id) AS {$qi('aggregate.id@Max')} FROM aggregate", "$builder");
+        $this->assertEquals("SELECT MAX(aggregate.id) AS {$qi('aggregate.id@max')} FROM aggregate", "$builder");
         $this->assertEquals([], $builder->getParams());
         $this->assertEquals(10, $builder->value());
 
         $builder = $gateway->selectCount('id', [], ['group_id2']);
-        $this->assertEquals("SELECT group_id2, COUNT(aggregate.id) AS {$qi('aggregate.id@Count')} FROM aggregate GROUP BY group_id2", "$builder");
+        $this->assertEquals("SELECT group_id2, COUNT(aggregate.id) AS {$qi('aggregate.id@count')} FROM aggregate GROUP BY group_id2", "$builder");
         $this->assertEquals([], $builder->getParams());
         $this->assertEquals([
             10 => 5,
@@ -997,7 +1008,7 @@ AND ((flag=1))", "$gw");
         ], $builder->pairs());
 
         $builder = $gateway->selectMin('id', [], ['group_id2']);
-        $this->assertEquals("SELECT group_id2, MIN(aggregate.id) AS {$qi('aggregate.id@Min')} FROM aggregate GROUP BY group_id2", "$builder");
+        $this->assertEquals("SELECT group_id2, MIN(aggregate.id) AS {$qi('aggregate.id@min')} FROM aggregate GROUP BY group_id2", "$builder");
         $this->assertEquals([], $builder->getParams());
         $this->assertEquals([
             10 => 1,
@@ -1034,6 +1045,7 @@ AND ((flag=1))", "$gw");
         $this->assertEquals([
             'name' => 'b',
         ], $gateway->findOrThrow([2], 'name'));
+
         $this->assertException(new NonSelectedException(), L($gateway)->findOrThrow(999));
     }
 
@@ -1167,6 +1179,11 @@ AND ((flag=1))", "$gw");
         ], $gateway->array('*', ['id' => [2, 4]]));
 
         $this->assertException(new NonSelectedException(), L($gateway)->arrayOrThrow('*', ['id' => [999]]));
+        $this->assertException(new NonSelectedException(), L($gateway)->assocOrThrow('*', ['id' => [999]]));
+        $this->assertException(new NonSelectedException(), L($gateway)->listsOrThrow('*', ['id' => [999]]));
+        $this->assertException(new NonSelectedException(), L($gateway)->pairsOrThrow('*', ['id' => [999]]));
+        $this->assertException(new NonSelectedException(), L($gateway)->tupleOrThrow('*', ['id' => [999]]));
+        $this->assertException(new NonSelectedException(), L($gateway)->valueOrThrow('*', ['id' => [999]]));
     }
 
     /**
@@ -1198,10 +1215,10 @@ AND ((flag=1))", "$gw");
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for write */', $log['sql']);
             $this->assertEquals([1], $log['params']);
 
-            $this->assertException('record', L($gateway)->findInShareOrThrow(0));
+            $gateway->findInShare(1);
             $log = $logs[2];
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for read */', $log['sql']);
-            $this->assertEquals([0], $log['params']);
+            $this->assertEquals([1], $log['params']);
 
             $this->assertException('record', L($gateway)->findForAffect(0));
             $log = $logs[3];
@@ -1941,9 +1958,11 @@ FROM t_article Article", $Article->column([
         $row = $database->t_article()->pk(1)->tuple([
             'cmin' => $database->t_comment()->submin('comment_id'),
             'cmax' => $database->t_comment()->submax('comment_id'),
+            'csum' => $database->t_comment()->subsum('comment_id'),
         ]);
         $this->assertEquals('1', $row['cmin']);
         $this->assertEquals('3', $row['cmax']);
+        $this->assertEquals('6', $row['csum']);
     }
 
     /**
@@ -2045,7 +2064,7 @@ FROM t_article Article", $Article->column([
         $this->assertEquals('SELECT Article.article_id, C.comment_id FROM t_article Article LEFT JOIN t_comment C ON C.article_id = Article.article_id', "$select");
 
         // where
-        $select = $Article->joinForeign($t_comment->as('C')->scoping([], ['1=1']))->select();
+        $select = $Article->autoJoinForeign($t_comment->as('C')->scoping([], ['1=1']))->select();
         $this->assertEquals('SELECT * FROM t_article Article LEFT JOIN t_comment C ON (C.article_id = Article.article_id) AND (1=1)', "$select");
 
         // orderBy
@@ -2055,6 +2074,8 @@ FROM t_article Article", $Article->column([
         // foreignOn
         $select = $Article->joinForeignOn($t_comment->as('C')->scoping([]), 'C.delete_flg = 0')->select();
         $this->assertEquals('SELECT * FROM t_article Article LEFT JOIN t_comment C ON (C.article_id = Article.article_id) AND (C.delete_flg = 0)', "$select");
+        $select = $Article->innerJoinForeignOn($t_comment->as('C')->scoping([]), 'C.delete_flg = 0')->select();
+        $this->assertEquals('SELECT * FROM t_article Article INNER JOIN t_comment C ON (C.article_id = Article.article_id) AND (C.delete_flg = 0)', "$select");
 
         // innerOn
         $select = $Article->innerJoinOn($t_comment->as('C')->scoping([], ['1=1']), [])->select();

@@ -5,14 +5,28 @@ namespace ryunosuke\dbml\Gateway;
 use Doctrine\DBAL\Schema\Column;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
-use ryunosuke\dbml\Generator\Yielder;
+use ryunosuke\dbml\Mixin\AffectConditionallyTrait;
+use ryunosuke\dbml\Mixin\AffectIgnoreTrait;
+use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
+use ryunosuke\dbml\Mixin\AggregateTrait;
+use ryunosuke\dbml\Mixin\ExportTrait;
+use ryunosuke\dbml\Mixin\FindTrait;
 use ryunosuke\dbml\Mixin\IteratorTrait;
+use ryunosuke\dbml\Mixin\JoinTrait;
 use ryunosuke\dbml\Mixin\OptionTrait;
+use ryunosuke\dbml\Mixin\PrepareTrait;
+use ryunosuke\dbml\Mixin\SelectAggregateTrait;
+use ryunosuke\dbml\Mixin\SelectForAffectTrait;
+use ryunosuke\dbml\Mixin\SelectForUpdateTrait;
+use ryunosuke\dbml\Mixin\SelectInShareTrait;
+use ryunosuke\dbml\Mixin\SelectOrThrowTrait;
+use ryunosuke\dbml\Mixin\SubAggregateTrait;
+use ryunosuke\dbml\Mixin\SubSelectTrait;
+use ryunosuke\dbml\Mixin\YieldTrait;
 use ryunosuke\dbml\Query\Expression\TableDescriptor;
 use ryunosuke\dbml\Query\Pagination\Paginator;
 use ryunosuke\dbml\Query\Pagination\Sequencer;
 use ryunosuke\dbml\Query\QueryBuilder;
-use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_get;
@@ -25,7 +39,6 @@ use function ryunosuke\dbml\parse_annotation;
 use function ryunosuke\dbml\snake_case;
 use function ryunosuke\dbml\split_noempty;
 use function ryunosuke\dbml\throws;
-use function ryunosuke\dbml\try_finally;
 
 // @formatter:off
 /**
@@ -306,469 +319,75 @@ use function ryunosuke\dbml\try_finally;
  *
  * @method array                  getIgnoreAffectScope() {更新時に無視するスコープ名を返す}
  * @method $this                  setIgnoreAffectScope(array $ignoreAffectScope) {更新時に無視するスコープ名を設定する}
- *
- * @method $this                  joinOn(TableGateway $table, $on) {
- *     結合方法が INNER で結合条件指定の <@uses TableGateway::join()>
- * }
- * @method $this                  innerJoinOn(TableGateway $table, $on) {
- *     結合方法が INNER で結合条件指定の <@uses TableGateway::join()>
- * }
- * @method $this                  leftJoinOn(TableGateway $table, $on) {
- *     結合方法が LEFT で結合条件指定の <@uses TableGateway::join()>
- * }
- * @method $this                  rightJoinOn(TableGateway $table, $on) {
- *     結合方法が RIGHT で結合条件指定の <@uses TableGateway::join()>
- * }
- *
- * @method $this                  joinForeign(TableGateway $table, $fkeyname = null) {
- *     結合方法が AUTO で外部キー指定の <@uses TableGateway::join()>
- * }
- * @method $this                  innerJoinForeign(TableGateway $table, $fkeyname = null) {
- *     結合方法が INNER で外部キー指定の <@uses TableGateway::join()>
- * }
- * @method $this                  leftJoinForeign(TableGateway $table, $fkeyname = null) {
- *     結合方法が LEFT で外部キー指定の <@uses TableGateway::join()>
- * }
- * @method $this                  rightJoinForeign(TableGateway $table, $fkeyname = null) {
- *     結合方法が RIGHT で外部キー指定の <@uses TableGateway::join()>
- * }
- *
- * @method $this                  joinForeignOn(TableGateway $table, $on, $fkeyname = null) {
- *     結合方法が AUTO で結合条件・外部キー指定の <@uses TableGateway::join()>
- * }
- * @method $this                  innerJoinForeignOn(TableGateway $table, $on, $fkeyname = null) {
- *     結合方法が INNER で結合条件・外部キー指定の <@uses TableGateway::join()>
- * }
- * @method $this                  leftJoinForeignOn(TableGateway $table, $on, $fkeyname = null) {
- *     結合方法が LEFT で結合条件・外部キー指定の <@uses TableGateway::join()>
- * }
- * @method $this                  rightJoinForeignOn(TableGateway $table, $on, $fkeyname = null) {
- *     結合方法が RIGHT で結合条件・外部キー指定の <@uses TableGateway::join()>
- * }
- *
- * @method $this                  column($tableDescriptor) {
- *     SELECT 句を追加する（<@uses QueryBuilder::column()> を参照）
- *
- *     ```php
- *     // SELECT id, name FROM tablename
- *     echo $gw->column('id, name');
- *     ```
- *
- *     @param string|array $tableDescriptor SELECT 句
- * }
- * @method $this                  where($where) {
- *     WHERE 句を追加する（<@uses QueryBuilder::where()> を参照）
- *
- *     ```php
- *     // SELECT * FROM tablename WHERE id = 99
- *     echo $gw->where(['id' => 99]);
- *     ```
- *
- *     @param string|array $where WHERE 句
- * }
- * @method $this                  orderBy($orderBy) {
- *     ORDER BY 句を追加する（<@uses QueryBuilder::orderBy()> を参照）
- *
- *     ```php
- *     // SELECT * FROM tablename ORDER BY id ASC
- *     echo $gw->orderBy(['id']);
- *     ```
- *
- *     @param string|array $orderBy ORDER BY 句
- * }
- * @method $this                  limit($limit) {
- *     LIMIT 句を追加する（<@uses QueryBuilder::limit()> を参照）
- *
- *     ```php
- *     // SELECT * FROM tablename LIMIT 50 OFFSET 40
- *     echo $gw->limit([40 => 50]);
- *     ```
- *
- *     @param int|array $limit LIMIT 句
- * }
- * @method $this                  groupBy($groupBy) {
- *     GROUP BY 句を追加する（<@uses QueryBuilder::groupBy()> を参照）
- *
- *     ```php
- *     // SELECT * FROM tablename GROUP BY group_key
- *     echo $gw->groupBy('group_key');
- *     ```
- *
- *     @param string|array $groupBy GROUP BY 句
- * }
- * @method $this                  having($having) {
- *     HAVING 句を追加する（<@uses QueryBuilder::having()> を参照）
- *
- *     ```php
- *     // SELECT * FROM tablename HAVING id = 99
- *     echo $gw->having(['id' => 99]);
- *     ```
- *
- *     @param string|array $having HAVING 句
- * }
- *
- * @method array|Entityable[]     array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を配列で返す（<@uses Database::selectArray()> を参照）
- * }
- * @method array|Entityable[]     assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を連想配列で返す（<@uses Database::selectAssoc()> を参照）
- * }
- * @method array                  lists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を[value]で返す（<@uses Database::selectLists()> を参照）
- * }
- * @method array                  pairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を[key => value]で返す（<@uses Database::selectPairs()> を参照）
- * }
- * @method array|Entityable|false tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコードを配列で返す（<@uses Database::selectTuple()> を参照）
- * }
- * @method mixed                  value($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     カラム値をスカラーで返す（<@uses Database::selectValue()> を参照）
- * }
- * @method array|Entityable|false find($variadic_primary, $tableDescriptor = []) {
- *     主キー指定でレコードを取得する
- *
- *     引数がかなりややこしいことになっている。複合主キーが id1, id2, id3 というテーブルだとすると
- *
- *     - `find([10, 20, 30])` のように呼び出した（配列指定主キー）
- *     - `find(10, 20, 30)` のように呼び出した（可変長引数主キー）
- *     - 上記は2つとも id1 = 10, id2 = 20, id3 = 30 とみなされる
- *
- *     - `find([10, 20, 30], ['column1', 'column2'])` のように呼び出した（配列指定主キー＋配列指定カラム）
- *     - `find([10, 20, 30], 'column1', 'column2')` のように呼び出した（配列指定主キー＋可変長引数カラム）
- *     - `find(10, 20, 30, ['column1', 'column2'])` のように呼び出した（可変長引数主キー＋配列指定カラム）
- *     - 上記はすべて id1 = 10, id2 = 20, id3 = 30 とみなされるとともに、SELECT 句に column1, column2 が含まれる
- *
- *     この仕様は「主キーを配列で持っている」「主キーを個別に持っている」という2つの状況に簡単に対応するため。
- *     前者の状況はほとんど無いため、実質的な呼び出し方は `(10, 20, 30)` 方式で十分。
- *
- *     ```php
- *     # レコードを1行取得する（単一主キーで全カラムを取得する最もシンプルな例）
- *     $row = $gw->find(1);
- *     // SELECT * FROM t_table WHERE primary_id = 1
- *
- *     # レコードを1行取得する（複合主キーでカラムを指定して取得するシンプルでない例）
- *     $row = $gw->find([1, 2], ['column1', 'column2']);
- *     // SELECT column1, column2 FROM t_table WHERE (primary_id1 = 1) AND (primary_id2 = 2)
- *     ```
- *
- *     @param mixed $variadic_primary 主キー値あるいは配列
- *     @param mixed $tableDescriptor 取得カラム
- * }
- *
- * @method array|Entityable[]     arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::array()> の共有ロック版
- * }
- * @method array|Entityable[]     assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::assoc()> の共有ロック版
- * }
- * @method array                  listsInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::lists()> の共有ロック版
- * }
- * @method array                  pairsInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::pairs()> の共有ロック版
- * }
- * @method array|Entityable|false tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::tuple()> の共有ロック版
- * }
- * @method mixed                  valueInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::value()> の共有ロック版
- * }
- * @method array|Entityable|false findInShare($variadic_primary, $tableDescriptor = []) {
- *     <@uses TableGateway::find()> の共有ロック版
- * }
- *
- * @method array|Entityable[]     arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::array()> の排他ロック版
- * }
- * @method array|Entityable[]     assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::assoc()> の排他ロック版
- * }
- * @method array                  listsForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::lists()> の排他ロック版
- * }
- * @method array                  pairsForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::pairs()> の排他ロック版
- * }
- * @method array|Entityable|false tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::tuple()> の排他ロック版
- * }
- * @method mixed                  valueForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::value()> の排他ロック版
- * }
- * @method array|Entityable|false findForUpdate($variadic_primary, $tableDescriptor = []) {
- *     <@uses TableGateway::find()> の排他ロック版
- * }
- *
- * @method array|Entityable[]     arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::array()> の例外送出版
- * }
- * @method array|Entityable[]     assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::assoc()> の例外送出版
- * }
- * @method array                  listsOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::lists()> の例外送出版
- * }
- * @method array                  pairsOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::pairs()> の例外送出版
- * }
- * @method array|Entityable       tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::tuple()> の例外送出版
- * }
- * @method mixed                  valueOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::value()> の例外送出版
- * }
- * @method array|Entityable       findOrThrow($variadic_primary, $tableDescriptor = []) {
- *     <@uses TableGateway::find()> の例外送出版
- * }
- *
- * @method array|Entityable[]     arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::array()> の排他ロック兼例外送出版
- * }
- * @method array|Entityable[]     assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::assoc()> の排他ロック兼例外送出版
- * }
- * @method array                  listsForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::lists()> の排他ロック兼例外送出版
- * }
- * @method array                  pairsForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::pairs()> の排他ロック兼例外送出版
- * }
- * @method array|Entityable       tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::tuple()> の排他ロック兼例外送出版
- * }
- * @method mixed                  valueForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     <@uses TableGateway::value()> の排他ロック兼例外送出版
- * }
- * @method array|Entityable       findForAffect($variadic_primary, $tableDescriptor = []) {
- *     <@uses TableGateway::find()> の排他ロック兼例外送出版
- * }
- *
- * @method Yielder                yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を配列で少しずつ返す（<@uses Database::yieldArray()> を参照）
- * }
- * @method Yielder                yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を連想配列で少しずつ返す（<@uses Database::yieldAssoc()> を参照）
- * }
- * @method Yielder                yieldLists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を[value]で少しずつ返す（<@uses Database::yieldLists()> を参照）
- * }
- * @method Yielder                yieldPairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を[key => value]で少しずつ返す（<@uses Database::yieldPairs()> を参照）
- * }
- *
- * @method int                exportArray($config = [], $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を php 配列でエクスポートする（<@uses Database::exportArray()> を参照）
- * }
- * @method int                exportCsv($config = [], $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を CSV でエクスポートする（<@uses Database::exportCsv()> を参照）
- * }
- * @method int                exportJson($config = [], $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     レコード群を JSON でエクスポートする（<@uses Database::exportJson()> を参照）
- * }
- *
- * @method QueryBuilder           subselectArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（array）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- * @method QueryBuilder           subselectAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（assoc）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- * @method QueryBuilder           subselectLists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（lists）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- * @method QueryBuilder           subselectPairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（pairs）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- * @method QueryBuilder           subselectTuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（tuple）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- * @method QueryBuilder           subselectValue($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     子供レコード（value）を表すサブビルダを返す（<@uses Database::subselect()> を参照）
- * }
- *
- * @method QueryBuilder subarray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {{@link subselectArray()} のエイリアス@inheritdoc subselectArray()}
- * @method QueryBuilder subassoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {{@link subselectAssoc()} のエイリアス@inheritdoc subselectAssoc()}
- * @method QueryBuilder sublists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {{@link subselectLists()} のエイリアス@inheritdoc subselectLists()}
- * @method QueryBuilder subpairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {{@link subselectPairs()} のエイリアス@inheritdoc subselectPairs()}
- * @method QueryBuilder subtuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {{@link subselectTuple()} のエイリアス@inheritdoc subselectTuple()}
- * @method QueryBuilder subvalue($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {{@link subselectValue()} のエイリアス@inheritdoc subselectValue()}
- *
- * @method QueryBuilder           select($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::select()>
- * }
- * @method QueryBuilder           subquery($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::subquery()>
- * }
- * @method QueryBuilder           subexists($tableDescriptor = [], $where = []) {
- *     駆動表を省略できる <@uses Database::subexists()>
- * }
- * @method QueryBuilder           notSubexists($tableDescriptor = [], $where = []) {
- *     駆動表を省略できる <@uses Database::notSubexists()>
- * }
- * @method QueryBuilder           subcount($column = [], $where = []) {
- *     駆動表を省略できる <@uses Database::subcount()>
- * }
- * @method QueryBuilder           submin($column = [], $where = []) {
- *     駆動表を省略できる <@uses Database::submin()>
- * }
- * @method QueryBuilder           submax($column = [], $where = []) {
- *     駆動表を省略できる <@uses Database::submax()>
- * }
- * @method QueryBuilder           subsum($column = [], $where = []) {
- *     駆動表を省略できる <@uses Database::subsum()>
- * }
- * @method QueryBuilder           subavg($column = [], $where = []) {
- *     駆動表を省略できる <@uses Database::subavg()>
- * }
- *
- * @method array|Entityable[]     neighbor($predicates = [], $limit = 1) {
- *     前後のレコードを返す（<@uses QueryBuilder::neighbor()> を参照）
- * }
- * @method int|float              exists($where = [], $for_update = false) {
- *     駆動表を省略できる <@uses Database::exists()>
- * }
- * @method int|float              min($column, $where = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::min()>
- * }
- * @method int|float              max($column, $where = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::max()>
- * }
- * @method int|float              sum($column, $where = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::sum()>
- * }
- * @method int|float              avg($column, $where = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::avg()>
- * }
- *
- * @method QueryBuilder           selectExists($where = [], $for_update = false) {
- *     駆動表を省略できる <@uses Database::selectExists()>
- * }
- * @method QueryBuilder           selectNotExists($where = [], $for_update = false) {
- *     駆動表を省略できる <@uses Database::selectNotExists()>
- * }
- * @method QueryBuilder           selectCount($column = [], $where = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::selectCount()>
- * }
- * @method QueryBuilder           selectMin($column, $where = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::selectMin()>
- * }
- * @method QueryBuilder           selectMax($column, $where = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::selectMax()>
- * }
- * @method QueryBuilder           selectSum($column, $where = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::selectSum()>
- * }
- * @method QueryBuilder           selectAvg($column, $where = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::selectAvg()>
- * }
- *
- * @method array|string           insertOrThrow($data) {
- *     <@uses TableGateway::insert()> の例外送出版
- * }
- * @method array|string           updateOrThrow($data, array $identifier = []) {
- *     <@uses TableGateway::update()> の例外送出版
- * }
- * @method array|string           deleteOrThrow(array $identifier = []) {
- *     <@uses TableGateway::delete()> の例外送出版
- * }
- * @method array|string           removeOrThrow(array $identifier = []) {
- *     <@uses TableGateway::remove()> の例外送出版
- * }
- * @method array|string[]         destroyOrThrow(array $identifier = []) {
- *     <@uses TableGateway::destroy()> の例外送出版
- * }
- * @method array|string           reduceOrThrow($limit = null, $orderBy = [], $groupBy = [], $identifier = []) {
- *     <@uses TableGateway::reduce()> の例外送出版
- * }
- * @method array|string           upsertOrThrow($insertData, $updateData = []) {
- *     <@uses TableGateway::upsert()> の例外送出版
- * }
- * @method array|string           modifyOrThrow($insertData, $updateData = []) {
- *     <@uses TableGateway::modify()> の例外送出版
- * }
- * @method array|string           replaceOrThrow($data) {
- *     <@uses TableGateway::replace()> の例外送出版
- * }
- *
- * @method array|string           insertSelectIgnore($sql, $columns = [], iterable $params = []) {
- *     駆動表を省略できる <@uses Database::insertSelectIgnore()>
- * }
- * @method array|string           insertArrayIgnore($data, $chunk = 0) {
- *     駆動表を省略できる <@uses Database::insertArrayIgnore()>
- * }
- * @method array|string           updateArrayIgnore($data, $identifier = []) {
- *     駆動表を省略できる <@uses Database::updateArrayIgnore()>
- * }
- * @method array|string           modifyArrayIgnore($insertData, $updateData = [], $chunk = 0) {
- *     駆動表を省略できる <@uses Database::modifyArrayIgnore()>
- * }
- * @method array                  changeArrayIgnore($dataarray, $identifier) {
- *     駆動表を省略できる <@uses Database::changeArrayIgnore()>
- * }
- * @method array|string[]         saveIgnore($data) {
- *     駆動表を省略できる <@uses Database::saveIgnore()>
- * }
- * @method array|string           createIgnore($data) {
- *     駆動表を省略できる <@uses Database::createIgnore()>
- * }
- * @method array|string           insertIgnore($data) {
- *     駆動表を省略できる <@uses Database::insertIgnore()>
- * }
- * @method array|string           updateIgnore($data, array $identifier = []) {
- *     駆動表を省略できる <@uses Database::updateIgnore()>
- * }
- * @method array|string           deleteIgnore(array $identifier = []) {
- *     駆動表を省略できる <@uses Database::deleteIgnore()>
- * }
- * @method array|string           removeIgnore(array $identifier = []) {
- *     駆動表を省略できる <@uses Database::removeIgnore()>
- * }
- * @method array|string[]         destroyIgnore(array $identifier = []) {
- *     駆動表を省略できる <@uses Database::destroyIgnore()>
- * }
- * @method array|string           modifyIgnore($insertData, $updateData = []) {
- *     駆動表を省略できる <@uses Database::modifyIgnore()>
- * }
- *
- * @method array|string           insertConditionally($condition, $data) {
- *     駆動表を省略できる <@uses Database::insertConditionally()>
- * }
- * @method array|string           upsertConditionally($condition, $insertData, $updateData = []) {
- *     駆動表を省略できる <@uses Database::upsertConditionally()>
- * }
- * @method array|string           modifyConditionally($condition, $insertData, $updateData = []) {
- *     駆動表を省略できる <@uses Database::modifyConditionally()>
- * }
- * @method array|string           createConditionally($condition, $data) {
- *     駆動表を省略できる <@uses Database::createConditionally()>
- * }
- *
- * @method Statement              prepareSelect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) {
- *     駆動表を省略できる <@uses Database::prepareSelect()>
- * }
- * @method Statement              prepareInsert($data) {
- *     駆動表を省略できる <@uses Database::prepareInsert()>
- * }
- * @method Statement              prepareUpdate($data, array $identifier = []) {
- *     駆動表を省略できる <@uses Database::prepareUpdate()>
- * }
- * @method Statement              prepareDelete(array $identifier = []) {
- *     駆動表を省略できる <@uses Database::prepareDelete()>
- * }
- * @method Statement              prepareModify($insertData, $updateData = []) {
- *     駆動表を省略できる <@uses Database::prepareModify()>
- * }
- * @method Statement              prepareReplace($data) {
- *     駆動表を省略できる <@uses Database::prepareReplace()>
- * }
  */
 // @formatter:on
 class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     use OptionTrait;
     use IteratorTrait {
-        count as countIterator;
+        IteratorTrait::count as countIterator;
     }
+
+    use JoinTrait;
+
+    use SelectOrThrowTrait {
+        selectArrayOrThrow as arrayOrThrow;
+        selectAssocOrThrow as assocOrThrow;
+        selectListsOrThrow as listsOrThrow;
+        selectPairsOrThrow as pairsOrThrow;
+        selectTupleOrThrow as tupleOrThrow;
+        selectValueOrThrow as valueOrThrow;
+    }
+    use SelectInShareTrait {
+        selectArrayInShare as arrayInShare;
+        selectAssocInShare as assocInShare;
+        selectListsInShare as listsInShare;
+        selectPairsInShare as pairsInShare;
+        selectTupleInShare as tupleInShare;
+        selectValueInShare as valueInShare;
+    }
+    use SelectForUpdateTrait {
+        selectArrayForUpdate as arrayForUpdate;
+        selectAssocForUpdate as assocForUpdate;
+        selectListsForUpdate as listsForUpdate;
+        selectPairsForUpdate as pairsForUpdate;
+        selectTupleForUpdate as tupleForUpdate;
+        selectValueForUpdate as valueForUpdate;
+    }
+    use SelectForAffectTrait {
+        selectArrayForAffect as arrayForAffect;
+        selectAssocForAffect as assocForAffect;
+        selectListsForAffect as listsForAffect;
+        selectPairsForAffect as pairsForAffect;
+        selectTupleForAffect as tupleForAffect;
+        selectValueForAffect as valueForAffect;
+    }
+    use FindTrait;
+    use YieldTrait;
+    use ExportTrait;
+    use SelectAggregateTrait;
+
+    use AggregateTrait {
+        AggregateTrait::count as countAggregate;
+    }
+    use SubSelectTrait {
+        subselectArray as subArray;
+        subselectAssoc as subAssoc;
+        subselectLists as subLists;
+        subselectPairs as subPairs;
+        subselectTuple as subTuple;
+        subselectValue as subValue;
+    }
+    use SubAggregateTrait;
+
+    use AffectIgnoreTrait;
+    use AffectConditionallyTrait;
+    use AffectOrThrowTrait;
+    use PrepareTrait;
+
+    protected function getDatabase() { return $this->database; }
+
+    protected function getConditionPosition() { return 0; }
 
     /** @var array scope のデフォルト値 */
     private static $defargs = [
@@ -927,8 +546,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         $tname = $this->database->convertTableName($name);
         if (isset($this->database->$tname)) {
-            $method = $this->getUnsafeOption('defaultJoinMethod') . 'join';
-            $that = $this->$method($this->database->$name);
+            $that = $this->join($this->getUnsafeOption('defaultJoinMethod') ?: 'auto', $this->database->$name);
             return end($that->joins);
         }
     }
@@ -959,144 +577,13 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             return $result;
         }
 
-        // スコープ系メソッド
-        if (preg_match('#^(column|where|orderBy|limit|groupBy|having)$#ui', $name)) {
-            $params = array_change_key_case(self::$defargs, CASE_LOWER);
-            $params[strtolower($name)] = $arguments[0];
-            return $this->scoping(...array_values($params));
-        }
-
-        // join 系メソッド
-        if (preg_match('#^(inner|left|right)?JoinOn$#ui', $name, $matches)) {
-            return $this->join($matches[1] ?? '' ?: 'inner', array_shift($arguments), array_get($arguments, 0, []), '');
-        }
-        if (preg_match('#^(auto|inner|left|right)?Join(Foreign)?$#ui', $name, $matches)) {
-            return $this->join($matches[1] ?? '' ?: 'auto', array_shift($arguments), [], array_get($arguments, 0, null));
-        }
-        if (preg_match('#^(auto|inner|left|right)?JoinForeignOn$#ui', $name, $matches)) {
-            return $this->join($matches[1] ?? '' ?: 'auto', array_shift($arguments), array_get($arguments, 0, []), array_get($arguments, 1, null));
-        }
-
-        // スコープを当てた後に Database への移譲で済むもの系
-        if (preg_match("#^((prepare)?select|select(count|min|max|sum|avg)|(not)?subexists|sub(query|count|min|max|sum|avg)|_count|min|max|sum|avg)$#ui", $name)) {
-            // Countable のために別メソッドにしているので読み替え
-            if (strcasecmp($name, '_count') === 0) {
-                $name = 'count';
-            }
-
-            $sp = $this->getScopeParams(...$arguments);
-            $return = $this->database->$name(...array_values($sp));
-
-            // メソッドによってはクエリビルダが返ってくるのでこの段階でヒントを紐付ける
-            if ($return instanceof QueryBuilder) {
-                $return->hint($this->hint);
-                // エンティティモードの場合は更に cast する
-                if ($this->original->alias && strcasecmp($name, 'select') === 0) {
-                    $return->cast(null);
-                }
-            }
-            return $return;
-        }
-
-        // ↑と同じだが、引数体系が違うもの系
-        if (preg_match('/^(exists|select(Not)?Exists)$/ui', $name, $matches)) {
-            $sp = $this->getScopeParams([], array_get($arguments, 0, []));
-            return $this->database->$name($sp['column'], $sp['where'], array_get($arguments, 1, false));
-        }
-
-        // subselect 系
-        if (preg_match('/^sub(select)?(.+?)$/ui', $name, $matches)) {
-            return $this->database->{"subselect{$matches[2]}"}(...array_values($this->getScopeParams(...$arguments)));
-        }
-
-        // find メソッド（tuple メソッドの特別版とみなせる）
-        if (preg_match('#^find(.*)#ui', $name, $matches)) {
-            $method = 'tuple' . $matches[1];
-            if (is_array($arguments[0])) {
-                $primary = $arguments[0];
-                $columns = array_slice($arguments, 1) ?: [];
-            }
-            else {
-                $primary = $arguments;
-                $columns = is_array(end($primary)) ? array_pop($primary) : [];
-            }
-            return $this->pk($primary)->$method($columns);
-        }
-
-        // yield 系メソッド
-        if (preg_match('/^yield/ui', $name, $matches)) {
-            return $this->database->$name($this->select(...$arguments));
-        }
-
-        // export 系メソッド
-        if (preg_match('/^export/ui', $name, $matches)) {
-            $config = (array) array_shift($arguments);
-            $file = array_get($config, 'file');
-            return $this->database->$name($this->select(...$arguments), [], $config, $file);
-        }
-
-        // builder への移譲系メソッド
-        if (preg_match('#^(neighbor)$#ui', $name, $matches)) {
-            if (strcasecmp($name, 'neighbor') === 0 && $this->pkukval && !($arguments[0] ?? null)) {
-                $arguments[0] = $this->pkukval;
-            }
-            $select = $this->select();
-            if ($this->original->alias) {
-                $select->cast(null);
-            }
-            return $select->$name(...$arguments);
-        }
-
         // マジックジョイン
         $tname = $this->database->convertTableName($name);
         if (isset($this->database->$tname)) {
-            $method = $this->getUnsafeOption('defaultJoinMethod') . 'join';
-            return $this->$method($this->database->$name(...$arguments));
+            return $this->join($this->getUnsafeOption('defaultJoinMethod') ?: 'auto', $this->database->$name(...$arguments));
         }
 
-        // prepare～affect 系
-        if (preg_match('/^prepare(.+)/ui', $name, $matches)) {
-            $method = strtolower($matches[1]);
-            $restorer = $this->database->storeOptions(['preparing' => true]);
-            return try_finally([$this, $method], $restorer, ...$arguments);
-        }
-        // affect～OrThrow 系
-        if (preg_match('/^(insert|update|delete|remove|destroy|reduce|upsert|modify|replace|truncate)OrThrow$/ui', $name, $matches)) {
-            $method = strtolower($matches[1]);
-            Adhoc::reargument($arguments, [$this, $method], []);
-            $arguments[] = ['primary' => 1, 'throw' => true];
-            return $this->$method(...$arguments);
-        }
-        // affect～Ignore 系
-        if (preg_match('/^(insertSelect|insertArray|updateArray|modifyArray|changeArray|save|insert|update|delete|remove|destroy|create|modify)Ignore$/ui', $name, $matches)) {
-            $method = strtolower($matches[1]);
-            Adhoc::reargument($arguments, [$this, $method], []);
-            $arguments[] = ['primary' => 2, 'ignore' => true];
-            return $this->$method(...$arguments);
-        }
-        // affect～Conditionally 系
-        if (preg_match('/^(insert|create|upsert|modify)Conditionally$/ui', $name, $matches)) {
-            $method = strtolower($matches[1]);
-            $opt = Adhoc::reargument($arguments, [$this, $method], [0 => 'where']);
-            $arguments[] = ['primary' => 2] + $opt;
-            return $this->$method(...$arguments);
-        }
-
-        // 上記以外はすべて fetch 系メソッドとする（例外は Database 側で投げてくれるはず）
-        $lockmode = null;
-        if (preg_match('#(.+?)(ForAffect|ForUpdate|InShare)(OrThrow)?$#ui', $name, $matches)) {
-            [, $mode, $lockmode, $orthrow] = array_map('strtolower', $matches + [3 => '']);
-            if ($lockmode === 'foraffect') {
-                $lockmode = 'ForUpdate';
-                $orthrow = 'OrThrow';
-            }
-            $name = $mode . $orthrow;
-        }
-        $select = $this->select(...$arguments);
-        if ($lockmode) {
-            $select->{"lock$lockmode"}();
-        }
-        return $this->database->{"fetch$name"}($select);
+        throw new \BadMethodCallException("'$name' is undefined.");
     }
 
     /**
@@ -1205,7 +692,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function offsetExists($offset): bool
     {
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
-            return $this->exists($this->_primary($offset));
+            return $this->exists('*', $this->_primary($offset));
         }
         return $this->describe()->hasColumn($offset);
     }
@@ -1600,10 +1087,12 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @used-by leftJoinOn()
      * @used-by rightJoinOn()
      * @used-by joinForeign()
+     * @used-by autoJoinForeign()
      * @used-by innerJoinForeign()
      * @used-by leftJoinForeign()
      * @used-by rightJoinForeign()
      * @used-by joinForeignOn()
+     * @used-by autoJoinForeignOn()
      * @used-by innerJoinForeignOn()
      * @used-by leftJoinForeignOn()
      * @used-by rightJoinForeignOn()
@@ -1850,6 +1339,96 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         $that->addScope($hash, ...func_get_args());
         $that->activeScopes[$hash] = [];
         return $that;
+    }
+
+    /**
+     * SELECT 句を追加する（{@uses QueryBuilder::column()} を参照）
+     *
+     * ```php
+     * // SELECT id, name FROM tablename
+     * echo $gw->column('id, name');
+     * ```
+     *
+     * @inheritdoc QueryBuilder::column()
+     */
+    public function column($tableDescriptor)
+    {
+        return $this->scoping(...array_values(array_replace(self::$defargs, ['column' => $tableDescriptor])));
+    }
+
+    /**
+     * WHERE 句を追加する（{@uses QueryBuilder::where()} を参照）
+     *
+     * ```php
+     * // SELECT * FROM tablename WHERE id = 99
+     * echo $gw->where(['id' => 99]);
+     * ```
+     *
+     * @inheritdoc QueryBuilder::where()
+     */
+    public function where($where)
+    {
+        return $this->scoping(...array_values(array_replace(self::$defargs, ['where' => $where])));
+    }
+
+    /**
+     * ORDER BY 句を追加する（{@uses QueryBuilder::orderBy()} を参照）
+     *
+     * ```php
+     * // SELECT * FROM tablename ORDER BY id ASC
+     * echo $gw->orderBy(['id']);
+     * ```
+     *
+     * @inheritdoc QueryBuilder::orderBy()
+     */
+    public function orderBy($orderBy)
+    {
+        return $this->scoping(...array_values(array_replace(self::$defargs, ['orderBy' => $orderBy])));
+    }
+
+    /**
+     * LIMIT 句を追加する（{@uses QueryBuilder::limit()} を参照）
+     *
+     * ```php
+     * // SELECT * FROM tablename LIMIT 50 OFFSET 40
+     * echo $gw->limit([40 => 50]);
+     * ```
+     *
+     * @inheritdoc QueryBuilder::limit()
+     */
+    public function limit($limit)
+    {
+        return $this->scoping(...array_values(array_replace(self::$defargs, ['limit' => $limit])));
+    }
+
+    /**
+     * GROUP BY 句を追加する（{@uses QueryBuilder::groupBy()} を参照）
+     *
+     * ```php
+     * // SELECT * FROM tablename GROUP BY group_key
+     * echo $gw->groupBy('group_key');
+     * ```
+     *
+     * @inheritdoc QueryBuilder::groupBy()
+     */
+    public function groupBy($groupBy)
+    {
+        return $this->scoping(...array_values(array_replace(self::$defargs, ['groupBy' => $groupBy])));
+    }
+
+    /**
+     * HAVING 句を追加する（{@uses QueryBuilder::having()} を参照）
+     *
+     * ```php
+     * // SELECT * FROM tablename HAVING id = 99
+     * echo $gw->having(['id' => 99]);
+     * ```
+     *
+     * @inheritdoc QueryBuilder::having()
+     */
+    public function having($having)
+    {
+        return $this->scoping(...array_values(array_replace(self::$defargs, ['having' => $having])));
     }
 
     /**
@@ -2299,6 +1878,281 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * 駆動表を省略できる {@uses Database::select()}
+     *
+     * @used-by array()
+     * @used-by arrayOrThrow()
+     * @used-by arrayInShare()
+     * @used-by arrayForUpdate()
+     * @used-by arrayForAffect()
+     * @used-by assoc()
+     * @used-by assocOrThrow()
+     * @used-by assocInShare()
+     * @used-by assocForUpdate()
+     * @used-by assocForAffect()
+     * @used-by lists()
+     * @used-by listsOrThrow()
+     * @used-by listsInShare()
+     * @used-by listsForUpdate()
+     * @used-by listsForAffect()
+     * @used-by pairs()
+     * @used-by pairsOrThrow()
+     * @used-by pairsInShare()
+     * @used-by pairsForUpdate()
+     * @used-by pairsForAffect()
+     * @used-by tuple()
+     * @used-by tupleOrThrow()
+     * @used-by tupleInShare()
+     * @used-by tupleForUpdate()
+     * @used-by tupleForAffect()
+     * @used-by value()
+     * @used-by valueOrThrow()
+     * @used-by valueInShare()
+     * @used-by valueForUpdate()
+     * @used-by valueForAffect()
+     *
+     * @inheritdoc Database::select()
+     */
+    public function select($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
+        $return = $this->database->select(...array_values($sp));
+
+        $return->hint($this->hint);
+        if ($this->original->alias) {
+            $return->cast(null);
+        }
+
+        return $return;
+    }
+
+    /**
+     * 主キーが指定されたクエリビルダを返す
+     *
+     * 引数がかなりややこしいことになっている。複合主キーが id1, id2, id3 というテーブルだとすると
+     *
+     * - `find([10, 20, 30])` のように呼び出した（配列指定主キー）
+     * - `find(10, 20, 30)` のように呼び出した（可変長引数主キー）
+     * - 上記は2つとも id1 = 10, id2 = 20, id3 = 30 とみなされる
+     *
+     * - `find([10, 20, 30], ['column1', 'column2'])` のように呼び出した（配列指定主キー＋配列指定カラム）
+     * - `find([10, 20, 30], 'column1', 'column2')` のように呼び出した（配列指定主キー＋可変長引数カラム）
+     * - `find(10, 20, 30, ['column1', 'column2'])` のように呼び出した（可変長引数主キー＋配列指定カラム）
+     * - 上記はすべて id1 = 10, id2 = 20, id3 = 30 とみなされるとともに、SELECT 句に column1, column2 が含まれる
+     *
+     * この仕様は「主キーを配列で持っている」「主キーを個別に持っている」という2つの状況に簡単に対応するため。
+     * 前者の状況はほとんど無いため、実質的な呼び出し方は `(10, 20, 30)` 方式で十分。
+     *
+     * ```php
+     * # レコードを1行取得する（単一主キーで全カラムを取得する最もシンプルな例）
+     * $row = $gw->find(1);
+     * // SELECT * FROM t_table WHERE primary_id = 1
+     *
+     * # レコードを1行取得する（複合主キーでカラムを指定して取得するシンプルでない例）
+     * $row = $gw->find([1, 2], ['column1', 'column2']);
+     * // SELECT column1, column2 FROM t_table WHERE (primary_id1 = 1) AND (primary_id2 = 2)
+     * ```
+     *
+     * @used-by find()
+     * @used-by findOrThrow()
+     * @used-by findInShare()
+     * @used-by findForUpdate()
+     * @used-by findForAffect()
+     *
+     * @param mixed $variadic_primary 主キー値あるいは配列
+     * @param mixed $tableDescriptor 取得カラム
+     * @return QueryBuilder 主キーが指定されたクエリビルダ
+     */
+    public function selectFind($variadic_primary, $tableDescriptor = [])
+    {
+        $arguments = func_get_args();
+        if (is_array($arguments[0])) {
+            $primary = $arguments[0];
+            $columns = array_slice($arguments, 1) ?: [];
+        }
+        else {
+            $primary = $arguments;
+            $columns = is_array(end($primary)) ? array_pop($primary) : [];
+        }
+        return $this->pk($primary)->column($columns)->select();
+    }
+
+    /**
+     * レコード群を配列で返す（{@uses Database::selectArray()} を参照）
+     *
+     * @inheritdoc Database::selectArray()
+     */
+    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->database->fetchArray($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * レコード群を連想配列で返す（{@uses Database::selectAssoc()} を参照）
+     *
+     * @inheritdoc Database::selectAssoc()
+     */
+    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->database->fetchAssoc($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * レコード群を[value]で返す（{@uses Database::selectLists()} を参照）
+     *
+     * @inheritdoc Database::selectLists()
+     */
+    public function lists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->database->fetchLists($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * レコード群を[key => value]で返す（{@uses Database::selectPairs()} を参照）
+     *
+     * @inheritdoc Database::selectPairs()
+     */
+    public function pairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->database->fetchPairs($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * レコードを配列で返す（{@uses Database::selectTuple()} を参照）
+     *
+     * @inheritdoc Database::selectTuple()
+     */
+    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->database->fetchTuple($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * カラム値をスカラーで返す（{@uses Database::selectValue()} を参照）
+     *
+     * @inheritdoc Database::selectValue()
+     */
+    public function value($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->database->fetchValue($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+    }
+
+    /**
+     * 駆動表を省略できる（{@uses Database::selectAggregate()} を参照）
+     *
+     * @used-by selectExists()
+     * @used-by selectNotExists()
+     * @used-by selectCount()
+     * @used-by selectMin()
+     * @used-by selectMax()
+     * @used-by selectSum()
+     * @used-by selectAvg()
+     *
+     * @inheritdoc Database::selectAggregate()
+     */
+    public function selectAggregate($aggregation, $column, $where = [], $groupBy = [], $having = [])
+    {
+        return $this->select($column, $where, [], [], $groupBy, $having)->aggregate($aggregation);
+    }
+
+    /**
+     * 駆動表を省略できる {@uses Database::subselect()}
+     *
+     * @used-by subselectArray()
+     * @used-by subselectAssoc()
+     * @used-by subselectLists()
+     * @used-by subselectPairs()
+     * @used-by subselectTuple()
+     * @used-by subselectValue()
+     *
+     * @used-by subArray()
+     * @used-by subAssoc()
+     * @used-by subLists()
+     * @used-by subPairs()
+     * @used-by subTuple()
+     * @used-by subValue()
+     *
+     * @inheritdoc Database::subselect()
+     */
+    public function subselect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
+        $return = $this->database->subselect(...array_values($sp));
+        $return->hint($this->hint);
+        return $return;
+    }
+
+    /**
+     * 駆動表を省略できる {@uses Database::subquery()}
+     *
+     * @used-by subexists()
+     * @used-by notSubexists()
+     *
+     * @inheritdoc Database::subquery()
+     */
+    public function subquery($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
+        $return = $this->database->subquery(...array_values($sp));
+        $return->hint($this->hint);
+        return $return;
+    }
+
+    /**
+     * 駆動表を省略できる {@uses Database::subaggregate()}
+     *
+     * @used-by subcount()
+     * @used-by submin()
+     * @used-by submax()
+     * @used-by subsum()
+     * @used-by subavg()
+     *
+     * @inheritdoc Database::subaggregate()
+     */
+    public function subaggregate($aggregate, $column, $where = [])
+    {
+        $sp = $this->getScopeParams($column, $where);
+        $return = $this->database->subaggregate($aggregate, ...array_values($sp));
+        $return->hint($this->hint);
+        return $return;
+    }
+
+    /**
+     * 駆動表を省略できる {@uses Database::aggregate()}
+     *
+     * @used-by exists()
+     * @used-by count()
+     * @used-by min()
+     * @used-by max()
+     * @used-by sum()
+     * @used-by avg()
+     *
+     * @inheritdoc Database::aggregate()
+     */
+    public function aggregate($aggregation, $column, $where = [], $groupBy = [], $having = [])
+    {
+        $sp = $this->getScopeParams($column, $where, [], [], $groupBy, $having);
+        return $this->database->aggregate($aggregation, $sp['column'], $sp['where'], $sp['groupBy'], $sp['having']);
+    }
+
+    /**
+     * 前後のレコードを返す（{@uses QueryBuilder::neighbor()} を参照）
+     *
+     * @inheritdoc QueryBuilder::neighbor()
+     */
+    public function neighbor($predicates = [], $limit = 1)
+    {
+        if ($this->pkukval && !$predicates) {
+            $predicates = $this->pkukval;
+        }
+        $select = $this->select();
+        if ($this->original->alias) {
+            $select->cast(null);
+        }
+        return $select->neighbor($predicates, $limit);
+    }
+
+    /**
      * レコード件数を返す
      *
      * 件数取得は下記の2種類の方法が存在する。
@@ -2312,11 +2166,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * 内部的にメソッド呼び出しと count 呼び出しを判断する術がないので引数で分岐している。
      *
-     * @used-by min()
-     * @used-by max()
-     * @used-by sum()
-     * @used-by avg()
-     *
      * @param string|array $column SELECT 句
      * @param string|array $where WHERE 句
      * @param string|array $groupBy GROUP BY 句
@@ -2327,8 +2176,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         // 引数が来ているならメソッド（Countable::count は引数が来ない）
         if (func_num_args() > 0) {
-            /** @noinspection PhpUndefinedMethodInspection */
-            return $this->_count($column, $where, $groupBy, $having);
+            return $this->countAggregate($column, $where, $groupBy, $having);
         }
 
         // 上記以外は Countable::count
@@ -2399,6 +2247,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::insertSelect()>
      *
+     * @used-by insertSelectIgnore()
+     *
      * @inheritdoc Database::insertSelect()
      */
     public function insertSelect($sql, $columns = [], iterable $params = [])
@@ -2409,6 +2259,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * 駆動表を省略できる <@uses Database::insertArray()>
+     *
+     * @used-by insertArrayIgnore()
      *
      * @inheritdoc Database::insertArray()
      */
@@ -2421,6 +2273,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::updateArray()>
      *
+     * @used-by updateArrayIgnore()
+     *
      * @inheritdoc Database::updateArray()
      */
     public function updateArray($data, $identifier = [], $chunk = 0)
@@ -2431,6 +2285,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * 駆動表を省略できる <@uses Database::modifyArray()>
+     *
+     * @used-by modifyArrayIgnore()
      *
      * @inheritdoc Database::modifyArray()
      */
@@ -2443,6 +2299,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::changeArray()>
      *
+     * @used-by changeArrayIgnore()
+     *
      * @inheritdoc Database::changeArray()
      */
     public function changeArray($dataarray, $identifier)
@@ -2454,6 +2312,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::save()>
      *
+     * @used-by saveIgnore()
+     *
      * @inheritdoc Database::save()
      */
     public function save($data)
@@ -2463,7 +2323,25 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * 駆動表を省略できる <@uses Database::create()>
+     *
+     * @used-by createIgnore()
+     * @used-by createConditionally()
+     *
+     * @inheritdoc Database::create()
+     */
+    public function create($data)
+    {
+        $this->resetResult();
+        return $this->database->create($this->tableName, ...func_get_args());
+    }
+
+    /**
      * 駆動表を省略できる <@uses Database::insert()>
+     *
+     * @used-by insertOrThrow()
+     * @used-by insertIgnore()
+     * @used-by insertConditionally()
      *
      * @inheritdoc Database::insert()
      */
@@ -2487,6 +2365,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::update()>
      *
+     * @used-by updateOrThrow()
+     * @used-by updateIgnore()
+     *
      * @inheritdoc Database::update()
      */
     public function update($data, array $identifier = [])
@@ -2497,6 +2378,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * 駆動表を省略できる <@uses Database::delete()>
+     *
+     * @used-by deleteOrThrow()
+     * @used-by deleteIgnore()
      *
      * @inheritdoc Database::delete()
      */
@@ -2509,6 +2393,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::remove()>
      *
+     * @used-by removeOrThrow()
+     * @used-by removeIgnore()
+     *
      * @inheritdoc Database::remove()
      */
     public function remove(array $identifier = [])
@@ -2519,6 +2406,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * 駆動表を省略できる <@uses Database::destroy()>
+     *
+     * @used-by destroyOrThrow()
+     * @used-by destroyIgnore()
      *
      * @inheritdoc Database::destroy()
      */
@@ -2531,6 +2421,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::reduce()>
      *
+     * @used-by reduceOrThrow()
+     *
      * @inheritdoc Database::reduce()
      */
     public function reduce($limit = null, $orderBy = [], $groupBy = [], $identifier = [])
@@ -2540,18 +2432,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * 駆動表を省略できる <@uses Database::create()>
-     *
-     * @inheritdoc Database::create()
-     */
-    public function create($data)
-    {
-        $this->resetResult();
-        return $this->database->create($this->tableName, ...func_get_args());
-    }
-
-    /**
      * 駆動表を省略できる <@uses Database::upsert()>
+     *
+     * @used-by upsertOrThrow()
+     * @used-by upsertConditionally()
      *
      * @inheritdoc Database::upsert()
      */
@@ -2564,6 +2448,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::modify()>
      *
+     * @used-by modifyOrThrow()
+     * @used-by modifyIgnore()
+     * @used-by modifyConditionally()
+     *
      * @inheritdoc Database::modify()
      */
     public function modify($insertData, $updateData = [])
@@ -2574,6 +2462,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * 駆動表を省略できる <@uses Database::replace()>
+     *
+     * @used-by replaceOrThrow()
      *
      * @inheritdoc Database::replace()
      */

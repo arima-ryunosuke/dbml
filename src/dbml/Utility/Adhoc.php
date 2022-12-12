@@ -4,56 +4,13 @@ namespace ryunosuke\dbml\Utility;
 
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
-use function ryunosuke\dbml\array_unset;
 use function ryunosuke\dbml\preg_capture;
-use function ryunosuke\dbml\reflect_callable;
 
 /**
  * 比較的固有な処理を記述する Utility クラス
  */
 class Adhoc
 {
-    /**
-     * 配列から指定番目の要素を差っ引いて callable のデフォルト引数を埋め込む
-     *
-     * @param array $arguments
-     * @param callable $callable
-     * @param array $remap
-     * @return array
-     */
-    public static function reargument(&$arguments, $callable, $remap = [])
-    {
-        static $cache = [];
-
-        // $call_name でキャッシュ。しかしクロージャはすべて「Closure::__invoke」になるのでキャッシュできない
-        is_callable($callable, true, $call_name);
-        if (!isset($cache[$call_name]) || $callable instanceof \Closure) {
-            $refunc = reflect_callable($callable);
-            $cache[$call_name] = [
-                'NumberOfRequiredParameters' => $refunc->getNumberOfRequiredParameters(),
-                'ParameterDefaultValues'     => [],
-            ];
-            foreach ($refunc->getParameters() as $n => $param) {
-                if ($param->isDefaultValueAvailable()) {
-                    $cache[$call_name]['ParameterDefaultValues'][$n] = $param->getDefaultValue();
-                }
-            }
-        }
-
-        $restargs = [];
-        foreach ($remap as $n => $key) {
-            $restargs[$key] = array_unset($arguments, $n);
-        }
-        $arguments = array_values($arguments);
-
-        if (count($arguments) < $cache[$call_name]['NumberOfRequiredParameters']) {
-            throw new \InvalidArgumentException("argument's length too short.");
-        }
-        $arguments += $cache[$call_name]['ParameterDefaultValues'];
-
-        return array_combine($remap, $restargs);
-    }
-
     /**
      * 値が「空」なら true を返す
      *

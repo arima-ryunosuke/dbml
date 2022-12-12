@@ -185,7 +185,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // 暖機運転
         $database->fetchArray('select * from heavy');
-        $database->yieldArray('select * from heavy');
+        $database->yieldArray('heavy');
 
         // fetchArray だと最大値が不穏
         gc_collect_cycles();
@@ -201,7 +201,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
         gc_collect_cycles();
         $initial = memory_get_usage();
         $size = 0;
-        foreach ($database->yieldArray('select * from heavy')->setBufferMode(false) as $row) {
+        foreach ($database->yieldArray('heavy')->setBufferMode(false) as $row) {
             $size += strlen($row['data']);
             $this->assertLessThan(100 * 1000 * 100, memory_get_usage() - $initial);
         }

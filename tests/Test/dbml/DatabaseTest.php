@@ -184,23 +184,37 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals($database->selectTuple('test', [], [], 1), $database->select('test', [], [], 1)->tuple());
 
         // select～ForUpdate|InShare 系(ロックされることを担保・・・は難しいのでエラーにならないことを担保)
-        $this->assertEquals($database->selectArray('test'), $database->selectArrayInShare('test'));
-        $this->assertEquals($database->selectValue('test', [], [], 1), $database->selectValueInShare('test', [], [], 1));
-        $this->assertEquals($database->selectTuple('test', [], [], 1), $database->selectTupleForUpdate('test', [], [], 1));
+        $this->assertEquals($database->selectArrayInShare('test'), $database->selectArrayForUpdate('test'));
+        $this->assertEquals($database->selectAssocInShare('test'), $database->selectAssocForUpdate('test'));
+        $this->assertEquals($database->selectListsInShare('test'), $database->selectListsForUpdate('test'));
+        $this->assertEquals($database->selectPairsInShare('test'), $database->selectPairsForUpdate('test'));
+        $this->assertEquals($database->selectTupleInShare('test', [], [], 1), $database->selectTupleForUpdate('test', [], [], 1));
+        $this->assertEquals($database->selectValueInShare('test', [], [], 1), $database->selectValueForUpdate('test', [], [], 1));
 
         // select～OrThrow 系(見つかる場合に同じ結果になることを担保)
         $this->assertEquals($database->selectArray('test'), $database->selectArrayOrThrow('test'));
+        $this->assertEquals($database->selectAssoc('test'), $database->selectAssocOrThrow('test'));
+        $this->assertEquals($database->selectLists('test'), $database->selectListsOrThrow('test'));
+        $this->assertEquals($database->selectPairs('test'), $database->selectPairsOrThrow('test'));
         $this->assertEquals($database->selectValue('test', [], [], 1), $database->selectValueOrThrow('test', [], [], 1));
         $this->assertEquals($database->selectTuple('test', [], [], 1), $database->selectTupleOrThrow('test', [], [], 1));
 
         // select～OrThrow 系(見つからなかった場合に例外が投がることを担保)
         $ex = new NonSelectedException('record is not found');
         $this->assertException($ex, L($database)->selectArrayOrThrow('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectValueOrThrow('test', ['1=0']));
+        $this->assertException($ex, L($database)->selectAssocOrThrow('test', ['1=0']));
+        $this->assertException($ex, L($database)->selectListsOrThrow('test', ['1=0']));
+        $this->assertException($ex, L($database)->selectPairsOrThrow('test', ['1=0']));
         $this->assertException($ex, L($database)->selectTupleOrThrow('test', ['1=0']));
+        $this->assertException($ex, L($database)->selectValueOrThrow('test', ['1=0']));
 
         // select～ForAffect 系(見つからなかった場合に例外が投がることを担保)
         $this->assertEquals($database->selectArray('test'), $database->selectArrayForAffect('test'));
+        $this->assertException($ex, L($database)->selectArrayForAffect('test', ['1=0']));
+        $this->assertException($ex, L($database)->selectAssocForAffect('test', ['1=0']));
+        $this->assertException($ex, L($database)->selectListsForAffect('test', ['1=0']));
+        $this->assertException($ex, L($database)->selectPairsForAffect('test', ['1=0']));
+        $this->assertException($ex, L($database)->selectTupleForAffect('test', ['1=0']));
         $this->assertException($ex, L($database)->selectValueForAffect('test', ['1=0']));
 
         // fetch～OrThrow 系(見つかる場合に同じ結果になることを担保)
@@ -215,6 +229,17 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertException($ex, L($database)->fetchArrayOrThrow($sql));
         $this->assertException($ex, L($database)->fetchValueOrThrow($sql));
         $this->assertException($ex, L($database)->fetchTupleOrThrow($sql));
+
+        // entity～ 系(流す程度に)
+        $this->assertEquals($database->entityArrayOrThrow('test'), $database->entityArrayForAffect('test'));
+        $this->assertEquals($database->entityAssocOrThrow('test'), $database->entityAssocForAffect('test'));
+        $this->assertEquals($database->entityTupleOrThrow('test', [], [], 1), $database->entityTupleForAffect('test', [], [], 1));
+        $this->assertEquals($database->entityArrayForUpdate('test'), $database->entityArrayInShare('test'));
+        $this->assertEquals($database->entityAssocForUpdate('test'), $database->entityAssocInShare('test'));
+        $this->assertEquals($database->entityTupleForUpdate('test', [], [], 1), $database->entityTupleInShare('test', [], [], 1));
+        $this->assertException($ex, L($database)->entityArrayForAffect('test', ['1=0']));
+        $this->assertException($ex, L($database)->entityAssocForAffect('test', ['1=0']));
+        $this->assertException($ex, L($database)->entityTupleForAffect('test', ['1=0']));
 
         // 作用行系(作用した場合に主キーが返ることを担保)
         $this->assertEquals(['id' => 99], $database->insertOrThrow('test', ['id' => 99]));
@@ -351,10 +376,6 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // H は存在しないはず
         $this->assertException(new \BadMethodCallException(), [$database, 'selectH'], 'hoge');
-
-        // 引数が足りない
-        $this->assertException(new \InvalidArgumentException('too short'), L($database)->insertOrThrow('test'));
-        $this->assertException(new \InvalidArgumentException('too short'), L($database)->insertConditionally('test', []));
     }
 
     /**
@@ -2170,7 +2191,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             ],
         ], $params);
 
-        $count = $database->getPlatform()->quoteIdentifier('*@Count');
+        $count = $database->getPlatform()->quoteIdentifier('*@count');
         $this->assertEquals([
             implode(" and ", [
                 "?",
@@ -2238,17 +2259,17 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     {
         $path = sys_get_temp_dir() . '/export.tmp';
 
-        $database->exportCsv('select * from test', [], [], $path);
+        $database->exportCsv(['file' => $path], 'test');
         $this->assertStringEqualsFile($path, "1,a,\n2,b,\n3,c,\n4,d,\n5,e,\n6,f,\n7,g,\n8,h,\n9,i,\n10,j,\n");
 
-        $database->exportJson($database->select('test'), [], [], $path);
+        $database->exportJson(['file' => $path], 'test');
         $this->assertJson(file_get_contents($path));
 
         $database->setCheckSameColumn('loose');
-        $this->assertException('cause loose', L($database)->exportCsv('select test.id, 0 as id from test'));
+        $this->assertException('cause loose', L($database)->export('csv', 'select test.id, 0 as id from test'));
         $database->setCheckSameColumn(null);
 
-        $this->assertException(new \BadMethodCallException('undefined'), L($database)->exportHoge($database->select('test'), [], [], $path));
+        $this->assertException(new \BadMethodCallException('undefined'), L($database)->export('Hoge', 'select 1'));
     }
 
     /**
@@ -2384,6 +2405,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_fetch_entity($database)
     {
+        $tuple = $database->entityTuple('t_article(1)');
+        $this->assertEquals([$tuple], $database->entityArray('t_article(1)'));
+        $this->assertEquals([1 => $tuple], $database->entityAssoc('t_article(1)'));
+
         // 明示的に指定されているときは伝播しない
         $row = $database->select([
             't_article.*' => [
@@ -2637,11 +2662,11 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_yield($database)
     {
-        $it = $database->yieldLists($database->select('test.name', ['id' => [2, 3]]));
+        $it = $database->yieldLists('test.name', ['id' => [2, 3]]);
         $this->assertInstanceOf(Yielder::class, $it);
         $this->assertEquals(['b', 'c'], iterator_to_array($it));
 
-        $it = $database->yieldArray('select * from test where id=1');
+        $it = $database->yieldArray('test', ['id' => 1]);
         $this->assertInstanceOf(Yielder::class, $it);
         $this->assertEquals([
             [
@@ -2651,7 +2676,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             ],
         ], iterator_to_array($it));
 
-        $it = $database->yieldArray($database->select('t_article/t_comment'));
+        $it = $database->yieldArray('t_article/t_comment');
         $this->assertEquals([
             [
                 'article_id' => '1',
@@ -5970,8 +5995,23 @@ INSERT INTO test (id, name) VALUES
     function test_affect_ignore($database)
     {
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
-            $database->insert('test', ['id' => 1], ['ignore' => true]);
-            $database->update('test', ['id' => 1], ['id' => 2], ['ignore' => true]);
+            $database->insertIgnore('test', ['id' => 1]);
+            $database->updateIgnore('test', ['id' => 1], ['id' => 2]);
+
+            $database->insert('foreign_p', ['id' => 1, 'name' => 'p']);
+            $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'c1']);
+
+            // sqlite は外部キーを無視できない（というか DELETE OR IGNORE が対応していない？）
+            if ($database->getPlatform() instanceof SqlitePlatform) {
+                $this->assertException('syntax error', L($database)->deleteIgnore('foreign_p', ['id' => 1]));
+                $this->assertException('syntax error', L($database)->removeIgnore('foreign_p', ['id' => 1]));
+                $this->assertException('syntax error', L($database)->destroyIgnore('foreign_p', ['id' => 1]));
+            }
+            else {
+                $database->deleteIgnore('foreign_p', ['id' => 1]);
+                $database->removeIgnore('foreign_p', ['id' => 1]);
+                $database->destroyIgnore('foreign_p', ['id' => 1]);
+            }
         }
     }
 
@@ -6271,10 +6311,12 @@ AND
             't_article' => [
                 'cmin' => $database->submin('t_comment.comment_id'),
                 'cmax' => $database->submax('t_comment.comment_id'),
+                'cavg' => $database->subavg('t_comment.comment_id'),
             ],
         ], [], [], 1);
         $this->assertEquals('1', $row['cmin']);
         $this->assertEquals('3', $row['cmax']);
+        $this->assertEquals(2.0, $row['cavg']);
 
         $this->assertException("aggregate column's length is over 1", function () use ($database) {
             $database->selectTuple([
@@ -6440,17 +6482,17 @@ ORDER BY T.id DESC, name ASC
         };
 
         $builder = $database->selectCount('aggregate.id');
-        $this->assertEquals("SELECT COUNT(aggregate.id) AS {$qi('aggregate.id@Count')} FROM aggregate", "$builder");
+        $this->assertEquals("SELECT COUNT(aggregate.id) AS {$qi('aggregate.id@count')} FROM aggregate", "$builder");
         $this->assertEquals([], $builder->getParams());
         $this->assertEquals(10, $builder->value());
 
         $builder = $database->selectMax('aggregate.id');
-        $this->assertEquals("SELECT MAX(aggregate.id) AS {$qi('aggregate.id@Max')} FROM aggregate", "$builder");
+        $this->assertEquals("SELECT MAX(aggregate.id) AS {$qi('aggregate.id@max')} FROM aggregate", "$builder");
         $this->assertEquals([], $builder->getParams());
         $this->assertEquals(10, $builder->value());
 
         $builder = $database->selectCount('aggregate.id', [], ['group_id2']);
-        $this->assertEquals("SELECT group_id2, COUNT(aggregate.id) AS {$qi('aggregate.id@Count')} FROM aggregate GROUP BY group_id2", "$builder");
+        $this->assertEquals("SELECT group_id2, COUNT(aggregate.id) AS {$qi('aggregate.id@count')} FROM aggregate GROUP BY group_id2", "$builder");
         $this->assertEquals([], $builder->getParams());
         $this->assertEquals([
             10 => 5,
@@ -6458,7 +6500,7 @@ ORDER BY T.id DESC, name ASC
         ], $builder->pairs());
 
         $builder = $database->selectMin('aggregate.id', [], ['group_id2']);
-        $this->assertEquals("SELECT group_id2, MIN(aggregate.id) AS {$qi('aggregate.id@Min')} FROM aggregate GROUP BY group_id2", "$builder");
+        $this->assertEquals("SELECT group_id2, MIN(aggregate.id) AS {$qi('aggregate.id@min')} FROM aggregate GROUP BY group_id2", "$builder");
         $this->assertEquals([], $builder->getParams());
         $this->assertEquals([
             10 => 1,

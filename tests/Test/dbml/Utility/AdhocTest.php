@@ -6,40 +6,6 @@ use ryunosuke\dbml\Utility\Adhoc;
 
 class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
-    function test_reargument()
-    {
-        $closure = function ($a = 1, $b = 2, $c = 3) { };
-
-        $arguments = [10, 20];
-        $this->assertEquals([], Adhoc::reargument($arguments, $closure));
-        $this->assertEquals([10, 20, 3], $arguments);
-
-        $arguments = [10, 'x', 20];
-        $this->assertEquals(['oa' => 'x'], Adhoc::reargument($arguments, $closure, [1 => 'oa']));
-        $this->assertEquals([10, 20, 3], $arguments);
-
-        $arguments = [10, 'x', 'y', 20, 30];
-        $this->assertEquals(['oa' => 'x', 'ob' => 'y'], Adhoc::reargument($arguments, $closure, [1 => 'oa', 2 => 'ob']));
-        $this->assertEquals([10, 20, 30], $arguments);
-
-        $arguments = [10, 'x', 20, 30, 'z'];
-        $this->assertEquals(['oa' => 'x', 'oc' => 'z'], Adhoc::reargument($arguments, $closure, [1 => 'oa', 4 => 'oc']));
-        $this->assertEquals([10, 20, 30], $arguments);
-
-        $arguments = [1];
-        $this->assertEquals([], Adhoc::reargument($arguments, function ($a, $b = 20) { }));
-        $this->assertEquals([1, 20], $arguments);
-
-        $arguments = [1];
-        $this->assertEquals([], Adhoc::reargument($arguments, function ($a, $b = 20, $c = 30) { }));
-        $this->assertEquals([1, 20, 30], $arguments);
-
-        $this->assertException('too short', function () {
-            $arguments = [];
-            Adhoc::reargument($arguments, function ($x) { });
-        });
-    }
-
     function test_is_empty()
     {
         $this->assertTrue(Adhoc::is_empty([]));
