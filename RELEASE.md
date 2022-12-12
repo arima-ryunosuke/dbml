@@ -22,6 +22,25 @@
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
 
+## 2.1.0
+
+- [*change][all] マジックメソッドを極力廃止して trait に変更
+- [*change][all] 一部のオプションのデフォルト値を変更
+- [*change][Database] 仮想カラムの expression 指定を廃止
+- [*change][Database] execute(Query|Statement) の廃止
+- [*change][Database] modifyAutoSelect オプションの廃止
+- [*change][Database] DoctrineCache の廃止
+- [*change][Logger] DoctrineLogger の廃止
+- [*change][Schema] getTableColumnMetadata の廃止
+- [*change][Operator] phrase 演算子を正規表現で再実装
+- [feature][Operator] between や 範囲演算子の INF 対応
+- [feature][Database] CTE を宣言する declareCommonTable を追加
+- [fixbug][Paginator] getPageRange で小数が混ざる不具合を修正
+- [fixbug][QueryBuilder] with の RECURSIVE は識別子に紐づくものではなく句に紐づく
+- [fixbug][TableGateway] get/set の両方で仮想カラム実装されていると一方しか有効にならない不具合を修正
+- [fixbug][Database] refresh すると cache が配列になってしまう不具合を修正
+- [fixbug][Database] initCommand が空文字のときにエラーになる不具合を修正
+
 ## 2.0.22
 
 - [change] doctrine:3.5 の対応
