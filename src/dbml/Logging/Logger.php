@@ -7,7 +7,6 @@ use Psr\Log\LogLevel;
 use ReflectionClass;
 use ryunosuke\dbml\Mixin\OptionTrait;
 use function ryunosuke\dbml\array_each;
-use function ryunosuke\dbml\array_flatten;
 use function ryunosuke\dbml\date_convert;
 use function ryunosuke\dbml\is_stringable;
 use function ryunosuke\dbml\parameter_length;
@@ -321,7 +320,7 @@ class Logger extends AbstractLogger
         }
 
         $sql = $context['sql'] ?? $message;
-        $params = array_flatten($context['params'] ?? []);
+        $params = array_merge($context['params'] ?? []);
         $types = $context['types'] ?? [];
         $metadata = $context['metadata'] ?? array_map(fn($v) => $v($context), $this->getUnsafeOption('metadata'));
 
