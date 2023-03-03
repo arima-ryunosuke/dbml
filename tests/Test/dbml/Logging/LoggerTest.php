@@ -264,6 +264,7 @@ select 4, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
         ]));
         $database->fetchArray('select ?', [1]);
 
+        $this->assertStringContainsString("-- id: ", $logs[0]);
         $this->assertStringContainsString("-- time: 20", $logs[0]);
         $this->assertStringContainsString("-- elapsed: 0.", $logs[0]);
         $this->assertStringContainsString("-- traces[]", $logs[0]);
@@ -272,21 +273,53 @@ select 4, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 
     function test_metadata_custom()
     {
+        $seq1 = $seq2 = 1;
         $logs = [];
         $database = self::getDummyDatabase();
         $database->setLogger(new Logger([
             'destination' => function ($log) use (&$logs) { $logs[] = $log; },
             'metadata'    => [
-                'hoge' => function () { return 123; },
-                'fuga' => function () { return [1, 2, 3]; },
+                'fixed' => 'direct',
+                'hoge'  => function () { return 123; },
+                'fuga'  => function () { return [1, 2, 3]; },
+                'piyo1' => function () use (&$seq1) { return $seq1++; },
+                'piyo2' => static function () use (&$seq2) { return $seq2++; },
             ],
         ]));
         $database->fetchArray('select ?', [1]);
+        $database->fetchArray('select ?', [2]);
+        $database->fetchArray('select ?', [3]);
 
-        $this->assertEquals("-- hoge: 123
--- fuga[]: 1
--- fuga[]: 2
--- fuga[]: 3
-select 1", $logs[0]);
+        // piyo2 は固定されている
+        $this->assertEquals(<<<LOG
+            -- fixed: direct
+            -- hoge: 123
+            -- fuga[]: 1
+            -- fuga[]: 2
+            -- fuga[]: 3
+            -- piyo1: 1
+            -- piyo2: 1
+            select 1
+            LOG, $logs[0]);
+        $this->assertEquals(<<<LOG
+            -- fixed: direct
+            -- hoge: 123
+            -- fuga[]: 1
+            -- fuga[]: 2
+            -- fuga[]: 3
+            -- piyo1: 2
+            -- piyo2: 1
+            select 2
+            LOG, $logs[1]);
+        $this->assertEquals(<<<LOG
+            -- fixed: direct
+            -- hoge: 123
+            -- fuga[]: 1
+            -- fuga[]: 2
+            -- fuga[]: 3
+            -- piyo1: 3
+            -- piyo2: 1
+            select 3
+            LOG, $logs[2]);
     }
 }

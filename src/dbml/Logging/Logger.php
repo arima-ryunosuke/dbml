@@ -8,6 +8,7 @@ use ReflectionClass;
 use ryunosuke\dbml\Mixin\OptionTrait;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\date_convert;
+use function ryunosuke\dbml\is_bindable_closure;
 use function ryunosuke\dbml\is_stringable;
 use function ryunosuke\dbml\parameter_length;
 use function ryunosuke\dbml\sql_bind;
@@ -112,7 +113,11 @@ class Logger extends AbstractLogger
             // flock するか否か
             'lockmode'    => true,
             // メタデータをコメント化して出力する際の処理（下記はあくまで組み込み。任意のキーを生やせばそれがログられる）
+            // static なクロージャを与えると初回呼び出しの結果が固定化され、次回以降同じ結果を返すようになる（コネクション ID などに使える）
             'metadata'    => [
+                'id'      => static function ($metadata) {
+                    return uniqid();
+                },
                 'time'    => function ($metadata) {
                     if (isset($metadata['time'])) {
                         return date_convert('Y/m/d H:i:s.v', $metadata['time']);
@@ -324,7 +329,22 @@ class Logger extends AbstractLogger
         $sql = $context['sql'] ?? $message;
         $params = array_merge($context['params'] ?? []);
         $types = $context['types'] ?? [];
-        $metadata = $context['metadata'] ?? array_map(fn($v) => $v($context), $this->getUnsafeOption('metadata'));
+        $metadata = $context['metadata'] ?? (function ($context) {
+            $metadata = $this->getUnsafeOption('metadata');
+            $result = [];
+            foreach ($metadata as $name => $data) {
+                if ($data instanceof \Closure && !is_bindable_closure($data)) {
+                    $data = $data($context);
+                    $metadata[$name] = $data;
+                }
+                elseif (is_callable($data)) {
+                    $data = $data($context);
+                }
+                $result[$name] = $data;
+            }
+            $this->setUnsafeOption('metadata', $metadata);
+            return $result;
+        })($context);
 
         // arrayBuffer を優先するため下記の順番を変えてはならない
         if (is_array($this->arrayBuffer)) {
