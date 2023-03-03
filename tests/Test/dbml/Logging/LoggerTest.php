@@ -34,60 +34,88 @@ class LoggerTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $simple = Logger::simple();
         $this->assertEquals(<<<EXPECTED
-select 'abcdefghijklmnopqrstuvwxyz', 2
-where 'abcdefgh' and 1 and 'binary(6162635C3078797A)'
-EXPECTED
-            , $simple(<<<ACTUAL
-select ?, ?
-where ? and ? and ?
-ACTUAL
-                , ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', true, 'abc\0xyz'], []));
+            select 'abcdefghijklmnopqrstuvwxyz', 2
+            where 'abcdefgh' and 1 and 'binary(6162635C3078797A)'
+            EXPECTED,
+            $simple(<<<ACTUAL
+            select ?, ?
+            where ? and ? and ?
+            ACTUAL, ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', true, 'abc\0xyz'], [], []));
 
         $simple10 = Logger::simple(10);
         $this->assertEquals(<<<EXPECTED
-select 'abc...wxyz', 2
-where 'abcdefgh' and 1 and 'binary(616...797A)'
-EXPECTED
-            , $simple10(<<<ACTUAL
-select ?, ?
-where ? and ? and ?
-ACTUAL
-                , ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', true, 'abc\0xyz'], []));
+            select 'abc...wxyz', 2
+            where 'abcdefgh' and 1 and 'binary(616...797A)'
+            EXPECTED,
+            $simple10(<<<ACTUAL
+            select ?, ?
+            where ? and ? and ?
+            ACTUAL, ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', true, 'abc\0xyz'], [], []));
+
+        $simplemeta = Logger::simple(10);
+        $this->assertEquals(<<<EXPECTED
+            -- hoge: HOGE
+            select 'abc...wxyz', 2
+            where 'abcdefgh' and 1 and 'binary(616...797A)'
+            EXPECTED,
+            $simplemeta(<<<ACTUAL
+            select ?, ?
+            where ? and ? and ?
+            ACTUAL, ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', true, 'abc\0xyz'], [], ['hoge' => 'HOGE']));
     }
 
     function test_pretty()
     {
         $pretty = Logger::pretty(10);
         $this->assertEquals(<<<EXPECTED
-select
-  'abc...wxyz',
-  2
-where
-  'abcdefgh'
-  and 1
-EXPECTED
-            , $pretty(<<<ACTUAL
-select ?, ?
-where ? and ?
-ACTUAL
-                , ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', true], []));
+            select
+              'abc...wxyz',
+              2
+            where
+              'abcdefgh'
+              and 1
+            EXPECTED,
+            $pretty(<<<ACTUAL
+            select ?, ?
+            where ? and ?
+            ACTUAL, ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', true], [], []));
     }
 
     function test_oneline()
     {
         $oneline = Logger::oneline(10);
         $this->assertEquals(<<<EXPECTED
-select 'abc...wxyz', 2, '  a  
-  b  
-  c  ' as white where 'abcdefgh' and 'X\\nY'
-EXPECTED
-            , $oneline(<<<ACTUAL
-select ?, ?, '  a  
-  b  
-  c  ' as white
-where ? and ?
-ACTUAL
-                , ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', "X\nY"], []));
+            select 'abc...wxyz', 2, '  a  
+              b  
+              c  ' as white where 'abcdefgh' and 'X\\nY'
+            EXPECTED,
+            $oneline(<<<ACTUAL
+            select ?, ?, '  a  
+              b  
+              c  ' as white
+            where ? and ?
+            ACTUAL, ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', "X\nY"], [], []));
+    }
+
+    function test_json()
+    {
+        $json = Logger::json(false);
+        $this->assertEquals('{"sql":"select ?, ?, \'  a  \n  b  \n  c  \' as white\nwhere ? and ?","params":["abcdefghijklmnopqrstuvwxyz",2,"abcdefgh","X\nY"],"types":[],"hoge":"HOGE"}',
+            $json(<<<ACTUAL
+            select ?, ?, '  a  
+              b  
+              c  ' as white
+            where ? and ?
+            ACTUAL, ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', "X\nY"], [], ['hoge' => 'HOGE']));
+
+        $json_bind = Logger::json(true);
+        $this->assertEquals('{"sql":"select \'abcdefghijklmnopqrstuvwxyz\', 2, \'  a  \n  b  \n  c  \' as white\nwhere \'abcdefgh\' and \'X\\\\nY\'","hoge":"HOGE"}',
+            $json_bind(<<<ACTUAL
+            select ?, ?, '  a  
+              b  
+              c  ' as white
+            where ? and ?
+            ACTUAL, ['abcdefghijklmnopqrstuvwxyz', 2, 'abcdefgh', "X\nY"], [], ['hoge' => 'HOGE']));
     }
 
     function test_callback()

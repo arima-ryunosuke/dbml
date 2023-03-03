@@ -147,7 +147,7 @@ class Logger extends AbstractLogger
      */
     public static function simple($trimsize = null)
     {
-        return function ($sql, $params, $types) use ($trimsize) {
+        return function ($sql, $params, $types, $metadata) use ($trimsize) {
             foreach ($params as $k => $param) {
                 if (is_string($param) || (is_object($param) && is_stringable($param))) {
                     $param = (string) $param;
@@ -164,7 +164,28 @@ class Logger extends AbstractLogger
                     $params[$k] = $param;
                 }
             }
-            return sql_bind(trim($sql), $params);
+
+            $sql = sql_bind(trim($sql), $params);
+
+            if ($metadata) {
+                $datalines = [];
+                foreach ($metadata as $key => $data) {
+                    if (is_iterable($data)) {
+                        foreach ($data as $k => $d) {
+                            if ($d !== null) {
+                                $datalines[] = sprintf("-- %s[%s]: %s\n", $key, is_int($k) ? '' : $k, $d);
+                            }
+                        }
+                    }
+                    else {
+                        if ($data !== null) {
+                            $datalines[] = sprintf("-- %s: %s\n", $key, $data);
+                        }
+                    }
+                }
+                $sql = implode("", $datalines) . $sql;
+            }
+            return $sql;
         };
     }
 
@@ -177,8 +198,8 @@ class Logger extends AbstractLogger
     public static function pretty($trimsize = null)
     {
         $simple = self::simple($trimsize);
-        return function ($sql, $params, $types) use ($simple) {
-            return sql_format($simple($sql, $params, $types));
+        return function ($sql, $params, $types, $metadata) use ($simple) {
+            return sql_format($simple($sql, $params, $types, $metadata));
         };
     }
 
@@ -191,7 +212,7 @@ class Logger extends AbstractLogger
     public static function oneline($trimsize = null)
     {
         $simple = self::simple($trimsize);
-        return function ($sql, $params, $types) use ($simple) {
+        return function ($sql, $params, $types, $metadata) use ($simple) {
             // ログ目的なので token_get_all で雑にやる（"" も '' も `` も php 的にはクオーティングなのでリテラルが保護される）
             // SqlServer はなんか特殊なクオートがあった気がするが考慮しない
             $tokens = token_get_all("<?php " . $sql);
@@ -208,7 +229,32 @@ class Logger extends AbstractLogger
                 }
                 $stripsql .= $token[1];
             }
-            return $simple($stripsql, $params, $types);
+            return $simple($stripsql, $params, $types, $metadata);
+        };
+    }
+
+    /**
+     * 1行 json (jsonl) のコールバックを返す
+     *
+     * @param bool $bind bind パラメータの埋め込みフラグ
+     * @return \Closure 文字列化コールバック
+     */
+    public static function json($bind = true)
+    {
+        return function ($sql, $params, $types, $metadata) use ($bind) {
+            if ($bind) {
+                $data = [
+                    'sql' => sql_bind($sql, $params),
+                ];
+            }
+            else {
+                $data = [
+                    'sql'    => $sql,
+                    'params' => $params,
+                    'types'  => $types,
+                ];
+            }
+            return json_encode($data + $metadata, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         };
     }
 
@@ -256,7 +302,7 @@ class Logger extends AbstractLogger
         if ($this->handle instanceof \Closure && parameter_length($this->handle) <= 1) {
             $handle = $this->handle;
             $this->handle = function () use ($handle) {
-                $handle($this->_stringify(...func_get_args()));
+                $handle($this->getUnsafeOption('callback')(...func_get_args()));
             };
         }
     }
@@ -282,37 +328,13 @@ class Logger extends AbstractLogger
         }
         if (is_array($this->arrayBuffer)) {
             foreach ($this->arrayBuffer as $log) {
-                fwrite($this->handle, $this->_stringify(...$log) . "\n");
+                fwrite($this->handle, $this->getUnsafeOption('callback')(...$log) . "\n");
             }
         }
 
         if ($locking) {
             flock($this->handle, LOCK_UN);
         }
-    }
-
-    private function _stringify($sql, $params, $types, $metadata)
-    {
-        $sql = $this->getUnsafeOption('callback')($sql, $params, $types);
-        if ($metadata) {
-            $datalines = [];
-            foreach ($metadata as $key => $data) {
-                if (is_iterable($data)) {
-                    foreach ($data as $k => $d) {
-                        if ($d !== null) {
-                            $datalines[] = sprintf("-- %s[%s]: %s\n", $key, is_int($k) ? '' : $k, $d);
-                        }
-                    }
-                }
-                else {
-                    if ($data !== null) {
-                        $datalines[] = sprintf("-- %s: %s\n", $key, $data);
-                    }
-                }
-            }
-            $sql = implode("", $datalines) . $sql;
-        }
-        return $sql;
     }
 
     /**
@@ -351,10 +373,10 @@ class Logger extends AbstractLogger
             $this->arrayBuffer[] = [$sql, $params, $types, $metadata];
         }
         elseif (is_resource($this->resourceBuffer)) {
-            fwrite($this->resourceBuffer, $this->_stringify($sql, $params, $types, $metadata) . "\n");
+            fwrite($this->resourceBuffer, $this->getUnsafeOption('callback')($sql, $params, $types, $metadata) . "\n");
         }
         elseif (is_resource($this->handle)) {
-            fwrite($this->handle, $this->_stringify($sql, $params, $types, $metadata) . "\n");
+            fwrite($this->handle, $this->getUnsafeOption('callback')($sql, $params, $types, $metadata) . "\n");
         }
         else {
             ($this->handle)($sql, $params, $types, $metadata);
@@ -364,7 +386,7 @@ class Logger extends AbstractLogger
             $this->bufferSize += strlen($sql) + array_sum(array_map('strlen', $params));
             if ($this->bufferSize > $this->bufferLimit) {
                 foreach ($this->arrayBuffer as $log) {
-                    fwrite($this->resourceBuffer, $this->_stringify(...$log) . "\n");
+                    fwrite($this->resourceBuffer, $this->getUnsafeOption('callback')(...$log) . "\n");
                 }
                 $this->arrayBuffer = [];
                 $this->bufferSize = 0;
