@@ -114,11 +114,13 @@ class Logger extends AbstractLogger
             // メタデータをコメント化して出力する際の処理（下記はあくまで組み込み。任意のキーを生やせばそれがログられる）
             'metadata'    => [
                 'time'    => function ($metadata) {
-                    return date_convert('Y/m/d H:i:s.v', microtime(true));
+                    if (isset($metadata['time'])) {
+                        return date_convert('Y/m/d H:i:s.v', $metadata['time']);
+                    }
                 },
                 'elapsed' => function ($metadata) {
-                    if (isset($metadata['elapsed'])) {
-                        return number_format($metadata['elapsed'], 3);
+                    if (isset($metadata['time'])) {
+                        return number_format(microtime(true) - $metadata['time'], 3);
                     }
                 },
                 'traces'  => function ($metadata) {

@@ -55,7 +55,7 @@ class MiddlewareTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertEquals([
             "debug" => [
-                "Executing prepare: {sql}",
+                "Executing prepare: {sql}, time: {time}",
             ],
             "info"  => [
                 "Connecting",
@@ -63,16 +63,16 @@ class MiddlewareTest extends \ryunosuke\Test\AbstractUnitTestCase
                 "ROLLBACK",
                 "BEGIN",
                 "COMMIT",
-                "Executing select: {sql}, elapsed: {elapsed}",
-                "Executing affect: {sql}, elapsed: {elapsed}",
-                "Executing statement: {sql} (parameters: {params}, types: {types}, elapsed: {elapsed})",
+                "Executing select: {sql}, time: {time}",
+                "Executing affect: {sql}, time: {time}",
+                "Executing statement: {sql} (parameters: {params}, types: {types}, time: {time})",
                 "Disconnecting",
             ],
             "error" => [
-                "Executing select: {sql}, elapsed: {elapsed}",
-                "Executing affect: {sql}, elapsed: {elapsed}",
-                "Executing statement: {sql} (parameters: {params}, types: {types}, elapsed: {elapsed})",
-                "Executing prepare: {sql}",
+                "Executing select: {sql}, time: {time}",
+                "Executing affect: {sql}, time: {time}",
+                "Executing statement: {sql} (parameters: {params}, types: {types}, time: {time})",
+                "Executing prepare: {sql}, time: {time}",
             ],
         ], $logger->logs);
     }

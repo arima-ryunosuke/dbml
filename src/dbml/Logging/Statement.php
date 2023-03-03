@@ -58,11 +58,11 @@ final class Statement extends AbstractStatementMiddleware
             throw $t;
         }
         finally {
-            $this->logger->$level('Executing statement: {sql} (parameters: {params}, types: {types}, elapsed: {elapsed})', [
+            $this->logger->$level('Executing statement: {sql} (parameters: {params}, types: {types}, time: {time})', [
                 'sql'     => $this->sql,
                 'params'  => $params ?? $this->params,
                 'types'   => $this->types,
-                'elapsed' => microtime(true) - $start,
+                'time'    => $start,
             ]);
         }
     }

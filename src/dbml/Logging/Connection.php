@@ -21,11 +21,13 @@ final class Connection extends AbstractConnectionMiddleware
 
     public function __destruct()
     {
-        $this->logger->info('Disconnecting');
+        $this->logger->info('Disconnecting', ['time' => microtime(true)]);
     }
 
     public function prepare(string $sql): DriverStatement
     {
+        $start = microtime(true);
+
         try {
             $level = 'debug';
             return new Statement(parent::prepare($sql), $this->logger, $sql);
@@ -35,7 +37,7 @@ final class Connection extends AbstractConnectionMiddleware
             throw $t;
         }
         finally {
-            $this->logger->$level('Executing prepare: {sql}', ['sql' => $sql]);
+            $this->logger->$level('Executing prepare: {sql}, time: {time}', ['sql' => $sql, 'time' => $start]);
         }
     }
 
@@ -52,7 +54,7 @@ final class Connection extends AbstractConnectionMiddleware
             throw $t;
         }
         finally {
-            $this->logger->$level('Executing select: {sql}, elapsed: {elapsed}', ['sql' => $sql, 'elapsed' => microtime(true) - $start]);
+            $this->logger->$level('Executing select: {sql}, time: {time}', ['sql' => $sql, 'time' => $start]);
         }
     }
 
@@ -69,27 +71,27 @@ final class Connection extends AbstractConnectionMiddleware
             throw $t;
         }
         finally {
-            $this->logger->$level('Executing affect: {sql}, elapsed: {elapsed}', ['sql' => $sql, 'elapsed' => microtime(true) - $start]);
+            $this->logger->$level('Executing affect: {sql}, time: {time}', ['sql' => $sql, 'time' => $start]);
         }
     }
 
     public function beginTransaction()
     {
-        $this->logger->info('BEGIN');
+        $this->logger->info('BEGIN', ['time' => microtime(true)]);
 
         return parent::beginTransaction();
     }
 
     public function commit()
     {
-        $this->logger->info('COMMIT');
+        $this->logger->info('COMMIT', ['time' => microtime(true)]);
 
         return parent::commit();
     }
 
     public function rollBack()
     {
-        $this->logger->info('ROLLBACK');
+        $this->logger->info('ROLLBACK', ['time' => microtime(true)]);
 
         return parent::rollBack();
     }

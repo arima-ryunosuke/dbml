@@ -22,7 +22,7 @@ final class Driver extends AbstractDriverMiddleware
      */
     public function connect(array $params)
     {
-        $this->logger->info('Connecting');
+        $this->logger->info('Connecting', ['time' => microtime(true)]);
 
         return new Connection(parent::connect($params), $this->logger);
     }
