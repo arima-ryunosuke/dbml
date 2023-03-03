@@ -50,10 +50,15 @@ final class Statement extends AbstractStatementMiddleware
         $start = microtime(true);
 
         try {
+            $level = 'info';
             return parent::execute($params);
         }
+        catch (\Throwable $t) {
+            $level = 'error';
+            throw $t;
+        }
         finally {
-            $this->logger->info('Executing statement: {sql} (parameters: {params}, types: {types}, elapsed: {elapsed})', [
+            $this->logger->$level('Executing statement: {sql} (parameters: {params}, types: {types}, elapsed: {elapsed})', [
                 'sql'     => $this->sql,
                 'params'  => $params ?? $this->params,
                 'types'   => $this->types,

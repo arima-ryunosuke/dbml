@@ -26,9 +26,17 @@ final class Connection extends AbstractConnectionMiddleware
 
     public function prepare(string $sql): DriverStatement
     {
-        $this->logger->debug('Executing prepare: {sql}', ['sql' => $sql]);
-
-        return new Statement(parent::prepare($sql), $this->logger, $sql);
+        try {
+            $level = 'debug';
+            return new Statement(parent::prepare($sql), $this->logger, $sql);
+        }
+        catch (\Throwable $t) {
+            $level = 'error';
+            throw $t;
+        }
+        finally {
+            $this->logger->$level('Executing prepare: {sql}', ['sql' => $sql]);
+        }
     }
 
     public function query(string $sql): Result
@@ -36,10 +44,15 @@ final class Connection extends AbstractConnectionMiddleware
         $start = microtime(true);
 
         try {
+            $level = 'info';
             return parent::query($sql);
         }
+        catch (\Throwable $t) {
+            $level = 'error';
+            throw $t;
+        }
         finally {
-            $this->logger->info('Executing select: {sql}, elapsed: {elapsed}', ['sql' => $sql, 'elapsed' => microtime(true) - $start]);
+            $this->logger->$level('Executing select: {sql}, elapsed: {elapsed}', ['sql' => $sql, 'elapsed' => microtime(true) - $start]);
         }
     }
 
@@ -48,10 +61,15 @@ final class Connection extends AbstractConnectionMiddleware
         $start = microtime(true);
 
         try {
+            $level = 'info';
             return parent::exec($sql);
         }
+        catch (\Throwable $t) {
+            $level = 'error';
+            throw $t;
+        }
         finally {
-            $this->logger->info('Executing affect: {sql}, elapsed: {elapsed}', ['sql' => $sql, 'elapsed' => microtime(true) - $start]);
+            $this->logger->$level('Executing affect: {sql}, elapsed: {elapsed}', ['sql' => $sql, 'elapsed' => microtime(true) - $start]);
         }
     }
 
