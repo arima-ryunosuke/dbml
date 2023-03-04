@@ -2075,7 +2075,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         // $fkeyname, $fromAlias の解決（大抵はどちらか一方が決まればどちらか一方も決まる）
         if (empty($fromAlias)) {
             if ($fkeyname !== '') {
-                $fkey = $schema->getForeignTable($fkeyname);
+                $fkey = $fkeyname === null ? [] : $schema->getForeignTable($fkeyname);
                 if ($fkey) {
                     [$local, $foreign] = first_keyvalue($fkey);
                     if ($table === $local) {
