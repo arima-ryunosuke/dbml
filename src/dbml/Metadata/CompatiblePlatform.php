@@ -343,6 +343,22 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * char と binary に互換性があるかを返す
+     *
+     * @return bool char と binary に互換性があるなら true
+     */
+    public function supportsCompatibleCharAndBinary()
+    {
+        if ($this->platform instanceof SQLServerPlatform) {
+            return false;
+        }
+        if ($this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 必要に応じて識別子をエスケープする
      *
      * @param string $word エスケープする文字列
@@ -880,6 +896,21 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         }
 
         return new Expression($this->platform->getConcatExpression(...$args));
+    }
+
+    /**
+     * binary 表現を返す
+     *
+     * @param string $data データ
+     * @return Expression|string BINARY Expression
+     */
+    public function getBinaryExpression($data)
+    {
+        // SQLServer はキャストしなければ binary として扱えない
+        if ($this->platform instanceof SQLServerPlatform) {
+            return new Expression('CAST(? as VARBINARY(MAX))', [(string) $data]);
+        }
+        return $data;
     }
 
     /**

@@ -1291,10 +1291,6 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_convertBoolToInt($database)
     {
-        // @todo 良くわからないエラーが出る
-        if ($database->getCompatiblePlatform()->getWrappedPlatform() instanceof SQLServerPlatform) {
-            return;
-        }
         $database->setConvertBoolToInt(true);
         $database->insert('misctype', [
             'id'        => 9,
@@ -1304,8 +1300,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cdecimal'  => false,
             'cstring'   => true,
             'ctext'     => false,
-            'cbinary'   => true,
-            'cblob'     => false,
+            'cbinary'   => '1',
+            'cblob'     => '0',
             'carray'    => true,
             'cjson'     => false,
             'cdate'     => '2012-12-12',
@@ -1319,6 +1315,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cdecimal'  => 0,
             'cstring'   => 1,
             'ctext'     => 0,
+            'cbinary'   => '1',
+            'cblob'     => '0',
             'carray'    => 1,
             'cjson'     => 0,
             'cdate'     => '2012-12-12',

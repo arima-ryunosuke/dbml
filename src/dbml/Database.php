@@ -1168,6 +1168,20 @@ class Database
             }
         }
 
+        if (!$this->getCompatiblePlatform()->supportsCompatibleCharAndBinary()) {
+            // 対象とする型（要するにバイナリ系）
+            $targets = [Types::BINARY => true, Types::BLOB => true];
+            foreach ($columns as $cname => $column) {
+                // 値が文字列で・・・
+                if (array_key_exists($cname, $row) && is_string($row[$cname])) {
+                    // バイナリ系の型なら文字列に変換する
+                    if (isset($targets[$column->getType()->getName()])) {
+                        $row[$cname] = $this->getCompatiblePlatform()->getBinaryExpression($row[$cname]);
+                    }
+                }
+            }
+        }
+
         // mysql は null を指定すれば自動採番されるが、他の RDBMS では伏せないと採番されないようだ
         if ($autocolumn && !isset($row[$autocolumn]) && !$this->getCompatiblePlatform()->supportsIdentityNullable()) {
             unset($row[$autocolumn]);

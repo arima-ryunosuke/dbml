@@ -278,6 +278,23 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_supportsCompatibleCharAndBinary($cplatform, $platform)
+    {
+        $expected = true;
+        if ($platform instanceof SQLServerPlatform) {
+            $expected = false;
+        }
+        elseif ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
+            $expected = false;
+        }
+        $this->assertEquals($expected, $cplatform->supportsCompatibleCharAndBinary());
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_quoteIdentifierIfNeeded($cplatform, $platform)
     {
         $this->assertEquals('', $cplatform->quoteIdentifierIfNeeded(''));
@@ -694,6 +711,21 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $expected = $platform instanceof SQLServerPlatform ? $platform->getConcatExpression('CAST(id1 as varchar)', 'CAST(id2 as varchar)') : $platform->getConcatExpression('id1', 'id2');
         $this->assertEquals($expected, $cplatform->getConcatExpression('id1', 'id2'));
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
+    function test_getBinaryExpression($cplatform, $platform)
+    {
+        if ($platform instanceof SQLServerPlatform) {
+            $this->assertExpression($cplatform->getBinaryExpression('hoge'), 'CAST(? as VARBINARY(MAX))', ['hoge']);
+        }
+        else {
+            $this->assertEquals('hoge', $cplatform->getBinaryExpression('hoge'));
+        }
     }
 
     /**
