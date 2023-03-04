@@ -1011,17 +1011,21 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_view($database)
     {
-        if (!$database->getPlatform() instanceof SQLServerPlatform) {
-            // まず v_blog<->t_article のリレーションがないことを担保して・・・
-            $this->assertEquals('SELECT A.*, B.* FROM t_article A, v_blog B', (string) $database->select('t_article A,v_blog B'));
-            // 仮想キーを追加すると・・・
-            $database->addForeignKey('v_blog', 't_article', 'article_id');
-            // リレーションが発生するはず
-            $this->assertEquals('SELECT A.*, B.* FROM t_article A LEFT JOIN v_blog B ON B.article_id = A.article_id', (string) $database->select('t_article A < v_blog B'));
+        $v_blog_columns = $database->getSchema()->getTableColumns('v_blog');
+        $this->assertEquals('integer', $v_blog_columns['article_id']->getType()->getName());
+        $this->assertEquals('string', $v_blog_columns['title']->getType()->getName());
+        $this->assertEquals('integer', $v_blog_columns['comment_id']->getType()->getName());
+        $this->assertEquals('text', $v_blog_columns['comment']->getType()->getName());
 
-            // 後処理
-            $database->getSchema()->refresh();
-        }
+        // まず v_blog<->t_article のリレーションがないことを担保して・・・
+        $this->assertEquals('SELECT A.*, B.* FROM t_article A, v_blog B', (string) $database->select('t_article A,v_blog B'));
+        // 仮想キーを追加すると・・・
+        $database->addForeignKey('v_blog', 't_article', 'article_id');
+        // リレーションが発生するはず
+        $this->assertEquals('SELECT A.*, B.* FROM t_article A LEFT JOIN v_blog B ON B.article_id = A.article_id', (string) $database->select('t_article A < v_blog B'));
+
+        // 後処理
+        $database->getSchema()->refresh();
     }
 
     /**

@@ -236,8 +236,9 @@ class Schema
                 else {
                     $columns = \Closure::bind(function ($table) {
                         $database = $this->_conn->getDatabase();
+                        $cplatform = new CompatiblePlatform($this->_platform);
                         /** @noinspection PhpDeprecationInspection */
-                        $sql = $this->_platform->getListTableColumnsSQL($table, $database);
+                        $sql = $cplatform->getListTableColumnsSQL($table, $database);
                         $tableColumns = $this->_conn->fetchAllAssociative($sql);
                         return $this->_getPortableTableColumnList($table, $database, $tableColumns);
                     }, $this->schemaManger, $this->schemaManger)($table_name);

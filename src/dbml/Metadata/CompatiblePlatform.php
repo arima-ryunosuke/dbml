@@ -543,6 +543,34 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * @internal
+     * @codeCoverageIgnore
+     */
+    public function getListTableColumnsSQL($table, $database = null): string
+    {
+        // doctrine 4.4 から VIEW のカラムが得られなくなったので暫定対応（SQLServer 以外は辛うじて getListTableColumnsSQL が使える）
+        if ($this->platform instanceof SQLServerPlatform) {
+            return <<<SQL
+                SELECT 
+                    c.name                  AS name,
+                    type_name(user_type_id) AS type,
+                    c.max_length            AS length,
+                    ~c.is_nullable          AS notnull,
+                    NULL                    AS "default",
+                    c.scale                 AS scale,
+                    c.precision             AS precision,
+                    0                       AS autoincrement,
+                    c.collation_name        AS collation,
+                    NULL                    AS comment
+                FROM sys.columns c
+                JOIN sys.views v ON v.object_id = c.object_id
+                WHERE SCHEMA_NAME(v.schema_id) = SCHEMA_NAME() AND v.name = {$this->platform->quoteStringLiteral($table)}
+            SQL;
+        }
+        return $this->platform->getListTableColumnsSQL($table, $database);
+    }
+
+    /**
      * クエリにロック構文を付加して返す
      *
      * @param string $query クエリ
