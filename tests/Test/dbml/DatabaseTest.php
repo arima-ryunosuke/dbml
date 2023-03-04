@@ -843,18 +843,13 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_declareCommonTable($database)
     {
-        // 対応していない？（マニュアル的には対応してそうだけど…）
-        if ($database->getPlatform() instanceof SQLServerPlatform) {
-            return;
-        }
-
         $database->refresh();
 
         $database->declareCommonTable([
             'fibonacci(n0, n)' => 'select 0, 1 union all select n, n0 + n from fibonacci WHERE n < 50',
             'querybuilder'     => fn() => $database->selectAvg('aggregate.group_id2', [], 'group_id1'),
             'arrays'           => [
-                'column'  => ['aggregate' => ['group_id1', 'MAX(group_id2)']],
+                'column'  => ['aggregate' => ['group_id1', 'max_id2' => 'MAX(group_id2)']],
                 'groupBy' => 'group_id1',
             ],
         ]);

@@ -616,6 +616,20 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_getWithRecursiveSyntax($cplatform, $platform)
+    {
+        $expected = 'WITH';
+        if (!$platform instanceof SQLServerPlatform) {
+            $expected .= ' RECURSIVE';
+        }
+        $this->assertEquals($expected, $cplatform->getWithRecursiveSyntax());
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_getCountExpression($cplatform, $platform)
     {
         $this->assertEquals("COUNT(hoge)", $cplatform->getCountExpression('hoge'));

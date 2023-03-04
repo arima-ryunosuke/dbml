@@ -180,8 +180,10 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_with($builder)
     {
+        $WITH = $builder->getDatabase()->getCompatiblePlatform()->getWithRecursiveSyntax();
+
         $builder->reset()->with('cte (col1, col2)', 'SELECT 1, 2 UNION ALL SELECT 3, 4');
-        $this->assertQuery("WITH RECURSIVE cte (col1, col2) AS (SELECT 1, 2 UNION ALL SELECT 3, 4) SELECT C.* FROM cte C", $builder->column([
+        $this->assertQuery("$WITH cte (col1, col2) AS (SELECT 1, 2 UNION ALL SELECT 3, 4) SELECT C.* FROM cte C", $builder->column([
             'cte as C' => ['*'],
         ]));
         $builder->with('cte (col1, col2)', null);
@@ -192,13 +194,13 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $builder->reset()
             ->with('cte1', 'SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4')
             ->with('cte2', 'SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4');
-        $this->assertQuery("WITH RECURSIVE cte1 AS (SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4),cte2 AS (SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4) SELECT C1.*, C2.* FROM cte1 C1, cte2 C2", $builder->column([
+        $this->assertQuery("$WITH cte1 AS (SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4),cte2 AS (SELECT 1 AS col1, 2 AS col2 UNION ALL SELECT 3, 4) SELECT C1.*, C2.* FROM cte1 C1, cte2 C2", $builder->column([
             'cte1 as C1' => ['*'],
             'cte2 as C2' => ['*'],
         ]));
 
         $builder->reset()->with('qb', $builder->getDatabase()->select('test1', ['id > ?' => 0]));
-        $this->assertQuery("WITH RECURSIVE qb AS (SELECT test1.* FROM test1 WHERE id > ?) SELECT Q.id AS qid, test2.* FROM qb Q INNER JOIN test2 ON test2.id = Q.id WHERE test2.id = ?", $builder->column([
+        $this->assertQuery("$WITH qb AS (SELECT test1.* FROM test1 WHERE id > ?) SELECT Q.id AS qid, test2.* FROM qb Q INNER JOIN test2 ON test2.id = Q.id WHERE test2.id = ?", $builder->column([
             'qb Q'   => [
                 'qid' => 'id',
             ],
@@ -209,16 +211,13 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         ])->where(['test2.id' => 1]));
         $this->assertEquals([0, 1], $builder->getParams());
 
-        // mysql では実際に投げてみる
-        if ($builder->getDatabase()->getPlatform() instanceof MySQLPlatform) {
-            $this->assertEquals([
-                [
-                    'qid'   => 1,
-                    'id'    => 1,
-                    'name2' => 'A',
-                ],
-            ], $builder->array());
-        }
+        $this->assertEquals([
+            [
+                'qid'   => 1,
+                'id'    => 1,
+                'name2' => 'A',
+            ],
+        ], $builder->array());
     }
 
     /**

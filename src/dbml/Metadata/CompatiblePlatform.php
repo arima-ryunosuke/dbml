@@ -750,6 +750,20 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * 再帰 WITH 句を返す
+     *
+     * @return string 再帰 WITH
+     */
+    public function getWithRecursiveSyntax()
+    {
+        // 他 DBMS は無条件で RECURSIVE をつけても大丈夫だが Sqlserver はだめっぽい
+        if ($this->platform instanceof SQLServerPlatform) {
+            return "WITH";
+        }
+        return "WITH RECURSIVE";
+    }
+
+    /**
      * count 表現を返す
      *
      * @param string $column カラム名
