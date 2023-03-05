@@ -3794,6 +3794,11 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $csvfile = $csvfile_head = sys_get_temp_dir() . '/csvfile_head.csv';
 
+        // 空のテスト
+        file_put_contents($csvfile, '');
+        $this->assertEquals(0, $database->loadCsv('nullable', $csvfile, ['chunk' => 0]));
+        $this->assertEquals(0, $database->loadCsv('nullable', $csvfile, ['chunk' => 1]));
+
         // skip と chunk
         file_put_contents($csvfile_head, <<<CSV
 id,name,cint,cfloat,cdecimal
@@ -4010,6 +4015,10 @@ CSV
      */
     function test_insertArray($database)
     {
+        // 空のテスト
+        $this->assertEquals(0, $database->insertArray('test', [], 0));
+        $this->assertEquals(0, $database->insertArray('test', [], 1));
+
         $namequery = $database->select('test.name', [], ['id' => 'desc']);
 
         // 配列
@@ -4154,6 +4163,10 @@ INSERT INTO test (name) VALUES
      */
     function test_updateArray($database)
     {
+        // 空のテスト
+        $this->assertEquals(0, $database->updateArray('test', [], [], 0));
+        $this->assertEquals(0, $database->updateArray('test', [], [], 1));
+
         $data = [
             ['id' => 1, 'name' => 'A'],
             ['id' => 2, 'name' => new Expression('UPPER(\'b\')')],
@@ -4359,6 +4372,10 @@ INSERT INTO test (name) VALUES
         if (!$database->getCompatiblePlatform()->supportsBulkMerge()) {
             return;
         }
+
+        // 空のテスト
+        $this->assertEquals(0, $database->modifyArray('test', [], [], 0));
+        $this->assertEquals(0, $database->modifyArray('test', [], [], 1));
 
         $data = [
             ['id' => 1, 'name' => 'A'],

@@ -5001,57 +5001,50 @@ class Database
             $template = "INSERT INTO $tableName (%s) VALUES %s";
 
             $affected = [];
-            $n = 0;
-            $values = $params = [];
             $current = mb_internal_encoding();
-            foreach ($file as $m => $fields) {
-                if ($m < $options['skip']) {
-                    continue;
-                }
+            foreach (iterator_chunk($file, $options['chunk'] ?: PHP_INT_MAX, true) as $rows) {
+                $values = $params = [];
 
-                if ($current !== $options['encoding']) {
-                    mb_convert_variables($current, $options['encoding'], $fields);
-                }
-
-                $r = -1;
-                $row = [];
-                foreach ($columns as $cname => $expr) {
-                    $r++;
-                    // 範囲外は全部直値（マップするキーがないのでどうしようもない）
-                    if (!isset($fields[$r])) {
-                        $row[$cname] = $expr;
+                foreach ($rows as $m => $fields) {
+                    if ($m < $options['skip']) {
+                        continue;
                     }
-                    // 値のみ指定ならそれをカラム名として CSV 列値を使う（ただし、 null はスキップ）
-                    elseif (is_int($cname)) {
-                        if ($expr === null) {
-                            continue;
+
+                    if ($current !== $options['encoding']) {
+                        mb_convert_variables($current, $options['encoding'], $fields);
+                    }
+
+                    $r = -1;
+                    $row = [];
+                    foreach ($columns as $cname => $expr) {
+                        $r++;
+                        // 範囲外は全部直値（マップするキーがないのでどうしようもない）
+                        if (!isset($fields[$r])) {
+                            $row[$cname] = $expr;
                         }
-                        $row[$expr] = $fields[$r];
+                        // 値のみ指定ならそれをカラム名として CSV 列値を使う（ただし、 null はスキップ）
+                        elseif (is_int($cname)) {
+                            if ($expr === null) {
+                                continue;
+                            }
+                            $row[$expr] = $fields[$r];
+                        }
+                        // Expression はマーカーとしての役割なので作り直す
+                        elseif ($expr instanceof Expression) {
+                            $row[$cname] = new Expression($expr, $fields[$r]);
+                        }
+                        elseif ($expr instanceof \Closure) {
+                            $row[$cname] = $expr($fields[$r]);
+                        }
+                        else {
+                            $row[$cname] = $expr;
+                        }
                     }
-                    // Expression はマーカーとしての役割なので作り直す
-                    elseif ($expr instanceof Expression) {
-                        $row[$cname] = new Expression($expr, $fields[$r]);
-                    }
-                    elseif ($expr instanceof \Closure) {
-                        $row[$cname] = $expr($fields[$r]);
-                    }
-                    else {
-                        $row[$cname] = $expr;
-                    }
+                    $row = $this->_normalize($tableName, $row);
+                    $set = $this->bindInto($row, $params);
+                    $values[] = '(' . implode(', ', $set) . ')';
                 }
-                $row = $this->_normalize($tableName, $row);
-                $set = $this->bindInto($row, $params);
-                $values[] = '(' . implode(', ', $set) . ')';
 
-                if (++$n === $options['chunk']) {
-                    $sql = sprintf($template, implode(', ', $colnames), implode(', ', $values));
-                    $affected[] = $this->executeAffect($sql, $params);
-                    $n = 0;
-                    $values = $params = [];
-                }
-            }
-
-            if ($values) {
                 $sql = sprintf($template, implode(', ', $colnames), implode(', ', $values));
                 $affected[] = $this->executeAffect($sql, $params);
             }
@@ -5140,40 +5133,31 @@ class Database
         $tableName = $this->convertTableName($tableName);
 
         $columns = null;
-        $values = [];
-        $params = [];
 
-        $n = 0;
         $affected = [];
         $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
         $template = "INSERT {$ignore}INTO $tableName (%s) VALUES %s";
-        foreach ($data as $row) {
-            if (!is_array($row)) {
-                throw new \InvalidArgumentException('$data\'s element must be array.');
+        foreach (iterator_chunk($data, $chunk ?: PHP_INT_MAX) as $rows) {
+            $values = [];
+            $params = [];
+            foreach ($rows as $row) {
+                if (!is_array($row)) {
+                    throw new \InvalidArgumentException('$data\'s element must be array.');
+                }
+
+                $row = $this->_normalize($tableName, $row);
+                $set = $this->bindInto($row, $params);
+
+                if (!isset($columns)) {
+                    $columns = array_keys($set);
+                }
+                elseif ($columns !== array_keys($set)) {
+                    throw new \UnexpectedValueException('columns are not match.');
+                }
+
+                $values[] = '(' . implode(', ', $set) . ')';
             }
 
-            $row = $this->_normalize($tableName, $row);
-            $set = $this->bindInto($row, $params);
-
-            if (!isset($columns)) {
-                $columns = array_keys($set);
-            }
-            elseif ($columns !== array_keys($set)) {
-                throw new \UnexpectedValueException('columns are not match.');
-            }
-
-            $values[] = '(' . implode(', ', $set) . ')';
-
-            if (++$n === $chunk) {
-                $sql = sprintf($template, implode(', ', $columns), implode(', ', $values));
-                $affected[] = $this->executeAffect($sql, $params);
-                $n = 0;
-                $values = [];
-                $params = [];
-            }
-        }
-
-        if ($values) {
             $sql = sprintf($template, implode(', ', $columns), implode(', ', $values));
             $affected[] = $this->executeAffect($sql, $params);
         }
@@ -5234,8 +5218,8 @@ class Database
         $condition = $this->_prewhere($tableName, $identifier);
 
         $affected = [];
-        foreach ($chunk ? array_chunk($data, $chunk) : [$data] as $block) {
-            $columns = $this->_normalizes($tableName, $block, $pcols);
+        foreach (iterator_chunk($data, $chunk ?: PHP_INT_MAX) as $rows) {
+            $columns = $this->_normalizes($tableName, $rows, $pcols);
             $pkcols = array_intersect_key($columns, $pkey);
             $cvcols = array_diff_key($columns, $pkey);
 
@@ -5328,46 +5312,37 @@ class Database
         }
 
         $columns = null;
-        $values = [];
-        $params = [];
 
-        $n = 0;
         $affected = [];
         $merge = $cplatform->getMergeSyntax($this->getSchema()->getTablePrimaryKey($tableName)->getColumns());
         $refer = $cplatform->getReferenceSyntax('%1$s');
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
         $template = "INSERT {$ignore}INTO $tableName (%s) VALUES %s $merge %s";
-        foreach ($insertData as $row) {
-            if (!is_array($row)) {
-                throw new \InvalidArgumentException('$data\'s element must be array.');
+        foreach (iterator_chunk($insertData, $chunk ?: PHP_INT_MAX) as $rows) {
+            $values = [];
+            $params = [];
+            foreach ($rows as $row) {
+                if (!is_array($row)) {
+                    throw new \InvalidArgumentException('$data\'s element must be array.');
+                }
+
+                $row = $this->_normalize($tableName, $row);
+                $set = $this->bindInto($row, $params);
+
+                if (!isset($columns)) {
+                    $columns = array_keys($set);
+                }
+                elseif ($columns !== array_keys($set)) {
+                    throw new \UnexpectedValueException('columns are not match.');
+                }
+
+                if (!isset($updates)) {
+                    $updates = array_sprintf($columns, '%1$s = ' . $refer, ', ');
+                }
+
+                $values[] = '(' . implode(', ', $set) . ')';
             }
 
-            $row = $this->_normalize($tableName, $row);
-            $set = $this->bindInto($row, $params);
-
-            if (!isset($columns)) {
-                $columns = array_keys($set);
-            }
-            elseif ($columns !== array_keys($set)) {
-                throw new \UnexpectedValueException('columns are not match.');
-            }
-
-            if (!isset($updates)) {
-                $updates = array_sprintf($columns, '%1$s = ' . $refer, ', ');
-            }
-
-            $values[] = '(' . implode(', ', $set) . ')';
-
-            if (++$n === $chunk) {
-                $sql = sprintf($template, implode(', ', $columns), implode(', ', $values), $updates);
-                $affected[] = $this->executeAffect($sql, array_merge($params, $updateParams));
-                $n = 0;
-                $values = [];
-                $params = [];
-            }
-        }
-
-        if ($values) {
             $sql = sprintf($template, implode(', ', $columns), implode(', ', $values), $updates);
             $affected[] = $this->executeAffect($sql, array_merge($params, $updateParams));
         }
