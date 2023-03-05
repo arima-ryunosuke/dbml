@@ -1109,75 +1109,49 @@ class Database
             $row = array_intersect_key($row, $columns);
         }
 
-        if ($this->getUnsafeOption('filterNullAtNotNullColumn')) {
-            foreach ($columns as $cname => $column) {
-                // 値が null で・・・
-                if (array_key_exists($cname, $row) && $row[$cname] === null) {
-                    // not null なら伏せる
-                    if ($column->getNotnull()) {
-                        unset($row[$cname]);
-                    }
-                }
-            }
-        }
+        $filterNullAtNotNullColumn = $this->getUnsafeOption('filterNullAtNotNullColumn');
+        $convertEmptyToNull = $this->getUnsafeOption('convertEmptyToNull');
+        $convertBoolToInt = $this->getUnsafeOption('convertBoolToInt');
+        $autoCastType = $this->getUnsafeOption('autoCastType');
+        $compatibleCharAndBinary = $this->getCompatiblePlatform()->supportsCompatibleCharAndBinary();
 
-        if ($this->getUnsafeOption('convertEmptyToNull')) {
-            // 対象としない型（要するに文字列系）
-            $targets = [Types::STRING => true, Types::TEXT => true, Types::BINARY => true, Types::BLOB => true];
-            foreach ($columns as $cname => $column) {
-                // 値が空文字で・・・
-                if (array_key_exists($cname, $row) && $row[$cname] === '') {
-                    // AUTO_INCREMENT か NULLABLE な文字列系以外の型なら null にする
-                    if ($cname === $autocolumn || (!isset($targets[$column->getType()->getName()]) && !$column->getNotnull())) {
-                        $row[$cname] = null;
-                    }
-                }
-            }
-        }
+        $integerTypes = [Types::BOOLEAN => true, Types::INTEGER => true, Types::SMALLINT => true, Types::BIGINT => true];
+        $decimalTypes = [Types::DECIMAL => true, Types::FLOAT => true];
+        $numericTypes = $integerTypes + $decimalTypes;
+        $clobTypes = [Types::STRING => true, Types::TEXT => true];
+        $blobTypes = [Types::BINARY => true, Types::BLOB => true];
+        $stringTypes = $clobTypes + $blobTypes;
 
-        if ($this->getUnsafeOption('convertBoolToInt')) {
-            // 対象とする型（要するに数値系）
-            $targets = [Types::BOOLEAN => true, Types::DECIMAL => true, Types::FLOAT => true, Types::INTEGER => true, Types::SMALLINT => true, Types::BIGINT => true];
-            foreach ($columns as $cname => $column) {
-                // 値が真偽値で・・・
-                if (array_key_exists($cname, $row) && is_bool($row[$cname])) {
-                    // 数値系の型なら int にする
-                    if (isset($targets[$column->getType()->getName()])) {
-                        $row[$cname] = (int) $row[$cname];
-                    }
-                }
-            }
-        }
-
-        if ($types = $this->getUnsafeOption('autoCastType')) {
-            foreach ($columns as $cname => $column) {
+        foreach ($columns as $cname => $column) {
+            if (array_key_exists($cname, $row)) {
                 $type = $column->getType();
                 $typename = $type->getName();
-                if (isset($types[$typename]['affect'])) {
-                    if ($converter = $types[$typename]['affect']) {
-                        if (array_key_exists($cname, $row) && !$row[$cname] instanceof Queryable) {
-                            if ($converter instanceof \Closure) {
-                                $row[$cname] = $converter($row[$cname], $this->getPlatform());
-                            }
-                            else {
-                                $row[$cname] = $type->convertToDatabaseValue($row[$cname], $this->getPlatform());
-                            }
-                        }
+                $nullable = !$column->getNotnull();
+
+                if ($filterNullAtNotNullColumn && $row[$cname] === null && !$nullable) {
+                    unset($row[$cname]);
+                    continue;
+                }
+
+                if ($convertEmptyToNull && $row[$cname] === '' && ($cname === $autocolumn || (!isset($stringTypes[$typename]) && $nullable))) {
+                    $row[$cname] = null;
+                }
+
+                if ($convertBoolToInt && is_bool($row[$cname]) && isset($numericTypes[$typename])) {
+                    $row[$cname] = (int) $row[$cname];
+                }
+
+                if (($converter = $autoCastType[$typename]['affect'] ?? null) && !$row[$cname] instanceof Queryable) {
+                    if ($converter instanceof \Closure) {
+                        $row[$cname] = $converter($row[$cname], $this->getPlatform());
+                    }
+                    else {
+                        $row[$cname] = $type->convertToDatabaseValue($row[$cname], $this->getPlatform());
                     }
                 }
-            }
-        }
 
-        if (!$this->getCompatiblePlatform()->supportsCompatibleCharAndBinary()) {
-            // 対象とする型（要するにバイナリ系）
-            $targets = [Types::BINARY => true, Types::BLOB => true];
-            foreach ($columns as $cname => $column) {
-                // 値が文字列で・・・
-                if (array_key_exists($cname, $row) && is_string($row[$cname])) {
-                    // バイナリ系の型なら文字列に変換する
-                    if (isset($targets[$column->getType()->getName()])) {
-                        $row[$cname] = $this->getCompatiblePlatform()->getBinaryExpression($row[$cname]);
-                    }
+                if (!$compatibleCharAndBinary && is_string($row[$cname]) && isset($blobTypes[$typename])) {
+                    $row[$cname] = $this->getCompatiblePlatform()->getBinaryExpression($row[$cname]);
                 }
             }
         }
