@@ -5741,6 +5741,10 @@ INSERT INTO test (id, name) VALUES
         $database->changeArray('multiprimary', [], ['mainid' => 2, 'subid = 7']);
         $this->assertCount(4, $database->selectArray('multiprimary', ['mainid' => 2]));
 
+        // 空のテスト3
+        $database->changeArray(['multiprimary' => ['mainid']], [], ['mainid' => 2, 'subid = 8']);
+        $this->assertCount(3, $database->selectArray('multiprimary', ['mainid' => 2]));
+
         // バルク兼プリペアのテスト
         $max = $database->max('test.id');
 
@@ -5858,6 +5862,134 @@ INSERT INTO test (id, name) VALUES
 
         // 一連の流れで mainid=2 に波及していないことを担保
         $this->assertEquals($mainid2, $database->selectArray('multiprimary', ['mainid' => 2]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_changeArray_returning($database)
+    {
+        $updatedAffectedRows = $database->getCompatiblePlatform()->supportsZeroAffectedUpdate() ? 0 : 2;
+
+        $primaries = $database->changeArray(['test' => ['uname' => new Expression('UPPER(name)', [])]], [
+            ['id' => 1, 'name' => 'a'],
+            ['id' => 2, 'name' => 'b'],
+            ['id' => 3, 'name' => 'X'],
+            ['id' => 99, 'name' => 'Z'],
+        ], ['id < 5']);
+        $this->assertEquals([
+            1  => [
+                "uname" => "A",
+                ""      => $updatedAffectedRows,
+            ],
+            2  => [
+                "uname" => "B",
+                ""      => $updatedAffectedRows,
+            ],
+            3  => [
+                "uname" => "C",
+                ""      => 2,
+            ],
+            4  => [
+                "uname" => "D",
+                ""      => -1,
+            ],
+            99 => [
+                "uname" => "Z",
+                ""      => 1,
+            ],
+        ], $primaries);
+
+        $primaries = $database->changeArray('test.name', [
+            ['id' => 1, 'name' => 'a'],
+            ['id' => 2, 'name' => 'b'],
+            ['id' => 3, 'name' => 'Y'],
+            ['id' => 99, 'name' => 'Z'],
+        ], []);
+        $this->assertEquals([
+            1  => [
+                "name" => "a",
+                ""     => $updatedAffectedRows,
+            ],
+            2  => [
+                "name" => "b",
+                ""     => $updatedAffectedRows,
+            ],
+            3  => [
+                "name" => "X",
+                ""     => 2,
+            ],
+            5  => [
+                "name" => "e",
+                ""     => -1,
+            ],
+            6  => [
+                "name" => "f",
+                ""     => -1,
+            ],
+            7  => [
+                "name" => "g",
+                ""     => -1,
+            ],
+            8  => [
+                "name" => "h",
+                ""     => -1,
+            ],
+            9  => [
+                "name" => "i",
+                ""     => -1,
+            ],
+            10 => [
+                "name" => "j",
+                ""     => -1,
+            ],
+            99 => [
+                "name" => "Z",
+                ""     => $updatedAffectedRows,
+            ],
+        ], $primaries);
+
+        if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
+            $primaries = $database->changeArray(['test' => ['name']], [
+                ['id' => 1, 'name' => 'a'],
+                ['id' => 2, 'name' => 'b'],
+                ['id' => 3, 'name' => 'Z'],
+                ['id' => 100, 'name' => 'Z'],
+            ], ['false']);
+            $this->assertEquals([
+                1   => [
+                    "name" => "a",
+                    ""     => 0,
+                ],
+                2   => [
+                    "name" => "b",
+                    ""     => 0,
+                ],
+                3   => [
+                    "name" => "Z",
+                    ""     => 2,
+                ],
+                100 => [
+                    "name" => "Z",
+                    ""     => 1,
+                ],
+            ], $primaries);
+
+            if ($database->getCompatiblePlatform()->supportsIgnore()) {
+                $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
+
+                $primaries = $database->changeArrayIgnore(['test' => ['name']], [
+                    ['id' => 1, 'name' => null],
+                ], ['id' => 1]);
+                $this->assertEquals([
+                    1 => [
+                        "name" => "a",
+                        ""     => 2,
+                    ],
+                ], $primaries);
+            }
+        }
     }
 
     /**

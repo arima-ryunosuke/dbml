@@ -5378,7 +5378,20 @@ class Database
      *
      * 返り値は `[primaryKeys]` となり「その世界における主キー配列」を返す。
      *
-     * ただし dryrun 中は [[primaryKeys], [実行した SQL]] という2タプルの階層配列を返す。
+     * ただし $tableName に配列を渡すと 主キーをキーとしたレコード配列を返すようになる。
+     * レコード配列には空文字キーで下記の値が自動で設定される。
+     * - 1: レコードが作成された
+     * - -1: レコードが削除された
+     * - 2: レコードが更新された
+     * - 0: 更新対象だが更新されなかった（mysql のみ）
+     * 返ってくるレコードのソースは下記のとおりである。
+     * - INSERT: 作成した後のレコード（元がないのだから新しいレコードしか返し得ない）
+     * - DELETE: 削除する前のレコード（削除したのだから元のレコードしか返し得ない）
+     * - UPDATE: 更新する前のレコード（「更新する値」は手元にあるわけなので更新前の値の方が有用度が高いため）
+     * 実用的には RETURNING に近く、変更のあった一覧を得ることができる。
+     * ただし bulk は自動で無効になるので注意（上記で言うところの「標準速度」が最速になる）。
+     *
+     * dryrun 中は [[primaryKeys], [実行した SQL]] という2タプルの階層配列を返す。
      * この返り値は内部規定であり、この構造に依存したコードを書いてはならない。
      * また、primaryKeys は現在の状態に基づく値であり、dryrun で得られた key や sql を後で実行する場合は注意を払わなければならない。
      *
@@ -5414,11 +5427,24 @@ class Database
      * // SELECT EXISTS (SELECT * FROM table_name WHERE id = '3')
      * // INSERT INTO table_name (id, name) VALUES ('3', 'piyo')
      * // DELETE FROM table_name WHERE (category = 'misc') AND (NOT (id IN ('1', '2', '3')))
+     *
+     * // $tableName に配列を与えると RETURNING 的動作になる（この場合作用行の id, name を返す）
+     * $result = $db->changeArray(['table_name' => ['id', 'name']], [
+     *     ['id' => 1,    'name' => 'changed'], // 更新
+     *     ['id' => 2,    'name' => 'hoge'],    // 未更新
+     *     ['id' => null, 'name' => 'fuga'],    // 作成
+     * ], ['category' => 'misc']);              // category=misc の世界で他のものを削除
+     * result: [
+     *     '1' => ['id' => 1, 'name' => 'base', '' => 2],  // 更新された行は 2（このとき、 name は更新前の値であり 'changed' ではない）
+     *     '2' => ['id' => 2, 'name' => 'hoge', '' => 0],  // 更新されてない行は 0（mysql のみ）
+     *     '5' => ['id' => 5, 'name' => 'fuga', '' => 1],  // 作成された行は 1（このとき、主キーも設定されて返ってくる）
+     *     '8' => ['id' => 8, 'name' => 'piyo', '' => -1], // 削除された行は -1
+     * ]
      * ```
      *
      * @used-by changeArrayIgnore()
      *
-     * @param string $tableName テーブル名
+     * @param string|array $tableName テーブル名
      * @param array $dataarray データ配列
      * @param array|mixed $identifier 束縛条件。 false を与えると DELETE 文自体を発行しない（速度向上と安全担保）
      * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
@@ -5427,31 +5453,34 @@ class Database
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
+        unset($opt['primary']); // 自身で処理するので不要
 
         $dryrun = $this->getUnsafeOption('dryrun');
+        $cplatform = $this->getCompatiblePlatform();
 
         $whereconds = arrayize($identifier);
 
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, []);
 
-        // 与えられていないなら消すだけ
-        if (empty($dataarray)) {
-            if ($identifier !== false) {
-                $sql = $this->delete($tableName, $whereconds);
-                if ($dryrun) {
-                    return [[], [$sql]];
-                }
-            }
-            return [];
+        $returning = [];
+        if ($tableName instanceof QueryBuilder) {
+            $opt['bulk'] = false;
+            $returning = $tableName->getQueryPart('select');
+            $tableName = first_key($tableName->getFromPart());
         }
+        if ($dryrun) {
+            $returning = [];
+        }
+        $tableName = $this->convertTableName($tableName);
 
         // 主キー情報を漁っておく
         $pcols = $this->getSchema()->getTablePrimaryColumns($tableName);
         $autocolumn = optional($this->getSchema()->getTableAutoIncrement($tableName))->getName();
+        $pksep = $this->getPrimarySeparator();
 
         // modifyArray や prepareModify が使えるか
-        $bulkable = array_get($opt, 'bulk', true) && $this->getCompatiblePlatform()->supportsBulkMerge();
-        $preparable = !$dryrun && array_get($opt, 'prepare', true) && $this->getCompatiblePlatform()->supportsMerge() && !$this->isEmulationMode();
+        $bulkable = array_get($opt, 'bulk', true) && $cplatform->supportsBulkMerge();
+        $preparable = !$dryrun && array_get($opt, 'prepare', true) && $cplatform->supportsMerge() && !$this->isEmulationMode();
 
         // カラムの種類でグルーピングする
         $primaries = [];
@@ -5476,7 +5505,18 @@ class Database
             }
         }
 
+        // returning モード（更新や削除のためその世界を事前取得する）
+        $oldrecords = [];
+        if ($returning) {
+            $pkcol = $cplatform->getConcatExpression(array_values(array_implode(array_keys($pcols), $this->quote($pksep))));
+            if ($identifier !== false) {
+                $oldrecords = $this->selectAssoc([$tableName => [self::AUTO_PRIMARY_KEY => $pkcol], '' => (array) $returning], $whereconds);
+            }
+        }
+
         $sqls = [];
+        $affecteds = [];
+        $inserteds = [];
 
         foreach ($col_group as $group) {
             if ($group['bulks'] ?? []) {
@@ -5490,14 +5530,26 @@ class Database
                 }
                 foreach ($group['rows'] as $n => $row) {
                     if ($stmt) {
-                        $stmt->executeAffect($row);
+                        $affected = $sqls[$n] = $stmt->executeAffect($row);
                     }
                     else {
-                        $sqls[] = $this->modify($tableName, $row, ...[[], $opt]);
+                        $affected = $sqls[$n] = $this->modify($tableName, $row, ...[[], $opt]);
                     }
 
                     if ($autocolumn !== null && !isset($primaries[$n][$autocolumn])) {
                         $primaries[$n][$autocolumn] = $this->getLastInsertId($tableName, $autocolumn);
+                    }
+
+                    // returning モード
+                    if ($returning) {
+                        $pv = implode($pksep, $primaries[$n]);
+                        $affecteds[$pv] = $affected;
+                        if (isset($oldrecords[$pv])) {
+                            $oldrecords[$pv] += ['' => $affected ? 2 : 0];
+                        }
+                        else {
+                            $inserteds[$pv] = $primaries[$n];
+                        }
                     }
                 }
             }
@@ -5505,10 +5557,28 @@ class Database
 
         // 更新外を削除（$cond を queryInto してるのは誤差レベルではなく速度に差が出るから）
         if ($identifier !== false) {
-            $cond = $this->getCompatiblePlatform()->getPrimaryCondition($primaries, $tableName);
-            $whereconds[] = $this->queryInto("NOT ($cond)", $cond->getParams());
-            $sqls[] = $this->delete($tableName, $whereconds);
+            $cond = $cplatform->getPrimaryCondition($primaries, $tableName);
+            $sqls[] = $this->delete($tableName, array_merge($whereconds, $primaries ? [$this->queryInto("NOT ($cond)", $cond->getParams())] : []));
         }
+
+        // returning モード（完了後に再フェッチを行い比較）
+        if ($returning) {
+            $cond = $cplatform->getPrimaryCondition($inserteds, $tableName);
+            $newrecords = $this->selectAssoc([$tableName => [self::AUTO_PRIMARY_KEY => $pkcol], '' => (array) $returning], [
+                [
+                    $whereconds,
+                    $inserteds ? [$this->queryInto("$cond", $cond->getParams())] : [],
+                ],
+            ]);
+            foreach (array_diff_key($newrecords, $oldrecords) as $pv => $row) {
+                $oldrecords[$pv] = $row + ['' => $affecteds[$pv]];
+            }
+            foreach (array_diff_key($oldrecords, $newrecords) as $pv => $row) {
+                $oldrecords[$pv] += ['' => -1];
+            }
+            return array_map(fn($row) => array_remove($row, [self::AUTO_PRIMARY_KEY]), $oldrecords);
+        }
+
         if ($dryrun) {
             return [$primaries, array_flatten($sqls)];
         }
