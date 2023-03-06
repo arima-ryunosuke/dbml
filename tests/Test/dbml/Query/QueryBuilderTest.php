@@ -560,6 +560,27 @@ GREATEST(1,2,3) FROM test1', $builder);
             ],
         ])->where(['' => 1])->tuple();
         $this->assertEquals([3 => 1, 2 => 1, 1 => 1], $actual['comments']);
+
+        $actual = $builder->reset()->setArrayFetch(null)->column([
+            't_article' => [
+                't_comment as comments-comment_id' => [],
+            ],
+        ])->where(['' => 1])->array();
+        $this->assertEquals([0, 1, 2], array_keys($actual[0]['comments']));
+
+        $actual = $builder->reset()->setArrayFetch(null)->column([
+            't_article' => [
+                't_comment as comments-comment_id' => [],
+            ],
+        ])->where(['' => 1])->assoc();
+        $this->assertEquals([3, 2, 1], array_keys($actual[1]['comments']));
+
+        $actual = $builder->reset()->setArrayFetch(null)->column([
+            't_article' => [
+                't_comment as comments-comment_id' => [],
+            ],
+        ])->where(['' => 1])->tuple();
+        $this->assertEquals([3, 2, 1], array_keys($actual['comments']));
     }
 
     /**

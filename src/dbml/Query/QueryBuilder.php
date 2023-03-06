@@ -169,6 +169,16 @@ use function ryunosuke\dbml\throws;
  *             '3' => [コメントレコード],
  *         ],
  *     ]
+ *
+ *     # null を指定した場合
+ *     [
+ *         // サブテーブル取得はメソッドの selectXXXXX に引きずられる（この場合 selectArray なので METHOD_ARRAY と同等）
+ *         't_comment' => [
+ *             [コメントレコード],
+ *             [コメントレコード],
+ *             [コメントレコード],
+ *         ],
+ *     ]
  *     ```
  *
  *     @param string $string Database::METHOD_XXX
@@ -741,10 +751,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 $pcols = $this->database->getSchema()->getTablePrimaryKey($from['table'])->getColumns();
                 $jcols = array_strpad(array_diff($pcols, array_keys($fcols)), '', $from['alias'] . '.');
                 if (!$jcols) {
-                    $subbuiler->tuple();
+                    $subbuiler->lazyMethod = Database::METHOD_TUPLE;
                 }
                 else {
-                    $subbuiler->{$this->getUnsafeOption('arrayFetch')}();
+                    $subbuiler->lazyMethod = $this->getUnsafeOption('arrayFetch');
                     array_unshift($subbuiler->sqlParts['select'], $concatPrimary(Database::AUTO_CHILD_KEY, $jcols));
                 }
             }
@@ -3301,6 +3311,15 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     $subselect->lockMode = $this->lockMode;
                     $subselect->lockOption = $this->lockOption;
                 }
+
+                // 親のフェッチメソッドを受け継ぐ
+                if ($subselect->lazyMethod === null) {
+                    $subselect->lazyMethod = $this->lazyMethod;
+                    if (Database::METHODS[$subselect->lazyMethod]['keyable'] === null) {
+                        $subselect->lazyMethod = Database::METHOD_ASSOC;
+                    }
+                }
+
                 $parents = $subselect->_subquery($parents, $column);
             }
         }
@@ -3877,8 +3896,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function fetch($method, iterable $params = [])
     {
+        $this->lazyMethod = $method;
         if ($this->lazyMode) {
-            $this->lazyMethod = $method;
             return $this;
         }
         return $this->getDatabase()->{"fetch$method"}($this, $params);
@@ -3886,8 +3905,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
     public function fetchOrThrow($method, $arguments)
     {
+        $this->lazyMethod = $method;
         if ($this->lazyMode) {
-            $this->lazyMethod = $method;
             return $this;
         }
         return $this->getDatabase()->{"fetch{$method}OrThrow"}($this, ...$arguments);

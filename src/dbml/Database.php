@@ -3642,7 +3642,7 @@ class Database
      */
     public function selectArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->fetchArray($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->array();
     }
 
     /**
@@ -3653,7 +3653,7 @@ class Database
      */
     public function selectAssoc($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->fetchAssoc($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->assoc();
     }
 
     /**
@@ -3664,7 +3664,7 @@ class Database
      */
     public function selectLists($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->fetchLists($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lists();
     }
 
     /**
@@ -3675,29 +3675,29 @@ class Database
      */
     public function selectPairs($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->fetchPairs($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->pairs();
     }
 
     /**
-     * {@uses Database::select()} の pairs 版（{@link fetchTuple()} も参照）
+     * {@uses Database::select()} の tuple 版（{@link fetchTuple()} も参照）
      *
      * @inheritdoc Database::select()
      * @return array|Entityable|false
      */
     public function selectTuple($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->fetchTuple($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->tuple();
     }
 
     /**
-     * {@uses Database::select()} の pairs 版（{@link fetchValue()} も参照）
+     * {@uses Database::select()} の value 版（{@link fetchValue()} も参照）
      *
      * @inheritdoc Database::select()
      * @return mixed
      */
     public function selectValue($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->fetchValue($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->value();
     }
 
     /**
@@ -3756,7 +3756,7 @@ class Database
      */
     public function entityArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->fetchArray($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->array();
     }
 
     /**
@@ -3767,7 +3767,7 @@ class Database
      */
     public function entityAssoc($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->fetchAssoc($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->assoc();
     }
 
     /**
@@ -3778,7 +3778,7 @@ class Database
      */
     public function entityTuple($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->fetchTuple($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->tuple();
     }
 
     /**
