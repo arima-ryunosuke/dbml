@@ -4,6 +4,7 @@ namespace ryunosuke\Test;
 
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver\AbstractSQLiteDriver\Middleware\EnableForeignKeys;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\AbstractAsset;
@@ -45,9 +46,7 @@ abstract class AbstractUnitTestCase extends TestCase
 
         $prefix = strtoupper($dbms);
         $config = ['url' => $getconst("{$prefix}_URL")];
-        if ($dbms === 'sqlite') {
-            $config['platform'] = new \ryunosuke\Test\Platforms\SqlitePlatform();
-        }
+        $middlewares = [];
 
         if ($init) {
             $mparam = DriverManager::getConnection($config)->getParams();
@@ -58,24 +57,20 @@ abstract class AbstractUnitTestCase extends TestCase
             $schemaManager->createDatabase($dbname);
         }
 
-        $driverOptions = [];
+        if ($dbms === 'sqlite') {
+            $config['platform'] = new \ryunosuke\Test\Platforms\SqlitePlatform();
+            $middlewares[] = new EnableForeignKeys();
+        }
         if ($dbms === 'mysql') {
-            $driverOptions[\PDO::MYSQL_ATTR_LOCAL_INFILE] = true;
+            $config['driverOptions'] = [
+                \PDO::MYSQL_ATTR_LOCAL_INFILE => true,
+            ];
         }
 
         $configuration = new Configuration();
-        $configuration->setMiddlewares([new Middleware(new LoggerChain())]);
-        $connection = DriverManager::getConnection($config + [
-                'driverOptions' => $driverOptions,
-            ],
-            $configuration
-        );
+        $configuration->setMiddlewares([new Middleware(new LoggerChain()), ...$middlewares]);
+        $connection = DriverManager::getConnection($config, $configuration);
         $connection->connect();
-
-        $init_command = trim($getconst("{$prefix}_INITCOMMAND"));
-        if ($init_command) {
-            $connection->executeStatement($init_command);
-        }
 
         return $connection;
     }

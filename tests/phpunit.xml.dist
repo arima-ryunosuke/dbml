@@ -10,17 +10,10 @@
         <!--> <const name="RDBMS" value="sqlite,mysql,pgsql,mssql"/> <-->
         <const name="RDBMS" value="sqlite"/>
 
-        <const name="SQLITE_URL" value="sqlite://user:pass@localhost:1234/:memory:"/>
-        <const name="SQLITE_INITCOMMAND" value="PRAGMA foreign_keys = ON"/>
-
-        <const name="MYSQL_URL" value="mysql://user:pass@localhost:3306/test_dbml?charset=utf8"/>
-        <const name="MYSQL_INITCOMMAND" value=""/>
-
-        <const name="PGSQL_URL" value="pgsql://user:pass@localhost:5432/test_dbml?charset=utf8"/>
-        <const name="PGSQL_INITCOMMAND" value=""/>
-
-        <const name="MSSQL_URL" value="mssql://user:pass@localhost:1433/test_dbml?charset=utf8"/>
-        <const name="MSSQL_INITCOMMAND" value=""/>
+        <const name="SQLITE_URL" value="sqlite://root:Password1234@localhost:11111/:memory:"/>
+        <const name="MYSQL_URL" value="mysql://root:Password1234@localhost:13306/dbml"/>
+        <const name="PGSQL_URL" value="pgsql://root:Password1234@localhost:15432/dbml"/>
+        <const name="MSSQL_URL" value="msql://sa:Password1234@localhost:11433/dbml"/>
     </php>
 
     <coverage>

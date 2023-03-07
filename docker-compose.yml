@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  mysql:
+    image: docker.io/mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: Password1234
+      TZ: 'Asia/Tokyo'
+    ports:
+    - 13306:3306
+  pgsql:
+    image: docker.io/postgres:latest
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: Password1234
+      TZ: 'Asia/Tokyo'
+    ports:
+    - 15432:5432
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Password1234
+      MSSQL_LCID: 1041
+      MSSQL_COLLATION: Japanese_BIN
+      TZ: 'Asia/Tokyo'
+    ports:
+    - 11433:1433
