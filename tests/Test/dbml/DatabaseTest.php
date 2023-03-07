@@ -6,9 +6,6 @@ use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
-use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
-use Doctrine\DBAL\Platforms\SqlitePlatform;
-use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
@@ -18,8 +15,8 @@ use ryunosuke\dbml\Exception\NonAffectedException;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Generator\Yielder;
-use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Logger;
+use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
@@ -119,7 +116,10 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         
         LOG,);
 
-        $this->assertException('$dbconfig must be', function () { new Database(null); });
+        $this->assertException('$dbconfig must be', function () {
+            /** @noinspection PhpParamsInspection */
+            new Database(null);
+        });
     }
 
     /**
@@ -268,7 +268,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
             $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
             $this->assertException($ex, L($database)->insert('test', ['id' => 9, 'name' => 'hoge'], ['throw' => true, 'ignore' => true]));
-            if ($database->getPlatform() instanceof SqlitePlatform) {
+            if (!$database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
                 $this->assertException($ex, L($database)->modify('test', ['id' => 9, 'name' => null], [], ['throw' => true, 'ignore' => true]));
             }
         }
@@ -498,8 +498,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $database = self::getDummyDatabase();
         $this->assertInstanceOf(CompatiblePlatform::class, $database->getCompatiblePlatform());
 
-        $cplatform = new class(new SqlitePlatform()) extends CompatiblePlatform {
-        };
+        $cplatform = new class ( new \ryunosuke\Test\Platforms\SqlitePlatform() ) extends CompatiblePlatform { };
 
         // クラス名
         $database = new Database(DriverManager::getConnection(['url' => 'sqlite:///:memory:']), [
@@ -887,7 +886,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'test2'     => [
                 'lower_name' => 'LOWER(%s.name2)',
                 'is_a'       => [
-                    'select' => ['name2' => 'A'],
+                    'select' => ['LOWER(?)' => 'A'],
                 ],
             ],
             'foreign_p' => [
@@ -906,10 +905,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         ]);
         $this->assertEquals('a', $database->selectValue('test1.lower_name', [], ['id'], 1));
         $this->assertEquals('a', $database->selectValue('test2.lower_name', [], ['id'], 1));
-        if (!$database->getPlatform() instanceof SQLServerPlatform) {
-            $this->assertTrue(!!$database->selectValue('test2.is_a', [], ['id'], 1));
-            $this->assertFalse(!!$database->selectValue('test2.is_a', [], ['id' => false], 1));
-        }
+        $this->assertEquals('a', $database->selectValue('test2.is_a', [], ['id'], 1));
+        $this->assertEquals('a', $database->selectValue('test2.is_a', [], ['id' => false], 1));
 
         $columns = $database->getSchema()->getTableColumns('foreign_p');
         $this->assertEquals('array', $columns['gw']->getType()->getName());
@@ -2152,8 +2149,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals(['(mainid, subid) IN ((?,?),(?,?))'], $where);
         $this->assertEquals([1, 2, 3, 4], $params);
 
-        // mysql は行値式を解すので実際に投げて確認する
-        if ($database->getPlatform() instanceof MySQLPlatform) {
+        // 行値式を解す DB では実際に投げて確認する
+        if ($database->getCompatiblePlatform()->supportsRowConstructor()) {
             $this->assertEquals([
                 [
                     'mainid' => '1',
@@ -2238,14 +2235,13 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $syntax = $cplatform->getCaseWhenSyntax("'9'", [1 => 10, 2 => 20], 99);
         $this->assertEquals(99, $database->fetchValue("SELECT $syntax", $syntax->getParams()));
 
-        // GROUP_CONCAT は方言がバラバラなので実際に投げてみて正当性を担保
-        if (!$cplatform->getWrappedPlatform() instanceof SQLServerPlatform) {
-            $syntax = $cplatform->getGroupConcatSyntax('name', '|');
-            $this->assertEquals('a|b|c|d|e|f|g|h|i|j', $database->fetchValue("SELECT $syntax FROM test"));
-        }
-
         // SQLServer は LIKE に特殊性があるので実際に投げてみて正当性を担保
         $this->assertSame([], $database->selectArray('test', ['name:LIKE' => 'w%r_o[d',]));
+
+        // SQLServer は GROUP_CONCAT に対応していないのでトラップ
+        $this->trapThrowable('is not supported by platform');
+        $syntax = $cplatform->getGroupConcatSyntax('name', '|');
+        $this->assertEquals('a|b|c|d|e|f|g|h|i|j', $database->fetchValue("SELECT $syntax FROM test"));
     }
 
     /**
@@ -3878,7 +3874,7 @@ CSV
         ], $csvfile));
 
         // カバレッジのために SQL 検証はしておく（実際のテストはすぐ↓）
-        if ($database->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
+        if (!$database->getPlatform() instanceof MySQLPlatform) {
             $sql = $database->dryrun()->loadCsv([
                 'nullable' => [
                     'id',
@@ -4179,7 +4175,7 @@ INSERT INTO test (name) VALUES
         $affected = $database->updateArray('test', $data, ['id <> ?' => 5]);
 
         // 6件与えているが、変更されるのは4件のはず(mysql の場合。他DBMSは5件)
-        $expected = $database->getPlatform() instanceof MySQLPlatform ? 4 : 5;
+        $expected = $database->getCompatiblePlatform()->supportsZeroAffectedUpdate() ? 4 : 5;
         $this->assertEquals($expected, $affected);
 
         // 実際に取得して変わっている/いないを確認
@@ -4215,7 +4211,7 @@ INSERT INTO test (name) VALUES
             $affected = $database->updateArray('test', $data, ['id <> ?' => 5], 2);
 
             // 6件与えているが、変更されるのは4件のはず(mysql の場合。他DBMSは5件)
-            $expected = $database->getPlatform() instanceof MySQLPlatform ? 4 : 5;
+            $expected = $database->getCompatiblePlatform()->supportsZeroAffectedUpdate() ? 4 : 5;
             $this->assertEquals($expected, $affected);
 
             // 実際に取得して変わっている/いないを確認
@@ -4255,7 +4251,7 @@ INSERT INTO test (name) VALUES
         $affected = $database->updateArray('multiprimary', $data, ['NOT (mainid = ? AND subid = ?)' => [1, 5]]);
 
         // 6件与えているが、変更されるのは4件のはず(mysql の場合。他DBMSは5件)
-        $expected = $database->getPlatform() instanceof MySQLPlatform ? 4 : 5;
+        $expected = $database->getCompatiblePlatform()->supportsZeroAffectedUpdate() ? 4 : 5;
         $this->assertEquals($expected, $affected);
 
         // 実際に取得して変わっている/いないを確認
@@ -4389,14 +4385,10 @@ INSERT INTO test (name) VALUES
         $affected = $database->modifyArray('test', $data);
 
         // mysql は 4件変更・2件追加で計10affected, sqlite は単純に 6affected
-        $expected = null;
-        if ($database->getPlatform() instanceof MySQLPlatform) {
+        if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
             $expected = 10;
         }
-        if ($database->getPlatform() instanceof SqlitePlatform) {
-            $expected = 6;
-        }
-        if ($database->getPlatform() instanceof PostgreSQLPlatform) {
+        else {
             $expected = 6;
         }
         $this->assertEquals($expected, $affected);
@@ -4446,14 +4438,10 @@ INSERT INTO test (name) VALUES
                 ['id' => 93, 'name' => 'A1'],
             ], [], 1);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 3affected
-            $expected = null;
-            if ($database->getPlatform() instanceof MySQLPlatform) {
+            if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
                 $expected = 5;
             }
-            if ($database->getPlatform() instanceof SqlitePlatform) {
-                $expected = 3;
-            }
-            if ($database->getPlatform() instanceof PostgreSQLPlatform) {
+            else {
                 $expected = 3;
             }
             $this->assertEquals($expected, $affected);
@@ -4467,14 +4455,10 @@ INSERT INTO test (name) VALUES
                 ['id' => 95, 'name' => 'A1'],
             ], ['name' => 'U'], 2);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 3affected
-            $expected = null;
-            if ($database->getPlatform() instanceof MySQLPlatform) {
+            if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
                 $expected = 5;
             }
-            if ($database->getPlatform() instanceof SqlitePlatform) {
-                $expected = 3;
-            }
-            if ($database->getPlatform() instanceof PostgreSQLPlatform) {
+            else {
                 $expected = 3;
             }
             $this->assertEquals($expected, $affected);
@@ -4489,14 +4473,10 @@ INSERT INTO test (name) VALUES
                 ['id' => 96, 'name' => 'A1'],
             ], [], 3);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 4affected
-            $expected = null;
-            if ($database->getPlatform() instanceof MySQLPlatform) {
+            if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
                 $expected = 5;
             }
-            if ($database->getPlatform() instanceof SqlitePlatform) {
-                $expected = 4;
-            }
-            if ($database->getPlatform() instanceof PostgreSQLPlatform) {
+            else {
                 $expected = 4;
             }
             $this->assertEquals($expected, $affected);
@@ -4673,11 +4653,6 @@ INSERT INTO test (id, name) VALUES
         if ($database->getCompatiblePlatform()->supportsInsertSet()) {
             $sql = $database->context(['insertSet' => true])->dryrun()->insert('test', ['name' => 'zz']);
             $this->assertEquals("INSERT INTO test SET name = 'zz'", $sql);
-
-            if ($database->getPlatform() instanceof MySQLPlatform) {
-                $database->executeAffect($sql);
-                $this->assertEquals('zz', $database->selectValue('test.name', [], ['id' => 'desc'], 1));
-            }
         }
     }
 
@@ -4941,8 +4916,8 @@ INSERT INTO test (id, name) VALUES
         $this->assertEquals('XXX', $database->selectValue('test(2).name'));
         $this->assertEquals('YYY', $database->selectValue('test(3).name'));
 
-        if (!$database->getPlatform() instanceof SqlitePlatform && !$database->getPlatform() instanceof SQLServerPlatform) {
-            $this->assertEquals(1, $database->update('test(2) as T', ['name' => 'ZZZ']));
+        if ($database->getCompatiblePlatform()->supportsUpdateJoin()) {
+            $this->assertEquals(1, $database->update('test(2)', ['name' => 'ZZZ']));
             $this->assertEquals('ZZZ', $database->selectValue('test(2).name'));
         }
     }
@@ -5014,7 +4989,7 @@ INSERT INTO test (id, name) VALUES
         $this->assertEquals(2, $database->delete('test(1, 2, 3)', ['id <> ?' => 2]));
         $this->assertEquals($count - 3, $database->count('test'));
 
-        if (!$database->getPlatform() instanceof SqlitePlatform) {
+        if ($database->getCompatiblePlatform()->supportsDeleteJoin()) {
             $this->assertEquals(1, $database->delete('test(4) AS T'));
             $this->assertEquals($count - 4, $database->count('test'));
         }
@@ -5589,29 +5564,29 @@ INSERT INTO test (id, name) VALUES
      */
     function test_modifyOrThrow($database)
     {
-        if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            // 普通にやれば次の連番が返るはず
-            $primary = $database->modifyOrThrow('test', ['name' => 'modify1']);
-            $this->assertEquals(['id' => 11], $primary);
-
-            // null も数値で返るはず(mysqlのみ)
-            if ($database->getPlatform() instanceof MySQLPlatform) {
-                $primary = $database->modifyOrThrow('test', ['id' => null, 'name' => 'modify2']);
-                $this->assertEquals(['id' => 12], $primary);
-            }
-
-            // Expression も数値で返るはず
-            $primary = $database->modifyOrThrow('test', ['id' => new Expression('?', 13), 'name' => 'modify3_1']);
-            $this->assertEquals(['id' => 13], $primary);
-            $primary = $database->modifyOrThrow('test', ['id' => new Expression('?', 13), 'name' => 'modify3_2']);
-            $this->assertEquals(['id' => 13], $primary);
-
-            // QueryBuilder も数値で返るはず
-            $primary = $database->modifyOrThrow('test', ['id' => $database->select(['test T' => 'id+100'], ['id' => 1]), 'name' => 'modify4_1']);
-            $this->assertEquals(['id' => 101], $primary);
-            $primary = $database->modifyOrThrow('test', ['id' => $database->select(['test T' => 'id'], ['id' => 1]), 'name' => 'modify4_2']);
-            $this->assertEquals(['id' => 1], $primary);
+        if (!$database->getCompatiblePlatform()->supportsIdentityUpdate()) {
+            return;
         }
+
+        // 普通にやれば次の連番が返るはず
+        $primary = $database->modifyOrThrow('test', ['name' => 'modify1']);
+        $this->assertEquals(['id' => 11], $primary);
+
+        // null も数値で返るはず
+        $primary = $database->modifyOrThrow('test', ['id' => null, 'name' => 'modify2']);
+        $this->assertEquals(['id' => 12], $primary);
+
+        // Expression も数値で返るはず
+        $primary = $database->modifyOrThrow('test', ['id' => new Expression('?', 13), 'name' => 'modify3_1']);
+        $this->assertEquals(['id' => 13], $primary);
+        $primary = $database->modifyOrThrow('test', ['id' => new Expression('?', 13), 'name' => 'modify3_2']);
+        $this->assertEquals(['id' => 13], $primary);
+
+        // QueryBuilder も数値で返るはず
+        $primary = $database->modifyOrThrow('test', ['id' => $database->select(['test T' => 'id+100'], ['id' => 1]), 'name' => 'modify4_1']);
+        $this->assertEquals(['id' => 101], $primary);
+        $primary = $database->modifyOrThrow('test', ['id' => $database->select(['test T' => 'id'], ['id' => 1]), 'name' => 'modify4_2']);
+        $this->assertEquals(['id' => 1], $primary);
     }
 
     /**
@@ -5638,14 +5613,16 @@ INSERT INTO test (id, name) VALUES
         ]);
         $this->assertEquals(['id' => 10], $result);
 
-        if ($database->getPlatform() instanceof MySQLPlatform) {
+        if ($database->getCompatiblePlatform()->supportsMerge()) {
             $sql = $database->dryrun()->modifyConditionally('test', ['id' => -1], [
                 'id'   => 10,
                 'name' => 'zzz',
             ]);
             $this->assertStringContainsString('INSERT INTO test (id, name) SELECT', $sql);
             $this->assertStringContainsString('WHERE (NOT EXISTS (SELECT * FROM test WHERE id =', $sql);
-            $this->assertStringContainsString('ON DUPLICATE KEY UPDATE id = VALUES(id), name = VALUES(name)', $sql);
+            $merge = $database->getCompatiblePlatform()->getMergeSyntax(['id']);
+            $reference = $database->getCompatiblePlatform()->getReferenceSyntax('id');
+            $this->assertStringContainsString("$merge id = $reference", $sql);
         }
     }
 
@@ -5672,18 +5649,6 @@ INSERT INTO test (id, name) VALUES
         $this->assertSame(['name' => '', 'cint' => null, 'cfloat' => null, 'cdecimal' => null], $row);
 
         $database->setConvertEmptyToNull(false);
-
-        // DBMS によって挙動が違うし、そもそもエラーになるものもあるので mysql のみ
-        if ($database->getConnection()->getDatabasePlatform() instanceof MySQLPlatform) {
-            $mode = $database->fetchValue('SELECT @@SESSION.sql_mode');
-            $database->executeAffect("SET @@SESSION.sql_mode := ''");
-            $pk = $database->insertOrThrow('nullable', ['name' => '', 'cint' => '', 'cfloat' => '', 'cdecimal' => '']);
-            $row = $database->selectTuple('nullable.!id', $pk);
-            $this->assertNotNull($row['cint']);
-            $this->assertNotNull($row['cfloat']);
-            $this->assertNotNull($row['cdecimal']);
-            $database->executeAffect("SET @@SESSION.sql_mode := '$mode'");
-        }
 
         $database->setInsertSet(true);
         if ($database->getCompatiblePlatform()->supportsInsertSet()) {
@@ -6141,23 +6106,27 @@ INSERT INTO test (id, name) VALUES
     function test_affect_ignore($database)
     {
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
-            $database->insertIgnore('test', ['id' => 1]);
-            $database->updateIgnore('test', ['id' => 1], ['id' => 2]);
+            $this->assertEquals([], $database->insertIgnore('test', ['id' => 1]));
+            $this->assertEquals([], $database->updateIgnore('test', ['id' => 1], ['id' => 2]));
 
             $database->insert('foreign_p', ['id' => 1, 'name' => 'p']);
             $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'c1']);
 
-            // sqlite は外部キーを無視できない（というか DELETE OR IGNORE が対応していない？）
-            if ($database->getPlatform() instanceof SqlitePlatform) {
-                $this->assertException('syntax error', L($database)->deleteIgnore('foreign_p', ['id' => 1]));
-                $this->assertException('syntax error', L($database)->removeIgnore('foreign_p', ['id' => 1]));
-                $this->assertException('syntax error', L($database)->destroyIgnore('foreign_p', ['id' => 1]));
-            }
-            else {
-                $database->deleteIgnore('foreign_p', ['id' => 1]);
-                $database->removeIgnore('foreign_p', ['id' => 1]);
-                $database->destroyIgnore('foreign_p', ['id' => 1]);
-            }
+            // sqlite は外部キーを無視できない（というか DELETE OR IGNORE が対応していない？）のでシンタックスだけ
+            $ignore = $database->getCompatiblePlatform()->getIgnoreSyntax();
+            $database = $database->dryrun();
+            $this->assertEquals("DELETE $ignore FROM foreign_p WHERE id = '1'", $database->deleteIgnore('foreign_p', ['id' => 1]));
+            $this->assertStringIgnoreBreak(<<<ACTUAL
+                DELETE $ignore FROM foreign_p WHERE
+                (id = '1')
+                AND ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = foreign_p.id)))
+                AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = foreign_p.id)))
+                ACTUAL, $database->removeIgnore('foreign_p', ['id' => 1]));
+            $this->assertEquals([
+                "DELETE $ignore FROM foreign_c1 WHERE (id) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '1')",
+                "DELETE $ignore FROM foreign_c2 WHERE (cid) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '1')",
+                "DELETE $ignore FROM foreign_p WHERE id = '1'",
+            ], $database->destroyIgnore('foreign_p', ['id' => 1]));
         }
     }
 
@@ -6256,10 +6225,10 @@ AND (g_parent.ancestor_id = g_ancestor.ancestor_id)))
      */
     function test_subquery($database)
     {
+        // SQLServer は GROUP_CONCAT に対応していないのでトラップ
+        $this->trapThrowable('is not supported by platform');
+
         $cplatform = $database->getCompatiblePlatform();
-        if ($cplatform->getWrappedPlatform() instanceof SQLServerPlatform) {
-            return;
-        }
 
         $rows = $database->selectArray([
             't_article' => [

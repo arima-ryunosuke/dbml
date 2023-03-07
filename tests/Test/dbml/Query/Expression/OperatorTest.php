@@ -2,7 +2,6 @@
 
 namespace ryunosuke\Test\dbml\Query\Expression;
 
-use Doctrine\DBAL\Platforms\SqlitePlatform;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Operator;
 
@@ -14,7 +13,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         parent::setUpBeforeClass();
 
-        self::$platform = new CompatiblePlatform(new SqlitePlatform);
+        self::$platform = new CompatiblePlatform(new \ryunosuke\Test\Platforms\SqlitePlatform());
 
         Operator::define('MATCH', function ($operand1, $operand2) {
             return [

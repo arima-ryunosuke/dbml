@@ -325,7 +325,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(true, $schema->getTableColumns('metasample')['dummy']->getPlatformOption('lazy')); // この時点では true
         $this->assertEquals('HOGE', $schema->getTableColumnExpression('metasample', 'dummy', 'select', 'hoge'));
         $this->assertEquals('HOGE', $schema->getTableColumnExpression('metasample', 'dummy', 'select', 'fuga'));    // キャッシュされるのでコールバックされない
-        $this->assertEquals(false, $schema->getTableColumns('metasample')['dummy']->getPlatformOption('lazy')); // 呼ばれたので false
+        $this->assertEquals(false, $schema->getTableColumns('metasample')['dummy']->getPlatformOption('lazy'));     // 呼ばれたので false
     }
 
     /**

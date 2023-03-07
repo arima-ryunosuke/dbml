@@ -20,12 +20,15 @@ use PHPUnit\Framework\SkippedTestError;
 use PHPUnit\Framework\TestCase;
 use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware;
+use ryunosuke\PHPUnit\TestCaseTrait;
 use function ryunosuke\dbml\cacheobject;
 use function ryunosuke\dbml\class_shorten;
 use function ryunosuke\dbml\try_null;
 
 abstract class AbstractUnitTestCase extends TestCase
 {
+    use TestCaseTrait;
+
     /** @var Connection[] */
     private static $connections = [];
 

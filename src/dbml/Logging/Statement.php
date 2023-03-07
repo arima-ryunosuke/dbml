@@ -7,7 +7,6 @@ use Doctrine\DBAL\Driver\Result as ResultInterface;
 use Doctrine\DBAL\Driver\Statement as StatementInterface;
 use Doctrine\DBAL\ParameterType;
 use Psr\Log\LoggerInterface;
-
 use function array_slice;
 use function func_get_args;
 

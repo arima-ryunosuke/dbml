@@ -96,10 +96,13 @@ namespace ryunosuke\Test {
                     $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($tableName2, true));
                 }
 
-                $result = parent::insert(...func_get_args());
-
-                if ($specified_id) {
-                    $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($tableName2, false));
+                try {
+                    $result = parent::insert(...func_get_args());
+                }
+                finally {
+                    if ($specified_id) {
+                        $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($tableName2, false));
+                    }
                 }
 
                 return $result;

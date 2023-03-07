@@ -422,14 +422,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function __toString()
     {
-        // __toString が例外を投げると即死するので例外ではなくエラーに変換する
-        try {
-            return $this->_getSql();
-        }
-        catch (\Exception $ex) {
-            trigger_error(get_class($ex) . ':' . $ex->getMessage() . "\n" . $ex->getTraceAsString(), E_USER_WARNING);
-            return 'invalid QueryBuilder';
-        }
+        return $this->_getSql();
     }
 
     private function _getSql()

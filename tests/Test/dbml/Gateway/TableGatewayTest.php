@@ -2,7 +2,6 @@
 
 namespace ryunosuke\Test\dbml\Gateway;
 
-use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
@@ -300,6 +299,11 @@ AND ((flag=1))", "$gw");
             ])->limit([1 => 10]);
         });
 
+        $offset_limit = function ($offset, $limit, $order) use ($database) {
+            $offset_limit = $database->getPlatform()->modifyLimitQuery('', $limit, $offset);
+            return trim($order ? $offset_limit : strtr($offset_limit, ['ORDER BY (SELECT 0)' => '']));
+        };
+
         // 何もしなくてもデフォルトスコープが適用されるはず
         $this->assertEquals('SELECT NOW() FROM test T', (string) $gateway->as('T')->select());
         // noscope するとデフォルトスコープも外れるはず
@@ -307,13 +311,10 @@ AND ((flag=1))", "$gw");
         // unscope で個別にはがせるはず
         $this->assertEquals('SELECT * FROM test T', (string) $gateway->as('T')->scope('hoge')->unscope('hoge')->unscope('')->select());
 
-        // SQLServer は LIMIT 句が特殊で文字列的なテストが出来ない
-        if (!$database->getCompatiblePlatform()->getWrappedPlatform() instanceof SQLServerPlatform) {
-            // hoge スコープが適用されるはず
-            $this->assertEquals('SELECT NOW(), T.id FROM test T WHERE id=1 GROUP BY id HAVING id="a" ORDER BY id ASC LIMIT 1', (string) $gateway->as('T')->scope('hoge')->select());
-            // hoge,fuga スコープの両方がその順番で適用されるはず
-            $this->assertEquals('SELECT NOW(), T.id, T.name FROM test T WHERE (id=1) AND (name="a") GROUP BY id, name HAVING (id="a") AND (name="a") ORDER BY id ASC, name ASC LIMIT 2', (string) $gateway->as('T')->scope('hoge fuga')->select());
-        }
+        // hoge スコープが適用されるはず
+        $this->assertEquals('SELECT NOW(), T.id FROM test T WHERE id=1 GROUP BY id HAVING id="a" ORDER BY id ASC ' . $offset_limit(0, 1, false), (string) $gateway->as('T')->scope('hoge')->select());
+        // hoge,fuga スコープの両方がその順番で適用されるはず
+        $this->assertEquals('SELECT NOW(), T.id, T.name FROM test T WHERE (id=1) AND (name="a") GROUP BY id, name HAVING (id="a") AND (name="a") ORDER BY id ASC, name ASC ' . $offset_limit(0, 2, false), (string) $gateway->as('T')->scope('hoge fuga')->select());
 
         // パラメータが適用されるはず
         $select = $gateway->as('T')->scope('piyo', 'col1', 1)->select('col2', ['name' => 'a']);
@@ -325,11 +326,9 @@ AND ((flag=1))", "$gw");
         $this->assertEquals([-1, 'a'], $select->getParams());
 
         // スコーピングが適用されるはず
-        if (!$database->getCompatiblePlatform()->getWrappedPlatform() instanceof SQLServerPlatform) {
-            $select = $gateway->as('T')->scope('this', 'col1')->select('col2', ['name' => 'a']);
-            $this->assertEquals('SELECT NOW(), T.col1 AS calias, T.col2 FROM test T WHERE (T.id <> ?) AND (T.name = ?) LIMIT 10 OFFSET 1', $select);
-            $this->assertEquals([-1, 'a'], $select->getParams());
-        }
+        $select = $gateway->as('T')->scope('this', 'col1')->select('col2', ['name' => 'a']);
+        $this->assertEquals('SELECT NOW(), T.col1 AS calias, T.col2 FROM test T WHERE (T.id <> ?) AND (T.name = ?) ' . $offset_limit(1, 10, true), (string) $select);
+        $this->assertEquals([-1, 'a'], $select->getParams());
 
         // 本体には一切影響がないはず
         $this->assertEquals(['' => []], self::forcedRead($gateway, 'activeScopes'));
@@ -685,10 +684,6 @@ AND ((flag=1))", "$gw");
      */
     function test_scoping_k($gateway, $database)
     {
-        if ($database->getCompatiblePlatform()->getWrappedPlatform() instanceof SQLServerPlatform) {
-            return;
-        }
-
         $select = $gateway->as('T')
             ->orderBy(['name' => 'DESC'])
             ->where('1=1')
@@ -702,7 +697,12 @@ AND ((flag=1))", "$gw");
             ->orderBy(true)
             ->select([]);
 
-        $this->assertEquals('SELECT NOW(?) AS c, NOW(1), NOW(2) AS now FROM test T WHERE (1=1) AND (c3 = ?) AND ((T.id = ?) OR (c2 = ?)) ORDER BY T.name DESC, CASE WHEN T.data IS NULL THEN 0 ELSE 1 END ASC, T.data ASC, T.id ASC LIMIT 2', (string) $select);
+        $offset_limit = function ($offset, $limit, $order) use ($database) {
+            $offset_limit = $database->getPlatform()->modifyLimitQuery('', $limit, $offset);
+            return trim($order ? $offset_limit : strtr($offset_limit, ['ORDER BY (SELECT 0)' => '']));
+        };
+
+        $this->assertEquals('SELECT NOW(?) AS c, NOW(1), NOW(2) AS now FROM test T WHERE (1=1) AND (c3 = ?) AND ((T.id = ?) OR (c2 = ?)) ORDER BY T.name DESC, CASE WHEN T.data IS NULL THEN 0 ELSE 1 END ASC, T.data ASC, T.id ASC ' . $offset_limit(0, 2, false), (string) $select);
         $this->assertEquals([9, 3, 1, 2], $select->getParams());
     }
 

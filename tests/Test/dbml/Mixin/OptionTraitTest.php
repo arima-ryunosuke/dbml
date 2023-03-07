@@ -333,9 +333,12 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
         ])->option('array'));
 
-        $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('hoge', []));
-        $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('hoge', null));
-        $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('op1', []));
+        /** @noinspection PhpParamsInspection */
+        {
+            $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('hoge', []));
+            $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('hoge', null));
+            $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('op1', []));
+        }
     }
 
     function test_option()

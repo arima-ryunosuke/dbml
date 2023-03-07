@@ -3,6 +3,7 @@
 namespace ryunosuke\dbml\Mixin;
 
 use ryunosuke\dbml\Database;
+use ryunosuke\dbml\Query\Expression\TableDescriptor;
 use ryunosuke\dbml\Query\QueryBuilder;
 
 trait SubAggregateTrait

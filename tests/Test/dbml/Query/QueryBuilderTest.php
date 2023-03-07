@@ -5,7 +5,6 @@ namespace ryunosuke\Test\dbml\Query;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
-use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
@@ -145,18 +144,21 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_builder($builder)
     {
-        // SQLServer は limit が違いすぎるので除外（Database 側のテストで担保）
-        if (!$builder->getDatabase()->getCompatiblePlatform()->getWrappedPlatform() instanceof SQLServerPlatform) {
-            $builder->build([
-                'column'  => 'test',
-                'where'   => 'id = 1',
-                'orderBy' => 'id',
-                'limit'   => 5,
-                'groupBy' => 'id',
-                'having'  => 'MIN(id) > 1',
-            ]);
-            $this->assertQuery('SELECT test.* FROM test WHERE id = 1 GROUP BY id HAVING MIN(id) > 1 ORDER BY id ASC LIMIT 5', $builder);
-        }
+        $builder->build([
+            'column'  => 'test',
+            'where'   => 'id = 1',
+            'orderBy' => 'id',
+            'limit'   => 5,
+            'groupBy' => 'id',
+            'having'  => 'MIN(id) > 1',
+        ]);
+
+        $offset_limit = function ($offset, $limit, $order) use ($builder) {
+            $offset_limit = $builder->getDatabase()->getPlatform()->modifyLimitQuery('', $limit, $offset);
+            return trim($order ? $offset_limit : strtr($offset_limit, ['ORDER BY (SELECT 0)' => '']));
+        };
+
+        $this->assertQuery('SELECT test.* FROM test WHERE id = 1 GROUP BY id HAVING MIN(id) > 1 ORDER BY id ASC ' . $offset_limit(0, 5, false), $builder);
     }
 
     /**
@@ -2241,10 +2243,8 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
         $this->assertEquals([null, null, null, null, null, 4, 2, 0, -2, -4], $builder->orderBy('cint', false, 'first')->lists());
 
         $builder->setNullsOrder('hoge');
-        @$builder->orderBy('hoge')->getQuery();
-        $this->assertStringContainsString('hoge is not supported', error_get_last()['message']);
-        @$builder->orderBy(new Expression('? + ?', [1, 2]))->getQuery();
-        $this->assertStringContainsString('is not support parametable query', error_get_last()['message']);
+        $this->assertException('hoge is not supported', L($builder->orderBy('hoge'))->getQuery());
+        $this->assertException('is not support parametable query', L($builder->orderBy(new Expression('? + ?', [1, 2])))->getQuery());
     }
 
     /**
@@ -2438,12 +2438,15 @@ SELECT test.* FROM test", $builder);
         $this->assertQuery("{$us}SELECT 1{$ue} UNION {$us}SELECT test.id FROM test WHERE id = ?{$ue}", $builder);
         $this->assertEquals([1], $builder->getParams());
 
-        // SQLServer は limit が違いすぎるので除外（Database 側のテストで担保）
-        if (!$builder->getDatabase()->getPlatform() instanceof SQLServerPlatform) {
-            $builder->column([[new Expression('RAND(?)', 100)]])->where(['uid' => 'inner'])->innerJoinOn('test1', new Expression('uid1 = ?', 10), '__dbml_union_table')->innerJoinOn('test2', new Expression('uid2 = ?', 20), 'test2')->orderBy('uuid')->limit(10, 1);
-            $this->assertQuery("SELECT RAND(?) FROM ({$us}SELECT 1{$ue} UNION {$us}SELECT test.id FROM test WHERE id = ?{$ue}) __dbml_union_table INNER JOIN test1 ON uid1 = ? INNER JOIN test2 ON uid2 = ? WHERE uid = ? ORDER BY uuid ASC LIMIT 10 OFFSET 1", $builder);
-            $this->assertEquals([100, 1, 10, 20, 'inner'], $builder->getParams());
-        }
+        $builder->column([[new Expression('RAND(?)', 100)]])->where(['uid' => 'inner'])->innerJoinOn('test1', new Expression('uid1 = ?', 10), '__dbml_union_table')->innerJoinOn('test2', new Expression('uid2 = ?', 20), 'test2')->orderBy('uuid')->limit(10, 1);
+
+        $offset_limit = function ($offset, $limit, $order) use ($builder) {
+            $offset_limit = $builder->getDatabase()->getPlatform()->modifyLimitQuery('', $limit, $offset);
+            return trim($order ? $offset_limit : strtr($offset_limit, ['ORDER BY (SELECT 0)' => '']));
+        };
+
+        $this->assertQuery("SELECT RAND(?) FROM ({$us}SELECT 1{$ue} UNION {$us}SELECT test.id FROM test WHERE id = ?{$ue}) __dbml_union_table INNER JOIN test1 ON uid1 = ? INNER JOIN test2 ON uid2 = ? WHERE uid = ? ORDER BY uuid ASC {$offset_limit(1, 10, false)}", $builder);
+        $this->assertEquals([100, 1, 10, 20, 'inner'], $builder->getParams());
     }
 
     /**
@@ -2540,9 +2543,7 @@ SELECT test.* FROM test", $builder);
         $qi = function ($str) use ($database) {
             return $database->getPlatform()->quoteSingleIdentifier($str);
         };
-        $exists = $database->getPlatform() instanceof SQLServerPlatform
-            ? "CASE WHEN (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) THEN 1 ELSE 0 END"
-            : "EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))";
+        $exists = $database->getCompatiblePlatform()->convertSelectExistsQuery("EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))");
         $this->assertStringIgnoreBreak(<<<SQL
 SELECT
 (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) AS alias1,
@@ -2754,7 +2755,7 @@ SQL
         ], $builder->neighbor(['id' => 10], 1));
 
         // 複数指定は行値式になる
-        if (!$builder->getDatabase()->getPlatform() instanceof SQLServerPlatform) {
+        if ($builder->getDatabase()->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $builder->getDatabase()->getCompatiblePlatform()->supportsRowConstructor()) {
             $builder->column('multiprimary.mainid, subid');
             $this->assertEquals([
                 -1 => ['mainid' => '1', 'subid' => '4'],
@@ -3952,7 +3953,7 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
         $this->assertStringContainsString(' ' . $lock, (string) $builder);
         $builder->array();
 
-        if (!$platform instanceof SQLServerPlatform) {
+        if ($builder->getDatabase()->getCompatiblePlatform()->appendLockSuffix('dummy', 'forupdate', '') !== 'dummy') {
             $builder->select('*')->from('test1')->lockForUpdate('SKIP LOCKED');
             $this->assertStringContainsString(' ' . $lock . ' SKIP LOCKED', (string) $builder);
         }
@@ -4135,20 +4136,6 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
                 ],
             ],
         ], $builder->tuple());
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
-     */
-    function test___toString($builder)
-    {
-        $builder->from('X');
-        $this->assertEquals('SELECT * FROM X', "$builder");
-
-        $builder->reset()->detectAutoOrder(true);
-        $this->assertEquals('invalid QueryBuilder', @"$builder");
-        $this->assertStringContainsString('query builder is not set "from"', error_get_last()['message']);
     }
 
     public static function assertQuery($expected, $actual, $message = '')
