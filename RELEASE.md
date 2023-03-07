@@ -21,6 +21,24 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 - TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
+- returning 句に対応したい
+- AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
+
+## 2.1.1
+
+- [feature][QueryBuilder] arrayFetch に null を与えると親の fetch method が伝播される機能
+- [feature][Database] changeArray に RETURNING 的挙動を実装
+- [refactor][Database] バルク系の chunk の実装を iterator_chunk に変更
+- [refactor][Database] normalize のループが冗長かつ非効率だったので修正
+- [fixbug][Database] SQLServer で BINARY に文字列を入れようとするとエラーになる不具合を修正
+- [fixbug][Schema] SQLServer で view のカラムが得られていなかった不具合を修正
+- [fixbug][QueryBuilder] SQLServer の WITH に RECURSIVE がついてしまう不具合を修正
+- [fixbug][QueryBuilder] 遅延外部キーが遅延されていなかった不具合を修正
+- [feature][Logging] json を追加
+- [feature][Logging] metadata の 直値と固定クロージャ対応
+- [feature][Logging] すべてのログに time データを追加
+- [change][Logging] 失敗時はログレベルを変える
+- [fixbug][Logger] パラメータが数値配列になっていた不具合を修正
 
 ## 2.1.0
 
