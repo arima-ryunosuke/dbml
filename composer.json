@@ -44,8 +44,7 @@
   "scripts": {
     "build": [
       "@export",
-      "@test",
-      "@document"
+      "@test"
     ],
     "export": [
       "export-function",
@@ -53,10 +52,6 @@
     ],
     "test": [
       "vendor/bin/phpunit --configuration=tests/phpunit.xml"
-    ],
-    "document": [
-      "rm -rf docs",
-      "@php bin/documentize.phar generate src docs --ansi -r --force --no-constant --no-function --no-private --contain 'ryunosuke\\dbml' --contain 'Doctrine' --except 'ryunosuke\\dbml\\Utility' --template-config .docconfig.php -v --stats"
     ],
     "post-install-cmd": [
       "@export"
