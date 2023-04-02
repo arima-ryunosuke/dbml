@@ -1707,8 +1707,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *         ],
      *     ],
      *     'table4' => [
-     *         'aliasA' => 'columnA',
-     *         'aliasB' => 'columnB',
+     *         'aliasA'          => 'columnA',
+     *         'aliasB'          => 'columnB',
+     *         'aliasC|datetime' => 'columnC',
      *     ],
      * ]);
      * ```
@@ -1733,6 +1734,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * | 10 | `"+prefix.column_name"`                          | JOIN 記号＋ドットを含む文字列は prefix テーブルと JOIN してそのカラムを取得
      * | 11 | `new Expression("NOW()")`                        | {@link Expression} を与えると一切加工せずそのまま文字列を表す
      * | 12 | `"NOW()"`                                        | 上と同じ。 `()` を含む文字列は自動で {@link Expression} 化される
+     * | 21 | `['alias|typename' => 'column']`                 | 配列のキーをパイプでつなぐとその型に変換されて取得できる
      * | 22 | `['alias' => function($row){}]`                  | キーが存在しないカラム指定のクロージャは行全体が渡ってくるコールバックになる
      * | 25 | `['cname' => function($cname){}]`                | キーが存在するカラム指定のクロージャはカラム値が単一で渡ってくるコールバックになる
      * | 27 | `function(){return function($v){return $v;};}`   | クロージャの亜種。クロージャを返すクロージャはそのままクロージャとして活きるのでメソッドのような扱いにできる

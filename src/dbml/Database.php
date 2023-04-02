@@ -339,33 +339,6 @@ class Database
         'CROSS' => '*',
     ];
 
-    public static $typeMap = [
-        Types::ARRAY                => ['array', 'string'],
-        Types::SIMPLE_ARRAY         => ['array', 'string'],
-        Types::JSON                 => ['array', 'string'],
-        Types::OBJECT               => ['object', 'string'],
-        Types::BOOLEAN              => ['bool'],
-        Types::INTEGER              => ['int'],
-        Types::SMALLINT             => ['int'],
-        Types::BIGINT               => ['int', 'string'],
-        Types::DECIMAL              => ['float', 'string'],
-        Types::FLOAT                => ['float'],
-        Types::STRING               => ['string'],
-        Types::TEXT                 => ['string'],
-        Types::BINARY               => ['string'],
-        Types::BLOB                 => ['string'],
-        Types::GUID                 => ['string'],
-        Types::DATETIME_MUTABLE     => [\DateTime::class, 'string'],
-        Types::DATETIME_IMMUTABLE   => [\DateTimeImmutable::class, 'string'],
-        Types::DATETIMETZ_MUTABLE   => [\DateTime::class, 'string'],
-        Types::DATETIMETZ_IMMUTABLE => [\DateTimeImmutable::class, 'string'],
-        Types::DATE_MUTABLE         => [\DateTime::class, 'string'],
-        Types::DATE_IMMUTABLE       => [\DateTimeImmutable::class, 'string'],
-        Types::TIME_MUTABLE         => [\DateTime::class, 'string'],
-        Types::TIME_IMMUTABLE       => [\DateTimeImmutable::class, 'string'],
-        Types::DATEINTERVAL         => [\DateInterval::class, 'string'],
-    ];
-
     /** @var Connection[] */
     private $connections;
 
@@ -430,7 +403,8 @@ class Database
                     'select' => function ($value, AbstractPlatform $platform) { return Type::getType('string')->convertToPHPValue($value, $platform); },
                     'affect' => function ($value, AbstractPlatform $platform) { return Type::getType('string')->convertToDatabaseValue($value, $platform); },
                 ],
-                // いずれにせよ上記の hoge,fuga,piyo のようにそもそも Type::hasType ではないものは無視される
+                // このように Type を渡すと（一度だけ） addType されると同時に select:convertToPHPValue, affect:convertToDatabaseValue が自動で設定される
+                'type'                  => new \Doctrine\DBAL\Types\DateTimeType(),
             ],
             // 同名カラムがあった時どう振る舞うか[null, 'noallow', 'strict', 'loose']
             'checkSameColumn'           => null,
@@ -993,6 +967,18 @@ class Database
                         }
                     }
                 }
+                [$c, $typename] = explode('|', $c, 2) + [1 => ''];
+                if ($typename) {
+                    if (isset($cast_type[$typename]['select'])) {
+                        $converter = $cast_type[$typename]['select'];
+                        if ($converter instanceof \Closure) {
+                            $v = $converter($v, $platform);
+                        }
+                        else {
+                            $v = Type::getType($typename)->convertToPHPValue($v, $platform);
+                        }
+                    }
+                }
 
                 $newrow[$c] = $v;
             }
@@ -1415,6 +1401,16 @@ class Database
      */
     public function echoAnnotation($namespace = null, $filename = null)
     {
+        $special_types = [
+            Types::SIMPLE_ARRAY         => 'array|string',
+            Types::JSON                 => 'array|string',
+            Types::BOOLEAN              => 'bool',
+            Types::INTEGER              => 'int',
+            Types::SMALLINT             => 'int',
+            Types::BIGINT               => 'int|string',
+            Types::DECIMAL              => 'float|string',
+            Types::FLOAT                => 'float',
+        ];
         $args1 = '$tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []';
         $args2 = '$variadic_primary, $tableDescriptor = []';
         $args3 = '$predicates = [], $limit = 1';
@@ -1434,12 +1430,11 @@ class Database
         $gateways = [];
         $entities = [];
         foreach ($tablemap['TtoE'] ?? [] as $tname => $entity_names) {
-            $column_types = array_each($this->getSchema()->getTableColumns($tname), function (&$carry, Column $column) {
-                $typename = $column->getType()->getName();
-                $typenames = array_map(function ($typename) {
-                    return class_exists($typename) ? "\\$typename" : $typename;
-                }, static::$typeMap[$typename] ?? [$typename]);
-                $carry[$column->getName()] = implode('|', $typenames);
+            $column_types = array_each($this->getSchema()->getTableColumns($tname), function (&$carry, Column $column) use ($special_types) {
+                $type = $column->getType();
+                $typename = $type->getName();
+                $reftype = (new \ReflectionMethod($type, 'convertToPHPValue'))->getReturnType();
+                $carry[$column->getName()] = @strval($reftype ?? $special_types[$typename] ?? 'string');
             }, []);
             $shape = array_sprintf($column_types, '%2$s: %1$s', ', ');
             $props = array_sprintf($column_types, "/** @var %1\$s */\npublic \$%2\$s;");
@@ -1502,6 +1497,17 @@ class Database
      */
     public function echoPhpStormMeta($innerOnly = false, $filename = null, $namespace = null)
     {
+        $special_types = [
+            Types::SIMPLE_ARRAY         => 'array|string',
+            Types::JSON                 => 'array|string',
+            Types::BOOLEAN              => 'bool',
+            Types::INTEGER              => 'int',
+            Types::SMALLINT             => 'int',
+            Types::BIGINT               => 'int|string',
+            Types::DECIMAL              => 'float|string',
+            Types::FLOAT                => 'float',
+        ];
+
         $export = function ($value, $nest = 0, $parents = []) use (&$export) {
             if (!is_array($value) || !$value) {
                 return var_export($value, true);
@@ -1534,15 +1540,20 @@ class Database
                 }
             }
 
-            $columns = array_map(function (Column $column) {
-                $typename = $column->getType()->getName();
+            $columns = array_map(function (Column $column) use ($special_types) {
+                $type = $column->getType();
+                $typename = $type->getName();
                 $autocast = $this->getUnsafeOption('autoCastType');
-                if (is_callable($autotype = $autocast[$typename]['select'] ?? null)) {
-                    if ($types = reflect_types(reflect_callable($autotype))->getTypes()) {
-                        return $types[0]->getName();
+                $converter = $autocast[$typename]['select'] ?? null;
+                if ($converter) {
+                    if (is_callable($converter)) {
+                        $reftype = reflect_callable($converter)->getReturnType();
+                    }
+                    else{
+                        $reftype = (new \ReflectionMethod($type, 'convertToPHPValue'))->getReturnType();
                     }
                 }
-                return (static::$typeMap[$typename] ?? [$typename])[0];
+                return @strval($reftype ?? $special_types[$typename] ?? 'string');
             }, $this->getSchema()->getTableColumns($tname));
             $entities[$entityname] = ($entities[$entityname] ?? []) + $columns;
         }
@@ -1636,7 +1647,14 @@ class Database
     {
         $types = [];
         foreach ($array as $type => $opt) {
-            if (!Type::hasType($type)) {
+            if ($opt instanceof Type) {
+                if (!Type::getTypeRegistry()->has($type)) {
+                    Type::getTypeRegistry()->register($type, $opt);
+                }
+                $types[$type] = [
+                    'select' => true,
+                    'affect' => true,
+                ];
                 continue;
             }
             // false はシカト（設定されていると見なされてしまうので代入すらしない）
@@ -1658,13 +1676,15 @@ class Database
             if (!$opt['select'] && !$opt['affect']) {
                 continue;
             }
-            // クロージャは $this をバインド（Type は static や引数ベースであり、状態を持たないのでこの段階でバインドできる）
-            $typeclass = Type::getType($type);
-            if ($opt['select'] instanceof \Closure) {
-                $opt['select'] = $opt['select']->bindTo($typeclass, $typeclass);
-            }
-            if ($opt['affect'] instanceof \Closure) {
-                $opt['affect'] = $opt['affect']->bindTo($typeclass, $typeclass);
+            // type があるクロージャは $this をバインド（Type は static や引数ベースであり、状態を持たないのでこの段階でバインドできる）
+            if (Type::hasType($type)) {
+                $typeclass = Type::getType($type);
+                if ($opt['select'] instanceof \Closure) {
+                    $opt['select'] = $opt['select']->bindTo($typeclass, $typeclass);
+                }
+                if ($opt['affect'] instanceof \Closure) {
+                    $opt['affect'] = $opt['affect']->bindTo($typeclass, $typeclass);
+                }
             }
             $types[$type] = $opt;
         }

@@ -5,6 +5,7 @@ namespace ryunosuke\Test\dbml;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Schema;
 use Doctrine\DBAL\Types\Type;
@@ -23,6 +24,7 @@ use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\dbml\Transaction\Transaction;
+use ryunosuke\dbml\Types\AbstractType;
 use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\Comment;
@@ -773,7 +775,14 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_autoCastType($database)
     {
+        $urlType = new class extends AbstractType {
+            public function getName()
+            {
+                return 'url';
+            }
+        };
         $database->setAutoCastType([
+            'url'     => $urlType,
             'hoge'    => true,
             'integer' => true,
             'float'   => [
@@ -787,6 +796,14 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
         ]);
         $this->assertEquals([
+            'url'     => [
+                'select' => true,
+                'affect' => true,
+            ],
+            'hoge'    => [
+                'select' => true,
+                'affect' => true,
+            ],
             'integer' => [
                 'select' => true,
                 'affect' => true,
@@ -2568,6 +2585,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'select' => true,
                 'affect' => true,
             ],
+            'closure'      => [
+                'select' => fn($value) => explode(',', $value),
+                'affect' => false,
+            ],
         ]);
 
         $database->getSchema()->setTableColumn('misctype', 'carray', ['type' => Types::SIMPLE_ARRAY]);
@@ -2579,7 +2600,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cdecimal'  => 1.2,
             'cdate'     => '2012-12-12',
             'cdatetime' => '2012-12-12 12:34:56',
-            'cstring'   => 'hoge',
+            'cstring'   => 'ho,ge',
             'ctext'     => 'fuga',
             'carray'    => [1, 2, 3, 4, 5, 6, 7, 8, 9],
             'cjson'     => new Expression('?', [json_encode(['a' => 'A'])]),
@@ -2588,14 +2609,20 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'misctype MT' => [
                 'cint',
                 'cdatetime',
+                'cstring|closure'     => 'cstring',
                 'carray',
                 'cjson',
+                'tarray|simple_array' => 'carray',
+                'tjson|json'          => 'cjson',
             ],
         ], [], [], 1);
         $this->assertSame(1, $row['cint']);
         $this->assertInstanceOf('\DateTime', $row['cdatetime']);
+        $this->assertEquals(['ho', 'ge'], $row['cstring']);
         $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['carray']);
+        $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['tarray']);
         $this->assertEquals(['a' => 'A'], $row['cjson']);
+        $this->assertEquals(['a' => 'A'], $row['tjson']);
 
         // 子供ネストもOK
         $this->assertSame([
@@ -2753,6 +2780,23 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_echoAnnotation($database)
     {
+        $database = $database->context();
+        $database->setAutoCastType([
+            'birthday'          => new class() extends AbstractType {
+                public function convertToPHPValue($value, AbstractPlatform $platform): \DateTimeImmutable
+                {
+                    return parent::convertToPHPValue($value, $platform);
+                }
+            },
+        ]);
+        $database->overrideColumns([
+            'misctype' => [
+                'cdate' => [
+                    'type' => 'birthday',
+                ],
+            ],
+        ]);
+
         $annotation = $database->echoAnnotation('ryunosuke\\Test\\dbml\\Annotation', __DIR__ . '/../../annotation.php');
         $this->assertStringContainsString('namespace ryunosuke\\Test\\dbml\\Annotation;', $annotation);
         $this->assertStringContainsString('trait TableGatewayProvider', $annotation);
@@ -2763,7 +2807,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertStringContainsString('class ArticleEntity extends', $annotation);
         $this->assertStringContainsString('class CommentEntity extends', $annotation);
         $this->assertStringContainsString('class ManagedCommentEntity extends', $annotation);
+        $this->assertStringContainsString('@var DateTimeImmutable', $annotation);
         $this->assertStringContainsString('$tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []', $annotation);
+
+        $database->unstackAll();
     }
 
     /**
@@ -2778,9 +2825,23 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'select' => function (): \ArrayObject { },
                 'affect' => false,
             ],
-            Types::INTEGER      => [
-                'select' => function () {/* no return type */ },
-                'affect' => false,
+            'birthday'          => new class() extends AbstractType {
+                public function convertToPHPValue($value, AbstractPlatform $platform): \DateTimeImmutable
+                {
+                    return parent::convertToPHPValue($value, $platform);
+                }
+            },
+        ]);
+        $database->overrideColumns([
+            'misctype'       => [
+                'cdate' => [
+                    'type' => 'birthday',
+                ],
+            ],
+            'misctype_child' => [
+                'cdate' => [
+                    'type' => 'birthday',
+                ],
             ],
         ]);
 
@@ -2791,7 +2852,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertStringContainsString('new \\ryunosuke\\dbml\\Entity\\Entityable', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
-        $this->assertStringContainsString('=> \DateTime::class', $phpstorm_meta);
+        $this->assertStringContainsString('=> \DateTimeImmutable::class', $phpstorm_meta);
         $this->assertStringContainsString('=> \ArrayObject::class', $phpstorm_meta);
 
         $phpstorm_meta = $database->echoPhpStormMeta(true, null, 'EntityNamespace');
@@ -2800,7 +2861,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
         $this->assertStringContainsString('new \\EntityNamespace\\test', $phpstorm_meta);
-        $this->assertStringContainsString('=> \DateTime::class', $phpstorm_meta);
+        $this->assertStringContainsString('=> \DateTimeImmutable::class', $phpstorm_meta);
 
         $database->unstackAll();
     }
