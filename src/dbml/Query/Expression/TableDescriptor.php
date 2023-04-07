@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpUnusedPrivateFieldInspection */
+<?php
 
 namespace ryunosuke\dbml\Query\Expression;
 

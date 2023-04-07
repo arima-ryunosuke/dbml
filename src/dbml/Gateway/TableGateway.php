@@ -1687,6 +1687,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             return !($column->getPlatformOptions()['virtual'] ?? false);
         });
         $alias = $that->modifier();
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return array_combine(QueryBuilder::CLAUSES, [
             $sargs['column'],
             Adhoc::modifier($alias, $columns, $sargs['where']),

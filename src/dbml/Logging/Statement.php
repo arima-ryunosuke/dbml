@@ -58,10 +58,10 @@ final class Statement extends AbstractStatementMiddleware
         }
         finally {
             $this->logger->$level('Executing statement: {sql} (parameters: {params}, types: {types}, time: {time})', [
-                'sql'     => $this->sql,
-                'params'  => $params ?? $this->params,
-                'types'   => $this->types,
-                'time'    => $start,
+                'sql'    => $this->sql,
+                'params' => $params ?? $this->params,
+                'types'  => $this->types,
+                'time'   => $start,
             ]);
         }
     }

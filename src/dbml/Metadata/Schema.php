@@ -100,7 +100,6 @@ class Schema
         $this->tableNames = [];
         $this->tables = [];
         $this->tableColumns = [];
-        $this->tableColumnMetadata = [];
         $this->foreignKeys = [];
         $this->lazyForeignKeys = [];
         $this->foreignColumns = [];
@@ -111,7 +110,7 @@ class Schema
     /**
      * テーブルオブジェクトをメタデータに追加する
      *
-     * @param Table $table 追加するテーブルオブジェクRと
+     * @param Table $table 追加するテーブルオブジェクト
      */
     public function addTable($table)
     {
@@ -229,7 +228,7 @@ class Schema
             }
 
             $this->tables[$table_name] = cache_fetch($this->cache, "Table-$table_name", function () use ($table_name) {
-                // doctrine 4.4 から view のカラムが得られなくなっている？ ようなのでかなりアドホックだが暫定対応
+                // doctrine 3.4 から view のカラムが得られなくなっている？ ようなのでかなりアドホックだが暫定対応
                 if ($this->schemaManger->tablesExist([$table_name])) {
                     $table = $this->schemaManger->introspectTable($table_name);
                 }

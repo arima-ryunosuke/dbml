@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: Password1234
       TZ: 'Asia/Tokyo'
     ports:
-    - 13306:3306
+      - 13306:3306
   pgsql:
     image: docker.io/postgres:latest
     environment:
@@ -15,7 +15,7 @@ services:
       POSTGRES_PASSWORD: Password1234
       TZ: 'Asia/Tokyo'
     ports:
-    - 15432:5432
+      - 15432:5432
   mssql:
     image: mcr.microsoft.com/mssql/server:2017-latest
     environment:
@@ -25,4 +25,4 @@ services:
       MSSQL_COLLATION: Japanese_BIN
       TZ: 'Asia/Tokyo'
     ports:
-    - 11433:1433
+      - 11433:1433
