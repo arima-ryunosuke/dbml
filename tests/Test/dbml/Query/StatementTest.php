@@ -20,12 +20,12 @@ class StatementTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['__dbml_auto_bind0' => 'hoge'], $stmt->getParams());
 
         // 引数のほうが少ない
-        $this->assertException('mismatch', function () use ($database) {
+        $this->assertException('does not have', function () use ($database) {
             new Statement('this is no=?, this is named=:named', ['named' => 'hoge'], $database);
         });
 
         // 引数のほうが多い
-        $this->assertException('mismatch', function () use ($database) {
+        $this->assertException('length is long', function () use ($database) {
             new Statement('this is no=?, this is named=:named', ['hoge', 'fuga'], $database);
         });
     }
@@ -70,16 +70,16 @@ class StatementTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // executeSelect はスレーブに接続されるのでエラーにならないはず
         $stmt = new Statement('select ? as hoge, :fuga as fuga from test_slave', ['hoge'], $database);
-        $this->assertEquals($expected, $stmt->executeSelect([':fuga' => 'fuga'])->fetchAllAssociative());
+        $this->assertEquals($expected, $stmt->executeSelect(['fuga' => 'fuga'])->fetchAllAssociative());
 
         // executeAffect はマスターに接続されるのでエラーにならないはず
         $stmt = new Statement('update test_master set name = :fuga where id = ?', [1], $database);
-        $this->assertEquals(1, $stmt->executeAffect([':fuga' => 'fuga']));
+        $this->assertEquals(1, $stmt->executeAffect(['fuga' => 'fuga']));
 
         // connection を指定すればそれが使われるはず
         $stmt = new Statement('select ? as hoge, :fuga as fuga from test_master', ['hoge'], $database);
-        $this->assertEquals($expected, $stmt->executeSelect([':fuga' => 'fuga'], $master)->fetchAllAssociative());
+        $this->assertEquals($expected, $stmt->executeSelect(['fuga' => 'fuga'], $master)->fetchAllAssociative());
         $stmt = new Statement('select ? as hoge, :fuga as fuga from test_slave', ['hoge'], $database);
-        $this->assertEquals($expected, $stmt->executeSelect([':fuga' => 'fuga'], $slave)->fetchAllAssociative());
+        $this->assertEquals($expected, $stmt->executeSelect(['fuga' => 'fuga'], $slave)->fetchAllAssociative());
     }
 }

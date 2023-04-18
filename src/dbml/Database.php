@@ -54,6 +54,7 @@ use ryunosuke\dbml\Query\Expression\Alias;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\Expression\TableDescriptor;
+use ryunosuke\dbml\Query\Parser;
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\dbml\Query\Statement;
@@ -2678,29 +2679,8 @@ class Database
             $sql = $sql->merge($params);
         }
 
-        // 順次置換
-        $posed = $named = [];
-        $sql = preg_replace_callback('/(\?)|(:([a-z_][a-z_0-9]*))/ui', function ($m) use ($params, &$posed, &$named) {
-            if ($m[1] === '?') {
-                $name = count($posed);
-                $posed[$name] = true;
-            }
-            else {
-                $name = $m[3];
-                $named[$name] = true;
-            }
-            if (!array_key_exists($name, $params)) {
-                throw new \InvalidArgumentException('parameter length is short.');
-            }
-            return $this->quote($params[$name]);
-        }, $sql);
-
-        // 未使用（元の奴から使用した奴を差っ引いて）があるなら例外
-        if (array_diff_key($params, $posed + $named)) {
-            throw new \InvalidArgumentException('parameter length is long.');
-        }
-
-        return $sql;
+        $parser = new Parser($this->getPlatform()->createSQLParser());
+        return $parser->convertQuotedSQL($sql, $params, fn($v) => $this->quote($v));
     }
 
     /**

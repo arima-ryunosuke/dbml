@@ -1726,11 +1726,11 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_queryInto($database)
     {
-        $this->assertEquals("'1''2'", $database->queryInto('??', [1, 2]));
-        $this->assertEquals("'1''2'", $database->queryInto(':hoge:fuga', ['hoge' => 1, 'fuga' => 2]));
+        $this->assertEquals("'1','2'", $database->queryInto('?,?', [1, 2]));
+        $this->assertEquals("'1','2'", $database->queryInto(':hoge,:fuga', ['hoge' => 1, 'fuga' => 2]));
         $this->assertEquals("hoge", $database->queryInto('hoge'));
-        $this->assertEquals("'1''2'", $database->queryInto('?:hoge', [1, 'hoge' => 2]));
-        $this->assertEquals("'2''1''3'", $database->queryInto(':hoge?:fuga', [1, 'fuga' => 3, 'hoge' => 2]));
+        $this->assertEquals("'1','2'", $database->queryInto('?,:hoge', [1, 'hoge' => 2]));
+        $this->assertEquals("'2','1','3'", $database->queryInto(':hoge,?,:fuga', [1, 'fuga' => 3, 'hoge' => 2]));
         $this->assertEquals("'1','2','3'", $database->queryInto(new Expression('?,?,?', [1, 2, 3])));
 
         // 他方が包含したり同名だったりすると予期せぬ動作になることがあるのでテスト
@@ -1752,11 +1752,11 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertException("long", L($database)->queryInto(new Expression('?,?,?', [1, 2, 3]), [1, 2, 3]));
 
         // プレースホルダを含む脆弱性があったのでテスト
-        $this->assertException('short', L($database)->queryInto('select ?', []));
+        $this->assertException('does not have', L($database)->queryInto('select ?', []));
         $this->assertException('long', L($database)->queryInto('select ?', [1, 2]));
 
         // 不一致だと予期せぬ動作になることがあるのでテスト
-        $this->assertException('short', L($database)->queryInto(':hoge', ['fuga' => 1]));
+        $this->assertException('does not have', L($database)->queryInto(':hoge', ['fuga' => 1]));
     }
 
     /**

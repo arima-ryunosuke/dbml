@@ -6,13 +6,14 @@ use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
 use ReflectionClass;
 use ryunosuke\dbml\Mixin\OptionTrait;
+use ryunosuke\dbml\Query\Parser;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\date_convert;
 use function ryunosuke\dbml\is_bindable_closure;
 use function ryunosuke\dbml\is_stringable;
 use function ryunosuke\dbml\parameter_length;
-use function ryunosuke\dbml\sql_bind;
 use function ryunosuke\dbml\sql_format;
+use function ryunosuke\dbml\sql_quote;
 use function ryunosuke\dbml\str_ellipsis;
 
 /**
@@ -165,7 +166,8 @@ class Logger extends AbstractLogger
                 }
             }
 
-            $sql = sql_bind(trim($sql), $params);
+            $parser = new Parser(false, Parser::ERROR_MODE_SILENT);
+            $sql = $parser->convertQuotedSQL(trim($sql), $params, fn($v) => sql_quote($v));
 
             if ($metadata) {
                 $datalines = [];
@@ -244,7 +246,7 @@ class Logger extends AbstractLogger
         return function ($sql, $params, $types, $metadata) use ($bind) {
             if ($bind) {
                 $data = [
-                    'sql' => sql_bind($sql, $params),
+                    'sql' => (new Parser(false, Parser::ERROR_MODE_SILENT))->convertQuotedSQL($sql, $params, fn($v) => sql_quote($v)),
                 ];
             }
             else {

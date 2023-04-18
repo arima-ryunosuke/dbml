@@ -28,7 +28,8 @@ use ryunosuke\dbml\Database;
  */
 class Statement implements Queryable
 {
-    private const AUTO_BIND_KEY = '__dbml_auto_bind';
+    /** @var Parser */
+    private $parser;
 
     /** @var string */
     private $query;
@@ -45,25 +46,9 @@ class Statement implements Queryable
     public function __construct($query, iterable $params, Database $database)
     {
         // コンストラクタ時点で疑問符プレースホルダーをすべて名前付きプレースホルダーに変換しておく
-        $n = 0;
-        $this->query = preg_replace_callback('#\?#u', function () use (&$n) {
-            return ':' . self::AUTO_BIND_KEY . ($n++);
-        }, $query);
-
-        // 初期パラメータはこの時点で確定
-        $m = 0;
-        foreach ($params as $k => $param) {
-            if (is_int($k)) {
-                $m++;
-                $k = self::AUTO_BIND_KEY . $k;
-            }
-            $this->params[$k] = $param;
-        }
-
-        // 疑問符プレースホルダーの数に不整合があるととても厄介なことになるのでこの段階で弾く
-        if ($n !== $m) {
-            throw new \InvalidArgumentException("'?' placeholder length is mismatch ($n !== $m).");
-        }
+        $this->parser = new Parser($database->getPlatform()->createSQLParser());
+        $this->query = $this->parser->convertNamedSQL($query, $params);
+        $this->params = $params;
 
         // コネクションを保持
         $this->database = $database;
