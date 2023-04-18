@@ -23,7 +23,7 @@
     "phpunit/phpunit": "9.*",
     "ryunosuke/phpunit-extension": "3.*",
     "symfony/cache": "5.*",
-    "ryunosuke/functions": "1.5.*"
+    "ryunosuke/functions": "1.6.*"
   },
   "autoload": {
     "psr-4": {
