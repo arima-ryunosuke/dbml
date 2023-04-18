@@ -8,12 +8,16 @@
     <php>
         <!--> specify test target dbms <-->
         <!--> <const name="RDBMS" value="sqlite,mysql,pgsql,mssql"/> <-->
-        <const name="RDBMS" value="sqlite"/>
+        <const name="RDBMS" value="pdo_sqlite"/>
 
-        <const name="SQLITE_URL" value="sqlite://root:Password1234@localhost:11111/:memory:"/>
-        <const name="MYSQL_URL" value="mysql://root:Password1234@localhost:13306/dbml"/>
-        <const name="PGSQL_URL" value="pgsql://root:Password1234@localhost:15432/dbml"/>
-        <const name="MSSQL_URL" value="msql://sa:Password1234@localhost:11433/dbml"/>
+        <const name="SQLITE3_URL" value="sqlite3://root:Password1234@localhost:11111/:memory:"/>
+        <const name="MYSQLI_URL" value="mysqli://root:Password1234@localhost:13306/dbmli"/>
+        <const name="PGSQL_URL" value="pgsql://root:Password1234@localhost:15432/dbmle"/>
+
+        <const name="PDO_SQLITE_URL" value="pdo-sqlite://root:Password1234@localhost:11111/:memory:"/>
+        <const name="PDO_MYSQL_URL" value="pdo-mysql://root:Password1234@localhost:13306/dbml"/>
+        <const name="PDO_PGSQL_URL" value="pdo-pgsql://root:Password1234@localhost:15432/dbml"/>
+        <const name="PDO_SQLSRV_URL" value="pdo-sqlsrv://sa:Password1234@localhost:11433/dbml"/>
     </php>
 
     <coverage>

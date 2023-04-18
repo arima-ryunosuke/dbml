@@ -13,6 +13,7 @@ use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\View;
+use Doctrine\DBAL\Tools\DsnParser;
 use Doctrine\DBAL\Types\Type;
 use PHPUnit\Framework\Error\Error;
 use PHPUnit\Framework\Exception;
@@ -48,11 +49,12 @@ abstract class AbstractUnitTestCase extends TestCase
         };
 
         $prefix = strtoupper($dbms);
-        $config = ['url' => $getconst("{$prefix}_URL")];
+        $parser = new DsnParser();
+        $params = $parser->parse($getconst("{$prefix}_URL"));
         $middlewares = [];
 
         if ($init) {
-            $mparam = DriverManager::getConnection($config)->getParams();
+            $mparam = DriverManager::getConnection($params)->getParams();
             $dbname = isset($mparam['dbname']) ? $mparam['dbname'] : (isset($mparam['path']) ? $mparam['path'] : '');
             unset($mparam['url'], $mparam['dbname'], $mparam['path']);
             $schemaManager = DriverManager::getConnection($mparam)->createSchemaManager();
@@ -60,19 +62,19 @@ abstract class AbstractUnitTestCase extends TestCase
             $schemaManager->createDatabase($dbname);
         }
 
-        if ($dbms === 'sqlite') {
-            $config['platform'] = new \ryunosuke\Test\Platforms\SqlitePlatform();
+        if (strpos($dbms, 'sqlite') !== false) {
+            $params['platform'] = new \ryunosuke\Test\Platforms\SqlitePlatform();
             $middlewares[] = new EnableForeignKeys();
         }
-        if ($dbms === 'mysql') {
-            $config['driverOptions'] = [
+        if ($params['driver'] === 'pdo_mysql') {
+            $params['driverOptions'] = [
                 \PDO::MYSQL_ATTR_LOCAL_INFILE => true,
             ];
         }
 
         $configuration = new Configuration();
         $configuration->setMiddlewares([new Middleware(new LoggerChain()), ...$middlewares]);
-        $connection = DriverManager::getConnection($config, $configuration);
+        $connection = DriverManager::getConnection($params, $configuration);
         $connection->connect();
 
         return $connection;
@@ -519,10 +521,14 @@ abstract class AbstractUnitTestCase extends TestCase
         if (self::$database === null) {
             $configuration = new Configuration();
             $configuration->setMiddlewares([new Middleware(new LoggerChain())]);
-            $connection = DriverManager::getConnection([
-                'url'      => 'sqlite:///:memory:',
+
+            $parser = new DsnParser();
+            $params = $parser->parse('sqlite3:///:memory:');
+            $params += [
                 'platform' => new \ryunosuke\Test\Platforms\SqlitePlatform(),
-            ], $configuration);
+            ];
+
+            $connection = DriverManager::getConnection($params, $configuration);
             self::createTables($connection, [
                 new Table('t',
                     [

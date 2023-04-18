@@ -5,6 +5,7 @@ namespace ryunosuke\Test\dbml;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Schema;
@@ -19,6 +20,7 @@ use ryunosuke\dbml\Generator\Yielder;
 use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware;
+use ryunosuke\dbml\Metadata\CompatibleConnection;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
@@ -622,33 +624,39 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_isEmulationMode($database)
     {
-        $expected = [
-            'sqlite'     => [true, true],
-            'mysql'      => [false, true],
-            'postgresql' => [false, true],
-            'mssql'      => [version_compare(PHP_VERSION, 8.1) < 0, true],
-        ];
+        $this->assertFalse(self::getDummyDatabase()->isEmulationMode(true));
 
-        try {
-            try {
-                $database->getPdo()->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
-            }
-            catch (\Exception $e) {
-            }
-            $this->assertSame($expected[$database->getCompatiblePlatform()->getName()][false], $database->isEmulationMode(true));
+        $native = $database->getConnection()->getNativeConnection();
+
+        if ($native instanceof \PDO) {
+            $expected = [
+                'sqlite'     => [true, true],
+                'mysql'      => [false, true],
+                'postgresql' => [false, true],
+                'mssql'      => [version_compare(PHP_VERSION, 8.1) < 0, true],
+            ];
 
             try {
-                $database->getPdo()->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+                try {
+                    $native->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+                }
+                catch (\Exception $e) {
+                }
+                $this->assertSame($expected[$database->getCompatiblePlatform()->getName()][false], $database->isEmulationMode(true));
+
+                try {
+                    $native->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+                }
+                catch (\Exception $e) {
+                }
+                $this->assertSame($expected[$database->getCompatiblePlatform()->getName()][true], $database->isEmulationMode(true));
             }
-            catch (\Exception $e) {
-            }
-            $this->assertSame($expected[$database->getCompatiblePlatform()->getName()][true], $database->isEmulationMode(true));
-        }
-        finally {
-            try {
-                $database->getPdo()->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
-            }
-            catch (\Exception $e) {
+            finally {
+                try {
+                    $native->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+                }
+                catch (\Exception $e) {
+                }
             }
         }
     }
@@ -2639,7 +2647,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             ],
         ], [], [], 1));
 
-        if ($database->getCompatiblePlatform()->supportsTableNameAttribute()) {
+        if ((new CompatibleConnection($database->getConnection()))->isSupportedTablePrefix()) {
             // mysql は * だけで型を活かすことができる
             $row = $database->selectTuple('misctype', [], [], 1);
             $this->assertSame(1, $row['cint']);
@@ -3946,6 +3954,7 @@ CSV
                 ],
             ], 'hoge.csv', [
                 'native' => true,
+                'escape' => '$',
             ]);
             $this->assertStringIgnoreBreak("
 LOAD DATA LOCAL INFILE 'hoge.csv'
@@ -3954,7 +3963,7 @@ CHARACTER SET 'utf8'
 FIELDS
 TERMINATED BY ','
 ENCLOSED BY '\"'
-ESCAPED BY '\'
+ESCAPED BY '$'
 LINES TERMINATED BY '\n'
 IGNORE 0 LINES
 (@id, @name, @__dummy__2, @dummy, @data) SET id = @id, name = UPPER(@name), dummy = NULL, data = 'binary'
@@ -3976,9 +3985,7 @@ IGNORE 0 LINES
      */
     function test_loadCsv_native($database)
     {
-        if (!$database->getPlatform() instanceof MySQLPlatform) {
-            return;
-        }
+        $this->trapThrowable(DriverException::class);
 
         // for mysql 8.0
         $database->executeAffect('SET GLOBAL local_infile= 1');

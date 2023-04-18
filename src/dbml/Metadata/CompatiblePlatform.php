@@ -310,20 +310,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
-     * \PDO::ATTR_FETCH_TABLE_NAMES が有効か否かを返す
-     *
-     * @return bool \PDO::ATTR_FETCH_TABLE_NAMES が有効なら true
-     */
-    public function supportsTableNameAttribute()
-    {
-        // エラーは出ないが MySql しか対応していないっぽい？
-        if ($this->platform instanceof MySQLPlatform) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * 行値式が有効か否かを返す
      *
      * @return bool 行値式が有効なら true

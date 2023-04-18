@@ -2,6 +2,7 @@
 
 namespace ryunosuke\Test;
 
+use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use ryunosuke\Test\Entity\Article;
@@ -68,13 +69,13 @@ class IntegrationTest extends AbstractUnitTestCase
      */
     function test_lockForUpdate_SkipLocked($db1)
     {
-        if ($db1->getPlatform() instanceof PostgreSQLPlatform) {
+        if ($db1->getPlatform() instanceof MySQLPlatform || $db1->getPlatform() instanceof PostgreSQLPlatform) {
             // 排他ロックで取得しておく
             $db1->begin();
             $db1->select('test1', ['id' => [1, 2]])->lockForUpdate()->array();
 
             // 別接続で SKIP LOCKED 取得してみる
-            $db2 = new Database(self::createConnection('pgsql'));
+            $db2 = new Database(DriverManager::getConnection($db1->getConnection()->getParams()));
             $rows = $db2->select('test1', ['id' => [1, 2, 3]])->lockForUpdate('SKIP LOCKED')->array();
             $db1->rollback();
 

@@ -5,6 +5,7 @@ namespace ryunosuke\dbml\Generator;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use ryunosuke\dbml\Database;
+use ryunosuke\dbml\Metadata\CompatibleConnection;
 
 /**
  * 少しずつ fetch する Generator のようなクラス
@@ -31,9 +32,6 @@ class Yielder implements \Iterator
 
     /** @var bool FETCH_UNIQUE の動作を模倣するか */
     private $emulationedUnique = true;
-
-    /** @var bool|null バッファモードの現在値 */
-    private $bufferedMode;
 
     /** @var callable 行コールバック */
     private $callback;
@@ -86,7 +84,7 @@ class Yielder implements \Iterator
 
     private function _cleanup()
     {
-        $this->setBufferMode($this->bufferedMode);
+        $this->setBufferMode(true);
         if ($this->statement instanceof Result) {
             $this->statement->free();
         }
@@ -123,23 +121,13 @@ class Yielder implements \Iterator
      *
      * 「同時にクエリを実行できない」は Database::sub 系クエリが使えないことを意味するので、本当に必要な時以外は呼ばなくていい。
      *
-     * @param bool|null $mode バッファモード/非バッファモード
+     * @param bool $mode バッファモード/非バッファモード
      * @return $this 自分自身
      */
     public function setBufferMode($mode)
     {
-        if ($mode === null) {
-            return $this;
-        }
-
-        // 非バッファモードは pdo_mysql しか対応していない（それすら非推奨の流れがあるが…）
-        $pdo = $this->connection->getNativeConnection();
-        if ($pdo->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'mysql') {
-            // @codeCoverageIgnoreStart
-            $this->bufferedMode = $this->bufferedMode ?? $pdo->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY);
-            $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $mode);
-            // @codeCoverageIgnoreEnd
-        }
+        $cconnection = new CompatibleConnection($this->connection);
+        $cconnection->setBufferMode($mode);
 
         return $this;
     }

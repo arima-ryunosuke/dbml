@@ -5,6 +5,7 @@ namespace ryunosuke\dbml\Query;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use ryunosuke\dbml\Database;
+use ryunosuke\dbml\Metadata\CompatibleConnection;
 
 /**
  * Statement をラップして扱いやすくしたクラス
@@ -37,6 +38,12 @@ class Statement implements Queryable
     /** @var array */
     private $params = [];
 
+    /** @var bool */
+    private $namedSupported;
+
+    /** @var array */
+    private $paramMap = [];
+
     /** @var Database */
     private $database;
 
@@ -50,23 +57,37 @@ class Statement implements Queryable
         $this->query = $this->parser->convertNamedSQL($query, $params);
         $this->params = $params;
 
+        $cconnection = new CompatibleConnection($database->getConnection());
+        $this->namedSupported = $cconnection->isSupportedNamedPlaceholder();
+
         // コネクションを保持
         $this->database = $database;
     }
 
     private function _execute($method, iterable $params, Connection $connection)
     {
+        // 引数パラメータを基本として初期パラメータで上書く
         $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
+        $params += $this->params;
 
         // 同じコネクションの stmt はキャッシュする（$this->query は不変なので問題ない）
         $key = spl_object_hash($connection);
         if (!isset($this->statements[$key])) {
-            $this->statements[$key] = $connection->prepare($this->query);
+            $query = $this->query;
+            if (!$this->namedSupported) {
+                $sampling = $params; // paramMap を得るのが目的で params の書き換えは望まない
+                $query = $this->parser->convertPositionalSQL($query, $sampling, $this->paramMap);
+            }
+            $this->statements[$key] = $connection->prepare($query);
         }
         $stmt = $this->statements[$key];
 
-        // 引数パラメータを基本として初期パラメータで上書く
-        foreach ($params + $this->params as $k => $param) {
+        if (!$this->namedSupported) {
+            $params = array_map(fn($key) => $params[$key], $this->paramMap);
+            array_unshift($params, null);
+            unset($params[0]);
+        }
+        foreach ($params as $k => $param) {
             $stmt->bindValue($k, $param);
         }
 

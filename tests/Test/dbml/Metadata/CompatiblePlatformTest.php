@@ -247,17 +247,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
-    function test_supportsTableNameAttribute($cplatform, $platform)
-    {
-        $expected = $platform instanceof MySQLPlatform;
-        $this->assertEquals($expected, $cplatform->supportsTableNameAttribute());
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
     function test_supportsRowConstructor($cplatform, $platform)
     {
         $expected = true;

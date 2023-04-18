@@ -1,8 +1,18 @@
 <?php
 
+use function ryunosuke\dbml\class_aliases;
+
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../vendor/ryunosuke/phpunit-extension/inc/bootstrap.php';
 require_once __DIR__ . '/classess.php';
+
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+class_aliases([
+    \Doctrine\DBAL\Driver\SQLite3\Result::class => \ryunosuke\dbml\Driver\SQLite3\Result::class,
+    \Doctrine\DBAL\Driver\Mysqli\Result::class  => \ryunosuke\dbml\Driver\Mysqli\Result::class,
+    \Doctrine\DBAL\Driver\PgSQL\Result::class   => \ryunosuke\dbml\Driver\PgSQL\Result::class,
+]);
 
 function var_pretty(...$args)
 {

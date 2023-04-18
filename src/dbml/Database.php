@@ -28,6 +28,7 @@ use ryunosuke\dbml\Generator\JsonGenerator;
 use ryunosuke\dbml\Generator\Yielder;
 use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware as LoggingMiddleware;
+use ryunosuke\dbml\Metadata\CompatibleConnection;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Metadata\Schema;
 use ryunosuke\dbml\Mixin\AffectConditionallyTrait;
@@ -553,6 +554,13 @@ class Database
      */
     public function __construct($dbconfig, $options = [])
     {
+        // 代替クラスのロード（本来こんなところに書くべきではないが他に良い場所もないのでほぼ必ず通るここに書く）
+        class_aliases([
+            \Doctrine\DBAL\Driver\SQLite3\Result::class => \ryunosuke\dbml\Driver\SQLite3\Result::class,
+            \Doctrine\DBAL\Driver\Mysqli\Result::class  => \ryunosuke\dbml\Driver\Mysqli\Result::class,
+            \Doctrine\DBAL\Driver\PgSQL\Result::class   => \ryunosuke\dbml\Driver\PgSQL\Result::class,
+        ]);
+
         $configure = function (Configuration $configuration) use ($options) {
             $middlewares = $configuration->getMiddlewares();
             if (array_find($middlewares, fn($middleware) => $middleware instanceof LoggingMiddleware) === false) {
@@ -833,32 +841,9 @@ class Database
         else {
             $stmt = $this->executeSelect($sql, $params);
         }
-        if ($this->getUnsafeOption('checkSameColumn')) {
-            // doctrine 3 系の PDO\Result で fetchmode を指定する術はない
-            $result = (function () { return $this->result; })->call($stmt);
-            if ($result instanceof \Doctrine\DBAL\Driver\PDO\Result) {
-                return new class($result, $this->getSlaveConnection()) extends \Doctrine\DBAL\Result {
-                    private \PDOStatement $statement;
 
-                    public function __construct(\Doctrine\DBAL\Driver\Result $result, Connection $connection)
-                    {
-                        parent::__construct($result, $connection);
-
-                        $this->statement = (function () { return $this->statement; })->call($result);
-                    }
-
-                    public function fetchAssociative()
-                    {
-                        return $this->statement->fetch(\PDO::FETCH_ASSOC | \PDO::FETCH_NAMED);
-                    }
-
-                    public function fetchAllAssociative(): array
-                    {
-                        return $this->statement->fetchAll(\PDO::FETCH_ASSOC | \PDO::FETCH_NAMED);
-                    }
-                };
-            }
-        }
+        $cconnection = new CompatibleConnection($this->getSlaveConnection());
+        $stmt = $cconnection->customResult($stmt, $this->getUnsafeOption('checkSameColumn'));
 
         return $stmt;
     }
@@ -999,28 +984,23 @@ class Database
             return function () { };
         }
 
-        // @codeCoverageIgnoreStart
-        // \PDO::ATTR_FETCH_TABLE_NAMES をサポートしてるならそれで（そっちのほうが汎用性が高い）
-        if ($this->getCompatiblePlatform()->supportsTableNameAttribute()) {
-            /** @var \PDO $pdo */
-            $pdo = $this->getSlaveConnection()->getNativeConnection();
-            $pdo->setAttribute(\PDO::ATTR_FETCH_TABLE_NAMES, true);
-            return function () use ($pdo) {
-                $pdo->setAttribute(\PDO::ATTR_FETCH_TABLE_NAMES, false);
-            };
-        }
-        // @codeCoverageIgnoreEnd
+        $cconnection = new CompatibleConnection($this->getSlaveConnection());
+        $revert = $cconnection->setTablePrefix();
 
-        // \PDO::ATTR_FETCH_TABLE_NAMES が対応していなくても QueryBuilder 経由ならそれっぽいことはできる
-        if ($sql instanceof QueryBuilder) {
-            $sql->setAutoTablePrefix(true);
-            return function () use ($sql) {
-                $sql->setAutoTablePrefix(false);
-            };
+        // QueryBuilder 経由ならそれっぽいことはできる
+        if ($revert === null) {
+            if ($sql instanceof QueryBuilder) {
+                $sql->setAutoTablePrefix(true);
+                $revert = function () use ($sql) {
+                    $sql->setAutoTablePrefix(false);
+                };
+            }
         }
-
         // どうしようもない
-        return function () { };
+        if ($revert === null) {
+            return function () { };
+        }
+        return $revert;
     }
 
     private function _getCallStack($filter_path)
@@ -1903,6 +1883,10 @@ class Database
      */
     public function isEmulationMode()
     {
+        if (!$this->getPdo() instanceof \PDO) {
+            return false;
+        }
+
         // driver ごとにエミュレーションサポートが異なる上、全ては調べてられないので実際に取得してダメだったら true とする
         try {
             return !!$this->getPdo()->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
