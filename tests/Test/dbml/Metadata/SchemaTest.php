@@ -548,7 +548,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             ]
         ));
 
-        $schema = new Schema(self::getDummyDatabase()->getConnection()->createSchemaManager(), new Psr16Cache(new NullAdapter()));
+        $schema = new Schema(self::getDummyDatabase()->getConnection()->createSchemaManager(), [], new Psr16Cache(new NullAdapter()));
 
         // 2つの経路がある
         $this->assertEquals([
@@ -576,5 +576,31 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             'leaf_root_seq' => 'seq',
         ], $schema->getForeignColumns('t_root', 't_leaf', null, $direction));
         $this->assertSame(false, $direction);
+    }
+
+    function test_event()
+    {
+        $schema = new Schema(self::getDummyDatabase()->getConnection()->createSchemaManager(), [
+            'onIntrospectTable' => function (Table $table) {
+                if ($table->getName() === 'tabletest') {
+                    $table->addColumn('hoge', 'integer');
+                    $table->setComment('modify-comment');
+                }
+                if ($table->getName() === 'test') {
+                    $table->addColumn('fuga', 'integer');
+                    $table->setComment('modify-comment');
+                }
+            },
+        ], new Psr16Cache(new NullAdapter()));
+
+        $table = $this->getDummyTable('tabletest');
+        $this->assertFalse($table->hasColumn('hoge'));
+        $schema->addTable($table);
+        $this->assertTrue($table->hasColumn('hoge'));
+        $this->assertEquals('modify-comment', $table->getComment());
+
+        $table = $schema->getTable('test');
+        $this->assertTrue($table->hasColumn('fuga'));
+        $this->assertEquals('modify-comment', $table->getComment());
     }
 }

@@ -366,6 +366,8 @@ class Database
             'initCommand'               => null,
             // スキーマを必要としたときのコールバック
             'onRequireSchema'           => function (Database $db) { },
+            // テーブルを必要としたときのコールバック（スキーマアクセス時に一度だけ呼ばれる）
+            'onIntrospectTable'         => function (Table $table) { },
             // テーブル名 => Entity クラス名のコンバータ
             'tableMapper'               => function ($table) { return pascal_case($table); },
             // 拡張 INSERT SET 構文を使うか否か（mysql 以外は無視される）
@@ -1942,9 +1944,12 @@ class Database
     public function getSchema()
     {
         if (!isset($this->cache['schema'])) {
+            $listeners = [
+                'onIntrospectTable' => $this->getUnsafeOption('onIntrospectTable'),
+            ];
             $cacher = $this->getUnsafeOption('cacheProvider');
             $callback = $this->getUnsafeOption('onRequireSchema');
-            $this->cache['schema'] = new Schema($this->connections['slave']->createSchemaManager(), $cacher);
+            $this->cache['schema'] = new Schema($this->connections['slave']->createSchemaManager(), $listeners, $cacher);
             $callback($this);
         }
         return $this->cache['schema'];

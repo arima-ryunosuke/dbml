@@ -46,6 +46,9 @@ class Schema
     /** @var AbstractSchemaManager */
     private $schemaManger;
 
+    /** @var callable[] */
+    private $listeners;
+
     /** @var CacheInterface */
     private $cache;
 
@@ -71,11 +74,13 @@ class Schema
      * コンストラクタ
      *
      * @param AbstractSchemaManager $schemaManger スキーママネージャ
+     * @param callable[] $listeners イベントリスナ
      * @param CacheInterface $cache キャッシュプロバイダ
      */
-    public function __construct(AbstractSchemaManager $schemaManger, $cache)
+    public function __construct(AbstractSchemaManager $schemaManger, $listeners, $cache)
     {
         $this->schemaManger = $schemaManger;
+        $this->listeners = $listeners;
         $this->cache = $cache;
     }
 
@@ -121,6 +126,8 @@ class Schema
         if ($this->hasTable($table_name)) {
             throw SchemaException::tableAlreadyExists($table_name);
         }
+
+        $table = ($this->listeners['onIntrospectTable'] ?? fn() => null)($table) ?? $table;
 
         $this->tableNames[] = $table_name;
         $this->tables[$table_name] = $table;
@@ -244,7 +251,8 @@ class Schema
                     $table = new Table($table_name, $columns);
                 }
                 $table->setSchemaConfig($this->schemaManger->createSchemaConfig());
-                return $table;
+
+                return ($this->listeners['onIntrospectTable'] ?? fn() => null)($table) ?? $table;
             });
         }
         return $this->tables[$table_name];

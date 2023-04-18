@@ -514,7 +514,7 @@ abstract class AbstractUnitTestCase extends TestCase
         return array_filter(self::$connections);
     }
 
-    public static function getDummyDatabase()
+    public static function getDummyDatabase(array $options = [])
     {
         if (self::$database === null) {
             $configuration = new Configuration();
@@ -564,9 +564,9 @@ abstract class AbstractUnitTestCase extends TestCase
                     [new ForeignKeyConstraint(['cid'], 'foreign_p', ['id'], 'fk_parentchild2')]
                 ),
             ]);
-            self::$database = new Database($connection, [
+            self::$database = new Database($connection, array_replace([
                 'cacheProvider' => cacheobject(sys_get_temp_dir() . '/dbml-dummy'),
-            ]);
+            ], $options));
         }
         return self::$database;
     }
