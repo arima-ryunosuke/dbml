@@ -1390,67 +1390,67 @@ class misctypeTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function findInShare($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function findForAffect($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function neighbor($predicates = [], $limit = 1) { }
 }
 
@@ -1458,67 +1458,67 @@ class misctype_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string} */
+    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string} */
+    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string} */
+    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string} */
+    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string} */
+    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string} */
+    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string} */
+    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function findInShare($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string} */
+    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string} */
+    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string} */
+    /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function findForAffect($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTime|string, cdatetime: \DateTime|string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
+    /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
 }
 
@@ -1934,67 +1934,67 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: \DateTime|string} */
+    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: \DateTime|string} */
+    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: \DateTime|string} */
+    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: \DateTime|string} */
+    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: \DateTime|string} */
+    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: \DateTime|string} */
+    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: \DateTime|string} */
+    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function findInShare($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: \DateTime|string} */
+    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: \DateTime|string} */
+    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: \DateTime|string} */
+    /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function findForAffect($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: \DateTime|string}> */
+    /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
 }
 
@@ -2070,67 +2070,67 @@ class ArticleTableGateway extends \ryunosuke\Test\Gateway\Article
 {
     use TableGatewayProvider;
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
     public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
     public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
     public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
     public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
     public function find($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
     public function findInShare($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
     public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
     public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int} */
     public function findForAffect($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: array|string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: int, closure: int, query_builder: int}> */
     public function neighbor($predicates = [], $limit = 1) { }
 }
 
@@ -2751,10 +2751,10 @@ class misctypeEntity extends \ryunosuke\dbml\Entity\Entity
     /** @var float|string */
     public $cdecimal;
 
-    /** @var \DateTime|string */
+    /** @var DateTimeImmutable */
     public $cdate;
 
-    /** @var \DateTime|string */
+    /** @var string */
     public $cdatetime;
 
     /** @var string */
@@ -2793,10 +2793,10 @@ class misctype_childEntity extends \ryunosuke\dbml\Entity\Entity
     /** @var float|string */
     public $cdecimal;
 
-    /** @var \DateTime|string */
+    /** @var string */
     public $cdate;
 
-    /** @var \DateTime|string */
+    /** @var string */
     public $cdatetime;
 
     /** @var string */
@@ -2904,7 +2904,7 @@ class oprlogEntity extends \ryunosuke\dbml\Entity\Entity
     /** @var int */
     public $primary_id;
 
-    /** @var \DateTime|string */
+    /** @var string */
     public $log_date;
 }
 
@@ -2940,7 +2940,7 @@ class ArticleEntity extends \ryunosuke\Test\Entity\Article
     /** @var int */
     public $title5;
 
-    /** @var array|string */
+    /** @var string */
     public $comment_count;
 
     /** @var int */
