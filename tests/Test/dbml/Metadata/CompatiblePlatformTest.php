@@ -733,6 +733,24 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_getSleepExpression($cplatform, $platform)
+    {
+        if ($platform instanceof MySQLPlatform) {
+            $this->assertExpression($cplatform->getSleepExpression(10), 'SLEEP(?)', [10]);
+        }
+        elseif ($platform instanceof PostgreSQLPlatform) {
+            $this->assertExpression($cplatform->getSleepExpression(10), 'pg_sleep(?)', [10]);
+        }
+        else {
+            $this->assertException('is not support', L($cplatform)->getSleepExpression(99));
+        }
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_getResetSequenceExpression($cplatform, $platform)
     {
         $expected = [

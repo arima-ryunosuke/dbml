@@ -914,6 +914,24 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * sleep 表現を返す
+     *
+     * @param float second 秒数
+     * @return Expression SLEEP Expression
+     */
+    public function getSleepExpression($second)
+    {
+        if ($this->platform instanceof MySQLPlatform) {
+            return new Expression("SLEEP(?)", $second);
+        }
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            return new Expression("pg_sleep(?)", $second);
+        }
+
+        throw DBALException::notSupported(__METHOD__);
+    }
+
+    /**
      * AUTO_INCREMENT のセット構文を返す
      *
      * @param string $tableName テーブル名
