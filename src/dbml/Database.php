@@ -140,6 +140,7 @@ use ryunosuke\dbml\Utility\Adhoc;
  *
  * mysql の UPDATE は条件が一致しても値が変わらなければ affected rows として 0 を返すので OrThrow すると正常動作なのに例外を投げる、という事象が発生する。
  * この動作が望ましくない場合は `PDO::MYSQL_ATTR_FOUND_ROWS = true` を使用する。
+ * ただし mysqli を用いる場合は PDO::MYSQL_ATTR_FOUND_ROWS = true と同等の結果になるように実装されている。
  *
  * [update/delete]OrThrow の戻り値は主キーだが、複数行に作用した場合は未定義となる（['id' => 3] で update/delete した場合は 3 を返せるが、['create_at < ?' => '2011-12-34'] といった場合は返しようがないため）。
  * そもそも「更新/削除できなかったら例外」という挙動が必要なケースはほぼ無いためこれらの用途はほとんどなく、単に他のメソッドとの統一のために存在している。
@@ -4522,7 +4523,10 @@ class Database
         // コンテキストを戻すための try～catch
         try {
             $this->affectedRows = null;
-            return $this->affectedRows = $this->getMasterConnection()->executeStatement($query, $params);
+            $this->affectedRows = $this->getMasterConnection()->executeStatement($query, $params);
+            // 利便性のため $this->affectedRows には代入しない（こうしておくと mysqli においてマッチ行と変更行が得られる）
+            $cconnection = new CompatibleConnection($this->getMasterConnection());
+            return $cconnection->alternateMatchedRows() ?? $this->affectedRows;
         }
         catch (\Exception $ex) {
             $this->unstackAll();

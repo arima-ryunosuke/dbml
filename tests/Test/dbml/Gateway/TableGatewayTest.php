@@ -6,6 +6,7 @@ use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Logging\Logger;
+use ryunosuke\dbml\Metadata\CompatibleConnection;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\Test\Database;
@@ -1421,7 +1422,8 @@ AND ((flag=1))", "$gw");
                 ['id' => 1, 'name' => ''],
                 ['id' => 2, 'name' => ''],
             ]));
-            $this->assertEquals(0, $gateway->updateArrayIgnore([
+            $updatedRow = (new CompatibleConnection($database->getConnection()))->getName() === 'mysqli' ? 2 : 0;
+            $this->assertEquals($updatedRow, $gateway->updateArrayIgnore([
                 ['id' => 1, 'name' => null],
                 ['id' => 2, 'name' => null],
             ]));

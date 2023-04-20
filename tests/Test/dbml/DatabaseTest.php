@@ -272,7 +272,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
             $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
             $this->assertException($ex, L($database)->insert('test', ['id' => 9, 'name' => 'hoge'], ['throw' => true, 'ignore' => true]));
-            if (!$database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
+            if ($database->getCompatiblePlatform()->getName() !== 'mysql') {
                 $this->assertException($ex, L($database)->modify('test', ['id' => 9, 'name' => null], [], ['throw' => true, 'ignore' => true]));
             }
         }
@@ -280,7 +280,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertException($ex, L($database)->deleteOrThrow('test', ['id' => -1]));
         $this->assertException($ex, L($database)->removeOrThrow('test', ['id' => -1]));
         $this->assertException($ex, L($database)->destroyOrThrow('test', ['id' => -1]));
-        if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
+        if ((new CompatibleConnection($database->getConnection()))->getName() === 'pdo-mysql') {
             $this->assertException($ex, L($database)->upsertOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => '']));
         }
 
@@ -303,7 +303,9 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertEquals(['id' => 'a'], $database->modifyIgnore('noauto', ['id' => 'a', 'name' => 'piyo']));
             $this->assertEquals([], $database->createIgnore('noauto', ['id' => 'x']));
             $this->assertEquals([], $database->insertIgnore('noauto', ['id' => 'x']));
-            $this->assertEquals([], $database->updateIgnore('noauto', ['id' => 'x'], ['id' => 'a']));
+            if ((new CompatibleConnection($database->getConnection()))->getName() !== 'mysqli') {
+                $this->assertEquals([], $database->updateIgnore('noauto', ['id' => 'x'], ['id' => 'a']));
+            }
             // insert しようとしてダメでさらに update しようとしてダメだった場合に無視できるのは mysql のみ（本当は方法があるのかもしれないが詳しくないのでわからない）
             if ($database->getPlatform() instanceof MySQLPlatform) {
                 $this->assertEquals([], $database->modifyIgnore('noauto', ['id' => 'x'], ['id' => 'a']));
@@ -318,7 +320,8 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 ['id' => 1, 'name' => ''],
                 ['id' => 2, 'name' => ''],
             ]));
-            $this->assertEquals(0, $database->updateArrayIgnore('noauto', [
+            $updatedRow = (new CompatibleConnection($database->getConnection()))->getName() === 'mysqli' ? 2 : 0;
+            $this->assertEquals($updatedRow, $database->updateArrayIgnore('noauto', [
                 ['id' => 1, 'name' => null],
                 ['id' => 2, 'name' => null],
             ]));
@@ -4242,8 +4245,8 @@ INSERT INTO test (name) VALUES
 
         $affected = $database->updateArray('test', $data, ['id <> ?' => 5]);
 
-        // 6件与えているが、変更されるのは4件のはず(mysql の場合。他DBMSは5件)
-        $expected = $database->getCompatiblePlatform()->supportsZeroAffectedUpdate() ? 4 : 5;
+        // 6件与えているが、変更されるのは4件のはず(pdo-mysql の場合。他DBMSは5件)
+        $expected = (new CompatibleConnection($database->getConnection()))->getName() === 'pdo-mysql' ? 4 : 5;
         $this->assertEquals($expected, $affected);
 
         // 実際に取得して変わっている/いないを確認
@@ -4278,8 +4281,8 @@ INSERT INTO test (name) VALUES
 
             $affected = $database->updateArray('test', $data, ['id <> ?' => 5], 2);
 
-            // 6件与えているが、変更されるのは4件のはず(mysql の場合。他DBMSは5件)
-            $expected = $database->getCompatiblePlatform()->supportsZeroAffectedUpdate() ? 4 : 5;
+            // 6件与えているが、変更されるのは4件のはず(pdo-mysql の場合。他DBMSは5件)
+            $expected = (new CompatibleConnection($database->getConnection()))->getName() === 'pdo-mysql' ? 4 : 5;
             $this->assertEquals($expected, $affected);
 
             // 実際に取得して変わっている/いないを確認
@@ -4318,8 +4321,8 @@ INSERT INTO test (name) VALUES
 
         $affected = $database->updateArray('multiprimary', $data, ['NOT (mainid = ? AND subid = ?)' => [1, 5]]);
 
-        // 6件与えているが、変更されるのは4件のはず(mysql の場合。他DBMSは5件)
-        $expected = $database->getCompatiblePlatform()->supportsZeroAffectedUpdate() ? 4 : 5;
+        // 6件与えているが、変更されるのは4件のはず(pdo-mysql の場合。他DBMSは5件)
+        $expected = (new CompatibleConnection($database->getConnection()))->getName() === 'pdo-mysql' ? 4 : 5;
         $this->assertEquals($expected, $affected);
 
         // 実際に取得して変わっている/いないを確認
@@ -4453,7 +4456,7 @@ INSERT INTO test (name) VALUES
         $affected = $database->modifyArray('test', $data);
 
         // mysql は 4件変更・2件追加で計10affected, sqlite は単純に 6affected
-        if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
+        if ($database->getCompatiblePlatform()->getName() === 'mysql') {
             $expected = 10;
         }
         else {
@@ -4506,7 +4509,7 @@ INSERT INTO test (name) VALUES
                 ['id' => 93, 'name' => 'A1'],
             ], [], 1);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 3affected
-            if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
+            if ($database->getCompatiblePlatform()->getName() === 'mysql') {
                 $expected = 5;
             }
             else {
@@ -4523,7 +4526,7 @@ INSERT INTO test (name) VALUES
                 ['id' => 95, 'name' => 'A1'],
             ], ['name' => 'U'], 2);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 3affected
-            if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
+            if ($database->getCompatiblePlatform()->getName() === 'mysql') {
                 $expected = 5;
             }
             else {
@@ -4541,7 +4544,7 @@ INSERT INTO test (name) VALUES
                 ['id' => 96, 'name' => 'A1'],
             ], [], 3);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 4affected
-            if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
+            if ($database->getCompatiblePlatform()->getName() === 'mysql') {
                 $expected = 5;
             }
             else {
@@ -5903,7 +5906,7 @@ INSERT INTO test (id, name) VALUES
      */
     function test_changeArray_returning($database)
     {
-        $updatedAffectedRows = $database->getCompatiblePlatform()->supportsZeroAffectedUpdate() ? 0 : 2;
+        $updatedAffectedRows = $database->getCompatiblePlatform()->getName() === 'mysql' ? 0 : 2;
 
         $primaries = $database->changeArray(['test' => ['uname' => new Expression('UPPER(name)', [])]], [
             ['id' => 1, 'name' => 'a'],
@@ -5983,7 +5986,7 @@ INSERT INTO test (id, name) VALUES
             ],
         ], $primaries);
 
-        if ($database->getCompatiblePlatform()->supportsZeroAffectedUpdate()) {
+        if ($database->getCompatiblePlatform()->getName() === 'mysql') {
             $primaries = $database->changeArray(['test' => ['name']], [
                 ['id' => 1, 'name' => 'a'],
                 ['id' => 2, 'name' => 'b'],
@@ -6175,7 +6178,9 @@ INSERT INTO test (id, name) VALUES
     {
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
             $this->assertEquals([], $database->insertIgnore('test', ['id' => 1]));
-            $this->assertEquals([], $database->updateIgnore('test', ['id' => 1], ['id' => 2]));
+            if ((new CompatibleConnection($database->getConnection()))->getName() !== 'mysqli') {
+                $this->assertEquals([], $database->updateIgnore('test', ['id' => 1], ['id' => 2]));
+            }
 
             $database->insert('foreign_p', ['id' => 1, 'name' => 'p']);
             $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'c1']);

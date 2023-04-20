@@ -212,4 +212,14 @@ class CompatibleConnection
 
         return $result;
     }
+
+    public function alternateMatchedRows()
+    {
+        if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
+            if ($this->nativeConnection->info !== null && preg_match('#Rows matched:\s*(\d+)\s*Changed: \s*(\d+)\s*Warnings: \s*(\d+)#ui', $this->nativeConnection->info, $matches)) {
+                return (int) $matches[1];
+            }
+        }
+        return null;
+    }
 }

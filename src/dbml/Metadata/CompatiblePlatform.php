@@ -215,21 +215,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
-     * UPDATE で更新されなかった時(条件一致しなかった時ではなく更新行に変化がなかった時) 0 を返すか否かを返す
-     *
-     * PDO::MYSQL_ATTR_FOUND_ROWS にも依存するけどここでは見ない（ほぼテスト用なので）
-     *
-     * @return bool UPDATE で更新されなかった時(条件一致しなかった時ではなく更新行に変化がなかった時) 0 を返すなら true
-     */
-    public function supportsZeroAffectedUpdate()
-    {
-        if ($this->platform instanceof MySQLPlatform) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * UPDATE + JOIN をサポートするか否かを返す
      *
      * @return bool UPDATE + JOIN をサポートするなら true

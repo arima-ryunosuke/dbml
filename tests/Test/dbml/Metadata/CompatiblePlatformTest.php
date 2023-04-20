@@ -170,17 +170,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
-    function test_supportsZeroAffectedUpdate($cplatform, $platform)
-    {
-        $expected = $platform instanceof MySQLPlatform;
-        $this->assertEquals($expected, $cplatform->supportsZeroAffectedUpdate());
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
     function test_supportsUpdateJoin($cplatform, $platform)
     {
         $expected = $platform instanceof MySQLPlatform || $platform instanceof SQLServerPlatform;
