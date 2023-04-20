@@ -4535,6 +4535,91 @@ class Database
     }
 
     /**
+     * 取得系クエリを非同期で実行する
+     *
+     * このメソッドはすぐに処理を返し、callable を返す。
+     * その間もクエリは実行されており、callable を実行すると最終結果が得られる。
+     *
+     * 非常に実験的な機能で現実装は mysqli/pgsql のみの対応。仕様は互換性を考慮せず変更されることがある。
+     *
+     * @inheritdoc Connection::executeQuery()
+     * @return callable 結果を返すクロージャ
+     */
+    public function executeSelectAsync($query, iterable $params = [])
+    {
+        $ticker = $this->executeAsync([$query => $params], $this->getSlaveConnection());
+        return fn() => $ticker(0); // @codeCoverageIgnore
+    }
+
+    /**
+     * 更新系クエリを非同期で実行する
+     *
+     * このメソッドはすぐに処理を返し、callable を返す。
+     * その間もクエリは実行されており、callable を実行すると最終結果が得られる。
+     *
+     * 非常に実験的な機能で現実装は mysqli/pgsql のみの対応。仕様は互換性を考慮せず変更されることがある。
+     *
+     * @inheritdoc Connection::executeStatement()
+     * @return callable 結果を返すクロージャ
+     */
+    public function executeAffectAsync($query, iterable $params = [])
+    {
+        $ticker = $this->executeAsync([$query => $params], $this->getMasterConnection());
+        return fn() => $ticker(0); // @codeCoverageIgnore
+    }
+
+    /**
+     * 複数クエリを非同期で実行する
+     *
+     * このメソッドはすぐに処理を返し、無名クラスを返す。
+     * tick を実行すると処理が進むので呼び元で適宜実行しなければならない。
+     * ただし declare(ticks=1) しておけばある程度自動で呼ばれるようになる。
+     *
+     * ticks を利用しているのは mysqli/pgsql ともに「本当に同時」には投げられないため。
+     * 結局のところ結果を受け取らない限りは次のクエリが自動実行されるようなことはなく、明示的に受け取りが必要。
+     * それを ticks で代用しているに過ぎない。
+     *
+     * 返り値を引数なしで呼ぶと同期待ちして全て返す。
+     * 引数にインデックスを与えるとそのクエリが完了するまで待ってそれを返す。
+     *
+     * 非常に実験的な機能で現実装は mysqli/pgsql のみの対応。
+     *
+     * @param array $queries 実行するクエリ配列
+     * @param ?Connection $connection 実行コネクション
+     * @return object|callable
+     */
+    public function executeAsync($queries, $connection = null)
+    {
+        if ($this->getUnsafeOption('dryrun')) {
+            throw new \UnexpectedValueException("executeAsync is not supported dryrun");
+        }
+
+        if ($this->getUnsafeOption('preparing')) {
+            throw new \UnexpectedValueException("executeAsync is not supported prepare");
+        }
+
+        if (is_array($queries)) {
+            $queries = (function ($queries) {
+                foreach ($queries as $query => $params) {
+                    if ($filter_path = $this->getInjectCallStack()) {
+                        $query = implode('', $this->_getCallStack($filter_path)) . $query;
+                    }
+
+                    if (array_depth($params, 2) === 1) {
+                        $params = [$params];
+                    }
+                    foreach ($params as $param) {
+                        yield $query => $param;
+                    }
+                }
+            })($queries);
+        }
+
+        $cconnection = new CompatibleConnection($connection ?? $this->getConnection());
+        return $cconnection->executeAsync($queries, $this->affectedRows);
+    }
+
+    /**
      * dryrun モードへ移行する
      *
      * このメソッドを呼んだ直後は、更新系メソッドが実際には実行せずに実行されるクエリを返すようになる。

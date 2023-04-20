@@ -8,6 +8,7 @@ use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\Driver\Middleware\AbstractConnectionMiddleware;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Result;
+use ryunosuke\dbml\Query\Parser;
 
 /**
  * RDBMS 特有の処理を記述するクラス
@@ -221,5 +222,177 @@ class CompatibleConnection
             }
         }
         return null;
+    }
+
+    public function executeAsync($sqls, &$affectedRows = null)
+    {
+        $parser = new Parser($this->connection->getDatabasePlatform()->createSQLParser());
+
+        if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
+            $next = function ($native, $sql, $params) use ($parser) {
+                // mysql に非同期 prepare は存在しないため埋め込んで実行する
+                $query = $parser->convertQuotedSQL($sql, $params, fn($v) => "'{$native->escape_string($v)}'");
+                $result = $native->query($query, MYSQLI_ASYNC);
+                if ($result === false) {
+                    throw new Driver\Mysqli\Exception\ConnectionError($native->error);
+                }
+                return $result;
+            };
+            $tick = function ($native, $waitForEnd) {
+                do {
+                    $read = $error = $reject = [$native];
+                    if (\mysqli::poll($read, $error, $reject, $waitForEnd ? 1 : 0) === false) {
+                        throw new \RuntimeException("mysqli::poll returned false");
+                    }
+
+                    foreach ($read as $mysqli) {
+                        $myresult = $mysqli->reap_async_query();
+                        if ($myresult === false) {
+                            throw new Driver\Mysqli\Exception\ConnectionError($mysqli->error);
+                        }
+
+                        $result = null;
+                        if ($myresult instanceof \mysqli_result) {
+                            $result = iterator_to_array($myresult);
+                            $myresult->free();
+                        }
+                        if ($myresult === true) {
+                            $result = $mysqli->affected_rows;
+                        }
+                        return $result;
+                    }
+                    // クエリタイムアウトとか接続が切れたとか致命的だと思うのでハンドリングしない
+                    foreach ($error as $mysqli) {
+                        throw new \RuntimeException("mysqli::poll reported error {$mysqli->sqlstate}");
+                    }
+                    // 1接続で1クエリを投げているだけなので reject(もうクエリがない) されることはない
+                    foreach ($reject as $mysqli) {
+                        throw new \RuntimeException("mysqli::poll reported reject {$mysqli->sqlstate}");
+                    }
+                } while (!$read && $waitForEnd);
+            };
+        }
+        if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
+            $next = function ($native, $sql, $params) use ($parser) {
+                $query = $parser->convertDollarSQL($sql, $params);
+                $return = @pg_send_query_params($native, $query, $params);
+                if ($return === 0) {
+                    throw new Driver\PgSQL\Exception(pg_last_error($native) ?: 'unknown');
+                }
+                return $return;
+            };
+            $tick = function ($native, $waitForEnd) {
+                if (!$waitForEnd && @pg_connection_busy($native)) {
+                    return null;
+                }
+
+                $pgresult = @pg_get_result($native);
+                if ($pgresult === false || pg_result_status($pgresult) === PGSQL_FATAL_ERROR) {
+                    throw new Driver\PgSQL\Exception(@pg_last_error($native) ?: 'unknown');
+                }
+
+                if (pg_num_fields($pgresult) !== 0) {
+                    $result = pg_fetch_all($pgresult);
+                }
+                else {
+                    $result = pg_affected_rows($pgresult);
+                }
+                pg_free_result($pgresult);
+                return $result;
+            };
+        }
+
+        if (!isset($next, $tick)) {
+            // カバレッジのために無名クラス自体は返すようにする
+            $next = function () {
+                throw DBALException::notSupported(__METHOD__);
+            };
+            $tick = function () { };
+        }
+
+        return new class($this->nativeConnection, $sqls, $next, $tick, $affectedRows) {
+            private            $native;
+            private \Generator $sqls;
+            private \Closure   $next;
+            private \Closure   $tick;
+            private bool       $waiting = false;
+            private array      $results = [];
+            private            $affectedRows;
+
+            public function __construct($native, $sqls, $next, $tick, &$affectedRows)
+            {
+                $this->native = $native;
+                $this->sqls = $sqls;
+                $this->next = $next;
+                $this->tick = $tick;
+                $this->affectedRows = &$affectedRows;
+
+                register_tick_function([$this, 'tick']);
+                $this->tick();
+            }
+
+            public function __destruct()
+            {
+                // 結果を受け取らないまま gc されるのは大抵の場合よくないので下手に制御せず例外を投げる（トランザクションが閉じている・負荷次第でたまにコケる・実行されたりされなかったりする）
+                if (!(!$this->waiting && !$this->sqls->valid())) {
+                    unregister_tick_function([$this, 'tick']);
+                    throw new \UnexpectedValueException("query not completed");
+                }
+            }
+
+            public function __invoke($index = null)
+            {
+                unregister_tick_function([$this, 'tick']);
+
+                while (true) {
+                    if ($this->tick(true) === null) {
+                        break;
+                    }
+                    if ($index !== null && isset($this->results[$index])) {
+                        break;
+                    }
+                }
+                if ($index === null) {
+                    return $this->results;
+                }
+                else {
+                    return $this->results[$index];
+                }
+            }
+
+            public function tick($waitForEnd = false)
+            {
+                // やることがない
+                if (!$this->waiting && !$this->sqls->valid()) {
+                    return null;
+                }
+
+                // 完了してるなら次のクエリへ
+                if (!$this->waiting) {
+                    $params = $this->sqls->current();
+                    $query = $this->sqls->key();
+                    $this->sqls->next();
+                    ($this->next)($this->native, $query, $params);
+                    $this->waiting = true;
+                    return 1;
+                }
+                else {
+                    $result = ($this->tick)($this->native, $waitForEnd);
+                    if ($result === null) {
+                        return 0;
+                    }
+                    assert(!is_bool($result));
+                    if (is_array($result)) {
+                        $this->results[] = $result;
+                        $this->waiting = false;
+                    }
+                    elseif (is_int($result)) {
+                        $this->affectedRows = $this->results[] = $result;
+                        $this->waiting = false;
+                    }
+                    return -1;
+                }
+            }
+        };
     }
 }

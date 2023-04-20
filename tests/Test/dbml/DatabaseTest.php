@@ -2920,6 +2920,168 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_executeSelectAsync($database)
+    {
+        $this->trapThrowable('is not supported');
+
+        // 「対応していない」というテストとカバレッジのために実行自体は行わせる
+        try {
+            $sleep1 = $database->queryInto($database->getCompatiblePlatform()->getSleepExpression(1));
+        }
+        catch (\Throwable $t) {
+            $sleep1 = "sleep(1)";
+        }
+
+        $time = microtime(true);
+        $result = $database->executeSelectAsync("SELECT id, $sleep1 as sleep, NULL as sleep FROM test WHERE id IN(?, ?)", [1, 2]);
+        sleep(2);
+        $actual = $result();
+
+        // 非同期なので SLEEP(1) * 2 + sleep(2) で4秒…ではなく2秒以内に終わる
+        $this->assertLessThan(2.5, microtime(true) - $time);
+
+        $this->assertEquals([
+            ["id" => 1, "sleep" => null],
+            ["id" => 2, "sleep" => null],
+        ], $actual);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_executeAffectAsync($database)
+    {
+        $this->trapThrowable('is not supported');
+
+        // 「対応していない」というテストとカバレッジのために実行自体は行わせる
+        try {
+            $sleep1 = $database->queryInto($database->getCompatiblePlatform()->getSleepExpression(1));
+        }
+        catch (\Throwable $t) {
+            $sleep1 = "sleep(1)";
+        }
+
+        $time = microtime(true);
+        $result = $database->executeAffectAsync("INSERT INTO test (data) SELECT $sleep1 UNION ALL SELECT $sleep1");
+        sleep(2);
+        $actual = $result();
+
+        // 非同期なので SLEEP(1) * 2 + sleep(2) で4秒…ではなく2秒以内に終わる
+        $this->assertLessThan(2.5, microtime(true) - $time);
+
+        $this->assertEquals(2, $actual);
+        $this->assertEquals(2, $database->getAffectedRows());
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_executeAsync($database)
+    {
+        $this->trapThrowable('is not supported');
+
+        // 「対応していない」というテストとカバレッジのために実行自体は行わせる
+        try {
+            $sleep1 = $database->queryInto($database->getCompatiblePlatform()->getSleepExpression(1));
+        }
+        catch (\Throwable $t) {
+            $sleep1 = "sleep(1)";
+        }
+
+        $time = microtime(true);
+        $result = $database->executeAsync([
+            "SELECT id, $sleep1 as sleep, NULL as sleep FROM test WHERE id IN(?, ?)" => [1, 2],
+            "INSERT INTO test (data) SELECT $sleep1 UNION ALL SELECT $sleep1"        => [],
+            "SELECT id, $sleep1 as sleep, NULL as sleep FROM test WHERE id IN(3, ?)" => [4],
+        ]);
+        try {
+            declare(ticks=1) {
+                for ($i = 0; $i < 50; $i++) {
+                    usleep(1000 * 100);
+                }
+            }
+        }
+        finally {
+            $actual = $result();
+        }
+
+        // 非同期なので SLEEP(1) * 2 * 3 + usleep(100,000) * 50 で11秒…ではなく6秒以内に終わる
+        $this->assertLessThan(6.5, microtime(true) - $time);
+
+        $this->assertEquals([
+            [
+                ["id" => 1, "sleep" => null],
+                ["id" => 2, "sleep" => null],
+            ],
+            2,
+            [
+                ["id" => 3, "sleep" => null],
+                ["id" => 4, "sleep" => null],
+            ],
+        ], $actual);
+        $this->assertEquals(2, $database->getAffectedRows());
+
+        // ネストしたパラメータはその数だけ実行する。さらにオフセット指定でその段階まで実行する
+        $result = $database->executeAsync([
+            "SELECT id, $sleep1 as sleep, NULL as sleep FROM test WHERE id IN(?, ?)" => [[1, 2], [3, 4], [5, 6]],
+        ]);
+
+        $time = microtime(true);
+        $this->assertEquals([
+            ["id" => 1, "sleep" => null],
+            ["id" => 2, "sleep" => null],
+        ], $result(0));
+        $this->assertGreaterThanOrEqual(2.0, microtime(true) - $time);
+
+        $time = microtime(true);
+        $this->assertEquals([
+            ["id" => 3, "sleep" => null],
+            ["id" => 4, "sleep" => null],
+        ], $result(1));
+        $this->assertGreaterThanOrEqual(2.0, microtime(true) - $time);
+
+        $time = microtime(true);
+        $this->assertEquals([
+            ["id" => 5, "sleep" => null],
+            ["id" => 6, "sleep" => null],
+        ], $result(2));
+        $this->assertGreaterThanOrEqual(2.0, microtime(true) - $time);
+
+        unset($result);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_executeAsync_misc($database)
+    {
+        $database->setOption('dryrun', 1);
+        $this->assertException('is not supported', L($database)->executeAsync(['SELECT 1' => []]));
+        $database->setOption('dryrun', 0);
+
+        $database->setOption('preparing', 1);
+        $this->assertException('is not supported', L($database)->executeAsync(['SELECT 1' => []]));
+        $database->setOption('preparing', 0);
+
+        $this->trapThrowable('is not supported');
+
+        try {
+            $database = $database->setInjectCallStack('DatabaseTest.php');
+            $result = $database->executeAsync(['SELECT 1' => []]);
+            $result();
+        }
+        finally {
+            $database->setInjectCallStack(null);
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_migrate($database)
     {
         $records = [
