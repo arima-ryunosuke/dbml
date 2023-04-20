@@ -6240,6 +6240,32 @@ INSERT INTO test (id, name) VALUES
 
         $cx = $database->dryrun();
 
+        $query = $cx->update('foreign_p', ['name' => 'HOGE'], ['' => 1]);
+        $this->assertStringIgnoreBreak("UPDATE foreign_p SET name = 'HOGE' WHERE foreign_p.id = '1'", $query);
+
+        $query = $cx->update('multiprimary', ['name' => 'HOGE'], ['' => [1, 2]]);
+        $this->assertStringIgnoreBreak("
+UPDATE multiprimary
+SET name = 'HOGE'
+WHERE (multiprimary.mainid = '1' AND multiprimary.subid = '2')", $query);
+
+        $query = $cx->update('multiprimary', ['name' => 'HOGE'], ['' => [[1, 2], [2, 3]]]);
+        if ($cx->getCompatiblePlatform()->supportsRowConstructor()) {
+            $this->assertStringIgnoreBreak("
+UPDATE multiprimary
+SET name = 'HOGE'
+WHERE (multiprimary.mainid, multiprimary.subid) IN (('1', '2'), ('2', '3'))", $query);
+        }
+        else {
+            $this->assertStringIgnoreBreak("
+UPDATE multiprimary
+SET name = 'HOGE'
+WHERE (multiprimary.mainid = '1' AND multiprimary.subid = '2') OR (multiprimary.mainid = '2' AND multiprimary.subid = '3')", $query);
+        }
+
+        $query = $cx->update('foreign_p', ['name' => 'HOGE'], ['' => 1]);
+        $this->assertStringIgnoreBreak("UPDATE foreign_p SET name = 'HOGE' WHERE foreign_p.id = '1'", $query);
+
         $query = $cx->update('foreign_p', ['name' => 'HOGE'], $cx->subexists('foreign_c1', ['seq > ?' => 0]));
         $this->assertStringIgnoreBreak("
 UPDATE foreign_p
@@ -6278,6 +6304,8 @@ AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = foreign_p.id))
 ((EXISTS (SELECT * FROM g_child WHERE g_child.parent_id = g_parent.parent_id)))
 AND (g_parent.ancestor_id = g_ancestor.ancestor_id)))
 ", $query);
+
+        $this->assertException('is not match primary columns', L($cx)->update('foreign_p', ['name' => 'HOGE'], ['' => [[1, 2]]]));
     }
 
     /**

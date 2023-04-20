@@ -1282,12 +1282,32 @@ class Database
             [$tableAlias, $tableName] = first_keyvalue($tableName);
         }
 
-        return array_map(function ($cond) use ($tableName, $tableAlias) {
+        $wheres = [];
+        foreach (arrayize($identifier) as $key => $cond) {
+            if ($key === '') {
+                $pcols = $this->getSchema()->getTablePrimaryKey($tableName)->getColumns();
+                $params = (array) $cond;
+                if (count($pcols) !== 1 && count($params) !== 0 && array_depth($params) === 1) {
+                    $params = [$params];
+                }
+                $pvals = array_each($params, function (&$carry, $pval) use ($pcols) {
+                    $pvals = (array) $pval;
+                    if (count($pcols) !== count($pvals)) {
+                        throw new \InvalidArgumentException('argument\'s length is not match primary columns.');
+                    }
+                    $carry[] = array_combine($pcols, $pvals);
+                });
+                $wheres[] = $this->getCompatiblePlatform()->getPrimaryCondition($pvals, $tableAlias ?? $tableName);
+                continue;
+            }
+
             if ($cond instanceof QueryBuilder && $cond->getSubmethod() !== null) {
                 $cond->setSubwhere($tableName, $tableAlias, null);
             }
-            return $cond;
-        }, arrayize($identifier));
+
+            $wheres[$key] = $cond;
+        }
+        return $wheres;
     }
 
     /**
