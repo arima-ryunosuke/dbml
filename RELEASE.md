@@ -24,6 +24,18 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.2
+
+- [feature] 非同期クエリを実験的に実装
+- [feature] mysqli の updateOrThrow をマッチ行にする
+- [feature] PDO ではなく一部のエクステンションに対応
+- [change] クエリパーサを使えるところは使う
+- [feature] クエリパーサの導入
+- [feature] onIntrospectTable イベントを追加
+- [feature] CompatiblePlatform に SLEEP 構文を追加
+- [feature] affect 系の where で空文字キーを主キーに読み替える機能
+- [feature] 型の強化
+
 ## 2.1.1
 
 - [feature][QueryBuilder] arrayFetch に null を与えると親の fetch method が伝播される機能

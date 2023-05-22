@@ -8,16 +8,13 @@ Doctrine/dbal を使用して CRUD 操作に特化したライブラリです。
 対応（テスト済み）RDBMS
 
 - sqlite 3.8
-- MySQL 5.6/5.7
-- PostgreSQL 9.2/9.5
-- SQLServer 2014
-
-なお、(Doctrineの)内部コネクションは PDO しかサポートしません。
-PDO 以外のコネクションで動作させた場合の挙動は未定義です。
+- MySQL 5.7/8.0
+- PostgreSQL 15
+- SQLServer 2017
 
 ドキュメントは下記においてあります。
 
-- [クラスリファレンス](https://arima-ryunosuke.github.io/dbml/)
+- [クラスリファレンス](https://arima-ryunosuke.github.io/document/dbml/)
 
 ## Install
 
@@ -90,7 +87,7 @@ $db->t_article->delete([
 ]);
 ```
 
-実際は JOIN ができたり下位テーブルを階層で取得できたり、 WHERE に条件が埋め込めたりしますが、そのような細かい使い方は[クラスリファレンス](https://arima-ryunosuke.github.io/dbml/)を参照。
+実際は JOIN ができたり下位テーブルを階層で取得できたり、 WHERE に条件が埋め込めたりしますが、そのような細かい使い方は[クラスリファレンス](https://arima-ryunosuke.github.io/document/dbml/)を参照。
 
 ## License
 
