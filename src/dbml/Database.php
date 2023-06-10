@@ -1499,13 +1499,20 @@ class Database
      *
      * 存在するテーブル名や tableMapper などを利用して phpstorm.meta を作成する。
      *
-     * @param bool $innerOnly namespace PHPSTORM_META のような外側を含めるか
+     * @param bool $innerOnly namespace PHPSTORM_META のような外側を含めるか（非推奨）
      * @param ?string $filename ファイルとして吐き出す先
      * @param ?string $namespace エンティティの名前空間。未指定だと Entityable に集約される
      * @return string phpstorm.meta の内容
      */
     public function echoPhpStormMeta($innerOnly = false, $filename = null, $namespace = null)
     {
+        // for compatible
+        if (!is_bool($innerOnly)) {
+            $namespace = $filename;
+            $filename = $innerOnly;
+            $innerOnly = false;
+        }
+
         $special_types = [
             Types::SIMPLE_ARRAY         => 'array|string',
             Types::JSON                 => 'array|string',
@@ -1569,10 +1576,12 @@ class Database
 
         $result = '';
         foreach ($entities as $entityname => $entity) {
-            $result .= "
-    override(new \\$entityname,
-        map({$export($entity, 2)})
-    );";
+            $result .= <<<META
+            
+                override(new \\$entityname,
+                    map({$export($entity, 2)})
+                );
+            META;
         }
         if (!$innerOnly) {
             $result = "<?php\nnamespace PHPSTORM_META {\n$result\n}";

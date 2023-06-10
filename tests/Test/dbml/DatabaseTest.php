@@ -2857,7 +2857,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         ]);
 
         $metafile = sys_get_temp_dir() . '/phpstormmeta';
-        $phpstorm_meta = $database->echoPhpStormMeta(false, $metafile);
+        $phpstorm_meta = $database->echoPhpStormMeta($metafile);
         $this->assertFileExists($metafile);
         $this->assertStringContainsString('namespace PHPSTORM_META', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\dbml\\Entity\\Entityable', $phpstorm_meta);
@@ -2866,8 +2866,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertStringContainsString('=> \DateTimeImmutable::class', $phpstorm_meta);
         $this->assertStringContainsString('=> \ArrayObject::class', $phpstorm_meta);
 
-        $phpstorm_meta = $database->echoPhpStormMeta(true, null, 'EntityNamespace');
-        $this->assertStringNotContainsString('namespace PHPSTORM_META', $phpstorm_meta);
+        $phpstorm_meta = $database->echoPhpStormMeta(null, 'EntityNamespace');
+        $this->assertStringContainsString('namespace PHPSTORM_META', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
