@@ -1425,10 +1425,15 @@ class Database
             'prop' => [],
             'func' => [],
         ];
+        $unique_names = [];
         foreach ($tablemap['gatewayClass'] as $tname => $gname) {
             $ename = $this->convertEntityName($tname);
-            $gateway_provider['prop'][] = "/** @var {$ename}TableGateway */\npublic \$$tname;";
-            $gateway_provider['func'][] = "/** @return {$ename}TableGateway */\npublic function $tname($args1) { }";
+            $tname_key = strtolower($tname);
+            if (!isset($unique_names[$tname_key])) {
+                $unique_names[$tname_key] = true;
+                $gateway_provider['prop'][] = "/** @var {$ename}TableGateway */\npublic \$$tname;";
+                $gateway_provider['func'][] = "/** @return {$ename}TableGateway */\npublic function $tname($args1) { }";
+            }
         }
 
         $gateways = [];
