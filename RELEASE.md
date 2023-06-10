@@ -24,6 +24,11 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.3
+
+- [change] echoPhpStormMeta の $innerOnly を廃止（非推奨）
+- [fixbug] echoAnnotation で TableGateway と EntityGateway が重複する不具合を修正
+
 ## 2.1.2
 
 - [feature] 非同期クエリを実験的に実装
