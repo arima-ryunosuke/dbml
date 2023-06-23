@@ -739,6 +739,38 @@ AND ((flag=1))", "$gw");
      * @param TableGateway $gateway
      * @param Database $database
      */
+    function test_secureOrderBy($gateway, $database)
+    {
+        $t_article = new TableGateway($database, 't_article');
+        $t_comment = new TableGateway($database, 't_comment');
+
+        $this->assertEquals([2, 1], $t_article->setSecureOrderBy(true)->select('article_id', [], ['-undefined', '-article_id'], 2)->lists());
+
+        $this->assertEquals([
+            "article_id"  => 1,
+            "comment_ids" => [3, 2, 1],
+        ], $t_article->select([
+            'article_id',
+            'comment_ids' => $t_comment->setSecureOrderBy(true)->subselect('comment_id', [], ['-undefined', '-comment_id'])->lists(),
+        ], ['article_id' => 1])->tuple());
+
+        // pgsql は ORDER BY をつけられない/mssql は GROUP_CONCAT が使えない（mysql はいけるがそもそも subquery で secure はほぼ用途がないので気にしない）
+        if ($database->getCompatiblePlatform()->getWrappedPlatform() instanceof SqlitePlatform) {
+            $this->assertEquals([
+                "article_id"  => 1,
+                "comment_ids" => '1 2 3', // 全体の ORDER BY と GROUP_CONCAT の ORDER BY は相関しない（クエリレベルで確かめたのでよしとする）
+            ], $t_article->select([
+                'article_id',
+                'comment_ids' => $t_comment->setSecureOrderBy(true)->subquery($database->getCompatiblePlatform()->getGroupConcatSyntax('comment_id', ' '), [], ['-undefined', '-comment_id']),
+            ], ['article_id' => 1])->tuple());
+        }
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
     function test_iterate($gateway, $database)
     {
         $this->assertEquals([

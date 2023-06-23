@@ -316,9 +316,10 @@ use function ryunosuke\dbml\throws;
  *
  *     @param string $string {@link Database::JOIN_MAPPER} のいずれかのキー
  * }
- *
  * @method array                  getIgnoreAffectScope() {更新時に無視するスコープ名を返す}
  * @method $this                  setIgnoreAffectScope(array $ignoreAffectScope) {更新時に無視するスコープ名を設定する}
+ * @method bool                   getSecureOrderBy() {orderBy でセキュア判定するかを返す}
+ * @method $this                  setSecureOrderBy(bool $secureOrderBy) {orderBy でセキュア判定するかを設定する}
  */
 // @formatter:on
 class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
@@ -454,6 +455,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             'scopeRenamer'      => function ($name) { return lcfirst($name); },
             // メソッドベース仮想カラムの命名規則
             'columnRenamer'     => function ($name) { return snake_case($name); },
+            // orderBy でセキュア判定するか（select を経由する場合のみなので注意）
+            'secureOrderBy'     => false,
         ];
     }
 
@@ -651,6 +654,16 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         $that = $this->clone();
         $that->$name = $value;
         return $that;
+    }
+
+    private function _unsetOrderBy(&$scope_params)
+    {
+        if ($this->getUnsafeOption('secureOrderBy')) {
+            $orderBy = $scope_params['orderBy'];
+            $scope_params['orderBy'] = [];
+            return $orderBy;
+        }
+        return [];
     }
 
     private function _rewhere(&$where)
@@ -1917,7 +1930,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function select($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
+        $orderBy = $this->_unsetOrderBy($sp);
         $return = $this->database->select(...array_values($sp));
+        if ($orderBy) {
+            $return->orderBySecure($orderBy);
+        }
 
         $return->hint($this->hint);
         if ($this->original->alias) {
@@ -2078,7 +2095,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function subselect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
+        $orderBy = $this->_unsetOrderBy($sp);
         $return = $this->database->subselect(...array_values($sp));
+        if ($orderBy) {
+            $return->orderBySecure($orderBy);
+        }
         $return->hint($this->hint);
         return $return;
     }
@@ -2094,7 +2115,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function subquery($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
+        $orderBy = $this->_unsetOrderBy($sp);
         $return = $this->database->subquery(...array_values($sp));
+        if ($orderBy) {
+            $return->orderBySecure($orderBy);
+        }
         $return->hint($this->hint);
         return $return;
     }
