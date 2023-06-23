@@ -1094,6 +1094,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
         // 文字列は select,from,join 句を調べて一致するもののみ
         if (is_string($column)) {
+            if (in_array($column[0] ?? '', ['+', '-'], true)) {
+                $column = substr($column, 1);
+            }
+
             // SELECT 句と比較
             foreach ($this->sqlParts['select'] as $select) {
                 // エイリアス指定ならそれを使う

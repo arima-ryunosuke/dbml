@@ -2175,6 +2175,10 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
         // 順序に変な文字を与えても ASC 化されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure(['t_article.article_id', 'invalid', 'test2.id' => 'invalid1'], 'invalid2');
         $this->assertStringContainsString('ORDER BY t_article.article_id ASC, test2.id ASC', "$builder");
+
+        // +-プレフィックス
+        $builder->resetQueryPart('orderBy')->orderBySecure(['-t_article.article_id', '+test2.id']);
+        $this->assertStringContainsString('ORDER BY t_article.article_id DESC, test2.id ASC', "$builder");
     }
 
     /**
