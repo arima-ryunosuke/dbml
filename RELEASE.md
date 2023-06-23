@@ -24,6 +24,12 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.4
+
+- [feature] TableGateway の set スコープ対応
+- [feature] TableGateway でも secureOrderBy を使用できるようにした
+- [fixbug] orderBySecure が "+-" プレフィックスに対応していない不具合を修正
+
 ## 2.1.3
 
 - [change] echoPhpStormMeta の $innerOnly を廃止（非推奨）
