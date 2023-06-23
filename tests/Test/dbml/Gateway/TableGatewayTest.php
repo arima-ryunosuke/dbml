@@ -415,6 +415,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
+            'colval'  => [],
         ], $gateway->getScopeParts('x1'));
 
         // デフォルト引数よりスコープパラメータの方が強い
@@ -425,6 +426,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
+            'colval'  => [],
         ], $gateway->getScopeParts('x1', 1));
 
         // プリセットパラメータが使用される
@@ -435,6 +437,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
+            'colval'  => [],
         ], $gateway->getScopeParts('x2'));
 
         // プリセットパラメータは上書きできない。与えた 999 は次のスコープパラメータとして使用される
@@ -445,6 +448,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
+            'colval'  => [],
         ], $gateway->getScopeParts('x2', 999));
 
         // 合成と同時に新しいスコープを当てたもの（合成のネストできるかのテストで値に特に意味はない）
@@ -455,6 +459,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
+            'colval'  => [],
         ], $gateway->getScopeParts('x3', 1));
 
         // 上記のクロージャ版
@@ -465,6 +470,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
+            'colval'  => [],
         ], $gateway->getScopeParts('x4', 1, -2));
 
         // 可変引数の合成スコープ dv
@@ -475,6 +481,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
+            'colval'  => [],
         ], $gateway->getScopeParts('dv', 1, 2, 3, 4));
 
         // 可変引数の合成スコープ dv1
@@ -485,6 +492,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
+            'colval'  => [],
         ], $gateway->getScopeParts('dv1', 2, 3, 4));
 
         // 合成スコープを合成した合成スコープ（合成のネストできるかのテストで値に特に意味はない）
@@ -495,6 +503,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [999],
             'groupBy' => [],
             'having'  => [],
+            'colval'  => [],
         ], $gateway->getScopeParts('mixmix'));
 
         // これはエラーになる（c の引数がどこにも現れていない）
@@ -1361,12 +1370,12 @@ AND ((flag=1))", "$gw");
         $this->assertEquals($count + 1, $count = $gateway->count());
 
         // insertOrThrow すると1件増えて主キーが返ってくるはず
-        $pri = $gateway->insertOrThrow(['name' => 'A']);
+        $pri = $gateway->set(['name' => 'A'])->insertOrThrow(['name' => 'A']);
         $this->assertEquals($count + 1, $count = $gateway->count());
         $this->assertEquals(['id' => $count], $pri);
 
         // update すると更新されるはず
-        $gateway->update(['name' => 'XXX'], $pri);
+        $gateway->set(['name' => 'XXX'])->update([], $pri);
         $this->assertEquals('XXX', $gateway->value('name', $pri));
 
         // updateOrThrow すると更新されて主キーが返ってくるはず
@@ -1664,6 +1673,20 @@ AND ((flag=1))", "$gw");
         $gateway->setIgnoreAffectScope(['hogehoge']);
         $gateway->update(['name' => 'XXX']);
         $this->assertEquals(['UPDATE test SET name = ?' => ['XXX']], $lastsql());
+
+        $gateway->addScope('defid', [], ['id' => 1], [], [], [], [], []);
+        $gateway->addScope('defname', [], [], [], [], [], [], ['name' => 'scoped name']);
+        $gateway->addScope('defdata', function ($data) {
+            return [
+                'colval' => ['data' => $data],
+            ];
+        });
+        $gateway->scope('defid defname')->scope('defdata', 'scoped data')->update([]);
+        $this->assertEquals(['UPDATE test SET name = ?, data = ? WHERE test.id = ?' => ['scoped name', 'scoped data', 1]], $lastsql());
+        $gateway->bindScope('defdata', ['binding data'])->scope('defdata')->update([]);
+        $this->assertEquals(['UPDATE test SET data = ?' => ['binding data']], $lastsql());
+        $gateway->bindScope('defdata', ['binding data'])->scope('defdata', 'current data')->update([]);
+        $this->assertEquals(['UPDATE test SET data = ?' => ['current data']], $lastsql());
 
         // ORDER,LIMIT が効いた update になる
         if ($database->getPlatform() instanceof SqlitePlatform) {

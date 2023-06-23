@@ -398,6 +398,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         'limit'   => [],
         'groupBy' => [],
         'having'  => [],
+        'colval'  => [],
     ];
 
     /** @var string デフォルト iterate メソッド */
@@ -666,9 +667,16 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         return [];
     }
 
-    private function _rewhere(&$where)
+    private function _redatawhere(&$data, &$where)
     {
+        $data ??= [];
+        $where ??= [];
+
         $sp = $this->getScopeParamsForAffect([], $where);
+        // まれに配列以外が来ることがある（entity とか builder とか）
+        if (is_array($data)) {
+            $data += $sp['colval'];
+        }
         $where = $sp['where'];
 
         // 集約系はどうしようもないので例外（集約を利用した update/delete なんて考慮したくない）
@@ -1171,20 +1179,21 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string|array $having HAVING 句
      * @return $this 自分自身
      */
-    public function addScope($name = '', $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function addScope($name = '', $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], $sets = [])
     {
         if ($tableDescriptor instanceof \Closure) {
             $scope = $tableDescriptor;
         }
         else {
-            $scope = array_combine(QueryBuilder::CLAUSES, [
-                arrayize($tableDescriptor),
-                arrayize($where),
-                arrayize($orderBy),
-                arrayize($limit),
-                arrayize($groupBy),
-                arrayize($having),
-            ]);
+            $scope = [
+                'column'  => arrayize($tableDescriptor),
+                'where'   => arrayize($where),
+                'orderBy' => arrayize($orderBy),
+                'limit'   => arrayize($limit),
+                'groupBy' => arrayize($groupBy),
+                'having'  => arrayize($having),
+                'colval'  => arrayize($sets),
+            ];
         }
         $this->scopes[$name] = $scope;
         return $this;
@@ -1445,6 +1454,21 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * SET 句を追加する（{@uses QueryBuilder::set()} を参照）
+     *
+     * ```php
+     * // UPDATE tablename SET id = 'hoge'
+     * echo $gw->set(['name' => 'hoge']);
+     * ```
+     *
+     * @inheritdoc QueryBuilder::set()
+     */
+    public function set($sets)
+    {
+        return $this->scoping(...array_values(array_replace(self::$defargs, ['colval' => $sets])));
+    }
+
+    /**
      * スコープで縛る
      *
      * スコープは空白区切りで複数指定できる。
@@ -1700,15 +1724,15 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             return !($column->getPlatformOptions()['virtual'] ?? false);
         });
         $alias = $that->modifier();
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return array_combine(QueryBuilder::CLAUSES, [
-            $sargs['column'],
-            Adhoc::modifier($alias, $columns, $sargs['where']),
-            Adhoc::modifier($alias, $columns, $sargs['orderBy']),
-            $sargs['limit'],
-            Adhoc::modifier($alias, $columns, $sargs['groupBy']),
-            Adhoc::modifier($alias, $columns, $sargs['having']),
-        ]);
+        return [
+            'column'  => $sargs['column'],
+            'where'   => Adhoc::modifier($alias, $columns, $sargs['where']),
+            'orderBy' => Adhoc::modifier($alias, $columns, $sargs['orderBy']),
+            'limit'   => $sargs['limit'],
+            'groupBy' => Adhoc::modifier($alias, $columns, $sargs['groupBy']),
+            'having'  => Adhoc::modifier($alias, $columns, $sargs['having']),
+            'colval'  => $sargs['colval'],
+        ];
     }
 
     /**
@@ -2359,7 +2383,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function create($data)
     {
         $this->resetResult();
-        return $this->database->create($this->tableName, ...func_get_args());
+        return $this->database->create($this->_redatawhere($data, $identifier), ...func_get_args());
     }
 
     /**
@@ -2385,7 +2409,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         ) {
             return $this->database->insertSelect($this->tableName, $this->database->select(...array_values($sp)));
         }
-        return $this->database->insert($this->tableName, ...func_get_args());
+        return $this->database->insert($this->_redatawhere($data, $identifier), ...func_get_args());
     }
 
     /**
@@ -2399,7 +2423,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function update($data, array $identifier = [])
     {
         $this->resetResult();
-        return $this->database->update($this->_rewhere($identifier), $data, $identifier, ...array_slice(func_get_args(), 2));
+        return $this->database->update($this->_redatawhere($data, $identifier), $data, $identifier, ...array_slice(func_get_args(), 2));
     }
 
     /**
@@ -2413,7 +2437,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function delete(array $identifier = [])
     {
         $this->resetResult();
-        return $this->database->delete($this->_rewhere($identifier), $identifier, ...array_slice(func_get_args(), 1));
+        return $this->database->delete($this->_redatawhere($data, $identifier), $identifier, ...array_slice(func_get_args(), 1));
     }
 
     /**
@@ -2427,7 +2451,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function remove(array $identifier = [])
     {
         $this->resetResult();
-        return $this->database->remove($this->_rewhere($identifier), $identifier, ...array_slice(func_get_args(), 1));
+        return $this->database->remove($this->_redatawhere($data, $identifier), $identifier, ...array_slice(func_get_args(), 1));
     }
 
     /**
@@ -2441,7 +2465,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function destroy(array $identifier = [])
     {
         $this->resetResult();
-        return $this->database->destroy($this->_rewhere($identifier), $identifier, ...array_slice(func_get_args(), 1));
+        return $this->database->destroy($this->_redatawhere($data, $identifier), $identifier, ...array_slice(func_get_args(), 1));
     }
 
     /**
