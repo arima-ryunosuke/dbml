@@ -46,14 +46,8 @@ class Paginator implements \IteratorAggregate, \Countable
     /** @var int 現在ページ */
     private $page;
 
-    /** @var int 全アイテム数 */
-    private $total;
-
     /** @var int 表示するページ数 */
     private $shownPage;
-
-    /** @var array ページ配列 */
-    private $pageRange;
 
     /**
      * コンストラクタ
@@ -79,8 +73,6 @@ class Paginator implements \IteratorAggregate, \Countable
      */
     public function paginate($currentpage, $countperpage, $shownpage = null)
     {
-        $this->total = null;
-        $this->pageRange = null;
         $this->resetResult();
 
         $countperpage = intval($countperpage);
@@ -95,7 +87,7 @@ class Paginator implements \IteratorAggregate, \Countable
 
         $this->builder->limit($countperpage, $this->page * $countperpage);
 
-        $this->shownPage = $shownpage;
+        $this->shownPage = $shownpage; // for compatible
 
         return $this;
     }
@@ -157,42 +149,34 @@ class Paginator implements \IteratorAggregate, \Countable
      */
     public function getTotal()
     {
-        if (!isset($this->total)) {
-            // for mysql
-            $this->getItems();
+        // for mysql
+        $this->getItems();
 
-            $this->total = $this->builder->getRowCount();
-        }
-
-        return $this->total;
+        return $this->builder->getRowCount();
     }
 
     /**
      * 表示ページを配列で返す
      *
+     * @param ?int $shownPage 表示するページ数。奇数が望ましい。省略時全ページ表示
      * @return array 表示ページ配列
      */
-    public function getPageRange()
+    public function getPageRange($shownPage = null)
     {
-        // カスみたいな負荷だと思うが一応キャッシュ
-        if (!isset($this->pageRange)) {
-            $pagecount = $this->getPageCount();
-            if ($this->shownPage === null) {
-                $this->pageRange = range(1, $pagecount);
-            }
-            elseif ($pagecount === 0) {
-                $this->pageRange = [];
-            }
-            else {
-                $offset = $this->getPage() - intval($this->shownPage / 2);
-                $min = 1;
-                $max = $pagecount - $this->shownPage + 1;
-                $offset = max($min, min($max, $offset));
-                $this->pageRange = range($offset, $offset + min($pagecount, $this->shownPage) - 1);
-            }
-        }
+        $shownPage ??= $this->shownPage;
 
-        return $this->pageRange;
+        $pagecount = $this->getPageCount();
+        if ($shownPage === null) {
+            return range(1, $pagecount);
+        }
+        if ($pagecount === 0) {
+            return [];
+        }
+        $offset = $this->getPage() - intval($shownPage / 2);
+        $min = 1;
+        $max = $pagecount - $shownPage + 1;
+        $offset = max($min, min($max, $offset));
+        return range($offset, $offset + min($pagecount, $shownPage) - 1);
     }
 
     /**
