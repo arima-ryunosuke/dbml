@@ -4849,7 +4849,7 @@ class Database
                 break;
             case 'change':
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
-                $result = $db->changeArray($tableName, $records, [], $opt);
+                $result = $db->changeArray($tableName, $records, [], [], $opt);
                 if ($opt['dryrun']) {
                     $results[] = $result[1];
                 }
@@ -5540,17 +5540,18 @@ class Database
      * // INSERT INTO table_name (id, name) VALUES ('3', 'piyo')
      * // DELETE FROM table_name WHERE (category = 'misc') AND (NOT (id IN ('1', '2', '3')))
      *
-     * // $tableName に配列を与えると RETURNING 的動作になる（この場合作用行の id, name を返す）
-     * $result = $db->changeArray(['table_name' => ['id', 'name']], [
+     * // $returning に配列を与えると RETURNING 的動作になる（この場合作用行の id, name を返す）
+     * $result = $db->changeArray('table_name', [
      *     ['id' => 1,    'name' => 'changed'], // 更新
      *     ['id' => 2,    'name' => 'hoge'],    // 未更新
      *     ['id' => null, 'name' => 'fuga'],    // 作成
-     * ], ['category' => 'misc']);              // category=misc の世界で他のものを削除
+     * ], ['category' => 'misc'],               // category=misc の世界で他のものを削除
+     * ['id', 'name']);                         // 返り値として id, name を返す
      * result: [
-     *     '1' => ['id' => 1, 'name' => 'base', '' => 2],  // 更新された行は 2（このとき、 name は更新前の値であり 'changed' ではない）
-     *     '2' => ['id' => 2, 'name' => 'hoge', '' => 0],  // 更新されてない行は 0（mysql のみ）
-     *     '5' => ['id' => 5, 'name' => 'fuga', '' => 1],  // 作成された行は 1（このとき、主キーも設定されて返ってくる）
-     *     '8' => ['id' => 8, 'name' => 'piyo', '' => -1], // 削除された行は -1
+     *     ['id' => 1, 'name' => 'base', '' => 2],  // 更新された行は 2（このとき、 name は更新前の値であり 'changed' ではない）
+     *     ['id' => 2, 'name' => 'hoge', '' => 0],  // 更新されてない行は 0（mysql のみ）
+     *     ['id' => 5, 'name' => 'fuga', '' => 1],  // 作成された行は 1（このとき、主キーも設定されて返ってくる）
+     *     ['id' => 8, 'name' => 'piyo', '' => -1], // 削除された行は -1
      * ]
      * ```
      *
@@ -5559,12 +5560,13 @@ class Database
      * @param string|array $tableName テーブル名
      * @param array $dataarray データ配列
      * @param array|mixed $identifier 束縛条件。 false を与えると DELETE 文自体を発行しない（速度向上と安全担保）
+     * @param ?array $returning 返り値の制御変数。配列を与えるとそのカラムの SELECT 結果を返す（null は主キーを表す）
      * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
      */
-    public function changeArray($tableName, $dataarray, $identifier)
+    public function changeArray($tableName, $dataarray, $identifier, $returning = [])
     {
         // 隠し引数 $opt
-        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
+        $opt = func_num_args() === 5 ? func_get_arg(4) : [];
         unset($opt['primary']); // 自身で処理するので不要
 
         $dryrun = $this->getUnsafeOption('dryrun');
@@ -5574,21 +5576,28 @@ class Database
 
         $tableName = $this->_preaffect($tableName, []);
 
-        $returning = [];
+        // for compatiblle
         if ($tableName instanceof QueryBuilder) {
-            $opt['bulk'] = false;
             $returning = $tableName->getQueryPart('select');
             $tableName = first_key($tableName->getFromPart());
-        }
-        if ($dryrun) {
-            $returning = [];
         }
         $tableName = $this->convertTableName($tableName);
 
         // 主キー情報を漁っておく
         $pcols = $this->getSchema()->getTablePrimaryColumns($tableName);
+        $plist = array_keys($pcols);
         $autocolumn = optional($this->getSchema()->getTableAutoIncrement($tableName))->getName();
         $pksep = $this->getPrimarySeparator();
+
+        if ($dryrun) {
+            $returning = [];
+        }
+        if ($returning === null) {
+            $returning = $plist;
+        }
+        if ($returning) {
+            $opt['bulk'] = false;
+        }
 
         // modifyArray や prepareModify が使えるか
         $bulkable = array_get($opt, 'bulk', true) && $cplatform->supportsBulkMerge();
@@ -5620,14 +5629,14 @@ class Database
         // returning モード（更新や削除のためその世界を事前取得する）
         $oldrecords = [];
         if ($returning) {
-            $pkcol = $cplatform->getConcatExpression(array_values(array_implode(array_keys($pcols), $this->quote($pksep))));
+            $pkcol = $cplatform->getConcatExpression(array_values(array_implode($plist, $this->quote($pksep))));
             if ($identifier !== false) {
-                $oldrecords = $this->selectAssoc([$tableName => [self::AUTO_PRIMARY_KEY => $pkcol], '' => (array) $returning], $whereconds);
+                $oldrecords = $this->selectAssoc([$tableName => [self::AUTO_PRIMARY_KEY => $pkcol], '' => $returning], $whereconds);
             }
         }
 
         $sqls = [];
-        $affecteds = [];
+        $idmap = [];
         $inserteds = [];
 
         foreach ($col_group as $group) {
@@ -5655,7 +5664,11 @@ class Database
                     // returning モード
                     if ($returning) {
                         $pv = implode($pksep, $primaries[$n]);
-                        $affecteds[$pv] = $affected;
+                        $idmap[$pv] = [
+                            'seq'      => $n,
+                            'affected' => $affected,
+                        ];
+
                         if (isset($oldrecords[$pv])) {
                             $oldrecords[$pv] += ['' => $affected ? 2 : 0];
                         }
@@ -5673,26 +5686,44 @@ class Database
             $sqls[] = $this->delete($tableName, array_merge($whereconds, $primaries ? [$this->queryInto("NOT ($cond)", $cond->getParams())] : []));
         }
 
+        if ($dryrun) {
+            return [$primaries, array_flatten($sqls)];
+        }
+
         // returning モード（完了後に再フェッチを行い比較）
         if ($returning) {
-            $cond = $cplatform->getPrimaryCondition($inserteds, $tableName);
-            $newrecords = $this->selectAssoc([$tableName => [self::AUTO_PRIMARY_KEY => $pkcol], '' => (array) $returning], [
-                [
-                    $whereconds,
-                    $inserteds ? [$this->queryInto("$cond", $cond->getParams())] : [],
-                ],
-            ]);
+            // 省略時の主キーだけであれば手元の情報で事足りるので漁る必要はない
+            if ($returning === $plist) {
+                $newrecords = $inserteds;
+            }
+            else {
+                $cond = $cplatform->getPrimaryCondition($inserteds, $tableName);
+                $newrecords = $this->selectAssoc([$tableName => [self::AUTO_PRIMARY_KEY => $pkcol], '' => $returning], [
+                    [
+                        $whereconds,
+                        $inserteds ? [$this->queryInto("$cond", $cond->getParams())] : [],
+                    ],
+                ]);
+            }
             foreach (array_diff_key($newrecords, $oldrecords) as $pv => $row) {
-                $oldrecords[$pv] = $row + ['' => $affecteds[$pv]];
+                $oldrecords[$pv] = $row + ['' => $idmap[$pv]['affected']];
             }
             foreach (array_diff_key($oldrecords, $newrecords) as $pv => $row) {
                 $oldrecords[$pv] += ['' => -1];
             }
-            return array_map(fn($row) => array_remove($row, [self::AUTO_PRIMARY_KEY]), $oldrecords);
-        }
 
-        if ($dryrun) {
-            return [$primaries, array_flatten($sqls)];
+            $result = [];
+            foreach ($oldrecords as $pv => $oldrecord) {
+                if (isset($idmap[$pv])) {
+                    $result[$idmap[$pv]['seq']] = $oldrecord;
+                }
+            }
+            foreach ($oldrecords as $pv => $oldrecord) {
+                if (!isset($idmap[$pv])) {
+                    $result[] = $oldrecord;
+                }
+            }
+            return array_map(fn($row) => array_remove($row, [self::AUTO_PRIMARY_KEY]), $result);
         }
         return $primaries;
     }
@@ -5843,7 +5874,7 @@ class Database
             }
 
             // changeArray すれば主キーが得られる。主キーが得られれば外部キーに設定できるし返り値用に整形できる
-            $changed = $this->changeArray($tname, $rows, $parents ?: false, $opt);
+            $changed = $this->changeArray($tname, $rows, $parents ?: false, [], $opt);
             if ($dryrun) {
                 $primaries[$tname] = $changed[0];
                 $sqls = array_merge($sqls, $changed[1]);

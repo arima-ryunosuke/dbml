@@ -6070,105 +6070,176 @@ INSERT INTO test (id, name) VALUES
     {
         $updatedAffectedRows = $database->getCompatiblePlatform()->getName() === 'mysql' ? 0 : 2;
 
+        $primaries = $database->changeArray('multiprimary', [
+            ['mainid' => 1, 'subid' => 1, 'name' => 'a'],
+            ['mainid' => 1, 'subid' => 2, 'name' => 'X'],
+            ['mainid' => 1, 'subid' => 9, 'name' => 'Z'],
+        ], ['mainid' => 1], null);
+        $this->assertEquals([
+            [
+                "mainid" => "1",
+                "subid"  => "1",
+                ""       => $updatedAffectedRows,
+            ],
+            [
+                "mainid" => "1",
+                "subid"  => "2",
+                ""       => 2,
+            ],
+            [
+                "mainid" => 1,
+                "subid"  => 9,
+                ""       => 1,
+            ],
+            [
+                "mainid" => "1",
+                "subid"  => "3",
+                ""       => -1,
+            ],
+            [
+                "mainid" => "1",
+                "subid"  => "4",
+                ""       => -1,
+            ],
+            [
+                "mainid" => "1",
+                "subid"  => "5",
+                ""       => -1,
+            ],
+        ], $primaries);
+
         $primaries = $database->changeArray(['test' => ['uname' => new Expression('UPPER(name)', [])]], [
-            ['id' => 1, 'name' => 'a'],
-            ['id' => 2, 'name' => 'b'],
+            "first" => ['id' => 1, 'name' => 'a'],
+            2       => ['id' => 2, 'name' => 'b'],
             ['id' => 3, 'name' => 'X'],
-            ['id' => 99, 'name' => 'Z'],
+            "last"  => ['id' => 91, 'name' => 'Z1'],
         ], ['id < 5']);
         $this->assertEquals([
-            1  => [
+            "first" => [
                 "uname" => "A",
                 ""      => $updatedAffectedRows,
             ],
-            2  => [
+            2       => [
                 "uname" => "B",
                 ""      => $updatedAffectedRows,
             ],
-            3  => [
+            3       => [
                 "uname" => "C",
                 ""      => 2,
             ],
-            4  => [
+            "last"  => [
+                "uname" => "Z1",
+                ""      => 1,
+            ],
+            4       => [
                 "uname" => "D",
                 ""      => -1,
-            ],
-            99 => [
-                "uname" => "Z",
-                ""      => 1,
             ],
         ], $primaries);
 
         $primaries = $database->changeArray('test.name', [
-            ['id' => 1, 'name' => 'a'],
-            ['id' => 2, 'name' => 'b'],
+            "first" => ['id' => 1, 'name' => 'a'],
+            2       => ['id' => 2, 'name' => 'b'],
             ['id' => 3, 'name' => 'Y'],
-            ['id' => 99, 'name' => 'Z'],
+            "last"  => ['id' => 92, 'name' => 'Z2'],
         ], []);
         $this->assertEquals([
-            1  => [
+            "first" => [
                 "name" => "a",
                 ""     => $updatedAffectedRows,
             ],
-            2  => [
+            2       => [
                 "name" => "b",
                 ""     => $updatedAffectedRows,
             ],
-            3  => [
+            3       => [
                 "name" => "X",
                 ""     => 2,
             ],
-            5  => [
+            "last"  => [
+                "name" => "Z2",
+                ""     => 1,
+            ],
+            4       => [
                 "name" => "e",
                 ""     => -1,
             ],
-            6  => [
+            5       => [
                 "name" => "f",
                 ""     => -1,
             ],
-            7  => [
+            6       => [
                 "name" => "g",
                 ""     => -1,
             ],
-            8  => [
+            7       => [
                 "name" => "h",
                 ""     => -1,
             ],
-            9  => [
+            8       => [
                 "name" => "i",
                 ""     => -1,
             ],
-            10 => [
+            9       => [
                 "name" => "j",
                 ""     => -1,
             ],
-            99 => [
-                "name" => "Z",
-                ""     => $updatedAffectedRows,
+            10      => [
+                "name" => "Z1",
+                ""     => -1,
+            ],
+        ], $primaries);
+
+        $primaries = $database->changeArray('test', [
+            "first" => ['id' => 1, 'name' => 'a'],
+            2       => ['id' => 2, 'name' => 'b'],
+            ['id' => 3, 'name' => 'Z'],
+            "last"  => ['id' => 93, 'name' => 'Z3'],
+        ], [], null);
+        $this->assertEquals([
+            "first" => [
+                "id" => "1",
+                ""   => $updatedAffectedRows,
+            ],
+            2       => [
+                "id" => "2",
+                ""   => $updatedAffectedRows,
+            ],
+            3       => [
+                "id" => "3",
+                ""   => 2,
+            ],
+            "last"  => [
+                "id" => 93,
+                ""   => 1,
+            ],
+            4       => [
+                "id" => "92",
+                ""   => -1,
             ],
         ], $primaries);
 
         if ($database->getCompatiblePlatform()->getName() === 'mysql') {
             $primaries = $database->changeArray(['test' => ['name']], [
-                ['id' => 1, 'name' => 'a'],
+                "first" => ['id' => 1, 'name' => 'a'],
                 ['id' => 2, 'name' => 'b'],
                 ['id' => 3, 'name' => 'Z'],
-                ['id' => 100, 'name' => 'Z'],
+                "last"  => ['id' => 100, 'name' => 'Z'],
             ], ['false']);
             $this->assertEquals([
-                1   => [
+                "first" => [
                     "name" => "a",
                     ""     => 0,
                 ],
-                2   => [
+                [
                     "name" => "b",
                     ""     => 0,
                 ],
-                3   => [
+                [
                     "name" => "Z",
-                    ""     => 2,
+                    ""     => 0,
                 ],
-                100 => [
+                "last"  => [
                     "name" => "Z",
                     ""     => 1,
                 ],
@@ -6181,7 +6252,7 @@ INSERT INTO test (id, name) VALUES
                     ['id' => 1, 'name' => null],
                 ], ['id' => 1]);
                 $this->assertEquals([
-                    1 => [
+                    [
                         "name" => "a",
                         ""     => 2,
                     ],
@@ -6232,7 +6303,7 @@ INSERT INTO test (id, name) VALUES
             ['mainid' => 1, 'subid' => 1, 'name' => 'X'],
             ['mainid' => 1, 'subid' => 2, 'name' => 'Y'],
             ['mainid' => 1, 'subid' => 3, 'name' => 'Z'],
-        ], ['mainid' => 1], ['bulk' => false]);
+        ], ['mainid' => 1], null, ['bulk' => false]);
 
         $this->assertEquals([
             ['mainid' => 1, 'subid' => 1],
