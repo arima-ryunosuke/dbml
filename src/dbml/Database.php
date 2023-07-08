@@ -1406,14 +1406,14 @@ class Database
     public function echoAnnotation($namespace = null, $filename = null)
     {
         $special_types = [
-            Types::SIMPLE_ARRAY         => 'array|string',
-            Types::JSON                 => 'array|string',
-            Types::BOOLEAN              => 'bool',
-            Types::INTEGER              => 'int',
-            Types::SMALLINT             => 'int',
-            Types::BIGINT               => 'int|string',
-            Types::DECIMAL              => 'float|string',
-            Types::FLOAT                => 'float',
+            Types::SIMPLE_ARRAY => 'array|string',
+            Types::JSON         => 'array|string',
+            Types::BOOLEAN      => 'bool',
+            Types::INTEGER      => 'int',
+            Types::SMALLINT     => 'int',
+            Types::BIGINT       => 'int|string',
+            Types::DECIMAL      => 'float|string',
+            Types::FLOAT        => 'float',
         ];
         $args1 = '$tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []';
         $args2 = '$variadic_primary, $tableDescriptor = []';
@@ -1514,14 +1514,14 @@ class Database
         }
 
         $special_types = [
-            Types::SIMPLE_ARRAY         => 'array|string',
-            Types::JSON                 => 'array|string',
-            Types::BOOLEAN              => 'bool',
-            Types::INTEGER              => 'int',
-            Types::SMALLINT             => 'int',
-            Types::BIGINT               => 'int|string',
-            Types::DECIMAL              => 'float|string',
-            Types::FLOAT                => 'float',
+            Types::SIMPLE_ARRAY => 'array|string',
+            Types::JSON         => 'array|string',
+            Types::BOOLEAN      => 'bool',
+            Types::INTEGER      => 'int',
+            Types::SMALLINT     => 'int',
+            Types::BIGINT       => 'int|string',
+            Types::DECIMAL      => 'float|string',
+            Types::FLOAT        => 'float',
         ];
 
         $export = function ($value, $nest = 0, $parents = []) use (&$export) {
@@ -1565,7 +1565,7 @@ class Database
                     if (is_callable($converter)) {
                         $reftype = reflect_callable($converter)->getReturnType();
                     }
-                    else{
+                    else {
                         $reftype = (new \ReflectionMethod($type, 'convertToPHPValue'))->getReturnType();
                     }
                 }

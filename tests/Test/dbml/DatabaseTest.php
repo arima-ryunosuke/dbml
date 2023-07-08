@@ -2793,7 +2793,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     {
         $database = $database->context();
         $database->setAutoCastType([
-            'birthday'          => new class() extends AbstractType {
+            'birthday' => new class() extends AbstractType {
                 public function convertToPHPValue($value, AbstractPlatform $platform): \DateTimeImmutable
                 {
                     return parent::convertToPHPValue($value, $platform);
