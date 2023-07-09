@@ -24,6 +24,11 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.5
+
+- [feature] Paginator の shownPage をステートレスに変更
+- [feature] changeArrayReturning の改善
+
 ## 2.1.4
 
 - [feature] TableGateway の set スコープ対応
