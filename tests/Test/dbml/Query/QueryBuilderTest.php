@@ -364,10 +364,24 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
     function test_column_expression($builder)
     {
         $builder->column([
+            'test' => [
+                'id',
+                'mixed' => function ($row, $name = 'test.name', $data = 'data') { return "{$row['id']}-$name-$data"; },
+            ],
+        ]);
+        $this->assertEquals('SELECT test.id, test.name AS __dbml_auto_column_dependtest_name, test.data AS __dbml_auto_column_dependtest_data, NULL AS mixed FROM test', (string) $builder);
+        $this->assertEquals([
+            'id'    => '1',
+            'mixed' => '1-a-',
+        ], $builder->limit(1)->tuple());
+
+        $builder->reset()->column([
             'test1' => [
                 'piyo'          => function ($row) { return 'xx-' . $row['name1']; },
                 'name1'         => function ($v) { return 'ss_' . $v; },
                 'id,name1 idn1' => function ($id, $name) { return "$id-$name"; },
+                'idn2'          => function ($id = 'id', $name = 'name1') { return "$id-$name"; },
+                'idn3'          => function ($row, $name = 'name1') { return "{$row['idn2']}-" . strtoupper($name); },
                 'last'          => new Expression("'dbval'"),
             ],
         ]);
@@ -375,6 +389,8 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
             'name1' => 'ss_a',
             'piyo'  => 'xx-ss_a',
             'idn1'  => '1-a',
+            'idn2'  => '1-a',
+            'idn3'  => '1-a-A',
             'last'  => 'dbval',
         ], $builder->limit(1)->tuple());
 

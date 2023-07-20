@@ -845,8 +845,24 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             // Closure は callbacks に入れる
             elseif ($column instanceof \Closure) {
                 [$colalias, $colactuals] = Alias::split($key, $key);
+                $params = (new \ReflectionFunction($column))->getParameters();
+                $defaults = array_map(fn(\ReflectionParameter $p) => $p->isDefaultValueAvailable() && is_string($p->getDefaultValue()) ? $p->getDefaultValue() : null, $params);
+                if (array_all($defaults, 'is_null')) {
+                    $colactuals = split_noempty(',', $colactuals);
+                }
+                else {
+                    $colactuals = $defaults;
+                }
                 $args = [];
-                foreach (split_noempty(',', $colactuals) as $colactual) {
+                foreach ($colactuals as $colactual) {
+                    if ($colactual === null) {
+                        $args[] = null;
+                        continue;
+                    }
+                    if (strpos($colactual, '.') !== false) {
+                        [$prefix, $colactual] = explode('.', $colactual, 2);
+                        $prefix .= '.';
+                    }
                     if (isset($actuals[$colactual])) {
                         if ($colalias === $colactual) {
                             $result[] = $prefix . $colactual;
@@ -1741,6 +1757,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * | 21 | `['alias|typename' => 'column']`                 | 配列のキーをパイプでつなぐとその型に変換されて取得できる
      * | 22 | `['alias' => function($row){}]`                  | キーが存在しないカラム指定のクロージャは行全体が渡ってくるコールバックになる
      * | 25 | `['cname' => function($cname){}]`                | キーが存在するカラム指定のクロージャはカラム値が単一で渡ってくるコールバックになる
+     * | 26 | `['alias' => function($c1='id', $c2='name'){}]`  | クロージャの引数にデフォルト値が設定されている場合はそれぞれが個別で渡ってくるコールバックになる
      * | 27 | `function(){return function($v){return $v;};}`   | クロージャの亜種。クロージャを返すクロージャはそのままクロージャとして活きるのでメソッドのような扱いにできる
      * | 30 | `Gateway object`                                 | Gateway の表すテーブルとの {@link Database::subselect()} 相当の動作
      * | 31 | `['+alias' => Gateway object]`                   | Gateway の表すテーブルとの JOIN を表す
@@ -3208,7 +3225,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 if ($args) {
                     $args2 = [];
                     foreach ($args as $arg) {
-                        $args2[] = $parent_row[$arg];
+                        $args2[] = $arg === null ? $parent_row : $parent_row[$arg];
                     }
                     $parent_row[$name] = $callback(...$args2);
                 }
