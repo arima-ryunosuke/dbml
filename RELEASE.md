@@ -24,6 +24,10 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.6
+
+- [feature] クロージャのデフォルト引数を自動で依存カラムに加える機能
+
 ## 2.1.5
 
 - [feature] Paginator の shownPage をステートレスに変更
