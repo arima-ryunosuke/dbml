@@ -2712,7 +2712,7 @@ if (!function_exists('ryunosuke\\dbml\\optional')) {
      *
      * @template T
      * @param T|null $object オブジェクト
-     * @param ?string $expected 期待するクラス名。指定した場合は is_a される
+     * @param null|string|T $expected 期待するクラス名。指定した場合は is_a される
      * @return T $object がオブジェクトならそのまま返し、違うなら NullObject を返す
      */
     function optional($object, $expected = null)
@@ -4040,7 +4040,7 @@ if (!function_exists('ryunosuke\\dbml\\csv_import')) {
                     if ($structure) {
                         $query = [];
                         foreach ($headers as $i => $header) {
-                            $query[] =  rawurlencode($header). "=" . rawurlencode($row[$i]);
+                            $query[] = rawurlencode($header) . "=" . rawurlencode($row[$i]);
                         }
                         $row = parse_query(implode('&', $query), '&', PHP_QUERY_RFC3986);
                         // csv の仕様上、空文字を置かざるを得ないが、数値配列の場合は空にしたいことがある
@@ -8542,17 +8542,19 @@ if (!function_exists('ryunosuke\\dbml\\pascal_case')) {
      * Example:
      * ```php
      * that(pascal_case('this_is_a_pen'))->isSame('ThisIsAPen');
+     * that(pascal_case('this_is-a-pen', '-_'))->isSame('ThisIsAPen');
      * ```
      *
      * @package ryunosuke\Functions\Package\strings
      *
      * @param string $string 対象文字列
-     * @param string $delimiter デリミタ
+     * @param string $delimiter デリミタ（複数可）
      * @return string 変換した文字列
      */
     function pascal_case($string, $delimiter = '_')
     {
-        return strtr(ucwords(strtr($string, [$delimiter => ' '])), [' ' => '']);
+        $replacemap = array_combine(str_split($delimiter), array_pad([], strlen($delimiter), ' '));
+        return strtr(ucwords(strtr($string, $replacemap)), [' ' => '']);
     }
 }
 
@@ -8631,17 +8633,21 @@ if (!function_exists('ryunosuke\\dbml\\snake_case')) {
      * Example:
      * ```php
      * that(snake_case('ThisIsAPen'))->isSame('this_is_a_pen');
+     * that(snake_case('URLEncode', '-'))->isSame('u-r-l-encode');     // デフォルトでは略語も分割される
+     * that(snake_case('URLEncode', '-', true))->isSame('url-encode'); // 第3引数 true で略語は維持される
      * ```
      *
      * @package ryunosuke\Functions\Package\strings
      *
      * @param string $string 対象文字列
      * @param string $delimiter デリミタ
+     * @param bool $keep_abbr すべて大文字の単語を1単語として扱うか
      * @return string 変換した文字列
      */
-    function snake_case($string, $delimiter = '_')
+    function snake_case($string, $delimiter = '_', $keep_abbr = false)
     {
-        return ltrim(strtolower(preg_replace('/[A-Z]/', $delimiter . '\0', $string)), $delimiter);
+        $pattern = $keep_abbr ? '/[A-Z]([A-Z](?![a-z]))*/' : '/[A-Z]/';
+        return ltrim(strtolower(preg_replace($pattern, $delimiter . '\0', $string)), $delimiter);
     }
 }
 
