@@ -283,6 +283,35 @@ select 4, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
         ], file($logfile, FILE_IGNORE_NEW_LINES));
     }
 
+    function test_transaction()
+    {
+        $logs = [];
+        $logger = new Logger([
+            'destination' => function ($log) use (&$logs) { $logs[] = $log; },
+            'transaction' => true,
+            'metadata'    => [],
+        ]);
+
+        $logger->info('ignore');
+        $logger->info('begin');
+        $logger->info('logging1');
+        $logger->info('commit');
+        $logger->info('ignore');
+        $logger->info('begin');
+        $logger->info('logging2');
+        $logger->info('rollback');
+        $logger->info('ignore');
+
+        $this->assertEquals([
+            "begin",
+            "logging1",
+            "commit",
+            "begin",
+            "logging2",
+            "rollback",
+        ], $logs);
+    }
+
     function test_metadata_default()
     {
         $logs = [];

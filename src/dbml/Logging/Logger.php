@@ -85,6 +85,9 @@ class Logger extends AbstractLogger
     /** @var string ログレベル */
     private $level;
 
+    /** @var bool トランザクション中 */
+    private $transacting;
+
     /** @var resource|\Closure ログハンドル */
     private $handle;
 
@@ -105,6 +108,8 @@ class Logger extends AbstractLogger
         return [
             // ログレベル
             'level'       => LogLevel::INFO,
+            // トランザクションだけをログるか（level >= INFO 以上である必要がある）
+            'transaction' => false,
             // 出力場所（string/resource/Closure/null）。null はログらない
             'destination' => null,
             // $sql, $params, $types の文字列化コールバック
@@ -285,6 +290,8 @@ class Logger extends AbstractLogger
             $buffer = false;
         }
 
+        $this->transacting = false;
+
         $this->handle = is_string($destination) ? fopen($destination, 'ab') : $destination;
 
         $this->bufferSize = 0;
@@ -350,6 +357,14 @@ class Logger extends AbstractLogger
             return;
         }
 
+        if (strcasecmp($message, 'BEGIN') === 0) {
+            $this->transacting = true;
+        }
+
+        if (!$this->transacting && $this->getUnsafeOption('transaction')) {
+            return;
+        }
+
         $sql = $context['sql'] ?? $message;
         $params = array_merge($context['params'] ?? []);
         $types = $context['types'] ?? [];
@@ -393,6 +408,10 @@ class Logger extends AbstractLogger
                 $this->arrayBuffer = [];
                 $this->bufferSize = 0;
             }
+        }
+
+        if (strcasecmp($message, 'COMMIT') === 0 || strcasecmp($message, 'ROLLBACK') === 0) {
+            $this->transacting = false;
         }
     }
 }
