@@ -2309,6 +2309,11 @@ class Database
      * 外部キーをまとめて追加する
      *
      * addForeignKey を複数呼ぶのとほぼ等しいが、遅延実行されて必要になったときに追加される。
+     * options で onUpdate/Delete や条件付き外部キーとして condition が与えられる。
+     * onDelete CASCADE はアプリレイヤーで可能な限りエミュレーションされる（onUpdate は未対応）。
+     * condition を指定すると条件付き外部キーとなり、JOIN するときに暗黙的に条件が含まれるようになる（subselect 等も同様）。
+     * これは「マスターテーブル」のようなごちゃまぜテーブルに対してテーブルごとの外部キーを張らざるを得ない状況を想定している。
+     * condition は現在のところ文字列での指定しかできない。
      *
      * ```php
      * # 下記のような配列を与える
@@ -2318,6 +2323,10 @@ class Database
      *             '外部キー名' => [
      *                 'ローカルカラム名1' => '外部カラム名1',
      *                 'ローカルカラム名2' => '外部カラム名2',
+     *                 'options' => [
+     *                     'onDelete'  => 'CASCADE',                   // CASCADE 動作はアプリでエミュレーションされる
+     *                     'condition' => ['colname' => 'cond value'], // join や subselect 時に自動付与される条件となる
+     *                 ],
      *             ],
      *             // 別キー名に対して上記の構造の繰り返しができる
      *         ],
@@ -2335,8 +2344,8 @@ class Database
         $result = [];
         foreach ($relations as $localTable => $foreignTables) {
             foreach ($foreignTables as $foreignTable => $relation) {
-                foreach ($relation as $fkname => $columnsMap) {
-                    $result[] = $this->getSchema()->addForeignKeyLazy($localTable, $foreignTable, $columnsMap, is_int($fkname) ? null : $fkname);
+                foreach ($relation as $fkname => $fkdata) {
+                    $result[] = $this->getSchema()->addForeignKeyLazy($localTable, $foreignTable, $fkdata, is_int($fkname) ? null : $fkname);
                 }
             }
         }
@@ -2351,13 +2360,15 @@ class Database
      *
      * @param string $localTable 外部キー定義テーブル名
      * @param string $foreignTable 参照先テーブル名
-     * @param string|array $columnsMap 外部キーカラム
+     * @param string|array $fkdata 外部キー情報
      * @param string|null $fkname 外部キー名。省略時は自動命名
      * @return ForeignKeyConstraint 追加した外部キーオブジェクト
      */
-    public function addForeignKey($localTable, $foreignTable, $columnsMap, $fkname = null)
+    public function addForeignKey($localTable, $foreignTable, $fkdata, $fkname = null)
     {
-        $columnsMap = array_rekey(arrayize($columnsMap), function ($k, $v) { return is_int($k) ? $v : $k; });
+        $fkdata = arrayize($fkdata);
+        $options = array_unset($fkdata, 'options', []) + ['virtual' => true];
+        $columnsMap = array_rekey($fkdata, fn($k, $v) => trim(is_int($k) ? $v : $k));
 
         // 省略時は自動命名
         if (!$fkname) {
@@ -2365,7 +2376,7 @@ class Database
         }
 
         // 外部キーオブジェクトの生成
-        $fk = new ForeignKeyConstraint(array_keys($columnsMap), $foreignTable, array_values($columnsMap), $fkname);
+        $fk = new ForeignKeyConstraint(array_keys($columnsMap), $foreignTable, array_values($columnsMap), $fkname, $options);
 
         return $this->getSchema()->addForeignKey($fk, $localTable);
     }
@@ -6133,6 +6144,8 @@ class Database
     /**
      * DELETE 構文
      *
+     * 仮想外部キーの CASCADE や SET NULL の実行も行われる（1階層のみ）。
+     *
      * ```php
      * # シンプルに1行 DELETE
      * $db->delete('tablename', ['id' => 1]);
@@ -6165,13 +6178,48 @@ class Database
         }
 
         $tableName = $this->convertTableName($tableName);
+        $prewhere = $this->_prewhere($tableName, $identifier);
+
+        $schema = $this->getSchema();
+        $cascades = [];
+        $setnulls = [];
+        $sets = [];
+        $fkeys = $schema->getForeignKeys($tableName, null);
+        foreach ($fkeys as $fkey) {
+            // 仮想でない通常の外部キーであれば RDBMS 側で削除・更新してくれるが、仮想外部キーは能動的に実行する必要がある
+            if (@$fkey->getOption('virtual') === true) {
+                $onDelete = strtoupper($fkey->onDelete());
+                if ($onDelete === 'CASCADE') {
+                    $ltable = first_key($schema->getForeignTable($fkey));
+                    $cascades[$ltable] = "<$ltable:{$fkey->getName()}";
+                }
+                if ($onDelete === 'SET NULL') {
+                    $ltable = first_key($schema->getForeignTable($fkey));
+                    $setnulls[$ltable] = "<$ltable:{$fkey->getName()}";
+                    $sets = array_strpad(array_fill_keys($fkey->getLocalColumns(), null), "$ltable.");
+                }
+            }
+        }
+
+        $affecteds = [];
+        if ($cascades){
+            $select = $this->select([$tableName => array_values($cascades)])->where($prewhere);
+            $affecteds[] = $this->executeAffect($this->getCompatiblePlatform()->convertDeleteQuery($select, array_keys($cascades)), $select->getParams());
+        }
+        if ($setnulls){
+            $select = $this->select([$tableName => array_values($setnulls)])->where($prewhere)->set($sets);
+            $affecteds[] = $this->executeAffect($this->getCompatiblePlatform()->convertUpdateQuery($select), $select->getParams());
+        }
 
         $params = [];
-        $criteria = $this->whereInto($this->_prewhere($tableName, $identifier), $params);
+        $criteria = $this->whereInto($prewhere, $params);
 
         $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
         $affected = $this->executeAffect("DELETE {$ignore}FROM $tableName" . ($criteria ? ' WHERE ' . implode(' AND ', Adhoc::wrapParentheses($criteria)) : ''), $params);
         if (!is_int($affected)) {
+            if ($affecteds) {
+                return array_merge($affecteds, (array) $affected);
+            }
             return $affected;
         }
 
@@ -6228,8 +6276,7 @@ class Database
         $schema = $this->getSchema();
         $fkeys = $schema->getForeignKeys($tableName, null);
         foreach ($fkeys as $fkey) {
-            $action = strtoupper($fkey->getOption('onDelete') ?: 'RESTRICT');
-            if (in_array($action, ['NO ACTION', 'RESTRICT'])) {
+            if ($fkey->onDelete() === null) {
                 $ltable = first_key($schema->getForeignTable($fkey));
                 $notexists = $this->select($ltable);
                 $notexists->setSubwhere($tableName, $aliasName, $fkey->getName());
@@ -6237,29 +6284,7 @@ class Database
             }
         }
 
-        if (isset($originalBuilder)) {
-            return $this->delete($originalBuilder, $identifier);
-        }
-
-        $params = [];
-        $criteria = $this->whereInto($identifier, $params);
-
-        $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $affected = $this->executeAffect("DELETE {$ignore}FROM $tableName" . ($criteria ? ' WHERE ' . implode(' AND ', Adhoc::wrapParentheses($criteria)) : ''), $params);
-        if (!is_int($affected)) {
-            return $affected;
-        }
-
-        if ($affected !== 0 && array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, arrayize($identifier));
-        }
-        if ($affected === 0 && array_get($opt, 'primary') === 2) {
-            return [];
-        }
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
-        }
-        return $affected;
+        return $this->delete($originalBuilder ?? $tableName, $identifier, $opt);
     }
 
     /**
@@ -6301,12 +6326,11 @@ class Database
         $tableName = $this->convertTableName($tableName);
         $identifier = $this->_prewhere($tableName, $identifier);
 
-        $affected = [];
+        $affecteds = [];
         $schema = $this->getSchema();
         $fkeys = $schema->getForeignKeys($tableName, null);
         foreach ($fkeys as $fkey) {
-            $action = strtoupper($fkey->getOption('onDelete') ?: 'RESTRICT');
-            if (in_array($action, ['NO ACTION', 'RESTRICT'])) {
+            if ($fkey->onDelete() === null) {
                 $ltable = first_key($schema->getForeignTable($fkey));
                 $pselect = $this->select([$tableName => $fkey->getForeignColumns()], $identifier);
                 $subwhere = [];
@@ -6320,29 +6344,16 @@ class Database
                     $ckey = implode(',', $fkey->getLocalColumns());
                     $subwhere["($ckey)"] = $pselect;
                 }
-                $affected = array_merge($affected, (array) $this->destroy($ltable, $subwhere, $opt));
+                $affecteds = array_merge($affecteds, (array) $this->destroy($ltable, $subwhere, array_pickup($opt, ['in', 'ignore'])));
             }
         }
 
-        $params = [];
-        $criteria = $this->whereInto($identifier, $params);
-
-        $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $affected[] = $this->executeAffect("DELETE {$ignore}FROM $tableName" . ($criteria ? ' WHERE ' . implode(' AND ', Adhoc::wrapParentheses($criteria)) : ''), $params);
-
+        $affected = $this->delete($tableName, $identifier, $opt);
         if ($this->getUnsafeOption('dryrun')) {
-            return $affected;
+            return array_merge($affecteds, (array) $affected);
         }
-
-        $affected = array_sum($affected);
-        if ($affected !== 0 && array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, arrayize($identifier));
-        }
-        if ($affected === 0 && array_get($opt, 'primary') === 2) {
-            return [];
-        }
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
+        if (is_int($affected)) {
+            return array_sum([...$affecteds, $affected]);
         }
         return $affected;
     }

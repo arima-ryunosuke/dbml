@@ -31,6 +31,7 @@ use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\Comment;
 use ryunosuke\Test\Entity\ManagedComment;
+use ryunosuke\Test\Platforms\SqlitePlatform;
 use function ryunosuke\dbml\array_order;
 use function ryunosuke\dbml\array_remove;
 use function ryunosuke\dbml\mkdir_p;
@@ -999,6 +1000,169 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $fkeys = $database->getSchema()->getTableForeignKeys('t_comment');
         $this->assertEquals(['fk_articlecomment'], array_keys($fkeys));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_addRelation_condition($database)
+    {
+        $fkeys = $database->addRelation([
+            'tran_table1' => [
+                'master_table' => [
+                    'auto_1tomaster' => [
+                        'master_id' => 'subid',
+                        'options'   => [
+                            'onUpdate'  => 'CASCADE',
+                            'onDelete'  => 'CASCADE',
+                            'condition' => ['category' => 'tran1'],
+                        ],
+                    ],
+                ],
+            ],
+            'tran_table2' => [
+                'master_table' => [
+                    'auto_2tomaster' => [
+                        'master_id' => 'subid',
+                        'options'   => [
+                            'onUpdate'  => 'SET NULL',
+                            'onDelete'  => 'SET NULL',
+                            'condition' => ['category' => 'tran2'],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+        $this->assertEquals(['auto_1tomaster', 'auto_2tomaster'], $fkeys);
+
+        $fk1 = $database->getSchema()->getTableForeignKeys('tran_table1')['auto_1tomaster'];
+        $this->assertEquals('CASCADE', $fk1->getOption('onUpdate'));
+        $this->assertEquals('CASCADE', $fk1->getOption('onDelete'));
+        $this->assertEquals(['category' => 'tran1'], $fk1->getOption('condition'));
+        $this->assertEquals(true, $fk1->getOption('virtual'));
+
+        $fk2 = $database->getSchema()->getTableForeignKeys('tran_table2')['auto_2tomaster'];
+        $this->assertEquals('SET NULL', $fk2->getOption('onUpdate'));
+        $this->assertEquals('SET NULL', $fk2->getOption('onDelete'));
+        $this->assertEquals(['category' => 'tran2'], $fk2->getOption('condition'));
+        $this->assertEquals(true, $fk2->getOption('virtual'));
+
+        // subwhere
+        $rows = $database->selectArray([
+            'master_table' => '*',
+        ], [
+            $database->subexists('tran_table1'),
+            'subid' => 10,
+        ]);
+        $this->assertEquals([
+            [
+                "category" => "tran1",
+                "subid"    => "10",
+            ],
+        ], $rows);
+
+        // join
+        $rows = $database->selectArray([
+            'master_table' => [
+                '*',
+                '+tran_table1' => ['*'],
+            ],
+        ], [
+            'subid' => 10,
+        ]);
+        $this->assertEquals([
+            [
+                "category"  => "tran1",
+                "subid"     => "10",
+                "id"        => "101",
+                "master_id" => "10",
+            ],
+            [
+                "category"  => "tran1",
+                "subid"     => "10",
+                "id"        => "201",
+                "master_id" => "10",
+            ],
+        ], $rows);
+
+        // subtable
+        $rows = $database->selectArray([
+            'master_table' => [
+                'tran_table1 as t1' => ['*'],
+                't2'                => $database->subselectArray('tran_table2')->setLazyMode('fetch'),
+                't2tuple'           => $database->subselectTuple('tran_table2', [], [], 1),
+            ],
+        ], [
+            'subid' => 10,
+        ]);
+        $this->assertEquals([
+            [
+                "t1"       => [
+                    101 => [
+                        "id"        => "101",
+                        "master_id" => "10",
+                    ],
+                    201 => [
+                        "id"        => "201",
+                        "master_id" => "10",
+                    ],
+                ],
+                "t2"       => [],
+                "t2tuple"  => false,
+                "category" => "tran1",
+                "subid"    => "10",
+            ],
+            [
+                "t1"       => [],
+                "t2"       => [
+                    [
+                        "id"        => "101",
+                        "master_id" => "10",
+                    ],
+                    [
+                        "id"        => "201",
+                        "master_id" => "10",
+                    ],
+                ],
+                "t2tuple"  => [
+                    "id"        => "101",
+                    "master_id" => "10",
+                ],
+                "category" => "tran2",
+                "subid"    => "10",
+            ],
+            [
+                "t1"       => [],
+                "t2"       => [],
+                "t2tuple"  => false,
+                "category" => "tran3",
+                "subid"    => "10",
+            ],
+        ], $rows);
+
+        if ($database->getPlatform() instanceof SqlitePlatform || $database->getPlatform() instanceof MySQLPlatform) {
+            $sqls = $database->dryrun()->delete('master_table', [
+                'subid' => 10,
+            ]);
+            $this->assertEquals([
+                "DELETE tran_table1 FROM master_table LEFT JOIN tran_table1 ON (master_table.category = 'tran1') AND (tran_table1.master_id = master_table.subid) WHERE subid = '10'",
+                "UPDATE master_table LEFT JOIN tran_table2 ON (master_table.category = 'tran2') AND (tran_table2.master_id = master_table.subid) SET tran_table2.master_id = NULL WHERE subid = '10'",
+                "DELETE FROM master_table WHERE subid = '10'",
+            ], $sqls);
+
+            if ($database->getPlatform() instanceof MySQLPlatform) {
+                $affected = $database->delete('master_table', [
+                    'subid' => 10,
+                ]);
+                // 通常外部キーと同様に affected row には換算されない
+                $this->assertEquals(3, $affected);
+                // tran_table1 は CASCADE なので消えている
+                $this->assertEquals([], $database->selectLists('tran_table1.id', ['master_id' => 10]));
+                // tran_table2 は SET NULL なので NULL
+                $this->assertEquals([101, 201], $database->selectLists('tran_table2.id', ['master_id' => null]));
+            }
+        }
     }
 
     /**

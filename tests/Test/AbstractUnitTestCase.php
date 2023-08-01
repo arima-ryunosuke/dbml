@@ -406,6 +406,27 @@ abstract class AbstractUnitTestCase extends TestCase
                             [],
                             [new ForeignKeyConstraint(['id'], 'horizontal1', ['id'], 'fkey_horizontal')]
                         ),
+                        new Table('master_table',
+                            [
+                                new Column('category', Type::getType('string')),
+                                new Column('subid', Type::getType('integer')),
+                            ],
+                            [new Index('PRIMARY', ['category', 'subid'], true, true)],
+                        ),
+                        new Table('tran_table1',
+                            [
+                                new Column('id', Type::getType('integer')),
+                                new Column('master_id', Type::getType('integer'), ['notnull' => false]),
+                            ],
+                            [new Index('PRIMARY', ['id'], true, true)],
+                        ),
+                        new Table('tran_table2',
+                            [
+                                new Column('id', Type::getType('integer')),
+                                new Column('master_id', Type::getType('integer'), ['notnull' => false]),
+                            ],
+                            [new Index('PRIMARY', ['id'], true, true)],
+                        ),
                         new Table('heavy',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
@@ -621,6 +642,9 @@ abstract class AbstractUnitTestCase extends TestCase
                 $db->truncate('multiunique');
                 $db->truncate('misctype');
                 $db->truncate('misctype_child');
+                $db->truncate('master_table');
+                $db->truncate('tran_table1');
+                $db->truncate('tran_table2');
                 $db->delete('foreign_c1');
                 $db->delete('foreign_c2');
                 $db->delete('foreign_p');
@@ -698,6 +722,22 @@ abstract class AbstractUnitTestCase extends TestCase
                             'uc2'  => $i * 100,
                         ]);
                         $char++;
+                    }
+                    foreach ([1, 2, 3] as $category) {
+                        for ($i = 1; $i <= 10; $i++) {
+                            $db->insert('master_table', [
+                                'category' => "tran$category",
+                                'subid'    => $i * 10,
+                            ]);
+                            if (in_array($category, [1, 2])) {
+                                foreach (range(1, 2) as $j) {
+                                    $db->insert("tran_table$category", [
+                                        'id'        => $i + $j * 100,
+                                        'master_id' => $i * 10,
+                                    ]);
+                                }
+                            }
+                        }
                     }
                     $db->insert('t_article', [
                         'article_id' => 1,

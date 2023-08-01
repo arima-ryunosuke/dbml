@@ -452,11 +452,11 @@ class Schema
      *
      * @param string $table_name1 テーブル名1
      * @param string $table_name2 テーブル名2
-     * @param ?string $fkeyname 制約名。未指定時は唯一の外部キー（複数ある場合は例外）
+     * @param ?string $fkeyname 制約名。未指定時は唯一の外部キー（複数ある場合は例外）。確定した外部キーオブジェクトが格納される
      * @param ?bool $direction キー（$table_name1 -> $table_name2 なら true）の方向が格納される
      * @return array [table1_column => table2_column]
      */
-    public function getForeignColumns($table_name1, $table_name2, $fkeyname = null, &$direction = null)
+    public function getForeignColumns($table_name1, $table_name2, &$fkeyname = null, &$direction = null)
     {
         $direction = null;
         if (!$this->hasTable($table_name1) || !$this->hasTable($table_name2)) {
@@ -473,15 +473,15 @@ class Schema
 
                 // 外部キーがなくても中間テーブルを介した関連があるかもしれない
                 if ($fcount === 0) {
-                    $ikeys = $this->getIndirectlyColumns($table_name1, $table_name2);
+                    $ikeys = $this->getIndirectlyColumns($table_name1, $table_name2, $fkey);
                     if ($ikeys) {
-                        return ['direction' => false, 'columns' => $ikeys];
+                        return ['direction' => false, 'columns' => $ikeys, 'fkey' => $fkey];
                     }
-                    $ikeys = $this->getIndirectlyColumns($table_name2, $table_name1);
+                    $ikeys = $this->getIndirectlyColumns($table_name2, $table_name1, $fkey);
                     if ($ikeys) {
-                        return ['direction' => true, 'columns' => array_flip($ikeys)];
+                        return ['direction' => true, 'columns' => array_flip($ikeys), 'fkey' => $fkey];
                     }
-                    return ['direction' => null, 'columns' => []];
+                    return ['direction' => null, 'columns' => [], 'fkey' => null];
                 }
 
                 // キー指定がないなら唯一のものを、あるならそれを取得
@@ -509,10 +509,11 @@ class Schema
                     $keys = $fkey->getForeignColumns();
                     $vals = $fkey->getLocalColumns();
                 }
-                return ['direction' => $direction, 'columns' => array_combine($keys, $vals)];
+                return ['direction' => $direction, 'columns' => array_combine($keys, $vals), 'fkey' => $fkey];
             });
         }
 
+        $fkeyname = $this->foreignColumns[$cacheid]['fkey'];
         $direction = $this->foreignColumns[$cacheid]['direction'];
         return $this->foreignColumns[$cacheid]['columns'];
     }
@@ -524,16 +525,18 @@ class Schema
      *
      * @param string $localTable 外部キー定義テーブル名
      * @param string $foreignTable 参照先テーブル名
-     * @param string|array $columnsMap 外部キーカラム
+     * @param string|array $fkdata 外部キー情報
      * @param string|null $fkname 外部キー名。省略時は自動命名
      * @return string 追加する外部キー名
      */
-    public function addForeignKeyLazy($localTable, $foreignTable, $columnsMap, $fkname = null)
+    public function addForeignKeyLazy($localTable, $foreignTable, $fkdata, $fkname = null)
     {
         $fkname = $fkname ?? ($localTable . '_' . $foreignTable . '_' . count($this->lazyForeignKeys[$localTable] ?? []));
-        $this->lazyForeignKeys[$localTable][$fkname] = function () use ($localTable, $foreignTable, $columnsMap, $fkname) {
-            $columnsMap = array_rekey(arrayize($columnsMap), function ($k, $v) { return is_int($k) ? $v : $k; });
-            $fk = new ForeignKeyConstraint(array_keys($columnsMap), $foreignTable, array_values($columnsMap), $fkname);
+        $this->lazyForeignKeys[$localTable][$fkname] = function () use ($localTable, $foreignTable, $fkdata, $fkname) {
+            $fkdata = arrayize($fkdata);
+            $options = array_unset($fkdata, 'options', []) + ['virtual' => true];
+            $columnsMap = array_rekey($fkdata, fn($k, $v) => trim(is_int($k) ? $v : $k));
+            $fk = new ForeignKeyConstraint(array_keys($columnsMap), $foreignTable, array_values($columnsMap), $fkname, $options);
             return [$fk, $localTable];
         };
         return $fkname;
@@ -666,13 +669,14 @@ class Schema
      *
      * @param string $to_table 向かうテーブル名（被参照外部キー）
      * @param string $from_table 元テーブル名（参照外部キー）
+     * @param ?ForeignKeyConstraint $fkey 確定した外部キーが格納される
      * @return array [lcolmun => fcolumn]
      */
-    public function getIndirectlyColumns($to_table, $from_table)
+    public function getIndirectlyColumns($to_table, $from_table, &$fkey = null)
     {
         $result = [];
-        foreach ($this->getTableForeignKeys($from_table) as $fkey) {
-            foreach ($fkey->getLocalColumns() as $lcolumn) {
+        foreach ($this->getTableForeignKeys($from_table) as $fkey2) {
+            foreach ($fkey2->getLocalColumns() as $lcolumn) {
                 // 外部キーカラムを一つづつ辿って
                 $routes = $this->followColumnName($to_table, $from_table, $lcolumn);
 
@@ -680,6 +684,7 @@ class Schema
                 $columns = array_unique($routes);
                 if (count($columns) === 1) {
                     $result[$lcolumn] = reset($columns);
+                    $fkey = $fkey2;
                 }
             }
         }

@@ -4,6 +4,7 @@ namespace ryunosuke\dbml\Query;
 
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Gateway\TableGateway;
@@ -319,6 +320,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
     /** @var array 関連カラム */
     private $lazyColumns = [];
+
+    /** @var array 束縛条件 */
+    private $lazyCondition = [];
 
     /** @var bool|int クエリを投げると同時に limit を外した件数を取得するか */
     private $rowcount = false;
@@ -710,13 +714,15 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             // 上記で確定しなかったら相関のある外部キーを漁る
             if (!isset($fcols)) {
                 $from = $from ?? array_find($subbuiler->getFromPart(), function ($from) use ($table) {
-                    $fcols = $this->database->getSchema()->getForeignColumns($table, $from['table'], $from['fkeyname']);
+                    $fkey = $from['fkeyname'];
+                    $fcols = $this->database->getSchema()->getForeignColumns($table, $from['table'], $fkey);
                     if ($fcols) {
                         return $from;
                     }
                 }, false);
+                $fkey = $from['fkeyname'] ?? $parsed->fkeyname;
                 $fcols = $from
-                    ? $this->database->getSchema()->getForeignColumns($table, $from['table'], $from['fkeyname'] ?? $parsed->fkeyname)
+                    ? $this->database->getSchema()->getForeignColumns($table, $from['table'], $fkey)
                     : null;
             }
 
@@ -736,6 +742,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             $subbuiler->lazyMode = $subbuiler->lazyMode ?? $this->getDefaultLazyMode();
             $subbuiler->lazyParent = Database::AUTO_PRIMARY_KEY . strtolower($name);
             $subbuiler->lazyColumns = $lazy_columns;
+            $subbuiler->lazyCondition = @optional($fkey ?? null, ForeignKeyConstraint::class)->getOption('condition') ?? [];
             $subbuiler->sqlParts['select'][] = $concatPrimary(Database::AUTO_PARENT_KEY, array_keys($lazy_columns));
 
             // 「主キーから外部キーを差っ引いたものが空」はすなわち「親との結合」とみなすことができる
@@ -1212,13 +1219,26 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $this->detectAutoOrder(true);
 
         // 後処理クロージャ（親カラムを参照して入れたり不要なカラムを伏せたり）
-        $arrayable = Database::METHODS[$this->lazyMethod]['keyable'] !== null;
+        $keyable = Database::METHODS[$this->lazyMethod]['keyable'];
         $entityable = Database::METHODS[$this->lazyMethod]['entity'];
-        $cleanup = function ($crows, $n) use ($arrayable, $entityable, $pcolumns, $parents) {
+        $cleanup = function ($crows, $n) use ($keyable, $entityable, $pcolumns, $parents) {
             if (!$crows) {
                 return $crows;
             }
-            if ($arrayable) {
+            if ($keyable !== null) {
+                if ($this->lazyCondition) {
+                    $crows = array_filter($crows, function ($crow) use ($parents, $n) {
+                        foreach ($this->lazyCondition as $pcol => $pval) {
+                            if (strcmp($parents[$n][$pcol], $pval) !== 0) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+                    if ($keyable === false) {
+                        $crows = array_values($crows);
+                    }
+                }
                 if ($entityable) {
                     foreach ($crows as $k => $crow) {
                         foreach ($pcolumns as $alias => $pcolumn) {
@@ -1230,6 +1250,11 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
             else {
                 if ($entityable) {
+                    foreach ($this->lazyCondition as $pcol => $pval) {
+                        if (strcmp($parents[$n][$pcol], $pval) !== 0) {
+                            return false;
+                        }
+                    }
                     foreach ($pcolumns as $alias => $pcolumn) {
                         $crows[$alias] = $parents[$n][$pcolumn];
                     }
@@ -1520,7 +1545,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }, []));
         }
         if ($fkeyname !== '') {
-            $mapper = array_merge($mapper, $this->database->getSchema()->getForeignColumns($table, $from['table'], $fkeyname));
+            $fkey = $fkeyname;
+            $mapper = array_merge($mapper, $this->database->getSchema()->getForeignColumns($table, $from['table'], $fkey));
         }
 
         if (!$mapper) {
@@ -1536,7 +1562,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $this->subwhere = "$table:$fkeyname";
         $pre_p = $alias ?: $table;
         $pre_c = $from['alias'];
-        $this->andWhere(array_sprintf($mapper, "$pre_c.%2\$s = $pre_p.%1\$s"));
+        $this->andWhere(array_merge(
+            @optional($fkey ?? null, ForeignKeyConstraint::class)->getOption('condition') ?? [],
+            array_sprintf($mapper, "$pre_c.%2\$s = $pre_p.%1\$s"),
+        ));
 
         if ($this->submethod === 'query') {
             if (!$this->sqlParts['select']) {
@@ -2101,9 +2130,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         // $fkeyname, $fromAlias の解決（大抵はどちらか一方が決まればどちらか一方も決まる）
         if (empty($fromAlias)) {
             if ($fkeyname !== '') {
-                $fkey = $fkeyname === null ? [] : $schema->getForeignTable($fkeyname);
-                if ($fkey) {
-                    [$local, $foreign] = first_keyvalue($fkey);
+                $ftable = $fkeyname === null ? [] : $schema->getForeignTable($fkeyname);
+                if ($ftable) {
+                    [$local, $foreign] = first_keyvalue($ftable);
                     if ($table === $local) {
                         $fromAlias = array_search($foreign, $froms, true);
                     }
@@ -2117,7 +2146,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                             continue;
                         }
                         $fromAlias = $falias;
-                        if ($schema->getForeignColumns($table, $from, $fkeyname)) {
+                        $fkey = $fkeyname;
+                        if ($schema->getForeignColumns($table, $from, $fkey)) {
                             break;
                         }
                     }
@@ -2140,7 +2170,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $fcols = [];
         $direction = null;
         if ($type !== null && $fkeyname !== '') {
-            $fcols = $schema->getForeignColumns($table, $fromTable, $fkeyname, $direction) ?: [];
+            $fkey = $fkeyname;
+            $fcols = $schema->getForeignColumns($table, $fromTable, $fkey, $direction) ?: [];
             if (!$fcols && $fromTable !== null && "$fkeyname" !== "") {
                 throw new \UnexpectedValueException("foreign key '$fkeyname' is not exists between $table<->$fromTable.");
             }
@@ -2152,14 +2183,13 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
         if ($fromAlias) {
             foreach ($stdclasses as $cond) {
-                $condition = array_merge(array_sprintf((array) $cond, function ($v, $k) use ($joinAlias, $fromAlias) {
-                    return sprintf('%s.%s = %s.%s', $joinAlias, is_int($k) ? $v : $k, $fromAlias, $v);
-                }), $condition);
+                $condition = array_merge(array_sprintf((array) $cond, fn($v, $k) => sprintf('%s.%s = %s.%s', $joinAlias, is_int($k) ? $v : $k, $fromAlias, $v)), $condition);
             }
         }
-        $condition = array_merge(array_sprintf($fcols, function ($v, $k) use ($joinAlias, $fromAlias) {
-            return sprintf('%s.%s = %s.%s', $joinAlias, $v, $fromAlias, $k);
-        }), Adhoc::modifier($joinAlias, $columns, $condition));
+        $condition = array_merge(
+            array_strpad(@optional($fkey ?? null, ForeignKeyConstraint::class)->getOption('condition') ?? [], "$fromAlias."),
+            array_sprintf($fcols, fn($v, $k) => sprintf('%s.%s = %s.%s', $joinAlias, $v, $fromAlias, $k)), Adhoc::modifier($joinAlias, $columns, $condition),
+        );
 
         // $type の解決
         if (strcasecmp($type ?? '', 'AUTO') === 0) {
@@ -3850,6 +3880,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $this->lazyMethod = null;
         $this->lazyParent = null;
         $this->lazyColumns = [];
+        $this->lazyCondition = [];
 
         $this->resetQueryPart();
 

@@ -380,13 +380,20 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $schema->addTable($foreign1);
         $schema->addTable($foreign2);
 
-        $this->assertEquals(['id' => 'foreign1'], $schema->getForeignColumns('metatest', 'foreign1'));
-        $this->assertEquals(['id' => 'foreign2'], $schema->getForeignColumns('metatest', 'foreign2'));
+        $fkey = null;
+        $this->assertEquals(['id' => 'foreign1'], $schema->getForeignColumns('metatest', 'foreign1', $fkey));
+        $this->assertEquals('FK_1', $fkey->getName());
+        $fkey = null;
+        $this->assertEquals(['id' => 'foreign2'], $schema->getForeignColumns('metatest', 'foreign2', $fkey));
+        $this->assertEquals('FK_2', $fkey->getName());
         $this->assertEquals(['foreign1' => 'id'], $schema->getForeignColumns('foreign1', 'metatest'));
         $this->assertEquals(['foreign2' => 'id'], $schema->getForeignColumns('foreign2', 'metatest'));
         $this->assertEquals([], $schema->getForeignColumns('foreign1', 'foreign2'));
-        $this->assertEquals(['id' => 'foreign1'], $schema->getForeignColumns('metatest', 'foreign1', 'FK_1'));
-        $this->assertException('is not exists', L($schema)->getForeignColumns('metatest', 'foreign1', 'FK_2'));
+        $fkey = 'FK_1';
+        $this->assertEquals(['id' => 'foreign1'], $schema->getForeignColumns('metatest', 'foreign1', $fkey));
+        $this->assertEquals('FK_1', $fkey->getName());
+        $fkey = 'FK_2';
+        $this->assertException('is not exists', L($schema)->getForeignColumns('metatest', 'foreign1', $fkey));
     }
 
     /**
@@ -398,11 +405,15 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $schema = $database->getSchema();
         $this->assertEquals([], $schema->getForeignColumns('notfound', 'foreign_d1'));
         $this->assertEquals([], $schema->getForeignColumns('foreign_d1', 'notfound'));
-        $this->assertEquals(['id' => 'd2_id'], $schema->getForeignColumns('foreign_d1', 'foreign_d2', 'fk_dd12'));
+        $fkey = 'fk_dd12';
+        $this->assertEquals(['id' => 'd2_id'], $schema->getForeignColumns('foreign_d1', 'foreign_d2', $fkey));
+        $this->assertEquals('fk_dd12', $fkey->getName());
 
-        $this->assertEquals(['id' => 'id'], $schema->getForeignColumns('foreign_c1', 'foreign_p', null, $direction));
+        $fkey = null;
+        $this->assertEquals(['id' => 'id'], $schema->getForeignColumns('foreign_c1', 'foreign_p', $fkey, $direction));
         $this->assertSame(true, $direction);
-        $this->assertEquals(['id' => 'id'], $schema->getForeignColumns('foreign_p', 'foreign_c1', null, $direction));
+        $fkey = null;
+        $this->assertEquals(['id' => 'id'], $schema->getForeignColumns('foreign_p', 'foreign_c1', $fkey, $direction));
         $this->assertSame(false, $direction);
 
         $this->assertException('ambiguous foreign keys', L($schema)->getForeignColumns('foreign_d2', 'foreign_d1'));
@@ -566,15 +577,17 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals([], $schema->getIndirectlyColumns('t_leaf', 't_root'));
 
         // getForeignColumns は代替される
+        $fkey = null;
         $this->assertEquals([
             'root_id' => 'leaf_root_id',
             'seq'     => 'leaf_root_seq',
-        ], $schema->getForeignColumns('t_leaf', 't_root', null, $direction));
+        ], $schema->getForeignColumns('t_leaf', 't_root', $fkey, $direction));
         $this->assertSame(true, $direction);
+        $fkey = null;
         $this->assertEquals([
             'leaf_root_id'  => 'root_id',
             'leaf_root_seq' => 'seq',
-        ], $schema->getForeignColumns('t_root', 't_leaf', null, $direction));
+        ], $schema->getForeignColumns('t_root', 't_leaf', $fkey, $direction));
         $this->assertSame(false, $direction);
     }
 
