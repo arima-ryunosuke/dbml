@@ -2221,21 +2221,21 @@ FROM t_article Article", $Article->column([
      */
     function test_magic_join($_, $database)
     {
-        $expected = $database->g_parent->where('2')->joinForeign($database->g_child()->where('3'));
-        $p = $database->g_parent->where('2')->g_child->where('3')->end();
+        $expected = $database->g_parent->where('2=2')->joinForeign($database->g_child()->where('3=3'));
+        $p = $database->g_parent->where('2=2')->g_child->where('3=3')->end();
         $this->assertEquals($expected->select(), $p->select());
 
         $expected = $database->Article()->joinForeign($database->Comment());
         $p = $database->Article()->Comment()->end();
         $this->assertEquals($expected->select(), $p->select());
 
-        $expected = $database->g_ancestor()->where('1')->joinForeign($database->g_parent()->where('2')->joinForeign($database->g_child()->where('3')));
+        $expected = $database->g_ancestor()->where('1=1')->joinForeign($database->g_parent()->where('2=2')->joinForeign($database->g_child()->where('3=3')));
 
         // 部分的に magic した記法
-        $actual = $database->g_ancestor->where('1')->joinForeign($database->g_parent->where('2')->g_child->where('3')->end());
+        $actual = $database->g_ancestor->where('1=1')->joinForeign($database->g_parent->where('2=2')->g_child->where('3=3')->end());
         $this->assertEquals($expected->select(), $actual->select());
         // 全て magic した記法
-        $actual = $database->g_ancestor()->where('1')->g_parent->where('2')->g_child->where('3')->end();
+        $actual = $database->g_ancestor()->where('1=1')->g_parent->where('2=2')->g_child->where('3=3')->end();
         $this->assertEquals($expected->select(), $actual->select());
     }
 

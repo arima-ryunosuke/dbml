@@ -2899,7 +2899,7 @@ SQL
 
         // reset すれば全部戻るか？ …のためのテストだけど、ここで変更メソッドを呼ばないと検出できないので気休め
         // 例えば「ビルダにメンバが増えて reset を修正しなければならないが忘れた」が検出できない
-        $this->assertEquals($original, $builder->reset());
+        $this->assertEquals((string) $original, (string) $builder->reset());
     }
 
     /**
