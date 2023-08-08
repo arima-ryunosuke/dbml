@@ -24,6 +24,10 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.8
+
+- [fixbug] 外部キーをキャッシュしてしまってキャッシュオブジェクトが巨大になる不具合を修正
+
 ## 2.1.7
 
 - [feature] 仮想外部キーにオプション（onUpdate/Delete, condition）を渡せる機能と条件付き外部キー
