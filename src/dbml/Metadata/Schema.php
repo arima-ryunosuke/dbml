@@ -475,11 +475,11 @@ class Schema
                 if ($fcount === 0) {
                     $ikeys = $this->getIndirectlyColumns($table_name1, $table_name2, $fkey);
                     if ($ikeys) {
-                        return ['direction' => false, 'columns' => $ikeys, 'fkey' => $fkey];
+                        return ['direction' => false, 'columns' => $ikeys, 'fkey' => $fkey->getName()];
                     }
                     $ikeys = $this->getIndirectlyColumns($table_name2, $table_name1, $fkey);
                     if ($ikeys) {
-                        return ['direction' => true, 'columns' => array_flip($ikeys), 'fkey' => $fkey];
+                        return ['direction' => true, 'columns' => array_flip($ikeys), 'fkey' => $fkey->getName()];
                     }
                     return ['direction' => null, 'columns' => [], 'fkey' => null];
                 }
@@ -509,12 +509,13 @@ class Schema
                     $keys = $fkey->getForeignColumns();
                     $vals = $fkey->getLocalColumns();
                 }
-                return ['direction' => $direction, 'columns' => array_combine($keys, $vals), 'fkey' => $fkey];
+                return ['direction' => $direction, 'columns' => array_combine($keys, $vals), 'fkey' => $fkey->getName()];
             });
         }
 
-        $fkeyname = $this->foreignColumns[$cacheid]['fkey'];
         $direction = $this->foreignColumns[$cacheid]['direction'];
+        $main_table = $direction ? $table_name1 : $table_name2;
+        $fkeyname = $this->getTableForeignKeys($main_table)[$this->foreignColumns[$cacheid]['fkey']] ?? null;
         return $this->foreignColumns[$cacheid]['columns'];
     }
 
