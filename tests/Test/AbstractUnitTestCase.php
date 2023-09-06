@@ -221,10 +221,10 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('cdecimal', Type::getType('decimal')),
                                 new Column('cdate', Type::getType('date')),
                                 new Column('cdatetime', Type::getType('datetime')),
-                                new Column('cstring', Type::getType('string')),
-                                new Column('ctext', Type::getType('text')),
-                                new Column('cbinary', Type::getType('binary'), ['notnull' => false]),
-                                new Column('cblob', Type::getType('blob'), ['notnull' => false]),
+                                new Column('cstring', Type::getType('string'), ['length' => 8]),
+                                new Column('ctext', Type::getType('text'), ['length' => 255]),
+                                new Column('cbinary', Type::getType('binary'), ['length' => 24, 'notnull' => false]),
+                                new Column('cblob', Type::getType('blob'), ['length' => 255, 'notnull' => false]),
                                 new Column('carray', Type::getType('simple_array'), ['notnull' => false]),
                                 new Column('cjson', Type::getType('json'), ['notnull' => false]),
                             ],
@@ -491,6 +491,7 @@ abstract class AbstractUnitTestCase extends TestCase
             $database = new Database($v[0], [
                 'convertBoolToInt'         => true,
                 'convertNumericToDatetime' => true,
+                'truncateString'           => true,
                 'modifyAutoSelect'         => false,
                 'tableMapper'              => static function ($tablename) {
                     if ($tablename === 't_article') {

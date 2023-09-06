@@ -10,6 +10,8 @@ use Doctrine\DBAL\Platforms\OraclePlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Types\Types;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\SelectOption;
 use ryunosuke\dbml\Query\Queryable;
@@ -21,6 +23,7 @@ use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\class_shorten;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\first_keyvalue;
+use function ryunosuke\dbml\starts_with;
 
 /**
  * 各 Platform では賄いきれない RDBMS の差異を吸収するクラス
@@ -371,6 +374,38 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         }
 
         return $this->platform->escapeStringForLike($word, $escaper);
+    }
+
+    /**
+     * 文字列を指定長で切る
+     *
+     * @param ?string $string 切る文字列
+     * @param Column $column カラム
+     * @return string 切られた文字列
+     */
+    public function truncateString($string, $column)
+    {
+        // @todo mysql 以外は詳しくないため未実装
+        if (!$this->platform instanceof MySQLPlatform) {
+            return $string;
+        }
+
+        if (in_array($column->getType()->getName(), [Types::STRING], true)) {
+            if (!$column->getLength() || !$column->hasPlatformOption('charset')) {
+                return $string;
+            }
+            $charset = $column->getPlatformOption('charset');
+            $charset = starts_with($charset, 'utf8') ? 'utf-8' : $charset;
+            return mb_substr($string, 0, $column->getLength(), $charset);
+        }
+        if (in_array($column->getType()->getName(), [Types::BINARY, Types::TEXT, Types::BLOB], true)) {
+            if (!$column->getLength()) {
+                return $string;
+            }
+            return substr($string, 0, $column->getLength());
+        }
+
+        throw new \InvalidArgumentException($column->getType()->getName() . ' is not supported');
     }
 
     /**

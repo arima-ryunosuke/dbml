@@ -218,6 +218,14 @@ use ryunosuke\dbml\Utility\Adhoc;
  *
  *     @param bool $bool int/float をタイムスタンプとみなすなら true
  * }
+ * @method bool                   getTruncateString()
+ * @method $this                  setTruncateString($bool) {
+ *     文字列系カラムに length を超える文字列が来たときの挙動を指定する
+ *
+ *     この設定を true にすると、文字列系カラムに length を超える文字列が来た場合に切り落とされるようになる。
+ *
+ *     @param bool $bool length で切り落とすなら true
+ * }
  * @method callable               getYamlParser()
  * @method $this                  setYamlParser($callable)
  * @method array                  getAutoCastType()
@@ -393,6 +401,8 @@ class Database
             'convertBoolToInt'          => true,
             // insert 時などに日時カラムは int/float をタイムスタンプとして扱うか否か
             'convertNumericToDatetime'  => false, // for compatible
+            // insert 時などに文字列カラムは length で切るか否か
+            'truncateString'            => false,
             // 埋め込み条件の yaml パーサ
             'yamlParser'                => function ($yaml) { return \ryunosuke\dbml\paml_import($yaml)[0]; },
             // DB型で自動キャストする型設定。select,affect 要素を持つ（多少無駄になるがサンプルも兼ねて冗長に記述してある）
@@ -1093,6 +1103,7 @@ class Database
         $convertEmptyToNull = $this->getUnsafeOption('convertEmptyToNull');
         $convertBoolToInt = $this->getUnsafeOption('convertBoolToInt');
         $convertNumericToDatetime = $this->getUnsafeOption('convertNumericToDatetime');
+        $truncateString = $this->getUnsafeOption('truncateString');
         $autoCastType = $this->getUnsafeOption('autoCastType');
         $compatibleCharAndBinary = $this->getCompatiblePlatform()->supportsCompatibleCharAndBinary();
 
@@ -1135,6 +1146,10 @@ class Database
                     $format ??= isset($datetimeTypes[$typename]) ? $this->getPlatform()->getDateTimeFormatString() : null;
                     $format ??= isset($datetimeTZTypes[$typename]) ? $this->getPlatform()->getDateTimeTzFormatString() : null;
                     $row[$cname] = $dt->format($format);
+                }
+
+                if ($truncateString && is_string($row[$cname]) && isset($stringTypes[$typename])) {
+                    $row[$cname] = $this->getCompatiblePlatform()->truncateString($row[$cname], $column);
                 }
 
                 if (($converter = $autoCastType[$typename]['affect'] ?? null) && !$row[$cname] instanceof Queryable) {

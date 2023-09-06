@@ -10,6 +10,8 @@ use Doctrine\DBAL\Platforms\OraclePlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
 
@@ -300,6 +302,32 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $expected = $platform instanceof SQLServerPlatform ? '\\[a\\%%m%%x%y' : '[a\\%%m%%x%y';
         $this->assertEquals($expected, $cplatform->escapeLike(['[a%', new Expression('m%'), ['x', 'y']]));
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
+    function test_truncateString($cplatform, $platform)
+    {
+        $cstring = new Column('dummy', Type::getType('string'), ['length' => 4]);
+        $cbinary = new Column('dummy', Type::getType('binary'), ['length' => 12]);
+        $ctext = new Column('dummy', Type::getType('text'), ['length' => 12]);
+        $cblob = new Column('dummy', Type::getType('blob'), ['length' => 12]);
+
+        $expected = $platform instanceof MySQLPlatform ? 'あいうえ' : 'あいうえお';
+        $this->assertEquals('あいうえお', $cplatform->truncateString('あいうえお', new Column('dummy', Type::getType('string'))));
+        $this->assertEquals('あいうえお', $cplatform->truncateString('あいうえお', new Column('dummy', Type::getType('binary'))));
+        $this->assertEquals('あいうえお', $cplatform->truncateString('あいうえお', $cstring));
+        $this->assertEquals($expected, $cplatform->truncateString('あいうえお', $cstring->setPlatformOption('charset', 'utf8mb3')));
+        $this->assertEquals($expected, $cplatform->truncateString('あいうえお', $cbinary));
+        $this->assertEquals($expected, $cplatform->truncateString('あいうえお', $ctext));
+        $this->assertEquals($expected, $cplatform->truncateString('あいうえお', $cblob));
+
+        if ($platform instanceof MySQLPlatform) {
+            $this->assertException('integer is not supported', L($cplatform)->truncateString('dummy', new Column('dummy', Type::getType('integer'))));
+        }
     }
 
     /**

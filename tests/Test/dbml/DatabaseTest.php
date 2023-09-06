@@ -1510,6 +1510,28 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cdatetime' => "2009-02-14 08:31:30{$microsecond}",
         ];
         $this->assertEquals($expected, array_intersect_key($database->selectTuple('misctype', ['id' => 9]), $expected));
+
+        if ($database->getPlatform() instanceof MySQLPlatform) {
+            $database->insert('misctype', [
+                'id'        => 10,
+                'cint'      => false,
+                'cfloat'    => true,
+                'cdecimal'  => false,
+                'cstring'   => 'あいうえおアイウエオ',
+                'ctext'     => str_repeat('a', 256),
+                'cbinary'   => 'かきくけこカキクケコ',
+                'cblob'     => str_repeat('b', 256),
+                'cdate'     => '2009-02-14',
+                'cdatetime' => "2009-02-14 08:31:30",
+            ]);
+            $expected = [
+                'cstring'   => 'あいうえおアイウ',
+                'ctext'     => str_repeat('a', 255),
+                'cbinary'   => 'かきくけこカキク',
+                'cblob'     => str_repeat('b', 255),
+            ];
+            $this->assertEquals($expected, array_intersect_key($database->selectTuple('misctype', ['id' => 10]), $expected));
+        }
     }
 
     /**
