@@ -1478,9 +1478,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_convertBoolToInt($database)
+    function test_convertTo($database)
     {
-        $database->setConvertBoolToInt(true);
         $database->insert('misctype', [
             'id'        => 9,
             'pid'       => true,
@@ -1493,9 +1492,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cblob'     => '0',
             'carray'    => true,
             'cjson'     => false,
-            'cdate'     => '2012-12-12',
-            'cdatetime' => '2012-12-12 12:34:56',
+            'cdate'     => 1234567890,
+            'cdatetime' => 1234567890.123,
         ]);
+        $microsecond = strpos($database->getPlatform()->getDateTimeFormatString(), '.u') === false ? "" : ".122999";
         $expected = [
             'id'        => 9,
             'pid'       => 1,
@@ -1504,14 +1504,12 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cdecimal'  => 0,
             'cstring'   => 1,
             'ctext'     => 0,
-            'cbinary'   => '1',
-            'cblob'     => '0',
             'carray'    => 1,
             'cjson'     => 0,
-            'cdate'     => '2012-12-12',
-            'cdatetime' => '2012-12-12 12:34:56',
+            'cdate'     => '2009-02-14',
+            'cdatetime' => "2009-02-14 08:31:30{$microsecond}",
         ];
-        $this->assertEquals($expected, array_intersect_key($expected, $database->selectTuple('misctype', ['id' => 9])));
+        $this->assertEquals($expected, array_intersect_key($database->selectTuple('misctype', ['id' => 9]), $expected));
     }
 
     /**

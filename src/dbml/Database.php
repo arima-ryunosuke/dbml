@@ -210,6 +210,14 @@ use ryunosuke\dbml\Utility\Adhoc;
  *
  *     @param bool $bool 真偽値を int に変換するなら true
  * }
+ * @method bool                   getConvertNumericToDatetime()
+ * @method $this                  setConvertNumericToDatetime($bool) {
+ *     日時系カラムに int/float が来たときの挙動を指定する
+ *
+ *     この設定を true にすると、日時系カラムに int/float が来た場合にタイムスタンプとみなすようになる。
+ *
+ *     @param bool $bool int/float をタイムスタンプとみなすなら true
+ * }
  * @method callable               getYamlParser()
  * @method $this                  setYamlParser($callable)
  * @method array                  getAutoCastType()
@@ -383,6 +391,8 @@ class Database
             'convertEmptyToNull'        => true,
             // insert 時などに数値系カラムは真偽値を int として扱うか否か
             'convertBoolToInt'          => true,
+            // insert 時などに日時カラムは int/float をタイムスタンプとして扱うか否か
+            'convertNumericToDatetime'  => false, // for compatible
             // 埋め込み条件の yaml パーサ
             'yamlParser'                => function ($yaml) { return \ryunosuke\dbml\paml_import($yaml)[0]; },
             // DB型で自動キャストする型設定。select,affect 要素を持つ（多少無駄になるがサンプルも兼ねて冗長に記述してある）
@@ -1082,12 +1092,17 @@ class Database
         $filterNullAtNotNullColumn = $this->getUnsafeOption('filterNullAtNotNullColumn');
         $convertEmptyToNull = $this->getUnsafeOption('convertEmptyToNull');
         $convertBoolToInt = $this->getUnsafeOption('convertBoolToInt');
+        $convertNumericToDatetime = $this->getUnsafeOption('convertNumericToDatetime');
         $autoCastType = $this->getUnsafeOption('autoCastType');
         $compatibleCharAndBinary = $this->getCompatiblePlatform()->supportsCompatibleCharAndBinary();
 
         $integerTypes = [Types::BOOLEAN => true, Types::INTEGER => true, Types::SMALLINT => true, Types::BIGINT => true];
         $decimalTypes = [Types::DECIMAL => true, Types::FLOAT => true];
         $numericTypes = $integerTypes + $decimalTypes;
+        $dateTypes = [Types::DATE_MUTABLE => true, Types::DATE_IMMUTABLE => true];
+        $datetimeTypes = [Types::DATETIME_MUTABLE => true, Types::DATETIME_IMMUTABLE => true];
+        $datetimeTZTypes = [Types::DATETIMETZ_MUTABLE => true, Types::DATETIMETZ_IMMUTABLE => true];
+        $datetimableTypes = $dateTypes + $datetimeTypes + $datetimeTZTypes;
         $clobTypes = [Types::STRING => true, Types::TEXT => true];
         $blobTypes = [Types::BINARY => true, Types::BLOB => true];
         $stringTypes = $clobTypes + $blobTypes;
@@ -1109,6 +1124,17 @@ class Database
 
                 if ($convertBoolToInt && is_bool($row[$cname]) && isset($numericTypes[$typename])) {
                     $row[$cname] = (int) $row[$cname];
+                }
+
+                if ($convertNumericToDatetime && (is_int($row[$cname]) || is_float($row[$cname])) && isset($datetimableTypes[$typename])) {
+                    $dt = new \DateTime();
+                    $dt->setTimestamp($row[$cname]);
+                    $dt->modify(((int) (($row[$cname] - (int) $row[$cname]) * 1000 * 1000)) . " microsecond");
+                    $format = null;
+                    $format ??= isset($dateTypes[$typename]) ? $this->getPlatform()->getDateFormatString() : null;
+                    $format ??= isset($datetimeTypes[$typename]) ? $this->getPlatform()->getDateTimeFormatString() : null;
+                    $format ??= isset($datetimeTZTypes[$typename]) ? $this->getPlatform()->getDateTimeTzFormatString() : null;
+                    $row[$cname] = $dt->format($format);
                 }
 
                 if (($converter = $autoCastType[$typename]['affect'] ?? null) && !$row[$cname] instanceof Queryable) {
@@ -6202,11 +6228,11 @@ class Database
         }
 
         $affecteds = [];
-        if ($cascades){
+        if ($cascades) {
             $select = $this->select([$tableName => array_values($cascades)])->where($prewhere);
             $affecteds[] = $this->executeAffect($this->getCompatiblePlatform()->convertDeleteQuery($select, array_keys($cascades)), $select->getParams());
         }
-        if ($setnulls){
+        if ($setnulls) {
             $select = $this->select([$tableName => array_values($setnulls)])->where($prewhere)->set($sets);
             $affecteds[] = $this->executeAffect($this->getCompatiblePlatform()->convertUpdateQuery($select), $select->getParams());
         }
