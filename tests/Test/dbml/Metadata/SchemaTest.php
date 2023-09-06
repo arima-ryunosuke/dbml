@@ -10,9 +10,8 @@ use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Metadata\Schema;
+use ryunosuke\SimpleCache\NullCache;
 use ryunosuke\Test\Database;
-use Symfony\Component\Cache\Adapter\NullAdapter;
-use Symfony\Component\Cache\Psr16Cache;
 use function ryunosuke\dbml\try_return;
 
 class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
@@ -559,7 +558,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             ]
         ));
 
-        $schema = new Schema(self::getDummyDatabase()->getConnection()->createSchemaManager(), [], new Psr16Cache(new NullAdapter()));
+        $schema = new Schema(self::getDummyDatabase()->getConnection()->createSchemaManager(), [], new NullCache());
 
         // 2つの経路がある
         $this->assertEquals([
@@ -604,7 +603,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
                     $table->setComment('modify-comment');
                 }
             },
-        ], new Psr16Cache(new NullAdapter()));
+        ], new NullCache());
 
         $table = $this->getDummyTable('tabletest');
         $this->assertFalse($table->hasColumn('hoge'));
