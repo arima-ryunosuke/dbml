@@ -98,7 +98,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // NULL (IN)
         $operator = new Operator(self::$platform, Operator::COLVAL, 'hoge', []);
-        $this->assertOperator('hoge IN (NULL)', [], $operator);
+        $this->assertOperator('FALSE', [], $operator);
 
         // NULLIN
         $operator = new Operator(self::$platform, Operator::COLVAL, 'hoge', [1, null]);
@@ -219,7 +219,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $operator = new Operator(self::$platform, 'IN', 'a', [1, 2]);
         $this->assertOperator('a IN (?,?)', [1, 2], $operator);
         $this->assertOperator('NOT (a IN (?,?))', [1, 2], $operator->not());
-        $this->assertOperator('a IN (NULL)', [], new Operator(self::$platform, 'IN', 'a', []));
+        $this->assertOperator('FALSE', [], new Operator(self::$platform, 'IN', 'a', []));
     }
 
     function test_op_nullin()
@@ -228,7 +228,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertOperator('a IN (?,?,?) OR a IS NULL', [1, 2, null], $operator);
         $this->assertOperator('NOT (a IN (?,?,?) OR a IS NULL)', [1, 2, null], $operator->not());
         $this->assertOperator('a IN (?,?)', [1, 2], new Operator(self::$platform, 'IN', 'a', [1, 2]));
-        $this->assertOperator('a IN (NULL)', [], new Operator(self::$platform, 'IN', 'a', []));
+        $this->assertOperator('FALSE', [], new Operator(self::$platform, 'IN', 'a', []));
     }
 
     function test_op_range()

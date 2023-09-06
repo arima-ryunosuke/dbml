@@ -390,9 +390,9 @@ class Operator implements Queryable
             $first = reset($this->operand2);
             $ph = $first ? '(' . implode(',', array_fill(0, count($first), '?')) . ')' : '';
         }
-        $placeholder = implode(',', array_fill(0, count($this->operand2), $ph)) ?: 'NULL';
+        $placeholder = implode(',', array_fill(0, count($this->operand2), $ph));
         $ORNULL = $allownull && in_array(null, $this->operand2, true) ? " OR {$this->operand1} IS NULL" : '';
-        $this->string = $this->operand1 . ' IN (' . $placeholder . ')' . $ORNULL;
+        $this->string = ($placeholder ? $this->operand1 . ' IN (' . $placeholder . ')' : "FALSE") . $ORNULL;
         $this->params = array_flatten($this->operand2);
     }
 

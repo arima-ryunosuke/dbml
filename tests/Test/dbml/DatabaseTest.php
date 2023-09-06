@@ -1980,7 +1980,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals(['hoge IS NULL'], $whereInto(['hoge' => null]));
         $this->assertEquals([], $params);
 
-        $this->assertEquals(['hoge IN (NULL)'], $whereInto(['hoge' => []]));
+        $this->assertEquals(['FALSE'], $whereInto(['hoge' => []]));
         $this->assertEquals([], $params);
 
         $this->assertEquals(['hoge = 1'], $whereInto(['hoge = 1']));
@@ -2058,7 +2058,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $this->assertEquals(['(scalar) OR (value)'], $whereInto([['scalar', 'value']]));
 
-        $this->assertEquals(['C IN (NULL)'], $whereInto([[], 'C' => []]));
+        $this->assertEquals(['FALSE'], $whereInto([[], 'C' => []]));
         $this->assertEquals([], $params);
 
         $this->assertEquals(['FUNC(99)'], $whereInto([new Expression('FUNC(99)')]));
@@ -2198,7 +2198,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'columnC = ?',
             'empty1 IS NULL',
             'empty2 = ?',
-            'empty3 IN (NULL)',
+            'FALSE',
             'subquery IN (SELECT test2.* FROM test2)',
         ], $wheres);
         $this->assertEquals([
@@ -2329,6 +2329,13 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     {
         $params = [];
         $where = $database->whereInto([
+            '(mainid, subid)' => [],
+        ], $params);
+        $this->assertEquals(['FALSE'], $where);
+        $this->assertEquals([], $params);
+
+        $params = [];
+        $where = $database->whereInto([
             '(mainid, subid)' => $database->select('multiprimary S.mainid,subid', ['name' => ['a', 'c']]),
         ], $params);
         $this->assertEquals(['(mainid, subid) IN (SELECT S.mainid, S.subid FROM multiprimary S WHERE name IN (?,?))'], $where);
@@ -2343,6 +2350,9 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         // 行値式を解す DB では実際に投げて確認する
         if ($database->getCompatiblePlatform()->supportsRowConstructor()) {
+            $this->assertEquals([], $database->selectArray('multiprimary M', [
+                '(mainid, subid)' => [],
+            ]));
             $this->assertEquals([
                 [
                     'mainid' => '1',

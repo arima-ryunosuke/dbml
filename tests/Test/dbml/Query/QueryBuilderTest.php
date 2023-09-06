@@ -1531,7 +1531,7 @@ AND
         $this->assertException("not match primary columns", L($builder->reset()->column('multiprimary'))->where(['' => [[1, 2, 3]]]));
 
         // トップレベル以外無視。ただし、OR などの数値キーは OK
-        $this->assertEquals("SELECT test.* FROM test WHERE (hoge IN (NULL)) AND (test.id = '3')", $builder->reset()->column('test')->where([
+        $this->assertEquals("SELECT test.* FROM test WHERE (FALSE) AND (test.id = '3')", $builder->reset()->column('test')->where([
             'hoge' => [
                 '' => [1, 2],
             ],
@@ -1758,7 +1758,7 @@ FROM t_article A
 WHERE ((A.article_id = '1')
 OR (/* vcolumn comment_count-k */ (SELECT COUNT(*) AS {$qi('*@count')} FROM t_comment WHERE t_comment.article_id = A.article_id) = '2')
 OR (A.article_id = '3'))
-AND (A.article_id IN (NULL))", $builder->queryInto());
+AND (FALSE)", $builder->queryInto());
         // 子供である C 条件が現れるのはインジェクションの危険性がある
         $this->assertStringIgnoreBreak("SELECT C.comment_id AS $child_key, C.*, C.article_id AS $parent_key
 FROM t_comment C
