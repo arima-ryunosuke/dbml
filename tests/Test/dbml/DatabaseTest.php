@@ -1901,7 +1901,17 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_queryInto($database)
     {
+        // 非連番パラメータの時の挙動がドライバーで異なる可能性があるので担保する
+        $this->assertEquals([
+            'a' => 1,
+            'b' => 2,
+        ], $database->fetchTuple('select ? as a, ? as b', [
+            3 => 1,
+            1 => 2,
+        ]));
+
         $this->assertEquals("'1','2'", $database->queryInto('?,?', [1, 2]));
+        $this->assertEquals("'1','2'", $database->queryInto('?,?', [9 => 1, 8 => 2]));
         $this->assertEquals("'1','2'", $database->queryInto(':hoge,:fuga', ['hoge' => 1, 'fuga' => 2]));
         $this->assertEquals("hoge", $database->queryInto('hoge'));
         $this->assertEquals("'1','2'", $database->queryInto('?,:hoge', [1, 'hoge' => 2]));

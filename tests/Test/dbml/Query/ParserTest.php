@@ -34,7 +34,7 @@ class ParserTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $parser = new Parser(false);
 
-        $params = [1, 'named' => 2, 3];
+        $params = [9 => 1, 'named' => 2, 3];
         $sql = $parser->convertNamedSQL('select ?, :named, :named, ?', $params);
         $this->assertEquals("select :__dbml_auto_bind0, :named, :named, :__dbml_auto_bind1", $sql);
         $this->assertEquals([
@@ -66,7 +66,7 @@ class ParserTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $parser = new Parser(false);
 
-        $params = [1, 'named' => 2, 3];
+        $params = [9 => 1, 'named' => 2, 3];
         $sql = $parser->convertPositionalSQL('select ?, :named, :named, ?', $params, $map);
         $this->assertEquals("select ?, ?, ?, ?", $sql);
         $this->assertEquals([
@@ -112,7 +112,7 @@ class ParserTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $parser = new Parser(false);
 
-        $params = [1, 'named' => 2, 3];
+        $params = [9 => 1, 'named' => 2, 3];
         $sql = $parser->convertDollarSQL('select ?, :named, :named, ?', $params, $map);
         $this->assertEquals("select $1, $2, $3, $4", $sql);
         $this->assertEquals([
@@ -149,7 +149,7 @@ class ParserTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $parser = new Parser(false);
 
-        $sql = $parser->convertQuotedSQL('select ?, :named, :named, ?', [null, 'named' => false, 'x'], fn($v) => "'$v'");
+        $sql = $parser->convertQuotedSQL('select ?, :named, :named, ?', [9 => null, 'named' => false, 'x'], fn($v) => "'$v'");
         $this->assertEquals("select NULL, 0, 0, 'x'", $sql);
 
         $params = [1, 2, 3];

@@ -113,7 +113,7 @@ class Parser
     public function convertNamedSQL($sql, iterable &$params)
     {
         $visitor = new class(
-            $params instanceof \Traversable ? iterator_to_array($params) : $params,
+            array_merge($params instanceof \Traversable ? iterator_to_array($params) : $params),
             $this->errorMode,
         ) implements DBALParser\Visitor {
             private int   $errorMode;
@@ -192,7 +192,7 @@ class Parser
     public function convertPositionalSQL($sql, iterable &$params, &$paramMap = [], $callback = null)
     {
         $visitor = new class(
-            $params instanceof \Traversable ? iterator_to_array($params) : $params,
+            array_merge($params instanceof \Traversable ? iterator_to_array($params) : $params),
             $callback ?? static fn($n) => '?',
             $this->errorMode,
         ) implements DBALParser\Visitor {
@@ -283,7 +283,7 @@ class Parser
     public function convertQuotedSQL($sql, iterable $params, $quoter)
     {
         $visitor = new class(
-            $params instanceof \Traversable ? iterator_to_array($params) : $params,
+            array_merge($params instanceof \Traversable ? iterator_to_array($params) : $params),
             $quoter,
             $this->errorMode,
         ) implements DBALParser\Visitor {
