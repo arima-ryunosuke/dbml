@@ -326,11 +326,12 @@ class Parser
 
             private function acceptParameter($key): void
             {
-                if (!array_key_exists($key, $this->parameters)) {
+                $exists = array_key_exists($key, $this->parameters);
+                if (!$exists) {
                     Parser::raiseMismatchParameter($key, $this->errorMode);
                 }
 
-                $this->buffer[] = ($this->callback)($this->parameters[$key] ?? null);
+                $this->buffer[] = $exists ? ($this->callback)($this->parameters[$key]) : "undefined($key)";
                 unset($this->knownParams[$key]);
             }
 

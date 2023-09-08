@@ -147,6 +147,10 @@ class ParserTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test_convertQuotedSQL()
     {
+        $parser = new Parser(false, Parser::ERROR_MODE_SILENT);
+        $sql = $parser->convertQuotedSQL('?, ?, :named', [1], fn($v) => $v);
+        $this->assertEquals("1, undefined(1), undefined(named)", $sql);
+
         $parser = new Parser(false);
 
         $sql = $parser->convertQuotedSQL('select ?, :named, :named, ?', [9 => null, 'named' => false, 'x'], fn($v) => "'$v'");
