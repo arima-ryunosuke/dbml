@@ -24,6 +24,14 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.9
+
+- [feature] length を超える文字列が来た時に切り落とす機能
+- [feature] numeric をタイムスタンプとみなす機能
+- [change] Parser のパラメータが足りないときは NULL ではなく文字列を埋め込むように変更
+- [fixbug] Parser に非連番パラメータを渡すとエラーになる不具合を修正
+- [fixbug] 行値式の IN に空配列を与えたときにエラーになる不具合を修正
+
 ## 2.1.8
 
 - [fixbug] 外部キーをキャッシュしてしまってキャッシュオブジェクトが巨大になる不具合を修正
