@@ -661,7 +661,7 @@ class Database
 
         if (!isset($options['cacheProvider'])) {
             $source = array_pickup($this->txConnection->getParams(), ['url', 'driver', 'host', 'port', 'user', 'password', 'dbname']);
-            $options['cacheProvider'] = cacheobject(sys_get_temp_dir() . '/' . sha1(serialize($source)));
+            $options['cacheProvider'] = cacheobject(sys_get_temp_dir() . '/dbml-' . sha1(serialize($source)));
         }
 
         $this->setDefault($options);
