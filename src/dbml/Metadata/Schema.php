@@ -358,6 +358,39 @@ class Schema
     }
 
     /**
+     * テーブルの（主キーを除く）ユニークキーカラムオブジェクトを取得する
+     *
+     * @param string $table_name 取得したいテーブル名
+     * @param string $ukname 取得したいユニークキー名（PRIMARY は特別扱いで主キーを返し、空文字は最初のキーを返す。将来的に nullable になるかもしれない）
+     * @return Column[] ユニークキーカラムオブジェクト配列
+     */
+    public function getTableUniqueColumns($table_name, $ukname = '')
+    {
+        $table = $this->getTable($table_name);
+
+        if (strcasecmp($ukname, 'PRIMARY') === 0) {
+            $uniqueKey = $table->getPrimaryKey();
+        }
+        elseif (strlen($ukname ?? '')) {
+            $uniqueKey = $table->getIndex($ukname);
+        }
+        else {
+            foreach ($table->getIndexes() as $index) {
+                if (!$index->isPrimary() && $index->isUnique()) {
+                    $uniqueKey = $index;
+                    break;
+                }
+            }
+        }
+
+        if (!isset($uniqueKey) || !$uniqueKey->isUnique()) {
+            throw new \InvalidArgumentException("Unique Index is not found or not unique");
+        }
+
+        return array_pickup($this->getTableColumns($table_name), $uniqueKey->getColumns());
+    }
+
+    /**
      * テーブルのオートインクリメントカラムを取得する
      *
      * @param string $table_name 取得したいテーブル名

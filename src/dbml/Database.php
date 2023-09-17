@@ -6645,6 +6645,7 @@ class Database
      * @param string|array $tableName テーブル名
      * @param mixed $insertData INSERT データ配列
      * @param mixed $updateData UPDATE データ配列
+     * @param string $uniquekey 重複チェックに使うユニークキー名
      * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
     public function modify($tableName, $insertData, $updateData = [])

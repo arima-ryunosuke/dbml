@@ -214,6 +214,36 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideSchema
      * @param Schema $schema
      */
+    function test_getTableUniqueColumns($schema)
+    {
+        $schema->addTable(new Table('uniquetable',
+            [
+                new Column('id', Type::getType('integer')),
+                new Column('uid1', Type::getType('integer')),
+                new Column('uid2', Type::getType('integer')),
+                new Column('uidx', Type::getType('integer')),
+            ],
+            [
+                new Index('PRIMARY', ['id'], true, true),
+                new Index('UNIQUEKEY1', ['uid1', 'uid2'], true, false),
+                new Index('UNIQUEKEY2', ['uidx'], true, false),
+            ]
+        ));
+
+        $this->assertEquals(array_intersect_key($schema->getTableColumns('uniquetable'), ['id' => '']), $schema->getTableUniqueColumns('uniquetable', 'primary'));
+        $this->assertEquals(array_intersect_key($schema->getTableColumns('uniquetable'), ['uid1' => '', 'uid2' => '']), $schema->getTableUniqueColumns('uniquetable', ''));
+        $this->assertEquals(array_intersect_key($schema->getTableColumns('uniquetable'), ['uid1' => '', 'uid2' => '']), $schema->getTableUniqueColumns('uniquetable'));
+        $this->assertEquals(array_intersect_key($schema->getTableColumns('uniquetable'), ['uidx' => '']), $schema->getTableUniqueColumns('uniquetable', 'UNIQUEKEY2'));
+
+        $this->assertException('is not found', L($schema)->getTableUniqueColumns('metasample'));
+        $this->assertException('does not exist', L($schema)->getTableUniqueColumns('uniquetable', 'undefined'));
+        $this->assertException(SchemaException::tableDoesNotExist('hogera'), L($schema)->getTablePrimaryKey('hogera'));
+    }
+
+    /**
+     * @dataProvider provideSchema
+     * @param Schema $schema
+     */
     function test_getTableAutoIncrement($schema)
     {
         $schema->addTable($this->getDummyTable('metatest'));
