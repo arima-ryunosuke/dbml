@@ -1680,67 +1680,67 @@ class multiuniqueTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int} */
+    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int} */
+    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int} */
+    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int} */
+    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int} */
+    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int} */
+    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function find($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int} */
+    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function findInShare($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int} */
+    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int} */
+    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int} */
+    /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function findForAffect($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int}> */
+    /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function neighbor($predicates = [], $limit = 1) { }
 }
 
@@ -3071,6 +3071,9 @@ class multiuniqueEntity extends \ryunosuke\dbml\Entity\Entity
 
     /** @var int */
     public $uc2;
+
+    /** @var int */
+    public $groupkey;
 }
 
 class noautoEntity extends \ryunosuke\dbml\Entity\Entity
