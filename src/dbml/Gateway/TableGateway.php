@@ -2340,10 +2340,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::modifyArray()
      */
-    public function modifyArray($insertData, $updateData = [], $chunk = 0)
+    public function modifyArray($insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = 0)
     {
         $this->resetResult();
-        return $this->database->modifyArray($this->tableName, $insertData, $updateData, $chunk, ...array_slice(func_get_args(), 3));
+        return $this->database->modifyArray($this->tableName, $insertData, $updateData, $uniquekey, $chunk, ...array_slice(func_get_args(), 4));
     }
 
     /**
@@ -2353,10 +2353,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::changeArray()
      */
-    public function changeArray($dataarray, $identifier, $returning = [])
+    public function changeArray($dataarray, $identifier, $uniquekey = 'PRIMARY', $returning = [])
     {
         $this->resetResult();
-        return $this->database->changeArray($this->tableName, $dataarray, $identifier, $returning, ...array_slice(func_get_args(), 3));
+        return $this->database->changeArray($this->tableName, $dataarray, $identifier, $uniquekey, $returning, ...array_slice(func_get_args(), 4));
     }
 
     /**
@@ -2504,10 +2504,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::modify()
      */
-    public function modify($insertData, $updateData = [])
+    public function modify($insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
         $this->resetResult();
-        return $this->database->modify($this->tableName, $insertData, $updateData, ...array_slice(func_get_args(), 2));
+        return $this->database->modify($this->tableName, $insertData, $updateData, $uniquekey, ...array_slice(func_get_args(), 3));
     }
 
     /**

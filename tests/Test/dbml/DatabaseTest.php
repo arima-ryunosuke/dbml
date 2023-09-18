@@ -274,7 +274,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
             $this->assertException($ex, L($database)->insert('test', ['id' => 9, 'name' => 'hoge'], ['throw' => true, 'ignore' => true]));
             if ($database->getCompatiblePlatform()->getName() !== 'mysql') {
-                $this->assertException($ex, L($database)->modify('test', ['id' => 9, 'name' => null], [], ['throw' => true, 'ignore' => true]));
+                $this->assertException($ex, L($database)->modify('test', ['id' => 9, 'name' => null], [], 'PRIMARY', ['throw' => true, 'ignore' => true]));
             }
         }
         $this->assertException($ex, L($database)->updateOrThrow('test', ['name' => 'd'], ['id' => -1]));
@@ -6270,6 +6270,55 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_changeArray_uk($database)
+    {
+        if (!$database->getCompatiblePlatform()->supportsMerge()) {
+            return;
+        }
+
+        $group2 = $database->selectArray('multiunique', ['groupkey' => 2]);
+
+        $primaries = $database->changeArray('multiunique', [
+            ['id' => 11, 'uc_s' => 'a1', 'uc_i' => 1, 'uc1' => 'X', 'uc2' => 1, 'groupkey' => 1],
+            ['id' => 12, 'uc_s' => 'b1', 'uc_i' => 2, 'uc1' => 'Y', 'uc2' => 2, 'groupkey' => 1],
+            ['id' => 13, 'uc_s' => 'c1', 'uc_i' => 3, 'uc1' => 'Z', 'uc2' => 3, 'groupkey' => 1],
+        ], ['groupkey' => 1], 'uk3');
+        // 与えた配列のとおりになっている
+        $this->assertEquals([
+            ["uc1" => "X", "uc2" => "1"],
+            ["uc1" => "Y", "uc2" => "2"],
+            ["uc1" => "Z", "uc2" => "3"],
+        ], $database->selectArray('multiunique.uc1,uc2', ['groupkey' => 1]));
+        // 一意キーを返している
+        $this->assertEquals([
+            ["uc1" => "X", "uc2" => "1"],
+            ["uc1" => "Y", "uc2" => "2"],
+            ["uc1" => "Z", "uc2" => "3"],
+        ], $primaries);
+
+        $primaries = $database->changeArray('multiunique', [
+            ['uc_s' => 'a2', 'uc_i' => 4, 'uc1' => 'X', 'uc2' => 1, 'groupkey' => 1],
+            ['uc_s' => 'b2', 'uc_i' => 5, 'uc1' => 'YY', 'uc2' => 2, 'groupkey' => 1],
+        ], ['groupkey' => 1], 'uk3');
+        // 与えた配列のとおりになっている
+        $this->assertEquals([
+            ["uc_s" => "a2", "uc_i" => 4, "uc1" => "X", "uc2" => 1],
+            ["uc_s" => "b2", "uc_i" => 5, "uc1" => "YY", "uc2" => 2],
+        ], $database->selectArray('multiunique.uc_s,uc_i,uc1,uc2', ['groupkey' => 1]));
+        // 一意キーを返している
+        $this->assertEquals([
+            ["uc1" => "X", "uc2" => 1],
+            ["uc1" => "YY", "uc2" => 2],
+        ], $primaries);
+
+        // 一連の流れで groupkey=2 に波及していないことを担保
+        $this->assertEquals($group2, $database->selectArray('multiunique', ['groupkey' => 2]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_changeArray_returning($database)
     {
         $updatedAffectedRows = $database->getCompatiblePlatform()->getName() === 'mysql' ? 0 : 2;
@@ -6507,7 +6556,7 @@ INSERT INTO test (id, name) VALUES
             ['mainid' => 1, 'subid' => 1, 'name' => 'X'],
             ['mainid' => 1, 'subid' => 2, 'name' => 'Y'],
             ['mainid' => 1, 'subid' => 3, 'name' => 'Z'],
-        ], ['mainid' => 1], null, ['bulk' => false]);
+        ], ['mainid' => 1], 'PRIMARY', null, ['bulk' => false]);
 
         $this->assertEquals([
             ['mainid' => 1, 'subid' => 1],

@@ -199,11 +199,12 @@ abstract class AbstractUnitTestCase extends TestCase
                         ),
                         new Table('multiunique',
                             [
-                                new Column('id', Type::getType('integer')),
+                                new Column('id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('uc_s', Type::getType('string')),
                                 new Column('uc_i', Type::getType('integer')),
                                 new Column('uc1', Type::getType('string')),
                                 new Column('uc2', Type::getType('integer')),
+                                new Column('groupkey', Type::getType('integer')),
                             ],
                             [
                                 new Index('PRIMARY', ['id'], true, true),
@@ -717,11 +718,12 @@ abstract class AbstractUnitTestCase extends TestCase
                     }
                     for ($i = 1, $char = 'a'; $i <= 10; $i++) {
                         $db->insert('multiunique', [
-                            'id'   => $i,
-                            'uc_s' => $char,
-                            'uc_i' => $i * 10,
-                            'uc1'  => "$char,$char",
-                            'uc2'  => $i * 100,
+                            'id'       => $i,
+                            'uc_s'     => $char,
+                            'uc_i'     => $i * 10,
+                            'uc1'      => "$char,$char",
+                            'uc2'      => $i * 100,
+                            'groupkey' => ceil($i / 5),
                         ]);
                         $char++;
                     }

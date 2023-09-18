@@ -1577,7 +1577,7 @@ AND ((flag=1))", "$gw");
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function modify($insertData, $updateData = [])
+            public function modify($insertData, $updateData = [], $uniquekey = 'PRIMARY')
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());

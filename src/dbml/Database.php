@@ -4891,17 +4891,17 @@ class Database
             case 'modify':
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
                 if ($opt['bulk']) {
-                    $results[] = $db->modifyArray($tableName, $records, [], $opt['chunk'], $opt);
+                    $results[] = $db->modifyArray($tableName, $records, [], 'PRIMARY', $opt['chunk'], $opt);
                 }
                 else {
                     foreach ($records as $record) {
-                        $results[] = $db->modify($tableName, $record, [], $opt);
+                        $results[] = $db->modify($tableName, $record, [], 'PRIMARY', $opt);
                     }
                 }
                 break;
             case 'change':
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
-                $result = $db->changeArray($tableName, $records, [], [], $opt);
+                $result = $db->changeArray($tableName, $records, [], 'PRIMARY', [], $opt);
                 if ($opt['dryrun']) {
                     $results[] = $result[1];
                 }
@@ -5448,13 +5448,20 @@ class Database
      * @param string $tableName テーブル名
      * @param array|callable|\Generator $insertData カラムデータあるいは Generator
      * @param array $updateData カラムデータあるいは Generator
+     * @param string|int $uniquekey 重複チェックに使うユニークキー名
      * @param int $chunk 分割 insert する場合はそのチャンクサイズ
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function modifyArray($tableName, $insertData, $updateData = [], $chunk = 0)
+    public function modifyArray($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = 0)
     {
         // 隠し引数 $opt
-        $opt = func_num_args() === 5 ? func_get_arg(4) : [];
+        $opt = func_num_args() === 6 ? func_get_arg(5) : [];
+
+        // for compatible
+        if (ctype_digit("$uniquekey")) {
+            $chunk = $uniquekey;
+            $uniquekey = 'PRIMARY';
+        }
 
         $cplatform = $this->getCompatiblePlatform();
         if (!$cplatform->supportsBulkMerge()) {
@@ -5478,7 +5485,7 @@ class Database
         $columns = null;
 
         $affected = [];
-        $merge = $cplatform->getMergeSyntax($this->getSchema()->getTablePrimaryKey($tableName)->getColumns());
+        $merge = $cplatform->getMergeSyntax(array_keys($this->getSchema()->getTableUniqueColumns($tableName, $uniquekey)));
         $refer = $cplatform->getReferenceSyntax('%1$s');
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
         $template = "INSERT {$ignore}INTO $tableName (%s) VALUES %s $merge %s";
@@ -5612,14 +5619,21 @@ class Database
      * @param string|array $tableName テーブル名
      * @param array $dataarray データ配列
      * @param array|mixed $identifier 束縛条件。 false を与えると DELETE 文自体を発行しない（速度向上と安全担保）
+     * @param string|array|null $uniquekey 重複チェックに使うユニークキー名
      * @param ?array $returning 返り値の制御変数。配列を与えるとそのカラムの SELECT 結果を返す（null は主キーを表す）
      * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
      */
-    public function changeArray($tableName, $dataarray, $identifier, $returning = [])
+    public function changeArray($tableName, $dataarray, $identifier, $uniquekey = 'PRIMARY', $returning = [])
     {
         // 隠し引数 $opt
-        $opt = func_num_args() === 5 ? func_get_arg(4) : [];
+        $opt = func_num_args() === 6 ? func_get_arg(5) : [];
         unset($opt['primary']); // 自身で処理するので不要
+
+        // for compatible
+        if (!is_string($uniquekey)) {
+            $returning = $uniquekey;
+            $uniquekey = 'PRIMARY';
+        }
 
         $dryrun = $this->getUnsafeOption('dryrun');
         $cplatform = $this->getCompatiblePlatform();
@@ -5636,9 +5650,12 @@ class Database
         $tableName = $this->convertTableName($tableName);
 
         // 主キー情報を漁っておく
-        $pcols = $this->getSchema()->getTablePrimaryColumns($tableName);
+        $pcols = $this->getSchema()->getTableUniqueColumns($tableName, $uniquekey);
         $plist = array_keys($pcols);
-        $autocolumn = optional($this->getSchema()->getTableAutoIncrement($tableName))->getName();
+        $autocolumn = null;
+        if ($uniquekey === 'PRIMARY') {
+            $autocolumn = optional($this->getSchema()->getTableAutoIncrement($tableName))->getName();
+        }
         $pksep = $this->getPrimarySeparator();
 
         if ($dryrun) {
@@ -5693,20 +5710,20 @@ class Database
 
         foreach ($col_group as $group) {
             if ($group['bulks'] ?? []) {
-                $sqls[] = $this->modifyArray($tableName, $group['bulks'], ...[[], 0, $opt]);
+                $sqls[] = $this->modifyArray($tableName, $group['bulks'], [], $uniquekey, 0, $opt);
             }
             if ($group['rows'] ?? []) {
                 // 2件以上じゃないとプリペアの旨味が少ない
                 $stmt = null;
                 if ($preparable && count($group['rows']) > 1) {
-                    $stmt = $this->prepareModify($tableName, $group['cols'], ...[[], $opt]);
+                    $stmt = $this->prepareModify($tableName, $group['cols'], [], $uniquekey, $opt);
                 }
                 foreach ($group['rows'] as $n => $row) {
                     if ($stmt) {
                         $affected = $sqls[$n] = $stmt->executeAffect($row);
                     }
                     else {
-                        $affected = $sqls[$n] = $this->modify($tableName, $row, ...[[], $opt]);
+                        $affected = $sqls[$n] = $this->modify($tableName, $row, [], $uniquekey, $opt);
                     }
 
                     if ($autocolumn !== null && !isset($primaries[$n][$autocolumn])) {
@@ -5926,7 +5943,7 @@ class Database
             }
 
             // changeArray すれば主キーが得られる。主キーが得られれば外部キーに設定できるし返り値用に整形できる
-            $changed = $this->changeArray($tname, $rows, $parents ?: false, [], $opt);
+            $changed = $this->changeArray($tname, $rows, $parents ?: false, 'PRIMARY', [], $opt);
             if ($dryrun) {
                 $primaries[$tname] = $changed[0];
                 $sqls = array_merge($sqls, $changed[1]);
@@ -6648,10 +6665,10 @@ class Database
      * @param string $uniquekey 重複チェックに使うユニークキー名
      * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function modify($tableName, $insertData, $updateData = [])
+    public function modify($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
         // 隠し引数 $opt
-        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
+        $opt = func_num_args() === 5 ? func_get_arg(4) : [];
 
         if (!$this->getCompatiblePlatform()->supportsMerge()) {
             return $this->upsert($tableName, $insertData, $updateData ?: null, $opt);
@@ -6677,7 +6694,7 @@ class Database
         $updateData = $this->getCompatiblePlatform()->convertMergeData($insertData, $updateData);
 
         $schema = $this->getSchema();
-        $pkcols = $schema->getTablePrimaryColumns($tableName);
+        $pkcols = $schema->getTableUniqueColumns($tableName, $uniquekey);
 
         $params = [];
         $sets1 = $this->bindInto($insertData, $params);
