@@ -2295,6 +2295,19 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * レコード配列の差分をとる
+     *
+     * Gateway 版の {@link Database::differ()} 。
+     *
+     * @inheritdoc Database::differ()
+     */
+    public function differ($array, $wheres = [])
+    {
+        $sp = $this->getScopeParams([], $wheres);
+        return $this->database->differ($array, $this->tableName, $sp['where']);
+    }
+
+    /**
      * 駆動表を省略できる <@uses Database::insertSelect()>
      *
      * @used-by insertSelectIgnore()

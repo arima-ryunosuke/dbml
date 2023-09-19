@@ -2,6 +2,7 @@
 
 namespace ryunosuke\Test\dbml\Gateway;
 
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
@@ -1964,6 +1965,32 @@ AND ((flag=1))", "$gw");
                 3 => ['comment_id' => '3'],
             ],
         ], $t_article->pk(1)->gather([], ['t_comment' => ['comment_id <> ?' => 2]]));
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_differ($gateway, $database)
+    {
+        if ($database->getPlatform() instanceof PostgreSQLPlatform) {
+            return;
+        }
+
+        $multiprimary = new TableGateway($database, 'multiprimary');
+        $this->assertEquals([
+            'b' => ['subid' => 1, 'name' => 'x'],
+            'c' => ['subid' => 2, 'name' => 'y', 'dummy' => null],
+            'd' => ['subid' => 3, 'name' => 'x'],
+            'e' => ['subid' => 6, 'name' => 'f'],
+        ], $multiprimary->where(['mainid' => 1])->differ([
+            'a' => ['subid' => 1, 'name' => 'a'],
+            'b' => ['subid' => 1, 'name' => 'x'],
+            'c' => ['subid' => 2, 'name' => 'y', 'dummy' => null],
+            'd' => ['subid' => 3, 'name' => 'x'],
+            'e' => ['subid' => 6, 'name' => 'f'],
+        ]));
     }
 
     /**

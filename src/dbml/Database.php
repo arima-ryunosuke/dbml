@@ -4483,6 +4483,79 @@ class Database
     }
 
     /**
+     * 配列を仮想テーブルとみなして差分をとる
+     *
+     * 指定された配列で仮想的なテーブルを作成し、NATURAL LEFT JOIN して無いものを返すイメージ。
+     *
+     * 配列はいわゆる「配列の配列」である必要がある。
+     * 要素のキーが一致しない場合は例外を投げる。
+     *
+     * ```php
+     * # hoge.jpg, fuga.jpg, piyo.jpg と t_s3 の差分をとる
+     * $db->differ([
+     *     'hoge' => ['path' => 'img/hoge.jpg'],
+     *     'fuga' => ['path' => 'img/fuga.jpg'],
+     *     'piyo' => ['path' => 'img/piyo.jpg'],
+     * ], 't_s3');
+     * // results: キーが維持されつつ存在しないものだけを返す
+     * [
+     *     'fuga' => ['path' => 'img/fuga.jpg'],
+     * ];
+     * ```
+     *
+     * @param array $array 対象配列
+     * @param string $tablename 取得テーブル
+     * @param array $wheres 対象テーブルの条件
+     * @return array 突き合わせ結果
+     */
+    public function differ($array, $tablename, $wheres = [])
+    {
+        $keyname = Database::AUTO_PRIMARY_KEY;
+        $tmpname = '__dbml_auto_join';
+
+        $pkcols = $this->getSchema()->getTablePrimaryColumns($tablename);
+        $columns = $this->getSchema()->getTable($tablename)->getColumns();
+
+        $joincols = null;
+        $selects = [];
+        $params = [];
+        foreach ($array as $key => $row) {
+            $realrow = array_intersect_key($row, $columns);
+            $realcols = array_keys($realrow);
+            if (!$realcols) {
+                throw new \InvalidArgumentException("row is empty#$key");
+            }
+
+            $joincols ??= $realcols;
+            if ($joincols !== $realcols) {
+                throw new \InvalidArgumentException("column is unmatched#$key (" . implode(',', $joincols) . ") != (" . implode(',', $realcols) . ")");
+            }
+
+            $selects[] = "SELECT ? $keyname, " . array_sprintf($realrow, '? %2$s', ', ');
+            $params = array_merge($params, [$key], array_values($realrow));
+        }
+        if (!$selects) {
+            return [];
+        }
+
+        $select = $this->createQueryBuilder();
+        $select->select("$tmpname.$keyname");
+        $select->from(new Expression('(' . implode(' UNION ', $selects) . ')', $params), $tmpname);
+        $select->leftJoinOn($tablename, array_merge(arrayize($wheres), array_sprintf($joincols, "$tablename.%1\$s = $tmpname.%1\$s")));
+        $select->where(array_sprintf($pkcols, "$tablename.%2\$s IS NULL"));
+        $select->setAutoOrder(false);
+
+        $rows = $select->assoc();
+        $result = [];
+        foreach ($array as $key => $row) {
+            if (isset($rows[$key])) {
+                $result[$key] = $row;
+            }
+        }
+        return $result;
+    }
+
+    /**
      * prepare されたステートメントを取得する
      *
      * ほぼ内部メソッドであり、実際は下記のように暗黙のうちに使用され、明示的に呼び出す必要はあまりない。

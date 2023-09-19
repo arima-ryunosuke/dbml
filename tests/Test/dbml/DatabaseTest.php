@@ -8,6 +8,7 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Schema;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
@@ -2590,6 +2591,42 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'child_id <= ?' => 5,
             ],
         ]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_differ($database)
+    {
+        // PostgreSQL は string = int の比較でコケるのでスルー
+        if ($database->getPlatform() instanceof PostgreSQLPlatform) {
+            return;
+        }
+
+        $this->assertEquals([], $database->differ([], 'multiprimary', ['multiprimary.mainid' => 1]));
+
+        $this->assertEquals([
+            'b' => ['subid' => 1, 'name' => 'x'],
+            'c' => ['subid' => 2, 'name' => 'y', 'dummy' => null],
+            'd' => ['subid' => 3, 'name' => 'x'],
+            'e' => ['subid' => 6, 'name' => 'f'],
+        ], $database->differ([
+            'a' => ['subid' => 1, 'name' => 'a'],
+            'b' => ['subid' => 1, 'name' => 'x'],
+            'c' => ['subid' => 2, 'name' => 'y', 'dummy' => null],
+            'd' => ['subid' => 3, 'name' => 'x'],
+            'e' => ['subid' => 6, 'name' => 'f'],
+        ], 'multiprimary', ['multiprimary.mainid' => 1]));
+
+        $this->assertException('row is empty', L($database)->differ([
+            ['unmatch1' => 1],
+            ['unmatch2' => 2],
+        ], 'multiprimary'));
+        $this->assertException('column is unmatched', L($database)->differ([
+            ['mainid' => 1],
+            ['subid' => 1],
+        ], 'multiprimary'));
     }
 
     /**
