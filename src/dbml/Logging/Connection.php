@@ -24,7 +24,7 @@ final class Connection extends AbstractConnectionMiddleware
         $this->logger->info('Disconnecting', ['time' => microtime(true)]);
     }
 
-    public function prepare(string $sql): DriverStatement
+    public function prepare(string $sql, $params = [], $types = []): DriverStatement
     {
         $start = microtime(true);
 
@@ -37,7 +37,7 @@ final class Connection extends AbstractConnectionMiddleware
             throw $t;
         }
         finally {
-            $this->logger->$level('Executing prepare: {sql}, time: {time}', ['sql' => $sql, 'time' => $start]);
+            $this->logger->$level('Executing prepare: {sql} parameters: {params}, types: {types}, time: {time}', ['sql' => $sql, 'params' => $params, 'types' => $types, 'time' => $start]);
         }
     }
 

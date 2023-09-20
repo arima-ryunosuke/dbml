@@ -2,9 +2,12 @@
 
 namespace ryunosuke\Test\dbml\Logging;
 
+use Doctrine\DBAL\Cache\QueryCacheProfile;
+use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Result;
 use Psr\Log\AbstractLogger;
-use ryunosuke\dbml\Logging\Connection;
-use ryunosuke\dbml\Logging\Driver;
+use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Logging\Middleware;
 use function ryunosuke\dbml\try_catch;
 
@@ -17,16 +20,19 @@ class MiddlewareTest extends \ryunosuke\Test\AbstractUnitTestCase
 
             public function log($level, $message, array $context = [])
             {
-                $this->logs[$level][] = $message;
+                $simple = Logger::simple();
+                $this->logs[$level][] = [
+                    'message' => $message,
+                    'query'   => $simple($context['sql'] ?? '', $context['params'] ?? [], [], []),
+                ];
             }
         };
-        $middleware = new Middleware($logger);
-
-        $driver = $middleware->wrap(new \Doctrine\DBAL\Driver\PDO\SQLite\Driver());
-        $this->assertInstanceOf(Driver::class, $driver);
-
-        $connection = $driver->connect(['url' => 'sqlite:///:memory:']);
-        $this->assertInstanceOf(Connection::class, $connection);
+        $config = new Configuration();
+        $config->setMiddlewares(['logging' => new Middleware($logger)]);
+        $connection = DriverManager::getConnection([
+            'url'          => 'sqlite:///:memory:',
+            'wrapperClass' => Connection::class,
+        ], $config);
 
         $connection->getNativeConnection()->exec('CREATE TABLE logs(id PRIMARY KEY)');
 
@@ -49,31 +55,106 @@ class MiddlewareTest extends \ryunosuke\Test\AbstractUnitTestCase
         $statement->bindValue(2, 2);
         try_catch(fn() => $statement->execute());
 
-        try_catch(fn() => $connection->prepare('select fail'));
+        try_catch(fn() => $connection->executeQuery('fail1 ?, ?', [1, 2]));
+        try_catch(fn() => $connection->executeStatement('fail2 ?, ?', [1, 2]));
 
         unset($connection);
+        unset($statement);
+        gc_collect_cycles();
 
         $this->assertEquals([
             "debug" => [
-                "Executing prepare: {sql}, time: {time}",
+                [
+                    "message" => "Executing prepare: {sql} parameters: {params}, types: {types}, time: {time}",
+                    "query"   => "insert into logs values(undefined(0) + undefined(1))",
+                ],
             ],
             "info"  => [
-                "Connecting",
-                "BEGIN",
-                "ROLLBACK",
-                "BEGIN",
-                "COMMIT",
-                "Executing select: {sql}, time: {time}",
-                "Executing affect: {sql}, time: {time}",
-                "Executing statement: {sql} (parameters: {params}, types: {types}, time: {time})",
-                "Disconnecting",
+                [
+                    "message" => "Connecting",
+                    "query"   => "",
+                ],
+                [
+                    "message" => "BEGIN",
+                    "query"   => "",
+                ],
+                [
+                    "message" => "ROLLBACK",
+                    "query"   => "",
+                ],
+                [
+                    "message" => "BEGIN",
+                    "query"   => "",
+                ],
+                [
+                    "message" => "COMMIT",
+                    "query"   => "",
+                ],
+                [
+                    "message" => "Executing select: {sql}, time: {time}",
+                    "query"   => "select 1",
+                ],
+                [
+                    "message" => "Executing affect: {sql}, time: {time}",
+                    "query"   => "select 2",
+                ],
+                [
+                    "message" => "Executing statement: {sql} parameters: {params}, types: {types}, time: {time}",
+                    "query"   => "insert into logs values(1 + 2)",
+                ],
+                [
+                    "message" => "Disconnecting",
+                    "query"   => "",
+                ],
             ],
             "error" => [
-                "Executing select: {sql}, time: {time}",
-                "Executing affect: {sql}, time: {time}",
-                "Executing statement: {sql} (parameters: {params}, types: {types}, time: {time})",
-                "Executing prepare: {sql}, time: {time}",
+                [
+                    "message" => "Executing select: {sql}, time: {time}",
+                    "query"   => "select fail",
+                ],
+                [
+                    "message" => "Executing affect: {sql}, time: {time}",
+                    "query"   => "select fail",
+                ],
+                [
+                    "message" => "Executing statement: {sql} parameters: {params}, types: {types}, time: {time}",
+                    "query"   => "insert into logs values(1 + 2)",
+                ],
+                [
+                    "message" => "Executing prepare: {sql} parameters: {params}, types: {types}, time: {time}",
+                    "query"   => "fail1 1, 2",
+                ],
+                [
+                    "message" => "Executing prepare: {sql} parameters: {params}, types: {types}, time: {time}",
+                    "query"   => "fail2 1, 2",
+                ],
             ],
         ], $logger->logs);
+    }
+}
+
+
+class Connection extends \Doctrine\DBAL\Connection
+{
+    public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
+    {
+        $connection = $this->getWrappedConnection();
+
+        if (count($params) > 0) {
+            return new Result($connection->prepare($sql, $params, $types)->execute(), $this);
+        }
+
+        return new Result($connection->query($sql), $this);
+    }
+
+    public function executeStatement($sql, array $params = [], array $types = [])
+    {
+        $connection = $this->getWrappedConnection();
+
+        if (count($params) > 0) {
+            return $connection->prepare($sql, $params, $types)->execute()->rowCount();
+        }
+
+        return $connection->exec($sql);
     }
 }
