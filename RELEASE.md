@@ -24,6 +24,14 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.10
+
+- [feature] prepare でコケた時にもパラメータでログれる機能
+- [feature] 配列の差分を取る機能
+- [feature] modify 系で一意制約を指定できる機能
+- [feature] ユニークキーのカラムを取得する機能
+- [change] デフォルトキャッシュディレクトリを変更
+
 ## 2.1.9
 
 - [feature] length を超える文字列が来た時に切り落とす機能
