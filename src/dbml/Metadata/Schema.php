@@ -498,6 +498,10 @@ class Schema
 
         $cacheid = sprintf($this->foreignCacheId, $table_name1, $table_name2, $fkeyname);
         if (!isset($this->foreignColumns[$cacheid])) {
+            // 遅延外部キーのためにここで呼んでおく（cache_fetch でキャッシュが使われた場合、アクセスされる機会が失われる）
+            $this->getTableForeignKeys($table_name1);
+            $this->getTableForeignKeys($table_name2);
+
             $this->foreignColumns[$cacheid] = cache_fetch($this->cache, $cacheid, function () use ($table_name1, $table_name2, $fkeyname) {
                 $fkeys = [];
                 $fkeys += $this->getForeignKeys($table_name1, $table_name2);
