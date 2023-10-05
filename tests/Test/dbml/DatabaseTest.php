@@ -1063,11 +1063,35 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             ],
         ], $rows);
 
-        // join
+        // join1
         $rows = $database->selectArray([
             'master_table' => [
                 '*',
                 '+tran_table1' => ['*'],
+            ],
+        ], [
+            'subid' => 10,
+        ]);
+        $this->assertEquals([
+            [
+                "category"  => "tran1",
+                "subid"     => "10",
+                "id"        => "101",
+                "master_id" => "10",
+            ],
+            [
+                "category"  => "tran1",
+                "subid"     => "10",
+                "id"        => "201",
+                "master_id" => "10",
+            ],
+        ], $rows);
+
+        // join2
+        $rows = $database->selectArray([
+            'tran_table1 TT' => [
+                '*',
+                '+master_table MT' => ['*'],
             ],
         ], [
             'subid' => 10,

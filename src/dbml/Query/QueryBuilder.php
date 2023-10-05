@@ -2186,9 +2186,15 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 $condition = array_merge(array_sprintf((array) $cond, fn($v, $k) => sprintf('%s.%s = %s.%s', $joinAlias, is_int($k) ? $v : $k, $fromAlias, $v)), $condition);
             }
         }
+        $virtualCondition = [];
+        if (isset($fkey) && $fkey instanceof ForeignKeyConstraint) {
+            $virtualAlias = $fkey->getForeignTableName() === $fromTable ? $fromAlias : $joinAlias;
+            $virtualCondition = array_strpad(@$fkey->getOption('condition') ?? [], "$virtualAlias.");
+        }
         $condition = array_merge(
-            array_strpad(@optional($fkey ?? null, ForeignKeyConstraint::class)->getOption('condition') ?? [], "$fromAlias."),
-            array_sprintf($fcols, fn($v, $k) => sprintf('%s.%s = %s.%s', $joinAlias, $v, $fromAlias, $k)), Adhoc::modifier($joinAlias, $columns, $condition),
+            $virtualCondition,
+            array_sprintf($fcols, fn($v, $k) => sprintf('%s.%s = %s.%s', $joinAlias, $v, $fromAlias, $k)),
+            Adhoc::modifier($joinAlias, $columns, $condition),
         );
 
         // $type の解決
