@@ -24,6 +24,11 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.11
+
+- [fixbug] キャッシュがあると遅延外部キーが有効にならない不具合を修正
+- [fixbug] 条件付き外部キー join でテーブル修飾子が入れ替わることがある不具合を修正
+
 ## 2.1.10
 
 - [feature] prepare でコケた時にもパラメータでログれる機能
