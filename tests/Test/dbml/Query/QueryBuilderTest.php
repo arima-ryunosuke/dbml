@@ -1451,6 +1451,57 @@ AND
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
+    function test_orWheres($builder)
+    {
+        $builder->column('test');
+
+        $builder->orWhere('id = 1');
+        $builder->orWhere(['id = 1', 'seq = 1']);
+        $builder->orWhere('id = 1', 'seq = 1');
+        $this->assertQuery('SELECT test.* FROM test WHERE (id = 1) OR ((id = 1) AND (seq = 1)) OR ((id = 1) OR (seq = 1))', $builder);
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
+    function test_orNotWheres($builder)
+    {
+        $builder->column('test');
+
+        $builder->orNotWhere('id = 1');
+        $builder->orNotWhere(['id = 1', 'seq = 1']);
+        $builder->orNotWhere('id = 1', 'seq = 1');
+        $this->assertQuery('SELECT test.* FROM test WHERE (NOT (id = 1)) OR (NOT ((id = 1) AND (seq = 1))) OR (NOT ((id = 1) OR (seq = 1)))', $builder);
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
+    function test_endWheres($builder)
+    {
+        $builder->column('test');
+
+        $builder->where('a');
+        $builder->orWhere('b');
+        //$builder->endWhere();
+        $builder->andWhere('c');
+        $this->assertQuery('SELECT test.* FROM test WHERE (a) OR (b) AND (c)', $builder);
+
+        $builder->column('test');
+
+        $builder->where('a');
+        $builder->orWhere('b');
+        $builder->endWhere();
+        $builder->andWhere('c');
+        $this->assertQuery('SELECT test.* FROM test WHERE ((a) OR (b)) AND (c)', $builder);
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
     function test_wheres_sub($builder)
     {
         $builder->column('t_article A')->where([
@@ -1494,8 +1545,8 @@ AND
 
         $t = $builder->getSubbuilder('C');
         $this->assertEquals([
-            'comment LIKE = ?',
-            'delete_flg = ?',
+            '0'    => 'comment LIKE = ?',
+            'AND1' => 'delete_flg = ?',
         ], $t->getQueryPart('where'));
         $this->assertEquals(['message', 0], $t->getParams());
     }
@@ -1559,8 +1610,8 @@ AND
             '*.*' => 'hoge',
         ]);
         $this->assertEquals([
-            'A.article_id = ?',
-            '(/* anywhere */ A.title collate utf8_bin LIKE ?) OR (/* anywhere */ C.comment LIKE ?)',
+            '0'    => 'A.article_id = ?',
+            'AND1' => '(/* anywhere */ A.title collate utf8_bin LIKE ?) OR (/* anywhere */ C.comment LIKE ?)',
         ], $t->getQueryPart('where'));
         $this->assertEquals([9, '%hoge%', '%hoge%'], $t->getParams());
 
@@ -1570,8 +1621,8 @@ AND
             '*' => 'hoge',
         ]);
         $this->assertEquals([
-            'A.article_id = ?',
-            '(/* anywhere */ A.title collate utf8_bin LIKE ?) OR (/* anywhere */ C.comment LIKE ?)',
+            '0'    => 'A.article_id = ?',
+            'AND1' => '(/* anywhere */ A.title collate utf8_bin LIKE ?) OR (/* anywhere */ C.comment LIKE ?)',
         ], $t->getQueryPart('where'));
         $this->assertEquals([9, '%hoge%', '%hoge%'], $t->getParams());
 
@@ -1581,8 +1632,8 @@ AND
             'A.*' => 'hoge',
         ]);
         $this->assertEquals([
-            'A.article_id = ?',
-            '/* anywhere */ A.title collate utf8_bin LIKE ?',
+            '0'    => 'A.article_id = ?',
+            'AND1' => '/* anywhere */ A.title collate utf8_bin LIKE ?',
         ], $t->getQueryPart('where'));
         $this->assertEquals([9, '%hoge%'], $t->getParams());
 
@@ -1595,8 +1646,8 @@ AND
             ],
         ]);
         $this->assertEquals([
-            'A.article_id = ?',
-            '(/* anywhere */ A.title collate utf8_bin LIKE ?) OR (/* anywhere */ C.comment LIKE ?)',
+            '0'    => 'A.article_id = ?',
+            'AND1' => '(/* anywhere */ A.title collate utf8_bin LIKE ?) OR (/* anywhere */ C.comment LIKE ?)',
         ], $t->getQueryPart('where'));
         $this->assertEquals([9, '%hoge%', '%hoge%'], $t->getParams());
     }
@@ -1626,8 +1677,8 @@ AND
         // C は ['*.article_id' => [1, 2, 3]] が適用され、*.comment が活きるはず
         $t = $builder->getSubbuilder('C');
         $this->assertEquals([
-            'C.article_id IN (?,?,?)',
-            'C.comment = ?',
+            '0'    => 'C.article_id IN (?,?,?)',
+            'AND1' => 'C.comment = ?',
         ], $t->getQueryPart('where'));
         $this->assertEquals([1, 2, 3, 'fuga'], $t->getParams());
     }
@@ -2001,6 +2052,57 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
         $builder->andNotHaving(['id = 1', 'seq = 1']);
         $builder->andNotHaving('id = 1', 'seq = 1');
         $this->assertQuery('SELECT test.* FROM test HAVING (NOT (id = 1)) AND (NOT ((id = 1) AND (seq = 1))) AND (NOT ((id = 1) OR (seq = 1)))', $builder);
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
+    function test_orHavings($builder)
+    {
+        $builder->column('test');
+
+        $builder->orHaving('id = 1');
+        $builder->orHaving(['id = 1', 'seq = 1']);
+        $builder->orHaving('id = 1', 'seq = 1');
+        $this->assertQuery('SELECT test.* FROM test HAVING (id = 1) OR ((id = 1) AND (seq = 1)) OR ((id = 1) OR (seq = 1))', $builder);
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
+    function test_orNotHavings($builder)
+    {
+        $builder->column('test');
+
+        $builder->orNotHaving('id = 1');
+        $builder->orNotHaving(['id = 1', 'seq = 1']);
+        $builder->orNotHaving('id = 1', 'seq = 1');
+        $this->assertQuery('SELECT test.* FROM test HAVING (NOT (id = 1)) OR (NOT ((id = 1) AND (seq = 1))) OR (NOT ((id = 1) OR (seq = 1)))', $builder);
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
+    function test_endHavings($builder)
+    {
+        $builder->column('test');
+
+        $builder->having('a');
+        $builder->orHaving('b');
+        //$builder->endHaving();
+        $builder->andHaving('c');
+        $this->assertQuery('SELECT test.* FROM test HAVING (a) OR (b) AND (c)', $builder);
+
+        $builder->column('test');
+
+        $builder->having('a');
+        $builder->orHaving('b');
+        $builder->endHaving();
+        $builder->andHaving('c');
+        $this->assertQuery('SELECT test.* FROM test HAVING ((a) OR (b)) AND (c)', $builder);
     }
 
     /**

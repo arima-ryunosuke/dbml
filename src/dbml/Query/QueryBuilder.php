@@ -609,9 +609,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             . concat(' ', implode(' ', $builder->sqlParts['option']))
             . concat(' ', implode(', ', $builder->sqlParts['select']) ?: '*')
             . concat(' FROM ', implode(', ', $builder->_getFromClauses()))
-            . concat(' WHERE ', implode(' AND ', Adhoc::wrapParentheses($builder->sqlParts['where'])))
+            . concat(' WHERE ', $this->_getConditionClause($builder->sqlParts['where']))
             . concat(' GROUP BY ', implode(', ', $builder->sqlParts['groupBy']))
-            . concat(' HAVING ', implode(' AND ', Adhoc::wrapParentheses($builder->sqlParts['having'])))
+            . concat(' HAVING ', $this->_getConditionClause($builder->sqlParts['having']))
             . concat(' ORDER BY ', implode(', ', $builder->sqlParts['orderBy']));
 
         $sql = $platform->modifyLimitQuery($sql, $builder->sqlParts['limit'], $builder->sqlParts['offset']);
@@ -655,6 +655,17 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             $jsql .= $this->_getJoinClauses($jname);
         }
         return $sql . $jsql;
+    }
+
+    private function _getConditionClause($conditions)
+    {
+        $result = "";
+        foreach (Adhoc::wrapParentheses($conditions) as $n => $condition) {
+            preg_match('#^(AND|OR)\d#i', $n, $matches);
+            $andor = isset($matches[1]) ? " {$matches[1]} " : '';
+            $result .= $andor . $condition;
+        }
+        return $result;
     }
 
     private function _buildColumn($columns, $table = null, $alias = null)
@@ -917,9 +928,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         return $this->_dirty();
     }
 
-    private function _buildCondition($type, $predicates, $ack = true)
+    private function _buildCondition($type, $predicates, $ack, $andor)
     {
-        $subtype = "and$type";
+        $andor = strtoupper($andor);
+        $subtype = "$andor$type";
 
         $froms = array_filter($this->getFromPart(), function ($from) {
             return is_string($from['table']);
@@ -1102,7 +1114,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             if (!$ack) {
                 $ors = 'NOT (' . $ors . ')';
             }
-            $this->sqlParts[$type][] = new Expression($ors, $params);
+            $next = count($this->sqlParts[$type]);
+            $key = $next === 0 ? 0 : $andor . $next;
+            $this->sqlParts[$type][$key] = new Expression($ors, $params);
         }
 
         return $this->_dirty();
@@ -2251,7 +2265,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             'type'      => $type,
             'table'     => $table,
             'alias'     => $alias,
-            'condition' => new Expression(implode(' AND ', Adhoc::wrapParentheses($qb->sqlParts['where'] ?: [1])), $qb->getParams('where')),
+            'condition' => new Expression($this->_getConditionClause($qb->sqlParts['where'] ?: [1]), $qb->getParams('where')),
         ];
 
         return $this->_dirty();
@@ -2397,7 +2411,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function where(...$predicates)
     {
-        return $this->resetQueryPart('where')->_buildCondition('where', $predicates);
+        return $this->resetQueryPart('where')->_buildCondition('where', $predicates, true, 'AND');
     }
 
     /**
@@ -2409,31 +2423,101 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function notWhere(...$predicates)
     {
-        return $this->resetQueryPart('where')->_buildCondition('where', $predicates, false);
+        return $this->resetQueryPart('where')->_buildCondition('where', $predicates, false, 'AND');
     }
 
     /**
-     * 引数内では AND、引数間では OR する（{@link where()} の追加版）
+     * 現在に対して AND で引数内では AND、引数間では OR する（{@link where()} の追加版）
      *
      * クリアされずに追加されること以外は {@link where()} と同じ。
+     *
+     * ```php
+     * $qb->where('current');
+     * $qb->andWhere(['a', 'b'], ['c', 'd']);
+     * // results: (current) AND ((a AND b) OR (c AND d))
+     * ```
      *
      * @inheritdoc where()
      */
     public function andWhere(...$predicates)
     {
-        return $this->_buildCondition('where', $predicates);
+        return $this->_buildCondition('where', $predicates, true, 'AND');
     }
 
     /**
-     * NOT つきで引数内では AND、引数間では OR する（{@link notWhere()} の追加版）
+     * 現在に対して AND で NOT つきで引数内では AND、引数間では OR する（{@link andWhere()} の NOT 版）
      *
-     * クリアされずに追加されること以外は {@link notWhere()} と同じ。
+     * NOT が付く以外は {@link andWhere()} と同じ。
      *
      * @inheritdoc where()
      */
     public function andNotWhere(...$predicates)
     {
-        return $this->_buildCondition('where', $predicates, false);
+        return $this->_buildCondition('where', $predicates, false, 'AND');
+    }
+
+    /**
+     * 現在に対して OR で引数内では AND、引数間では OR する（{@link where()} の追加版）
+     *
+     * クリアされずに OR で追加されること以外は {@link where()} と同じ。
+     *
+     * ```php
+     * $qb->where('current');
+     * $qb->orWhere(['a', 'b'], ['c', 'd']);
+     * // results: (current) OR ((a AND b) OR (c AND d))
+     * ```
+     *
+     * @inheritdoc where()
+     */
+    public function orWhere(...$predicates)
+    {
+        return $this->_buildCondition('where', $predicates, true, 'OR');
+    }
+
+    /**
+     * 現在に対して OR で NOT つきで引数内では AND、引数間では OR する（{@link orWhere()} のNOT 版）
+     *
+     * NOT が付く以外は {@link orWhere()} と同じ。
+     *
+     * @inheritdoc where()
+     */
+    public function orNotWhere(...$predicates)
+    {
+        return $this->_buildCondition('where', $predicates, false, 'OR');
+    }
+
+    /**
+     * 現在の条件をブロック化する
+     *
+     * AND/OR は基本的に andWhere/orWhere の「引数内では AND、引数間では OR」という仕様で賄えるが、既にあるブロックはどうしようもない。
+     * このメソッドを呼ぶと現在の条件を1つのブロックとみなして括弧が付与されるようになる。
+     *
+     * ```php
+     * $qb->where('a');
+     * $qb->orWhere('b');
+     * $qb->endWhere(); // これがあることで括弧が付く
+     * $qb->andWhere('c');
+     * // results: (a OR b) AND c
+     *
+     * $qb->where('a');
+     * $qb->orWhere('b');
+     * //$qb->endWhere(); これがないと括弧が付かない
+     * $qb->andWhere('c');
+     * // results: a OR b AND c
+     * ```
+     *
+     * @inheritdoc where()
+     */
+    public function endWhere()
+    {
+        if ($this->sqlParts['where']) {
+            $params = [];
+            foreach ($this->sqlParts['where'] as $where) {
+                $where->merge($params);
+            }
+            $this->sqlParts['where'] = [new Expression($this->_getConditionClause($this->sqlParts['where']), $params)];
+        }
+        return $this->_dirty();
     }
 
     /**
@@ -2509,43 +2593,86 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function having(...$predicates)
     {
-        return $this->resetQueryPart('having')->_buildCondition('having', $predicates);
+        return $this->resetQueryPart('having')->_buildCondition('having', $predicates, true, 'AND');
     }
 
     /**
      * NOT つきで引数内では AND、引数間では OR する having（クリア版）
      *
-     * NOT が付くこと以外は {@link having()} と同じ。
+     * WHERE ではなく HAVING である点を除いて引数体系などは {@link notWhere()} と同じ。
      *
      * @inheritdoc having()
      */
     public function notHaving(...$predicates)
     {
-        return $this->resetQueryPart('having')->_buildCondition('having', $predicates, false);
+        return $this->resetQueryPart('having')->_buildCondition('having', $predicates, false, 'AND');
     }
 
     /**
      * 引数内では AND、引数間では OR する（{@link having()} の追加版）
      *
-     * クリアされずに追加されること以外は {@link having()} と同じ。
+     * WHERE ではなく HAVING である点を除いて引数体系などは {@link andWhere()} と同じ。
      *
      * @inheritdoc having()
      */
     public function andHaving(...$predicates)
     {
-        return $this->_buildCondition('having', $predicates);
+        return $this->_buildCondition('having', $predicates, true, 'AND');
     }
 
     /**
      * NOT つきで引数内では AND、引数間では OR する（{@link notHaving()} の追加版）
      *
-     * クリアされずに追加されること以外は {@link notHaving()} と同じ。
+     * WHERE ではなく HAVING である点を除いて引数体系などは {@link notWhere()} と同じ。
      *
      * @inheritdoc having()
      */
     public function andNotHaving(...$predicates)
     {
-        return $this->_buildCondition('having', $predicates, false);
+        return $this->_buildCondition('having', $predicates, false, 'AND');
+    }
+
+    /**
+     * 現在に対して OR で引数内では AND、引数間では OR する（{@link having()} の追加版）
+     *
+     * WHERE ではなく HAVING である点を除いて引数体系などは {@link orWhere()} と同じ。
+     *
+     * @inheritdoc having()
+     */
+    public function orHaving(...$predicates)
+    {
+        return $this->_buildCondition('having', $predicates, true, 'OR');
+    }
+
+    /**
+     * 現在に対して OR で NOT つきで引数内では AND、引数間では OR する（{@link having()} の追加版）
+     *
+     * WHERE ではなく HAVING である点を除いて引数体系などは {@link orNotWhere()} と同じ。
+     *
+     * @inheritdoc having()
+     */
+    public function orNotHaving(...$predicates)
+    {
+        return $this->_buildCondition('having', $predicates, false, 'OR');
+    }
+
+    /**
+     * 現在の条件をブロック化する
+     *
+     * WHERE ではなく HAVING である点を除いて引数体系などは {@link endWhere()} と同じ。
+     *
+     * @inheritdoc where()
+     */
+    public function endHaving()
+    {
+        if ($this->sqlParts['having']) {
+            $params = [];
+            foreach ($this->sqlParts['having'] as $where) {
+                $where->merge($params);
+            }
+            $this->sqlParts['having'] = [new Expression($this->_getConditionClause($this->sqlParts['having']), $params)];
+        }
+        return $this->_dirty();
     }
 
     /**
