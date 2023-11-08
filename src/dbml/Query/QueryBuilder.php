@@ -48,6 +48,7 @@ use function ryunosuke\dbml\optional;
 use function ryunosuke\dbml\preg_splice;
 use function ryunosuke\dbml\rbind;
 use function ryunosuke\dbml\split_noempty;
+use function ryunosuke\dbml\str_exists;
 use function ryunosuke\dbml\str_lchop;
 use function ryunosuke\dbml\throws;
 
@@ -1131,8 +1132,14 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
         // 文字列は select,from,join 句を調べて一致するもののみ
         if (is_string($column)) {
-            if (in_array($column[0] ?? '', ['+', '-'], true)) {
-                $column = substr($column, 1);
+            // テーブル記法は再帰
+            if (str_exists($column, ['+', '-'])) {
+                foreach (preg_split('#([+-])#', $column, -1, PREG_SPLIT_NO_EMPTY) as $part) {
+                    if (!$this->_isSecureColumn($part)) {
+                        return false;
+                    }
+                }
+                return true;
             }
 
             // SELECT 句と比較
@@ -2788,15 +2795,18 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 }
             }
         }
+        // テーブル記法
+        elseif ($order === null && is_string($sort) && str_exists($sort, ['+', '-'])) {
+            $parts = preg_split('#([+-])#', $sort, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+            foreach (array_chunk($parts, 2) as $part) {
+                $this->addOrderBy($part[1], $part[0] === '+');
+            }
+        }
         else {
             if ($sort instanceof Queryable && $order === null) {
                 $this->sqlParts['orderBy'][] = [$sort, null, $nullsOrder];
             }
             else {
-                if (is_string($sort) && $order === null) {
-                    $order = $sort[0] !== '-';
-                    $sort = ltrim($sort, '-+');
-                }
                 if (is_array($order)) {
                     $nullsOrder = $order[1] ?? null;
                     $order = $order[0] ?? null;

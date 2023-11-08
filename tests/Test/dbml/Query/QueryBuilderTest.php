@@ -2117,6 +2117,7 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
         $this->assertQuery('SELECT test.* FROM test ORDER BY test.id DESC', $builder->orderBy(false));
         $this->assertQuery('SELECT test.* FROM test ORDER BY id1 ASC, id2 DESC, id3 DESC', $builder->orderBy([['id1', 'ASC'], ['id2', false], ['id3']], false));
         $this->assertQuery('SELECT test.* FROM test ORDER BY id ASC', $builder->orderBy('id'));
+        $this->assertQuery('SELECT test.* FROM test ORDER BY id ASC, name DESC', $builder->orderBy('+id-name'));
         $this->assertQuery('SELECT test.* FROM test ORDER BY id DESC', $builder->orderBy('-id'));
         $this->assertQuery('SELECT test.* FROM test ORDER BY id ASC', $builder->orderBy('id', true));
         $this->assertQuery('SELECT test.* FROM test ORDER BY id DESC', $builder->orderBy('id', false));
@@ -2297,6 +2298,14 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
         // +-プレフィックス
         $builder->resetQueryPart('orderBy')->orderBySecure(['-t_article.article_id', '+test2.id']);
         $this->assertStringContainsString('ORDER BY t_article.article_id DESC, test2.id ASC', "$builder");
+
+        // 複合+-プレフィックス
+        $builder->resetQueryPart('orderBy')->orderBySecure(['-t_article.article_id', '+test2.id-test2.name2']);
+        $this->assertStringContainsString('ORDER BY t_article.article_id DESC, test2.id ASC, test2.name2 DESC', "$builder");
+
+        // 複合+-プレフィックスは1つでもダメなら丸ごと除外される
+        $builder->resetQueryPart('orderBy')->orderBySecure(['+test2.invalid-test2.name2']);
+        $this->assertStringNotContainsString('ORDER BY ', "$builder");
     }
 
     /**
