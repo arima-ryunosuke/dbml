@@ -164,6 +164,8 @@ use ryunosuke\dbml\Utility\Adhoc;
  *
  * @method bool                   getInsertSet()
  * @method $this                  setInsertSet($bool)
+ * @method bool                   getUpdateEmpty()
+ * @method $this                  setUpdateEmpty($bool)
  * @method bool                   getFilterNoExistsColumn()
  * @method $this                  setFilterNoExistsColumn($bool) {
  *     存在しないカラムをフィルタするか指定する
@@ -391,6 +393,8 @@ class Database
             'tableMapper'               => function ($table) { return pascal_case($table); },
             // 拡張 INSERT SET 構文を使うか否か（mysql 以外は無視される）
             'insertSet'                 => false,
+            // UPDATE で空データの時に意味のない更新をするか？（false だと構文エラーになる）
+            'updateEmpty'               => true,
             // insert 時などにテーブルに存在しないカラムを自動でフィルタするか否か
             'filterNoExistsColumn'      => true,
             // insert 時などに not null な列に null が来た場合に自動でフィルタするか否か
@@ -6248,8 +6252,14 @@ class Database
 
         $tableName = $this->convertTableName($tableName);
 
-        $params = [];
         $data = $this->_normalize($tableName, $data);
+        if (!count($data) && $this->getUnsafeOption('updateEmpty')) {
+            foreach ($this->getSchema()->getTablePrimaryColumns($tableName) as $pk => $column) {
+                $data[$pk] = $this->raw($pk);
+            }
+        }
+
+        $params = [];
         $set = $this->bindInto($data, $params);
         $sets = array_sprintf($set, '%2$s = %1$s', ', ');
         $criteria = $this->whereInto($this->_prewhere($tableName, $identifier), $params);

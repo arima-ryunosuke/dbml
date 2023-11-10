@@ -5318,6 +5318,21 @@ INSERT INTO test (id, name) VALUES
         ]);
         $this->assertEquals(1, $affected);
         $this->assertEquals('LOWER', $database->fetchValue('select name from test where id = 1'));
+
+        // 空
+        $realaffected = $database->update('multiprimary', [
+            'name' => 'XXX',
+        ], [
+            'mainid' => 1,
+        ]);
+        $affected = $database->update('multiprimary', [
+            // empty
+        ], [
+            'mainid' => 1,
+        ]);
+        $cconnection = new CompatibleConnection($database->getConnection());
+        $this->assertEquals($cconnection->getName() === 'pdo-mysql' ? 0 : $realaffected, $affected);
+        $this->assertEquals($database->getPlatform() instanceof MySQLPlatform ? 0 : $realaffected, $database->getAffectedRows());
     }
 
     /**
