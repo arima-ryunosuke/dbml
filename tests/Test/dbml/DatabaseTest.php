@@ -2972,35 +2972,38 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             ],
         ], iterator_to_array($it));
 
-        $it = $database->yieldArray('t_article/t_comment');
+        $it = $database->yieldArray($database->select([
+            'test' => [
+                'id',
+                'name',
+                'test1{id:id}' => [
+                    'name1',
+                ],
+                'test2{id:id}' => [
+                    'name2',
+                ],
+            ],
+        ], ['id' => [1, 2, 3, 4]]), ['id' => [2, 3]]);
         $this->assertEquals([
             [
-                'article_id' => '1',
-                'title'      => 'タイトルです',
-                'checks'     => '',
-                'Comment'    => [
-                    1 => [
-                        'comment_id' => '1',
-                        'article_id' => '1',
-                        'comment'    => 'コメント1です',
-                    ],
-                    2 => [
-                        'comment_id' => '2',
-                        'article_id' => '1',
-                        'comment'    => 'コメント2です',
-                    ],
-                    3 => [
-                        'comment_id' => '3',
-                        'article_id' => '1',
-                        'comment'    => 'コメント3です',
-                    ],
+                "id"    => "2",
+                "name"  => "b",
+                "test1" => [
+                    "name1" => "b",
+                ],
+                "test2" => [
+                    "name2" => "B",
                 ],
             ],
             [
-                'article_id' => '2',
-                'title'      => 'コメントのない記事です',
-                'checks'     => '',
-                'Comment'    => [],
+                "id"    => "3",
+                "name"  => "c",
+                "test1" => [
+                    "name1" => "c",
+                ],
+                "test2" => [
+                    "name2" => "C",
+                ],
             ],
         ], iterator_to_array($it));
     }
