@@ -137,9 +137,14 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getConnection());
         $g->setFetchMethod('hoge');
-        $ex = new \UnexpectedValueException("method 'hoge' is undefined");
-        $this->assertException($ex, L($g)->key());
-        $this->assertException($ex, L($g)->current());
+        $ex = new \UnexpectedValueException("method 'hoge' is undefined.");
+        try {
+            iterator_to_array($g->getIterator());
+            $this->fail();
+        }
+        catch (\UnexpectedValueException $expected) {
+            $this->assertEquals($ex->getMessage(), $expected->getMessage());
+        }
     }
 
     /**
@@ -165,6 +170,36 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
             [2 => '8',],
             [2 => '9',],
             [2 => '10',],
+        ], $actual);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_chunk($database)
+    {
+        $g = new Yielder($database->executeSelect('select subid from multiprimary'), $database->getConnection(), 'lists', function ($rows) {
+            foreach ($rows as $n => $row) {
+                $rows[$n]['subid'] = $rows[$n]['subid'] * 10;
+            }
+            return $rows;
+        }, 7);
+        $actual = [];
+        foreach ($g as $k => $v) {
+            $actual[] = [$k => $v];
+        }
+        $this->assertEquals([
+            [0 => 10,],
+            [1 => 20,],
+            [2 => 30,],
+            [3 => 40,],
+            [4 => 50,],
+            [5 => 60,],
+            [6 => 70,],
+            [7 => 80,],
+            [8 => 90,],
+            [9 => 100,],
         ], $actual);
     }
 

@@ -3923,13 +3923,17 @@ class Database
      */
     public function yield($sql, iterable $params = [])
     {
+        $chunk = null;
         $converter = $this->_getConverter($sql);
-        $callback = $sql instanceof QueryBuilder ? function ($row) use ($sql, $converter) {
-            return $sql->postselect([$converter($row)], true)[0];
-        } : $converter;
-        return new Yielder(function ($connection) use ($sql, $params) {
-            return $this->_sqlToStmt($sql, $params, $connection);
-        }, $this->getSlaveConnection(), null, $callback);
+        if ($sql instanceof QueryBuilder) {
+            if ($chunk = $sql->getLazyChunk()) {
+                $converter = fn($rows) => $sql->postselect(array_map($converter, $rows), true);
+            }
+            else {
+                $converter = fn($row) => $sql->postselect([$converter($row)], true)[0];
+            }
+        }
+        return new Yielder(fn($connection) => $this->_sqlToStmt($sql, $params, $connection), $this->getSlaveConnection(), null, $converter, $chunk);
     }
 
     /**

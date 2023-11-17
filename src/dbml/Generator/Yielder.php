@@ -10,17 +10,8 @@ use ryunosuke\dbml\Metadata\CompatibleConnection;
 /**
  * 少しずつ fetch する Generator のようなクラス
  */
-class Yielder implements \Iterator
+class Yielder implements \IteratorAggregate
 {
-    /** @var int 整数キーのための連番 */
-    private $position;
-
-    /** @var array 重複キーを取り除くためのインデックス */
-    private $indexes = [];
-
-    /** @var array 現在行 */
-    private $current;
-
     /** @var Result|\Closure ステートメント */
     private $statement;
 
@@ -36,20 +27,25 @@ class Yielder implements \Iterator
     /** @var callable 行コールバック */
     private $callback;
 
+    /** @var ?int チャンク数 */
+    private $chunk;
+
     /**
      * コンストラクタ
      *
      * @param Result|\Closure $statement 取得に使用される \Statement
      * @param Connection $connection 取得に使用するコネクション
      * @param ?string $method フェッチメソッド名
-     * @param ?callable $callback 1行ごとに呼ばれるコールバック処理
+     * @param ?callable $callback $chunk 行ごとに呼ばれるコールバック処理
+     * @param ?int $chunk コールバック処理のチャンク数。指定するとその数だけバッファリングされるので留意
      */
-    public function __construct($statement, $connection, $method = null, $callback = null)
+    public function __construct($statement, $connection, $method = null, $callback = null, $chunk = null)
     {
         $this->statement = $statement;
         $this->connection = $connection;
         $this->method = $method;
         $this->callback = $callback;
+        $this->chunk = $chunk;
     }
 
     /**
@@ -62,26 +58,6 @@ class Yielder implements \Iterator
         $this->_cleanup();
     }
 
-    private function _fetch()
-    {
-        if ($this->statement instanceof \Closure) {
-            $this->statement = ($this->statement)($this->connection);
-            if (!$this->statement instanceof Result) {
-                throw new \RuntimeException('stetement provider returns invalid type.');
-            }
-        }
-
-        $row = $this->statement->fetchAssociative();
-        if ($row === false) {
-            return false;
-        }
-
-        if ($this->callback) {
-            $row = ($this->callback)($row);
-        }
-        return $row;
-    }
-
     private function _cleanup()
     {
         $this->setBufferMode(true);
@@ -89,7 +65,6 @@ class Yielder implements \Iterator
             $this->statement->free();
         }
         $this->statement = null;
-        $this->indexes = [];
     }
 
     /**
@@ -160,103 +135,115 @@ class Yielder implements \Iterator
         return $this;
     }
 
-    /**
-     * @ignore
-     */
-    public function rewind(): void
+    public function getIterator()
     {
-        $this->position = 0;
-        $this->current = $this->_fetch();
-    }
-
-    /**
-     * @ignore
-     */
-    public function next(): void
-    {
-        $this->position++;
-        $this->current = $this->_fetch();
-    }
-
-    /**
-     * @ignore
-     */
-    public function valid(): bool
-    {
-        // 現在行が終わってるなら掃除して終了（false）
-        if ($this->current === false) {
-            $this->_cleanup();
-            return false;
-        }
-
-        // 継続してるなら true を返せばよいが、 assoc/pairs のために重複を除去しなければならない
-        if ($this->emulationedUnique) {
-            switch ($this->method) {
-                case Database::METHOD_ASSOC:
-                case Database::METHOD_PAIRS:
-                    foreach ($this->current as $v) {
-                        // 既読なら更に次へ行く
-                        if (isset($this->indexes[$v])) {
-                            $this->next();
-                            return $this->valid();
-                        }
-                        // 突破したら既読マークを付ける
-                        $this->indexes[$v] = true;
-                        break;
-                    }
+        if ($this->statement instanceof \Closure) {
+            $this->statement = ($this->statement)($this->connection);
+            if (!$this->statement instanceof Result) {
+                throw new \RuntimeException('stetement provider returns invalid type.');
             }
         }
 
-        return !!$this->current;
-    }
+        $position = -1;
+        $indexes = [];
 
-    /**
-     * @ignore
-     */
-    #[\ReturnTypeWillChange]
-    public function key()
-    {
-        switch ($this->method) {
-            case Database::METHOD_ARRAY:
-            case Database::METHOD_LISTS:
-                return $this->position;
+        $loop = function ($rows) use (&$position, &$indexes) {
+            foreach ($rows as $row) {
+                $position++;
 
-            case Database::METHOD_PAIRS:
-            case Database::METHOD_ASSOC:
-                foreach ($this->current as $v) {
-                    return $v;
-                }
-        }
-
-        throw new \UnexpectedValueException("method '{$this->method}' is undefined.");
-    }
-
-    /**
-     * @ignore
-     */
-    #[\ReturnTypeWillChange]
-    public function current()
-    {
-        switch ($this->method) {
-            case Database::METHOD_ARRAY:
-            case Database::METHOD_ASSOC:
-                return $this->current;
-
-            /** @noinspection PhpMissingBreakStatementInspection */
-            case Database::METHOD_LISTS:
-                foreach ($this->current as $v) {
-                    return $v;
-                }
-            case Database::METHOD_PAIRS:
-                $flg = false;
-                foreach ($this->current as $v) {
-                    if ($flg) {
-                        return $v;
+                // assoc/pairs のために重複を除去しなければならない
+                if ($this->emulationedUnique) {
+                    switch ($this->method) {
+                        case Database::METHOD_ASSOC:
+                        case Database::METHOD_PAIRS:
+                            foreach ($row as $v) {
+                                // 既読なら更に次へ行く
+                                if (isset($indexes[$v])) {
+                                    continue 3;
+                                }
+                                // 突破したら既読マークを付ける
+                                $indexes[$v] = true;
+                                break;
+                            }
                     }
-                    $flg = true;
                 }
+
+                switch ($this->method) {
+                    case Database::METHOD_ARRAY:
+                        yield $position => $row;
+                        break;
+                    case Database::METHOD_ASSOC:
+                        foreach ($row as $v) {
+                            yield $v => $row;
+                            break;
+                        }
+                        break;
+                    case Database::METHOD_LISTS:
+                        foreach ($row as $v) {
+                            yield $position => $v;
+                            break;
+                        }
+                        break;
+                    case Database::METHOD_PAIRS:
+                        $key = null;
+                        $flg = false;
+                        foreach ($row as $v) {
+                            if (!$flg) {
+                                $flg = true;
+                                $key = $v;
+                                continue;
+                            }
+                            else {
+                                yield $key => $v;
+                                break;
+                            }
+                        }
+                        break;
+                    default:
+                        throw new \UnexpectedValueException("method '{$this->method}' is undefined.");
+                }
+            }
+        };
+
+        $chunks = [];
+
+        while (true) {
+            $row = $this->statement->fetchAssociative();
+            if ($row === false) {
+                break;
+            }
+
+            // チャンクが有効なら溜めておく
+            if ($this->chunk) {
+                $chunks[] = $row;
+                if (count($chunks) < $this->chunk) {
+                    continue;
+                }
+
+                if ($this->callback) {
+                    $chunks = ($this->callback)($chunks);
+                }
+
+                yield from $loop($chunks);
+                $chunks = [];
+            }
+            else {
+                if ($this->callback) {
+                    $row = ($this->callback)($row); // for compatible. future scope: $rows = ($this->callback)([$row])
+                }
+
+                yield from $loop([$row]);
+            }
         }
 
-        throw new \UnexpectedValueException("method '{$this->method}' is undefined.");
+        if ($chunks) {
+            if ($this->callback) {
+                $chunks = ($this->callback)($chunks);
+            }
+
+            yield from $loop($chunks);
+        }
+
+        $this->_cleanup();
     }
 }

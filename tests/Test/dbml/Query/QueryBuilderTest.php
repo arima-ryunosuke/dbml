@@ -12,6 +12,7 @@ use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
+use ryunosuke\dbml\Generator\Yielder;
 use ryunosuke\dbml\Query\Expression\Alias;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
@@ -63,6 +64,144 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertSame($builder, $builder->setLazyMode('eager')->valueOrThrow());
 
         $this->assertException(new NonSelectedException("record is not found"), L($builder->reset()->from('test1')->where('id = -1'))->valueOrThrow());
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
+    function test_yield($builder)
+    {
+        $builder->setArrayFetch(null);
+
+        $yielder = $builder->reset()->select('name1')->from('test1')->limit(3)->yield();
+        $this->assertInstanceOf(Yielder::class, $yielder);
+        $this->assertEquals([
+            ["name1" => "a"],
+            ["name1" => "b"],
+            ["name1" => "c"],
+        ], iterator_to_array($yielder));
+
+        $database = $builder->getDatabase();
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'c1name11']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 2, 'name' => 'c1name12']);
+        $database->insert('foreign_c2', ['cid' => 1, 'seq' => 1, 'name' => 'c2name11']);
+        $database->insert('foreign_c2', ['cid' => 1, 'seq' => 2, 'name' => 'c2name12']);
+        $database->insert('foreign_p', ['id' => 2, 'name' => 'name1']);
+        $database->insert('foreign_c1', ['id' => 2, 'seq' => 1, 'name' => 'c1name21']);
+        $database->insert('foreign_c1', ['id' => 2, 'seq' => 2, 'name' => 'c1name22']);
+        $database->insert('foreign_c2', ['cid' => 2, 'seq' => 1, 'name' => 'c2name21']);
+        $database->insert('foreign_c2', ['cid' => 2, 'seq' => 2, 'name' => 'c2name22']);
+        $database->insert('foreign_p', ['id' => 3, 'name' => 'name1']);
+        $database->insert('foreign_c1', ['id' => 3, 'seq' => 1, 'name' => 'c1name31']);
+        $database->insert('foreign_c1', ['id' => 3, 'seq' => 2, 'name' => 'c1name32']);
+        $database->insert('foreign_c2', ['cid' => 3, 'seq' => 1, 'name' => 'c2name31']);
+        $database->insert('foreign_c2', ['cid' => 3, 'seq' => 2, 'name' => 'c2name32']);
+
+        $expected = [
+            1 => [
+                "id"         => "1",
+                "name"       => "name1",
+                "foreign_c1" => [
+                    1 => [
+                        "id"   => "1",
+                        "seq"  => "1",
+                        "name" => "c1name11",
+                    ],
+                    2 => [
+                        "id"   => "1",
+                        "seq"  => "2",
+                        "name" => "c1name12",
+                    ],
+                ],
+                "foreign_c2" => [
+                    1 => [
+                        "cid"  => "1",
+                        "seq"  => "1",
+                        "name" => "c2name11",
+                    ],
+                    2 => [
+                        "cid"  => "1",
+                        "seq"  => "2",
+                        "name" => "c2name12",
+                    ],
+                ],
+            ],
+            2 => [
+                "id"         => "2",
+                "name"       => "name1",
+                "foreign_c1" => [
+                    1 => [
+                        "id"   => "2",
+                        "seq"  => "1",
+                        "name" => "c1name21",
+                    ],
+                    2 => [
+                        "id"   => "2",
+                        "seq"  => "2",
+                        "name" => "c1name22",
+                    ],
+                ],
+                "foreign_c2" => [
+                    1 => [
+                        "cid"  => "2",
+                        "seq"  => "1",
+                        "name" => "c2name21",
+                    ],
+                    2 => [
+                        "cid"  => "2",
+                        "seq"  => "2",
+                        "name" => "c2name22",
+                    ],
+                ],
+            ],
+            3 => [
+                "id"         => "3",
+                "name"       => "name1",
+                "foreign_c1" => [
+                    1 => [
+                        "id"   => "3",
+                        "seq"  => "1",
+                        "name" => "c1name31",
+                    ],
+                    2 => [
+                        "id"   => "3",
+                        "seq"  => "2",
+                        "name" => "c1name32",
+                    ],
+                ],
+                "foreign_c2" => [
+                    1 => [
+                        "cid"  => "3",
+                        "seq"  => "1",
+                        "name" => "c2name31",
+                    ],
+                    2 => [
+                        "cid"  => "3",
+                        "seq"  => "2",
+                        "name" => "c2name32",
+                    ],
+                ],
+            ],
+        ];
+        $yielder = $builder->reset()->column([
+            'foreign_p' => [
+                '*',
+                'foreign_c1' => ['*'],
+                'foreign_c2' => ['*'],
+            ],
+        ])->yield(0, 'assoc');
+        $this->assertEquals($expected, iterator_to_array($yielder));
+
+        $yielder = $builder->reset()->column([
+            'foreign_p' => [
+                '*',
+                'foreign_c1' => ['*'],
+                'foreign_c2' => ['*'],
+            ],
+        ])->yield(2, 'assoc');
+        $this->assertEquals($expected, iterator_to_array($yielder));
     }
 
     /**

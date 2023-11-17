@@ -8,6 +8,7 @@ use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Gateway\TableGateway;
+use ryunosuke\dbml\Generator\Yielder;
 use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\IteratorTrait;
 use ryunosuke\dbml\Mixin\JoinTrait;
@@ -324,6 +325,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
     /** @var array 束縛条件 */
     private $lazyCondition = [];
+
+    /** @var ?int subselect 時のチャンク数 */
+    private $lazyChunk;
 
     /** @var bool|int クエリを投げると同時に limit を外した件数を取得するか */
     private $rowcount = false;
@@ -4024,6 +4028,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $this->lazyParent = null;
         $this->lazyColumns = [];
         $this->lazyCondition = [];
+        $this->lazyChunk = null;
 
         $this->resetQueryPart();
 
@@ -4100,6 +4105,37 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             return $this;
         }
         return $this->getDatabase()->{"fetch{$method}OrThrow"}($this, ...$arguments);
+    }
+
+    /**
+     * Yielder を返す
+     *
+     * @link Database::yield()
+     *
+     * 引数は subselect 時に使用されるものなので通常時は不要。
+     *
+     * @param ?int $chunk subselect のチャンク数
+     * @param ?string $method フェッチタイプ
+     * @param iterable $params bind パラメータ
+     * @return Yielder
+     */
+    public function yield($chunk = null, $method = null, iterable $params = [])
+    {
+        $method ??= 'array';
+        $this->lazyMethod = $method;
+        $this->lazyMode = self::LAZY_MODE_FETCH; // postselect 参照
+        $this->lazyChunk = $chunk;
+        return $this->getDatabase()->yield($this, $params)->setFetchMethod($method);
+    }
+
+    /**
+     * 内部向け
+     *
+     * @return int|null
+     */
+    public function getLazyChunk()
+    {
+        return $this->lazyChunk;
     }
 
     /**
