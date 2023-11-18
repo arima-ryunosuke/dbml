@@ -18,7 +18,7 @@ class CsvGenerator extends AbstractGenerator
         $config = array_replace([
             // BOM を出力するか（出力すると Excel でわりかし便利）
             'bom'       => false,
-            // 'SJIS-WIN' のような文字列。 null で何もしない
+            // 'SJIS-WIN' のような文字列。 null で何もしない。true で SELECT 列をそのまま出す
             'encoding'  => null,
             // 1行目のヘッダ(['columnName' => 'headerName'])。null でヘッダを出力しない
             'headers'   => null,
@@ -59,7 +59,7 @@ class CsvGenerator extends AbstractGenerator
         }
 
         // ヘッダ出力
-        if ($this->config['headers'] !== null) {
+        if (is_array($this->config['headers'])) {
             $headers = array_values($this->config['headers']);
             $bytelength += $this->_write($resource, $headers);
         }
@@ -70,6 +70,7 @@ class CsvGenerator extends AbstractGenerator
     protected function generateBody($resource, $key, $value, $first_flg)
     {
         static $keys = null;
+        $bytelength = 0;
 
         // 最初のループのみ共通ヘッダを定義
         if ($first_flg) {
@@ -78,6 +79,10 @@ class CsvGenerator extends AbstractGenerator
                 // 後述の array_intersect_key のために代入だけはしておく（fetchArray なのでほぼあり得ないが…）
                 $keys = $value;
             }
+            elseif ($this->config['headers'] === true) {
+                $keys = $value;
+                $bytelength += $this->_write($resource, array_keys($value));
+            }
             else {
                 $keys = $this->config['headers'];
             }
@@ -85,7 +90,9 @@ class CsvGenerator extends AbstractGenerator
 
         // headers との共通項を出力
         $row = array_intersect_key($value, $keys);
-        return $this->_write($resource, $row);
+        $bytelength += $this->_write($resource, $row);
+
+        return $bytelength;
     }
 
     protected function generateTail($resource)

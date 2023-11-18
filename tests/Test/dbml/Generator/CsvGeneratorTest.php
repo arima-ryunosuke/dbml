@@ -38,10 +38,32 @@ class CsvGeneratorTest extends \ryunosuke\Test\AbstractUnitTestCase
             ['id' => '100', 'name' => 'thisisname'],
             ['id' => '999', 'name' => "\t!|"],
         ]);
-        $actual = "\xEF\xBB\xBF" . mb_convert_encoding("ID\t名前
-100\tTHISISNAME
-999\t|\t!||
-", 'SJIS-win');
+        $actual = "\xEF\xBB\xBF" . mb_convert_encoding(<<<CSV
+            ID\t名前
+            100\tTHISISNAME
+            999\t|\t!||
+            
+            CSV, 'SJIS-win');
+        $this->assertEquals(strlen($actual), $length);
+        $this->assertStringEqualsFile($path, $actual);
+    }
+
+    function test_autoheader()
+    {
+        $path = tempnam(sys_get_temp_dir(), 'export');
+        $g = new CsvGenerator([
+            'headers' => true,
+        ]);
+        $length = $g->generate($path, [
+            ['id' => '100', 'name' => 'thisisname'],
+            ['id' => '101', 'name' => 'thatisname'],
+        ]);
+        $actual = <<<CSV
+            id,name
+            100,thisisname
+            101,thatisname
+            
+            CSV;
         $this->assertEquals(strlen($actual), $length);
         $this->assertStringEqualsFile($path, $actual);
     }
@@ -60,7 +82,6 @@ class CsvGeneratorTest extends \ryunosuke\Test\AbstractUnitTestCase
         ]);
         $length = $g->generate($path, []);
         $this->assertEquals(10, $length);
-        $this->assertStringEqualsFile($path, "ID,名前
-");
+        $this->assertStringEqualsFile($path, "ID,名前\n");
     }
 }
