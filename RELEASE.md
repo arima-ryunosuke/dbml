@@ -24,6 +24,15 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.12
+
+- [feature] CsvGenerator の自動ヘッダ出力機能
+- [feature] Yielder の chunk 対応
+- [fixbug] yield 系メソッドに QueryBuilder を渡すとサブ設定が消えてしまう不具合を修正
+- [feature] 空データ UPDATE 対応
+- [fixbug] orderBy が複数のテーブル記法に対応していない不具合を修正
+- [feature] orWhere(Having)/endWhere(Having) を実装
+
 ## 2.1.11
 
 - [fixbug] キャッシュがあると遅延外部キーが有効にならない不具合を修正
