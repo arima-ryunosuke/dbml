@@ -3166,7 +3166,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     public function countize($column = '*')
     {
         $that = clone $this;
-        $this->setAutoOrder(false);
+        $that->setAutoOrder(false);
         $that->resetQueryPart('orderBy');
         $that->resetQueryPart('offset');
         $that->resetQueryPart('limit');
@@ -3187,7 +3187,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             else {
                 $that->resetQueryPart('select')->select('1');
             }
-            $counter = $this->database->createQueryBuilder();
+            $counter = $that->database->createQueryBuilder();
             $counter->select(new Alias(self::COUNT_ALIAS, "COUNT($column)"));
             $counter->from(['__dbml_auto_table' => $that]);
         }
