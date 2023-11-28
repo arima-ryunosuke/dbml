@@ -3937,7 +3937,7 @@ class Database
         $converter = $this->_getConverter($sql);
         if ($sql instanceof QueryBuilder) {
             if ($chunk = $sql->getLazyChunk()) {
-                $converter = fn($rows) => $sql->postselect(array_map($converter, $rows), true);
+                $converter = fn($rows) => $sql->postselect(array_map($converter, $rows), false);
             }
             else {
                 $converter = fn($row) => $sql->postselect([$converter($row)], true)[0];
