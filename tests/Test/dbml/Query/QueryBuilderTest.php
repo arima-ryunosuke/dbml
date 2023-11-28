@@ -2837,6 +2837,25 @@ SQL
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
+    function test_existize($builder)
+    {
+        /// sql server の方言があるのでクエリレベルではなく結果レベルでテストしている
+
+        $this->assertEquals('1', $builder->reset()->column('test')->existize()->value());
+        $this->assertEquals('0', $builder->reset()->column('test')->existize(false)->value());
+
+        $this->assertEquals('0', $builder->reset()->column('test')->where('id = -1')->existize()->value());
+        $this->assertEquals('1', $builder->reset()->column('test')->where('id = -1')->existize(false)->value());
+
+        if ($builder->getDatabase()->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
+            $this->assertQuery('SELECT EXISTS (SELECT * FROM test WHERE id = 1 /* lock for write */)', $builder->reset()->column('test')->where('id = 1')->existize(true, true));
+        }
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
     function test_countize($builder)
     {
         // 素のクエリは count クエリになる

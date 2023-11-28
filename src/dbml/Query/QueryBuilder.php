@@ -3152,6 +3152,50 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     }
 
     /**
+     * EXISTS クエリ化
+     *
+     * ```php
+     * # status: 'active' の EXISTS を発行する
+     * $qb->column('t_article')->where(['status' => 'active'])->existize();
+     * // SELECT EXISTS(SELECT * FROM t_article WHERE status = 'active')
+     * ```
+     *
+     * @param bool $affirmation NOT EXISTS フラグ
+     * @param bool $for_update EXISTS チェックはしばしばロックを伴うのでそのフラグ
+     * @return $this 自分自身
+     */
+    public function existize($affirmation = true, $for_update = false)
+    {
+        $that = clone $this;
+        $that->resetQueryPart('select');
+        $that->resetQueryPart('orderBy');
+        $that->resetQueryPart('offset');
+        $that->resetQueryPart('limit');
+
+        // EXISTS だけなのでこの辺は全部不要
+        $that->subbuilders = [];
+        $that->callbacks = [];
+        $that->phpOrders = [];
+        $that->caster = null;
+
+        if ($affirmation) {
+            $that->exists();
+        }
+        else {
+            $that->notExists();
+        }
+
+        if ($for_update) {
+            $that->lockForUpdate();
+        }
+
+        $exister = $that->database->createQueryBuilder();
+        $exister->select($that->database->getCompatiblePlatform()->convertSelectExistsQuery($that));
+        $exister->setAutoOrder(false);
+        return $exister;
+    }
+
+    /**
      * COUNT(\*) クエリ化（厳密に言えば limit なしの COUNT(\*) 化）
      *
      * ```php
