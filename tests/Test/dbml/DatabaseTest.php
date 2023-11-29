@@ -3623,16 +3623,16 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             $result = $database->migrate('foreign_p', 'change', $records, $opt + ['bulk' => false]);
             $this->assertCount(4, $result);
             $this->assertArrayStartsWith([
+                "DELETE FROM foreign_p WHERE NOT (foreign_p.id IN ('11', '12', '13'))",
                 "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') ON",
                 "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') ON",
                 "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') ON",
-                "DELETE FROM foreign_p WHERE NOT (foreign_p.id IN ('11', '12', '13'))",
             ], $result);
             $result = $database->migrate('foreign_p', 'change', $records, $opt + ['bulk' => true]);
             $this->assertCount(2, $result);
             $this->assertArrayStartsWith([
-                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
                 "DELETE FROM foreign_p WHERE NOT (foreign_p.id IN ('11', '12', '13'))",
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
             ], $result);
 
             // SAVE
@@ -3640,35 +3640,35 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             $this->assertCount(11, $result);
             $this->assertArrayStartsWith([
                 "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') ON",
-                "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11') ON",
                 "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('11')) AND (NOT ((foreign_c1.seq = '1' AND foreign_c1.id = '11')))",
+                "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11') ON",
                 "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') ON",
-                "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12') ON",
                 "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('12')) AND (NOT ((foreign_c2.seq = '1' AND foreign_c2.cid = '12')))",
+                "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12') ON",
                 "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') ON",
-                "INSERT INTO foreign_c1 (seq, name, id) VALUES ('2', 'cc1', '13') ON",
                 "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('13')) AND (NOT ((foreign_c1.seq = '2' AND foreign_c1.id = '13')))",
-                "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('2', 'cc2', '13') ON",
+                "INSERT INTO foreign_c1 (seq, name, id) VALUES ('2', 'cc1', '13') ON",
                 "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('13')) AND (NOT ((foreign_c2.seq = '2' AND foreign_c2.cid = '13')))",
+                "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('2', 'cc2', '13') ON",
             ], $result);
             $result = $database->migrate('foreign_p', 'save', $records, $opt + ['bulk' => true]);
             $this->assertCount(5, $result);
             if ($database->getCompatiblePlatform()->supportsRowConstructor()) {
                 $this->assertArrayStartsWith([
                     "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
-                    "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11'), ('2', 'cc1', '13') ON",
                     "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('11','13')) AND (NOT ((foreign_c1.seq, foreign_c1.id) IN (('1', '11'), ('2', '13'))))",
-                    "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12'), ('2', 'cc2', '13') ON",
+                    "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11'), ('2', 'cc1', '13') ON",
                     "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('12','13')) AND (NOT ((foreign_c2.seq, foreign_c2.cid) IN (('1', '12'), ('2', '13'))))",
+                    "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12'), ('2', 'cc2', '13') ON",
                 ], $result);
             }
             else {
                 $this->assertArrayStartsWith([
                     "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
-                    "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11'), ('2', 'cc1', '13') ON",
                     "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('11','13')) AND (NOT ((foreign_c1.seq = '1' AND foreign_c1.id = '11') OR (foreign_c1.seq = '2' AND foreign_c1.id = '13')))",
-                    "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12'), ('2', 'cc2', '13') ON",
+                    "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11'), ('2', 'cc1', '13') ON",
                     "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('12','13')) AND (NOT ((foreign_c2.seq = '1' AND foreign_c2.cid = '12') OR (foreign_c2.seq = '2' AND foreign_c2.cid = '13')))",
+                    "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12'), ('2', 'cc2', '13') ON",
                 ], $result);
             }
         }
@@ -4186,21 +4186,21 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
             $this->assertArrayStartsWith([
                 'INSERT INTO g_ancestor',
-                'INSERT INTO g_parent',
                 'DELETE FROM g_parent',
-                'INSERT INTO g_child',
+                'INSERT INTO g_parent',
                 'DELETE FROM g_child',
+                'INSERT INTO g_child',
             ], $sqls);
         }
         else {
             $this->assertArrayStartsWith([
                 'INSERT INTO g_ancestor',
                 'INSERT INTO g_ancestor',
-                'INSERT INTO g_parent',
-                'INSERT INTO g_parent',
-                'INSERT INTO g_parent',
-                'INSERT INTO g_parent',
                 'DELETE FROM g_parent',
+                'INSERT INTO g_parent',
+                'INSERT INTO g_parent',
+                'INSERT INTO g_parent',
+                'INSERT INTO g_parent',
                 'INSERT INTO g_child',
                 'INSERT INTO g_child',
                 'INSERT INTO g_child',
@@ -4262,19 +4262,19 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         ]);
         $this->assertArrayStartsWith([
             'INSERT INTO g_ancestor',
-            'INSERT INTO g_parent',
-            'INSERT INTO g_parent',
             'DELETE FROM g_parent',
-            'INSERT INTO g_child',
-            'INSERT INTO g_child',
-            'INSERT INTO g_child',
-            'INSERT INTO g_child',
+            'INSERT INTO g_parent',
+            'INSERT INTO g_parent',
             'DELETE FROM g_child',
-            'INSERT INTO g_grand1',
-            'INSERT INTO g_grand1',
-            'INSERT INTO g_grand1',
-            'INSERT INTO g_grand1',
+            'INSERT INTO g_child',
+            'INSERT INTO g_child',
+            'INSERT INTO g_child',
+            'INSERT INTO g_child',
             'DELETE FROM g_grand1',
+            'INSERT INTO g_grand1',
+            'INSERT INTO g_grand1',
+            'INSERT INTO g_grand1',
+            'INSERT INTO g_grand1',
         ], $sqls);
     }
 
@@ -6615,9 +6615,9 @@ INSERT INTO test (id, name) VALUES
 
         if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
             $this->assertArrayStartsWith([
-                'INSERT INTO test',
-                'INSERT INTO test',
                 'DELETE FROM test',
+                'INSERT INTO test',
+                'INSERT INTO test',
             ], $changed[1]);
         }
         else {
@@ -6643,18 +6643,18 @@ INSERT INTO test (id, name) VALUES
 
         if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
             $this->assertArrayStartsWith([
-                'INSERT INTO multiprimary',
-                'INSERT INTO multiprimary',
-                'INSERT INTO multiprimary',
                 'DELETE FROM multiprimary',
+                'INSERT INTO multiprimary',
+                'INSERT INTO multiprimary',
+                'INSERT INTO multiprimary',
             ], $changed[1]);
         }
         else {
             $this->assertArrayStartsWith([
-                'UPDATE multiprimary',
-                'UPDATE multiprimary',
-                'UPDATE multiprimary',
                 'DELETE FROM multiprimary',
+                'UPDATE multiprimary',
+                'UPDATE multiprimary',
+                'UPDATE multiprimary',
             ], $changed[1]);
         }
     }

@@ -5619,7 +5619,7 @@ class Database
     }
 
     /**
-     * INSERT+UPDATE+DELETE を同時に行う
+     * DELETE+INSERT+UPDATE を同時に行う
      *
      * テーブル状態を指定した配列・条件に「持っていく」メソッドとも言える。
      *
@@ -5627,12 +5627,12 @@ class Database
      * また、可能な限りクエリを少なくかつ効率的に実行されるように構築されるので、テーブル定義や与えたデータによってはまったく構成の異なるクエリになる可能性がある（結果は同じになるが）。
      * 具体的には
      *
-     * - BULK MERGE をサポートしていてカラムが完全に共通の場合：     modifyArray(単一) + delete 的な動作（最も高速）
-     * - BULK MERGE をサポートしていてカラムがそれなりに共通の場合： modifyArray(複数) + delete 的な動作（比較的高速）
-     * - merge をサポートしていてカラムが完全に共通の場合：          prepareModify(単一) + delete 的な動作（標準速度）
-     * - merge をサポートしていてカラムがそれなりに共通の場合：      prepareModify(複数) + delete 的な動作（比較的低速）
-     * - merge をサポートしていてカラムがバラバラだった場合：        各行 modify + delete 的な動作（最も低速）
-     * - merge をサポートしていなくてカラムがバラバラだった場合：    各行 select + 各行 insert/update + delete 的な動作（最悪）
+     * - BULK MERGE をサポートしていてカラムが完全に共通の場合：     delete + modifyArray(単一)的な動作（最も高速）
+     * - BULK MERGE をサポートしていてカラムがそれなりに共通の場合： delete + modifyArray(複数)的な動作（比較的高速）
+     * - merge をサポートしていてカラムが完全に共通の場合：          delete + prepareModify(単一)的な動作（標準速度）
+     * - merge をサポートしていてカラムがそれなりに共通の場合：      delete + prepareModify(複数)的な動作（比較的低速）
+     * - merge をサポートしていてカラムがバラバラだった場合：        delete + 各行 modify 的な動作（最も低速）
+     * - merge をサポートしていなくてカラムがバラバラだった場合：    delete + 各行 select + 各行 insert/update 的な動作（最悪）
      *
      * という動作になる。
      *
@@ -5662,6 +5662,8 @@ class Database
      *     ['id' => 2, 'name' => 'fuga'],
      *     ['id' => 3, 'name' => 'piyo'],
      * ], ['category' => 'misc']);
+     * // DELETE FROM table_name WHERE (category = 'misc') AND (NOT (id IN ('1', '2', '3')))
+     *
      * // BULK MERGE をサポートしている場合、下記がカラムの種類ごとに発行される
      * // INSERT INTO table_name (id, name) VALUES
      * //   ('1', 'hoge'),
@@ -5670,14 +5672,12 @@ class Database
      * // ON DUPLICATE KEY UPDATE
      * //   id = VALUES(id),
      * //   name = VALUES(name)
-     * // DELETE FROM table_name WHERE (category = 'misc') AND (NOT (id IN ('1', '2', '3')))
      * //
      * // merge をサポートしている場合、下記がカラムの種類ごとに発行される（merge は疑似クエリ）
      * // [prepare] INSERT INTO table_name (id, name) VALUES (?, ?) ON UPDATE id = VALUES(id), name = VALUES(name)
      * // [execute] INSERT INTO table_name (id, name) VALUES (1, 'hoge') ON UPDATE id = VALUES(id), name = VALUES(name)
      * // [execute] INSERT INTO table_name (id, name) VALUES (2, 'fuga') ON UPDATE id = VALUES(id), name = VALUES(name)
      * // [execute] INSERT INTO table_name (id, name) VALUES (3, 'piyo') ON UPDATE id = VALUES(id), name = VALUES(name)
-     * // DELETE FROM table_name WHERE (category = 'misc') AND (NOT (id IN ('1', '2', '3')))
      * //
      * // merge をサポートしていない場合、全行分 select して行が無ければ insert, 行が有れば update する
      * // SELECT EXISTS (SELECT * FROM table_name WHERE id = '1')
@@ -5686,7 +5686,6 @@ class Database
      * // UPDATE table_name SET name = 'fuga' WHERE id = '2'
      * // SELECT EXISTS (SELECT * FROM table_name WHERE id = '3')
      * // INSERT INTO table_name (id, name) VALUES ('3', 'piyo')
-     * // DELETE FROM table_name WHERE (category = 'misc') AND (NOT (id IN ('1', '2', '3')))
      *
      * // $returning に配列を与えると RETURNING 的動作になる（この場合作用行の id, name を返す）
      * $result = $db->changeArray('table_name', [
@@ -5797,6 +5796,13 @@ class Database
         $idmap = [];
         $inserteds = [];
 
+        // 主キー外を削除（$cond を queryInto してるのは誤差レベルではなく速度に差が出るから）
+        if ($identifier !== false) {
+            $delete_ids = array_filter($primaries, fn($pkval) => count(array_filter($pkval, fn($v) => $v !== null)) === count($pcols));
+            $cond = $cplatform->getPrimaryCondition($delete_ids, $tableName);
+            $sqls[] = $this->delete($tableName, array_merge($whereconds, $delete_ids ? [$this->queryInto("NOT ($cond)", $cond->getParams())] : []));
+        }
+
         foreach ($col_group as $group) {
             if ($group['bulks'] ?? []) {
                 $sqls[] = $this->modifyArray($tableName, $group['bulks'], [], $uniquekey, 0, $opt);
@@ -5809,10 +5815,10 @@ class Database
                 }
                 foreach ($group['rows'] as $n => $row) {
                     if ($stmt) {
-                        $affected = $sqls[$n] = $stmt->executeAffect($row);
+                        $affected = $sqls[] = $stmt->executeAffect($row);
                     }
                     else {
-                        $affected = $sqls[$n] = $this->modify($tableName, $row, [], $uniquekey, $opt);
+                        $affected = $sqls[] = $this->modify($tableName, $row, [], $uniquekey, $opt);
                     }
 
                     if ($autocolumn !== null && !isset($primaries[$n][$autocolumn])) {
@@ -5836,12 +5842,6 @@ class Database
                     }
                 }
             }
-        }
-
-        // 更新外を削除（$cond を queryInto してるのは誤差レベルではなく速度に差が出るから）
-        if ($identifier !== false) {
-            $cond = $cplatform->getPrimaryCondition($primaries, $tableName);
-            $sqls[] = $this->delete($tableName, array_merge($whereconds, $primaries ? [$this->queryInto("NOT ($cond)", $cond->getParams())] : []));
         }
 
         if ($dryrun) {
