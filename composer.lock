@@ -1120,16 +1120,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.6.13",
+            "version": "9.6.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "f3d767f7f9e191eab4189abe41ab37797e30b1be"
+                "reference": "05017b80304e0eb3f31d90194a563fd53a6021f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/f3d767f7f9e191eab4189abe41ab37797e30b1be",
-                "reference": "f3d767f7f9e191eab4189abe41ab37797e30b1be",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/05017b80304e0eb3f31d90194a563fd53a6021f1",
+                "reference": "05017b80304e0eb3f31d90194a563fd53a6021f1",
                 "shasum": ""
             },
             "require": {
@@ -1203,7 +1203,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.6.13"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.6.15"
             },
             "funding": [
                 {
@@ -1219,20 +1219,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-09-19T05:39:22+00:00"
+            "time": "2023-12-01T16:55:19+00:00"
         },
         {
             "name": "ryunosuke/functions",
-            "version": "v1.6.9",
+            "version": "v1.6.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/arima-ryunosuke/php-functions.git",
-                "reference": "c1655cc59d5b22ddf3a0f386519ef0e646556679"
+                "reference": "08a6b18e9642e7a5f4fb125c212868bca8bf6973"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arima-ryunosuke/php-functions/zipball/c1655cc59d5b22ddf3a0f386519ef0e646556679",
-                "reference": "c1655cc59d5b22ddf3a0f386519ef0e646556679",
+                "url": "https://api.github.com/repos/arima-ryunosuke/php-functions/zipball/08a6b18e9642e7a5f4fb125c212868bca8bf6973",
+                "reference": "08a6b18e9642e7a5f4fb125c212868bca8bf6973",
                 "shasum": ""
             },
             "require": {
@@ -1266,22 +1266,22 @@
             "description": "Utility functions for PHP",
             "support": {
                 "issues": "https://github.com/arima-ryunosuke/php-functions/issues",
-                "source": "https://github.com/arima-ryunosuke/php-functions/tree/v1.6.9"
+                "source": "https://github.com/arima-ryunosuke/php-functions/tree/v1.6.11"
             },
-            "time": "2023-11-20T22:23:08+00:00"
+            "time": "2023-12-02T12:02:40+00:00"
         },
         {
             "name": "ryunosuke/phpunit-extension",
-            "version": "v3.16.0",
+            "version": "v3.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/arima-ryunosuke/phpunit-extension.git",
-                "reference": "cf08c8d2ed77b9fa0fde24f819ea08130a19e749"
+                "reference": "707088989cd162c5b8f9532d71aeb9ecea68169e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arima-ryunosuke/phpunit-extension/zipball/cf08c8d2ed77b9fa0fde24f819ea08130a19e749",
-                "reference": "cf08c8d2ed77b9fa0fde24f819ea08130a19e749",
+                "url": "https://api.github.com/repos/arima-ryunosuke/phpunit-extension/zipball/707088989cd162c5b8f9532d71aeb9ecea68169e",
+                "reference": "707088989cd162c5b8f9532d71aeb9ecea68169e",
                 "shasum": ""
             },
             "require": {
@@ -1313,9 +1313,9 @@
             "description": "PHPUnit Fluent interface and Custom assertions",
             "support": {
                 "issues": "https://github.com/arima-ryunosuke/phpunit-extension/issues",
-                "source": "https://github.com/arima-ryunosuke/phpunit-extension/tree/v3.16.0"
+                "source": "https://github.com/arima-ryunosuke/phpunit-extension/tree/v3.17.0"
             },
-            "time": "2023-08-18T15:48:40+00:00"
+            "time": "2023-11-28T07:52:56+00:00"
         },
         {
             "name": "ryunosuke/simple-cache",
@@ -2416,16 +2416,16 @@
         },
         {
             "name": "symfony/var-exporter",
-            "version": "v5.4.26",
+            "version": "v5.4.32",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-exporter.git",
-                "reference": "11401fe94f960249b3c63a488c63ba73091c1e4a"
+                "reference": "fdb022f0d3d41df240c18e2eb9a117c430f06add"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-exporter/zipball/11401fe94f960249b3c63a488c63ba73091c1e4a",
-                "reference": "11401fe94f960249b3c63a488c63ba73091c1e4a",
+                "url": "https://api.github.com/repos/symfony/var-exporter/zipball/fdb022f0d3d41df240c18e2eb9a117c430f06add",
+                "reference": "fdb022f0d3d41df240c18e2eb9a117c430f06add",
                 "shasum": ""
             },
             "require": {
@@ -2469,7 +2469,7 @@
                 "serialize"
             ],
             "support": {
-                "source": "https://github.com/symfony/var-exporter/tree/v5.4.26"
+                "source": "https://github.com/symfony/var-exporter/tree/v5.4.32"
             },
             "funding": [
                 {
@@ -2485,7 +2485,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-07-20T07:21:16+00:00"
+            "time": "2023-11-16T19:33:05+00:00"
         },
         {
             "name": "theseer/tokenizer",
