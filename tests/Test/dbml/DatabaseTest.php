@@ -4201,15 +4201,15 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'INSERT INTO g_parent',
                 'INSERT INTO g_parent',
                 'INSERT INTO g_parent',
-                'INSERT INTO g_child',
-                'INSERT INTO g_child',
-                'INSERT INTO g_child',
-                'INSERT INTO g_child',
-                'INSERT INTO g_child',
-                'INSERT INTO g_child',
-                'INSERT INTO g_child',
-                'INSERT INTO g_child',
                 'DELETE FROM g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
+                'INSERT INTO g_child',
             ], $sqls);
         }
 
@@ -4583,6 +4583,19 @@ CSV
             $this->assertEquals(3, $affected);
             // ケツから3件取れば突っ込んだデータのはず(ただし逆順)
             $this->assertEquals(['c', 'b', 'a'], $database->fetchLists($namequery->limit($affected)));
+
+            // チャンク(params:3)
+            $affected = $database->insertArray('test', [
+                ['name' => 'c', 'data' => 'C'],
+                ['name' => 'h', 'data' => 'H'],
+                ['name' => 'u', 'data' => 'U'],
+                ['name' => 'n', 'data' => 'N'],
+                ['name' => 'k', 'data' => 'K'],
+            ], 'params:3');
+            // 5件追加したら 5 が返るはず
+            $this->assertEquals(5, $affected);
+            // ケツから5件取れば突っ込んだデータのはず(ただし逆順)
+            $this->assertEquals(['k', 'n', 'u', 'h', 'c'], $database->fetchLists($namequery->limit($affected)));
         });
         $this->assertEquals([
             "INSERT INTO test (name) VALUES ('a')",
@@ -4591,6 +4604,9 @@ CSV
             "INSERT INTO test (name) VALUES ('a'), ('b')",
             "INSERT INTO test (name) VALUES ('c')",
             "INSERT INTO test (name) VALUES ('a'), ('b'), ('c')",
+            "INSERT INTO test (name, data) VALUES ('c', 'C'), ('h', 'H')",
+            "INSERT INTO test (name, data) VALUES ('u', 'U'), ('n', 'N')",
+            "INSERT INTO test (name, data) VALUES ('k', 'K')",
         ], array_values(preg_grep('#^INSERT#', $logs)));
     }
 
@@ -4870,8 +4886,8 @@ INSERT INTO test (name) VALUES
         }
 
         // 空のテスト
-        $this->assertEquals(0, $database->modifyArray('test', [], [], 0));
-        $this->assertEquals(0, $database->modifyArray('test', [], [], 1));
+        $this->assertEquals(0, $database->modifyArray('test', [], [], 'PRIMARY', 0));
+        $this->assertEquals(0, $database->modifyArray('test', [], [], 'PRIMARY', 1));
 
         $data = [
             ['id' => 1, 'name' => 'A'],
@@ -6622,10 +6638,10 @@ INSERT INTO test (id, name) VALUES
         }
         else {
             $this->assertArrayStartsWith([
+                'DELETE FROM test',
                 'UPDATE test',
                 'UPDATE test',
                 'INSERT INTO test',
-                'DELETE FROM test',
             ], $changed[1]);
         }
 

@@ -166,6 +166,16 @@ use ryunosuke\dbml\Utility\Adhoc;
  * @method $this                  setInsertSet($bool)
  * @method bool                   getUpdateEmpty()
  * @method $this                  setUpdateEmpty($bool)
+ * @method int|string             getDefaultChunk()
+ * @method $this                  setDefaultChunk($int) {
+ *     バルク系メソッドの $chunk に null が与えられた場合のデフォルトチャンクサイズを指定する
+ *
+ *     原則は int で、文字列指定で特殊な設定が行える。
+ *     現在のところ `params:12345` で「bind parameter 数が 12345 を超えたとき」のみ。
+ *     これは mysql の bind parameter 上限が 65535 であることに起因している。
+ *
+ *     @param int|string $int デフォルトチャンクサイズ
+ *  }
  * @method bool                   getFilterNoExistsColumn()
  * @method $this                  setFilterNoExistsColumn($bool) {
  *     存在しないカラムをフィルタするか指定する
@@ -395,6 +405,8 @@ class Database
             'insertSet'                 => false,
             // UPDATE で空データの時に意味のない更新をするか？（false だと構文エラーになる）
             'updateEmpty'               => true,
+            // バルク系メソッドの $chunk に null が与えられた場合のデフォルトチャンクサイズ（文字列指定で特殊なコールバックが設定できる）
+            'defaultChunk'              => PHP_INT_MAX,
             // insert 時などにテーブルに存在しないカラムを自動でフィルタするか否か
             'filterNoExistsColumn'      => true,
             // insert 時などに not null な列に null が来た場合に自動でフィルタするか否か
@@ -1065,6 +1077,20 @@ class Database
 
         // magic call が多く、同ファイル同行が頻出するため unique する
         return array_unique($traces);
+    }
+
+    private function _getChunk($chunk, &$params)
+    {
+        $chunk = $chunk ?? $this->getUnsafeOption('defaultChunk');
+        // for compatible
+        if ($chunk === 0) {
+            return PHP_INT_MAX;
+        }
+        // 特殊設定: params の数でチャンク
+        if (is_string($chunk) && preg_match('#^params:\s*(\d+)$#', trim($chunk), $matches)) {
+            return function () use (&$params, $matches) { return count($params) < $matches[1]; };
+        }
+        return $chunk;
     }
 
     private function _normalize($table, $row)
@@ -4903,7 +4929,7 @@ class Database
             'dryrun' => true,
             'ignore' => false,
             'bulk'   => false,
-            'chunk'  => 0,
+            'chunk'  => null,
         ];
 
         $tableName = $this->convertTableName($tableName);
@@ -5255,7 +5281,7 @@ class Database
 
             $affected = [];
             $current = mb_internal_encoding();
-            foreach (iterator_chunk($file, $options['chunk'] ?: PHP_INT_MAX, true) as $rows) {
+            foreach (iterator_chunk($file, $this->_getChunk($options['chunk'], $params), true) as $rows) {
                 $values = $params = [];
 
                 foreach ($rows as $m => $fields) {
@@ -5371,10 +5397,10 @@ class Database
      *
      * @param string $tableName テーブル名
      * @param array|callable|\Generator $data カラムデータ配列あるいは Generator
-     * @param int $chunk 分割 insert する場合はそのチャンクサイズ
+     * @param ?int $chunk 分割 insert する場合はそのチャンクサイズ
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function insertArray($tableName, $data, $chunk = 0)
+    public function insertArray($tableName, $data, $chunk = null)
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
@@ -5390,7 +5416,7 @@ class Database
         $affected = [];
         $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
         $template = "INSERT {$ignore}INTO $tableName (%s) VALUES %s";
-        foreach (iterator_chunk($data, $chunk ?: PHP_INT_MAX) as $rows) {
+        foreach (iterator_chunk($data, $this->_getChunk($chunk, $params)) as $rows) {
             $values = [];
             $params = [];
             foreach ($rows as $row) {
@@ -5450,10 +5476,10 @@ class Database
      * @param string $tableName テーブル名
      * @param array|callable|\Generator $data カラムデータあるいは Generator あるいは Generator を返す callable
      * @param array|mixed $identifier 束縛条件
-     * @param int $chunk 分割 update する場合はそのチャンクサイズ
+     * @param ?int $chunk 分割 update する場合はそのチャンクサイズ
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function updateArray($tableName, $data, $identifier = [], $chunk = 0)
+    public function updateArray($tableName, $data, $identifier = [], $chunk = null)
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 5 ? func_get_arg(4) : [];
@@ -5471,7 +5497,7 @@ class Database
         $condition = $this->_prewhere($tableName, $identifier);
 
         $affected = [];
-        foreach (iterator_chunk($data, $chunk ?: PHP_INT_MAX) as $rows) {
+        foreach (iterator_chunk($data, $this->_getChunk($chunk, $params)) as $rows) {
             $columns = $this->_normalizes($tableName, $rows, $pcols);
             $pkcols = array_intersect_key($columns, $pkey);
             $cvcols = array_diff_key($columns, $pkey);
@@ -5538,10 +5564,10 @@ class Database
      * @param array|callable|\Generator $insertData カラムデータあるいは Generator
      * @param array $updateData カラムデータあるいは Generator
      * @param string|int $uniquekey 重複チェックに使うユニークキー名
-     * @param int $chunk 分割 insert する場合はそのチャンクサイズ
+     * @param ?int $chunk 分割 insert する場合はそのチャンクサイズ
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function modifyArray($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = 0)
+    public function modifyArray($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = null)
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 6 ? func_get_arg(5) : [];
@@ -5578,7 +5604,7 @@ class Database
         $refer = $cplatform->getReferenceSyntax('%1$s');
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
         $template = "INSERT {$ignore}INTO $tableName (%s) VALUES %s $merge %s";
-        foreach (iterator_chunk($insertData, $chunk ?: PHP_INT_MAX) as $rows) {
+        foreach (iterator_chunk($insertData, $this->_getChunk($chunk, $params)) as $rows) {
             $values = [];
             $params = [];
             foreach ($rows as $row) {
@@ -5805,7 +5831,7 @@ class Database
 
         foreach ($col_group as $group) {
             if ($group['bulks'] ?? []) {
-                $sqls[] = $this->modifyArray($tableName, $group['bulks'], [], $uniquekey, 0, $opt);
+                $sqls[] = $this->modifyArray($tableName, $group['bulks'], [], $uniquekey, null, $opt);
             }
             if ($group['rows'] ?? []) {
                 // 2件以上じゃないとプリペアの旨味が少ない

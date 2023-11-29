@@ -2327,7 +2327,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::insertArray()
      */
-    public function insertArray($data, $chunk = 0)
+    public function insertArray($data, $chunk = null)
     {
         $this->resetResult();
         return $this->database->insertArray($this->tableName, $data, $chunk, ...array_slice(func_get_args(), 2));
@@ -2340,7 +2340,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::updateArray()
      */
-    public function updateArray($data, $identifier = [], $chunk = 0)
+    public function updateArray($data, $identifier = [], $chunk = null)
     {
         $this->resetResult();
         return $this->database->updateArray($this->tableName, $data, $identifier, $chunk, ...array_slice(func_get_args(), 3));
@@ -2353,7 +2353,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::modifyArray()
      */
-    public function modifyArray($insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = 0)
+    public function modifyArray($insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = null)
     {
         $this->resetResult();
         return $this->database->modifyArray($this->tableName, $insertData, $updateData, $uniquekey, $chunk, ...array_slice(func_get_args(), 4));
