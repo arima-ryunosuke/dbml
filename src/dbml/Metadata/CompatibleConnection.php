@@ -253,7 +253,14 @@ class CompatibleConnection
 
                         $result = null;
                         if ($myresult instanceof \mysqli_result) {
-                            $result = iterator_to_array($myresult);
+                            $types = array_column($myresult->fetch_fields(), 'type', 'name');
+
+                            $result = [];
+                            foreach ($myresult as $n => $row) {
+                                foreach ($row as $column => $value) {
+                                    $result[$n][$column] = \ryunosuke\dbml\Driver\Mysqli\Result::mapType($types[$column], $value);
+                                }
+                            }
                             $myresult->free();
                         }
                         if ($myresult === true) {
@@ -292,7 +299,19 @@ class CompatibleConnection
                 }
 
                 if (pg_num_fields($pgresult) !== 0) {
-                    $result = pg_fetch_all($pgresult);
+                    $types = [];
+                    $numFields = pg_num_fields($pgresult);
+                    for ($i = 0; $i < $numFields; ++$i) {
+                        $name = pg_field_name($pgresult, $i);
+                        $types[$name] = pg_field_type($pgresult, $i);
+                    }
+
+                    $result = [];
+                    foreach (pg_fetch_all($pgresult) as $n => $row) {
+                        foreach ($row as $column => $value) {
+                            $result[$n][$column] = \ryunosuke\dbml\Driver\PgSQL\Result::mapType($types[$column], $value);
+                        }
+                    }
                 }
                 else {
                     $result = pg_affected_rows($pgresult);

@@ -3207,7 +3207,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         // 非同期なので SLEEP(1) * 2 + sleep(2) で4秒…ではなく2秒以内に終わる
         $this->assertLessThan(2.5, microtime(true) - $time);
 
-        $this->assertEquals([
+        $this->assertSame([
             ["id" => 1, "sleep" => null],
             ["id" => 2, "sleep" => null],
         ], $actual);
@@ -3277,7 +3277,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         // 非同期なので SLEEP(1) * 2 * 3 + usleep(100,000) * 50 で11秒…ではなく6秒以内に終わる
         $this->assertLessThan(6.5, microtime(true) - $time);
 
-        $this->assertEquals([
+        $this->assertSame([
             [
                 ["id" => 1, "sleep" => null],
                 ["id" => 2, "sleep" => null],
@@ -3296,21 +3296,21 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         ]);
 
         $time = microtime(true);
-        $this->assertEquals([
+        $this->assertSame([
             ["id" => 1, "sleep" => null],
             ["id" => 2, "sleep" => null],
         ], $result(0));
         $this->assertGreaterThanOrEqual(2.0, microtime(true) - $time);
 
         $time = microtime(true);
-        $this->assertEquals([
+        $this->assertSame([
             ["id" => 3, "sleep" => null],
             ["id" => 4, "sleep" => null],
         ], $result(1));
         $this->assertGreaterThanOrEqual(2.0, microtime(true) - $time);
 
         $time = microtime(true);
-        $this->assertEquals([
+        $this->assertSame([
             ["id" => 5, "sleep" => null],
             ["id" => 6, "sleep" => null],
         ], $result(2));

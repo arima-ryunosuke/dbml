@@ -146,7 +146,7 @@ final class Result extends AbstractResult
     }
 
     /** @return string|int|float|bool|null */
-    private function mapType(string $postgresType, ?string $value)
+    public static function mapType(string $postgresType, ?string $value)
     {
         if ($value === null) {
             return null;

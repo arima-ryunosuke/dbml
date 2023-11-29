@@ -255,4 +255,94 @@ class IntegrationTest extends AbstractUnitTestCase
             // LIMIT 2 が効くので 3 の t_article は含まれない
         ], $rows);
     }
+
+    /**
+     * 非同期関係
+     *
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_async($database)
+    {
+        if ($database->getCompatibleConnection()->getName() !== 'mysqli') {
+            return;
+        }
+        $database->executeAffect('DROP TABLE IF EXISTS t_alltype');
+        $database->executeAffect(<<<SQL
+            CREATE TABLE t_alltype (
+                id            BIGINT(20) UNSIGNED NOT NULL,
+                as_bit        BIT(1) NULL DEFAULT NULL,
+                as_tinyint    TINYINT(3) NULL DEFAULT NULL,
+                as_shortint   SMALLINT(5) NULL DEFAULT NULL,
+                as_mediumint  MEDIUMINT(7) NULL DEFAULT NULL,
+                as_int        INT(10) NULL DEFAULT NULL,
+                as_bigint     BIGINT(19) NULL DEFAULT NULL,
+                as_float      FLOAT NULL DEFAULT NULL,
+                as_double     DOUBLE NULL DEFAULT NULL,
+                as_decimal    DECIMAL(20,6) NULL DEFAULT NULL,
+                as_char       CHAR(50) NULL DEFAULT NULL,
+                as_varchar    VARCHAR(50) NULL DEFAULT NULL,
+                as_tinytext   TINYTEXT NULL DEFAULT NULL,
+                as_text       TEXT NULL DEFAULT NULL,
+                as_mediumtext MEDIUMTEXT NULL DEFAULT NULL,
+                as_longtext   LONGTEXT NULL DEFAULT NULL,
+                as_binary     BINARY(50) NULL DEFAULT NULL,
+                as_varbinary  VARBINARY(50) NULL DEFAULT NULL,
+                as_tinyblob   TINYBLOB NULL DEFAULT NULL,
+                as_blob       BLOB NULL DEFAULT NULL,
+                as_mediumblob MEDIUMBLOB NULL DEFAULT NULL,
+                as_longblob   LONGBLOB NULL DEFAULT NULL,
+                as_json       JSON NULL DEFAULT NULL,
+                as_date       DATE NULL DEFAULT NULL,
+                as_time       TIME NULL DEFAULT NULL,
+                as_year       YEAR NULL DEFAULT NULL,
+                as_datetime   DATETIME NULL DEFAULT NULL,
+                as_timestamp  TIMESTAMP NULL DEFAULT NULL,
+                as_point      POINT NULL DEFAULT NULL,
+                as_enum       ENUM('Y','N') NULL DEFAULT NULL,
+                as_set        SET('A','B') NULL DEFAULT NULL,
+                PRIMARY KEY (id) USING BTREE
+            )
+        SQL,);
+        $database->executeAffect(<<<SQL
+            INSERT INTO t_alltype SET
+                id            = 1,
+                as_bit        = 0,
+                as_tinyint    = 1,
+                as_shortint   = 2,
+                as_mediumint  = 3,
+                as_int        = 4,
+                as_bigint     = 5,
+                as_float      = 1.1,
+                as_double     = 2.2,
+                as_decimal    = 3.3,
+                as_char       = "s1",
+                as_varchar    = "s2",
+                as_tinytext   = "s3",
+                as_text       = "s4",
+                as_mediumtext = "s5",
+                as_longtext   = "s6",
+                as_binary     = "b1",
+                as_varbinary  = "b2",
+                as_tinyblob   = "b3",
+                as_blob       = "b4",
+                as_mediumblob = "b5",
+                as_longblob   = "b6",
+                as_json       = "[1,2,3]",
+                as_date       = "2014-12-24",
+                as_time       = "12:34:56",
+                as_year       = "2014",
+                as_datetime   = "2014-12-24T12:34:56",
+                as_timestamp  = "2014-12-24T12:34:56",
+                as_point      = ST_GeomFromText("POINT(1 1)"),
+                as_enum       = "Y",
+                as_set        = "A,B"
+        SQL,);
+
+        $syncrows = $database->executeSelect('SELECT * FROM t_alltype')->fetchAllAssociative();
+        $asyncrows = $database->executeSelectAsync('SELECT * FROM t_alltype')();
+        $this->assertSame($syncrows, $asyncrows);
+
+        $database->executeAffect('DROP TABLE IF EXISTS t_alltype');
+    }
 }
