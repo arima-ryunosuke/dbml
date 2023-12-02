@@ -21,7 +21,6 @@ use ryunosuke\dbml\Generator\Yielder;
 use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware;
-use ryunosuke\dbml\Metadata\CompatibleConnection;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
@@ -282,7 +281,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertException($ex, L($database)->deleteOrThrow('test', ['id' => -1]));
         $this->assertException($ex, L($database)->removeOrThrow('test', ['id' => -1]));
         $this->assertException($ex, L($database)->destroyOrThrow('test', ['id' => -1]));
-        if ((new CompatibleConnection($database->getConnection()))->getName() === 'pdo-mysql') {
+        if ($database->getCompatibleConnection()->getName() === 'pdo-mysql') {
             $this->assertException($ex, L($database)->upsertOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => '']));
         }
 
@@ -305,7 +304,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertEquals(['id' => 'a'], $database->modifyIgnore('noauto', ['id' => 'a', 'name' => 'piyo']));
             $this->assertEquals([], $database->createIgnore('noauto', ['id' => 'x']));
             $this->assertEquals([], $database->insertIgnore('noauto', ['id' => 'x']));
-            if ((new CompatibleConnection($database->getConnection()))->getName() !== 'mysqli') {
+            if ($database->getCompatibleConnection()->getName() !== 'mysqli') {
                 $this->assertEquals([], $database->updateIgnore('noauto', ['id' => 'x'], ['id' => 'a']));
             }
             // insert しようとしてダメでさらに update しようとしてダメだった場合に無視できるのは mysql のみ（本当は方法があるのかもしれないが詳しくないのでわからない）
@@ -322,7 +321,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 ['id' => 1, 'name' => ''],
                 ['id' => 2, 'name' => ''],
             ]));
-            $updatedRow = (new CompatibleConnection($database->getConnection()))->getName() === 'mysqli' ? 2 : 0;
+            $updatedRow = $database->getCompatibleConnection()->getName() === 'mysqli' ? 2 : 0;
             $this->assertEquals($updatedRow, $database->updateArrayIgnore('noauto', [
                 ['id' => 1, 'name' => null],
                 ['id' => 2, 'name' => null],
@@ -2915,7 +2914,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             ],
         ], [], [], 1));
 
-        if ((new CompatibleConnection($database->getConnection()))->isSupportedTablePrefix()) {
+        if ($database->getCompatibleConnection()->isSupportedTablePrefix()) {
             // mysql は * だけで型を活かすことができる
             $row = $database->selectTuple('misctype', [], [], 1);
             $this->assertSame(1, $row['cint']);
@@ -4676,7 +4675,7 @@ INSERT INTO test (name) VALUES
         $affected = $database->updateArray('test', $data, ['id <> ?' => 5]);
 
         // 6件与えているが、変更されるのは4件のはず(pdo-mysql の場合。他DBMSは5件)
-        $expected = (new CompatibleConnection($database->getConnection()))->getName() === 'pdo-mysql' ? 4 : 5;
+        $expected = $database->getCompatibleConnection()->getName() === 'pdo-mysql' ? 4 : 5;
         $this->assertEquals($expected, $affected);
 
         // 実際に取得して変わっている/いないを確認
@@ -4712,7 +4711,7 @@ INSERT INTO test (name) VALUES
             $affected = $database->updateArray('test', $data, ['id <> ?' => 5], 2);
 
             // 6件与えているが、変更されるのは4件のはず(pdo-mysql の場合。他DBMSは5件)
-            $expected = (new CompatibleConnection($database->getConnection()))->getName() === 'pdo-mysql' ? 4 : 5;
+            $expected = $database->getCompatibleConnection()->getName() === 'pdo-mysql' ? 4 : 5;
             $this->assertEquals($expected, $affected);
 
             // 実際に取得して変わっている/いないを確認
@@ -4752,7 +4751,7 @@ INSERT INTO test (name) VALUES
         $affected = $database->updateArray('multiprimary', $data, ['NOT (mainid = ? AND subid = ?)' => [1, 5]]);
 
         // 6件与えているが、変更されるのは4件のはず(pdo-mysql の場合。他DBMSは5件)
-        $expected = (new CompatibleConnection($database->getConnection()))->getName() === 'pdo-mysql' ? 4 : 5;
+        $expected = $database->getCompatibleConnection()->getName() === 'pdo-mysql' ? 4 : 5;
         $this->assertEquals($expected, $affected);
 
         // 実際に取得して変わっている/いないを確認
@@ -5333,8 +5332,7 @@ INSERT INTO test (id, name) VALUES
         ], [
             'mainid' => 1,
         ]);
-        $cconnection = new CompatibleConnection($database->getConnection());
-        $this->assertEquals($cconnection->getName() === 'pdo-mysql' ? 0 : $realaffected, $affected);
+        $this->assertEquals($database->getCompatibleConnection()->getName() === 'pdo-mysql' ? 0 : $realaffected, $affected);
         $this->assertEquals($database->getPlatform() instanceof MySQLPlatform ? 0 : $realaffected, $database->getAffectedRows());
     }
 
@@ -6743,7 +6741,7 @@ INSERT INTO test (id, name) VALUES
     {
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
             $this->assertEquals([], $database->insertIgnore('test', ['id' => 1]));
-            if ((new CompatibleConnection($database->getConnection()))->getName() !== 'mysqli') {
+            if ($database->getCompatibleConnection()->getName() !== 'mysqli') {
                 $this->assertEquals([], $database->updateIgnore('test', ['id' => 1], ['id' => 2]));
             }
 

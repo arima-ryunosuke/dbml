@@ -5,7 +5,6 @@ namespace ryunosuke\dbml\Query;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use ryunosuke\dbml\Database;
-use ryunosuke\dbml\Metadata\CompatibleConnection;
 
 /**
  * Statement をラップして扱いやすくしたクラス
@@ -57,8 +56,7 @@ class Statement implements Queryable
         $this->query = $this->parser->convertNamedSQL($query, $params);
         $this->params = $params;
 
-        $cconnection = new CompatibleConnection($database->getConnection());
-        $this->namedSupported = $cconnection->isSupportedNamedPlaceholder();
+        $this->namedSupported = $database->getCompatibleConnection()->isSupportedNamedPlaceholder();
 
         // コネクションを保持
         $this->database = $database;

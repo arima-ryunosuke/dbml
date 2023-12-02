@@ -867,8 +867,7 @@ class Database
             $stmt = $this->executeSelect($sql, $params);
         }
 
-        $cconnection = new CompatibleConnection($this->getSlaveConnection());
-        $stmt = $cconnection->customResult($stmt, $this->getUnsafeOption('checkSameColumn'));
+        $stmt = $this->getCompatibleConnection($connection)->customResult($stmt, $this->getUnsafeOption('checkSameColumn'));
 
         return $stmt;
     }
@@ -1009,8 +1008,7 @@ class Database
             return function () { };
         }
 
-        $cconnection = new CompatibleConnection($this->getSlaveConnection());
-        $revert = $cconnection->setTablePrefix();
+        $revert = $this->getCompatibleConnection($this->getSlaveConnection())->setTablePrefix();
 
         // QueryBuilder 経由ならそれっぽいことはできる
         if ($revert === null) {
@@ -1839,6 +1837,18 @@ class Database
             $cons[spl_object_hash($con)] = $con;
         }
         return array_values($cons);
+    }
+
+    /**
+     * {@link CompatibleConnection 互換用コネクション}を取得する
+     *
+     * @param ?Connection $connection コネクション（省略時はトランザクションコネクション）
+     * @return CompatibleConnection 本ライブラリの互換用コネクション
+     */
+    public function getCompatibleConnection($connection = null)
+    {
+        $connection ??= $this->getConnection();
+        return $this->cache['compatibleConnection'][spl_object_hash($connection)] ??= new CompatibleConnection($connection);
     }
 
     /**
@@ -4672,8 +4682,7 @@ class Database
             $this->affectedRows = null;
             $this->affectedRows = $this->getMasterConnection()->executeStatement($query, $params);
             // 利便性のため $this->affectedRows には代入しない（こうしておくと mysqli においてマッチ行と変更行が得られる）
-            $cconnection = new CompatibleConnection($this->getMasterConnection());
-            return $cconnection->alternateMatchedRows() ?? $this->affectedRows;
+            return $this->getCompatibleConnection($this->getMasterConnection())->alternateMatchedRows() ?? $this->affectedRows;
         }
         catch (\Exception $ex) {
             $this->unstackAll();
@@ -4762,8 +4771,7 @@ class Database
             })($queries);
         }
 
-        $cconnection = new CompatibleConnection($connection ?? $this->getConnection());
-        return $cconnection->executeAsync($queries, $this->affectedRows);
+        return $this->getCompatibleConnection($connection)->executeAsync($queries, $this->affectedRows);
     }
 
     /**
