@@ -346,23 +346,22 @@ class CompatibleConnection
                 $this->tick = $tick;
                 $this->affectedRows = &$affectedRows;
 
-                register_tick_function([$this, 'tick']);
                 $this->tick();
+                register_tick_function([$this, 'tick']);
             }
 
             public function __destruct()
             {
+                unregister_tick_function([$this, 'tick']);
+
                 // 結果を受け取らないまま gc されるのは大抵の場合よくないので下手に制御せず例外を投げる（トランザクションが閉じている・負荷次第でたまにコケる・実行されたりされなかったりする）
                 if (!(!$this->waiting && !$this->sqls->valid())) {
-                    unregister_tick_function([$this, 'tick']);
                     throw new \UnexpectedValueException("query not completed");
                 }
             }
 
             public function __invoke($index = null)
             {
-                unregister_tick_function([$this, 'tick']);
-
                 while (true) {
                     if ($this->tick(true) === null) {
                         break;
