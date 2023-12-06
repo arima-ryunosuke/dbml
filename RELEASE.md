@@ -24,6 +24,17 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.13
+
+- [fixbug] async 無名クラスが解放されないことがある不具合を修正
+- [fixbug] 非同期クエリで型が死ぬ不具合を修正
+- [feature] デフォルトチャンクサイズ・条件を指定できる defaultChunk オプションを追加
+- [feature] exists されたクエリビルダを実行する方法がなかったので existize を追加
+- [fixbug] countize で余計なメソッドが呼ばれていた不具合を修正
+- [fixbug] subbuilder の chunk が効いていない不具合を修正
+- [fixbug] changeArray で一意エラーが出る不具合を修正
+- [refactor] 無駄が多いので CompatibleConnection の生成をキャッシュ化
+
 ## 2.1.12
 
 - [feature] CsvGenerator の自動ヘッダ出力機能
