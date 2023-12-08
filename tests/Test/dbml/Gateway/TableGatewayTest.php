@@ -1451,6 +1451,45 @@ AND ((flag=1))", "$gw");
      * @param TableGateway $gateway
      * @param Database $database
      */
+    function test_affectAndPrimary($gateway, $database)
+    {
+        /// 「正しく委譲されているか？」が確認できればいいので細かい動作はテストしない
+
+        $count = $gateway->count();
+
+        // insertAndPrimary すると1件増えて主キーが返ってくるはず
+        $pri = $gateway->insertAndPrimary(['name' => 'A']);
+        $this->assertEquals($count + 1, $count = $gateway->count());
+        $this->assertEquals(['id' => $count], $pri);
+
+        // updateAndPrimary すると更新されて主キーが返ってくるはず
+        $pri = $gateway->updateAndPrimary(['name' => 'YYY'], $pri);
+        $this->assertEquals('YYY', $gateway->value('name', $pri));
+        $this->assertEquals(['id' => $count], $pri);
+
+        // 主キー有りで upsert すると更新されるはず
+        $pri = $gateway->upsertAndPrimary($pri + ['name' => 'ZZZ']);
+        $this->assertEquals($count, $count = $gateway->count());
+        $this->assertEquals('ZZZ', $gateway->value('name', $pri));
+
+        // 主キー無しで upsert すると挿入されるはず
+        $pri = $gateway->upsertAndPrimary(['name' => 'KKK']);
+        $this->assertEquals($count + 1, $count = $gateway->count());
+        $this->assertEquals('KKK', $gateway->value('name', $pri));
+
+        // delete すると1件減るはず
+        $pri = $gateway->deleteAndPrimary($pri);
+        $this->assertEquals($count - 1, $count = $gateway->count());
+        $this->assertEquals(false, $gateway->value('name', $pri));
+
+        $this->assertEquals(11, $count);
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
     function test_affect_ignore($gateway, $database)
     {
         if ($database->getCompatiblePlatform()->supportsIgnore()) {

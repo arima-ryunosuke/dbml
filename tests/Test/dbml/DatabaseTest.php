@@ -247,7 +247,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertException($ex, L($database)->entityAssocForAffect('test', ['1=0']));
         $this->assertException($ex, L($database)->entityTupleForAffect('test', ['1=0']));
 
-        // 作用行系(作用した場合に主キーが返ることを担保)
+        // affectOrThrow(作用した場合に主キーが返ることを担保)
         $this->assertEquals(['id' => 99], $database->insertOrThrow('test', ['id' => 99]));
         $this->assertEquals(['id' => 99], $database->upsertOrThrow('test', ['id' => 99, 'name' => 'hogera']));
         $this->assertEquals(['id' => 99], $database->modifyOrThrow('test', ['id' => 99, 'name' => 'rageho']));
@@ -268,6 +268,29 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['id' => 1], $database->deleteOrThrow('test', ['id' => 1]));
         $this->assertEquals(['id' => 2], $database->removeOrThrow('test', ['id' => 2]));
         $this->assertEquals(['id' => 3], $database->destroyOrThrow('test', ['id' => 3]));
+
+        // affectAndPrimary(作用した場合に主キーが返ることを担保)
+        $this->assertEquals(['id' => 88], $database->insertAndPrimary('test', ['id' => 88]));
+        $this->assertEquals(['id' => 88], $database->upsertAndPrimary('test', ['id' => 88, 'name' => 'hogera']));
+        $this->assertEquals(['id' => 88], $database->modifyAndPrimary('test', ['id' => 88, 'name' => 'rageho']));
+        // ON AUTO_INCREMENT
+        $lastid = $database->insertAndPrimary('test', ['name' => 'hogera']);
+        $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
+        $lastid = $database->upsertAndPrimary('test', ['name' => 'hogera']);
+        $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
+        $lastid = $database->modifyAndPrimary('test', ['name' => 'hogera']);
+        $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
+        // NO AUTO_INCREMENT
+        $this->assertEquals(['id' => 'd'], $database->insertAndPrimary('noauto', ['id' => 'd', 'name' => 'fugara']));
+        $this->assertEquals(['id' => 'e'], $database->upsertAndPrimary('noauto', ['id' => 'e', 'name' => 'fugara']));
+        $this->assertEquals(['id' => 'f'], $database->modifyAndPrimary('noauto', ['id' => 'f', 'name' => 'fugara']));
+
+        // update/delete
+        $this->assertEquals(['id' => 1], $database->updateAndPrimary('test', ['name' => 'hogera'], ['id' => 1]));
+        $this->assertEquals(['id' => 1], $database->invalidAndPrimary('test', ['id' => 1], ['name' => 'deleted']));
+        $this->assertEquals(['id' => 1], $database->deleteAndPrimary('test', ['id' => 1]));
+        $this->assertEquals(['id' => 2], $database->removeAndPrimary('test', ['id' => 2]));
+        $this->assertEquals(['id' => 3], $database->destroyAndPrimary('test', ['id' => 3]));
 
         // 作用行系(見つからなかった場合に例外が投がることを担保)
         $ex = new NonAffectedException('affected row is nothing');
@@ -6863,6 +6886,7 @@ INSERT INTO test (id, name) VALUES
             $this->assertEquals(['name' => 'repN', 'data' => 'repD'], $database->selectTuple('test.name,data', ['id' => $id]));
 
             $this->assertEquals(['id' => $id + 1], $database->replaceOrThrow('test', ['id' => $id + 1, 'name' => '', 'data' => '']));
+            $this->assertEquals(['id' => $id + 1], $database->replaceAndPrimary('test', ['id' => $id + 1, 'name' => '', 'data' => '']));
         }
     }
 

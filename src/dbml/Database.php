@@ -32,6 +32,7 @@ use ryunosuke\dbml\Logging\Middleware as LoggingMiddleware;
 use ryunosuke\dbml\Metadata\CompatibleConnection;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Metadata\Schema;
+use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
 use ryunosuke\dbml\Mixin\AffectConditionallyTrait;
 use ryunosuke\dbml\Mixin\AffectIgnoreTrait;
 use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
@@ -145,6 +146,12 @@ use ryunosuke\dbml\Utility\Adhoc;
  *
  * [update/delete]OrThrow の戻り値は主キーだが、複数行に作用した場合は未定義となる（['id' => 3] で update/delete した場合は 3 を返せるが、['create_at < ?' => '2011-12-34'] といった場合は返しようがないため）。
  * そもそも「更新/削除できなかったら例外」という挙動が必要なケースはほぼ無いためこれらの用途はほとんどなく、単に他のメソッドとの統一のために存在している。
+ *
+ * **AndPrimary**
+ *
+ * 通常の更新系メソッドに付与できる。
+ * 返り値として主キー配列を返すようになる。
+ * OrThrow と異なり作用行は見ないで常に主キーを返すため、「とりあえずザクザクと行を追加したい」のようなテストケースの作成などで有用。
  *
  * **Ignore**
  *
@@ -339,6 +346,7 @@ class Database
     use AffectIgnoreTrait;
     use AffectConditionallyTrait;
     use AffectOrThrowTrait;
+    use AffectAndPrimaryTrait;
     use PrepareTrait;
 
     protected function getDatabase() { return $this; }
@@ -6264,6 +6272,7 @@ class Database
      * ```
      *
      * @used-by insertOrThrow()
+     * @used-by insertAndPrimary()
      * @used-by insertIgnore()
      * @used-by insertConditionally()
      *
@@ -6344,6 +6353,9 @@ class Database
             return $affected;
         }
 
+        if (array_get($opt, 'primary') === 3) {
+            return $this->_postaffect($tableName, $data);
+        }
         if ($affected === 0 && array_get($opt, 'primary') === 2) {
             return [];
         }
@@ -6390,6 +6402,7 @@ class Database
      * ```
      *
      * @used-by updateOrThrow()
+     * @used-by updateAndPrimary()
      * @used-by updateIgnore()
      *
      * @param string|array|QueryBuilder $tableName テーブル名
@@ -6439,6 +6452,9 @@ class Database
             return $affected;
         }
 
+        if (array_get($opt, 'primary') === 3) {
+            return $this->_postaffect($tableName, $data + arrayize($identifier));
+        }
         if ($affected !== 0 && array_get($opt, 'primary')) {
             return $this->_postaffect($tableName, $data + arrayize($identifier));
         }
@@ -6469,6 +6485,7 @@ class Database
      * ```
      *
      * @used-by deleteOrThrow()
+     * @used-by deleteAndPrimary()
      * @used-by deleteIgnore()
      *
      * @param string|array|QueryBuilder $tableName テーブル名
@@ -6539,6 +6556,9 @@ class Database
             return $affected;
         }
 
+        if (array_get($opt, 'primary') === 3) {
+            return $this->_postaffect($tableName, arrayize($identifier));
+        }
         if ($affected !== 0 && array_get($opt, 'primary')) {
             return $this->_postaffect($tableName, arrayize($identifier));
         }
@@ -6578,6 +6598,7 @@ class Database
      * ```
      *
      * @used-by invalidOrThrow()
+     * @used-by invalidAndPrimary()
      * @used-by invalidIgnore()
      *
      * @param string|array $tableName テーブル名
@@ -6660,6 +6681,7 @@ class Database
      * ```
      *
      * @used-by removeOrThrow()
+     * @used-by removeAndPrimary()
      * @used-by removeIgnore()
      *
      * @param string|array|QueryBuilder $tableName テーブル名
@@ -6722,6 +6744,7 @@ class Database
      * ```
      *
      * @used-by destroyOrThrow()
+     * @used-by destroyAndPrimary()
      * @used-by destroyIgnore()
      *
      * @param string|array $tableName テーブル名
@@ -6926,6 +6949,7 @@ class Database
      * ```
      *
      * @used-by upsertOrThrow()
+     * @used-by upsertAndPrimary()
      * @used-by upsertConditionally()
      *
      * @param string|array $tableName テーブル名
@@ -7018,6 +7042,7 @@ class Database
      * ```
      *
      * @used-by modifyOrThrow()
+     * @used-by modifyAndPrimary()
      * @used-by modifyIgnore()
      * @used-by modifyConditionally()
      *
@@ -7092,6 +7117,9 @@ class Database
             $this->resetAutoIncrement($tableName, null);
         }
 
+        if (array_get($opt, 'primary') === 3) {
+            return $this->_postaffect($tableName, $updatable ? $updateData : $insertData);
+        }
         if ($affected !== 0 && array_get($opt, 'primary')) {
             return $this->_postaffect($tableName, $updatable ? $updateData : $insertData);
         }
@@ -7120,6 +7148,7 @@ class Database
      * ```
      *
      * @used-by replaceOrThrow()
+     * @used-by replaceAndPrimary()
      *
      * @param string|array $tableName テーブル名
      * @param mixed $data REPLACE データ配列

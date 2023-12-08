@@ -5,6 +5,7 @@ namespace ryunosuke\dbml\Gateway;
 use Doctrine\DBAL\Schema\Column;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
+use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
 use ryunosuke\dbml\Mixin\AffectConditionallyTrait;
 use ryunosuke\dbml\Mixin\AffectIgnoreTrait;
 use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
@@ -384,6 +385,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     use AffectIgnoreTrait;
     use AffectConditionallyTrait;
     use AffectOrThrowTrait;
+    use AffectAndPrimaryTrait;
     use PrepareTrait;
 
     protected function getDatabase() { return $this->database; }
@@ -2426,6 +2428,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 駆動表を省略できる <@uses Database::insert()>
      *
      * @used-by insertOrThrow()
+     * @used-by insertAndPrimary()
      * @used-by insertIgnore()
      * @used-by insertConditionally()
      *
@@ -2452,6 +2455,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 駆動表を省略できる <@uses Database::update()>
      *
      * @used-by updateOrThrow()
+     * @used-by updateAndPrimary()
      * @used-by updateIgnore()
      *
      * @inheritdoc Database::update()
@@ -2466,6 +2470,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 駆動表を省略できる <@uses Database::delete()>
      *
      * @used-by deleteOrThrow()
+     * @used-by deleteAndPrimary()
      * @used-by deleteIgnore()
      *
      * @inheritdoc Database::delete()
@@ -2480,6 +2485,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 駆動表を省略できる <@uses Database::invalid()>
      *
      * @used-by invalidOrThrow()
+     * @used-by invalidAndPrimary()
      * @used-by invalidIgnore()
      *
      * @inheritdoc Database::invalid()
@@ -2494,6 +2500,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 駆動表を省略できる <@uses Database::remove()>
      *
      * @used-by removeOrThrow()
+     * @used-by removeAndPrimary()
      * @used-by removeIgnore()
      *
      * @inheritdoc Database::remove()
@@ -2508,6 +2515,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 駆動表を省略できる <@uses Database::destroy()>
      *
      * @used-by destroyOrThrow()
+     * @used-by destroyAndPrimary()
      * @used-by destroyIgnore()
      *
      * @inheritdoc Database::destroy()
@@ -2535,6 +2543,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 駆動表を省略できる <@uses Database::upsert()>
      *
      * @used-by upsertOrThrow()
+     * @used-by upsertAndPrimary()
      * @used-by upsertConditionally()
      *
      * @inheritdoc Database::upsert()
@@ -2549,6 +2558,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 駆動表を省略できる <@uses Database::modify()>
      *
      * @used-by modifyOrThrow()
+     * @used-by modifyAndPrimary()
      * @used-by modifyIgnore()
      * @used-by modifyConditionally()
      *
@@ -2564,6 +2574,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 駆動表を省略できる <@uses Database::replace()>
      *
      * @used-by replaceOrThrow()
+     * @used-by replaceAndPrimary()
      *
      * @inheritdoc Database::replace()
      */
