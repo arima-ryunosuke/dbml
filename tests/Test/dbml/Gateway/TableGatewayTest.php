@@ -134,6 +134,7 @@ class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
             'article_id' => '1',
             'title'      => 'タイトルです',
             'checks'     => '',
+            'delete_at'  => null,
             'Comment'    => [
                 1 => [
                     'comment_id' => '1',
@@ -817,6 +818,7 @@ AND ((flag=1))", "$gw");
             'article_id' => '1',
             'title'      => 'タイトルです',
             'checks'     => '',
+            'delete_at'  => null,
         ], $row);
 
         $Article = new TableGateway($database, 't_article', 'Article');
@@ -828,6 +830,7 @@ AND ((flag=1))", "$gw");
             'article_id' => '1',
             'title'      => 'タイトルです',
             'checks'     => '',
+            'delete_at'  => null,
         ], json_decode(json_encode($row), true));
     }
 
@@ -1547,6 +1550,12 @@ AND ((flag=1))", "$gw");
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
+            public function invalid(array $identifier = [], ?array $invalid_columns = null)
+            {
+                $this->called[] = __FUNCTION__;
+                return parent::{__FUNCTION__}(...func_get_args());
+            }
+
             public function remove(array $identifier = [])
             {
                 $this->called[] = __FUNCTION__;
@@ -1604,6 +1613,7 @@ AND ((flag=1))", "$gw");
         $gateway->updateIgnore(['name' => 'aaa'], ['id' => 1]);
         $gateway->updateOrThrow(['name' => 'aaa'], ['id' => 2]);
         $gateway->replaceOrThrow(['id' => 3, 'name' => 'aaa']);
+        $gateway->invalidOrThrow(['id' => 3], ['name' => 'XXX']);
         $gateway->deleteOrThrow(['id' => 1]);
         $gateway->removeOrThrow(['id' => 2]);
         $gateway->destroyOrThrow(['id' => 3]);
@@ -1620,6 +1630,7 @@ AND ((flag=1))", "$gw");
             'update',
             'update',
             'replace',
+            'invalid',
             'delete',
             'remove',
             'destroy',
@@ -1827,6 +1838,28 @@ AND ((flag=1))", "$gw");
 
         $this->assertEquals(3, $database->count('t_article'));
         $this->assertEquals(5, $database->count('t_comment'));
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_invalid($gateway, $database)
+    {
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
+        $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
+        $database->insert('foreign_p', ['id' => 3, 'name' => 'name3']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
+
+        $foreign_p = new TableGateway($database, 'foreign_p');
+        $affected = $foreign_p->invalid([
+            'id' => [1, 2],
+        ], ['name' => 'invalid']);
+
+        // 指定している 1, 2 のみ
+        $this->assertEquals(2, $affected);
+        $this->assertEquals(['invalid', 'invalid', 'name3'], $foreign_p->lists('name'));
     }
 
     /**
@@ -2242,6 +2275,21 @@ FROM t_article Article", $Article->column([
 
     /**
      * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_invalidColumn($gateway, $database)
+    {
+        $this->assertNull($gateway->invalidColumn());
+
+        $database->t_article->pk(1)->invalid([
+            'article_id' => 1,
+        ]);
+        $this->assertEquals(date('Y-m-d H:i:s'), date('Y-m-d H:i:s', strtotime($database->t_article->pk(1)->value(['delete_at']))));
+    }
+
+    /**
+     * @dataProvider provideGateway
      * @param TableGateway $_
      * @param Database $database
      */
@@ -2304,6 +2352,7 @@ FROM t_article Article", $Article->column([
             'article_id'    => '1',
             'title'         => 'HELLO WORLD',
             'checks'        => '',
+            'delete_at'     => null,
             'statement'     => 'HELLO WORLD',
             'closure'       => '1-HELLO WORLD',
             'query_builder' => '3',
@@ -2323,6 +2372,7 @@ FROM t_article Article", $Article->column([
             'title'        => 'hello world',
             'title_checks' => 'hello world:1,2,3',
             'checks'       => '1,2,3',
+            'delete_at'    => null,
         ], $database->t_article->scope('id', 1)->tuple([
             '*',
             'title_checks',

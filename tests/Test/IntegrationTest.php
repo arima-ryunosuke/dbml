@@ -56,6 +56,7 @@ class IntegrationTest extends AbstractUnitTestCase
                     'cond_id_in'      => '1',
                     'cond_title_like' => '1',
                     'checks'          => '',
+                    'delete_at'       => null,
                 ],
             ], $select->array());
         }
@@ -129,6 +130,7 @@ class IntegrationTest extends AbstractUnitTestCase
                 'article_id' => '1',
                 'title'      => 'タイトルです',
                 'checks'     => '',
+                'delete_at'  => null,
             ],
         ], iterator_to_array($database->t_article()->pk(1)));
 
@@ -189,6 +191,7 @@ class IntegrationTest extends AbstractUnitTestCase
             'checks'     => [1, 2, 3],
             'statement'  => 'DUMMY TITLE',
             'title5'     => 'DUMMY TITLE',
+            'delete_at'  => null,
         ], $database->t_article->as('A')->select('!', $pk)->tuple());
 
         $where = (string) $database->t_article->where([
@@ -235,6 +238,7 @@ class IntegrationTest extends AbstractUnitTestCase
                 'article_id' => '1',
                 'title'      => 'タイトルです',
                 'checks'     => '',
+                'delete_at'  => null,
                 'C'          => [
                     // ORDER BY C.commnet_id DESC が効くので降順になる
                     // LIMIT 3 が効くので 6 の t_comment は含まれない

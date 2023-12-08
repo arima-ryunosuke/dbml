@@ -320,6 +320,7 @@ abstract class AbstractUnitTestCase extends TestCase
                             [
                                 new Column('ancestor_id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('ancestor_name', Type::getType('string'), ['length' => 32]),
+                                new Column('delete_at', Type::getType('datetime'), ['notnull' => false, 'default' => null]),
                             ],
                             [new Index('PRIMARY', ['ancestor_id'], true, true)]
                         ),
@@ -328,6 +329,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('parent_id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('parent_name', Type::getType('string'), ['length' => 32]),
                                 new Column('ancestor_id', Type::getType('integer'), []),
+                                new Column('delete_at', Type::getType('datetime'), ['notnull' => false, 'default' => null]),
                             ],
                             [
                                 new Index('PRIMARY', ['parent_id'], true, true),
@@ -345,6 +347,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('child_id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('child_name', Type::getType('string'), ['length' => 32]),
                                 new Column('parent_id', Type::getType('integer'), []),
+                                new Column('delete_at', Type::getType('datetime'), ['notnull' => false, 'default' => null]),
                             ],
                             [new Index('PRIMARY', ['child_id'], true, true)],
                             [],
@@ -360,6 +363,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('parent_id', Type::getType('integer'), []),
                                 new Column('ancestor_id', Type::getType('integer'), []),
                                 new Column('grand1_name', Type::getType('string'), ['length' => 32]),
+                                new Column('delete_at', Type::getType('datetime'), ['notnull' => false, 'default' => null]),
                             ],
                             [new Index('PRIMARY', ['grand_id'], true, true)],
                             [],
@@ -381,6 +385,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                     new Column('parent_id', Type::getType('integer'), []),
                                     new Column('ancestor_id', Type::getType('integer'), []),
                                     new Column('grand2_name', Type::getType('string'), ['length' => 32]),
+                                    new Column('delete_at', Type::getType('datetime'), ['notnull' => false, 'default' => null]),
                                 ],
                                 [new Index('PRIMARY', ['grand_id'], true, true)],
                                 [],
@@ -440,6 +445,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('article_id', Type::getType('integer')),
                                 new Column('title', Type::getType('string')),
                                 new Column('checks', Type::getType('string')),
+                                new Column('delete_at', Type::getType('datetime'), ['notnull' => false, 'default' => null]),
                             ],
                             [
                                 new Index('PRIMARY', ['article_id'], true, true),

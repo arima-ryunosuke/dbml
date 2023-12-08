@@ -7,6 +7,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\AbstractAsset;
 use Doctrine\DBAL\Schema\Column;
@@ -175,7 +176,15 @@ use ryunosuke\dbml\Utility\Adhoc;
  *     これは mysql の bind parameter 上限が 65535 であることに起因している。
  *
  *     @param int|string $int デフォルトチャンクサイズ
- *  }
+ * }
+ * @method array                  getDefaultInvalidColumn()
+ * @method $this                  setDefaultInvalidColumn($array) {
+ *     論理削除時のカラムを指定する
+ *
+ *     この設定で ['delete_at' => now()] などとすると invalid コール時に delete_at が now で更新されるようになる。
+ *
+ *     @param array $array 論理削除時のカラム
+ * }
  * @method bool                   getFilterNoExistsColumn()
  * @method $this                  setFilterNoExistsColumn($bool) {
  *     存在しないカラムをフィルタするか指定する
@@ -407,6 +416,12 @@ class Database
             'updateEmpty'               => true,
             // バルク系メソッドの $chunk に null が与えられた場合のデフォルトチャンクサイズ（文字列指定で特殊なコールバックが設定できる）
             'defaultChunk'              => PHP_INT_MAX,
+            // 無効化時のデフォルトカラム
+            'defaultInvalidColumn'      => [
+                //'delete_flg'  => 1,
+                //'delete_user' => fn() => Auth()::id(),
+                //'delete_time' => fn() => date('Y-m-d H:i:s'),
+            ],
             // insert 時などにテーブルに存在しないカラムを自動でフィルタするか否か
             'filterNoExistsColumn'      => true,
             // insert 時などに not null な列に null が来た場合に自動でフィルタするか否か
@@ -6426,6 +6441,93 @@ class Database
         }
         if ($affected === 0 && array_get($opt, 'throw')) {
             throw new NonAffectedException('affected row is nothing.');
+        }
+        return $affected;
+    }
+
+    /**
+     * 論理削除構文
+     *
+     * 指定された論理削除カラムを更新する。
+     * 簡単に言えば「単に指定カラムを更新する update メソッド」に近いが、下記のように外部キーを見て無効化が伝播する。
+     *
+     * - RESTRICT/NO ACTION: 紐づく子テーブルレコードが無効でない場合、例外を投げる
+     * - CASCADE: 紐づく子テーブルレコードも無効にする
+     *
+     * 「無効化」の定義は $invalid_columns で与えるカラムで決まる。
+     * $invalid_columns = ['delete_at' => fn() => date('Y-m-d H:i:s')] のように指定すれば delete_at が現在日時で UPDATE される。
+     * $invalid_columns は全テーブルで共通であるが、null を与えると TableGateway::invalidColumn() -> defaultInvalidColumn オプション の優先順位で自動指定される。
+     *
+     * 「無効」の定義は「指定カラムが NULL でない」こと（指定カラムが NULL = 有効状態）。
+     * いわゆるフラグで delete_flg=0 としても無効であることに留意。
+     *
+     * 相互参照外部キーでかつそれらが共に「RESTRICT/NO ACTION」だと無限ループになるので注意。
+     * （そのような外部キーはおかしいと思うので特にチェックしない）。
+     *
+     * ```php
+     * # childtable -> parenttable に CASCADE な外部キーがある場合
+     * $db->invalid('parenttable', ['parent_id' => 1], ['delete_at' => date('Y-m-d H:i:s')]);
+     * // UPDATE childtable  SET delete_at = '2014-12-24 12:34:56' WHERE (parent_id) IN (SELECT parenttable.parent_id FROM parenttable WHERE parenttable.parent_id = 1)
+     * // UPDATE parenttable SET delete_at = '2014-12-24 12:34:56' WHERE parenttable.parent_id = 1
+     * ```
+     *
+     * @used-by invalidOrThrow()
+     * @used-by invalidIgnore()
+     *
+     * @param string|array $tableName テーブル名
+     * @param array|mixed $identifier WHERE 条件
+     * @param ?array $invalid_columns 無効カラム値
+     * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
+     */
+    public function invalid($tableName, $identifier, $invalid_columns = null)
+    {
+        // 隠し引数 $opt
+        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
+
+        $tableName = $this->_preaffect($tableName, []);
+
+        $tableName = $this->convertTableName($tableName);
+        $identifier = $this->_prewhere($tableName, $identifier);
+
+        $invalid_columns ??= $this->$tableName->invalidColumn();
+        $invalid_columns ??= $this->getUnsafeOption('defaultInvalidColumn');
+        assert(!empty($invalid_columns));
+
+        $affecteds = [];
+        $schema = $this->getSchema();
+        $fkeys = $schema->getForeignKeys($tableName, null);
+        uasort($fkeys, fn($a, $b) => ($a->onDelete() ? 1 : 0) <=> ($b->onDelete() ? 1 : 0));
+        foreach ($fkeys as $fkey) {
+            $ltable = first_key($schema->getForeignTable($fkey));
+            $lcolumns = array_intersect_key($invalid_columns, $schema->getTableColumns($ltable));
+            if (!$lcolumns) {
+                continue;
+            }
+            $ckey = implode(',', $fkey->getLocalColumns());
+            $subwhere = [
+                "($ckey)" => $this->select([$tableName => $fkey->getForeignColumns()], $identifier),
+            ];
+
+            if ($fkey->onDelete() === null) {
+                $invalid_where = array_map(fn($column) => $this->raw("$column IS NULL"), array_keys($lcolumns));
+                if ($this->exists($ltable, array_merge($subwhere, $invalid_where))) {
+                    $driverException = new class("Cannot invalid a parent row: a foreign key constraint fails ($ltable, CONSTRAINT {$fkey->getName()})") extends \Exception implements Driver\Exception {
+                        public function getSQLState() { return '10000'; } // @codeCoverageIgnore
+                    };
+                    throw new ForeignKeyConstraintViolationException($driverException, null);
+                }
+            }
+            else {
+                $affecteds = array_merge($affecteds, (array) $this->invalid($ltable, $subwhere, $lcolumns, $opt));
+            }
+        }
+
+        $affected = $this->update($tableName, $invalid_columns, $identifier, $opt);
+        if ($this->getUnsafeOption('dryrun')) {
+            return array_merge($affecteds, (array) $affected);
+        }
+        if (is_int($affected)) {
+            return array_sum([...$affecteds, $affected]);
         }
         return $affected;
     }

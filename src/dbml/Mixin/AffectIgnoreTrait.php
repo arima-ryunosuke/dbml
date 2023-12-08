@@ -105,6 +105,16 @@ trait AffectIgnoreTrait
     }
 
     /**
+     * IGNORE 付き {@uses Database::invalid()}
+     *
+     * @inheritdoc Database::invalid()
+     */
+    public function invalidIgnore(...$args)
+    {
+        return $this->_invokeAffectIgnore('invalid', $args);
+    }
+
+    /**
      * IGNORE 付き {@uses Database::remove()}
      *
      * @inheritdoc Database::remove()

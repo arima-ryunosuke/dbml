@@ -45,6 +45,16 @@ trait AffectOrThrowTrait
     }
 
     /**
+     * 作用行が 0 のときに例外を投げる {@uses Database::invalid()}
+     *
+     * @inheritdoc Database::invalid()
+     */
+    public function invalidOrThrow(...$args)
+    {
+        return $this->_invokeAffectOrThrow('invalid', $args);
+    }
+
+    /**
      * 作用行が 0 のときに例外を投げる {@uses Database::remove()}
      *
      * @inheritdoc Database::remove()

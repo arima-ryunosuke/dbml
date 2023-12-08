@@ -1019,6 +1019,7 @@ GREATEST(1,2,3) FROM test1', $builder);
             'article_id' => '1',
             'title'      => 'タイトルです',
             'checks'     => '',
+            'delete_at'  => null,
             'C'          => [
                 2 => [
                     'comment_id' => '2',

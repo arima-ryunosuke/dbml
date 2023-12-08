@@ -225,6 +225,13 @@ namespace ryunosuke\Test\Gateway {
             }
             return $row;
         }
+
+        public function invalidColumn()
+        {
+            return [
+                'delete_at' => fn() => date('Y-m-d H:i:s'),
+            ];
+        }
     }
 
     class Comment extends TableGateway

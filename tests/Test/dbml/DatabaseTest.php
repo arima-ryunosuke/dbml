@@ -9,6 +9,7 @@ use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
@@ -3755,21 +3756,25 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             1 => [
                 'ancestor_id'   => '1',
                 'ancestor_name' => 'A',
+                'delete_at'     => null,
                 'g_parent'      => [
                     1 => [
                         'parent_id'   => '1',
                         'ancestor_id' => '1',
                         'parent_name' => 'AA',
+                        'delete_at'   => null,
                         'g_child'     => [
                             1 => [
                                 'child_id'   => '1',
                                 'parent_id'  => '1',
                                 'child_name' => 'AAA',
+                                'delete_at'  => null,
                             ],
                             2 => [
                                 'child_id'   => '2',
                                 'parent_id'  => '1',
                                 'child_name' => 'AAB',
+                                'delete_at'  => null,
                             ],
                         ],
                     ],
@@ -3777,16 +3782,19 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                         'parent_id'   => '2',
                         'ancestor_id' => '1',
                         'parent_name' => 'AB',
+                        'delete_at'   => null,
                         'g_child'     => [
                             3 => [
                                 'child_id'   => '3',
                                 'parent_id'  => '2',
                                 'child_name' => 'ABA',
+                                'delete_at'  => null,
                             ],
                             4 => [
                                 'child_id'   => '4',
                                 'parent_id'  => '2',
                                 'child_name' => 'ABB',
+                                'delete_at'  => null,
                             ],
                         ],
                     ],
@@ -3795,21 +3803,25 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             2 => [
                 'ancestor_id'   => '2',
                 'ancestor_name' => 'B',
+                'delete_at'     => null,
                 'g_parent'      => [
                     3 => [
                         'parent_id'   => '3',
                         'ancestor_id' => '2',
                         'parent_name' => 'BA',
+                        'delete_at'   => null,
                         'g_child'     => [
                             5 => [
                                 'child_id'   => '5',
                                 'parent_id'  => '3',
                                 'child_name' => 'BAA',
+                                'delete_at'  => null,
                             ],
                             6 => [
                                 'child_id'   => '6',
                                 'parent_id'  => '3',
                                 'child_name' => 'BAB',
+                                'delete_at'  => null,
                             ],
                         ],
                     ],
@@ -3817,16 +3829,19 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                         'parent_id'   => '4',
                         'ancestor_id' => '2',
                         'parent_name' => 'BB',
+                        'delete_at'   => null,
                         'g_child'     => [
                             7 => [
                                 'child_id'   => '7',
                                 'parent_id'  => '4',
                                 'child_name' => 'BBA',
+                                'delete_at'  => null,
                             ],
                             8 => [
                                 'child_id'   => '8',
                                 'parent_id'  => '4',
                                 'child_name' => 'BBB',
+                                'delete_at'  => null,
                             ],
                         ],
                     ],
@@ -5529,6 +5544,68 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_invalid($database)
+    {
+        $database->save('g_ancestor', [
+            "ancestor_id"   => 1,
+            'ancestor_name' => 'A1',
+            'g_parent'      => [
+                [
+                    "parent_id"   => 1,
+                    'parent_name' => 'A1P1',
+                    'g_child'     => [
+                        [
+                            'child_name' => 'A1P1C1',
+                        ],
+                    ],
+                    'g_grand1'    => [
+                        [
+                            'grand1_name' => 'A1P1G1',
+                        ],
+                    ],
+                    'g_grand2'    => [
+                        [
+                            'grand2_name' => 'A1P1G2',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        // g_grand1 が RESTRICT なので失敗する
+        $this->assertException('Cannot invalid a parent row', L($database)->invalid('g_ancestor', [], ['delete_at' => '2014-12-24 00:00:00']));
+
+        // g_grand1 を無効化すれば・・・
+        $this->assertEquals(1, $database->invalid('g_grand1', [], ['delete_at' => '2014-12-24 00:00:00']));
+
+        // g_ancestor で一挙に無効化できる
+        $this->assertGreaterThanOrEqual(4, $database->invalid('g_ancestor', [], ['delete_at' => '2014-12-24 00:00:00']));
+
+        // g_parent/g_child などにも伝播している
+        $this->assertEquals([
+            1 => "2014-12-24 00:00:00",
+        ], array_map(fn($v) => date('Y-m-d H:i:s', strtotime($v)), $database->selectPairs('g_parent.parent_id,delete_at')));
+        $this->assertEquals([
+            1 => "2014-12-24 00:00:00",
+        ], array_map(fn($v) => date('Y-m-d H:i:s', strtotime($v)), $database->selectPairs('g_child.child_id,delete_at')));
+
+        // sqlserver がわけのわからんコケ方をするのでさしあたり除外（外部キーの取得が実体と一致しない？）
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            // dryrun はクエリ配列を返す
+            $this->assertEquals([
+                "UPDATE g_child SET delete_at = '2014-12-24 00:00:00' WHERE (parent_id) IN (SELECT g_parent.parent_id FROM g_parent WHERE (ancestor_id) IN (SELECT g_ancestor.ancestor_id FROM g_ancestor WHERE ancestor_id = '1'))",
+                "UPDATE g_grand1 SET delete_at = '2014-12-24 00:00:00' WHERE (parent_id) IN (SELECT g_parent.parent_id FROM g_parent WHERE (ancestor_id) IN (SELECT g_ancestor.ancestor_id FROM g_ancestor WHERE ancestor_id = '1'))",
+                "UPDATE g_grand2 SET delete_at = '2014-12-24 00:00:00' WHERE (parent_id,ancestor_id) IN (SELECT g_parent.parent_id, g_parent.ancestor_id FROM g_parent WHERE (ancestor_id) IN (SELECT g_ancestor.ancestor_id FROM g_ancestor WHERE ancestor_id = '1'))",
+                "UPDATE g_parent SET delete_at = '2014-12-24 00:00:00' WHERE (ancestor_id) IN (SELECT g_ancestor.ancestor_id FROM g_ancestor WHERE ancestor_id = '1')",
+                "UPDATE g_ancestor SET delete_at = '2014-12-24 00:00:00' WHERE ancestor_id = '1'",
+            ], $database->dryrun()->invalid('g_ancestor', ['ancestor_id' => 1], ['delete_at' => '2014-12-24 00:00:00']));
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_remove($database)
     {
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
@@ -6768,6 +6845,9 @@ INSERT INTO test (id, name) VALUES
             $ignore = $database->getCompatiblePlatform()->getIgnoreSyntax();
             $database = $database->dryrun();
             $this->assertEquals("DELETE $ignore FROM foreign_p WHERE id = '1'", $database->deleteIgnore('foreign_p', ['id' => 1]));
+            $this->assertEquals([
+                "UPDATE $ignore foreign_p SET name = 'deleted' WHERE id = '1'",
+            ], $database->invalidIgnore('foreign_p', ['id' => 1], ['name' => 'deleted']));
             $this->assertStringIgnoreBreak(<<<ACTUAL
                 DELETE $ignore FROM foreign_p WHERE
                 (id = '1')
@@ -8081,6 +8161,7 @@ ORDER BY T.id DESC, name ASC
             'comment'    => 'コメント2です',
             'title'      => 'タイトルです',
             'checks'     => '',
+            'delete_at'  => null,
         ], $row);
 
         /** @var \ryunosuke\Test\Entity\Article $row */

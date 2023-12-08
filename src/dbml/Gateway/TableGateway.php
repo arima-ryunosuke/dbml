@@ -916,6 +916,16 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * 無効カラムを返す
+     *
+     * @return ?array
+     */
+    public function invalidColumn()
+    {
+        return null;
+    }
+
+    /**
      * テーブルエイリアス名を設定する
      *
      * ```php
@@ -2451,6 +2461,20 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         $this->resetResult();
         return $this->database->delete($this->_redatawhere($data, $identifier), $identifier, ...array_slice(func_get_args(), 1));
+    }
+
+    /**
+     * 駆動表を省略できる <@uses Database::invalid()>
+     *
+     * @used-by invalidOrThrow()
+     * @used-by invalidIgnore()
+     *
+     * @inheritdoc Database::invalid()
+     */
+    public function invalid(array $identifier = [], ?array $invalid_columns = null)
+    {
+        $this->resetResult();
+        return $this->database->invalid($this->_redatawhere($data, $identifier), $identifier, $invalid_columns, ...array_slice(func_get_args(), 2));
     }
 
     /**
