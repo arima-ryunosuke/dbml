@@ -1422,20 +1422,27 @@ AND ((flag=1))", "$gw");
         ], ['name' => 'XXX']);
         $this->assertEquals(['XXX', 'XXX'], $gateway->lists('name'));
 
+        $gateway->affectArray([
+            ['@method' => 'insert', 'name' => 'affectArray'],
+            ['@method' => 'update', 'id' => 2, 'name' => 'affectArray'],
+            ['@method' => 'delete', 'id' => 3, 'name' => 'affectArray'],
+        ]);
+        $this->assertEquals(['affectArray', 'affectArray'], $gateway->lists('name'));
+
         if ($database->getCompatiblePlatform()->supportsMerge()) {
             $gateway->updateArray([
                 ['id' => 1, 'name' => 'xxx'],
                 ['id' => 2, 'name' => 'yyy'],
                 ['id' => 3, 'name' => 'zzz'],
             ]);
-            $this->assertEquals(['yyy', 'zzz'], $gateway->lists('name'));
+            $this->assertEquals(['yyy', 'affectArray'], $gateway->lists('name'));
 
             $gateway->modifyArray([
                 ['id' => 1, 'name' => 'AAA'],
                 ['id' => 2, 'name' => 'BBB'],
                 ['id' => 3, 'name' => 'CCC'],
             ]);
-            $this->assertEquals(['AAA', 'BBB', 'CCC'], $gateway->lists('name'));
+            $this->assertEquals(['AAA', 'BBB', 'CCC', 'affectArray'], $gateway->lists('name'));
         }
     }
 

@@ -2383,6 +2383,19 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * 駆動表を省略できる <@uses Database::affectArray()>
+     *
+     * @used-by affectArrayIgnore()
+     *
+     * @inheritdoc Database::affectArray()
+     */
+    public function affectArray($dataarray)
+    {
+        $this->resetResult();
+        return $this->database->affectArray($this->tableName, $dataarray, ...array_slice(func_get_args(), 1));
+    }
+
+    /**
      * 駆動表を省略できる <@uses Database::save()>
      *
      * @used-by saveIgnore()

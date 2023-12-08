@@ -1108,6 +1108,30 @@ class Database
         return $chunk;
     }
 
+    private function _extractPrimaryCondition($tableName, $data)
+    {
+        $primary = $rowdata = $condition = [];
+
+        $pkcols = $this->getSchema()->getTablePrimaryColumns($tableName);
+        foreach ($data as $col => $value) {
+            if (is_string($col)) {
+                if (array_key_exists($col, $pkcols)) {
+                    $primary[$col] = $value;
+                }
+                else {
+                    $rowdata[$col] = $value;
+                }
+            }
+            else {
+                $condition[$col] = $value;
+            }
+        }
+        if (count($pkcols) !== count($primary)) {
+            throw new \UnexpectedValueException(sprintf("primary data mismatch(%s.%s != %s)", $tableName, json_encode(array_keys($pkcols)), json_encode($primary)));
+        }
+        return [$primary, $rowdata, $condition];
+    }
+
     private function _normalize($table, $row)
     {
         // これはメソッド冒頭に記述し、決して場所を移動しないこと
@@ -5944,6 +5968,75 @@ class Database
     }
 
     /**
+     * 各行の method キーに応じた処理を行う
+     *
+     * changeArray のメソッド明示版のようなもの。
+     * 各行に "@method" のようなものを潜ませるとそのメソッドで各行を操作する。
+     * 原則的にDML3兄弟（INSERT,UPDATE,DELETE）のみのサポート（他のメソッドも呼べるようにしてあるが非互換）。
+     *
+     * ```php
+     * $db->changeArray('table_name', [
+     *     ['@method' => 'insert', 'id' => 1, 'name' => 'hoge'], // 特に変わったことはない普通の INSERT
+     *     ['@method' => 'update', 'id' => 2, 'name' => 'fuga'], // 主キーとデータを分離して UPDATE
+     *     ['@method' => 'delete', 'id' => 3, 'name' => 'piyo'], // 主キーのみ有効で他は無視して DELETE
+     * ]);
+     * // DELETE FROM table_name WHERE (id = 3)
+     * // UPDATE table_name SET name = 'fuga' WHERE (id = 2)
+     * // INSERT INTO tablename (id, name) VALUES ('1', 'hoge')
+     * ```
+     *
+     * @used-by affectArrayIgnore()
+     *
+     * @param string $tableName テーブル名
+     * @param array $dataarray データ配列
+     * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
+     */
+    public function affectArray($tableName, $dataarray)
+    {
+        // 隠し引数 $opt
+        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
+        $opt['method_key'] = '@method';
+
+        // 処理順は下記で固定とする（概して delete 系は制約違反が少なく、insert 系が制約違反になりやすい）
+        $affects = [
+            'destroy' => [],
+            'remove'  => [],
+            'delete'  => [],
+            'update'  => [],
+            'upsert'  => [],
+            'modify'  => [],
+            'replace' => [],
+            'invalid' => [],
+            'insert'  => [],
+        ];
+        foreach ($dataarray as $n => $row) {
+            $method = $row[$opt['method_key']] ?? '';
+            unset($row[$opt['method_key']]);
+            if (!isset($affects[$method])) {
+                throw new \InvalidArgumentException("$method is invalid($n th)");
+            }
+
+            $affects[$method][$n] = $row;
+        }
+
+        $results = [];
+        foreach ($affects as $method => $rows) {
+            foreach ($rows as $n => $row) {
+                $arguments = parameter_default([$this, $method], [$tableName, $row]);
+                $arguments[] = ['primary' => 3, 'extract' => 1] + $opt;
+
+                /** @noinspection PhpIllegalArrayKeyTypeInspection */
+                $results[$n] = $this->$method(...$arguments);
+            }
+        }
+
+        if ($this->getUnsafeOption('dryrun')) {
+            return array_flatten($results);
+        }
+        return $results;
+    }
+
+    /**
      * 自身 modify + 子テーブルの changeArray を行う
      *
      * フレームワークや ORM における save に近い。
@@ -6322,6 +6415,13 @@ class Database
         $tableName = $this->convertTableName($tableName);
 
         $data = $this->_normalize($tableName, $data);
+
+        if (array_get($opt, 'extract') === 1) {
+            [$primary, $rowdata, ] = $this->_extractPrimaryCondition($tableName, $data);
+            $identifier += $primary;
+            $data = $rowdata;
+        }
+
         if (!count($data) && $this->getUnsafeOption('updateEmpty')) {
             foreach ($this->getSchema()->getTablePrimaryColumns($tableName) as $pk => $column) {
                 $data[$pk] = $this->raw($pk);
@@ -6388,6 +6488,12 @@ class Database
         }
 
         $tableName = $this->convertTableName($tableName);
+
+        if (array_get($opt, 'extract') === 1) {
+            [$primary, , $condition] = $this->_extractPrimaryCondition($tableName, $identifier);
+            $identifier = $primary + $condition;
+        }
+
         $prewhere = $this->_prewhere($tableName, $identifier);
 
         $schema = $this->getSchema();
@@ -6487,6 +6593,15 @@ class Database
         $tableName = $this->_preaffect($tableName, []);
 
         $tableName = $this->convertTableName($tableName);
+
+        if (array_get($opt, 'extract') === 1) {
+            [$primary, $rowdata, $condition] = $this->_extractPrimaryCondition($tableName, $identifier);
+            $invalid_columns ??= $rowdata ?: null;
+            $identifier = $primary + $condition;
+            // 実質 update なのでもう不要
+            unset($opt['extract']);
+        }
+
         $identifier = $this->_prewhere($tableName, $identifier);
 
         $invalid_columns ??= $this->$tableName->invalidColumn();
@@ -6621,6 +6736,14 @@ class Database
         $tableName = $this->_preaffect($tableName, []);
 
         $tableName = $this->convertTableName($tableName);
+
+        if (array_get($opt, 'extract') === 1) {
+            [$primary, , $condition] = $this->_extractPrimaryCondition($tableName, $identifier);
+            $identifier = $primary + $condition;
+            // delete に移譲するのでもう不要
+            unset($opt['extract']);
+        }
+
         $identifier = $this->_prewhere($tableName, $identifier);
 
         $affecteds = [];

@@ -65,6 +65,16 @@ trait AffectIgnoreTrait
     }
 
     /**
+     * IGNORE 付き {@uses Database::affectArray()}
+     *
+     * @inheritdoc Database::affectArray()
+     */
+    public function affectArrayIgnore(...$args)
+    {
+        return $this->_invokeAffectIgnore('affectArray', $args);
+    }
+
+    /**
      * IGNORE 付き {@uses Database::save()}
      *
      * @inheritdoc Database::save()

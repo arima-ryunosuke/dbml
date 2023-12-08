@@ -6756,6 +6756,100 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_affectArray($database)
+    {
+        // 画面からこのようなデータが来たと仮定
+        $post = [
+            0   => ['@method' => 'delete', 'id' => '1', 'name' => 'delete1'],
+            1   => ['@method' => 'update', 'id' => '2', 'name' => 'update1'],
+            2   => ['@method' => 'update', 'id' => '3', 'name' => 'c'],
+            3   => ['@method' => 'invalid', 'id' => '4', 'name' => 'invalid'],
+            -1  => ['@method' => 'insert', 'name' => 'insert1'],
+            -2  => ['@method' => 'insert', 'name' => 'insert2'],
+            999 => ['@method' => 'delete', 'id' => '999', 'name' => 'delete2'],
+        ];
+
+        $sqls = $database->dryrun()->affectArray('test', $post);
+        $this->assertEquals([
+            "DELETE FROM test WHERE id = '1'",
+            "DELETE FROM test WHERE id = '999'",
+            "UPDATE test SET name = 'update1' WHERE id = '2'",
+            "UPDATE test SET name = 'c' WHERE id = '3'",
+            "UPDATE test SET name = 'invalid' WHERE id = '4'",
+            "INSERT INTO test (name) VALUES ('insert1')",
+            "INSERT INTO test (name) VALUES ('insert2')",
+        ], $sqls);
+
+        $primaries = $database->affectArray('test', $post);
+        $this->assertEquals([
+            0   => ["id" => "1"],
+            999 => ["id" => "999"],
+            1   => ["id" => "2"],
+            2   => ["id" => "3"],
+            3   => ["id" => "4"],
+            -1  => ["id" => "11"],
+            -2  => ["id" => "12"],
+        ], $primaries);
+
+        $this->assertException('is invalid', L($database)->affectArray('test', [['@method' => 'unknown']]));
+        $this->assertException('primary data mismatch', L($database)->affectArray('test', [['@method' => 'update']]));
+        $this->assertException('primary data mismatch', L($database)->affectArray('test', [['@method' => 'delete']]));
+
+        if ($database->getCompatiblePlatform()->supportsIgnore()) {
+            $primaries = $database->affectArrayIgnore('test', [
+                ['@method' => 'insert', 'id' => 5, 'name' => 'X'],
+                ['@method' => 'update', 'id' => 6, 'name' => 'Y'],
+            ]);
+            $this->assertEquals([
+                1 => ["id" => 6],
+                0 => ["id" => 5],
+            ], $primaries);
+
+            $this->assertEquals('e', $database->selectValue('test(5).name'));
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_affectArray_misc($database)
+    {
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
+        $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
+        $database->insert('foreign_c2', ['cid' => 2, 'seq' => 21, 'name' => 'c2name1']);
+
+        // 画面からこのようなデータが来たと仮定
+        $post = [
+            ['@method' => 'destroy', 'id' => '1', 'name' => 'destroy'],
+            ['@method' => 'remove', 'id' => '2', 'name' => 'remove'],
+            ['@method' => 'modify', 'id' => '3', 'name' => 'modify'],
+        ];
+
+        if ($database->getCompatiblePlatform()->supportsMerge()) {
+            $sqls = $database->dryrun()->affectArray('foreign_p', $post);
+            $this->assertArrayStartsWith([
+                "DELETE FROM foreign_c1 WHERE (id) IN (",
+                "DELETE FROM foreign_c2 WHERE (cid) IN (",
+                "DELETE FROM foreign_p WHERE id = '1'",
+                "DELETE FROM foreign_p WHERE (id = '2') AND (",
+                "INSERT INTO foreign_p (id, name) VALUES ('3', 'modify') ON ",
+            ], $sqls);
+        }
+
+        $primaries = $database->affectArray('foreign_p', $post);
+        $this->assertEquals([
+            ["id" => "1"],
+            ["id" => "2"],
+            ["id" => "3"],
+        ], $primaries);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_replace($database)
     {
         if ($database->getCompatiblePlatform()->supportsReplace()) {
