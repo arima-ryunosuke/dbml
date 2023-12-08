@@ -153,8 +153,8 @@ class ParserTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $parser = new Parser(false);
 
-        $sql = $parser->convertQuotedSQL('select ?, :named, :named, ?', [9 => null, 'named' => false, 'x'], fn($v) => "'$v'");
-        $this->assertEquals("select NULL, 0, 0, 'x'", $sql);
+        $sql = $parser->convertQuotedSQL('select ?, :named, :named, ?, ?', [9 => null, 'named' => false, 'x', fn() => true], fn($v) => "'$v'");
+        $this->assertEquals("select NULL, 0, 0, 'x', 1", $sql);
 
         $params = [1, 2, 3];
         $this->assertException('does not have', L($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v));

@@ -65,21 +65,22 @@ class StatementTest extends \ryunosuke\Test\AbstractUnitTestCase
             [
                 'hoge' => 'hoge',
                 'fuga' => 'fuga',
+                'piyo' => '1',
             ],
         ];
 
         // executeSelect はスレーブに接続されるのでエラーにならないはず
-        $stmt = new Statement('select ? as hoge, :fuga as fuga from test_slave', ['hoge'], $database);
-        $this->assertEquals($expected, $stmt->executeSelect(['fuga' => 'fuga'])->fetchAllAssociative());
+        $stmt = new Statement('select ? as hoge, :fuga as fuga, ? as piyo from test_slave', [fn() => 'hoge', fn() => true], $database);
+        $this->assertEquals($expected, $stmt->executeSelect(['fuga' => fn() => 'fuga'])->fetchAllAssociative());
 
         // executeAffect はマスターに接続されるのでエラーにならないはず
         $stmt = new Statement('update test_master set name = :fuga where id = ?', [1], $database);
-        $this->assertEquals(1, $stmt->executeAffect(['fuga' => 'fuga']));
+        $this->assertEquals(1, $stmt->executeAffect(['fuga' => fn() => 'fuga']));
 
         // connection を指定すればそれが使われるはず
-        $stmt = new Statement('select ? as hoge, :fuga as fuga from test_master', ['hoge'], $database);
-        $this->assertEquals($expected, $stmt->executeSelect(['fuga' => 'fuga'], $master)->fetchAllAssociative());
-        $stmt = new Statement('select ? as hoge, :fuga as fuga from test_slave', ['hoge'], $database);
-        $this->assertEquals($expected, $stmt->executeSelect(['fuga' => 'fuga'], $slave)->fetchAllAssociative());
+        $stmt = new Statement('select ? as hoge, :fuga as fuga, ? as piyo from test_master', [fn() => 'hoge', fn() => true], $database);
+        $this->assertEquals($expected, $stmt->executeSelect(['fuga' => fn() => 'fuga'], $master)->fetchAllAssociative());
+        $stmt = new Statement('select ? as hoge, :fuga as fuga, ? as piyo from test_slave', [fn() => 'hoge', fn() => true], $database);
+        $this->assertEquals($expected, $stmt->executeSelect(['fuga' => fn() => 'fuga'], $slave)->fetchAllAssociative());
     }
 }

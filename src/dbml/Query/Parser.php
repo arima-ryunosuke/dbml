@@ -302,6 +302,9 @@ class Parser
                 $this->knownParams = $parameters;
                 $this->parameters = $parameters;
                 $this->callback = static function ($value) use ($quoter) {
+                    if ($value instanceof \Closure) {
+                        $value = $value();
+                    }
                     if ($value === null) {
                         return 'NULL';
                     }

@@ -86,6 +86,12 @@ class Statement implements Queryable
             unset($params[0]);
         }
         foreach ($params as $k => $param) {
+            if ($param instanceof \Closure) {
+                $param = $param();
+            }
+            if (is_bool($param)) {
+                $param = (int) $param;
+            }
             $stmt->bindValue($k, $param);
         }
 

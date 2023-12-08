@@ -4665,7 +4665,15 @@ class Database
     public function executeSelect($query, iterable $params = [])
     {
         $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
-        $params = array_map(function ($p) { return is_bool($p) ? (int) $p : $p; }, $params);
+        $params = array_map(static function ($p) {
+            if ($p instanceof \Closure) {
+                $p = $p();
+            }
+            if (is_bool($p)) {
+                return (int) $p;
+            }
+            return $p;
+        }, $params);
 
         if ($filter_path = $this->getInjectCallStack()) {
             $query = implode('', $this->_getCallStack($filter_path)) . $query;
@@ -4689,7 +4697,15 @@ class Database
     public function executeAffect($query, iterable $params = [])
     {
         $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
-        $params = array_map(function ($p) { return is_bool($p) ? (int) $p : $p; }, $params);
+        $params = array_map(static function ($p) {
+            if ($p instanceof \Closure) {
+                $p = $p();
+            }
+            if (is_bool($p)) {
+                return (int) $p;
+            }
+            return $p;
+        }, $params);
 
         if ($this->getUnsafeOption('dryrun')) {
             return $this->queryInto($query, $params);

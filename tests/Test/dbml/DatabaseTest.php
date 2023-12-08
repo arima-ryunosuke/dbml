@@ -3174,13 +3174,13 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_executeSelect_and_Update($database)
+    function test_executeSelect_and_Affect($database)
     {
-        $database->insert('noauto', ['id' => false, 'name' => 'hoge']);
-        $database->insert('noauto', ['id' => true, 'name' => 'fuga']);
+        $database->insert('noauto', ['id' => false, 'name' => fn() => 'hoge']);
+        $database->insert('noauto', ['id' => true, 'name' => fn() => 'fuga']);
 
-        $this->assertCount(1, $database->selectArray('noauto', ['id' => false]));
-        $this->assertCount(1, $database->selectArray('test', ['id' => true]));
+        $this->assertCount(1, $database->executeSelect('SELECT * FROM test WHERE id = :id', ['id' => fn() => true])->fetchAllAssociative());
+        $this->assertCount(0, $database->executeSelect('SELECT * FROM test WHERE id = :id', ['id' => fn() => false])->fetchAllAssociative());
     }
 
     /**
