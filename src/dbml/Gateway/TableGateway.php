@@ -2038,7 +2038,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->database->fetchArray($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->array();
     }
 
     /**
@@ -2048,7 +2048,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->database->fetchAssoc($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->assoc();
     }
 
     /**
@@ -2058,7 +2058,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function lists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->database->fetchLists($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lists();
     }
 
     /**
@@ -2068,7 +2068,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function pairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->database->fetchPairs($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->pairs();
     }
 
     /**
@@ -2078,7 +2078,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->database->fetchTuple($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->tuple();
     }
 
     /**
@@ -2088,7 +2088,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function value($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->database->fetchValue($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->value();
     }
 
     /**
