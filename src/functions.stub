@@ -6217,7 +6217,7 @@ if (!function_exists('ryunosuke\\dbml\\iterator_chunk')) {
 
         // Generator は Iterator であるが Iterator は Generator ではないので変換する
         if (is_iterable($iterator)) {
-            $iterator = (function () use ($iterator) { yield from $iterator; })();
+            $iterator = (fn() => yield from $iterator)();
         }
 
         $chunk = 0;
@@ -10358,15 +10358,17 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
      * 各種オブジェクトやクロージャ、循環参照を含む配列など様々なものが出力できる。
      * ただし、下記は不可能あるいは復元不可（今度も対応するかは未定）。
      *
-     * - Generator クラス
      * - 特定の内部クラス（PDO など）
      * - リソース
-     * - アロー関数によるクロージャ
      *
      * オブジェクトは「リフレクションを用いてコンストラクタなしで生成してプロパティを代入する」という手法で復元する。
+     * ただしコンストラクタが必須引数無しの場合はコールされる。
      * のでクラスによってはおかしな状態で復元されることがある（大体はリソース型のせいだが…）。
      * sleep, wakeup, Serializable などが実装されているとそれはそのまま機能する。
      * set_state だけは呼ばれないので注意。
+     *
+     * Generator は元となった関数/メソッドを再コールすることで復元される。
+     * その仕様上、引数があると呼べないし、実行位置はリセットされる。
      *
      * クロージャはコード自体を引っ張ってきて普通に function (){} として埋め込む。
      * クラス名のエイリアスや use, $this バインドなど可能な限り復元するが、おそらくあまりに複雑なことをしてると失敗する。
@@ -10416,9 +10418,9 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
 
             public function varId($var)
             {
-                // オブジェクトは明確な ID が取れる（closure/object の区分けに処理的な意味はない）
+                // オブジェクトは明確な ID が取れる（generator/closure/object の区分けに処理的な意味はない）
                 if (is_object($var)) {
-                    $id = ($var instanceof \Closure ? 'closure' : 'object') . (spl_object_id($var) + 1);
+                    $id = ($var instanceof \Generator ? 'generator' : ($var instanceof \Closure ? 'closure' : 'object')) . (spl_object_id($var) + 1);
                     $this->vars[$id] = $var;
                     return $id;
                 }
@@ -10457,9 +10459,9 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
 
         // 再帰用クロージャ
         $vars = [];
-        $export = function ($value, $nest = 0) use (&$export, &$vars, $var_manager) {
-            $spacer0 = str_repeat(" ", 4 * ($nest + 0));
-            $spacer1 = str_repeat(" ", 4 * ($nest + 1));
+        $export = function ($value, $nest = 0, $raw = false) use (&$export, &$vars, $var_manager) {
+            $spacer0 = str_repeat(" ", 4 * max(0, $nest + 0));
+            $spacer1 = str_repeat(" ", 4 * max(0, $nest + 1));
             $raw_export = fn($v) => $v;
             $var_export = fn($v) => var_export($v, true);
             $neighborToken = function ($n, $d, $tokens) {
@@ -10524,6 +10526,33 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
                 $kvl = implode($middle, $kvl);
                 $declare = $vid ? "\$this->$vid = " : "";
                 return "{$declare}[$begin{$kvl}$end]";
+            }
+            if ($value instanceof \Generator) {
+                $ref = new \ReflectionGenerator($value);
+                $reffunc = $ref->getFunction();
+
+                if ($reffunc->getNumberOfRequiredParameters() > 0) {
+                    throw new \DomainException('required argument Generator is not support.');
+                }
+
+                $caller = null;
+                if ($reffunc instanceof \ReflectionFunction) {
+                    if ($reffunc->isClosure()) {
+                        $caller = "({$export($reffunc->getClosure(), $nest)})";
+                    }
+                    else {
+                        $caller = $reffunc->name;
+                    }
+                }
+                if ($reffunc instanceof \ReflectionMethod) {
+                    if ($reffunc->isStatic()) {
+                        $caller = "{$reffunc->class}::{$reffunc->name}";
+                    }
+                    else {
+                        $caller = "{$export($ref->getThis(), $nest)}->{$reffunc->name}";
+                    }
+                }
+                return "\$this->$vid = {$caller}()";
             }
             if ($value instanceof \Closure) {
                 $ref = new \ReflectionFunction($value);
@@ -10604,9 +10633,14 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
             if (is_object($value)) {
                 $ref = new \ReflectionObject($value);
 
-                // ジェネレータはどう頑張っても無理
-                if ($value instanceof \Generator) {
-                    throw new \DomainException('Generator Class is not support.');
+                // 内部クラスで serialize 出来ないものは __PHP_Incomplete_Class で代替（復元時に無視する）
+                try {
+                    if ($ref->isInternal()) {
+                        serialize($value);
+                    }
+                }
+                catch (\Exception $e){
+                    return "\$this->$vid = new \\__PHP_Incomplete_Class()";
                 }
 
                 // 無名クラスは定義がないのでパースが必要
@@ -10651,8 +10685,8 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
                             }
                         }
 
-                        // コンストラクタは呼ばないのでリネームしておく
-                        if ($token[1] === '__construct') {
+                        // 引数ありコンストラクタは呼ばないのでリネームしておく
+                        if ($token[1] === '__construct' && $ref->getConstructor() && $ref->getConstructor()->getNumberOfRequiredParameters()) {
                             $token[1] = "replaced__construct";
                         }
 
@@ -10673,6 +10707,9 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
                         'indent'   => $spacer1,
                         'baseline' => -1,
                     ]);
+                    if ($raw) {
+                        return $code;
+                    }
                     $classname = "(function () {\n{$spacer1}return $code;\n{$spacer0}})";
                 }
                 else {
@@ -10701,79 +10738,99 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
         };
 
         $exported = $export($value, 1);
-        $others = "";
+        $others = [];
         $vars = [];
         foreach ($var_manager->orphan() as $rid => [$isref, $vid, $var]) {
             $declare = $isref ? "&\$this->$vid" : $export($var, 1);
-            $others .= "    \$this->$rid = $declare;\n";
-        }
-        $result = "(function () {
-{$others}    return $exported;
-" . '})->call(new class() {
-    public function new(&$object, $class, $provider)
-    {
-        if ($class instanceof \\Closure) {
-            $object = $class();
-            $reflection = $this->reflect(get_class($object));
-        }
-        else {
-            $reflection = $this->reflect($class);
-            $object = $reflection["self"]->newInstanceWithoutConstructor();
-        }
-        [$fields, $privates] = $provider();
-
-        if ($reflection["unserialize"]) {
-            $object->__unserialize($fields);
-            return $object;
+            $others[] = "\$this->$rid = $declare;";
         }
 
-        foreach ($reflection["parents"] as $parent) {
-            foreach ($this->reflect($parent->name)["properties"] as $name => $property) {
-                if (isset($privates[$parent->name][$name])) {
-                    $property->setValue($object, $privates[$parent->name][$name]);
+        static $factory = null;
+        if ($factory === null) {
+            // @codeCoverageIgnoreStart
+            $factory = $export(new class() {
+                public function new(&$object, $class, $provider)
+                {
+                    if ($class instanceof \Closure) {
+                        $object = $class();
+                        $reflection = $this->reflect(get_class($object));
+                    }
+                    else {
+                        $reflection = $this->reflect($class);
+                        if ($reflection["constructor"] && $reflection["constructor"]->getNumberOfRequiredParameters() === 0) {
+                            $object = $reflection["self"]->newInstance();
+                        }
+                        else {
+                            $object = $reflection["self"]->newInstanceWithoutConstructor();
+                        }
+                    }
+                    [$fields, $privates] = $provider();
+
+                    if ($reflection["unserialize"]) {
+                        $object->__unserialize($fields);
+                        return $object;
+                    }
+
+                    foreach ($reflection["parents"] as $parent) {
+                        foreach ($this->reflect($parent->name)["properties"] as $name => $property) {
+                            if (isset($privates[$parent->name][$name]) && !$privates[$parent->name][$name] instanceof \__PHP_Incomplete_Class) {
+                                $property->setValue($object, $privates[$parent->name][$name]);
+                            }
+                            if ((isset($fields[$name]) || array_key_exists($name, $fields))) {
+                                if (!$fields[$name] instanceof \__PHP_Incomplete_Class) {
+                                    $property->setValue($object, $fields[$name]);
+                                }
+                                unset($fields[$name]);
+                            }
+                        }
+                    }
+                    foreach ($fields as $name => $value) {
+                        $object->$name = $value;
+                    }
+
+                    if ($reflection["wakeup"]) {
+                        $object->__wakeup();
+                    }
+
+                    return $object;
                 }
-                if (isset($fields[$name]) || array_key_exists($name, $fields)) {
-                    $property->setValue($object, $fields[$name]);
-                    unset($fields[$name]);
+
+                private function reflect($class)
+                {
+                    static $cache = [];
+                    if (!isset($cache[$class])) {
+                        $refclass = new \ReflectionClass($class);
+                        $cache[$class] = [
+                            "self"        => $refclass,
+                            "constructor" => $refclass->getConstructor(),
+                            "parents"     => [],
+                            "properties"  => [],
+                            "unserialize" => $refclass->hasMethod("__unserialize"),
+                            "wakeup"      => $refclass->hasMethod("__wakeup"),
+                        ];
+                        for ($current = $refclass; $current; $current = $current->getParentClass()) {
+                            $cache[$class]["parents"][$current->name] = $current;
+                        }
+                        foreach ($refclass->getProperties() as $property) {
+                            if (!$property->isStatic()) {
+                                $property->setAccessible(true);
+                                $cache[$class]["properties"][$property->name] = $property;
+                            }
+                        }
+                    }
+                    return $cache[$class];
                 }
-            }
-        }
-        foreach ($fields as $name => $value) {
-            $object->$name = $value;
+            }, -1, true);
+            // @codeCoverageIgnoreEnd
         }
 
-        if ($reflection["wakeup"]) {
-            $object->__wakeup();
-        }
-
-        return $object;
-    }
-
-    private function reflect($class)
-    {
-        static $cache = [];
-        if (!isset($cache[$class])) {
-            $refclass = new \ReflectionClass($class);
-            $cache[$class] = [
-                "self"        => $refclass,
-                "parents"     => [],
-                "properties"  => [],
-                "unserialize" => $refclass->hasMethod("__unserialize"),
-                "wakeup"      => $refclass->hasMethod("__wakeup"),
-            ];
-            for ($current = $refclass; $current; $current = $current->getParentClass()) {
-                $cache[$class]["parents"][$current->name] = $current;
-            }
-            foreach ($refclass->getProperties() as $property) {
-                if (!$property->isStatic()) {
-                    $property->setAccessible(true);
-                    $cache[$class]["properties"][$property->name] = $property;
-                }
-            }
-        }
-        return $cache[$class];
-    }
-})';
+        $E = fn($v) => $v;
+        $result = <<<PHP
+            (function () {
+                {$E(implode("\n    ", $others))}
+                return $exported;
+            })->call($factory)
+            PHP;
 
         if ($options['format'] === 'minify') {
             $tmp = tempnam(sys_get_temp_dir(), 've3');
