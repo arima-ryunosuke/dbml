@@ -24,6 +24,15 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.14
+
+- [fixbug] insert/modifyArray で AUTOINCREMENT を混ぜるとエラーになる不具合を修正
+- [fixbug] Tablegateway 経由だと arrayFetch オプションが効かない不具合を修正
+- [feature] 例外を投げずに常に主キーを返す AndPrimary を実装
+- [feature] 行自体がメソッドを持つ affectArray を実装
+- [feature] 論理削除を行う invalid メソッドを実装
+- [feature] バインドパラメータにクロージャを指定できる機能
+
 ## 2.1.13
 
 - [fixbug] async 無名クラスが解放されないことがある不具合を修正
