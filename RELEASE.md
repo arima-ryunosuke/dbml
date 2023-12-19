@@ -24,6 +24,10 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.15
+
+- [fixbug] affectArray に affected rows の入れ忘れ
+
 ## 2.1.14
 
 - [fixbug] insert/modifyArray で AUTOINCREMENT を混ぜるとエラーになる不具合を修正
