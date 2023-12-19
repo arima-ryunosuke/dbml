@@ -6810,6 +6810,13 @@ INSERT INTO test (id, name) VALUES
      */
     function test_affectArray($database)
     {
+        if ($database->getCompatiblePlatform()->getName() === 'mysql') {
+            $noaffectedUpdatedRows = 0;
+        }
+        else {
+            $noaffectedUpdatedRows = 1;
+        }
+
         // 画面からこのようなデータが来たと仮定
         $post = [
             0   => ['@method' => 'delete', 'id' => '1', 'name' => 'delete1'],
@@ -6834,13 +6841,13 @@ INSERT INTO test (id, name) VALUES
 
         $primaries = $database->affectArray('test', $post);
         $this->assertEquals([
-            0   => ["id" => "1"],
-            999 => ["id" => "999"],
-            1   => ["id" => "2"],
-            2   => ["id" => "3"],
-            3   => ["id" => "4"],
-            -1  => ["id" => "11"],
-            -2  => ["id" => "12"],
+            0   => ["id" => "1", "" => 1],
+            999 => ["id" => "999", "" => 0],
+            1   => ["id" => "2", "" => 1],
+            2   => ["id" => "3", "" => $noaffectedUpdatedRows],
+            3   => ["id" => "4", "" => 1],
+            -1  => ["id" => "11", "" => 1],
+            -2  => ["id" => "12", "" => 1],
         ], $primaries);
 
         $this->assertException('is invalid', L($database)->affectArray('test', [['@method' => 'unknown']]));
@@ -6853,8 +6860,8 @@ INSERT INTO test (id, name) VALUES
                 ['@method' => 'update', 'id' => 6, 'name' => 'Y'],
             ]);
             $this->assertEquals([
-                1 => ["id" => 6],
-                0 => ["id" => 5],
+                1 => ["id" => 6, "" => 1],
+                0 => ["id" => 5, "" => 0],
             ], $primaries);
 
             $this->assertEquals('e', $database->selectValue('test(5).name'));
@@ -6892,9 +6899,9 @@ INSERT INTO test (id, name) VALUES
 
         $primaries = $database->affectArray('foreign_p', $post);
         $this->assertEquals([
-            ["id" => "1"],
-            ["id" => "2"],
-            ["id" => "3"],
+            ["id" => "1", "" => 1],
+            ["id" => "2", "" => 0],
+            ["id" => "3", "" => 1],
         ], $primaries);
     }
 

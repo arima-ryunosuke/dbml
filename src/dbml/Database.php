@@ -5983,7 +5983,7 @@ class Database
      * 原則的にDML3兄弟（INSERT,UPDATE,DELETE）のみのサポート（他のメソッドも呼べるようにしてあるが非互換）。
      *
      * ```php
-     * $db->changeArray('table_name', [
+     * $db->affectArray('table_name', [
      *     ['@method' => 'insert', 'id' => 1, 'name' => 'hoge'], // 特に変わったことはない普通の INSERT
      *     ['@method' => 'update', 'id' => 2, 'name' => 'fuga'], // 主キーとデータを分離して UPDATE
      *     ['@method' => 'delete', 'id' => 3, 'name' => 'piyo'], // 主キーのみ有効で他は無視して DELETE
@@ -6027,18 +6027,23 @@ class Database
             $affects[$method][$n] = $row;
         }
 
+        $dryrunning = $this->getUnsafeOption('dryrun');
+
         $results = [];
         foreach ($affects as $method => $rows) {
             foreach ($rows as $n => $row) {
                 $arguments = parameter_default([$this, $method], [$tableName, $row]);
                 $arguments[] = ['primary' => 3, 'extract' => 1] + $opt;
 
-                /** @noinspection PhpIllegalArrayKeyTypeInspection */
+                /** @var int|string $n */
                 $results[$n] = $this->$method(...$arguments);
+                if (!$dryrunning) {
+                    $results[$n][''] = $this->getAffectedRows();
+                }
             }
         }
 
-        if ($this->getUnsafeOption('dryrun')) {
+        if ($dryrunning) {
             return array_flatten($results);
         }
         return $results;
