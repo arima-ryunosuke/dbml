@@ -1199,7 +1199,7 @@ class Database
                 $typename = $type->getName();
                 $nullable = !$column->getNotnull();
 
-                if ($filterNullAtNotNullColumn && $row[$cname] === null && !$nullable) {
+                if ($filterNullAtNotNullColumn && $row[$cname] === null && !$nullable && $cname !== $autocolumn) {
                     unset($row[$cname]);
                     continue;
                 }

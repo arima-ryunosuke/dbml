@@ -4577,6 +4577,17 @@ CSV
         $this->assertEquals(3, $affected);
         // ケツから3件取れば突っ込んだデータのはず(ただし逆順)
         $this->assertEquals(['c', 'b', 'a'], $database->fetchLists($namequery->limit($affected)));
+
+
+        if ($database->getCompatiblePlatform()->supportsIdentityNullable()) {
+            $data = [
+                ['id' => 99, 'name' => '99'],
+                ['id' => null, 'name' => 'null'],
+            ];
+
+            $affected = $database->insertArray('test', $data);
+            $this->assertEquals(2, $affected);
+        }
     }
 
     /**
@@ -4971,6 +4982,24 @@ INSERT INTO test (name) VALUES
         ], $database->selectLists('test.name', [
             'id' => [1, 999],
         ]));
+
+        if ($database->getCompatiblePlatform()->supportsIdentityNullable()) {
+            $data = [
+                ['id' => 9, 'name' => '9'],
+                ['id' => null, 'name' => 'null'],
+            ];
+
+            $affected = $database->modifyArray('test', $data);
+
+            // mysql は 1件変更・1件追加で計3affected, sqlite は単純に 2affected
+            if ($database->getCompatiblePlatform()->getName() === 'mysql') {
+                $expected = 3;
+            }
+            else {
+                $expected = 2;
+            }
+            $this->assertEquals($expected, $affected);
+        }
     }
 
     /**
