@@ -1029,7 +1029,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         // 指定されていない場合は $insertData を返す。ただし、データが長大な場合、2重に bind されることになり無駄なので参照構文を使う
         return array_each($insertData, function (&$carry, $v, $k) {
             $reference = $this->getReferenceSyntax($k);
-            $carry[$k] = $reference === false ? $v : new Expression($this->getReferenceSyntax($k));
+            $carry[$k] = $reference === false ? $v : new Expression($reference);
         }, []);
     }
 

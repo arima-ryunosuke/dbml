@@ -4970,7 +4970,7 @@ INSERT INTO test (name) VALUES
 
         $database->modifyArray('test', [
             ['id' => 1, 'name' => 'X'],
-            ['id' => 999, 'name' => 'ZZZ'],
+            ['id' => 998, 'name' => 'ZZZ'],
         ], [
             'name' => 'UUU',
         ]);
@@ -4978,6 +4978,20 @@ INSERT INTO test (name) VALUES
             'UUU',
             'ZZZ',
         ], $database->selectLists('test.name', [
+            'id' => [1, 998],
+        ]));
+
+        $database->modifyArray('test', [
+            ['id' => 1, 'name' => 'AAA'],
+            ['id' => 999, 'name' => 'ZZZ'],
+        ], [
+            '*'    => null,
+            'data' => 'common data',
+        ]);
+        $this->assertEquals([
+            ['name' => 'AAA', 'data' => 'common data'],
+            ['name' => 'ZZZ', 'data' => ''],
+        ], $database->selectArray('test.name,data', [
             'id' => [1, 999],
         ]));
 
@@ -5156,6 +5170,17 @@ INSERT INTO test (id, name) VALUES
 ('990', 'nothing'),
 ('991', 'zzz')
 {$merge(['id'])} name = 'hoge'", $affected);
+
+        $affected = $database->dryrun()->modifyArray('test', $data, ['data' => 'hoge', '*' => fn($c, $d) => $d[$c]]);
+        $this->assertStringIgnoreBreak("
+INSERT INTO test (id, name) VALUES
+('1', 'A'),
+('2', UPPER('b')),
+('3', UPPER('c')),
+('4', (SELECT UPPER(name1) FROM test1 WHERE id = '4')),
+('990', 'nothing'),
+('991', 'zzz')
+{$merge(['id'])} data = 'hoge', name = 'A'", $affected);
 
         $affected = $database->dryrun()->modifyArray('test', $data, ['name' => 'hoge'], 4);
         $this->assertStringIgnoreBreak("
@@ -6207,9 +6232,21 @@ INSERT INTO test (id, name) VALUES
         $database->modify('test', ['id' => $id, 'name' => 'repN', 'data' => 'repD'], ['name' => 'upN', 'data' => 'upD']);
         $this->assertEquals(['name' => 'upN', 'data' => 'upD'], $database->selectTuple('test.name,data', ['id' => $id]));
 
+        $database->modify('test', ['id' => $id, 'name' => 'repN2'], ['*' => null, 'data' => 'upD2']);
+        $this->assertEquals(['name' => 'repN2', 'data' => 'upD2'], $database->selectTuple('test.name,data', ['id' => $id]));
+
         if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
             $database->modify(['test' => ['id', 'name']], [$id, 'repN2'], [$id, 'repN3']);
-            $this->assertEquals(['name' => 'repN3', 'data' => 'upD'], $database->selectTuple('test.name,data', ['id' => $id]));
+            $this->assertEquals(['name' => 'repN3', 'data' => 'upD2'], $database->selectTuple('test.name,data', ['id' => $id]));
+
+            $merge = function ($columns) use ($database) { return $database->getCompatiblePlatform()->getMergeSyntax($columns); };
+            $refer = function ($column) use ($database) { return $database->getCompatiblePlatform()->getReferenceSyntax($column); };
+
+            $affected = $database->dryrun()->modify('test', ['id' => 1, 'name' => 'name1'], ['*' => null, 'data' => 'updateData']);
+            $this->assertEquals("INSERT INTO test (id, name) VALUES ('1', 'name1') {$merge(['id'])} name = {$refer('name')}, data = 'updateData'", $affected);
+
+            $affected = $database->dryrun()->modify('test', ['id' => 1, 'name' => 'name1'], ['data' => 'updateData', '*' => null]);
+            $this->assertEquals("INSERT INTO test (id, name) VALUES ('1', 'name1') {$merge(['id'])} data = 'updateData', name = {$refer('name')}", $affected);
         }
 
         $this->assertException(new \InvalidArgumentException('is not supported Q'), L($database)->modify('test.name', ['X' => 'Y']));

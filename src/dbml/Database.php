@@ -1130,6 +1130,32 @@ class Database
         return [$primary, $rowdata, $condition];
     }
 
+    private function _wildUpdate($updateData, $insertData, $ignoreColumn)
+    {
+        // この分岐はなくても実質同じだが無駄にループをまわしたくないので早期リターン
+        if (!array_key_exists('*', $updateData)) {
+            return $updateData;
+        }
+
+        // 特別な意味はないがなんとなく * の位置で保持しておく
+        $newUpdateData = [];
+        foreach ($updateData as $uColumn => $uDatum) {
+            if ($uColumn === '*') {
+                $uDatum ??= function ($updateColumn, $insertData) {
+                    $reference = $this->getCompatiblePlatform()->getReferenceSyntax($updateColumn);
+                    return $reference === false ? $insertData[$updateColumn] : $this->raw($reference);
+                };
+                foreach (array_diff_key($insertData, $updateData) as $iColumn => $iData) {
+                    $newUpdateData[$iColumn] = ($uDatum instanceof \Closure) ? $uDatum($iColumn, $insertData) : $uDatum;
+                }
+            }
+            else {
+                $newUpdateData[$uColumn] = $uDatum;
+            }
+        }
+        return array_diff_key($newUpdateData, $ignoreColumn);
+    }
+
     private function _normalize($table, $row)
     {
         // これはメソッド冒頭に記述し、決して場所を移動しないこと
@@ -5596,6 +5622,21 @@ class Database
      * // ON DUPLICATE KEY UPDATE
      * //   name = 'XXX'
      *
+     * # $updateData に ['*' => ?callable] を渡すと $updateData に無いカラムが $insertData を元にコールバックされる（大抵は null を渡せば事足りる。modify の example も参照）
+     * $db->modifyArray('tablename', [
+     *     ['id' => 1, 'name' => 'hoge'],
+     *     ['id' => 2, 'name' => 'fuga'],
+     *     ['id' => 3, 'name' => 'piyo'],
+     * ], ['*' => null, 'data' => 'XXX']);
+     * // INSERT INTO tablename (id, name) VALUES
+     * //   ('1', 'hoge'),
+     * //   ('2', 'fuga'),
+     * //   ('3', 'piyo')
+     * // ON DUPLICATE KEY UPDATE
+     * //   id = VALUES(id),
+     * //   name = VALUES(name),
+     * //   data = 'XXX'
+     *
      * # $updateData を指定しなければ VALUES(col) になる（≒変更されない）
      * $db->modifyArray('tablename', [
      *     ['id' => 1, 'name' => 'hoge'],
@@ -5615,7 +5656,7 @@ class Database
      *
      * @param string $tableName テーブル名
      * @param array|callable|\Generator $insertData カラムデータあるいは Generator
-     * @param array $updateData カラムデータあるいは Generator
+     * @param array $updateData カラムデータ
      * @param string|int $uniquekey 重複チェックに使うユニークキー名
      * @param ?int $chunk 分割 insert する場合はそのチャンクサイズ
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
@@ -5644,16 +5685,11 @@ class Database
 
         $updates = null;
         $updateParams = [];
-        if ($updateData) {
-            $updateData = $this->_normalize($tableName, $updateData);
-            $updateData = $this->bindInto($updateData, $updateParams);
-            $updates = array_sprintf($updateData, '%2$s = %1$s', ', ');
-        }
-
         $columns = null;
 
         $affected = [];
-        $merge = $cplatform->getMergeSyntax(array_keys($this->getSchema()->getTableUniqueColumns($tableName, $uniquekey)));
+        $ukcols = $this->getSchema()->getTableUniqueColumns($tableName, $uniquekey);
+        $merge = $cplatform->getMergeSyntax(array_keys($ukcols));
         $refer = $cplatform->getReferenceSyntax('%1$s');
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
         $template = "INSERT {$ignore}INTO $tableName (%s) VALUES %s $merge %s";
@@ -5676,7 +5712,15 @@ class Database
                 }
 
                 if (!isset($updates)) {
-                    $updates = array_sprintf($columns, '%1$s = ' . $refer, ', ');
+                    if ($updateData) {
+                        $updateData = $this->_wildUpdate($updateData, $row, $ukcols);
+                        $updateData = $this->_normalize($tableName, $updateData);
+                        $updateData = $this->bindInto($updateData, $updateParams);
+                        $updates = array_sprintf($updateData, '%2$s = %1$s', ', ');
+                    }
+                    else {
+                        $updates = array_sprintf($columns, '%1$s = ' . $refer, ', ');
+                    }
                 }
 
                 $values[] = '(' . implode(', ', $set) . ')';
@@ -7004,6 +7048,7 @@ class Database
             if (!$updateData) {
                 $updateData = array_diff_key($insertData, $pcols);
             }
+            $updateData = $this->_wildUpdate($updateData, $insertData, $pcols);
             $affected = $this->update($originalName, $updateData, $wheres, $opt);
             return is_int($affected) && $affected === 1 ? 2 : $affected;
         }
@@ -7034,6 +7079,29 @@ class Database
      *     'name' => 'hoge',
      * ], ['name' => 'fuga']);
      * // INSERT INTO tablename SET id = '1', name = 'hoge' ON DUPLICATE KEY UPDATE name = 'fuga'
+     *
+     * # $updateData に ['*' => ?callable] を渡すと $updateData に無いカラムが $insertData を元にコールバックされる
+     * # 分かりにくいが要するに「$insertData の一部だけを書き換えて $updateData にすることができる」ということ
+     * $db->modify('tablename', [
+     *     'id'   => 1,
+     *     'name' => 'hoge',
+     *     'data' => 'on insert data',
+     * ], ['*' => fn($column, $insertData) => $insertData[$column], 'data' => 'on update data']);
+     * // INSERT INTO tablename SET
+     * //   id = '1', name = 'hoge', data = 'on insert data'
+     * // ON DUPLICATE KEY UPDATE
+     * //   id = '1', name = 'hoge', data = 'on update data'
+     *
+     * # ただし、実際は値を直接使うのではなく参照構文（mysql の VALUES など）を使うだろうので、null を渡すと自動で使用される
+     * $db->modify('tablename', [
+     *     'id'   => 1,
+     *     'name' => 'hoge',
+     *     'data' => 'on insert data',
+     * ], ['*' => null, 'data' => 'on update data']);
+     * // INSERT INTO tablename SET
+     * //   id = '1', name = 'hoge', data = 'on insert data'
+     * // ON DUPLICATE KEY UPDATE
+     * //   id = VALUES(id), name = VALUES(name), data = 'on update data'
      * ```
      *
      * @used-by modifyOrThrow()
@@ -7067,16 +7135,16 @@ class Database
                 $updateData = array_combine(array_keys($insertData), $updateData);
             }
         }
-        $updatable = !!$updateData;
+
+        $schema = $this->getSchema();
+        $pkcols = $schema->getTableUniqueColumns($tableName, $uniquekey);
 
         $tableName = $this->convertTableName($tableName);
 
         $insertData = $this->_normalize($tableName, $insertData);
+        $updateData = $this->_wildUpdate($updateData, $insertData, $pkcols);
         $updateData = $this->_normalize($tableName, $updateData);
         $updateData = $this->getCompatiblePlatform()->convertMergeData($insertData, $updateData);
-
-        $schema = $this->getSchema();
-        $pkcols = $schema->getTableUniqueColumns($tableName, $uniquekey);
 
         $params = [];
         $sets1 = $this->bindInto($insertData, $params);
@@ -7113,10 +7181,10 @@ class Database
         }
 
         if (array_get($opt, 'primary') === 3) {
-            return $this->_postaffect($tableName, $updatable ? $updateData : $insertData);
+            return $this->_postaffect($tableName, $insertData + $updateData);
         }
         if ($affected !== 0 && array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, $updatable ? $updateData : $insertData);
+            return $this->_postaffect($tableName, $insertData + $updateData);
         }
         if ($affected === 0 && array_get($opt, 'primary') === 2) {
             return [];
