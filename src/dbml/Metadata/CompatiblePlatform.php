@@ -39,14 +39,19 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     /** @var AbstractPlatform 元 platform */
     private $platform;
 
+    /** @var ?string */
+    private $version;
+
     /**
      * コンストラクタ
      *
      * @param AbstractPlatform $platform 元 platform
+     * @param ?string $version バージョン文字列
      */
-    public function __construct(AbstractPlatform $platform)
+    public function __construct(AbstractPlatform $platform, $version = null)
     {
         $this->platform = $platform;
+        $this->version = $version;
     }
 
     /**
@@ -57,6 +62,16 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getWrappedPlatform()
     {
         return $this->platform;
+    }
+
+    /**
+     * バージョン文字列を取得する
+     *
+     * @return ?string バージョン文字列
+     */
+    public function getVersion()
+    {
+        return $this->version;
     }
 
     /**
@@ -311,7 +326,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return false;
         }
         if ($this->platform instanceof SqlitePlatform) {
-            return version_compare(\SQLite3::version()['versionString'], '3.15.0', '>=');
+            return version_compare($this->version, '3.15.0') >= 0;
         }
         return true;
     }

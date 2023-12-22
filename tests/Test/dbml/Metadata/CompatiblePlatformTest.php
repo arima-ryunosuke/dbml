@@ -23,17 +23,18 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     public static function providePlatform()
     {
         $platforms = [
-            'sqlite_t'   => new \ryunosuke\Test\Platforms\SqlitePlatform(),
-            'sqlite'     => new SqlitePlatform(),
-            'mysql'      => new MySQLPlatform(),
-            'postgresql' => new PostgreSQLPlatform(),
-            'sqlserver'  => new SQLServerPlatform(),
-            'oracle'     => new OraclePlatform(),
+            'sqlite_t'    => [new \ryunosuke\Test\Platforms\SqlitePlatform(), "3.31.1"],
+            'sqlite'      => [new SqlitePlatform(), "3.31.1"],
+            'mysql'       => [new MySQLPlatform(), "8.0.33"],
+            'postgresql'  => [new PostgreSQLPlatform(), "15.4.1"],
+            'sqlserver'   => [new SQLServerPlatform(), "14.00.3460"],
+            'sqlserver16' => [new SQLServerPlatform(), "16.0"],
+            'oracle'      => [new OraclePlatform(), "1.0"],
         ];
-        return array_map(function (AbstractPlatform $v) {
+        return array_map(function ($v) {
             return [
-                new CompatiblePlatform($v),
-                $v,
+                new CompatiblePlatform(...$v),
+                $v[0],
             ];
         }, $platforms);
     }

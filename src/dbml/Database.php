@@ -2075,7 +2075,7 @@ class Database
         if (!isset($this->cache['compatiblePlatform'])) {
             $classname = $this->getUnsafeOption('compatiblePlatform');
             assert(is_a($classname, CompatiblePlatform::class, true));
-            $this->cache['compatiblePlatform'] = is_object($classname) ? $classname : new $classname($this->getPlatform());
+            $this->cache['compatiblePlatform'] = is_object($classname) ? $classname : new $classname($this->getPlatform(), (fn() => $this->getServerVersion())->bindTo($this->getSlaveConnection(), Connection::class)());
         }
         return $this->cache['compatiblePlatform'];
     }
