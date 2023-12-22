@@ -496,8 +496,20 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getSpaceshipSyntax($cplatform, $platform)
     {
-        $expected = $platform instanceof MySQLPlatform ? '<=>' : 'IS NULL OR';
-        $this->assertStringContainsString($expected, $cplatform->getSpaceshipSyntax('hoge'));
+        $expected = '(hoge IS NULL AND ? IS NULL) OR hoge = ?';
+        if ($platform instanceof SqlitePlatform) {
+            $expected = 'hoge IS ?';
+        }
+        if ($platform instanceof MySQLPlatform) {
+            $expected = 'hoge <=> ?';
+        }
+        if ($platform instanceof PostgreSQLPlatform) {
+            $expected = 'hoge IS NOT DISTINCT FROM ?';
+        }
+        if ($platform instanceof SQLServerPlatform && version_compare($cplatform->getVersion(), "16") >= 0) {
+            $expected = 'hoge IS NOT DISTINCT FROM ?';
+        }
+        $this->assertEquals($expected, $cplatform->getSpaceshipSyntax('hoge'));
     }
 
     /**

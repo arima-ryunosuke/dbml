@@ -803,15 +803,26 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      *
      * $column はカラム名を想定しており、エスケープされないので注意すること。
      *
+     * @todo 呼び元で ? の数を算出してるので Syntax ではなく Expression 返しの方が良い
+     *
      * @param string $column 左辺値
      * @return string null 許容演算子
      */
     public function getSpaceshipSyntax($column)
     {
+        if ($this->platform instanceof SqlitePlatform) {
+            return "$column IS ?";
+        }
         if ($this->platform instanceof MySQLPlatform) {
             return "$column <=> ?";
         }
-        return "$column IS NULL OR $column = ?";
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            return "$column IS NOT DISTINCT FROM ?";
+        }
+        if ($this->platform instanceof SQLServerPlatform && version_compare($this->version, '16') >= 0) {
+            return "$column IS NOT DISTINCT FROM ?";
+        }
+        return "($column IS NULL AND ? IS NULL) OR $column = ?";
     }
 
     /**

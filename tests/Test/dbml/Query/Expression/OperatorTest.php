@@ -127,8 +127,8 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_op_spaceship()
     {
         $operator = new Operator(self::$platform, '<=>', 'a', [99]);
-        $this->assertOperator('a IS NULL OR a = ?', [99], $operator);
-        $this->assertOperator('NOT (a IS NULL OR a = ?)', [99], $operator->not());
+        $this->assertOperator('a IS ?', [99], $operator);
+        $this->assertOperator('NOT (a IS ?)', [99], $operator->not());
         $this->assertException('contains 1 elements', L(new Operator(self::$platform, '<=>', 'a', []))->getQuery());
     }
 

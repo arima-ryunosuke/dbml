@@ -359,7 +359,7 @@ class Operator implements Queryable
             throw new \UnexpectedValueException("SPACESHIP's operand2 must be array contains 1 elements.");
         }
         $this->string = $this->platform->getSpaceshipSyntax($this->operand1);
-        $this->params = $this->operand2;
+        $this->params = array_fill(0, substr_count($this->string, '?'), reset($this->operand2));
     }
 
     private function _isnull()
