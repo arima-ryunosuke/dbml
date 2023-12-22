@@ -737,6 +737,32 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_getRegexpExpression($cplatform, $platform)
+    {
+        $expected = null;
+        if ($platform instanceof SqlitePlatform) {
+            $expected = "REGEXP";
+        }
+        if ($platform instanceof MySQLPlatform) {
+            $expected = "RLIKE";
+        }
+        if ($platform instanceof PostgreSQLPlatform) {
+            $expected = "~*";
+        }
+
+        if ($expected === null) {
+            $this->assertException('is not supported', L($cplatform)->getRegexpExpression());
+        }
+        else {
+            $this->assertEquals($expected, $cplatform->getRegexpExpression());
+        }
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_getBinaryExpression($cplatform, $platform)
     {
         if ($platform instanceof SQLServerPlatform) {

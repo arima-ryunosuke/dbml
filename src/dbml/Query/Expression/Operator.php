@@ -413,7 +413,7 @@ class Operator implements Queryable
 
     private function _phrase()
     {
-        $regexp = $this->platform->getWrappedPlatform()->getRegexpExpression();
+        $regexp = $this->platform->getRegexpExpression();
         $split = function ($delimiter, $string) {
             return array_filter(array_map('trim', quoteexplode($delimiter, $string, null)), 'strlen');
         };
@@ -421,17 +421,29 @@ class Operator implements Queryable
         $params = [];
         $patterns = [];
         foreach ($split('|', $this->operand2[0]) as $i => $sentence) {
-            foreach ($split([" ", "　", "\t", "\n"], $sentence) as $j => $phrase) {
+            $phrases = [];
+            foreach ($split([" ", "　", "\t", "\n"], $sentence) as $phrase) {
+                // fix e.g. ["hoge,", "fuga"] -> ["hoge,fuga"]
+                if ($lastcomma ?? false) {
+                    $phrases[array_key_last($phrases)] .= $phrase;
+                    continue;
+                }
+                $lastcomma = $phrase[-1] === ',';
+                $phrases[] = $phrase;
+            }
+            foreach ($phrases as $j => $phrase) {
                 foreach ($split(",", $phrase) as $k => $word) {
                     $pattern = $this->operand1 . " $regexp ?";
-                    if ($word[0] === '-') {
+                    $s = $word[0] ?? '';
+                    $e = $word[-1] ?? '';
+                    if ($s === '-') {
                         $pattern = "NOT ($pattern)";
                         $word = substr($word, 1);
                     }
-                    if ($word[0] === '"' && $word[-1] === '"') {
+                    if ($s === '"' && $e === '"') {
                         $word = glob2regex(trim(stripslashes($word), '"'));
                     }
-                    elseif ($word[0] === "'" && $word[-1] === "'") {
+                    elseif ($s === "'" && $e === "'") {
                         // @memo \A,\z is from mysql>=8
                         $word = '^' . preg_quote(trim(stripslashes($word), "'")) . '$';
                     }

@@ -931,6 +931,26 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * 正規表現を返す
+     *
+     * @return string REGEXP Expression
+     */
+    public function getRegexpExpression()
+    {
+        if ($this->platform instanceof SqlitePlatform) {
+            return "REGEXP";
+        }
+        if ($this->platform instanceof MySQLPlatform) {
+            return "RLIKE";
+        }
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            return "~*";
+        }
+
+        throw DBALException::notSupported(__METHOD__);
+    }
+
+    /**
      * binary 表現を返す
      *
      * @param string $data データ
