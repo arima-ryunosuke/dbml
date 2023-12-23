@@ -41,6 +41,11 @@ class CompatibleConnection
         $this->nativeConnection = $driverConnection->getNativeConnection();
     }
 
+    public function getConnection()
+    {
+        return $this->connection;
+    }
+
     public function getName()
     {
         if ($this->driverConnection instanceof Driver\PDO\Connection) {
@@ -84,20 +89,62 @@ class CompatibleConnection
         return true;
     }
 
-    public function isSupportedTablePrefix()
+    public function getSupportedMetadata(): array
     {
+        $base = [
+            'actualTableName'  => false,
+            'actualColumnName' => false,
+            'aliasTableName'   => false,
+            'aliasColumnName'  => false,
+            'nativeType'       => false,
+            'table&&column'    => false, // actual,alias を問わず table,column の両方をサポートしているかのショートカット
+        ];
+
         if ($this->driverConnection instanceof Driver\PDO\Connection) {
-            if ($this->nativeConnection->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'mysql') {
-                return true;
+            // https://learn.microsoft.com/ja-jp/sql/connect/php/pdostatement-getcolumnmeta?view=sql-server-ver16
+            // > データベースで列を含むテーブルの名前を指定します。 常に空白です。
+            if ($this->nativeConnection->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'sqlsrv') {
+                return array_replace($base, [
+                    'aliasColumnName' => true,
+                    'nativeType'      => true,
+                ]);
             }
+            /** @see \PDOStatement::getColumnMeta() */
+            return array_replace($base, [
+                'actualTableName' => true,
+                'aliasColumnName' => true,
+                'nativeType'      => true,
+                'table&&column'   => true,
+            ]);
+        }
+        if ($this->driverConnection instanceof Driver\SQLite3\Connection) {
+            /** @see \SQLite3Result::columnName(), \SQLite3Result::columnType() */
+            return array_replace($base, [
+                'aliasColumnName' => true,
+                'nativeType'      => true,
+            ]);
         }
         if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
-            return true;
+            /** @see \mysqli_result::fetch_fields() */
+            return array_replace($base, [
+                'actualTableName'  => true,
+                'actualColumnName' => true,
+                'aliasTableName'   => true,
+                'aliasColumnName'  => true,
+                'nativeType'       => true,
+                'table&&column'    => true,
+            ]);
         }
         if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
-            return true;
+            /** @see \pg_field_table(), \pg_field_name(), \pg_field_type() */
+            return array_replace($base, [
+                'actualTableName' => true,
+                'aliasColumnName' => true,
+                'nativeType'      => true,
+                'table&&column'   => true,
+            ]);
         }
-        return false;
+        return $base;
     }
 
     public function tryPDOAttribute($attribute_name, $attribute_value)
@@ -128,90 +175,46 @@ class CompatibleConnection
         }
     }
 
-    public function setTablePrefix()
-    {
-        // \PDO::ATTR_FETCH_TABLE_NAMES をサポートしてるならそれで（そっちのほうが汎用性が高い）
-        if ($this->driverConnection instanceof Driver\PDO\Connection) {
-            if ($this->tryPDOAttribute(\PDO::ATTR_FETCH_TABLE_NAMES, true)) {
-                return function () {
-                    $this->nativeConnection->setAttribute(\PDO::ATTR_FETCH_TABLE_NAMES, false);
-                };
-            }
-        }
-
-        if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
-            // 直接代入はいつか壊れるが、いずれ WeakMap に変更したいのでとりあえず暫定
-            $this->driverConnection->tablePrefix = true;
-            return function () {
-                $this->driverConnection->tablePrefix = false;
-            };
-        }
-        if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
-            // 直接代入はいつか壊れるが、いずれ WeakMap に変更したいのでとりあえず暫定
-            $this->driverConnection->tablePrefix = true;
-            return function () {
-                $this->driverConnection->tablePrefix = false;
-            };
-        }
-    }
-
-    public function customResult(Result $result, $groupByName)
+    public function customResult(Result $result, $checkSameColumn)
     {
         $driverResult = (fn() => $this->result)->bindTo($result, Result::class)($result);
 
-        if ($this->driverConnection instanceof Driver\PDO\Connection) {
-            if ($groupByName) {
-                $result = new class($driverResult, $this->connection) extends Result {
-                    private \PDOStatement $statement;
-
-                    public function __construct(Driver\PDO\Result $result, Connection $connection)
-                    {
-                        parent::__construct($result, $connection);
-
-                        $this->statement = (fn() => $this->statement)->bindTo($result, Driver\PDO\Result::class)();
-                    }
-
-                    public function fetchAssociative()
-                    {
-                        return $this->statement->fetch(\PDO::FETCH_ASSOC | \PDO::FETCH_NAMED);
-                    }
-
-                    public function fetchAllAssociative(): array
-                    {
-                        return $this->statement->fetchAll(\PDO::FETCH_ASSOC | \PDO::FETCH_NAMED);
-                    }
-                };
+        if ($driverResult instanceof \ryunosuke\dbml\Driver\ResultInterface) {
+            if ($checkSameColumn) {
+                $driverResult->setSameCheckMethod($checkSameColumn);
             }
         }
-        if ($this->driverConnection instanceof Driver\SQLite3\Connection) {
-            /** @var \ryunosuke\dbml\Driver\SQLite3\Result $driverResult */
-            if ($groupByName) {
-                $driverResult->groupByName();
-            }
-        }
-        if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
-            /** @var \ryunosuke\dbml\Driver\Mysqli\Result $driverResult */
+
+        if ($driverResult instanceof \ryunosuke\dbml\Driver\Mysqli\Result) {
             if ($this->driverConnection->bufferMode ?? true) {
                 $driverResult->storeResult();
-            }
-            if ($this->driverConnection->tablePrefix ?? false) {
-                $driverResult->prefixTableName();
-            }
-            if ($groupByName) {
-                $driverResult->groupByName();
-            }
-        }
-        if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
-            /** @var \ryunosuke\dbml\Driver\PgSQL\Result $driverResult */
-            if ($this->driverConnection->tablePrefix ?? false) {
-                $driverResult->prefixTableName();
-            }
-            if ($groupByName) {
-                $driverResult->groupByName();
             }
         }
 
         return $result;
+    }
+
+    public function getMetadata(Result $result): array
+    {
+        $driverResult = (fn() => $this->result)->bindTo($result, Result::class)($result);
+
+        if ($driverResult instanceof \ryunosuke\dbml\Driver\ResultInterface) {
+            $metadata = $driverResult->getMetadata();
+            // アクセステーブルのメタデータに対応していない場合、クエリレベルで強制的に付与しているので分解しなければならない
+            /** @see \ryunosuke\dbml\Database::_toTablePrefix() */
+            if (!$this->getSupportedMetadata()['table&&column']) {
+                foreach ($metadata as $n => $metadatum) {
+                    $parts = explode('.', $metadatum['aliasColumnName'], 2);
+                    if (count($parts) === 2 && !strlen($metadatum['aliasTableName'] ?? '')) {
+                        $metadata[$n]['aliasTableName'] = $parts[0];
+                        $metadata[$n]['aliasColumnName'] = $parts[1];
+                    }
+                }
+            }
+            return $metadata;
+        }
+
+        return [];
     }
 
     public function alternateMatchedRows()
@@ -224,7 +227,7 @@ class CompatibleConnection
         return null;
     }
 
-    public function executeAsync($sqls, &$affectedRows = null)
+    public function executeAsync($sqls, $converter, &$affectedRows = null)
     {
         $parser = new Parser($this->connection->getDatabasePlatform()->createSQLParser());
 
@@ -238,7 +241,7 @@ class CompatibleConnection
                 }
                 return $result;
             };
-            $tick = function ($native, $waitForEnd) {
+            $tick = function ($native, $waitForEnd) use ($converter) {
                 do {
                     $read = $error = $reject = [$native];
                     if (\mysqli::poll($read, $error, $reject, $waitForEnd ? 1 : 0) === false) {
@@ -253,13 +256,14 @@ class CompatibleConnection
 
                         $result = null;
                         if ($myresult instanceof \mysqli_result) {
-                            $types = array_column($myresult->fetch_fields(), 'type', 'name');
+                            $metadata = \ryunosuke\dbml\Driver\Mysqli\Result::getMetadataFrom($myresult);
 
                             $result = [];
-                            foreach ($myresult as $n => $row) {
-                                foreach ($row as $column => $value) {
-                                    $result[$n][$column] = \ryunosuke\dbml\Driver\Mysqli\Result::mapType($types[$column], $value);
+                            foreach ($myresult->fetch_all(MYSQLI_NUM) as $i => $row) {
+                                foreach ($row as $n => $value) {
+                                    $result[$i][$metadata[$n]['aliasColumnName']] = \ryunosuke\dbml\Driver\Mysqli\Result::mapType($metadata[$n]['nativeType'], $value);
                                 }
+                                $result[$i] = $converter($result[$i], $metadata);
                             }
                             $myresult->free();
                         }
@@ -288,7 +292,7 @@ class CompatibleConnection
                 }
                 return $return;
             };
-            $tick = function ($native, $waitForEnd) {
+            $tick = function ($native, $waitForEnd) use ($converter) {
                 if (!$waitForEnd && @pg_connection_busy($native)) {
                     return null;
                 }
@@ -299,18 +303,14 @@ class CompatibleConnection
                 }
 
                 if (pg_num_fields($pgresult) !== 0) {
-                    $types = [];
-                    $numFields = pg_num_fields($pgresult);
-                    for ($i = 0; $i < $numFields; ++$i) {
-                        $name = pg_field_name($pgresult, $i);
-                        $types[$name] = pg_field_type($pgresult, $i);
-                    }
+                    $metadata = \ryunosuke\dbml\Driver\PgSQL\Result::getMetadataFrom($pgresult);
 
                     $result = [];
-                    foreach (pg_fetch_all($pgresult) as $n => $row) {
-                        foreach ($row as $column => $value) {
-                            $result[$n][$column] = \ryunosuke\dbml\Driver\PgSQL\Result::mapType($types[$column], $value);
+                    foreach (pg_fetch_all($pgresult, PGSQL_NUM) as $i => $row) {
+                        foreach ($row as $n => $value) {
+                            $result[$i][$metadata[$n]['aliasColumnName']] = \ryunosuke\dbml\Driver\PgSQL\Result::mapType($metadata[$n]['nativeType'], $value);
                         }
+                        $result[$i] = $converter($result[$i], $metadata);
                     }
                 }
                 else {

@@ -2,77 +2,34 @@
 
 namespace ryunosuke\dbml\Driver\SQLite3;
 
-use ryunosuke\dbml\Driver\AbstractResult;
+use Doctrine\DBAL\Driver\SQLite3\DbalResult;
+use ryunosuke\dbml\Driver\ResultInterface;
+use ryunosuke\dbml\Driver\ResultTrait;
 use SQLite3Result;
-use const SQLITE3_ASSOC;
-use const SQLITE3_NUM;
 
-/**
- * @see \Doctrine\DBAL\Driver\SQLite3\Result
- * @copyright 2006 Doctrine Project
- * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
- *
- * @codeCoverageIgnore
- */
-final class Result extends AbstractResult
+require_once __DIR__ . '/../../../dbal/Driver/SQLite3/Result.php';
+
+final class Result extends DbalResult implements ResultInterface
 {
-    private ?SQLite3Result $result;
-    private int            $changes;
+    use ResultTrait;
 
-    /** @internal The result can be only instantiated by its driver connection or statement. */
-    public function __construct(SQLite3Result $result, int $changes)
+    public static function getMetadataFrom(SQLite3Result $result)
     {
-        $this->result = $result;
-        $this->changes = $changes;
+        $metadata = [];
+        for ($i = 0, $l = $result->numColumns(); $i < $l; ++$i) {
+            $metadata[$i] = [
+                'actualTableName'  => null,
+                'actualColumnName' => null,
+                'aliasTableName'   => null,
+                'aliasColumnName'  => $result->columnName($i),
+                'nativeType'       => (string) $result->columnType($i),
+            ];
+        }
+        return $metadata;
     }
 
-    /** @inheritdoc */
-    public function fetchNumeric()
+    public function getMetadata(): array
     {
-        if ($this->result === null) {
-            return false;
-        }
-
-        return $this->result->fetchArray(SQLITE3_NUM);
-    }
-
-    /** @inheritdoc */
-    public function fetchAssociative()
-    {
-        if ($this->result === null) {
-            return false;
-        }
-
-        if ($this->groupByName) {
-            $nums = $this->result->fetchArray(SQLITE3_NUM) ?: [];
-            $columns = array_map(fn($n) => $this->result->columnName($n), array_keys($nums));
-            return $this->_fetchGroup($columns, $nums) ?: false;
-        }
-
-        return $this->result->fetchArray(SQLITE3_ASSOC);
-    }
-
-    public function rowCount(): int
-    {
-        return $this->changes;
-    }
-
-    public function columnCount(): int
-    {
-        if ($this->result === null) {
-            return 0;
-        }
-
-        return $this->result->numColumns();
-    }
-
-    public function free(): void
-    {
-        if ($this->result === null) {
-            return;
-        }
-
-        $this->result->finalize();
-        $this->result = null;
+        return self::getMetadataFrom($this->result);
     }
 }

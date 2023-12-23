@@ -19,6 +19,10 @@ class Yielder implements \IteratorAggregate
     /** @var Result|\Closure ステートメント */
     private $statement;
 
+    /** @var CompatibleConnection */
+    #[DebugInfo(false)]
+    private $cconnection;
+
     /** @var Connection */
     #[DebugInfo(false)]
     private $connection;
@@ -39,15 +43,20 @@ class Yielder implements \IteratorAggregate
      * コンストラクタ
      *
      * @param Result|\Closure $statement 取得に使用される \Statement
-     * @param Connection $connection 取得に使用するコネクション
+     * @param CompatibleConnection|Connection $cconnection 取得に使用するコネクション
      * @param ?string $method フェッチメソッド名
      * @param ?callable $callback $chunk 行ごとに呼ばれるコールバック処理
      * @param ?int $chunk コールバック処理のチャンク数。指定するとその数だけバッファリングされるので留意
      */
-    public function __construct($statement, $connection, $method = null, $callback = null, $chunk = null)
+    public function __construct($statement, $cconnection, $method = null, $callback = null, $chunk = null)
     {
+        // for compatible
+        if ($cconnection instanceof Connection) {
+            $cconnection = new CompatibleConnection($cconnection);
+        }
         $this->statement = $statement;
-        $this->connection = $connection;
+        $this->cconnection = $cconnection;
+        $this->connection = $cconnection->getConnection();
         $this->method = $method;
         $this->callback = $callback;
         $this->chunk = $chunk;
@@ -106,8 +115,7 @@ class Yielder implements \IteratorAggregate
      */
     public function setBufferMode($mode)
     {
-        $cconnection = new CompatibleConnection($this->connection);
-        $cconnection->setBufferMode($mode);
+        $this->cconnection->setBufferMode($mode);
 
         return $this;
     }
@@ -148,6 +156,8 @@ class Yielder implements \IteratorAggregate
                 throw new \RuntimeException('stetement provider returns invalid type.');
             }
         }
+
+        $metadata = $this->cconnection->getMetadata($this->statement);
 
         $position = -1;
         $indexes = [];
@@ -226,7 +236,7 @@ class Yielder implements \IteratorAggregate
                 }
 
                 if ($this->callback) {
-                    $chunks = ($this->callback)($chunks);
+                    $chunks = ($this->callback)($chunks, $metadata);
                 }
 
                 yield from $loop($chunks);
@@ -234,7 +244,7 @@ class Yielder implements \IteratorAggregate
             }
             else {
                 if ($this->callback) {
-                    $row = ($this->callback)($row); // for compatible. future scope: $rows = ($this->callback)([$row])
+                    $row = ($this->callback)($row, $metadata); // for compatible. future scope: $rows = ($this->callback)([$row])
                 }
 
                 yield from $loop([$row]);
@@ -243,7 +253,7 @@ class Yielder implements \IteratorAggregate
 
         if ($chunks) {
             if ($this->callback) {
-                $chunks = ($this->callback)($chunks);
+                $chunks = ($this->callback)($chunks, $metadata);
             }
 
             yield from $loop($chunks);

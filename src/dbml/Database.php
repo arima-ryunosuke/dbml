@@ -9,6 +9,7 @@ use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Schema\AbstractAsset;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
@@ -628,6 +629,7 @@ class Database
             \Doctrine\DBAL\Driver\SQLite3\Result::class => \ryunosuke\dbml\Driver\SQLite3\Result::class,
             \Doctrine\DBAL\Driver\Mysqli\Result::class  => \ryunosuke\dbml\Driver\Mysqli\Result::class,
             \Doctrine\DBAL\Driver\PgSQL\Result::class   => \ryunosuke\dbml\Driver\PgSQL\Result::class,
+            \Doctrine\DBAL\Driver\PDO\Result::class     => \ryunosuke\dbml\Driver\PDO\Result::class,
         ]);
 
         $configure = function (Configuration $configuration) use ($options) {
@@ -867,7 +869,7 @@ class Database
         $revert = $this->_toTablePrefix($sql);
         try {
             $stmt = $this->_sqlToStmt($sql, $params, $this->getSlaveConnection());
-            return $this->perform($stmt->fetchAllAssociative(), $method, $converter);
+            return $this->perform($stmt, $method, $converter);
         }
         finally {
             $revert();
@@ -923,98 +925,75 @@ class Database
     {
         $platform = $this->getPlatform();
         $cast_type = $this->getUnsafeOption('autoCastType');
-        $samecheck_method = $this->getUnsafeOption('checkSameColumn');
-        $samecheck = function ($c, $vv) use ($samecheck_method) {
-            if ($samecheck_method === 'noallow') {
-                throw new \UnexpectedValueException("columns '$c' is same column or alias (cause $samecheck_method).");
-            }
-            elseif ($samecheck_method === 'strict') {
-                $v = array_pop($vv);
-                if (!in_array($v, $vv, true)) {
-                    throw new \UnexpectedValueException("columns '$c' is same column or alias (cause $samecheck_method).");
-                }
-                return $v;
-            }
-            elseif ($samecheck_method === 'loose') {
-                if (count(array_unique(array_filter($vv, function ($s) { return $s !== null; }))) > 1) {
-                    throw new \UnexpectedValueException("columns '$c' is same column or alias (cause $samecheck_method).");
-                }
-                return end($vv);
-            }
-            else {
-                throw new \DomainException("checkSameColumn is invalid.");
-            }
-        };
-
-        // フェッチモードを変えるのでこの段階で取得しておかないと describe にまで影響が出てしまう
-        /** @var Type[][] $table_columns */
-        $table_columns = $cast_type ? array_each($this->getSchema()->getTableNames(), function (&$carry, $tname) {
-            $carry[$tname] = [];
-            foreach ($this->getSchema()->getTableColumns($tname) as $cname => $column) {
-                $carry[$tname][$cname] = $column->getType();
-            }
-        }, []) : [];
+        $tablePrefix = !$this->getCompatibleConnection($this->getSlaveConnection())->getSupportedMetadata()['table&&column'];
 
         /** @var QueryBuilder $data_source */
         $data_source = optional($data_source, QueryBuilder::class);
         $rconverter = $data_source->getRowConverter();
         $alias_table = array_lookup($data_source->getFromPart() ?: [], 'table');
 
-        return function ($row) use ($platform, $cast_type, $table_columns, $alias_table, $rconverter, $samecheck_method, $samecheck) {
+        $getTableColumnType = function ($tableName, $columnName) use ($alias_table) {
+            // クエリビルダ経由でエイリアスマップが得られるなら変換ができる
+            if (isset($alias_table[$tableName])) {
+                $tableName = $alias_table[$tableName];
+            }
+            if (!is_string($tableName)) {
+                return null;
+            }
+
+            static $cache = [];
+            if (!isset($cache[$tableName])) {
+                if ($this->getSchema()->hasTable($tableName)) {
+                    $cache[$tableName] = array_map(fn($column) => $column->getType(), $this->getSchema()->getTableColumns($tableName));
+                }
+                else {
+                    $cache[$tableName] = [];
+                }
+            }
+            return $cache[$tableName][$columnName] ?? null;
+        };
+
+        $cconverter = function ($typename, $value) use ($cast_type, $platform) {
+            if (isset($cast_type[$typename]['select'])) {
+                $converter = $cast_type[$typename]['select'];
+                if ($converter instanceof \Closure) {
+                    return $converter($value, $platform);
+                }
+                else {
+                    return Type::getType($typename)->convertToPHPValue($value, $platform);
+                }
+            }
+            return $value;
+        };
+
+        $metadataTableColumn = null;
+        return function ($row, $metadata) use ($getTableColumnType, $cconverter, $rconverter, $tablePrefix, &$metadataTableColumn) {
+            // 死ぬほど呼び出されるので適した形式でキャッシュしておく
+            if ($metadataTableColumn === null) {
+                $metadataTableColumn = [];
+                foreach ($metadata as $meta) {
+                    $metadataTableColumn[$meta['aliasColumnName']] = [
+                        strlen($meta['actualTableName'] ?? '') ? $meta['actualTableName'] : $meta['aliasTableName'],
+                        strlen($meta['actualColumnName'] ?? '') ? $meta['actualColumnName'] : $meta['aliasColumnName'],
+                    ];
+                }
+            }
+
             $newrow = [];
             foreach ($row as $c => $v) {
-                if ($samecheck_method && is_array($v)) {
-                    $v = $samecheck($c, $v);
+                // 勝手につけたプレフィックスは外さなければならない
+                if ($tablePrefix === true && count($parts = explode('.', $c, 2)) === 2) {
+                    [, $c] = $parts;
                 }
 
-                if ($cast_type) {
-                    $parts = explode('.', $c, 3);
-                    $pcount = count($parts);
-                    if ($pcount >= 2) {
-                        // mysql の場合は3個来ることがある（暗黙＋明示＋列名）。その場合は最初を捨てて明示を優先する
-                        if ($pcount === 3) {
-                            [, $table, $c] = $parts;
-                        }
-                        else {
-                            [$table, $c] = $parts;
-                        }
-
-                        // クエリビルダ経由でエイリアスマップが得られるなら変換ができる
-                        if (isset($alias_table[$table])) {
-                            $table = $alias_table[$table];
-                        }
-
-                        // カラムが存在するなら convert
-                        if (is_string($table) && isset($table_columns[$table][$c])) {
-                            $type = $table_columns[$table][$c];
-                            $typename = $type->getName();
-                            if (isset($cast_type[$typename]['select'])) {
-                                $converter = $cast_type[$typename]['select'];
-                                if ($converter instanceof \Closure) {
-                                    $v = $converter($v, $platform);
-                                }
-                                else {
-                                    $v = $type->convertToPHPValue($v, $platform);
-                                }
-                            }
-                        }
-
-                        if ($samecheck_method && array_key_exists($c, $newrow)) {
-                            $v = $samecheck($c, [$newrow[$c], $v]);
-                        }
-                    }
+                // Alias|Typename 由来の変換（修飾子があればアドホックに変換できる）
+                if (count($parts = explode('|', $c, 2)) === 2) {
+                    [$c, $typename] = $parts;
+                    $v = $cconverter($typename, $v);
                 }
-                [$c, $typename] = explode('|', $c, 2) + [1 => ''];
-                if ($typename) {
-                    if (isset($cast_type[$typename]['select'])) {
-                        $converter = $cast_type[$typename]['select'];
-                        if ($converter instanceof \Closure) {
-                            $v = $converter($v, $platform);
-                        }
-                        else {
-                            $v = Type::getType($typename)->convertToPHPValue($v, $platform);
-                        }
-                    }
+                // Result 由来の変換（Result がテーブル名とカラム名を返してくれるなら対応表が作れる）
+                elseif (isset($metadataTableColumn[$c]) && $type = $getTableColumnType(...$metadataTableColumn[$c])) {
+                    $v = $cconverter($type->getName(), $v);
                 }
 
                 $newrow[$c] = $v;
@@ -1030,25 +1009,22 @@ class Database
     {
         // そういうモードではないならそもそも何もしない
         if (!$this->getUnsafeOption('autoCastType')) {
-            return function () { };
+            return fn() => null;
         }
 
-        $revert = $this->getCompatibleConnection($this->getSlaveConnection())->setTablePrefix();
+        // ドライバレベルで TableName, ColumnName の取得をサポートしている
+        if ($this->getCompatibleConnection($this->getSlaveConnection())->getSupportedMetadata()['table&&column']) {
+            return fn() => null;
+        }
 
         // QueryBuilder 経由ならそれっぽいことはできる
-        if ($revert === null) {
-            if ($sql instanceof QueryBuilder) {
-                $sql->setAutoTablePrefix(true);
-                $revert = function () use ($sql) {
-                    $sql->setAutoTablePrefix(false);
-                };
-            }
+        if ($sql instanceof QueryBuilder) {
+            $sql->setAutoTablePrefix(true);
+            return fn() => $sql->setAutoTablePrefix(false);
         }
+
         // どうしようもない
-        if ($revert === null) {
-            return function () { };
-        }
-        return $revert;
+        return fn() => null;
     }
 
     private function _getCallStack($filter_path)
@@ -3429,13 +3405,19 @@ class Database
      *
      * @ignore 難解過ぎる上内部でしか使われない
      *
-     * @param \Traversable|array $row_provider foreach で回せる何か
+     * @param Result|array $row_provider foreach で回せる何か
      * @param string|array $fetch_mode Database::METHOD__XXX
      * @param ?\Closure $converter 行ごとの変換クロージャ
      * @return array|bool|mixed クエリ結果
      */
     public function perform($row_provider, $fetch_mode, $converter = null)
     {
+        $metadata = [];
+        if ($row_provider instanceof Result) {
+            $metadata = $this->getCompatibleConnection()->getMetadata($row_provider);
+            $row_provider = $row_provider->fetchAllAssociative();
+        }
+
         switch ($fetch_mode) {
             default:
                 throw new \BadMethodCallException("unknown fetch method '$fetch_mode'.");
@@ -3444,14 +3426,14 @@ class Database
             case self::METHOD_ARRAY:
                 $result = [];
                 foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
+                    $row = $converter ? $converter($row, $metadata) : $row;
                     $result[] = $row;
                 }
                 return $result;
             case self::METHOD_ASSOC:
                 $result = [];
                 foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
+                    $row = $converter ? $converter($row, $metadata) : $row;
                     foreach ($row as $e) {
                         $key = $e;
                         break;
@@ -3465,7 +3447,7 @@ class Database
             case self::METHOD_LISTS:
                 $result = [];
                 foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
+                    $row = $converter ? $converter($row, $metadata) : $row;
                     foreach ($row as $e) {
                         $val = $e;
                         break;
@@ -3477,7 +3459,7 @@ class Database
             case self::METHOD_PAIRS:
                 $result = [];
                 foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
+                    $row = $converter ? $converter($row, $metadata) : $row;
                     $i = 0;
                     foreach ($row as $e) {
                         if ($i++ === 1) {
@@ -3496,7 +3478,7 @@ class Database
                 $result = false;
                 $first = true;
                 foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
+                    $row = $converter ? $converter($row, $metadata) : $row;
                     if ($first) {
                         $first = false;
                         $result = $row;
@@ -3510,7 +3492,7 @@ class Database
                 $result = false;
                 $first = true;
                 foreach ($row_provider as $row) {
-                    $row = $converter ? $converter($row) : $row;
+                    $row = $converter ? $converter($row, $metadata) : $row;
                     if ($first) {
                         $first = false;
                         foreach ($row as $e) {
@@ -4018,13 +4000,13 @@ class Database
         $converter = $this->_getConverter($sql);
         if ($sql instanceof QueryBuilder) {
             if ($chunk = $sql->getLazyChunk()) {
-                $converter = fn($rows) => $sql->postselect(array_map($converter, $rows), false);
+                $converter = fn($rows, $metadata) => $sql->postselect(array_map(fn($row) => $converter($row, $metadata), $rows), false);
             }
             else {
-                $converter = fn($row) => $sql->postselect([$converter($row)], true)[0];
+                $converter = fn($row, $metadata) => $sql->postselect([$converter($row, $metadata)], true)[0];
             }
         }
-        return new Yielder(fn($connection) => $this->_sqlToStmt($sql, $params, $connection), $this->getSlaveConnection(), null, $converter, $chunk);
+        return new Yielder(fn($connection) => $this->_sqlToStmt($sql, $params, $connection), $this->getCompatibleConnection($this->getSlaveConnection()), null, $converter, $chunk);
     }
 
     /**
@@ -4850,7 +4832,7 @@ class Database
             })($queries);
         }
 
-        return $this->getCompatibleConnection($connection)->executeAsync($queries, $this->affectedRows);
+        return $this->getCompatibleConnection($connection)->executeAsync($queries, $this->_getConverter(null), $this->affectedRows);
     }
 
     /**

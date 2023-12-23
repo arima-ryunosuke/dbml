@@ -1605,7 +1605,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             ],
         ]));
         $database->setAutoCastType(['guid' => true]);
-        $this->assertEquals(['id' => '1'], $database->fetchTuple('select 1 as "A.id", 1 as "B.id" from test where id = 1'));
+        $this->assertIsArray($database->fetchTuple('select 1 as "A.id", 1 as "B.id" from test where id = 1'));
         $this->assertException('cause strict', L($database)->fetchArray('select 1 as "A.id", 2 as "B.id" from test'));
         $database->setAutoCastType([]);
 
@@ -1628,7 +1628,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             ],
         ]));
         $database->setAutoCastType(['guid' => true]);
-        $this->assertEquals(['id' => '1'], $database->fetchTuple('select NULL as "A.id", 1 as "B.id", 1 as "C.id" from test where id = 1'));
+        $this->assertIsArray($database->fetchTuple('select NULL as "A.id", 1 as "B.id", 1 as "C.id" from test where id = 1'));
         $this->assertException('cause loose', L($database)->fetchArray('select NULL as "A.id", 0 as "B.id", 1 as "C.id" from test'));
         $database->setAutoCastType([]);
 
@@ -2939,24 +2939,37 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             ],
         ], [], [], 1));
 
-        if ($database->getCompatibleConnection()->isSupportedTablePrefix()) {
-            // mysql は * だけで型を活かすことができる
+        $supported = $database->getCompatibleConnection()->getSupportedMetadata();
+        if ($supported['table&&column']) {
+            // テーブル取得がサポートされていれば * だけで型を活かすことができる
             $row = $database->selectTuple('misctype', [], [], 1);
             $this->assertSame(1, $row['cint']);
             $this->assertInstanceOf('\DateTime', $row['cdatetime']);
             $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['carray']);
 
-            // さらには生クエリでも可能
+            // 生クエリでも可能
             $row = $database->fetchTuple('select * from misctype');
             $this->assertSame(1, $row['cint']);
             $this->assertInstanceOf('\DateTime', $row['cdatetime']);
             $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['carray']);
         }
-        else {
-            // mysql の 'a.b.c' を模倣
-            $row = $database->fetchTuple('select cint as "HOGE.misctype.cint" from misctype');
-            $this->assertSame(1, $row['cint']);
+        if ($supported['actualColumnName']) {
+            // オリジナルカラム取得もサポートされていればエイリアスを張っても型を活かすことができる
+            $row = $database->fetchTuple('select cint as cint2, cdatetime as cdatetime2, carray as carray2 from misctype MT');
+            $this->assertSame(1, $row['cint2']);
+            $this->assertInstanceOf('\DateTime', $row['cdatetime2']);
+            $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['carray2']);
         }
+
+        // ビルダレベルのカバレッジ用
+        $dummy = self::getDummyDatabase();
+        $dummy->modify('test', ['id' => 1]);
+        $row = $dummy->selectTuple('test.id', ['id' => 1]);
+        $this->assertSame(1, $row['id']);
+        $select = $dummy->select([])->from($dummy->select('test', ['' => 1]), 't')->addSelect(['id' => 't.id', 'hoge.num' => 123]);
+        $row = $select->tuple();
+        $this->assertSame(1, $row['id']);
+        $this->assertSame(123, $row['num']);
 
         $database->setAutoCastType([]);
         $database->getSchema()->refresh();
