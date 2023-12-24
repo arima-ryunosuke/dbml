@@ -2,14 +2,11 @@
 
 namespace ryunosuke\dbml\Driver\PDO;
 
-use Doctrine\DBAL\Driver\PDO\DbalResult;
 use PDOStatement;
 use ryunosuke\dbml\Driver\ResultInterface;
 use ryunosuke\dbml\Driver\ResultTrait;
 
-require_once __DIR__ . '/../../../dbal/Driver/PDO/Result.php';
-
-final class Result extends DbalResult implements ResultInterface
+final class Result extends \ryunosuke\dbal\Driver\PDO\Result implements ResultInterface
 {
     use ResultTrait;
 

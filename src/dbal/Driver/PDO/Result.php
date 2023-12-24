@@ -1,20 +1,21 @@
 <?php
+//@formatter:off
+/**
+ * @see \Doctrine\DBAL\Driver\PDO\Result
+ * @copyright 2006 Doctrine Project
+ * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
+ */
 
 declare(strict_types=1);
 
-namespace Doctrine\DBAL\Driver\PDO;
+namespace ryunosuke\dbal\Driver\PDO;
 
 use Doctrine\DBAL\Driver\Result as ResultInterface;
 use PDO;
 use PDOException;
 use PDOStatement;
 
-//@formatter:off
-/**
- * @copyright 2006 Doctrine Project
- * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
- */
-class DbalResult implements ResultInterface
+class Result implements ResultInterface
 {
     protected PDOStatement $statement;
 

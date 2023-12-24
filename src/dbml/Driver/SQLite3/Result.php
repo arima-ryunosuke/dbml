@@ -2,14 +2,11 @@
 
 namespace ryunosuke\dbml\Driver\SQLite3;
 
-use Doctrine\DBAL\Driver\SQLite3\DbalResult;
 use ryunosuke\dbml\Driver\ResultInterface;
 use ryunosuke\dbml\Driver\ResultTrait;
 use SQLite3Result;
 
-require_once __DIR__ . '/../../../dbal/Driver/SQLite3/Result.php';
-
-final class Result extends DbalResult implements ResultInterface
+final class Result extends \ryunosuke\dbal\Driver\SQLite3\Result implements ResultInterface
 {
     use ResultTrait;
 

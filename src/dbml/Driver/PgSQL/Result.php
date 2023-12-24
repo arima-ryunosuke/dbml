@@ -1,17 +1,14 @@
-<?php /** @noinspection PhpElementIsNotAvailableInCurrentPhpVersionInspection */
+<?php
 
 namespace ryunosuke\dbml\Driver\PgSQL;
 
-use Doctrine\DBAL\Driver\PgSQL\DbalResult;
 use ryunosuke\dbml\Driver\ResultInterface;
 use ryunosuke\dbml\Driver\ResultTrait;
 use function pg_field_name;
 use function pg_field_type;
 use function pg_num_fields;
 
-require_once __DIR__ . '/../../../dbal/Driver/PgSQL/Result.php';
-
-final class Result extends DbalResult implements ResultInterface
+final class Result extends \ryunosuke\dbal\Driver\PgSQL\Result implements ResultInterface
 {
     use ResultTrait;
 

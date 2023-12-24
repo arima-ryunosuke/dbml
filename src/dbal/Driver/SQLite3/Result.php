@@ -1,6 +1,12 @@
 <?php
+//@formatter:off
+/**
+ * @see \Doctrine\DBAL\Driver\SQLite3\Result
+ * @copyright 2006 Doctrine Project
+ * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
+ */
 
-namespace Doctrine\DBAL\Driver\SQLite3;
+namespace ryunosuke\dbal\Driver\SQLite3;
 
 use Doctrine\DBAL\Driver\FetchUtils;
 use Doctrine\DBAL\Driver\Result as ResultInterface;
@@ -9,12 +15,7 @@ use SQLite3Result;
 use const SQLITE3_ASSOC;
 use const SQLITE3_NUM;
 
-//@formatter:off
-/**
- * @copyright 2006 Doctrine Project
- * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
- */
-class DbalResult implements ResultInterface
+class Result implements ResultInterface
 {
     protected ?SQLite3Result $result;
     private int $changes;

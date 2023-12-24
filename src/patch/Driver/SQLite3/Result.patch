@@ -1,0 +1,26 @@
+@@ -1,6 +1,12 @@
+ <?php
++//@formatter:off
++/**
++ * @see \Doctrine\DBAL\Driver\SQLite3\Result
++ * @copyright 2006 Doctrine Project
++ * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
++ */
+ 
+-namespace Doctrine\DBAL\Driver\SQLite3;
++namespace ryunosuke\dbal\Driver\SQLite3;
+ 
+ use Doctrine\DBAL\Driver\FetchUtils;
+ use Doctrine\DBAL\Driver\Result as ResultInterface;
+@@ -9,9 +15,9 @@
+ use const SQLITE3_ASSOC;
+ use const SQLITE3_NUM;
+ 
+-final class Result implements ResultInterface
++class Result implements ResultInterface
+ {
+-    private ?SQLite3Result $result;
++    protected ?SQLite3Result $result;
+     private int $changes;
+ 
+     /** @internal The result can be only instantiated by its driver connection or statement. */

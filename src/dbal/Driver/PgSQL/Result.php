@@ -1,6 +1,12 @@
 <?php
+//@formatter:off
+/**
+ * @see \Doctrine\DBAL\Driver\PgSQL\Result
+ * @copyright 2006 Doctrine Project
+ * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
+ */
 
-namespace Doctrine\DBAL\Driver\PgSQL;
+namespace ryunosuke\dbal\Driver\PgSQL;
 
 use Doctrine\DBAL\Driver\FetchUtils;
 use Doctrine\DBAL\Driver\PgSQL\Exception\UnexpectedValue;
@@ -32,12 +38,7 @@ use const PGSQL_ASSOC;
 use const PGSQL_NUM;
 use const PHP_INT_SIZE;
 
-//@formatter:off
-/**
- * @copyright 2006 Doctrine Project
- * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
- */
-class DbalResult implements ResultInterface
+class Result implements ResultInterface
 {
     /** @var PgSqlResult|resource|null */
     protected $result;

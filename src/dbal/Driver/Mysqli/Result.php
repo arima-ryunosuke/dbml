@@ -1,8 +1,14 @@
 <?php
+//@formatter:off
+/**
+ * @see \Doctrine\DBAL\Driver\Mysqli\Result
+ * @copyright 2006 Doctrine Project
+ * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
+ */
 
 declare(strict_types=1);
 
-namespace Doctrine\DBAL\Driver\Mysqli;
+namespace ryunosuke\dbal\Driver\Mysqli;
 
 use Doctrine\DBAL\Driver\Exception;
 use Doctrine\DBAL\Driver\FetchUtils;
@@ -10,17 +16,13 @@ use Doctrine\DBAL\Driver\Mysqli\Exception\StatementError;
 use Doctrine\DBAL\Driver\Result as ResultInterface;
 use mysqli_sql_exception;
 use mysqli_stmt;
+
 use function array_column;
 use function array_combine;
 use function array_fill;
 use function count;
 
-//@formatter:off
-/**
- * @copyright 2006 Doctrine Project
- * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
- */
-class DbalResult implements ResultInterface
+class Result implements ResultInterface
 {
     protected mysqli_stmt $statement;
 

@@ -2,14 +2,11 @@
 
 namespace ryunosuke\dbml\Driver\Mysqli;
 
-use Doctrine\DBAL\Driver\Mysqli\DbalResult;
 use mysqli_result;
 use ryunosuke\dbml\Driver\ResultInterface;
 use ryunosuke\dbml\Driver\ResultTrait;
 
-require_once __DIR__ . '/../../../dbal/Driver/Mysqli/Result.php';
-
-final class Result extends DbalResult implements ResultInterface
+final class Result extends \ryunosuke\dbal\Driver\Mysqli\Result implements ResultInterface
 {
     use ResultTrait;
 

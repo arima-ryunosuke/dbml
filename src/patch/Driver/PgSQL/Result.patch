@@ -1,0 +1,36 @@
+@@ -1,6 +1,12 @@
+ <?php
++//@formatter:off
++/**
++ * @see \Doctrine\DBAL\Driver\PgSQL\Result
++ * @copyright 2006 Doctrine Project
++ * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
++ */
+ 
+-namespace Doctrine\DBAL\Driver\PgSQL;
++namespace ryunosuke\dbal\Driver\PgSQL;
+ 
+ use Doctrine\DBAL\Driver\FetchUtils;
+ use Doctrine\DBAL\Driver\PgSQL\Exception\UnexpectedValue;
+@@ -32,10 +38,10 @@
+ use const PGSQL_NUM;
+ use const PHP_INT_SIZE;
+ 
+-final class Result implements ResultInterface
++class Result implements ResultInterface
+ {
+     /** @var PgSqlResult|resource|null */
+-    private $result;
++    protected $result;
+ 
+     /** @param PgSqlResult|resource $result */
+     public function __construct($result)
+@@ -245,7 +251,7 @@
+     }
+ 
+     /** @return string|int|float|bool|null */
+-    private function mapType(string $postgresType, ?string $value)
++    public static function mapType(string $postgresType, ?string $value)
+     {
+         if ($value === null) {
+             return null;

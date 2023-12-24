@@ -30,7 +30,8 @@
   },
   "autoload": {
     "psr-4": {
-      "ryunosuke\\dbml\\": "src/dbml"
+      "ryunosuke\\dbml\\": "src/dbml",
+      "ryunosuke\\dbal\\": "src/dbal"
     },
     "files": [
       "src/functions.stub"
@@ -47,20 +48,29 @@
   "scripts": {
     "build": [
       "@export",
+      "@diff",
       "@test"
     ],
     "export": [
       "export-function",
       "exclude-internal"
     ],
+    "patch": [
+      "@php bin/transport.php patch"
+    ],
+    "diff": [
+      "@php bin/transport.php diff"
+    ],
     "test": [
       "vendor/bin/phpunit --configuration=tests/phpunit.xml"
     ],
     "post-install-cmd": [
-      "@export"
+      "@export",
+      "@patch"
     ],
     "post-update-cmd": [
-      "@export"
+      "@export",
+      "@patch"
     ]
   }
 }
