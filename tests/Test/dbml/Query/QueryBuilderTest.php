@@ -1149,6 +1149,34 @@ GREATEST(1,2,3) FROM test1', $builder);
             ],
         ]);
         $this->assertQuery("SELECT C1.id, C1.seq FROM foreign_p P INNER JOIN foreign_c1 C1 ON C1.id = P.id", $builder);
+
+        $builder->reset()->column([
+            'foreign_s' => [
+                'name1' => '+foreign_sc sc1:fk_sc1.name',
+                'name2' => '+foreign_sc sc2:fk_sc2.name',
+            ],
+        ]);
+        $this->assertQuery("SELECT sc1.name AS name1, sc2.name AS name2 FROM foreign_s INNER JOIN foreign_sc sc1 ON sc1.s_id1 = foreign_s.id INNER JOIN foreign_sc sc2 ON sc2.s_id2 = foreign_s.id", $builder);
+        $this->assertException("must be table as alias", L($builder->reset())->column([
+            'foreign_s' => [
+                'name1' => '+foreign_sc:fk_sc1.name',
+                'name2' => '+foreign_sc:fk_sc2.name',
+            ],
+        ]));
+
+        $builder->reset()->column([
+            'foreign_s' => [
+                'name1' => '+foreign_sc sc1:[1].name',
+                'name2' => '+foreign_sc sc2:[2].name',
+            ],
+        ]);
+        $this->assertQuery("SELECT sc1.name AS name1, sc2.name AS name2 FROM foreign_s INNER JOIN foreign_sc sc1 ON 1 INNER JOIN foreign_sc sc2 ON 2", $builder);
+        $this->assertException("must be table as alias", L($builder->reset())->column([
+            'foreign_s' => [
+                'name1' => '+foreign_sc:[1].name',
+                'name2' => '+foreign_sc:[2].name',
+            ],
+        ]));
     }
 
     /**

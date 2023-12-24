@@ -2145,7 +2145,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function from($table, $alias = null, $type = null, $condition = [], $fkeyname = null, $fromAlias = null)
     {
-        $froms = array_lookup($this->getFromPart(), 'table');
+        $tables = $this->getFromPart();
+        $froms = array_lookup($tables, 'table');
         $schema = $this->database->getSchema();
 
         // $table, $alias の解決（配列・ビルダ・文字列を受け入れる）
@@ -2198,11 +2199,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         }
         $fromTable = $froms[$fromAlias] ?? null;
         $joinAlias = $alias ?: $table;
-
-        // 既設定エイリアスならスルー
-        if (isset($froms[$joinAlias]) && $froms[$joinAlias] === $table) {
-            return $this;
-        }
 
         // 外部キーの解決
         $fcols = [];
@@ -2269,6 +2265,12 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $isfrom = $type === null || (empty($fromAlias) && empty($froms));
 
         if ($isfrom) {
+            // for compatible 既設定エイリアスならスルー
+            // $gateway->getScopeParams で駆動表が2回呼ばれてしまう対策で、そこを解決すれば不要 or 例外になる
+            if (isset($froms[$joinAlias]) && $froms[$joinAlias] === $table) {
+                return $this;
+            }
+
             $this->sqlParts['from'][] = [
                 'table'     => $table,
                 'alias'     => $alias,
@@ -2284,12 +2286,32 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         if ($table instanceof QueryBuilder) {
             $qb->andWhere($table->onConditions);
         }
+        $conditionExpr = new Expression($this->_getConditionClause($qb->sqlParts['where'] ?: [1]), $qb->getParams('where'));
+
+        // 既設定エイリアスならスルー
+        if (isset($froms[$joinAlias]) && $froms[$joinAlias] === $table) {
+            // ただし外部キーが異なるなら安全のため例外
+            $fkeyL = $fkeyname;
+            $fkeyR = $tables[$joinAlias]['fkeyname'];
+            if (strlen($fkeyL ?? '') && strlen($fkeyR ?? '') && $fkeyL !== $fkeyR) {
+                throw new \UnexpectedValueException("same table(alias) specified($fkeyL, $fkeyR), must be table as alias");
+            }
+            // 同上（Conditionチェック）
+            $condL = $conditionExpr;
+            $condR = $tables[$joinAlias]['condition'];
+            if ($condL->getQuery() !== $condR->getQuery() || $condL->getParams() !== $condR->getParams()) {
+                throw new \UnexpectedValueException("same table(alias) specified($condL, $condR), must be table as alias");
+            }
+
+            return $this;
+        }
 
         $this->sqlParts['join'][$fromAlias][] = [
             'type'      => $type,
             'table'     => $table,
             'alias'     => $alias,
-            'condition' => new Expression($this->_getConditionClause($qb->sqlParts['where'] ?: [1]), $qb->getParams('where')),
+            'fkeyname'  => $fkeyname,
+            'condition' => $conditionExpr,
         ];
 
         return $this->_dirty();
@@ -3995,8 +4017,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     'from'      => $fromkey,
                     'table'     => $join['table'],
                     'alias'     => $alias,
-                    'fkeyname'  => null,
-                    'condition' => null,
+                    'fkeyname'  => $join['fkeyname'],
+                    'condition' => $join['condition'],
                     'type'      => $join['type'],
                 ];
             }
