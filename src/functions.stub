@@ -18,6 +18,40 @@ if (!defined('ryunosuke\\dbml\\IS_PRIVATE')) {
     define('ryunosuke\\dbml\\IS_PRIVATE', 16);
 }
 
+if (!defined('ryunosuke\\dbml\\EN_MONTH_SHORT')) {
+    define('ryunosuke\\dbml\\EN_MONTH_SHORT', [
+        1  => "jan",
+        2  => "feb",
+        3  => "mar",
+        4  => "apr",
+        5  => "may",
+        6  => "jun",
+        7  => "jul",
+        8  => "aug",
+        9  => "sep",
+        10 => "oct",
+        11 => "nov",
+        12 => "dec",
+    ]);
+}
+
+if (!defined('ryunosuke\\dbml\\EN_MONTH_LONG')) {
+    define('ryunosuke\\dbml\\EN_MONTH_LONG', [
+        1  => "january",
+        2  => "february",
+        3  => "march",
+        4  => "april",
+        5  => "may",
+        6  => "june",
+        7  => "july",
+        8  => "august",
+        9  => "september",
+        10 => "october",
+        11 => "november",
+        12 => "december",
+    ]);
+}
+
 if (!defined('ryunosuke\\dbml\\JP_ERA')) {
     define('ryunosuke\\dbml\\JP_ERA', [
         [
@@ -2377,6 +2411,10 @@ if (!function_exists('ryunosuke\\dbml\\is_hasharray')) {
      */
     function is_hasharray(array $array)
     {
+        if (function_exists('array_is_list')) {
+            return !array_is_list($array); // @codeCoverageIgnore
+        }
+
         $i = 0;
         foreach ($array as $k => $dummy) {
             if ($k !== $i++) {
@@ -2745,6 +2783,48 @@ if (!function_exists('ryunosuke\\dbml\\optional')) {
             };
         }
         return $nullobject;
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\type_exists') || (new \ReflectionFunction('ryunosuke\\dbml\\type_exists'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\type_exists')) {
+    /**
+     * 型が存在するか返す
+     *
+     * class/interface/trait/enum exists の合せ技。
+     * trait/enum のように今後型的なものがさらに増えるかもしれないし、class_exists だけして interface/trait が抜けているコードを何度も見てきた。
+     * それを一元管理するような関数となる。
+     *
+     * Example:
+     * ```php
+     * that(class_exists(\Throwable::class))->isFalse();     // class_exists は class にしか反応しない
+     * that(interface_exists(\Exception::class))->isFalse(); // interface_exists は interface にしか反応しない
+     * that(trait_exists(\Error::class))->isFalse();         // trait_exists は trait にしか反応しない
+     * // type_exists であれば全てに反応する
+     * that(type_exists(\Throwable::class))->isTrue();
+     * that(type_exists(\Exception::class))->isTrue();
+     * that(type_exists(\Error::class))->isTrue();
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\classobj
+     *
+     * @param string $typename 調べる型名
+     * @param bool $autoload オートロードを行うか
+     * @return bool 型が存在するなら true
+     */
+    function type_exists($typename, $autoload = true)
+    {
+        if (class_exists($typename, $autoload)) {
+            return true;
+        }
+        if (interface_exists($typename, $autoload)) {
+            return true;
+        }
+        if (trait_exists($typename, $autoload)) {
+            return true;
+        }
+        // enum は class で実装されているので enum_exists は不要
+        return false;
     }
 }
 
@@ -5033,15 +5113,20 @@ if (!function_exists('ryunosuke\\dbml\\date_timestamp')) {
         }
 
         $relative = $parts['relative'] ?? [];
-        if (($relative['month'] ?? false)
+        if (true
             && !isset($relative['weekday'])            // 週指定があるとかなり特殊で初日末日が意味を為さない
             && !isset($relative['first_day_of_month']) // first day 指定があるなら初日確定
             && !isset($relative['last_day_of_month'])  // last day 指定があるなら末日確定
         ) {
-            $parts['month'] += $relative['month'];
-            $parts['year'] += intdiv($parts['month'], 12);
-            $parts['month'] %= 12;
-            $parts['month'] += $parts['month'] <= 0 ? 12 : 0;
+            if ($relative['year'] ?? false) {
+                $parts['year'] += $relative['year'];
+            }
+            if ($relative['month'] ?? false) {
+                $parts['month'] += $relative['month'];
+                $parts['year'] += intdiv($parts['month'], 12);
+                $parts['month'] %= 12;
+                $parts['month'] += $parts['month'] <= 0 ? 12 : 0;
+            }
 
             if (!checkdate($parts['month'], $parts['day'], $parts['year'])) {
                 $timestamp = strtotime(date('Y-m-t H:i:s', $timestamp - $DAY1 * 4));
@@ -6321,7 +6406,7 @@ if (!function_exists('ryunosuke\\dbml\\evaluate')) {
     {
         $cachefile = null;
         if ($cachesize && strlen($phpcode) >= $cachesize) {
-            $cachefile = function_configure('cachedir') . '/' . rawurlencode(__FUNCTION__) . '-' . sha1($phpcode) . '.php';
+            $cachefile = function_configure('storagedir') . '/' . rawurlencode(__FUNCTION__) . '-' . sha1($phpcode) . '.php';
             if (!file_exists($cachefile)) {
                 file_put_contents($cachefile, "<?php $phpcode", LOCK_EX);
             }
@@ -6963,6 +7048,7 @@ if (!function_exists('ryunosuke\\dbml\\parse_php')) {
             'flags'          => 0,    // token_get_all の $flags. TOKEN_PARSE を与えると ParseError が出ることがあるのでデフォルト 0
             'cache'          => true, // キャッシュするか否か
             'greedy'         => false,// end と nest か一致したときに処理を継続するか
+            'backtick'       => true, // `` もパースするか
             'nest_token'     => [
                 ')' => '(',
                 '}' => '{',
@@ -6977,6 +7063,9 @@ if (!function_exists('ryunosuke\\dbml\\parse_php')) {
             $phptag = $option['phptag'] ? '<?php ' : '';
             $phpcode = $phptag . $phpcode;
             $position = -strlen($phptag);
+
+            $backtick = '';
+            $backticking = false;
 
             $tokens = [];
             $tmp = token_get_all($phpcode, $option['flags']);
@@ -7025,9 +7114,23 @@ if (!function_exists('ryunosuke\\dbml\\parse_php')) {
                 }
                 // @codeCoverageIgnoreEnd
 
+                if (!$option['backtick']) {
+                    if ($token[1] === '`') {
+                        if ($backticking) {
+                            $token[1] = $backtick . $token[1];
+                            $backtick = '';
+                        }
+                        $backticking = !$backticking;
+                    }
+                    if ($backticking) {
+                        $backtick .= $token[1];
+                        continue;
+                    }
+                }
+
                 $token[] = $position;
                 if ($option['flags'] & TOKEN_NAME) {
-                    $token[] = token_name($token[0]);
+                    $token[] = !$option['backtick'] && $token[0] === 96 ? 'T_BACKTICK' : token_name($token[0]);
                 }
 
                 $position += strlen($token[1]);
@@ -7476,6 +7579,60 @@ if (!function_exists('ryunosuke\\dbml\\preg_splice')) {
             }
         }
         return $subject;
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\random_range') || (new \ReflectionFunction('ryunosuke\\dbml\\random_range'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\random_range')) {
+    /**
+     * 指定範囲内からランダムで返す
+     *
+     * $count を null にすると個数すらもランダムで返す。
+     * 結果は範囲内では重複しない。
+     *
+     * 範囲が負数の場合は例外を投げるが、$count の 0 や範囲超過数は許容される（array_rand とは違う）。
+     *
+     * Example:
+     * ```php
+     * mt_srand(5); // テストがコケるので種固定
+     *
+     * // [10~20] の区間でランダムに3件返す
+     * that(random_range(10, 20, 3))->is([19, 20, 10]);
+     * // 0 を渡しても OK（単に空配列を返す）
+     * that(random_range(10, 20, 0))->is([]);
+     * // 範囲超過数を渡しても OK（最大個数で返す）
+     * that(count(random_range(10, 20, 999)))->is(11);
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\random
+     *
+     * @param int $min 最小値
+     * @param int $max 最大値
+     * @param ?int $count 返す個数
+     * @return array min～maxの数値の配列
+     */
+    function random_range($min, $max, $count = null)
+    {
+        $range = $max - $min;
+        if ($range < 0) {
+            throw new \InvalidArgumentException("invalid range ($min > $max)");
+        }
+
+        if ($count === null) {
+            $count = rand(0, $range + 1);
+        }
+
+        if ($count > ($range >> 1)) {
+            $array = range($min, $max);
+            shuffle($array);
+            return array_slice($array, 0, $count);
+        }
+
+        $result = [];
+        while (count($result) < $count) {
+            $result[rand($min, $max)] = null;
+        }
+        return array_keys($result);
     }
 }
 
@@ -9510,6 +9667,19 @@ if (!function_exists('ryunosuke\\dbml\\cacheobject')) {
                 $this->directory = $directory;
             }
 
+            public function __debugInfo()
+            {
+                $class = self::class;
+                $props = (array) $this;
+
+                // 全キャッシュは情報量としてでかすぎるが、何がどこに配置されているかくらいは有ってもいい
+                $ekey = "\0$class\0entries";
+                assert(array_key_exists($ekey, $props));
+                $props[$ekey] = array_reduce(array_keys($props[$ekey]), fn($acc, $k) => $acc + [$k => $this->_getFilename($k)], []);
+
+                return $props;
+            }
+
             private function _exception(string $message = "", int $code = 0, \Throwable $previous = null): \Throwable
             {
                 return interface_exists(\Psr\SimpleCache\InvalidArgumentException::class)
@@ -9734,7 +9904,7 @@ if (!function_exists('ryunosuke\\dbml\\function_configure')) {
      *
      * @package ryunosuke\Functions\Package\utility
      *
-     * @param array|string $option 設定。文字列指定時はその値を返す
+     * @param array|?string $option 設定。文字列指定時はその値を返す
      * @return array|string 設定値
      */
     function function_configure($option)
@@ -9743,6 +9913,7 @@ if (!function_exists('ryunosuke\\dbml\\function_configure')) {
 
         // default
         $config['cachedir'] ??= sys_get_temp_dir() . DIRECTORY_SEPARATOR . strtr(__NAMESPACE__, ['\\' => '%']);
+        $config['storagedir'] ??= DIRECTORY_SEPARATOR === '/' ? '/var/tmp/rf' : (getenv('ALLUSERSPROFILE') ?: sys_get_temp_dir()) . '\\rf';
         $config['placeholder'] ??= '';
         $config['var_stream'] ??= get_cfg_var('rfunc.var_stream') ?: 'VarStreamV010000';          // for compatible
         $config['memory_stream'] ??= get_cfg_var('rfunc.memory_stream') ?: 'MemoryStreamV010000'; // for compatible
@@ -9758,6 +9929,7 @@ if (!function_exists('ryunosuke\\dbml\\function_configure')) {
                         $config[$name] = $entry;
                         break;
                     case 'cachedir':
+                    case 'storagedir':
                         $entry ??= $config[$name];
                         if (!file_exists($entry)) {
                             @mkdir($entry, 0777 & (~umask()), true);
@@ -9770,7 +9942,7 @@ if (!function_exists('ryunosuke\\dbml\\function_configure')) {
                             if (!defined($entry)) {
                                 define($entry, tmpfile() ?: [] ?: '' ?: 0.0 ?: null ?: false);
                             }
-                            if (!is_resource(constant($entry))) {
+                            if (!is_resourcable(constant($entry))) {
                                 // もしリソースじゃないと一意性が保てず致命的になるので例外を投げる
                                 throw new \RuntimeException('placeholder is not resource'); // @codeCoverageIgnore
                             }
@@ -9783,11 +9955,15 @@ if (!function_exists('ryunosuke\\dbml\\function_configure')) {
         }
 
         // getting
+        if ($option === null) {
+            return $config;
+        }
         if (is_string($option)) {
             switch ($option) {
                 default:
                     return $config[$option] ?? null;
                 case 'cachedir':
+                case 'storagedir':
                     $dirname = $config[$option];
                     if (!file_exists($dirname)) {
                         @mkdir($dirname, 0777 & (~umask()), true); // @codeCoverageIgnore
@@ -10012,7 +10188,44 @@ if (!function_exists('ryunosuke\\dbml\\is_primitive')) {
      */
     function is_primitive($var)
     {
-        return is_scalar($var) || is_null($var) || is_resource($var);
+        return is_scalar($var) || is_null($var) || is_resourcable($var);
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\is_resourcable') || (new \ReflectionFunction('ryunosuke\\dbml\\is_resourcable'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\is_resourcable')) {
+    /**
+     * 閉じたリソースでも true を返す is_resource
+     *
+     * マニュアル（ https://www.php.net/manual/ja/function.is-resource.php ）に記載の通り、 isresource は閉じたリソースで false を返す。
+     * リソースはリソースであり、それでは不便なこともあるので、閉じていようとリソースなら true を返す関数。
+     *
+     * Example:
+     * ```php
+     * // 閉じたリソースを用意
+     * $resource = tmpfile();
+     * fclose($resource);
+     * // is_resource は false を返すが・・・
+     * that(is_resource($resource))->isFalse();
+     * // is_resourcable は true を返す
+     * that(is_resourcable($resource))->isTrue();
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\var
+     *
+     * @param mixed $var 調べる値
+     * @return bool リソースなら true
+     */
+    function is_resourcable($var)
+    {
+        if (is_resource($var)) {
+            return true;
+        }
+        // もっといい方法があるかもしれないが、簡単に調査したところ gettype するしか術がないような気がする
+        if (strpos(gettype($var), 'resource') === 0) {
+            return true;
+        }
+        return false;
     }
 }
 
@@ -10359,7 +10572,7 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
      * ただし、下記は不可能あるいは復元不可（今度も対応するかは未定）。
      *
      * - 特定の内部クラス（PDO など）
-     * - リソース
+     * - 大部分のリソース
      *
      * オブジェクトは「リフレクションを用いてコンストラクタなしで生成してプロパティを代入する」という手法で復元する。
      * ただしコンストラクタが必須引数無しの場合はコールされる。
@@ -10372,6 +10585,9 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
      *
      * クロージャはコード自体を引っ張ってきて普通に function (){} として埋め込む。
      * クラス名のエイリアスや use, $this バインドなど可能な限り復元するが、おそらくあまりに複雑なことをしてると失敗する。
+     *
+     * リソースはファイル的なリソースであればメタ情報を出力して復元時に再オープンする。
+     * それ以外のリソースは null で出力される（将来的に例外にするかもしれない）。
      *
      * 軽くベンチを取ったところ、オブジェクトを含まない純粋な配列の場合、serialize の 200 倍くらいは速い（それでも var_export の方が速いが…）。
      * オブジェクトを含めば含むほど遅くなり、全要素がオブジェクトになると serialize と同程度になる。
@@ -10430,6 +10646,12 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
                     if (!$id) {
                         $id = 'array' . (count($this->vars) + 1);
                     }
+                    $this->vars[$id] = $var;
+                    return $id;
+                }
+                // リソースも一応は ID がある
+                if (is_resourcable($var)) {
+                    $id = 'resource' . (int) $var;
                     $this->vars[$id] = $var;
                     return $id;
                 }
@@ -10633,13 +10855,49 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
             if (is_object($value)) {
                 $ref = new \ReflectionObject($value);
 
+                // enum はリテラルを返せばよい
+                if ($value instanceof \UnitEnum) {
+                    $declare = "\\$ref->name::$value->name";
+                    if ($ref->getConstant($value->name) === $value) {
+                        return "\$this->$vid = $declare";
+                    }
+                    // enum の polyfill で、__callStatic を利用して疑似的にエミュレートしているライブラリは多い
+                    // もっとも、「多い」だけであり、そうとは限らないので値は見る必要はある（例外が飛ぶかもしれないので try も必要）
+                    if ($ref->hasMethod('__callStatic')) {
+                        try {
+                            if ($declare() === $value) {
+                                return "\$this->$vid = $declare()";
+                            }
+                        }
+                        catch (\Throwable $t) { // @codeCoverageIgnore
+                            // through. treat regular object
+                        }
+                    }
+                }
+
+                // 弱参照系は同時に渡ってきていれば復元できる
+                if ($value instanceof \WeakReference) {
+                    $weakreference = $value->get();
+                    if ($weakreference === null) {
+                        $weakreference = new \stdClass();
+                    }
+                    return "\$this->$vid = \\WeakReference::create({$export($weakreference, $nest)})";
+                }
+                if ($value instanceof \WeakMap) {
+                    $weakmap = "{$spacer1}\$this->$vid = new \\WeakMap();\n";
+                    foreach ($value as $object => $data) {
+                        $weakmap .= "{$spacer1}\$this->{$vid}[{$export($object)}] = {$export($data)};\n";
+                    }
+                    return "\$this->$vid = (function () {\n{$weakmap}{$spacer1}return \$this->$vid;\n$spacer0})->call(\$this)";
+                }
+
                 // 内部クラスで serialize 出来ないものは __PHP_Incomplete_Class で代替（復元時に無視する）
                 try {
                     if ($ref->isInternal()) {
                         serialize($value);
                     }
                 }
-                catch (\Exception $e){
+                catch (\Exception $e) {
                     return "\$this->$vid = new \\__PHP_Incomplete_Class()";
                 }
 
@@ -10733,8 +10991,18 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
 
                 return "\$this->new(\$this->$vid, $classname, (function () {\n{$spacer1}return {$export([$fields, $privates], $nest + 1)};\n{$spacer0}}))";
             }
+            if (is_resourcable($value)) {
+                // スタンダードなリソースなら復元できないこともない
+                $meta = stream_get_meta_data($value);
+                if (!in_array(strtolower($meta['stream_type']), ['stdio', 'output'], true)) {
+                    return 'null'; // for compatible. 例外にしたい
+                }
+                $meta['position'] = @ftell($value);
+                $meta['context'] = stream_context_get_options($value);
+                return "\$this->$vid = \$this->open({$export($meta, $nest + 1)})";
+            }
 
-            return is_null($value) || is_resource($value) ? 'null' : $var_export($value);
+            return is_null($value) ? 'null' : $var_export($value);
         };
 
         $exported = $export($value, 1);
@@ -10793,6 +11061,18 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
                     }
 
                     return $object;
+                }
+
+                public function open($metadata)
+                {
+                    $resource = fopen($metadata['uri'], $metadata['mode'], false, stream_context_create($metadata['context']));
+                    if ($resource === false) {
+                        return null;
+                    }
+                    if ($metadata['seekable'] && is_int($metadata['position'])) {
+                        fseek($resource, $metadata['position']);
+                    }
+                    return $resource;
                 }
 
                 private function reflect($class)
