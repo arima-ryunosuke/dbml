@@ -6236,7 +6236,7 @@ class Database
         $data = $this->_normalize($tableName, $data);
 
         if (array_get($opt, 'extract') === 1) {
-            [$primary, $rowdata, ] = $this->_extractPrimaryCondition($tableName, $data);
+            [$primary, $rowdata,] = $this->_extractPrimaryCondition($tableName, $data);
             $identifier += $primary;
             $data = $rowdata;
         }

@@ -75,7 +75,14 @@ abstract class AbstractUnitTestCase extends TestCase
         $configuration = new Configuration();
         $configuration->setMiddlewares([new Middleware(new LoggerChain()), ...$middlewares]);
         $connection = DriverManager::getConnection($params, $configuration);
-        $connection->connect();
+
+        $native = $connection->getNativeConnection();
+        if ($native instanceof \PDO && strpos($dbms, 'sqlite') !== false) {
+            $native->sqliteCreateFunction('REGEXP', fn($pattern, $value) => (int) mb_eregi($pattern, $value), 2);
+        }
+        if ($native instanceof \SQLite3) {
+            $native->createFunction('REGEXP', fn($pattern, $value) => (int) mb_eregi($pattern, $value), 2);
+        }
 
         return $connection;
     }
@@ -105,7 +112,7 @@ abstract class AbstractUnitTestCase extends TestCase
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
-                                new Column('data', Type::getType('string'), ['length' => 32, 'default' => '']),
+                                new Column('data', Type::getType('string'), ['length' => 255, 'default' => '']),
                             ],
                             [new Index('PRIMARY', ['id'], true, true)]
                         ),

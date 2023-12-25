@@ -3627,16 +3627,10 @@ SQL
         $this->assertInstanceOf(\ArrayObject::class, $actual['this']());
         $this->assertException('Using $this when not in object context', $actual['static']);
 
-        /**
-         * @noinspection PhpUndefinedFieldInspection
-         * @noinspection PhpUndefinedMethodInspection
-         */
-        {
-            $actual = $builder->limit(1)->cast()->tuple();
-            $this->assertEquals(10, $actual->func(10));
-            $this->assertInstanceOf(Entity::class, $actual->this());
-            $this->assertException('Using $this when not in object context', $actual->static);
-        }
+        $actual = $builder->limit(1)->cast()->tuple();
+        $this->assertEquals(10, $actual->func(10));
+        $this->assertInstanceOf(Entity::class, $actual->this());
+        $this->assertException('Using $this when not in object context', $actual->static);
 
         $builder->column([
             'test' => [

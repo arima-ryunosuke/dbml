@@ -5,6 +5,7 @@ namespace ryunosuke\Test;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Types\Types;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\Comment;
 
@@ -60,6 +61,57 @@ class IntegrationTest extends AbstractUnitTestCase
                 ],
             ], $select->array());
         }
+    }
+
+    /**
+     * 若干複雑な Operator の実際の実行
+     *
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_operator($database)
+    {
+        $this->trapThrowable('is not supported');
+
+        // spaceship
+        $this->assertEquals([5], $database->selectLists('nullable', [
+            'cint:<=>' => 0,
+        ]));
+        $this->assertEquals([2, 4, 6, 8, 10], $database->selectLists('nullable', [
+            'cint:<=>' => null,
+        ]));
+
+        // phrase
+        $database->truncate('test');
+        $database->insertArray('test', [
+            ['data' => 'this is sentence: "PHP is a general-purpose scripting language geared towards web development."'],
+            ['data' => 'this is formula: (A1+B1-Z1)'],
+            ['data' => 'this is sourcecode: `json_encode([1, 2, 3], JSON_PRETTY_PRINT | JSON_FORCE_OBJECT);`'],
+        ]);
+        $this->assertEquals([1, 2, 3], $database->selectLists('test.id', [
+            'data:phrase' => "this",
+        ]));
+        $this->assertEquals([1, 3], $database->selectLists('test.id', [
+            'data:phrase' => "-Z1", // "Z1" 除外
+        ]));
+        $this->assertEquals([2], $database->selectLists('test.id', [
+            'data:phrase' => '"-Z1"', // "-Z1" 包含
+        ]));
+        $this->assertEquals([1, 3], $database->selectLists('test.id', [
+            'data:phrase' => "this php, json",
+        ]));
+        $this->assertEquals([1], $database->selectLists('test.id', [
+            'data:phrase' => "php script",
+        ]));
+        $this->assertEquals([1, 3], $database->selectLists('test.id', [
+            'data:phrase' => "s*ce", // sentence, source
+        ]));
+        $this->assertEquals([1, 2], $database->selectLists('test.id', [
+            'data:phrase' => "this sentence | this formula",
+        ]));
+        $this->assertEquals([2], $database->selectLists('test.id', [
+            'data:phrase' => "this sentence -php | this formula",
+        ]));
     }
 
     /**
@@ -271,6 +323,31 @@ class IntegrationTest extends AbstractUnitTestCase
         if ($database->getCompatibleConnection()->getName() !== 'mysqli') {
             return;
         }
+
+        $database->setAutoCastType([
+            'simple_array' => true,
+            'json'         => true,
+        ]);
+
+        $database->getSchema()->setTableColumn('misctype', 'carray', ['type' => Types::SIMPLE_ARRAY]);
+        $database->getSchema()->setTableColumn('misctype', 'cjson', ['type' => Types::JSON]);
+
+        $database->insert('misctype', [
+            'cint'      => 1,
+            'cfloat'    => 1.1,
+            'cdecimal'  => 1.2,
+            'cdate'     => '2012-12-12',
+            'cdatetime' => '2012-12-12 12:34:56',
+            'cstring'   => 'ho,ge',
+            'ctext'     => 'fuga',
+            'carray'    => [1, 2, 3],
+            'cjson'     => ['a' => 'A'],
+        ]);
+
+        $syncrows = $database->selectArray('misctype.carray,cjson');
+        $asyncrows = $database->executeSelectAsync('SELECT carray, cjson FROM misctype')();
+        $this->assertSame($syncrows, $asyncrows);
+
         $database->executeAffect('DROP TABLE IF EXISTS t_alltype');
         $database->executeAffect(<<<SQL
             CREATE TABLE t_alltype (
@@ -348,5 +425,8 @@ class IntegrationTest extends AbstractUnitTestCase
         $this->assertSame($syncrows, $asyncrows);
 
         $database->executeAffect('DROP TABLE IF EXISTS t_alltype');
+
+        $database->setAutoCastType([]);
+        $database->getSchema()->refresh();
     }
 }
