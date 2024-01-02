@@ -13,7 +13,7 @@ trait SelectInShareTrait
      */
     public function selectArrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchArray($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->array();
     }
 
     /**
@@ -23,7 +23,7 @@ trait SelectInShareTrait
      */
     public function selectAssocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchAssoc($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->assoc();
     }
 
     /**
@@ -33,7 +33,7 @@ trait SelectInShareTrait
      */
     public function selectListsInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchLists($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->lists();
     }
 
     /**
@@ -43,7 +43,7 @@ trait SelectInShareTrait
      */
     public function selectPairsInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchPairs($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->pairs();
     }
 
     /**
@@ -53,7 +53,7 @@ trait SelectInShareTrait
      */
     public function selectTupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchTuple($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->tuple();
     }
 
     /**
@@ -63,6 +63,6 @@ trait SelectInShareTrait
      */
     public function selectValueInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchValue($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->value();
     }
 }

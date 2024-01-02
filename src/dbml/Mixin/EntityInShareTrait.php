@@ -13,7 +13,7 @@ trait EntityInShareTrait
      */
     public function entityArrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchArray($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare());
+        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->array();
     }
 
     /**
@@ -23,7 +23,7 @@ trait EntityInShareTrait
      */
     public function entityAssocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchAssoc($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare());
+        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->assoc();
     }
 
     /**
@@ -33,6 +33,6 @@ trait EntityInShareTrait
      */
     public function entityTupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchTuple($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare());
+        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->tuple();
     }
 }

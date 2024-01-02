@@ -8168,7 +8168,7 @@ ORDER BY T.id DESC, name ASC
         $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
         $database->insert('foreign_c2', ['cid' => 1, 'seq' => 21, 'name' => 'c2name1']);
 
-        $rows = $database->selectArray([
+        $rows = $database->context(['arrayFetch' => null])->selectArrayInShare([
             'foreign_p P' => [
                 'pie'              => new Expression('3.14'),
                 'foreign_c1 as C1' => ['name'],
@@ -8179,10 +8179,10 @@ ORDER BY T.id DESC, name ASC
             [
                 'pie' => 3.14,
                 'C1'  => [
-                    11 => ['name' => 'c1name1'],
+                    ['name' => 'c1name1'],
                 ],
                 'C2'  => [
-                    21 => ['name' => 'c2name1'],
+                    ['name' => 'c2name1'],
                 ],
             ],
         ], $rows);

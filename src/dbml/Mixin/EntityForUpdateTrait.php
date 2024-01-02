@@ -13,7 +13,7 @@ trait EntityForUpdateTrait
      */
     public function entityArrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchArray($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
+        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->array();
     }
 
     /**
@@ -23,7 +23,7 @@ trait EntityForUpdateTrait
      */
     public function entityAssocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchAssoc($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
+        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->assoc();
     }
 
     /**
@@ -33,6 +33,6 @@ trait EntityForUpdateTrait
      */
     public function entityTupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchTuple($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
+        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->tuple();
     }
 }

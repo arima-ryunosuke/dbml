@@ -13,7 +13,7 @@ trait SelectForUpdateTrait
      */
     public function selectArrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchArray($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->array();
     }
 
     /**
@@ -23,7 +23,7 @@ trait SelectForUpdateTrait
      */
     public function selectAssocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchAssoc($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->assoc();
     }
 
     /**
@@ -33,7 +33,7 @@ trait SelectForUpdateTrait
      */
     public function selectListsForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchLists($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->lists();
     }
 
     /**
@@ -43,7 +43,7 @@ trait SelectForUpdateTrait
      */
     public function selectPairsForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchPairs($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->pairs();
     }
 
     /**
@@ -53,7 +53,7 @@ trait SelectForUpdateTrait
      */
     public function selectTupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchTuple($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->tuple();
     }
 
     /**
@@ -63,6 +63,6 @@ trait SelectForUpdateTrait
      */
     public function selectValueForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->fetchValue($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
+        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->value();
     }
 }
