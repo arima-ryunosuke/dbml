@@ -24,6 +24,32 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.16
+
+- [feature] トランザクションのリトライ処理を改善
+- [feature] executeAffect のリトライを実装
+- [feature] executeSelect のクエリキャッシュを実装
+- [refactor] 諸々修正
+- [refactor] affect のバリエーションでコード補完が ...$args になる件の改善
+- [refactor] select のバリエーションを trait 化
+- [change] Driver 周りの整理
+- [fixbug] echoAnnotation のクラス名が完全修飾になっていない不具合を修正
+- [fixbug] replace で与えていないデータが null エラーになる不具合を修正
+- [fixbug] 仮想カラムの where に配列以外が来ると Warning が出る不具合を修正
+- [fixbug] CTE があると orderBySecure が例外を吐く不具合を修正
+- [fixbug] ForUpdate/InShare で arrayFetch オプションが効かない不具合を修正
+- [fixbug] 結合条件が違うにも関わらず同じテーブルとして統合されてしまう不具合を修正
+- [fixbug] phrase 検索の不具合を修正
+- [fixbug] spaceship 演算子で column が NULL だと常に TRUE になっていた不具合を修正
+- [feature] バインドパラメータ対応型を拡張
+- [feature] ランダム機能を実装
+- [feature] getTableColumns で特定条件を伏せる機能
+- [feature] CompatiblePlatform にバージョンを導入
+- [feature] modify(Array) の updateData に * キーを与えると insertData の値で埋められる機能
+- [feature] TableGateway の特殊メソッドのキャッシュ化と属性化
+- [feature] キャッシュのウォームアップメソッドを追加
+- [feature] debugInfo の整理
+
 ## 2.1.15
 
 - [fixbug] affectArray に affected rows の入れ忘れ
