@@ -758,6 +758,34 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_getRandomExpression($cplatform, $platform)
+    {
+        if ($platform instanceof SqlitePlatform) {
+            $this->assertExpression($cplatform->getRandomExpression(null), '(0.5 - RANDOM() / CAST(-9223372036854775808 AS REAL) / 2)', []);
+            $this->assertExpression($cplatform->getRandomExpression(1234), '(0.5 - RANDOM() / CAST(-9223372036854775808 AS REAL) / 2)', []);
+        }
+        elseif ($platform instanceof MySQLPlatform) {
+            $this->assertExpression($cplatform->getRandomExpression(null), 'RAND()', []);
+            $this->assertExpression($cplatform->getRandomExpression(1234), 'RAND(?)', [1234]);
+        }
+        elseif ($platform instanceof PostgreSQLPlatform) {
+            $this->assertExpression($cplatform->getRandomExpression(null), 'random()', []);
+            $this->assertExpression($cplatform->getRandomExpression(1234), 'random()', []);
+        }
+        elseif ($platform instanceof SQLServerPlatform) {
+            $this->assertExpression($cplatform->getRandomExpression(null), 'RAND(CHECKSUM(NEWID()))', []);
+            $this->assertExpression($cplatform->getRandomExpression(1234), 'RAND(CHECKSUM(NEWID()))', []);
+        }
+        else {
+            $this->assertException('is not support', L($cplatform)->getRandomExpression(null));
+        }
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_getResetSequenceExpression($cplatform, $platform)
     {
         $expected = [

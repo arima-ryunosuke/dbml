@@ -2485,6 +2485,34 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
+    function test_orderByRandom($builder)
+    {
+        /// 方言があるのでクエリレベルではなく結果レベルでテストしている
+
+        $sorted = $builder->getDatabase()->select('test.id')->orderByPrimary()->lists();
+        $select = $builder->getDatabase()->select('test.id')->orderByRandom();
+        $this->assertNotEquals($select->lists(), $sorted);
+
+        // mysql だけは seed が活きる
+        if ($builder->getDatabase()->getCompatiblePlatform()->getName() === 'mysql') {
+            $select = $builder->getDatabase()->select('test.id')->orderByRandom(123);
+            $this->assertEquals($select->lists(), $select->lists());
+        }
+
+        // ついでに [0~1.0) を担保
+        $random = $builder->getDatabase()->getCompatiblePlatform()->getRandomExpression(null);
+        $actual = $builder->getDatabase()->fetchTuple("SELECT $random as r1, $random as r2");
+        $this->assertNotEquals($actual['r1'], $actual['r2']);
+        $this->assertGreaterThanOrEqual(0.0, $actual['r1']);
+        $this->assertLessThan(1.0, $actual['r1']);
+        $this->assertGreaterThanOrEqual(0.0, $actual['r2']);
+        $this->assertLessThan(1.0, $actual['r2']);
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
     function test_orderByNulls($builder)
     {
         $builder->column('nullable.cint');

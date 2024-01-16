@@ -16,6 +16,7 @@ use ryunosuke\dbml\Mixin\OptionTrait;
 use ryunosuke\dbml\Query\Expression\Alias;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
+use ryunosuke\dbml\Query\Expression\OrderBy;
 use ryunosuke\dbml\Query\Expression\SelectOption;
 use ryunosuke\dbml\Query\Expression\TableDescriptor;
 use ryunosuke\dbml\Query\Pagination\Paginator;
@@ -486,6 +487,16 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             return $this->sql = $comments . $sql;
         }
 
+        // Random ORDER（OrderBy はかなりアドホックに書き換えることがあるので別軸で行わなければならない）
+        foreach ($builder->sqlParts['orderBy'] as $n => $orderBy) {
+            if ($orderBy instanceof OrderBy) {
+                unset($builder->sqlParts['orderBy'][$n]);
+                $sql = $orderBy($builder);
+                $this->sqlParts = $sql->sqlParts;
+                return $this->sql = $comments . $sql;
+            }
+        }
+
         // SELECT 句に手を加える
         foreach ($builder->sqlParts['select'] as $n => $select) {
             if ($builder->autoTablePrefix && is_string($select)) {
@@ -499,7 +510,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 $alias = $select->getAlias();
                 $actual = $select->getActual();
 
-                if ($builder->autoTablePrefix && is_string($actual)) {
+                if ($builder->autoTablePrefix && is_string($actual) && !$select->isPlaceholdable()) {
                     $parts = explode('.', $actual);
                     if (count($parts) === 2 && $parts[1] !== '*') {
                         $alias = $parts[0] . '.' . $alias;
@@ -2809,7 +2820,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
         }
         else {
-            if ($sort instanceof Queryable && $order === null) {
+            if ($sort instanceof OrderBy) {
+                $this->sqlParts['orderBy'][] = $sort;
+            }
+            elseif ($sort instanceof Queryable && $order === null) {
                 $this->sqlParts['orderBy'][] = [$sort, null, $nullsOrder];
             }
             else {
@@ -2913,6 +2927,24 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         else {
             return $this->orderBy(array_strpad($columns, '', $tablename . '.'), $is_asc);
         }
+    }
+
+    /**
+     * 乱数による orderBy
+     *
+     * ORDER BY RANDOM による素朴な方法で、特に工夫はない（QueryBuilder なので）。
+     * 原則として ORDER BY はリセットされる。
+     * これは「指定 ORDER より先は不定」という RDBMS の動作に基づく。
+     * （`ORDER BY A,B,C,RAND()` として A,B,C は保証されるがその先の保証はない（≒実質的にランダムと言える））
+     *
+     * @param ?int $seed 乱数のシード
+     * @return $this 自分自身
+     */
+    public function orderByRandom($seed = null)
+    {
+        $this->orderBy($this->database->getCompatiblePlatform()->getRandomExpression($seed));
+        $this->detectAutoOrder(false);
+        return $this;
     }
 
     /**
@@ -4267,6 +4299,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
     public function getParams($queryPartName = null)
     {
+        // _getSql で内部構造が変わることがあるので呼んでおく必要がある
+        $this->_getSql();
+
         $parts = $queryPartName ? $this->sqlParts[$queryPartName] : $this->sqlParts;
         $params = [];
         array_walk_recursive($parts, function ($param) use (&$params) {

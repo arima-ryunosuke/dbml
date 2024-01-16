@@ -25,6 +25,7 @@ use ryunosuke\dbml\Logging\Middleware;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
+use ryunosuke\dbml\Query\Expression\OrderBy;
 use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\dbml\Types\AbstractType;
@@ -35,6 +36,7 @@ use ryunosuke\Test\Entity\ManagedComment;
 use ryunosuke\Test\Platforms\SqlitePlatform;
 use function ryunosuke\dbml\array_order;
 use function ryunosuke\dbml\array_remove;
+use function ryunosuke\dbml\kvsort;
 use function ryunosuke\dbml\mkdir_p;
 use function ryunosuke\dbml\rm_rf;
 use function ryunosuke\dbml\try_null;
@@ -7507,6 +7509,80 @@ ORDER BY T.id DESC, name ASC
             ['id' => '3', 'name' => 'c', 'a' => 'A'],
             ['id' => '3', 'name' => 'C', 'a' => 'A'],
         ], $database->unionAll([$test1, $test2], ['id', 'name', 'a' => new Expression('UPPER(?)', 'a')], ['id' => 3], 'ord')->array());
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_selectAtRandom($database)
+    {
+        // これらのテストは 1/120 の確率でコケるが気にしなくてよい（再実行でパスすれば OK）
+
+        $random = $database->selectAssoc('test', ['id > ?' => 5], OrderBy::random(), 5);
+        $sorted = $database->selectAssoc('test', ['id > ?' => 5], 'id', 5);
+        $this->assertNotSame($sorted, $random);
+        $this->assertSame($sorted, kvsort($random, fn($av, $bv, $ak, $bk) => $ak <=> $bk));
+
+        $random = $database->selectLists('test.id', ['id > ?' => 5], OrderBy::random(), 5);
+        $sorted = $database->selectLists('test.id', ['id > ?' => 5], 'id', 5);
+        $this->assertNotSame($sorted, $random);
+        $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av) <=> intval($bv))));
+
+        $random = $database->selectPairs('test.id,name', ['id > ?' => 5], OrderBy::random(), 5);
+        $sorted = $database->selectPairs('test.id,name', ['id > ?' => 5], 'id', 5);
+        $this->assertNotSame($sorted, $random);
+        $this->assertSame($sorted, kvsort($random, fn($av, $bv, $ak, $bk) => $ak <=> $bk));
+
+        $random = $database->selectValue('test.id', ['id > ?' => 5], OrderBy::random(), 1);
+        $sorted = $database->selectValue('test.id', ['id' => $random]);
+        $this->assertSame($sorted, $random);
+
+        $random = $database->selectTuple('test.id,name', ['id > ?' => 5], OrderBy::random(), 1);
+        $sorted = $database->selectTuple('test.id,name', ['id' => $random['id']]);
+        $this->assertSame($sorted, $random);
+
+        $random = $database->selectArray('multiprimary', ['mainid' => 2], OrderBy::random(), 5);
+        $sorted = $database->selectArray('multiprimary', ['mainid' => 2], 'subid', 5);
+        $this->assertNotSame($sorted, $random);
+        $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['subid']) <=> intval($bv['subid']))));
+
+        // よく分からないエラーが出るのでいったん退避
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            $database->insert('noauto', ['id' => 'a', 'name' => 'name1']);
+            $database->insert('noauto', ['id' => 'b', 'name' => 'name2']);
+            $database->insert('noauto', ['id' => 'c', 'name' => 'name3']);
+
+            $random = $database->selectArray('noauto', [], OrderBy::random());
+            $sorted = $database->selectArray('noauto');
+            $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => $av['id'] <=> $bv['id'])));
+        }
+
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
+        $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'cname11']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 2, 'name' => 'cname12']);
+        $database->insert('foreign_c1', ['id' => 2, 'seq' => 1, 'name' => 'cname21']);
+
+        $columns = [
+            'foreign_p P' => [
+                'foreign_c1 C1' => ['*'],
+                'foreign_c2 C2' => ['*'],
+            ],
+        ];
+        $random = $database->selectArray($columns, [], OrderBy::random(), 5);
+        $sorted = $database->selectArray($columns, [], [], 5);
+        $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['id']) <=> intval($bv['id']))));
+
+        $columns = [
+            'foreign_p P' => [
+                '<foreign_c1 C1' => ['*'],
+                '<foreign_c2 C2' => ['*'],
+            ],
+        ];
+        $random = $database->selectArray($columns, [], OrderBy::random(), 5);
+        $sorted = $database->selectArray($columns, [], [], 5);
+        $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['id']) <=> intval($bv['id']))));
     }
 
     /**

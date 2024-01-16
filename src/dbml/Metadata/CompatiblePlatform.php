@@ -953,6 +953,34 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * random 表現（[0~1.0)）を返す
+     *
+     * @param ?int $seed 乱数シード
+     * @return Expression RANDOM Expression
+     */
+    public function getRandomExpression($seed)
+    {
+        // Sqlite にシード設定方法は存在しない
+        if ($this->platform instanceof SqlitePlatform) {
+            return new Expression("(0.5 - RANDOM() / CAST(-9223372036854775808 AS REAL) / 2)");
+        }
+        // MySQL のみ単体クエリで setseed+random が実現できる
+        if ($this->platform instanceof MySQLPlatform) {
+            return $seed === null ? new Expression("RAND()") : new Expression("RAND(?)", $seed);
+        }
+        // PostgreSQL は setseed があるが、SELECT 句で呼んでも毎回 setseed され random が同じ値になってしまう
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            return new Expression("random()");
+        }
+        // SQLServer の RAND はシードを与えなければ同じ値を返してしまう
+        if ($this->platform instanceof SQLServerPlatform) {
+            return new Expression("RAND(CHECKSUM(NEWID()))");
+        }
+
+        throw DBALException::notSupported(__METHOD__);
+    }
+
+    /**
      * AUTO_INCREMENT のセット構文を返す
      *
      * @param string $tableName テーブル名
