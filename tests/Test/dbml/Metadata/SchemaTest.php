@@ -290,6 +290,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         ], $column->getPlatformOptions());
         $this->assertEquals('string', $column->getType()->getName());
         $this->assertEquals('string', $schema->getTableColumns('metasample')['id']->getType()->getName());
+        $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample')));
 
         // 仮想カラムの追加
         $column = $schema->setTableColumn('metasample', 'dummy', [
@@ -310,26 +311,53 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         ], $column->getPlatformOptions());
         $this->assertEquals('integer', $column->getType()->getName());
         $this->assertEquals('integer', $schema->getTableColumns('metasample')['dummy']->getType()->getName());
+        $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_UPDATABLE)));
+        $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_REAL)));
 
         // 仮想カラムの上書き
         $column = $schema->setTableColumn('metasample', 'dummy', [
-            'type'     => 'string',
-            'select'   => 'NOW()',
-            'implicit' => true,
-            'others'   => [
+            'type'       => 'string',
+            'select'     => 'NOW()',
+            'affect'     => static fn($value, $row) => $value,
+            'implicit'   => true,
+            'generation' => ['expression' => 'concat("a", "b")'],
+            'others'     => [
                 'fuga' => 'FUGA',
             ],
         ]);
         $this->assertEquals([
-            'virtual'  => true,
-            'select'   => 'NOW()',
-            'implicit' => true,
-            'others'   => [
+            'virtual'    => true,
+            'select'     => 'NOW()',
+            'affect'     => static fn($value, $row) => $value,
+            'implicit'   => true,
+            'generation' => ['expression' => 'concat("a", "b")'],
+            'others'     => [
                 'fuga' => 'FUGA',
             ],
         ], $column->getPlatformOptions());
         $this->assertEquals('string', $column->getType()->getName());
         $this->assertEquals('string', $schema->getTableColumns('metasample')['dummy']->getType()->getName());
+        $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_UPDATABLE)));
+        $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_REAL)));
+
+        // 仮想カラムの上書き2
+        $column = $schema->setTableColumn('metasample', 'dummy', [
+            'generation' => null,
+        ]);
+        $this->assertEquals([
+            'virtual'    => true,
+            'select'     => 'NOW()',
+            'affect'     => static fn($value, $row) => $value,
+            'implicit'   => true,
+            'generation' => null,
+            'others'     => [
+                'fuga' => 'FUGA',
+            ],
+        ], $column->getPlatformOptions());
+        $this->assertEquals('string', $column->getType()->getName());
+        $this->assertEquals('string', $schema->getTableColumns('metasample')['dummy']->getType()->getName());
+        $this->assertEquals(['id', 'dummy'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_UPDATABLE)));
+        $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_REAL)));
 
         // キャッシュが効いていないか担保しておく
         $this->assertEquals('SELECT metasample.id, NOW() AS dummy FROM metasample', $database->select('metasample.!')->queryInto());
@@ -337,7 +365,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         // 仮想カラムの削除
         $column = $schema->setTableColumn('metasample', 'dummy', null);
         $this->assertNull($column);
-        $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample')));
+        $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', fn() => true)));
     }
 
     /**

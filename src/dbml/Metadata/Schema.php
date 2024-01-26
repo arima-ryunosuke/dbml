@@ -43,6 +43,9 @@ use function ryunosuke\dbml\optional;
  */
 class Schema
 {
+    public const COLUMN_UPDATABLE = 1 << 2;
+    public const COLUMN_REAL      = 1 << 3;
+
     /** @var AbstractSchemaManager */
     private $schemaManger;
 
@@ -158,8 +161,8 @@ class Schema
 
         if ($table->hasColumn($column_name)) {
             $column = $table->getColumn($column_name);
-            $definitation['virtual'] = $column->getPlatformOptions()['virtual'] ?? false;
-            $definitation['implicit'] = $definitation['virtual'] ? $definitation['implicit'] ?? false : true;
+            $definitation['virtual'] ??= $column->getPlatformOptions()['virtual'] ?? false;
+            $definitation['implicit'] ??= $column->getPlatformOptions()['implicit'] ?? ($definitation['virtual'] ? $definitation['implicit'] ?? false : true);
         }
         else {
             $column = $table->addColumn($column_name, 'integer');
@@ -293,14 +296,39 @@ class Schema
      * テーブルのカラムオブジェクトを取得する
      *
      * @param string $table_name 取得したいテーブル名
+     * @param null|int|callable $filter 取得条件
      * @return Column[] テーブルのカラムオブジェクト配列
      */
-    public function getTableColumns($table_name)
+    public function getTableColumns($table_name, $filter = null)
     {
         if (!isset($this->tableColumns[$table_name])) {
             $this->tableColumns[$table_name] = $this->getTable($table_name)->getColumns();
         }
-        return $this->tableColumns[$table_name];
+        if ($filter === null) {
+            return $this->tableColumns[$table_name];
+        }
+        return array_filter($this->tableColumns[$table_name], function (Column $column, $name) use ($filter) {
+            if (is_callable($filter)) {
+                return $filter($column, $name);
+            }
+
+            $platformOptions = $column->getPlatformOptions();
+            if ($filter & static::COLUMN_REAL) {
+                if ($platformOptions['virtual'] ?? false) {
+                    return false;
+                }
+            }
+            if ($filter & static::COLUMN_UPDATABLE) {
+                if (($platformOptions['virtual'] ?? false) && !isset($platformOptions['affect'])) {
+                    return false;
+                }
+                // for ryunosuke/dbal
+                if (isset($platformOptions['generation'])) {
+                    return false;
+                }
+            }
+            return true;
+        }, ARRAY_FILTER_USE_BOTH);
     }
 
     /**
