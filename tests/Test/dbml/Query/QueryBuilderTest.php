@@ -2404,17 +2404,26 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
      */
     function test_orderBySecure($builder)
     {
+        $builder->getDatabase()->declareVirtualTable('vt_test_orderBySecure', ['misctype']);
         $builder->column([
-            't_article' => [
+            't_article'             => [
                 '*',
                 'article_id',
                 'title as title9',
                 'title2',
             ],
+            'vt_test_orderBySecure' => [
+                'pid',
+                'prid' => 'pid',
+            ],
             [
                 'hoge' => 't_article.title',
             ],
-        ])->innerJoinOn('test2 T2', 'TRUE')->innerJoinOn($builder->getDatabase()->select('test'), 'TRUE');
+        ])
+            ->with('cte', $builder->getDatabase()->select('test1.name1 as test1name1'))
+            ->innerJoinOn('cte fcte', 'TRUE')
+            ->innerJoinOn('test2 T2', 'TRUE')
+            ->innerJoinOn($builder->getDatabase()->select('test'), 'TRUE');
 
         // 't_article.article_id' は SELECT に出現するので許容されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure('t_article.article_id');
@@ -2432,6 +2441,14 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
         $builder->resetQueryPart('orderBy')->orderBySecure('title2');
         $this->assertStringContainsString('ORDER BY title2 ASC', "$builder");
 
+        // 仮想テーブルは許容されるはず
+        $builder->resetQueryPart('orderBy')->orderBySecure('pid');
+        $this->assertStringContainsString('ORDER BY pid ASC', "$builder");
+
+        // 同上。エイリアス版
+        $builder->resetQueryPart('orderBy')->orderBySecure('prid');
+        $this->assertStringContainsString('ORDER BY prid ASC', "$builder");
+
         // エイリアス名は許容されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure('hoge');
         $this->assertStringContainsString('ORDER BY hoge ASC', "$builder");
@@ -2443,6 +2460,14 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
         // サブクエリな from でも解釈可能なら許容されるはず
         $builder->resetQueryPart('orderBy')->orderBySecure('data');
         $this->assertStringContainsString('ORDER BY data ASC', "$builder");
+
+        // CTE でも中身がクエリビルダなら許容されるはず
+        $builder->resetQueryPart('orderBy')->orderBySecure('fcte.name1');
+        $this->assertStringContainsString('ORDER BY fcte.name1 ASC', "$builder");
+
+        // 同上。エイリアス版
+        $builder->resetQueryPart('orderBy')->orderBySecure('test1name1');
+        $this->assertStringContainsString('ORDER BY test1name1 ASC', "$builder");
 
         // なんだかよくわからないテーブルは許容されないはず
         $builder->resetQueryPart('orderBy')->orderBySecure('t_unknown.id');

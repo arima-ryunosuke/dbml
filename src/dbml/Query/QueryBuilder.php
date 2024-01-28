@@ -1140,7 +1140,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         return $this->_dirty();
     }
 
-    private function _isSecureColumn($column)
+    private function _isSecureColumn($column, $alias = null)
     {
         // Expression は信頼できる
         if ($column instanceof Expression) {
@@ -1182,13 +1182,26 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             foreach ($this->getFromPart() as $table) {
                 // QueryBuilder なら更に再帰
                 if ($table['table'] instanceof QueryBuilder) {
-                    if ($table['table']->_isSecureColumn($column)) {
+                    if ($table['table']->_isSecureColumn($column, $table['alias'])) {
                         return true;
                     }
                     continue;
                 }
+                // テーブルが存在しない場合は仮想テーブルだったり cte だったりする
+                if (!$this->database->getSchema()->hasTable($table['table'])) {
+                    if ($vtable = $this->database->getVirtualTable($table['table'])) {
+                        // と思ったが build 時点で組み込まれているのでここここにくることはない（備忘のためにコードは残す）
+                        assert($vtable); // @codeCoverageIgnore
+                    }
+                    if ($cte = $this->sqlParts['with'][$table['table']] ?? null) {
+                        if ($cte instanceof QueryBuilder && $cte->_isSecureColumn($column, $table['alias'])) {
+                            return true;
+                        }
+                    }
+                    continue;
+                }
                 // 修飾されていたならテーブル名と比較しないと '1; DELETE FROM tablename -- .id' で攻撃が可能
-                if (isset($modifier) && ($modifier !== $table['table'] && $modifier !== $table['alias'])) {
+                if (isset($modifier) && ($modifier !== $table['table'] && $modifier !== $table['alias'] && $modifier !== $alias)) {
                     continue;
                 }
                 // テーブルにカラムが存在しないなら次へ
