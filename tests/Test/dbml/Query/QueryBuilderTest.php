@@ -1900,12 +1900,15 @@ AND
             'P.name'                                                       => 1,
             'P.raw1',
             'P.raw1:%LIKE%'                                                => 'X',
+            '!P.raw1:%LIKE'                                                => 'X',
+            '!P.raw1:LIKE%'                                                => '',
             'P.raw2',
             '!P.raw1'                                                      => [],
             'P.count_child'                                                => 0,
             'P.count_child > ?'                                            => 1,
             'P.count_child BETWEEN ? AND ?'                                => [7, 9],
             '!P.count_child'                                               => [],
+            '!P.count_child > ?'                                           => [123],
             'P.has_child',
             'P.has_child'                                                  => 0,
             'P.has_child IN (?)'                                           => [[0, 1]],
@@ -1921,10 +1924,12 @@ SELECT P.* FROM foreign_p P WHERE
 (P.dummy = 1) AND (P.dummy = '1') AND (P.name = 1) AND (P.name = '1')
 AND (/* vcolumn raw1-2 */ UPPER(P.name))
 AND (/* vcolumn raw1-k */ UPPER(P.name) LIKE '%X%')
+AND (/* vcolumn raw1-k */ UPPER(P.name) LIKE '%X')
 AND (/* vcolumn raw2-3 */ id + 9 = '10')
 AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) = '0')
 AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) > '1')
 AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) BETWEEN '7' AND '9')
+AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) > '123')
 AND (/* vcolumn has_child-4 */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))))
 AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) = '0')
 AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) IN ('0','1'))

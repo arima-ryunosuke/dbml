@@ -3080,7 +3080,7 @@ class Database
                 $emptyfilter = isset($cond[0]) && $cond[0] === '!';
                 if ($emptyfilter) {
                     $vcopy = $value;
-                    if (strpos($cond, '/* vcolumn') !== false) {
+                    if (strpos($cond, '/* vcolumn') !== false && is_array($vcopy)) {
                         array_shift($vcopy);
                     }
                     if (Adhoc::is_empty($vcopy)) {
