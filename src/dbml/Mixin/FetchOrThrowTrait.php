@@ -3,6 +3,7 @@
 namespace ryunosuke\dbml\Mixin;
 
 use ryunosuke\dbml\Database;
+use ryunosuke\dbml\Query\QueryBuilder;
 
 trait FetchOrThrowTrait
 {
@@ -11,9 +12,19 @@ trait FetchOrThrowTrait
      *
      * @inheritdoc Database::fetchArray()
      */
-    public function fetchArrayOrThrow(...$args)
+    private function fetchArrayOrThrowWithSql($sql, iterable $params = [])
     {
-        return $this->fetchOrThrow('array', $args);
+        return $this->fetchOrThrow('array', $sql, $params);
+    }
+
+    /**
+     * {@uses QueryBuilder::array()} の例外送出版
+     *
+     * @inheritdoc QueryBuilder::array()
+     */
+    private function fetchArrayOrThrowWithoutSql(iterable $params = [])
+    {
+        return $this->fetchOrThrow('array', $params);
     }
 
     /**
@@ -21,9 +32,19 @@ trait FetchOrThrowTrait
      *
      * @inheritdoc Database::fetchAssoc()
      */
-    public function fetchAssocOrThrow(...$args)
+    private function fetchAssocOrThrowWithSql($sql, iterable $params = [])
     {
-        return $this->fetchOrThrow('assoc', $args);
+        return $this->fetchOrThrow('assoc', $sql, $params);
+    }
+
+    /**
+     * {@uses QueryBuilder::assoc()} の例外送出版
+     *
+     * @inheritdoc QueryBuilder::assoc()
+     */
+    private function fetchAssocOrThrowWithoutSql(iterable $params = [])
+    {
+        return $this->fetchOrThrow('assoc', $params);
     }
 
     /**
@@ -31,9 +52,19 @@ trait FetchOrThrowTrait
      *
      * @inheritdoc Database::fetchLists()
      */
-    public function fetchListsOrThrow(...$args)
+    private function fetchListsOrThrowWithSql($sql, iterable $params = [])
     {
-        return $this->fetchOrThrow('lists', $args);
+        return $this->fetchOrThrow('lists', $sql, $params);
+    }
+
+    /**
+     * {@uses QueryBuilder::lists()} の例外送出版
+     *
+     * @inheritdoc QueryBuilder::lists()
+     */
+    private function fetchListsOrThrowWithoutSql(iterable $params = [])
+    {
+        return $this->fetchOrThrow('lists', $params);
     }
 
     /**
@@ -41,9 +72,19 @@ trait FetchOrThrowTrait
      *
      * @inheritdoc Database::fetchPairs()
      */
-    public function fetchPairsOrThrow(...$args)
+    private function fetchPairsOrThrowWithSql($sql, iterable $params = [])
     {
-        return $this->fetchOrThrow('pairs', $args);
+        return $this->fetchOrThrow('pairs', $sql, $params);
+    }
+
+    /**
+     * {@uses QueryBuilder::pairs()} の例外送出版
+     *
+     * @inheritdoc QueryBuilder::pairs()
+     */
+    private function fetchPairsOrThrowWithoutSql(iterable $params = [])
+    {
+        return $this->fetchOrThrow('pairs', $params);
     }
 
     /**
@@ -51,9 +92,19 @@ trait FetchOrThrowTrait
      *
      * @inheritdoc Database::fetchTuple()
      */
-    public function fetchTupleOrThrow(...$args)
+    private function fetchTupleOrThrowWithSql($sql, iterable $params = [])
     {
-        return $this->fetchOrThrow('tuple', $args);
+        return $this->fetchOrThrow('tuple', $sql, $params);
+    }
+
+    /**
+     * {@uses QueryBuilder::tuple()} の例外送出版
+     *
+     * @inheritdoc QueryBuilder::tuple()
+     */
+    private function fetchTupleOrThrowWithoutSql(iterable $params = [])
+    {
+        return $this->fetchOrThrow('tuple', $params);
     }
 
     /**
@@ -61,8 +112,18 @@ trait FetchOrThrowTrait
      *
      * @inheritdoc Database::fetchValue()
      */
-    public function fetchValueOrThrow(...$args)
+    private function fetchValueOrThrowWithSql($sql, iterable $params = [])
     {
-        return $this->fetchOrThrow('value', $args);
+        return $this->fetchOrThrow('value', $sql, $params);
+    }
+
+    /**
+     * {@uses QueryBuilder::value()} の例外送出版
+     *
+     * @inheritdoc QueryBuilder::value()
+     */
+    private function fetchValueOrThrowWithoutSql(iterable $params = [])
+    {
+        return $this->fetchOrThrow('value', $params);
     }
 }

@@ -63,7 +63,13 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertSame($builder, $builder->setLazyMode('eager')->valueOrThrow());
 
-        $this->assertException(new NonSelectedException("record is not found"), L($builder->reset()->from('test1')->where('id = -1'))->valueOrThrow());
+        $empty = $builder->reset()->from('test1')->where('id = -1');
+        $this->assertException(new NonSelectedException("record is not found"), L($empty)->arrayOrThrow());
+        $this->assertException(new NonSelectedException("record is not found"), L($empty)->assocOrThrow());
+        $this->assertException(new NonSelectedException("record is not found"), L($empty)->listsOrThrow());
+        $this->assertException(new NonSelectedException("record is not found"), L($empty)->pairsOrThrow());
+        $this->assertException(new NonSelectedException("record is not found"), L($empty)->tupleOrThrow());
+        $this->assertException(new NonSelectedException("record is not found"), L($empty)->valueOrThrow());
     }
 
     /**

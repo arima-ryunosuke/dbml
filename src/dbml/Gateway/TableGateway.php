@@ -21,6 +21,7 @@ use ryunosuke\dbml\Mixin\SelectAggregateTrait;
 use ryunosuke\dbml\Mixin\SelectForAffectTrait;
 use ryunosuke\dbml\Mixin\SelectForUpdateTrait;
 use ryunosuke\dbml\Mixin\SelectInShareTrait;
+use ryunosuke\dbml\Mixin\SelectMethodTrait;
 use ryunosuke\dbml\Mixin\SelectOrThrowTrait;
 use ryunosuke\dbml\Mixin\SubAggregateTrait;
 use ryunosuke\dbml\Mixin\SubSelectTrait;
@@ -325,6 +326,9 @@ use function ryunosuke\dbml\throws;
  * @method $this                  setIgnoreAffectScope(array $ignoreAffectScope) {更新時に無視するスコープ名を設定する}
  * @method bool                   getSecureOrderBy() {orderBy でセキュア判定するかを返す}
  * @method $this                  setSecureOrderBy(bool $secureOrderBy) {orderBy でセキュア判定するかを設定する}
+ *
+ * これは phpstorm の as keyword が修正されたら不要になる
+ * @method array|Entityable[] array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
  */
 // @formatter:on
 class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
@@ -337,6 +341,14 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     use JoinTrait;
 
+    use SelectMethodTrait {
+        selectArray as public array; // phpstorm がエラーを吐くので public を付けている
+        selectAssoc as assoc;
+        selectLists as lists;
+        selectPairs as pairs;
+        selectTuple as tuple;
+        selectValue as value;
+    }
     use SelectOrThrowTrait {
         selectArrayOrThrow as arrayOrThrow;
         selectAssocOrThrow as assocOrThrow;
@@ -2070,66 +2082,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             $columns = is_array(end($primary)) ? array_pop($primary) : [];
         }
         return $this->pk($primary)->column($columns)->select();
-    }
-
-    /**
-     * レコード群を配列で返す（{@uses Database::selectArray()} を参照）
-     *
-     * @inheritdoc Database::selectArray()
-     */
-    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->array();
-    }
-
-    /**
-     * レコード群を連想配列で返す（{@uses Database::selectAssoc()} を参照）
-     *
-     * @inheritdoc Database::selectAssoc()
-     */
-    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->assoc();
-    }
-
-    /**
-     * レコード群を[value]で返す（{@uses Database::selectLists()} を参照）
-     *
-     * @inheritdoc Database::selectLists()
-     */
-    public function lists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lists();
-    }
-
-    /**
-     * レコード群を[key => value]で返す（{@uses Database::selectPairs()} を参照）
-     *
-     * @inheritdoc Database::selectPairs()
-     */
-    public function pairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->pairs();
-    }
-
-    /**
-     * レコードを配列で返す（{@uses Database::selectTuple()} を参照）
-     *
-     * @inheritdoc Database::selectTuple()
-     */
-    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->tuple();
-    }
-
-    /**
-     * カラム値をスカラーで返す（{@uses Database::selectValue()} を参照）
-     *
-     * @inheritdoc Database::selectValue()
-     */
-    public function value($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->value();
     }
 
     /**

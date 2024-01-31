@@ -7,8 +7,10 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
+use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Generator\Yielder;
+use ryunosuke\dbml\Mixin\FetchMethodTrait;
 use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\IteratorTrait;
 use ryunosuke\dbml\Mixin\JoinTrait;
@@ -204,6 +206,9 @@ use function ryunosuke\dbml\throws;
  * @method $this                  setPropagateLockMode($int)
  * @method bool                   getInjectChildColumn()
  * @method $this                  setInjectChildColumn($bool)
+ *
+ * これは phpstorm の as keyword が修正されたら不要になる
+ * @method $this|array|Entityable[] array(iterable $params = [])
  */
 // @formatter:on
 class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
@@ -214,13 +219,22 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
     use JoinTrait;
 
+    use FetchMethodTrait {
+        fetchArrayWithoutSql as public array; // phpstorm がエラーを吐くので別途定義
+        fetchAssocWithoutSql as public assoc;
+        fetchListsWithoutSql as public lists;
+        fetchPairsWithoutSql as public pairs;
+        fetchTupleWithoutSql as public tuple;
+        fetchValueWithoutSql as public value;
+    }
+
     use FetchOrThrowTrait {
-        fetchArrayOrThrow as arrayOrThrow;
-        fetchAssocOrThrow as assocOrThrow;
-        fetchListsOrThrow as listsOrThrow;
-        fetchPairsOrThrow as pairsOrThrow;
-        fetchTupleOrThrow as tupleOrThrow;
-        fetchValueOrThrow as valueOrThrow;
+        fetchArrayOrThrowWithoutSql as public arrayOrThrow;
+        fetchAssocOrThrowWithoutSql as public assocOrThrow;
+        fetchListsOrThrowWithoutSql as public listsOrThrow;
+        fetchPairsOrThrowWithoutSql as public pairsOrThrow;
+        fetchTupleOrThrowWithoutSql as public tupleOrThrow;
+        fetchValueOrThrowWithoutSql as public valueOrThrow;
     }
 
     // 構成要素のキー
@@ -4208,16 +4222,18 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         if ($this->lazyMode) {
             return $this;
         }
-        return $this->getDatabase()->{"fetch$method"}($this, $params);
+
+        return $this->getDatabase()->fetch($method, $this, $params);
     }
 
-    public function fetchOrThrow($method, $arguments)
+    public function fetchOrThrow($method, iterable $params = [])
     {
-        $this->lazyMethod = $method;
-        if ($this->lazyMode) {
-            return $this;
+        $result = $this->fetch($method, $params);
+        // Value, Tuple は [] を返し得ないし、複数行系も false を返し得ない
+        if ($result === [] || $result === false) {
+            throw new NonSelectedException('record is not found.');
         }
-        return $this->getDatabase()->{"fetch{$method}OrThrow"}($this, ...$arguments);
+        return $result;
     }
 
     /**
@@ -4249,72 +4265,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     public function getLazyChunk()
     {
         return $this->lazyChunk;
-    }
-
-    /**
-     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchArray()} 参照）
-     *
-     * @inheritdoc Database::fetchArray()
-     * @return $this|array|Entityable[]
-     */
-    public function array(iterable $params = [])
-    {
-        return $this->fetch(__FUNCTION__, $params);
-    }
-
-    /**
-     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchAssoc()} 参照）
-     *
-     * @inheritdoc Database::fetchAssoc()
-     * @return $this|array|Entityable[]
-     */
-    public function assoc(iterable $params = [])
-    {
-        return $this->fetch(__FUNCTION__, $params);
-    }
-
-    /**
-     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchLists()} 参照）
-     *
-     * @inheritdoc Database::fetchLists()
-     * @return $this|array
-     */
-    public function lists(iterable $params = [])
-    {
-        return $this->fetch(__FUNCTION__, $params);
-    }
-
-    /**
-     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchPairs()} 参照）
-     *
-     * @inheritdoc Database::fetchPairs()
-     * @return $this|array
-     */
-    public function pairs(iterable $params = [])
-    {
-        return $this->fetch(__FUNCTION__, $params);
-    }
-
-    /**
-     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchTuple()} 参照）
-     *
-     * @inheritdoc Database::fetchTuple()
-     * @return $this|array|Entityable|false
-     */
-    public function tuple(iterable $params = [])
-    {
-        return $this->fetch(__FUNCTION__, $params);
-    }
-
-    /**
-     * 自身が保持しているクエリでレコードの配列を返す（{@uses Database::fetchValue()} 参照）
-     *
-     * @inheritdoc Database::fetchValue()
-     * @return $this|mixed
-     */
-    public function value(iterable $params = [])
-    {
-        return $this->fetch(__FUNCTION__, $params);
     }
 
     /**

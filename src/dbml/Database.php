@@ -42,8 +42,10 @@ use ryunosuke\dbml\Mixin\AggregateTrait;
 use ryunosuke\dbml\Mixin\EntityForAffectTrait;
 use ryunosuke\dbml\Mixin\EntityForUpdateTrait;
 use ryunosuke\dbml\Mixin\EntityInShareTrait;
+use ryunosuke\dbml\Mixin\EntityMethodTrait;
 use ryunosuke\dbml\Mixin\EntityOrThrowTrait;
 use ryunosuke\dbml\Mixin\ExportTrait;
+use ryunosuke\dbml\Mixin\FetchMethodTrait;
 use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\OptionTrait;
 use ryunosuke\dbml\Mixin\PrepareTrait;
@@ -51,6 +53,7 @@ use ryunosuke\dbml\Mixin\SelectAggregateTrait;
 use ryunosuke\dbml\Mixin\SelectForAffectTrait;
 use ryunosuke\dbml\Mixin\SelectForUpdateTrait;
 use ryunosuke\dbml\Mixin\SelectInShareTrait;
+use ryunosuke\dbml\Mixin\SelectMethodTrait;
 use ryunosuke\dbml\Mixin\SelectOrThrowTrait;
 use ryunosuke\dbml\Mixin\SubAggregateTrait;
 use ryunosuke\dbml\Mixin\SubSelectTrait;
@@ -333,11 +336,28 @@ class Database
     use DebugInfoTrait;
     use OptionTrait;
 
-    use FetchOrThrowTrait;
+    use FetchMethodTrait {
+        fetchArrayWithSql as public fetchArray;
+        fetchAssocWithSql as public fetchAssoc;
+        fetchListsWithSql as public fetchLists;
+        fetchPairsWithSql as public fetchPairs;
+        fetchTupleWithSql as public fetchTuple;
+        fetchValueWithSql as public fetchValue;
+    }
+    use FetchOrThrowTrait {
+        fetchArrayOrThrowWithSql as public fetchArrayOrThrow;
+        fetchAssocOrThrowWithSql as public fetchAssocOrThrow;
+        fetchListsOrThrowWithSql as public fetchListsOrThrow;
+        fetchPairsOrThrowWithSql as public fetchPairsOrThrow;
+        fetchTupleOrThrowWithSql as public fetchTupleOrThrow;
+        fetchValueOrThrowWithSql as public fetchValueOrThrow;
+    }
+    use SelectMethodTrait;
     use SelectOrThrowTrait;
     use SelectInShareTrait;
     use SelectForUpdateTrait;
     use SelectForAffectTrait;
+    use EntityMethodTrait;
     use EntityInShareTrait;
     use EntityOrThrowTrait;
     use EntityForUpdateTrait;
@@ -861,19 +881,6 @@ class Database
         });
 
         return $maps;
-    }
-
-    private function _doFetch($sql, iterable $params, $method)
-    {
-        $converter = $this->_getConverter($sql);
-        $revert = $this->_toTablePrefix($sql);
-        try {
-            $stmt = $this->_sqlToStmt($sql, $params, $this->getSlaveConnection());
-            return $this->perform($stmt, $method, $converter);
-        }
-        finally {
-            $revert();
-        }
     }
 
     private function _sqlToStmt($sql, iterable $params, Connection $connection)
@@ -3508,205 +3515,58 @@ class Database
         }
     }
 
-    public function fetchOrThrow($method, $arguments)
-    {
-        $result = $this->{"fetch$method"}(...$arguments);
-        // Value, Tuple は [] を返し得ないし、複数行系も false を返し得ない
-        if ($result === [] || $result === false) {
-            throw new NonSelectedException('record is not found.');
-        }
-        return $result;
-    }
-
     /**
-     * レコードの配列を返す
+     * フェッチメソッドとクエリとパラメータを指定して実行する
      *
-     * ```php
-     * $db->fetchArray('SELECT id, name FROM tablename');
-     * // results:
-     * [
-     *     [
-     *         'id'   => 1,
-     *         'name' => 'name1',
-     *     ],
-     *     [
-     *         'id'   => 2,
-     *         'name' => 'name2',
-     *     ],
-     * ];
-     * ```
-     *
+     * @used-by fetchArray()
+     * @used-by fetchAssoc()
+     * @used-by fetchLists()
+     * @used-by fetchPairs()
+     * @used-by fetchTuple()
+     * @used-by fetchValue()
      * @used-by fetchArrayOrThrow()
-     *
-     * @param string|QueryBuilder|Statement $sql クエリ
-     * @param iterable $params bind パラメータ
-     * @return array|Entityable[] クエリ結果
-     */
-    public function fetchArray($sql, iterable $params = [])
-    {
-        $result = $this->_doFetch($sql, $params, self::METHOD_ARRAY);
-        if ($sql instanceof QueryBuilder) {
-            $result = $sql->postselect($result);
-        }
-        return $result;
-    }
-
-    /**
-     * レコードの連想配列を返す
-     *
-     * ```php
-     * $db->fetchAssoc('SELECT id, name FROM tablename');
-     * // results:
-     * [
-     *     1 => [
-     *         'id'   => 1,
-     *         'name' => 'name1',
-     *     ],
-     *     2 => [
-     *         'id'   => 2,
-     *         'name' => 'name2',
-     *     ],
-     * ];
-     * ```
-     *
      * @used-by fetchAssocOrThrow()
-     *
-     * @param string|QueryBuilder|Statement $sql クエリ
-     * @param iterable $params bind パラメータ
-     * @return array|Entityable[] クエリ結果
-     */
-    public function fetchAssoc($sql, iterable $params = [])
-    {
-        $result = $this->_doFetch($sql, $params, self::METHOD_ASSOC);
-        if ($sql instanceof QueryBuilder) {
-            $result = $sql->postselect($result);
-        }
-        return $result;
-    }
-
-    /**
-     * レコード[1列目]の配列を返す
-     *
-     * ```php
-     * $db->fetchLists('SELECT name FROM tablename');
-     * // results:
-     * [
-     *     'name1',
-     *     'name2',
-     * ];
-     * ```
-     *
      * @used-by fetchListsOrThrow()
-     *
-     * @param string|QueryBuilder|Statement $sql クエリ
-     * @param iterable $params bind パラメータ
-     * @return array|Entityable[] クエリ結果
-     */
-    public function fetchLists($sql, iterable $params = [])
-    {
-        $result = $this->_doFetch($sql, $params, self::METHOD_LISTS);
-        if ($sql instanceof QueryBuilder) {
-            $result = $sql->postselect($result);
-        }
-        return $result;
-    }
-
-    /**
-     * レコード[1列目=>2列目]の連想配列を返す
-     *
-     * ```php
-     * $db->fetchPairs('SELECT id, name FROM tablename');
-     * // results:
-     * [
-     *     1 => 'name1',
-     *     2 => 'name2',
-     * ];
-     * ```
-     *
      * @used-by fetchPairsOrThrow()
-     *
-     * @param string|QueryBuilder|Statement $sql クエリ
-     * @param iterable $params bind パラメータ
-     * @return array|Entityable[] クエリ結果
-     */
-    public function fetchPairs($sql, iterable $params = [])
-    {
-        $result = $this->_doFetch($sql, $params, self::METHOD_PAIRS);
-        if ($sql instanceof QueryBuilder) {
-            $result = $sql->postselect($result);
-        }
-        return $result;
-    }
-
-    /**
-     * レコードを返す
-     *
-     * このメソッドはフェッチ結果が2件以上だと**例外を投げる**。
-     * これは
-     *
-     * - 1行を期待しているのに WHERE や LIMIT がなく、無駄なクエリになっている
-     * - {@link whereInto()} の仕様により意図せず配列を与えて WHERE IN になっている
-     *
-     * のを予防的に阻止するため必要な仕様である。
-     *
-     * ```php
-     * $db->fetchTuple('SELECT id, name FROM tablename LIMIT 1');
-     * // results:
-     * [
-     *     'id'   => 1,
-     *     'name' => 'name1',
-     * ];
-     * ```
-     *
      * @used-by fetchTupleOrThrow()
-     *
-     * @param string|QueryBuilder|Statement $sql クエリ
-     * @param iterable $params bind パラメータ
-     * @return array|Entityable|false クエリ結果
-     */
-    public function fetchTuple($sql, iterable $params = [])
-    {
-        $result = $this->_doFetch($sql, $params, self::METHOD_TUPLE);
-        if ($result === false) {
-            return false;
-        }
-        if ($sql instanceof QueryBuilder) {
-            $result = $sql->postselect([$result])[0];
-        }
-        return $result;
-    }
-
-    /**
-     * レコード[1列目]を返す
-     *
-     * このメソッドはフェッチ結果が2件以上だと**例外を投げる**。
-     * これは
-     *
-     * - 1行を期待しているのに WHERE や LIMIT がなく、無駄なクエリになっている
-     * - {@link whereInto()} の仕様により意図せず配列を与えて WHERE IN になっている
-     *
-     * のを予防的に阻止するために必要な仕様である。
-     *
-     * ```php
-     * $db->fetchValue('SELECT name FROM tablename LIMIT 1');
-     * // results:
-     * 'name1';
-     * ```
-     *
      * @used-by fetchValueOrThrow()
      *
      * @param string|QueryBuilder|Statement $sql クエリ
      * @param iterable $params bind パラメータ
-     * @return mixed クエリ結果
+     * @return false|array|Entityable[] クエリ結果
      */
-    public function fetchValue($sql, iterable $params = [])
+    public function fetch($method, $sql, iterable $params = [])
     {
-        $result = $this->_doFetch($sql, $params, self::METHOD_VALUE);
+        $converter = $this->_getConverter($sql);
+        $revert = $this->_toTablePrefix($sql);
+        try {
+            $stmt = $this->_sqlToStmt($sql, $params, $this->getSlaveConnection());
+            $result = $this->perform($stmt, $method, $converter);
+        }
+        finally {
+            $revert();
+        }
+
         if ($result === false) {
             return false;
         }
         if ($sql instanceof QueryBuilder) {
-            $result = $sql->postselect([$result])[0];
+            if (self::METHODS[$method]['keyable'] === null) {
+                $result = $sql->postselect([$result])[0];
+            }
+            else {
+                $result = $sql->postselect($result);
+            }
+        }
+        return $result;
+    }
+
+    public function fetchOrThrow($method, $sql, iterable $params = [])
+    {
+        $result = $this->{"fetch$method"}($sql, $params);
+        // Value, Tuple は [] を返し得ないし、複数行系も false を返し得ない
+        if ($result === [] || $result === false) {
+            throw new NonSelectedException('record is not found.');
         }
         return $result;
     }
@@ -3788,72 +3648,6 @@ class Database
     }
 
     /**
-     * {@uses Database::select()} の array 版（{@link fetchArray()} も参照）
-     *
-     * @inheritdoc Database::select()
-     * @return array|Entityable[]
-     */
-    public function selectArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->array();
-    }
-
-    /**
-     * {@uses Database::select()} の assoc 版（{@link fetchAssoc()} も参照）
-     *
-     * @inheritdoc Database::select()
-     * @return array|Entityable[]
-     */
-    public function selectAssoc($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->assoc();
-    }
-
-    /**
-     * {@uses Database::select()} の lists 版（{@link fetchLists()} も参照）
-     *
-     * @inheritdoc Database::select()
-     * @return array
-     */
-    public function selectLists($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lists();
-    }
-
-    /**
-     * {@uses Database::select()} の pairs 版（{@link fetchPairs()} も参照）
-     *
-     * @inheritdoc Database::select()
-     * @return array
-     */
-    public function selectPairs($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->pairs();
-    }
-
-    /**
-     * {@uses Database::select()} の tuple 版（{@link fetchTuple()} も参照）
-     *
-     * @inheritdoc Database::select()
-     * @return array|Entityable|false
-     */
-    public function selectTuple($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->tuple();
-    }
-
-    /**
-     * {@uses Database::select()} の value 版（{@link fetchValue()} も参照）
-     *
-     * @inheritdoc Database::select()
-     * @return mixed
-     */
-    public function selectValue($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->value();
-    }
-
-    /**
      * 各句を指定してエンティティ用クエリビルダを生成する
      *
      * エンティティクラスは駆動表で決まる。
@@ -3899,39 +3693,6 @@ class Database
     public function entity($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->cast(null);
-    }
-
-    /**
-     * {@uses Database::entity()} の array 版
-     *
-     * @inheritdoc Database::entity()
-     * @return Entityable[]
-     */
-    public function entityArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->array();
-    }
-
-    /**
-     * {@uses Database::entity()} の assoc 版
-     *
-     * @inheritdoc Database::entity()
-     * @return Entityable[]
-     */
-    public function entityAssoc($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->assoc();
-    }
-
-    /**
-     * {@uses Database::entity()} の tuple 版
-     *
-     * @inheritdoc Database::entity()
-     * @return Entityable
-     */
-    public function entityTuple($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
-    {
-        return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->tuple();
     }
 
     /**
