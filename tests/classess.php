@@ -148,6 +148,7 @@ namespace ryunosuke\Test {
 
 namespace ryunosuke\Test\Gateway {
 
+    use ryunosuke\dbml\Attribute\VirtualColumn;
     use ryunosuke\dbml\Database;
 
     /**
@@ -191,6 +192,9 @@ namespace ryunosuke\Test\Gateway {
             }
         }
 
+        /**
+         * @lazy true
+         */
         public function setUpperTitleColumn($value)
         {
             return [
@@ -198,9 +202,7 @@ namespace ryunosuke\Test\Gateway {
             ];
         }
 
-        /**
-         * @implicit true
-         */
+        #[VirtualColumn(type: "string", implicit: true)]
         public function getStatementColumn()
         {
             return 'UPPER(%s.title)';

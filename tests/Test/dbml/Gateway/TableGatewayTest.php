@@ -3,6 +3,7 @@
 namespace ryunosuke\Test\dbml\Gateway;
 
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Types\StringType;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
@@ -2433,8 +2434,11 @@ FROM t_article Article", $Article->column([
             'title_checks',
         ]));
 
-        // statement はアノテーションで implicit を指定してるので ! で引っ張ることができる
+        // statement はアトリビュートで implicit を指定してるので ! で引っ張ることができる
         $this->assertArrayHasKey('statement', $database->t_article->pk(1)->tuple('!'));
+
+        // statement はアトリビュートで type を指定してるので型情報を持っている
+        $this->assertInstanceOf(StringType::class, $database->getSchema()->getTable('t_article')->getColumn('statement')->getType());
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace ryunosuke\dbml\Gateway;
 
 use Doctrine\DBAL\Schema\Column;
+use ryunosuke\dbml\Attribute\VirtualColumn;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
@@ -35,6 +36,7 @@ use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_get;
 use function ryunosuke\dbml\array_unset;
 use function ryunosuke\dbml\arrayize;
+use function ryunosuke\dbml\cache_fetch;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\flagval;
 use function ryunosuke\dbml\parameter_length;
@@ -492,41 +494,76 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         }
         $this->setDefault($default + $database->getOptions());
 
-        $scope_renamer = $this->getUnsafeOption('scopeRenamer');
-        $column_renamer = $this->getUnsafeOption('columnRenamer');
+        $cacher = $this->database->getCacheProvider();
+        $classname = strpos(static::class, '@anonymous') === false ? strtr(static::class, ['\\' => '-']) : sha1(static::class);
+        $magic_methods = cache_fetch($cacher, "TableGateway-$classname-magics", function () {
+            $scope_renamer = $this->getUnsafeOption('scopeRenamer');
+            $column_renamer = $this->getUnsafeOption('columnRenamer');
+
+            $result = [];
+            foreach (get_class_methods($this) as $method) {
+                if (preg_match('#^scope(.+)#i', $method, $m)) {
+                    $result[] = [
+                        'type'   => 'scope',
+                        'name'   => $scope_renamer($m[1]),
+                        'method' => $method,
+                    ];
+                }
+                if (preg_match('#^(virtual|get|set)(.+?)Column$#i', $method, $m)) {
+                    $result[] = [
+                        'type'    => 'vcolumn',
+                        'subtype' => strtolower($m[1]),
+                        'name'    => $column_renamer($m[2]),
+                        'method'  => $method,
+                    ];
+                }
+            }
+            return $result;
+        });
+
         $vcolumns = [];
-        foreach (get_class_methods($this) as $method) {
-            if (preg_match('#^scope(.+)#i', $method, $m)) {
-                $this->addScope($scope_renamer($m[1]), function (...$args) use ($method) {
-                    $this->$method(...$args);
+        foreach ($magic_methods as $method) {
+            if ($method['type'] === 'scope') {
+                $this->addScope($method['name'], function (...$args) use ($method) {
+                    $this->{$method['method']}(...$args);
                     return $this;
                 });
+                continue;
             }
-            if (preg_match('#^(virtual|get|set)(.+?)Column$#i', $method, $m)) {
-                $rmethod = new \ReflectionMethod($this, $method);
-                $attrs = parse_annotation($rmethod, [
-                    'lazy'     => true,
-                    'implicit' => true,
-                ]);
+            elseif ($method['type'] === 'vcolumn') {
+                $rmethod = new \ReflectionMethod($this, $method['method']);
+
+                $attribute = VirtualColumn::of($rmethod);
+                if ($attribute) {
+                    $attrs = $attribute->getNamedArguments();
+                }
+                else {
+                    // for compatible php7.4. in future scope delete Annotation
+                    $attrs = parse_annotation($rmethod, [
+                        'type'     => null,
+                        'lazy'     => true,
+                        'implicit' => true,
+                    ]);
+                }
+                $attrs['type'] = $attrs['type'] ?? null;
                 $attrs['lazy'] = flagval($attrs['lazy'] ?? true);
                 $attrs['implicit'] = flagval($attrs['implicit'] ?? false);
-                $vname = $column_renamer($m[2]);
-                $closure = $rmethod->getClosure($this);
 
-                $vcolumns[$vname] ??= [];
-                if (strcasecmp($m[1], 'virtual') === 0) {
-                    $vcolumns[$vname] += array_replace($attrs, [
+                $closure = $rmethod->getClosure($this);
+                $vcolumns[$method['name']] ??= [];
+                if ($method['subtype'] === 'virtual') {
+                    $vcolumns[$method['name']] += array_replace($attrs, [
                         'select' => fn() => $closure(),
                         'affect' => fn($value, $row) => $closure($value, $row),
                     ]);
                 }
-                if (strcasecmp($m[1], 'get') === 0) {
-                    $vcolumns[$vname] += array_replace($attrs, [
+                if ($method['subtype'] === 'get') {
+                    $vcolumns[$method['name']] += array_replace($attrs, [
                         'select' => $closure,
                     ]);
                 }
-                if (strcasecmp($m[1], 'set') === 0) {
-                    $vcolumns[$vname] += array_replace($attrs, [
+                if ($method['subtype'] === 'set') {
+                    $vcolumns[$method['name']] += array_replace($attrs, [
                         'affect' => $closure,
                     ]);
                 }
