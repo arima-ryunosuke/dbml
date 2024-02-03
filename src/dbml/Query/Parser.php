@@ -3,6 +3,7 @@
 namespace ryunosuke\dbml\Query;
 
 use Doctrine\DBAL\SQL\Parser as DBALParser;
+use ryunosuke\dbml\Utility\Adhoc;
 
 /**
  * クエリをパースして本ライブラリの使用に足る情報を得るクラス
@@ -301,18 +302,7 @@ class Parser
             {
                 $this->knownParams = $parameters;
                 $this->parameters = $parameters;
-                $this->callback = static function ($value) use ($quoter) {
-                    if ($value instanceof \Closure) {
-                        $value = $value();
-                    }
-                    if ($value === null) {
-                        return 'NULL';
-                    }
-                    if (is_bool($value)) {
-                        return (int) $value;
-                    }
-                    return $quoter($value);
-                };
+                $this->callback = static fn($value) => Adhoc::stringifyParameter($value, $quoter);
 
                 $this->errorMode = $errorMode;
             }

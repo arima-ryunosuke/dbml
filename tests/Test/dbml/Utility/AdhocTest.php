@@ -3,6 +3,8 @@
 namespace ryunosuke\Test\dbml\Utility;
 
 use ryunosuke\dbml\Utility\Adhoc;
+use ryunosuke\Test\IntEnum;
+use ryunosuke\Test\StringEnum;
 
 class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -89,5 +91,47 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
         $e = self::getDummyDatabase()->raw('column');
         $this->assertEquals(['T.c' => $e], Adhoc::modifier('T', ['c' => true], ['c' => $e]));
         $this->assertEquals(['c' => [$e]], Adhoc::modifier('T', ['c' => true], ['c' => [$e]]));
+    }
+
+    function test_stringifyParameter()
+    {
+        $quoter = fn($v) => $v;
+        $this->assertSame('NULL', Adhoc::stringifyParameter(fn() => null, $quoter));
+        $this->assertSame('123', Adhoc::stringifyParameter(fn() => 123, $quoter));
+        $this->assertSame('NULL', Adhoc::stringifyParameter(null, $quoter));
+        $this->assertSame('0', Adhoc::stringifyParameter(false, $quoter));
+        $this->assertSame('1', Adhoc::stringifyParameter(IntEnum::Int1(), $quoter));
+        $this->assertSame('hoge', Adhoc::stringifyParameter(StringEnum::StringHoge(), $quoter));
+        $this->assertSame('string', Adhoc::stringifyParameter(new class() {
+            public function __toString() { return 'string'; }
+        }, $quoter));
+        $this->assertSame('invoke', Adhoc::stringifyParameter(new class() {
+            public function __invoke() { return 'invoke'; }
+        }, $quoter));
+        $this->assertSame('string', Adhoc::stringifyParameter(new class() {
+            public function __toString() { return 'string'; }
+            public function __invoke() { return 'invoke'; }
+        }, $quoter));
+    }
+
+    function test_bindableParameters()
+    {
+        $this->assertSame([
+            'fn-null'     => null,
+            'fn-int'      => 123,
+            'null'        => null,
+            'false'       => 0,
+            'true'        => 1,
+            'int-enum'    => 1,
+            'string-enum' => "hoge",
+        ], Adhoc::bindableParameters([
+            'fn-null'     => fn() => null,
+            'fn-int'      => fn() => 123,
+            'null'        => null,
+            'false'       => false,
+            'true'        => true,
+            'int-enum'    => IntEnum::Int1(),
+            'string-enum' => StringEnum::StringHoge(),
+        ]));
     }
 }

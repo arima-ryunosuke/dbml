@@ -1961,6 +1961,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals("0", $database->quote(false, null));
         $this->assertEquals("1", $database->quote(true, null));
         $this->assertEquals("'1'", $database->quote(1, null));
+        $this->assertEquals("'hoge'", $database->quote(fn() => 'hoge', null));
     }
 
     /**

@@ -2780,15 +2780,7 @@ class Database
      */
     public function quote($value, $type = null)
     {
-        if ($value === null) {
-            return 'NULL';
-        }
-
-        if (is_bool($value)) {
-            return (int) $value;
-        }
-
-        return $this->getSlaveConnection()->quote($value, $type);
+        return Adhoc::stringifyParameter($value, fn($value) => $this->getSlaveConnection()->quote($value, $type));
     }
 
     /**
@@ -4727,16 +4719,7 @@ class Database
      */
     public function executeSelect($query, iterable $params = [])
     {
-        $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
-        $params = array_map(static function ($p) {
-            if ($p instanceof \Closure) {
-                $p = $p();
-            }
-            if (is_bool($p)) {
-                return (int) $p;
-            }
-            return $p;
-        }, $params);
+        $params = Adhoc::bindableParameters($params);
 
         if ($filter_path = $this->getInjectCallStack()) {
             $query = implode('', $this->_getCallStack($filter_path)) . $query;
@@ -4759,16 +4742,7 @@ class Database
      */
     public function executeAffect($query, iterable $params = [])
     {
-        $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
-        $params = array_map(static function ($p) {
-            if ($p instanceof \Closure) {
-                $p = $p();
-            }
-            if (is_bool($p)) {
-                return (int) $p;
-            }
-            return $p;
-        }, $params);
+        $params = Adhoc::bindableParameters($params);
 
         if ($this->getUnsafeOption('dryrun')) {
             return $this->queryInto($query, $params);

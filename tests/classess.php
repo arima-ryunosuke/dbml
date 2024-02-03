@@ -41,6 +41,28 @@ namespace {
 namespace ryunosuke\Test {
 
     use Doctrine\DBAL\Platforms\SQLServerPlatform;
+    use ryunosuke\polyfill\enum\IntBackedEnum;
+    use ryunosuke\polyfill\enum\StringBackedEnum;
+
+    /**
+     * @method static self Int1()
+     * @method static self Int2()
+     */
+    class IntEnum extends IntBackedEnum
+    {
+        const Int1 = 1;
+        const Int2 = 2;
+    }
+
+    /**
+     * @method static self StringHoge()
+     * @method static self StringFuga()
+     */
+    class StringEnum extends StringBackedEnum
+    {
+        const StringHoge = 'hoge';
+        const StringFuga = 'fuga';
+    }
 
     /**
      * テスト用 Database

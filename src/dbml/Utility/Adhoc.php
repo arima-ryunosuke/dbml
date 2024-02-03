@@ -4,6 +4,7 @@ namespace ryunosuke\dbml\Utility;
 
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
+use function ryunosuke\dbml\is_stringable;
 use function ryunosuke\dbml\preg_capture;
 
 /**
@@ -131,5 +132,42 @@ class Adhoc
             $result[$key] = $val;
         }
         return $result;
+    }
+
+    /** @noinspection PhpElementIsNotAvailableInCurrentPhpVersionInspection */
+    public static function stringifyParameter($param, callable $quoter): string
+    {
+        if ($param instanceof \BackedEnum) {
+            $param = $param->value;
+        }
+        if (is_object($param) && is_callable($param) && !is_stringable($param)) {
+            $param = $param();
+        }
+        if (is_bool($param)) {
+            return (int) $param;
+        }
+        if ($param === null) {
+            return 'NULL';
+        }
+        return $quoter($param);
+    }
+
+    /** @noinspection PhpElementIsNotAvailableInCurrentPhpVersionInspection */
+    public static function bindableParameters(iterable $params): array
+    {
+        $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
+        foreach ($params as $k => $param) {
+            if ($param instanceof \BackedEnum) {
+                $param = $param->value;
+            }
+            if (is_object($param) && is_callable($param) && !is_stringable($param)) {
+                $param = $param();
+            }
+            if (is_bool($param)) {
+                $param = (int) $param;
+            }
+            $params[$k] = $param;
+        }
+        return $params;
     }
 }

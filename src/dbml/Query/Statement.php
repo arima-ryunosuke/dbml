@@ -5,6 +5,7 @@ namespace ryunosuke\dbml\Query;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use ryunosuke\dbml\Database;
+use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\utility\attribute\Attribute\DebugInfo;
 use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 
@@ -90,13 +91,7 @@ class Statement implements Queryable
             array_unshift($params, null);
             unset($params[0]);
         }
-        foreach ($params as $k => $param) {
-            if ($param instanceof \Closure) {
-                $param = $param();
-            }
-            if (is_bool($param)) {
-                $param = (int) $param;
-            }
+        foreach (Adhoc::bindableParameters($params) as $k => $param) {
             $stmt->bindValue($k, $param);
         }
 
