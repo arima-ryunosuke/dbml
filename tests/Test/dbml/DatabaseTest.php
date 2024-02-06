@@ -410,13 +410,11 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertException(new \BadMethodCallException(), [$database, 'selectH'], 'hoge');
     }
 
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test___debugInfo($database)
+    function test___debugInfo()
     {
-        $this->assertArrayNotHasKey('cache', $database->__debugInfo());
+        $debugString = print_r(self::getDummyDatabase(), true);
+        $this->assertStringNotContainsString('txConnection:', $debugString);
+        $this->assertStringNotContainsString('cache:', $debugString);
     }
 
     /**

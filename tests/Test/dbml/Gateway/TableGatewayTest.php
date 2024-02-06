@@ -61,6 +61,15 @@ class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertException('undefined', L($gateway)->hogera());
     }
 
+    function test___debugInfo()
+    {
+        $gateway = new TableGateway(self::getDummyDatabase(), 'test');
+        $debugString = print_r($gateway, true);
+        $this->assertStringContainsString('tableName:', $debugString);
+        $this->assertStringNotContainsString('database:', $debugString);
+        $this->assertStringNotContainsString('__result:', $debugString);
+    }
+
     /**
      * @dataProvider provideGateway
      * @param TableGateway $gateway

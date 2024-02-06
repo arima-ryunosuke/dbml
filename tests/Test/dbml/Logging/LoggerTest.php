@@ -17,6 +17,13 @@ class LoggerTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertSame($callback, $logger->getOption('callback'));
     }
 
+    function test___debugInfo()
+    {
+        $debugString = print_r(new Logger(null), true);
+        $this->assertStringContainsString('handle:', $debugString);
+        $this->assertStringNotContainsString('arrayBuffer:', $debugString);
+    }
+
     function test___destruct()
     {
         // for coverage. nothing todo

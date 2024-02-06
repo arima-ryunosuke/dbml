@@ -6,16 +6,21 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Metadata\CompatibleConnection;
+use ryunosuke\utility\attribute\Attribute\DebugInfo;
+use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 
 /**
  * 少しずつ fetch する Generator のようなクラス
  */
 class Yielder implements \IteratorAggregate
 {
+    use DebugInfoTrait;
+
     /** @var Result|\Closure ステートメント */
     private $statement;
 
     /** @var Connection */
+    #[DebugInfo(false)]
     private $connection;
 
     /** @var string イテレートメソッド（Database::METHOD_XXX） */

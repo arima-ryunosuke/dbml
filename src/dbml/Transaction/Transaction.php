@@ -11,6 +11,7 @@ use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware;
 use ryunosuke\dbml\Mixin\OptionTrait;
+use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 use function ryunosuke\dbml\array_set;
 use function ryunosuke\dbml\arrayize;
 
@@ -167,6 +168,7 @@ use function ryunosuke\dbml\arrayize;
  */
 class Transaction
 {
+    use DebugInfoTrait;
     use OptionTrait;
 
     /// トランザクション分離レベル

@@ -5,6 +5,8 @@ namespace ryunosuke\dbml\Query;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Result;
 use ryunosuke\dbml\Database;
+use ryunosuke\utility\attribute\Attribute\DebugInfo;
+use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 
 /**
  * Statement をラップして扱いやすくしたクラス
@@ -28,6 +30,8 @@ use ryunosuke\dbml\Database;
  */
 class Statement implements Queryable
 {
+    use DebugInfoTrait;
+
     /** @var Parser */
     private $parser;
 
@@ -47,6 +51,7 @@ class Statement implements Queryable
     private $database;
 
     /** @var \Doctrine\DBAL\Statement[] */
+    #[DebugInfo(false)]
     private $statements = [];
 
     public function __construct($query, iterable $params, Database $database)

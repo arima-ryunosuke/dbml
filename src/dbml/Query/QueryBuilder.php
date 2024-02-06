@@ -21,6 +21,7 @@ use ryunosuke\dbml\Query\Expression\TableDescriptor;
 use ryunosuke\dbml\Query\Pagination\Paginator;
 use ryunosuke\dbml\Query\Pagination\Sequencer;
 use ryunosuke\dbml\Utility\Adhoc;
+use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 use function ryunosuke\dbml\array_all;
 use function ryunosuke\dbml\array_convert;
 use function ryunosuke\dbml\array_depth;
@@ -206,6 +207,7 @@ use function ryunosuke\dbml\throws;
 // @formatter:on
 class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 {
+    use DebugInfoTrait;
     use OptionTrait;
     use IteratorTrait;
 

@@ -30,6 +30,14 @@ class StatementTest extends \ryunosuke\Test\AbstractUnitTestCase
         });
     }
 
+    function test___debugInfo()
+    {
+        $debugString = print_r(new Statement('query', [], self::getDummyDatabase()), true);
+        $this->assertStringContainsString('query:', $debugString);
+        $this->assertStringNotContainsString('database:', $debugString);
+        $this->assertStringNotContainsString('statements:', $debugString);
+    }
+
     /**
      * @dataProvider provideDatabase
      * @param Database $database

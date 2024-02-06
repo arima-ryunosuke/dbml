@@ -225,6 +225,15 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertException(new \BadMethodCallException("is undefined"), [$builder, 'joinHoge']);
     }
 
+    function test___debugInfo()
+    {
+        $builder = new QueryBuilder(self::getDummyDatabase());
+        $debugString = print_r($builder, true);
+        $this->assertStringContainsString('sqlParts:', $debugString);
+        $this->assertStringNotContainsString('database:', $debugString);
+        $this->assertStringNotContainsString('__result:', $debugString);
+    }
+
     /**
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder

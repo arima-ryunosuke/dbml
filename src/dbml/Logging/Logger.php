@@ -7,6 +7,8 @@ use Psr\Log\LogLevel;
 use ReflectionClass;
 use ryunosuke\dbml\Mixin\OptionTrait;
 use ryunosuke\dbml\Query\Parser;
+use ryunosuke\utility\attribute\Attribute\DebugInfo;
+use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\date_convert;
 use function ryunosuke\dbml\is_bindable_closure;
@@ -80,6 +82,7 @@ use function ryunosuke\dbml\str_ellipsis;
  */
 class Logger extends AbstractLogger
 {
+    use DebugInfoTrait;
     use OptionTrait;
 
     /** @var string ログレベル */
@@ -101,6 +104,7 @@ class Logger extends AbstractLogger
     private $resourceBuffer;
 
     /** @var array 一時配列ログバッファ */
+    #[DebugInfo(false)]
     private $arrayBuffer;
 
     public static function getDefaultOptions()

@@ -8,6 +8,14 @@ use ryunosuke\Test\Database;
 
 class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
+    function test___debugInfo()
+    {
+        $yielder = new Yielder(fn() => null, self::getDummyDatabase()->getConnection());
+        $debugString = print_r($yielder, true);
+        $this->assertStringContainsString('statement:', $debugString);
+        $this->assertStringNotContainsString('database:', $debugString);
+    }
+
     /**
      * @dataProvider provideDatabase
      * @param Database $database

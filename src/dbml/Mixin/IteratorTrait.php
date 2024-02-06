@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\utility\attribute\Attribute\DebugInfo;
 use function ryunosuke\dbml\first_keyvalue;
 
 /**
@@ -18,6 +19,7 @@ trait IteratorTrait
     private $__args = [];
 
     /** @var array 結果セット配列 */
+    #[DebugInfo(false)]
     private $__result = null;
 
     /**

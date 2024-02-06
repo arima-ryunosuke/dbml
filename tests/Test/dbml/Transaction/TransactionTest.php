@@ -64,6 +64,14 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals([1, 2, 3], $transaction->retries);
     }
 
+    function test___debugInfo()
+    {
+        $transaction = new Transaction(self::getDummyDatabase());
+        $debugString = print_r($transaction, true);
+        $this->assertStringContainsString('retryCount:', $debugString);
+        $this->assertStringNotContainsString('database:', $debugString);
+    }
+
     /**
      * @dataProvider provideTransaction
      * @param Transaction $transaction

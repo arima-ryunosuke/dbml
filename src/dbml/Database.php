@@ -63,6 +63,8 @@ use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\dbml\Utility\Adhoc;
+use ryunosuke\utility\attribute\Attribute\DebugInfo;
+use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 
 // @formatter:off
 /**
@@ -322,8 +324,10 @@ use ryunosuke\dbml\Utility\Adhoc;
  * @method $this                  setInjectChildColumn($bool) {{@link QueryBuilder::setInjectChildColumn()} 参照@inheritdoc QueryBuilder::setInjectChildColumn()}
  */
 // @formatter:on
+#[DebugInfo(false)]
 class Database
 {
+    use DebugInfoTrait;
     use OptionTrait;
 
     use FetchOrThrowTrait;
@@ -388,15 +392,18 @@ class Database
     ];
 
     /** @var Connection[] */
+    #[DebugInfo(false)]
     private $connections;
 
     /** @var Connection */
+    #[DebugInfo(false)]
     private $txConnection;
 
     /** @var \ArrayObject */
     private $vtables;
 
     /** @var \ArrayObject 「未初期化なら生成して返す」系のメソッドのキャッシュ */
+    #[DebugInfo(false)]
     private $cache;
 
     /** @var int */
@@ -798,25 +805,6 @@ class Database
         }
 
         throw new \BadMethodCallException("'$name' is undefined.");
-    }
-
-    /**
-     * __debugInfo
-     *
-     * いろいろ統括していて情報量が多すぎるので出力を絞る。
-     *
-     * @see http://php.net/manual/ja/language.oop5.magic.php#object.debuginfo
-     *
-     * @return array var_dump されるプロパティ
-     */
-    public function __debugInfo()
-    {
-        $classname = __CLASS__;
-        $properties = (array) $this;
-        unset($properties["\0$classname\0connections"]);  // 旨味が少ない（有益な情報があまりない）
-        unset($properties["\0$classname\0txConnection"]); // connections と同じ
-        unset($properties["\0$classname\0cache"]);        // 不要（個別に見れば良い）
-        return $properties;
     }
 
     private function _tableMap()

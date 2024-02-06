@@ -29,6 +29,8 @@ use ryunosuke\dbml\Query\Pagination\Paginator;
 use ryunosuke\dbml\Query\Pagination\Sequencer;
 use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\dbml\Utility\Adhoc;
+use ryunosuke\utility\attribute\Attribute\DebugInfo;
+use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_get;
 use function ryunosuke\dbml\array_unset;
@@ -325,6 +327,7 @@ use function ryunosuke\dbml\throws;
 // @formatter:on
 class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 {
+    use DebugInfoTrait;
     use OptionTrait;
     use IteratorTrait {
         IteratorTrait::count as countIterator;
@@ -434,6 +437,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     private $hint;
 
     /** @var TableGateway */
+    #[DebugInfo(false)]
     private $end;
 
     /** @var TableGateway[] join する Gateway 配列 */
