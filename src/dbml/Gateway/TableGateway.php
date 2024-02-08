@@ -399,11 +399,60 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
     use SubAggregateTrait;
 
-    use AffectIgnoreTrait;
-    use AffectConditionallyTrait;
-    use AffectOrThrowTrait;
-    use AffectAndPrimaryTrait;
-    use PrepareTrait;
+    use AffectIgnoreTrait {
+        insertSelectIgnoreWithoutTable as public insertSelectIgnore;
+        insertArrayIgnoreWithoutTable as public insertArrayIgnore;
+        updateArrayIgnoreWithoutTable as public updateArrayIgnore;
+        modifyArrayIgnoreWithoutTable as public modifyArrayIgnore;
+        changeArrayIgnoreWithoutTable as public changeArrayIgnore;
+        affectArrayIgnoreWithoutTable as public affectArrayIgnore;
+        saveIgnoreWithoutTable as public saveIgnore;
+        insertIgnoreWithoutTable as public insertIgnore;
+        updateIgnoreWithoutTable as public updateIgnore;
+        deleteIgnoreWithoutTable as public deleteIgnore;
+        invalidIgnoreWithoutTable as public invalidIgnore;
+        removeIgnoreWithoutTable as public removeIgnore;
+        destroyIgnoreWithoutTable as public destroyIgnore;
+        createIgnoreWithoutTable as public createIgnore;
+        modifyIgnoreWithoutTable as public modifyIgnore;
+        modifyIgnoreWithoutTable as public modifyIgnore;
+    }
+    use AffectConditionallyTrait {
+        insertConditionallyWithoutTable as public insertConditionally;
+        createConditionallyWithoutTable as public createConditionally;
+        upsertConditionallyWithoutTable as public upsertConditionally;
+        modifyConditionallyWithoutTable as public modifyConditionally;
+    }
+    use AffectOrThrowTrait {
+        insertOrThrowWithoutTable as public insertOrThrow;
+        updateOrThrowWithoutTable as public updateOrThrow;
+        deleteOrThrowWithoutTable as public deleteOrThrow;
+        invalidOrThrowWithoutTable as public invalidOrThrow;
+        removeOrThrowWithoutTable as public removeOrThrow;
+        destroyOrThrowWithoutTable as public destroyOrThrow;
+        reduceOrThrowWithoutTable as public reduceOrThrow;
+        upsertOrThrowWithoutTable as public upsertOrThrow;
+        modifyOrThrowWithoutTable as public modifyOrThrow;
+        replaceOrThrowWithoutTable as public replaceOrThrow;
+    }
+    use AffectAndPrimaryTrait {
+        insertAndPrimaryWithoutTable as public insertAndPrimary;
+        updateAndPrimaryWithoutTable as public updateAndPrimary;
+        deleteAndPrimaryWithoutTable as public deleteAndPrimary;
+        invalidAndPrimaryWithoutTable as public invalidAndPrimary;
+        removeAndPrimaryWithoutTable as public removeAndPrimary;
+        destroyAndPrimaryWithoutTable as public destroyAndPrimary;
+        upsertAndPrimaryWithoutTable as public upsertAndPrimary;
+        modifyAndPrimaryWithoutTable as public modifyAndPrimary;
+        replaceAndPrimaryWithoutTable as public replaceAndPrimary;
+    }
+    use PrepareTrait {
+        prepareInsertWithoutTable as public prepareInsert;
+        prepareUpdateWithoutTable as public prepareUpdate;
+        prepareDeleteWithoutTable as public prepareDelete;
+        prepareModifyWithoutTable as public prepareModify;
+        prepareReplaceWithoutTable as public prepareReplace;
+    }
 
     protected function getDatabase() { return $this->database; }
 

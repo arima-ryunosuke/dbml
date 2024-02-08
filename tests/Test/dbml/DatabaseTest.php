@@ -380,6 +380,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             ]);
 
             // for coverage
+            $this->assertEquals(['id' => 1], $database->saveIgnore('foreign_p', ['id' => 1]));
             $this->assertEquals([], $database->delete('foreign_c1', ['id' => -1], ['primary' => 2]));
             $this->assertEquals([], $database->remove('foreign_c1', ['id' => -1], ['primary' => 2]));
             $this->assertEquals([], $database->destroy('foreign_c1', ['id' => -1], ['primary' => 2]));
@@ -5691,6 +5692,9 @@ INSERT INTO test (id, name) VALUES
                 "UPDATE g_ancestor SET delete_at = '2014-12-24 00:00:00' WHERE ancestor_id = '1'",
             ], $database->dryrun()->invalid('g_ancestor', ['ancestor_id' => 1], ['delete_at' => '2014-12-24 00:00:00']));
         }
+
+        $this->assertEquals(['id' => 1], $database->invalidOrThrow('test', ['id' => 1], ['name' => 'deleted']));
+        $this->assertException('affected row is nothing', L($database)->invalidOrThrow('test', ['id' => -1], ['name' => 'deleted']));
     }
 
     /**

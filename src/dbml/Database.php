@@ -370,11 +370,60 @@ class Database
     use SubSelectTrait;
     use SubAggregateTrait;
 
-    use AffectIgnoreTrait;
-    use AffectConditionallyTrait;
-    use AffectOrThrowTrait;
-    use AffectAndPrimaryTrait;
-    use PrepareTrait;
+    use AffectIgnoreTrait {
+        insertSelectIgnoreWithTable as public insertSelectIgnore;
+        insertArrayIgnoreWithTable as public insertArrayIgnore;
+        updateArrayIgnoreWithTable as public updateArrayIgnore;
+        modifyArrayIgnoreWithTable as public modifyArrayIgnore;
+        changeArrayIgnoreWithTable as public changeArrayIgnore;
+        affectArrayIgnoreWithTable as public affectArrayIgnore;
+        saveIgnoreWithTable as public saveIgnore;
+        insertIgnoreWithTable as public insertIgnore;
+        updateIgnoreWithTable as public updateIgnore;
+        deleteIgnoreWithTable as public deleteIgnore;
+        invalidIgnoreWithTable as public invalidIgnore;
+        removeIgnoreWithTable as public removeIgnore;
+        destroyIgnoreWithTable as public destroyIgnore;
+        createIgnoreWithTable as public createIgnore;
+        modifyIgnoreWithTable as public modifyIgnore;
+        modifyIgnoreWithTable as public modifyIgnore;
+    }
+    use AffectConditionallyTrait {
+        insertConditionallyWithTable as public insertConditionally;
+        createConditionallyWithTable as public createConditionally;
+        upsertConditionallyWithTable as public upsertConditionally;
+        modifyConditionallyWithTable as public modifyConditionally;
+    }
+    use AffectOrThrowTrait {
+        insertOrThrowWithTable as public insertOrThrow;
+        updateOrThrowWithTable as public updateOrThrow;
+        deleteOrThrowWithTable as public deleteOrThrow;
+        invalidOrThrowWithTable as public invalidOrThrow;
+        removeOrThrowWithTable as public removeOrThrow;
+        destroyOrThrowWithTable as public destroyOrThrow;
+        reduceOrThrowWithTable as public reduceOrThrow;
+        upsertOrThrowWithTable as public upsertOrThrow;
+        modifyOrThrowWithTable as public modifyOrThrow;
+        replaceOrThrowWithTable as public replaceOrThrow;
+    }
+    use AffectAndPrimaryTrait {
+        insertAndPrimaryWithTable as public insertAndPrimary;
+        updateAndPrimaryWithTable as public updateAndPrimary;
+        deleteAndPrimaryWithTable as public deleteAndPrimary;
+        invalidAndPrimaryWithTable as public invalidAndPrimary;
+        removeAndPrimaryWithTable as public removeAndPrimary;
+        destroyAndPrimaryWithTable as public destroyAndPrimary;
+        upsertAndPrimaryWithTable as public upsertAndPrimary;
+        modifyAndPrimaryWithTable as public modifyAndPrimary;
+        replaceAndPrimaryWithTable as public replaceAndPrimary;
+    }
+    use PrepareTrait {
+        prepareInsertWithTable as public prepareInsert;
+        prepareUpdateWithTable as public prepareUpdate;
+        prepareDeleteWithTable as public prepareDelete;
+        prepareModifyWithTable as public prepareModify;
+        prepareReplaceWithTable as public prepareReplace;
+    }
 
     protected function getDatabase() { return $this; }
 
@@ -5651,6 +5700,7 @@ class Database
                 // 2件以上じゃないとプリペアの旨味が少ない
                 $stmt = null;
                 if ($preparable && count($group['rows']) > 1) {
+                    /** @noinspection PhpMethodParametersCountMismatchInspection */
                     $stmt = $this->prepareModify($tableName, $group['cols'], [], $uniquekey, $opt);
                 }
                 foreach ($group['rows'] as $n => $row) {

@@ -15,6 +15,7 @@ use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Platforms\SqlitePlatform;
 use function ryunosuke\dbml\csv_import;
 use function ryunosuke\dbml\json_import;
+use function ryunosuke\dbml\try_catch;
 
 class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -976,6 +977,24 @@ AND ((flag=1))", "$gw");
         $stmt->executeAffect(['id' => 102, 'name' => 'updateYYY']);
         $this->assertEquals(['updateXXX', 'updateYYY'], $gateway->lists('name', ['id' => [101, 102]]));
 
+        // modify
+        if ($database->getCompatiblePlatform()->supportsMerge()) {
+            $stmt = $gateway->prepareModify([':id', ':name']);
+            $this->assertStringContainsString("UPDATE", $queryInto($stmt, ['id' => 1, 'name' => 'yyy']));
+            $stmt->executeAffect(['id' => 102, 'name' => 'modifyXXX']);
+            $stmt->executeAffect(['id' => 103, 'name' => 'modifyYYY']);
+            $this->assertEquals(['modifyXXX', 'modifyYYY'], $gateway->lists('name', ['id' => [102, 103]]));
+        }
+
+        // replace
+        if ($database->getCompatiblePlatform()->supportsReplace()) {
+            $stmt = $gateway->prepareReplace([':id', ':name']);
+            $this->assertStringContainsString("REPLACE", $queryInto($stmt, ['id' => 1, 'name' => 'zzz']));
+            $stmt->executeAffect(['id' => 103, 'name' => 'replaceXXX']);
+            $stmt->executeAffect(['id' => 104, 'name' => 'replaceYYY']);
+            $this->assertEquals(['replaceXXX', 'replaceYYY'], $gateway->lists('name', ['id' => [103, 104]]));
+        }
+
         // delete
         $stmt = $gateway->prepareDelete(['id = :id']);
         $this->assertEquals("DELETE FROM test WHERE id = '1'", $queryInto($stmt, ['id' => 1]));
@@ -1394,6 +1413,11 @@ AND ((flag=1))", "$gw");
         // updateOrThrow すると更新されて主キーが返ってくるはず
         $pri = $gateway->updateOrThrow(['name' => 'YYY'], $pri);
         $this->assertEquals('YYY', $gateway->value('name', $pri));
+
+        // 主キー有りで modify すると更新されるはず
+        $pri = $gateway->modifyOrThrow($pri + ['name' => 'KKK']);
+        $this->assertEquals($count, $count = $gateway->count());
+        $this->assertEquals('KKK', $gateway->value('name', $pri));
         $this->assertEquals(['id' => $count], $pri);
 
         // 主キー有りで upsert すると更新されるはず
@@ -1405,6 +1429,12 @@ AND ((flag=1))", "$gw");
         $pri = $gateway->upsertOrThrow(['name' => 'KKK']);
         $this->assertEquals($count + 1, $count = $gateway->count());
         $this->assertEquals('KKK', $gateway->value('name', $pri));
+
+        // invalid すると name が deleted になるはず
+        $pri = $gateway->invalidOrThrow($pri, ['name' => 'deleted']);
+        $this->assertEquals($count, $count = $gateway->count());
+        $this->assertEquals('deleted', $gateway->value('name', $pri));
+        $this->assertEquals(['id' => $count], $pri);
 
         // delete すると1件減るはず
         $gateway->delete($pri);
@@ -1454,6 +1484,19 @@ AND ((flag=1))", "$gw");
             ]);
             $this->assertEquals(['AAA', 'BBB', 'CCC', 'affectArray'], $gateway->lists('name'));
         }
+
+        if ($database->getCompatiblePlatform()->supportsIgnore()) {
+            $primaries = $gateway->affectArrayIgnore([
+                ['@method' => 'insert', 'id' => 1, 'name' => 'X'],
+                ['@method' => 'update', 'id' => 2, 'name' => 'Y'],
+            ]);
+            $this->assertEquals([
+                1 => ["id" => 2, "" => 1],
+                0 => ["id" => 1, "" => 0],
+            ], $primaries);
+
+            $this->assertEquals('AAA', $gateway->pk(1)->value('name'));
+        }
     }
 
     /**
@@ -1487,10 +1530,27 @@ AND ((flag=1))", "$gw");
         $this->assertEquals($count + 1, $count = $gateway->count());
         $this->assertEquals('KKK', $gateway->value('name', $pri));
 
+        // 主キーありで modify すると更新されるはず
+        $pri = $gateway->modifyAndPrimary($pri + ['name' => 'LLL']);
+        $this->assertEquals($count, $count = $gateway->count());
+        $this->assertEquals('LLL', $gateway->value('name', $pri));
+
+        // invalid すると name が deleted になるはず
+        $pri = $gateway->invalidAndPrimary($pri, ['name' => 'deleted']);
+        $this->assertEquals($count, $count = $gateway->count());
+        $this->assertEquals('deleted', $gateway->value('name', $pri));
+
         // delete すると1件減るはず
         $pri = $gateway->deleteAndPrimary($pri);
         $this->assertEquals($count - 1, $count = $gateway->count());
         $this->assertEquals(false, $gateway->value('name', $pri));
+
+        // この辺はエラーさえ出なければいい
+        if ($database->getCompatiblePlatform()->supportsReplace()) {
+            $this->assertEquals($pri, $gateway->replaceAndPrimary($pri));
+        }
+        $this->assertEquals($pri, $gateway->removeAndPrimary($pri));
+        $this->assertEquals($pri, $gateway->destroyAndPrimary($pri));
 
         $this->assertEquals(11, $count);
     }
@@ -1509,6 +1569,7 @@ AND ((flag=1))", "$gw");
             $this->assertEquals(['id' => '11'], $gateway->updateIgnore(['name' => 'fuga'], ['id' => 11]));
             $this->assertEquals([], $gateway->updateIgnore(['name' => 'hoge'], ['id' => -1]));
 
+            $this->assertEquals(['id' => '11'], $gateway->modifyIgnore(['id' => 11, 'name' => 'piyo']));
             $this->assertEquals(['id' => '11'], $gateway->saveIgnore(['id' => 11]));
 
             // array 系
@@ -1553,6 +1614,14 @@ AND ((flag=1))", "$gw");
                     ],
                 ],
             ]);
+
+            // for coverage
+            $this->assertEquals(['id' => 1], $database->foreign_p->saveIgnore(['id' => 1]));
+            $this->assertEquals(['id' => 1], $database->foreign_p->invalidIgnore(['id' => 1], ['name' => 'deleted']));
+            // delete の syntax error はしょうがない
+            try_catch(L($database->foreign_c1)->deleteIgnore(['id' => -1]));
+            try_catch(L($database->foreign_c1)->removeIgnore(['id' => -1]));
+            try_catch(L($database->foreign_c1)->destroyIgnore(['id' => -1]));
         }
     }
 

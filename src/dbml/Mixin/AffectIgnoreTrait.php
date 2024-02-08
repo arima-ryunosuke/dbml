@@ -3,14 +3,17 @@
 namespace ryunosuke\dbml\Mixin;
 
 use ryunosuke\dbml\Database;
+use ryunosuke\dbml\Gateway\TableGateway;
 use function ryunosuke\dbml\parameter_default;
+use function ryunosuke\dbml\parameter_length;
 
 trait AffectIgnoreTrait
 {
     private function _invokeAffectIgnore($method, $arguments)
     {
+        $arity = parameter_length([$this, $method]);
         $arguments = parameter_default([$this, $method], $arguments);
-        $arguments[] = ['primary' => 2, 'ignore' => true];
+        $arguments[$arity] = ['primary' => 2, 'ignore' => true] + ($arguments[$arity] ?? []);
         return $this->$method(...$arguments);
     }
 
@@ -19,9 +22,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::insertSelect()
      */
-    public function insertSelectIgnore(...$args)
+    private function insertSelectIgnoreWithTable($tableName, $sql, $columns = [], iterable $params = [])
     {
-        return $this->_invokeAffectIgnore('insertSelect', $args);
+        assert(parameter_default([$this, 'insertSelect']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('insertSelect', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::insertSelect()}
+     *
+     * @inheritdoc TableGateway::insertSelect()
+     */
+    private function insertSelectIgnoreWithoutTable($sql, $columns = [], iterable $params = [])
+    {
+        assert(parameter_default([$this, 'insertSelect']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('insertSelect', func_get_args());
     }
 
     /**
@@ -29,9 +44,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::insertArray()
      */
-    public function insertArrayIgnore(...$args)
+    private function insertArrayIgnoreWithTable($tableName, $data, $chunk = null)
     {
-        return $this->_invokeAffectIgnore('insertArray', $args);
+        assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('insertArray', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::insertArray()}
+     *
+     * @inheritdoc TableGateway::insertArray()
+     */
+    private function insertArrayIgnoreWithoutTable($data, $chunk = null)
+    {
+        assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('insertArray', func_get_args());
     }
 
     /**
@@ -39,9 +66,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::updateArray()
      */
-    public function updateArrayIgnore(...$args)
+    private function updateArrayIgnoreWithTable($tableName, $data, $identifier = [], $chunk = null)
     {
-        return $this->_invokeAffectIgnore('updateArray', $args);
+        assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('updateArray', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::updateArray()}
+     *
+     * @inheritdoc TableGateway::updateArray()
+     */
+    private function updateArrayIgnoreWithoutTable($data, $identifier = [], $chunk = null)
+    {
+        assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('updateArray', func_get_args());
     }
 
     /**
@@ -49,9 +88,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::modifyArray()
      */
-    public function modifyArrayIgnore(...$args)
+    private function modifyArrayIgnoreWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = null)
     {
-        return $this->_invokeAffectIgnore('modifyArray', $args);
+        assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('modifyArray', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::modifyArray()}
+     *
+     * @inheritdoc TableGateway::modifyArray()
+     */
+    private function modifyArrayIgnoreWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = null)
+    {
+        assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('modifyArray', func_get_args());
     }
 
     /**
@@ -59,9 +110,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::changeArray()
      */
-    public function changeArrayIgnore(...$args)
+    private function changeArrayIgnoreWithTable($tableName, $dataarray, $identifier, $uniquekey = 'PRIMARY', $returning = [])
     {
-        return $this->_invokeAffectIgnore('changeArray', $args);
+        assert(parameter_default([$this, 'changeArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('changeArray', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::changeArray()}
+     *
+     * @inheritdoc TableGateway::changeArray()
+     */
+    private function changeArrayIgnoreWithoutTable($dataarray, $identifier, $uniquekey = 'PRIMARY', $returning = [])
+    {
+        assert(parameter_default([$this, 'changeArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('changeArray', func_get_args());
     }
 
     /**
@@ -69,9 +132,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::affectArray()
      */
-    public function affectArrayIgnore(...$args)
+    private function affectArrayIgnoreWithTable($tableName, $dataarray)
     {
-        return $this->_invokeAffectIgnore('affectArray', $args);
+        assert(parameter_default([$this, 'affectArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('affectArray', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::affectArray()}
+     *
+     * @inheritdoc TableGateway::affectArray()
+     */
+    private function affectArrayIgnoreWithoutTable($dataarray)
+    {
+        assert(parameter_default([$this, 'affectArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('affectArray', func_get_args());
     }
 
     /**
@@ -79,9 +154,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::save()
      */
-    public function saveIgnore(...$args)
+    private function saveIgnoreWithTable($tableName, $data)
     {
-        return $this->_invokeAffectIgnore('save', $args);
+        assert(parameter_default([$this, 'save']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('save', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::save()}
+     *
+     * @inheritdoc TableGateway::save()
+     */
+    private function saveIgnoreWithoutTable($data)
+    {
+        assert(parameter_default([$this, 'save']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('save', func_get_args());
     }
 
     /**
@@ -89,9 +176,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::insert()
      */
-    public function insertIgnore(...$args)
+    private function insertIgnoreWithTable($tableName, $data)
     {
-        return $this->_invokeAffectIgnore('insert', $args);
+        assert(parameter_default([$this, 'insert']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('insert', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::insert()}
+     *
+     * @inheritdoc TableGateway::insert()
+     */
+    private function insertIgnoreWithoutTable($data)
+    {
+        assert(parameter_default([$this, 'insert']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('insert', func_get_args());
     }
 
     /**
@@ -99,9 +198,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::update()
      */
-    public function updateIgnore(...$args)
+    private function updateIgnoreWithTable($tableName, $data, $identifier = [])
     {
-        return $this->_invokeAffectIgnore('update', $args);
+        assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('update', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::update()}
+     *
+     * @inheritdoc TableGateway::update()
+     */
+    private function updateIgnoreWithoutTable($data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('update', func_get_args());
     }
 
     /**
@@ -109,9 +220,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::delete()
      */
-    public function deleteIgnore(...$args)
+    private function deleteIgnoreWithTable($tableName, $identifier = [])
     {
-        return $this->_invokeAffectIgnore('delete', $args);
+        assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('delete', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::delete()}
+     *
+     * @inheritdoc TableGateway::delete()
+     */
+    private function deleteIgnoreWithoutTable($identifier = [])
+    {
+        assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('delete', func_get_args());
     }
 
     /**
@@ -119,9 +242,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::invalid()
      */
-    public function invalidIgnore(...$args)
+    private function invalidIgnoreWithTable($tableName, $identifier, $invalid_columns = null)
     {
-        return $this->_invokeAffectIgnore('invalid', $args);
+        assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('invalid', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::invalid()}
+     *
+     * @inheritdoc TableGateway::invalid()
+     */
+    private function invalidIgnoreWithoutTable($identifier = [], $invalid_columns = null)
+    {
+        assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('invalid', func_get_args());
     }
 
     /**
@@ -129,9 +264,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::remove()
      */
-    public function removeIgnore(...$args)
+    private function removeIgnoreWithTable($tableName, $identifier = [])
     {
-        return $this->_invokeAffectIgnore('remove', $args);
+        assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('remove', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::remove()}
+     *
+     * @inheritdoc TableGateway::remove()
+     */
+    private function removeIgnoreWithoutTable($identifier = [])
+    {
+        assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('remove', func_get_args());
     }
 
     /**
@@ -139,9 +286,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::destroy()
      */
-    public function destroyIgnore(...$args)
+    private function destroyIgnoreWithTable($tableName, $identifier = [])
     {
-        return $this->_invokeAffectIgnore('destroy', $args);
+        assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('destroy', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::destroy()}
+     *
+     * @inheritdoc TableGateway::destroy()
+     */
+    private function destroyIgnoreWithoutTable($identifier = [])
+    {
+        assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('destroy', func_get_args());
     }
 
     /**
@@ -149,9 +308,21 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::create()
      */
-    public function createIgnore(...$args)
+    private function createIgnoreWithTable($tableName, $data)
     {
-        return $this->_invokeAffectIgnore('create', $args);
+        assert(parameter_default([$this, 'create']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('create', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::create()}
+     *
+     * @inheritdoc TableGateway::create()
+     */
+    private function createIgnoreWithoutTable($data)
+    {
+        assert(parameter_default([$this, 'create']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('create', func_get_args());
     }
 
     /**
@@ -159,8 +330,20 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::modify()
      */
-    public function modifyIgnore(...$args)
+    private function modifyIgnoreWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
-        return $this->_invokeAffectIgnore('modify', $args);
+        assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('modify', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::modify()}
+     *
+     * @inheritdoc TableGateway::modify()
+     */
+    private function modifyIgnoreWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    {
+        assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('modify', func_get_args());
     }
 }
