@@ -7207,9 +7207,18 @@ class Database
             return !($column->getPlatformOptions()['virtual'] ?? false);
         });
 
+        $cplatform = $this->getCompatiblePlatform();
+        $defaults = $this->getEmptyRecord($tableName);
         $selects = [];
         foreach ($columns as $cname => $column) {
-            $selects[$cname] = array_get($sets, $cname, $cname);
+            if (array_key_exists($cname, $sets)) {
+                $selects[$cname] = $sets[$cname];
+            }
+            else {
+                $pkisnull = array_sprintf($primary, "$tableName.%2\$s IS NULL", ' AND ');
+                $default = $this->raw($this->quote($defaults[$cname]));
+                $selects[$cname] = $cplatform->getCaseWhenSyntax(null, [$pkisnull => $default], $this->raw($cname))->merge($params);
+            }
         }
 
         $criteria = $this->whereInto(array_intersect_key($data, $primary), $params);

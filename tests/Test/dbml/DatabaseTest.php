@@ -6959,6 +6959,9 @@ INSERT INTO test (id, name) VALUES
             $database->replace('test', ['id' => $id, 'name' => 'repN', 'data' => 'repD']);
             $this->assertEquals(['name' => 'repN', 'data' => 'repD'], $database->selectTuple('test.name,data', ['id' => $id]));
 
+            $database->replace('test', ['id' => $id, 'name' => 'defN']);
+            $this->assertEquals(['name' => 'defN', 'data' => 'repD'], $database->selectTuple('test.name,data', ['id' => $id]));
+
             $this->assertEquals(['id' => $id + 1], $database->replaceOrThrow('test', ['id' => $id + 1, 'name' => '', 'data' => '']));
             $this->assertEquals(['id' => $id + 1], $database->replaceAndPrimary('test', ['id' => $id + 1, 'name' => '', 'data' => '']));
         }
