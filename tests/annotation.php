@@ -1476,67 +1476,67 @@ class misctypeTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function findInShare($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
+    /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function findForAffect($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
+    /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function neighbor($predicates = [], $limit = 1) { }
 }
 
@@ -2997,7 +2997,7 @@ class misctypeEntity extends \ryunosuke\dbml\Entity\Entity
     /** @var float|string */
     public $cdecimal;
 
-    /** @var DateTimeImmutable */
+    /** @var \DateTimeImmutable */
     public $cdate;
 
     /** @var string */

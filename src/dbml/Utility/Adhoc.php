@@ -6,6 +6,7 @@ use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
 use function ryunosuke\dbml\is_stringable;
 use function ryunosuke\dbml\preg_capture;
+use function ryunosuke\dbml\type_exists;
 
 /**
  * 比較的固有な処理を記述する Utility クラス
@@ -169,5 +170,22 @@ class Adhoc
             $params[$k] = $param;
         }
         return $params;
+    }
+
+    public static function stringifyType(?\ReflectionType $type): ?string
+    {
+        if ($type === null) {
+            return null;
+        }
+
+        // __toString は 7.4 でエラーになる
+        $types = preg_split('#([' . preg_quote('?|&()') . '])#', @strval($type), -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $types = array_map(fn($type) => type_exists($type) ? "\\$type" : $type, $types);
+
+        // ?int は 7.4 で int, 8.0 で ?int になるし 8.0 で ?int|string のような記法は許されないので null|int|string になる
+        if ($type instanceof \ReflectionNamedType && $type->allowsNull() && $types[0] !== '?') {
+            array_unshift($types, '?');
+        }
+        return implode('', $types);
     }
 }
