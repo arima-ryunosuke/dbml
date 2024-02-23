@@ -18,6 +18,7 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use ryunosuke\dbml\Driver\ArrayResult;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Exception\NonAffectedException;
@@ -943,7 +944,7 @@ class Database
                 $stmt = $stmt->executeSelect($params, $connection);
             }
             else {
-                $stmt = $this->executeSelect($this->_builderToSql($sql, $params), $params);
+                $stmt = $this->executeSelect($this->_builderToSql($sql, $params), $params, $sql->getCacheTtl());
             }
         }
         else {
@@ -4509,9 +4510,20 @@ class Database
      *
      * @inheritdoc Connection::executeQuery()
      */
-    public function executeSelect($query, iterable $params = [])
+    public function executeSelect($query, iterable $params = [], ?int $ttl = 0)
     {
         $params = Adhoc::bindableParameters($params);
+
+        /** @var CacheInterface $cacher */
+        $cacher = $this->getUnsafeOption('cacheProvider');
+
+        $queryid = $query . ':' . json_encode($params);
+        $cacheid = "Database-" . hash('fnv164', $queryid) . "-fetch";
+
+        $cache = $cacher->get($cacheid) ?? [];
+        if (array_key_exists($queryid, $cache)) {
+            return new Result(new ArrayResult($cache[$queryid]['data'], $cache[$queryid]['meta']), $this->getSlaveConnection());
+        }
 
         if ($filter_path = $this->getInjectCallStack()) {
             $query = implode('', $this->_getCallStack($filter_path)) . $query;
@@ -4519,7 +4531,18 @@ class Database
 
         // コンテキストを戻すための try～catch
         try {
-            return $this->getSlaveConnection()->executeQuery($query, $params);
+            $result = $this->getSlaveConnection()->executeQuery($query, $params);
+            if ($ttl !== 0) {
+                $cconnection = $this->getCompatibleConnection($this->getSlaveConnection());
+                $cache[$queryid] = [
+                    'meta' => $cconnection->getMetadata($result),
+                    'data' => $result->fetchAllNumeric(),
+                ];
+                $cacher->set($cacheid, $cache, $ttl);
+                $result->free();
+                $result = new Result(new ArrayResult($cache[$queryid]['data'], $cache[$queryid]['meta']), $this->getSlaveConnection());
+            }
+            return $result;
         }
         catch (\Exception $ex) {
             $this->unstackAll();

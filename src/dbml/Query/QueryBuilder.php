@@ -286,6 +286,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     /** @var string 生成した SQL（キャッシュ） */
     private $sql;
 
+    /** @var array キャッシュモード */
+    private $cache = [];
+
     /** @var array php コールバック */
     private $callbacks = [];
 
@@ -4135,6 +4138,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function reset()
     {
+        // キャッシュ解除は真っ先に行う（配下のフィールドにもあてるため）
+        $this->cache(false);
+
         // 固有なフィールドをクリア
         $this->statement = null;
         $this->caster = null;
@@ -4198,6 +4204,53 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     public function getPreparedStatement()
     {
         return $this->statement;
+    }
+
+    /**
+     * このビルダとサブビルダにキャッシュするように指示する
+     *
+     * キャッシュはクエリ＋パラメータで丸ごとキャッシュされる。
+     *
+     * ```php
+     * # このクエリは10秒間キャッシュされる
+     * $qb->cache(10)->column('t_article', ['state' => 'active'])->array();
+     * ```
+     *
+     * @param null|int|false $ttl キャッシュ期限（null はキャッシュドライバーのデフォルトに従う。false は解除）
+     * @return $this 自分自身
+     */
+    public function cache($ttl = null)
+    {
+        if ($ttl === false) {
+            $this->cache = [];
+        }
+        else {
+            $this->cache = ['ttl' => $ttl];
+        }
+
+        foreach ($this->subbuilders as $subbuilder) {
+            $subbuilder->cache($ttl);
+        }
+        return $this;
+    }
+
+    /**
+     * 内部向け
+     *
+     * @return int|null
+     */
+    public function getCacheTtl()
+    {
+        // 未設定
+        if (!$this->cache) {
+            return 0;
+        }
+        // ロッククエリでキャッシュを有効化するのは多くの場合良くない
+        if ($this->lockMode !== LockMode::NONE) {
+            return 0;
+        }
+
+        return $this->cache['ttl'];
     }
 
     /**

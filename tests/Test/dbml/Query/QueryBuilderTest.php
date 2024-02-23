@@ -4415,6 +4415,70 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
+    function test_cache($builder)
+    {
+        $builder->cache(10)->cache(false);
+        $this->assertEquals(0, $builder->getCacheTtl());
+        
+        $builder->cache(10)->column(['test' => 'name'])->where(['id' => [1, 2]])->orderBy(['name' => false]);
+
+        $array = $builder->array();
+        $builder->getDatabase()->update('test', ['name' => 'Z1'], ['id' => 1]);
+
+        // キャッシュが効く
+        $this->assertEquals($array, $builder->array());
+        // orThrow を付けても大丈夫
+        $this->assertEquals($array, $builder->arrayOrThrow());
+        // 異なるメソッドでも効く
+        $this->assertEquals($array, array_values($builder->assoc()));
+        // クエリが異なれば効かない
+        $this->assertNotEquals($array, (clone $builder)->orWhere(['id' => 3])->array());
+
+        // ロック中は・・・
+        $builder->lockForUpdate();
+
+        $array = $builder->array();
+        $builder->getDatabase()->update('test', ['name' => 'Z2'], ['id' => 2]);
+
+        // 一切効かない
+        $this->assertNotEquals($array, $builder->array());
+        $this->assertNotEquals($array, $builder->arrayOrThrow());
+        $this->assertNotEquals($array, array_values($builder->assoc()));
+        $this->assertNotEquals($array, (clone $builder)->orWhere(['id' => 3])->array());
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     * @param Database $database
+     */
+    function test_cache_sub($builder, $database)
+    {
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'c1name11']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 2, 'name' => 'c1name12']);
+        $database->insert('foreign_c2', ['cid' => 1, 'seq' => 1, 'name' => 'c2name11']);
+        $database->insert('foreign_c2', ['cid' => 1, 'seq' => 2, 'name' => 'c2name12']);
+
+        $builder->column([
+            'foreign_p' => [
+                '*',
+                'foreign_c1 c1' => ['*'],
+                'foreign_c2 c2' => ['*'],
+            ],
+        ])->where(['foreign_p.id' => 1])->cache(10);
+
+        $array = $builder->array();
+        $database->destroy('foreign_p', ['id' => 1]);
+
+        $this->assertEquals($array, $builder->array());
+        $this->assertEquals($array, $builder->arrayOrThrow());
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
     function test_parameter($builder)
     {
         // 追加順は関係なく区毎の順番で返ってくるはず

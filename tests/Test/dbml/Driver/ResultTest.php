@@ -2,7 +2,7 @@
 
 namespace ryunosuke\Test\dbml\Driver;
 
-use Doctrine\DBAL\Cache\ArrayResult;
+use ryunosuke\dbml\Driver\ArrayResult;
 use ryunosuke\dbml\Driver\ResultInterface;
 use ryunosuke\dbml\Driver\ResultTrait;
 
@@ -11,8 +11,8 @@ class ResultTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_fetchAssociative()
     {
         $result = new Result([
-            ['a' => 'a1', 'b' => 'b1', 'c' => 'c1'],
-            ['a' => 'a2', 'b' => 'b2', 'c' => 'c2'],
+            ['a1', 'b1', 'c1'],
+            ['a2', 'b2', 'c2'],
         ], [
             [
                 'aliasColumnName' => 'A',
@@ -24,7 +24,7 @@ class ResultTest extends \ryunosuke\Test\AbstractUnitTestCase
                 'aliasColumnName' => 'C',
             ],
         ]);
-        $this->assertEquals(['a' => 'a1', 'b' => 'b1', 'c' => 'c1'], $result->fetchAssociative());
+        $this->assertEquals(['A' => 'a1', 'B' => 'b1', 'C' => 'c1'], $result->fetchAssociative());
 
         $result->setSameCheckMethod('strict');
         $this->assertEquals(['A' => 'a2', 'B' => 'b2', 'C' => 'c2'], $result->fetchAssociative());
@@ -35,8 +35,8 @@ class ResultTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_fetchAllAssociative()
     {
         $result = new Result([
-            ['a' => 'a1', 'b' => 'b1', 'c' => 'c1'],
-            ['a' => 'a2', 'b' => 'b2', 'c' => 'c2'],
+            ['a1', 'b1', 'c1'],
+            ['a2', 'b2', 'c2'],
         ], [
             [
                 'aliasColumnName' => 'A',
@@ -49,13 +49,13 @@ class ResultTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
         ]);
         $this->assertEquals([
-            ['a' => 'a1', 'b' => 'b1', 'c' => 'c1'],
-            ['a' => 'a2', 'b' => 'b2', 'c' => 'c2'],
+            ['A' => 'a1', 'B' => 'b1', 'C' => 'c1'],
+            ['A' => 'a2', 'B' => 'b2', 'C' => 'c2'],
         ], $result->fetchAllAssociative());
 
         $result = new Result([
-            ['a' => 'a1', 'b' => 'b1', 'c' => 'c1'],
-            ['a' => 'a2', 'b' => 'b2', 'c' => 'c2'],
+            ['A' => 'a1', 'B' => 'b1', 'C' => 'c1'],
+            ['A' => 'a2', 'B' => 'b2', 'C' => 'c2'],
         ], [
             [
                 'aliasColumnName' => 'A',
@@ -103,38 +103,9 @@ class ResultTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 }
 
-class MockResult
-{
-    private \Doctrine\DBAL\Driver\Result $internal;
-
-    public function __construct($data)
-    {
-        $this->internal = new ArrayResult($data);
-    }
-
-    public function __call($name, $arguments)
-    {
-        return $this->internal->$name(...$arguments);
-    }
-}
-
-class Result extends MockResult implements ResultInterface
+class Result extends ArrayResult implements ResultInterface
 {
     use ResultTrait {
         checkSameColumn as public;
-    }
-
-    private array $meta;
-
-    public function __construct($data, $meta)
-    {
-        parent::__construct($data);
-
-        $this->meta = $meta;
-    }
-
-    public function getMetadata(): array
-    {
-        return $this->meta;
     }
 }
