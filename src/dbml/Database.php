@@ -16,6 +16,7 @@ use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Exception\NonAffectedException;
@@ -172,6 +173,7 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * 値のエスケープに関しては基本的には安全側に倒しているが、 {@link Expression} を使用する場合はその前提が崩れる事がある（ `()` を含むエントリは自動で Expression 化されるので同じ）。
  * 原則的に外部入力を Expression 化したり、値以外の入力として使用するのは全く推奨できない。
  *
+ * @method CacheInterface         getCacheProvider()
  * @method bool                   getInsertSet()
  * @method $this                  setInsertSet($bool)
  * @method bool                   getUpdateEmpty()
@@ -7342,6 +7344,57 @@ class Database
             $cache[$yaml] = $result;
         }
         return $cache[$yaml];
+    }
+
+    /**
+     * キャッシュの破棄と再生成
+     *
+     * デプロイの直後等にこのメソッドを呼べば全キャッシュが生成される。
+     *
+     * @param bool $force
+     * @return $this
+     */
+    public function recache($force = true)
+    {
+        // Database 以外でも getCacheProvider を使っている箇所があるので触るときは精査
+        // 内部キャッシュなどは未考慮で良い。あくまでリクエストをまたぐキャッシュの暖機
+
+        $cacher = $this->getCacheProvider();
+        if ($force) {
+            $cacher->clear();
+        }
+
+        $schema = $this->getSchema();
+
+        // テーブル名とオブジェクト
+        foreach ($schema->getTableNames() as $table_name) {
+            // Table オブジェクト
+            $schema->getTable($table_name);
+
+            // Gateway オブジェクト（select は特別な意味はないが、呼ぶことでカラムが温まるかもしれない程度）
+            $this->$table_name->select();
+        }
+
+        // 外部キーとリレーション
+        foreach ($schema->getForeignKeys() as $fkey_name => $fkey) {
+            // 駆動表,結合表,外部キー指定有無の全パターン
+            [$ltable, $ftable] = first_keyvalue($schema->getForeignTable($fkey));
+            foreach ([
+                [$ltable, $ftable, null],
+                [$ltable, $ftable, $fkey_name],
+                [$ftable, $ltable, null],
+                [$ftable, $ltable, $fkey_name],
+            ] as $args) {
+                try {
+                    $schema->getForeignColumns(...$args);
+                }
+                catch (\Throwable $t) {
+                    // through
+                }
+            }
+        }
+
+        return $this;
     }
 
     /**

@@ -8338,4 +8338,30 @@ ORDER BY T.id DESC, name ASC
         $database->upsert('Article', $pri + ['title' => 'ZZZ']);
         $this->assertEquals('ZZZ', $database->selectValue('t_article.title', $pri));
     }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_recache($database)
+    {
+        $database->refresh();
+
+        $this->assertTrue($database->getSchema()->hasTable('test'));
+        $this->assertFalse($database->getSchema()->hasTable('newtable'));
+
+        self::createTables($database->getConnection(), [
+            new Schema\Table('newtable',
+                [new Schema\Column('id', Type::getType('integer'))],
+                [new Schema\Index('PRIMARY', ['id'], true, true)]
+            ),
+        ]);
+
+        $this->assertFalse($database->getSchema()->hasTable('newtable'));
+        $database->recache()->getSchema()->refresh();
+        $this->assertTrue($database->getSchema()->hasTable('newtable'));
+
+        $database->getConnection()->createSchemaManager()->dropTable('newtable');
+        $database->refresh();
+    }
 }
