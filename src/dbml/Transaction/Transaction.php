@@ -4,6 +4,7 @@ namespace ryunosuke\dbml\Transaction;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\RetryableException;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\DBAL\TransactionIsolationLevel;
 use Psr\Log\LoggerInterface;
 use ryunosuke\dbml\Database;
@@ -128,7 +129,7 @@ use function ryunosuke\dbml\arrayize;
  * @property \Closure[] $retry retry イベント配列
  * @property \Closure[] $catch catch イベント配列
  * @property \Closure[] $finish finish イベント配列
- * @property int[] $retries リトライ間隔
+ * @property \Closure|int[] $retries リトライ間隔
  * @property \Closure $retryable リトライ判定処理
  * @property bool $savepointable savepoint 有効/無効フラグ
  *
@@ -156,7 +157,7 @@ use function ryunosuke\dbml\arrayize;
  * @method $this           setCatch(array $closure) catch イベント配列を設定する
  * @method \Closure[]      getFinish() finish イベント配列を取得する
  * @method $this           setFinish(array $closure) finish イベント配列を設定する
- * @method $this|int[]     retries($ints = null) リトライ間隔を設定・取得する
+ * @method $this|\Closure|int[] retries($closure = null) リトライ間隔を設定・取得する
  * @method int[]           getRetries()リトライ間隔を取得する
  * @method $this           setRetries($ints)リトライ間隔を設定する
  * @method $this|\Closure  retryable($closure = null) リトライ判定処理を設定・取得する
@@ -209,9 +210,9 @@ class Transaction
             // 完了イベント
             'finish'         => [/* function () { }*/],
             // リトライ回数兼間隔
-            'retries'        => [],
+            'retries'        => [], // for compatible. rename to retryable and default null in future scope
             // リトライ可能判定処理
-            'retryable'      => null,
+            'retryable'      => fn($ex) => $ex instanceof RetryableException, // for compatible.
             // セーブポイントを活かすか
             'savepointable'  => null,
         ];
@@ -227,6 +228,25 @@ class Transaction
     {
         $this->database = $database;
 
+        // for compatible. 将来的にデフォルト化する。今はリファレンス的意味合いが強い。
+        if (!isset($options['retries'])) {
+            $options['retries'] = function (int $retryCount, \Exception $ex, Connection $connection): ?float {
+                // 無限リトライ防止
+                if ($retryCount > 5) {
+                    return null;
+                }
+                // id や uk がクロージャで、値が毎回変わることもある
+                if ($ex instanceof UniqueConstraintViolationException) {
+                    return 0.1;
+                }
+                // それ以外は doctrine に任せる
+                if ($ex instanceof RetryableException) {
+                    return 1.0;
+                }
+                return null;
+            };
+        }
+
         $default = [];
         foreach ($database->getOptions() as $key => $value) {
             $key = preg_replace('#^transaction#u', '', $key, -1, $count);
@@ -234,9 +254,6 @@ class Transaction
                 $default[lcfirst($key)] = $value;
             }
         }
-        $default['retryable'] = function ($ex) {
-            return $ex instanceof RetryableException;
-        };
         $this->setDefault($options + $default);
     }
 
@@ -382,15 +399,23 @@ class Transaction
             $this->_invokeArray($this->fail, $ex);
 
             // リトライ
-            $retries = $this->retries;
-            if (isset($retries[$this->retryCount]) && ($this->retryable)($ex)) {
-                usleep($retries[$this->retryCount] * 1000);
-                $this->retryCount++;
-
-                // retry
-                $this->_invokeArray($this->retry, $this->retryCount);
+            if (is_callable($this->retries) && !is_null($retryable = ($this->retries)($this->retryCount, $ex, $connection))) {
+                usleep($retryable * 1000 * 1000);
+                $this->_invokeArray($this->retry, ++$this->retryCount);
 
                 return $this->_execute($connection, $previewMode);
+            }
+            // for compatible
+            if (is_array($retries = $this->retries)) {
+                if (isset($retries[$this->retryCount]) && ($this->retryable)($ex)) {
+                    usleep($retries[$this->retryCount] * 1000);
+                    $this->retryCount++;
+
+                    // retry
+                    $this->_invokeArray($this->retry, $this->retryCount);
+
+                    return $this->_execute($connection, $previewMode);
+                }
             }
 
             throw $ex;

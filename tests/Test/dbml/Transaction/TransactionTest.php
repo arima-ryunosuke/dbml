@@ -4,6 +4,8 @@ namespace ryunosuke\Test\dbml\Transaction;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Exception\LockWaitTimeoutException;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\Test\Database;
@@ -51,6 +53,20 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(true, $transaction->savepointable);
         $this->assertEquals([1, 2, 3], $transaction->retries);
         $this->assertFalse(call_user_func($transaction->retryable, new \Exception()));
+
+        // defaultRetryable. 本来は個別定義して専用でテストすべきだが過渡期なのでここで
+
+        $transaction = new Transaction($database, [
+            'savepointable' => true,
+            'retries'       => null,
+        ]);
+        $ex1 =(new \ReflectionClass(UniqueConstraintViolationException::class))->newInstanceWithoutConstructor();
+        $ex2 =(new \ReflectionClass(LockWaitTimeoutException::class))->newInstanceWithoutConstructor();
+        $this->assertEquals(null, ($transaction->retries)(100, $ex1, $database->getConnection()));
+        $this->assertEquals(null, ($transaction->retries)(100, $ex2, $database->getConnection()));
+        $this->assertEquals(0.1, ($transaction->retries)(0, $ex1, $database->getConnection()));
+        $this->assertEquals(1.0, ($transaction->retries)(0, $ex2, $database->getConnection()));
+        $this->assertEquals(null, ($transaction->retries)(0, new \Exception(), $database->getConnection()));
     }
 
     /**
@@ -257,7 +273,35 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         // 1回しかチャレンジしてないはず
         $this->assertEquals(1, $count);
         // リトライされないのでまぁ1秒以内には返ってくるはず
-        $this->assertLessThanOrEqual(1000, microtime(true) - $start);
+        $this->assertLessThanOrEqual(1, microtime(true) - $start);
+    }
+
+    /**
+     * @dataProvider provideTransaction
+     * @param Transaction $transaction
+     * @param Database $database
+     */
+    function test_retry_closure($transaction, $database)
+    {
+        $database->delete('test', ['id >= ?' => 3]);
+        $start = microtime(true);
+
+        $count = 1;
+        $transaction->retries(function ($retryCount, $ex) {
+            if ($ex instanceof UniqueConstraintViolationException) {
+                return 0.1;
+            }
+        })->main(function () use ($database, &$count) {
+            $database->insert('test', [
+                'id'   => $count++,
+                'name' => 'x',
+            ]);
+        })->perform();
+
+        // 挿入されているはず
+        $this->assertEquals('x', $database->selectValue('test.name', ['id' => 3]));
+        // id1, id2 が重複でコケるのでまぁ 0.5 秒くらいで終わるはず
+        $this->assertLessThanOrEqual(0.5, microtime(true) - $start);
     }
 
     /**
