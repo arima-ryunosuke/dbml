@@ -6,6 +6,7 @@ use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception\DriverException;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
@@ -3270,6 +3271,38 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             ["id" => 1, "sleep" => null],
             ["id" => 2, "sleep" => null],
         ], $actual);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_executeAffect_retry($database)
+    {
+        $database->delete('test', ['id >= ?' => 3]);
+        $time = microtime(true);
+
+        $database = $database->context(['defaultRetry' => 5]);
+        $id = 1;
+        $affected = $database->insert("test", [
+            'id'   => function () use (&$id) { return $id++; },
+            'name' => 'x',
+        ]);
+
+        // リトライで成功する
+        $this->assertEquals(1, $affected);
+        // レコードもできている
+        $this->assertEquals('x', $database->selectValue('test.name', ['id' => 3]));
+        // 主キーの重複は短時間ウェイトにしてある
+        $this->assertLessThanOrEqual(0.5, microtime(true) - $time);
+
+        // リトライ回数を超えると通常通り例外を投げる
+        $database = $database->context(['defaultRetry' => 2]);
+        $id = 1;
+        $this->assertException(UniqueConstraintViolationException::class, L($database)->insert("test", [
+            'id'   => function () use (&$id) { return $id++; },
+            'name' => 'x',
+        ]));
     }
 
     /**

@@ -96,10 +96,10 @@ namespace ryunosuke\Test {
             return false;
         }
 
-        public function executeAffect($query, iterable $params = [])
+        public function executeAffect($query, iterable $params = [], ?int $retry = null)
         {
             $this->is_dirty = true;
-            return parent::executeAffect($query, $params);
+            return parent::executeAffect($query, $params, $retry);
         }
 
         /**
