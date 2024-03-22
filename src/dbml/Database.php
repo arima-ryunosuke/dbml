@@ -4537,7 +4537,7 @@ class Database
 
         // コンテキストを戻すための try～catch
         try {
-            $result = $this->getSlaveConnection()->executeQuery($query, $params);
+            $result = $this->getSlaveConnection()->executeQuery($query, $params, Adhoc::bindableTypes($params));
             if ($ttl !== 0) {
                 $cconnection = $this->getCompatibleConnection($this->getSlaveConnection());
                 $cache[$queryid] = [
@@ -4584,7 +4584,7 @@ class Database
             RETRY:
             try {
                 $this->affectedRows = null;
-                $this->affectedRows = $this->getMasterConnection()->executeStatement($query, $params);
+                $this->affectedRows = $this->getMasterConnection()->executeStatement($query, $params, Adhoc::bindableTypes($params));
             }
             catch (\Exception $ex) {
                 if ($retry-- > 0) {

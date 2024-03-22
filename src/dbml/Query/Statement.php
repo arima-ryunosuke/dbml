@@ -91,8 +91,10 @@ class Statement implements Queryable
             array_unshift($params, null);
             unset($params[0]);
         }
-        foreach (Adhoc::bindableParameters($params) as $k => $param) {
-            $stmt->bindValue($k, $param);
+        $params = Adhoc::bindableParameters($params);
+        $types = Adhoc::bindableTypes($params);
+        foreach ($params as $k => $param) {
+            $stmt->bindValue($k, $param, $types[$k]);
         }
 
         // 実行して返す

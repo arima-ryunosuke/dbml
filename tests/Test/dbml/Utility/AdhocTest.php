@@ -2,6 +2,7 @@
 
 namespace ryunosuke\Test\dbml\Utility;
 
+use Doctrine\DBAL\ParameterType;
 use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\Test\IntEnum;
 use ryunosuke\Test\StringEnum;
@@ -132,6 +133,25 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
             'true'        => true,
             'int-enum'    => IntEnum::Int1(),
             'string-enum' => StringEnum::StringHoge(),
+        ]));
+    }
+
+    function test_bindableTypes()
+    {
+        $this->assertSame([
+            "null"   => ParameterType::NULL,
+            "false"  => ParameterType::BOOLEAN,
+            "true"   => ParameterType::BOOLEAN,
+            "int"    => ParameterType::INTEGER,
+            "float"  => null,
+            "string" => null,
+        ], Adhoc::bindableTypes([
+            'null'   => null,
+            'false'  => false,
+            'true'   => true,
+            'int'    => 123,
+            'float'  => 3.14,
+            'string' => 'string',
         ]));
     }
 

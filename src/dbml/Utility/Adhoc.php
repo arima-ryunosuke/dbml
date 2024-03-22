@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Utility;
 
+use Doctrine\DBAL\ParameterType;
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
 use function ryunosuke\dbml\is_stringable;
@@ -170,6 +171,27 @@ class Adhoc
             $params[$k] = $param;
         }
         return $params;
+    }
+
+    public static function bindableTypes(iterable $params): array
+    {
+        // 実質的に bindableParameters の後に呼ばれるのが前提なので enum とか is_object は考慮しない
+        $types = [];
+        foreach ($params as $k => $param) {
+            if (is_null($param)) {
+                $types[$k] = ParameterType::NULL;
+            }
+            elseif (is_bool($param)) {
+                $types[$k] = ParameterType::BOOLEAN;
+            }
+            elseif (is_int($param)) {
+                $types[$k] = ParameterType::INTEGER;
+            }
+            else {
+                $types[$k] = null; // 決め打ちしない（null にすることで呼び元で ?? Hoge できるようにする）
+            }
+        }
+        return $types;
     }
 
     public static function stringifyType(?\ReflectionType $type): ?string

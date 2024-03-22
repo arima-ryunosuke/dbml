@@ -1541,7 +1541,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cbinary'   => '1',
             'cblob'     => '0',
             'carray'    => true,
-            'cjson'     => false,
+            'cjson'     => "null",
             'cdate'     => 1234567890,
             'cdatetime' => 1234567890.123,
         ]);
@@ -1555,7 +1555,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cstring'   => 1,
             'ctext'     => 0,
             'carray'    => 1,
-            'cjson'     => 0,
+            'cjson'     => "null",
             'cdate'     => '2009-02-14',
             'cdatetime' => "2009-02-14 08:31:30{$microsecond}",
         ];
@@ -2513,9 +2513,9 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $cplatform = $database->getCompatiblePlatform();
 
         // CASE WHEN の条件なしとか ELSE 節とかを実際に投げてみて正当性を担保
-        $syntax = $cplatform->getCaseWhenSyntax("'2'", [1 => 10, 2 => 20], 99);
+        $syntax = $cplatform->getCaseWhenSyntax("2", [1 => 10, 2 => 20], 99);
         $this->assertEquals(20, $database->fetchValue("SELECT $syntax", $syntax->getParams()));
-        $syntax = $cplatform->getCaseWhenSyntax("'9'", [1 => 10, 2 => 20], 99);
+        $syntax = $cplatform->getCaseWhenSyntax("9", [1 => 10, 2 => 20], 99);
         $this->assertEquals(99, $database->fetchValue("SELECT $syntax", $syntax->getParams()));
 
         // SQLServer は LIKE に特殊性があるので実際に投げてみて正当性を担保
@@ -3221,6 +3221,47 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $this->assertCount(1, $database->executeSelect('SELECT * FROM test WHERE id = :id', ['id' => fn() => true])->fetchAllAssociative());
         $this->assertCount(0, $database->executeSelect('SELECT * FROM test WHERE id = :id', ['id' => fn() => false])->fetchAllAssociative());
+
+        // PDO は設定によって違う（しかもドライバでバラバラ）し pgsql は少し特殊っぽくて、統一できない or コケやすいので動的に決める
+        $sample = $database->executeSelect('SELECT ?', [1])->fetchOne();
+        $name = $database->getCompatibleConnection()->getName();
+        $strval = function ($val) use ($name, $sample) {
+            if (is_int($sample) || in_array($name, ['sqlite3', 'mysqli'], true)) {
+                return $val;
+            }
+            else {
+                return (string) $val;
+            }
+        };
+
+        $expected = [
+            "cnull"   => null,
+            "cfalse"  => $strval(0),
+            "ctrue"   => $strval(1),
+            "cint"    => $strval(123),
+            "cfloat"  => "3.14",
+            "cstring" => "string",
+        ];
+        $query = <<<SQL
+            SELECT
+              ? as cnull,
+              ? as cfalse,
+              ? as ctrue,
+              ? as cint,
+              ? as cfloat,
+              ? as cstring
+        SQL;
+        $params = [
+            null,
+            false,
+            true,
+            123,
+            3.14,
+            "string",
+        ];
+
+        $this->assertSame($expected, $database->executeSelect($query, $params)->fetchAssociative());
+        $this->assertSame($expected, $database->prepare($query, $params)->executeSelect()->fetchAssociative());
     }
 
     /**
