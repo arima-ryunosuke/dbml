@@ -1248,6 +1248,29 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_switchForeignKey($database)
+    {
+        // トランザクションありきの RDBMS がある
+        $database->begin();
+        try {
+            $this->assertEquals(-1, $database->switchForeignKey(false, 'fk_parentchild1'));
+            $this->assertEquals(-1, $database->switchForeignKey(false, 'fk_parentchild2'));
+
+            // 外部キーエラーは発生しない
+            $database->insert('foreign_c1', ['id' => 999, 'seq' => 1, 'name' => 'c1name1']);
+            $database->insert('foreign_c2', ['cid' => 999, 'seq' => 2, 'name' => 'c2name1']);
+        }
+        finally {
+            $database->rollback();
+        }
+        $this->assertEquals(0, $database->switchForeignKey(true, 'fk_parentchild1'));
+        $this->assertEquals(0, $database->switchForeignKey(true, 'fk_parentchild2'));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_view($database)
     {
         $v_blog_columns = $database->getSchema()->getTableColumns('v_blog');

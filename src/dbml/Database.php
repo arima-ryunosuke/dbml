@@ -483,6 +483,9 @@ class Database
     #[DebugInfo(false)]
     private $cache;
 
+    /** @var array */
+    private array $foreignKeySwitchingLevels = [];
+
     /** @var int */
     private $affectedRows;
 
@@ -2583,6 +2586,41 @@ class Database
         $fk = new ForeignKeyConstraint(array_keys($columnsMap), $foreignTable, array_values($columnsMap));
 
         return $this->getSchema()->ignoreForeignKey($fk, $localTable);
+    }
+
+    /**
+     * DBレイヤーの外部キー制約の有効無効を切り替える
+     *
+     * RDBMS によっては制約単位で切り替えられるので、その場合は $fkey を指定する。
+     *
+     * 深い階層で enable -> enable -> disable ->disable した場合、最初の disable で解除されてしまうので、ネストレベルが管理される。
+     * ネストレベルが 0 の時（本当に切り替わったとき）のみクエリは実行される。
+     * さらにネストレベルは $fkey 指定時はそれぞれで管理される。
+     *
+     * @param bool $enable 有効無効
+     * @param null|ForeignKeyConstraint|string $fkey 切り替える外部キー制約
+     * @return int ネストレベル
+     */
+    public function switchForeignKey($enable, $fkey = null): int
+    {
+        $fkeyname = $fkey instanceof ForeignKeyConstraint ? $fkey->getName() : $fkey;
+        $table_name = first_key($this->getSchema()->getForeignTable($fkey));
+        $levelkey = "$fkeyname@$table_name";
+
+        $level = $this->foreignKeySwitchingLevels[$levelkey] ?? 0;
+
+        if ($enable && ++$level === 0) {
+            foreach ($this->getCompatiblePlatform()->getSwitchForeignKeyExpression($enable, $table_name, $fkeyname) as $sql) {
+                $this->executeAffect($sql);
+            }
+        }
+        if (!$enable && $level-- === 0) {
+            foreach ($this->getCompatiblePlatform()->getSwitchForeignKeyExpression($enable, $table_name, $fkeyname) as $sql) {
+                $this->executeAffect($sql);
+            }
+        }
+
+        return $this->foreignKeySwitchingLevels[$levelkey] = $level;
     }
 
     /**
@@ -7315,6 +7353,7 @@ class Database
         $this->getUnsafeOption('cacheProvider')->clear();
         $this->cache = new \ArrayObject();
         $this->txConnection = $this->getMasterConnection();
+        $this->foreignKeySwitchingLevels = [];
         $this->affectedRows = null;
         $this->lastInsertIds = [];
         return $this->unstackAll();

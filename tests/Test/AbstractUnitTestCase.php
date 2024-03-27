@@ -269,7 +269,12 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             [new Index('PRIMARY', ['id', 'seq'], true, true)],
                             [],
-                            [new ForeignKeyConstraint(['id'], 'foreign_p', ['id'], 'fk_parentchild1')]
+                            [
+                                new ForeignKeyConstraint(['id'], 'foreign_p', ['id'], 'fk_parentchild1', [
+                                    'deferrable' => true,
+                                    'deferred'   => true,
+                                ]),
+                            ]
                         ),
                         new Table('foreign_c2',
                             [
@@ -279,7 +284,12 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             [new Index('PRIMARY', ['cid', 'seq'], true, true)],
                             [],
-                            [new ForeignKeyConstraint(['cid'], 'foreign_p', ['id'], 'fk_parentchild2')]
+                            [
+                                new ForeignKeyConstraint(['cid'], 'foreign_p', ['id'], 'fk_parentchild2', [
+                                    'deferrable' => true,
+                                    'deferred'   => true,
+                                ]),
+                            ]
                         ),
                         new Table('foreign_d1',
                             [

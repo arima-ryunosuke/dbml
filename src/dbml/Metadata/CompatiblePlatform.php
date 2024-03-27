@@ -1046,6 +1046,35 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * 外部キー有効無効切替構文を返す
+     *
+     * @param bool $enabled 有効無効
+     * @param ?string $table_name テーブル名
+     * @param ?string $fkname 外部キー名
+     * @return array 外部キーを切り替える一連のクエリ文字列配列
+     */
+    public function getSwitchForeignKeyExpression($enabled, $table_name = null, $fkname = null)
+    {
+        if ($this->platform instanceof SqlitePlatform) {
+            return ['PRAGMA foreign_keys = ' . ($enabled ? 'true' : 'false')];
+        }
+        if ($this->platform instanceof MySQLPlatform) {
+            return ["SET SESSION foreign_key_checks = " . ($enabled ? '1' : '0')];
+        }
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            assert($fkname !== null);
+            return ["SET CONSTRAINTS $fkname " . ($enabled ? 'IMMEDIATE' : 'DEFERRED')];
+        }
+        if ($this->platform instanceof SQLServerPlatform) {
+            assert($table_name !== null);
+            $fkname ??= 'ALL';
+            return ["ALTER TABLE $table_name " . ($enabled ? 'WITH CHECK CHECK' : 'NOCHECK') . " CONSTRAINT $fkname"];
+        }
+
+        return [];
+    }
+
+    /**
      * IGNORE 構文を返す
      *
      * @return string IGNORE 構文

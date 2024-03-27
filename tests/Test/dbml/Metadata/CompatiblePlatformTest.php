@@ -855,6 +855,37 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_getSwitchForeignKeyExpression($cplatform, $platform)
+    {
+        if ($platform instanceof SqlitePlatform) {
+            $this->assertEquals(['PRAGMA foreign_keys = false'], $cplatform->getSwitchForeignKeyExpression(false));
+            $this->assertEquals(['PRAGMA foreign_keys = true'], $cplatform->getSwitchForeignKeyExpression(true));
+        }
+        elseif ($platform instanceof MySQLPlatform) {
+            $this->assertEquals(['SET SESSION foreign_key_checks = 0'], $cplatform->getSwitchForeignKeyExpression(false));
+            $this->assertEquals(['SET SESSION foreign_key_checks = 1'], $cplatform->getSwitchForeignKeyExpression(true));
+        }
+        elseif ($platform instanceof PostgreSQLPlatform) {
+            $this->assertEquals(['SET CONSTRAINTS fkname DEFERRED'], $cplatform->getSwitchForeignKeyExpression(false, null, 'fkname'));
+            $this->assertEquals(['SET CONSTRAINTS fkname IMMEDIATE'], $cplatform->getSwitchForeignKeyExpression(true, null, 'fkname'));
+        }
+        elseif ($platform instanceof SQLServerPlatform) {
+            $this->assertEquals(['ALTER TABLE tablename NOCHECK CONSTRAINT fkname'], $cplatform->getSwitchForeignKeyExpression(false, 'tablename', 'fkname'));
+            $this->assertEquals(['ALTER TABLE tablename WITH CHECK CHECK CONSTRAINT fkname'], $cplatform->getSwitchForeignKeyExpression(true, 'tablename', 'fkname'));
+            $this->assertEquals(['ALTER TABLE tablename NOCHECK CONSTRAINT ALL'], $cplatform->getSwitchForeignKeyExpression(false, 'tablename'));
+            $this->assertEquals(['ALTER TABLE tablename WITH CHECK CHECK CONSTRAINT ALL'], $cplatform->getSwitchForeignKeyExpression(true, 'tablename'));
+        }
+        else {
+            $this->assertEquals([], $cplatform->getSwitchForeignKeyExpression(false));
+            $this->assertEquals([], $cplatform->getSwitchForeignKeyExpression(true));
+        }
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_getIgnoreSyntax($cplatform, $platform)
     {
         if ($platform instanceof SqlitePlatform) {
