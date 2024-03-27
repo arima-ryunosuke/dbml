@@ -1163,7 +1163,7 @@ class Database
                 $condition[$col] = $value;
             }
         }
-        if (count($pkcols) !== count($primary)) {
+        if ($primary && count($pkcols) !== count($primary)) {
             throw new \UnexpectedValueException(sprintf("primary data mismatch(%s.%s != %s)", $tableName, json_encode(array_keys($pkcols)), json_encode($primary)));
         }
         return [$primary, $rowdata, $condition];

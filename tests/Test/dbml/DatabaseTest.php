@@ -7000,8 +7000,8 @@ INSERT INTO test (id, name) VALUES
         ], $primaries);
 
         $this->assertException('is invalid', L($database)->affectArray('test', [['@method' => 'unknown']]));
-        $this->assertException('primary data mismatch', L($database)->affectArray('test', [['@method' => 'update']]));
-        $this->assertException('primary data mismatch', L($database)->affectArray('test', [['@method' => 'delete']]));
+        $this->assertException('primary data mismatch', L($database)->affectArray('multiprimary', [['@method' => 'update', 'mainid' => 1]]));
+        $this->assertException('primary data mismatch', L($database)->affectArray('multiprimary', [['@method' => 'delete', 'mainid' => 1]]));
 
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
             $primaries = $database->affectArrayIgnore('test', [
