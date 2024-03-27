@@ -260,6 +260,50 @@ trait AffectIgnoreTrait
     }
 
     /**
+     * IGNORE 付き {@uses Database::revise()}
+     *
+     * @inheritdoc Database::revise()
+     */
+    private function reviseIgnoreWithTable($tableName, $data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('revise', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::revise()}
+     *
+     * @inheritdoc TableGateway::revise()
+     */
+    private function reviseIgnoreWithoutTable($data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('revise', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses Database::upgrade()}
+     *
+     * @inheritdoc Database::upgrade()
+     */
+    private function upgradeIgnoreWithTable($tableName, $data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('upgrade', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::upgrade()}
+     *
+     * @inheritdoc TableGateway::upgrade()
+     */
+    private function upgradeIgnoreWithoutTable($data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('upgrade', func_get_args());
+    }
+
+    /**
      * IGNORE 付き {@uses Database::remove()}
      *
      * @inheritdoc Database::remove()

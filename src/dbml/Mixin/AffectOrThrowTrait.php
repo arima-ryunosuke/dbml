@@ -123,6 +123,58 @@ trait AffectOrThrowTrait
     }
 
     /**
+     * 作用行が 0 のときに例外を投げる {@uses Database::revise()}
+     *
+     * @inheritdoc Database::revise()
+     * @return array|string
+     * @throws NonAffectedException
+     */
+    private function reviseOrThrowWithTable($tableName, $data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectOrThrow('revise', func_get_args());
+    }
+
+    /**
+     * 作用行が 0 のときに例外を投げる {@uses TableGateway::revise()}
+     *
+     * @inheritdoc TableGateway::revise()
+     * @return array|string
+     * @throws NonAffectedException
+     */
+    private function reviseOrThrowWithoutTable($data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectOrThrow('revise', func_get_args());
+    }
+
+    /**
+     * 作用行が 0 のときに例外を投げる {@uses Database::upgrade()}
+     *
+     * @inheritdoc Database::upgrade()
+     * @return array|string
+     * @throws NonAffectedException
+     */
+    private function upgradeOrThrowWithTable($tableName, $data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectOrThrow('upgrade', func_get_args());
+    }
+
+    /**
+     * 作用行が 0 のときに例外を投げる {@uses TableGateway::upgrade()}
+     *
+     * @inheritdoc TableGateway::upgrade()
+     * @return array|string
+     * @throws NonAffectedException
+     */
+    private function upgradeOrThrowWithoutTable($data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectOrThrow('upgrade', func_get_args());
+    }
+
+    /**
      * 作用行が 0 のときに例外を投げる {@uses Database::remove()}
      *
      * @inheritdoc Database::remove()

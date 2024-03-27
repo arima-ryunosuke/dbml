@@ -289,7 +289,9 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['id' => 'f'], $database->modifyAndPrimary('noauto', ['id' => 'f', 'name' => 'fugara']));
 
         // update/delete
-        $this->assertEquals(['id' => 1], $database->updateAndPrimary('test', ['name' => 'hogera'], ['id' => 1]));
+        $this->assertEquals(['id' => 1], $database->updateAndPrimary('test', ['name' => 'hogera1'], ['id' => 1]));
+        $this->assertEquals(['id' => 1], $database->reviseAndPrimary('test', ['name' => 'hogera2'], ['id' => 1]));
+        $this->assertEquals(['id' => 1], $database->upgradeAndPrimary('test', ['name' => 'hogera3'], ['id' => 1]));
         $this->assertEquals(['id' => 1], $database->invalidAndPrimary('test', ['id' => 1], ['name' => 'deleted']));
         $this->assertEquals(['id' => 1], $database->deleteAndPrimary('test', ['id' => 1]));
         $this->assertEquals(['id' => 2], $database->removeAndPrimary('test', ['id' => 2]));
@@ -5818,6 +5820,122 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_revise($database)
+    {
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
+        $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
+        $database->insert('foreign_p', ['id' => 3, 'name' => 'name3']);
+        $database->insert('foreign_p', ['id' => 4, 'name' => 'name4']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
+        $database->insert('foreign_c2', ['cid' => 2, 'seq' => 21, 'name' => 'c2name1']);
+
+        $affected = $database->revise('foreign_p', ['id' => $database->raw('id + 5')], [
+            'id' => [1, 2, 3],
+        ]);
+
+        // 1, 2 は子供で使われていて 4 は指定していない。結果 3 しか更新されない
+        $this->assertEquals(1, $affected);
+
+        // 実際に取得してみて担保する
+        $this->assertEquals([
+            ['id' => 1, 'name' => 'name1'],
+            ['id' => 2, 'name' => 'name2'],
+            ['id' => 4, 'name' => 'name4'],
+            ['id' => 3 + 5, 'name' => 'name3'],
+        ], $database->selectArray('foreign_p'));
+
+        // OrThrow
+        if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
+            $this->assertException('affected row is nothing', L($database)->reviseOrThrow('test', ['id' => -1], ['id' => -1]));
+        }
+
+        if ($database->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
+            $logs = [];
+            $logger = new Logger([
+                'destination' => function ($sql, $params) use (&$logs) {
+                    $logs[] = compact('sql', 'params');
+                },
+                'level'       => 'debug',
+                'metadata'    => [],
+            ]);
+            try {
+                $database->setLogger($logger);
+                $database->revise('foreign_p P < foreign_c1 C', ['name' => 'revise'], ['C.id' => 99]);
+            }
+            catch (\Exception $ex) {
+                $last = reset($logs);
+                $this->assertEquals('UPDATE foreign_p P LEFT JOIN foreign_c1 C ON C.id = P.id SET name = ? WHERE (C.id = ?) AND ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = P.id))) AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = P.id)))', $last['sql']);
+            }
+            $database->setLogger(null);
+        }
+
+        // 相互外部キー
+        $this->assertEquals("UPDATE foreign_d1 SET name = 'hoge' WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id)))", $database->dryrun()->revise('foreign_d1', ['name' => 'hoge'], ['id' => 1]));
+        $this->assertEquals("UPDATE foreign_d2 SET name = 'hoge' WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id)))", $database->dryrun()->revise('foreign_d2', ['name' => 'hoge'], ['id' => 1]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_upgrade($database)
+    {
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
+        $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
+        $database->insert('foreign_p', ['id' => 3, 'name' => 'name3']);
+        $database->insert('foreign_p', ['id' => 4, 'name' => 'name4']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
+        $database->insert('foreign_c2', ['cid' => 2, 'seq' => 21, 'name' => 'c2name1']);
+        $database->insert('foreign_c2', ['cid' => 4, 'seq' => 41, 'name' => 'c4name1']);
+
+        $database->begin();
+        try {
+            // 1, 2 は子供で使われているが強制更新される。 4 は指定していない。結果 4 が残る
+            $affected = $database->upgrade('foreign_p', ['id' => 1 + 5], ['id' => 1]);
+            $this->assertEquals(2, $affected);
+            $affected = $database->upgrade('foreign_p', ['id' => 2 + 5], ['id' => 2]);
+            $this->assertEquals(2, $affected);
+            $affected = $database->upgrade('foreign_p', ['id' => 3 + 5], ['id' => 3]);
+            $this->assertEquals(1, $affected);
+
+            // 実際に取得してみて担保する
+            $this->assertEquals([
+                ['id' => 4 + 0, 'name' => 'name4'],
+                ['id' => 1 + 5, 'name' => 'name1'],
+                ['id' => 2 + 5, 'name' => 'name2'],
+                ['id' => 3 + 5, 'name' => 'name3'],
+            ], $database->selectArray('foreign_p'));
+            $this->assertEquals([
+                ['cid' => 4 + 0, 'seq' => 41, 'name' => 'c4name1'],
+                ['cid' => 2 + 5, 'seq' => 21, 'name' => 'c2name1'],
+            ], $database->selectArray('foreign_c2'));
+        }
+        finally {
+            $database->rollback();
+        }
+
+        // OrThrow
+        if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
+            $this->assertException('affected row is nothing', L($database)->upgradeOrThrow('test', ['id' => -1], ['id' => -1]));
+        }
+
+        // 主キーを更新しない
+        $this->assertEquals([
+            "UPDATE foreign_p SET name = 'hoge1' WHERE id = '4'",
+        ], $database->dryrun()->upgrade('foreign_p', ['name' => 'hoge1'], ['id' => 4]));
+
+        // dryrun はクエリ配列を返す
+        $this->assertEquals([
+            "UPDATE foreign_c1 SET id = '9' WHERE (id) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '4')",
+            "UPDATE foreign_c2 SET cid = '9' WHERE (cid) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '4')",
+            "UPDATE foreign_p SET id = '9' WHERE id = '4'",
+        ], $database->dryrun()->upgrade('foreign_p', ['id' => 4 + 5], ['id' => 4]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_remove($database)
     {
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
@@ -7048,14 +7166,20 @@ INSERT INTO test (id, name) VALUES
     {
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
         $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
+        $database->insert('foreign_p', ['id' => 3, 'name' => 'name3']);
+        $database->insert('foreign_p', ['id' => 4, 'name' => 'name4']);
         $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
         $database->insert('foreign_c2', ['cid' => 2, 'seq' => 21, 'name' => 'c2name1']);
+        $database->insert('foreign_c1', ['id' => 3, 'seq' => 31, 'name' => 'c3name1']);
+        $database->insert('foreign_c2', ['cid' => 4, 'seq' => 41, 'name' => 'c4name1']);
 
         // 画面からこのようなデータが来たと仮定
         $post = [
             ['@method' => 'destroy', 'id' => '1', 'name' => 'destroy'],
             ['@method' => 'remove', 'id' => '2', 'name' => 'remove'],
-            ['@method' => 'modify', 'id' => '3', 'name' => 'modify'],
+            ['@method' => 'upgrade', 'id' => '3', 'name' => 'upgrade'],
+            ['@method' => 'revise', 'id' => '4', 'name' => 'revise'],
+            ['@method' => 'modify', 'id' => '5', 'name' => 'modify'],
         ];
 
         if ($database->getCompatiblePlatform()->supportsMerge()) {
@@ -7065,7 +7189,9 @@ INSERT INTO test (id, name) VALUES
                 "DELETE FROM foreign_c2 WHERE (cid) IN (",
                 "DELETE FROM foreign_p WHERE id = '1'",
                 "DELETE FROM foreign_p WHERE (id = '2') AND (",
-                "INSERT INTO foreign_p (id, name) VALUES ('3', 'modify') ON ",
+                "UPDATE foreign_p SET name = 'upgrade' WHERE id = '3'",
+                "UPDATE foreign_p SET name = 'revise' WHERE ",
+                "INSERT INTO foreign_p (id, name) VALUES ('5', 'modify') ON ",
             ], $sqls);
         }
 
@@ -7074,6 +7200,8 @@ INSERT INTO test (id, name) VALUES
             ["id" => "1", "" => 1],
             ["id" => "2", "" => 0],
             ["id" => "3", "" => 1],
+            ["id" => "4", "" => 0],
+            ["id" => "5", "" => 1],
         ], $primaries);
     }
 
@@ -7169,6 +7297,9 @@ INSERT INTO test (id, name) VALUES
 
             $database->insert('foreign_p', ['id' => 1, 'name' => 'p']);
             $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'c1']);
+
+            $this->assertEquals([], $database->reviseIgnore('foreign_p', ['id' => 2, 'name' => 'pp'], ['id' => 1]));
+            $this->assertEquals(['id' => 2], $database->upgradeIgnore('foreign_p', ['id' => 2, 'name' => 'pp'], ['id' => 1]));
 
             // sqlite は外部キーを無視できない（というか DELETE OR IGNORE が対応していない？）のでシンタックスだけ
             $ignore = $database->getCompatiblePlatform()->getIgnoreSyntax();

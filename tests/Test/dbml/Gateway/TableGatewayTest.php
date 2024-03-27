@@ -1407,8 +1407,16 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(['id' => $count], $pri);
 
         // update すると更新されるはず
-        $gateway->set(['name' => 'XXX'])->update([], $pri);
-        $this->assertEquals('XXX', $gateway->value('name', $pri));
+        $gateway->set(['name' => 'XXX1'])->update([], $pri);
+        $this->assertEquals('XXX1', $gateway->value('name', $pri));
+
+        // revise 委譲の確認
+        $pri = $gateway->reviseOrThrow(['name' => 'XXX2'], $pri);
+        $this->assertEquals('XXX2', $gateway->value('name', $pri));
+
+        // upgrade 委譲の確認
+        $pri = $gateway->upgradeOrThrow(['name' => 'XXX3'], $pri);
+        $this->assertEquals('XXX3', $gateway->value('name', $pri));
 
         // updateOrThrow すると更新されて主キーが返ってくるはず
         $pri = $gateway->updateOrThrow(['name' => 'YYY'], $pri);
@@ -1516,8 +1524,18 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(['id' => $count], $pri);
 
         // updateAndPrimary すると更新されて主キーが返ってくるはず
-        $pri = $gateway->updateAndPrimary(['name' => 'YYY'], $pri);
-        $this->assertEquals('YYY', $gateway->value('name', $pri));
+        $pri = $gateway->updateAndPrimary(['name' => 'YYY1'], $pri);
+        $this->assertEquals('YYY1', $gateway->value('name', $pri));
+        $this->assertEquals(['id' => $count], $pri);
+
+        // revise 委譲
+        $pri = $gateway->reviseAndPrimary(['name' => 'YYY2'], $pri);
+        $this->assertEquals('YYY2', $gateway->value('name', $pri));
+        $this->assertEquals(['id' => $count], $pri);
+
+        // upgrade 委譲
+        $pri = $gateway->upgradeAndPrimary(['name' => 'YYY3'], $pri);
+        $this->assertEquals('YYY3', $gateway->value('name', $pri));
         $this->assertEquals(['id' => $count], $pri);
 
         // 主キー有りで upsert すると更新されるはず
@@ -1617,6 +1635,8 @@ AND ((flag=1))", "$gw");
 
             // for coverage
             $this->assertEquals(['id' => 1], $database->foreign_p->saveIgnore(['id' => 1]));
+            $this->assertEquals(['id' => 1], $database->foreign_p->reviseIgnore(['name' => 'revise'], ['id' => 1]));
+            $this->assertEquals(['id' => 1], $database->foreign_p->upgradeIgnore(['name' => 'upgrade'], ['id' => 1]));
             $this->assertEquals(['id' => 1], $database->foreign_p->invalidIgnore(['id' => 1], ['name' => 'deleted']));
             // delete の syntax error はしょうがない
             try_catch(L($database->foreign_c1)->deleteIgnore(['id' => -1]));

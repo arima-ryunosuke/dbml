@@ -165,7 +165,7 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  *
  * **Ignore**
  *
- * [insert, updert, modify, delete, remove, destroy] メソッドのみに付与できる。
+ * [insert, updert, modify, delete, invalid, revise, upgrade, remove, destroy] メソッドのみに付与できる。
  * RDBMS に動作は異なるが、 `INSERT IGNORE` のようなクエリが発行される。
  *
  * **Conditionally**
@@ -387,6 +387,8 @@ class Database
         updateIgnoreWithTable as public updateIgnore;
         deleteIgnoreWithTable as public deleteIgnore;
         invalidIgnoreWithTable as public invalidIgnore;
+        reviseIgnoreWithTable as public reviseIgnore;
+        upgradeIgnoreWithTable as public upgradeIgnore;
         removeIgnoreWithTable as public removeIgnore;
         destroyIgnoreWithTable as public destroyIgnore;
         createIgnoreWithTable as public createIgnore;
@@ -404,6 +406,8 @@ class Database
         updateOrThrowWithTable as public updateOrThrow;
         deleteOrThrowWithTable as public deleteOrThrow;
         invalidOrThrowWithTable as public invalidOrThrow;
+        reviseOrThrowWithTable as public reviseOrThrow;
+        upgradeOrThrowWithTable as public upgradeOrThrow;
         removeOrThrowWithTable as public removeOrThrow;
         destroyOrThrowWithTable as public destroyOrThrow;
         reduceOrThrowWithTable as public reduceOrThrow;
@@ -416,6 +420,8 @@ class Database
         updateAndPrimaryWithTable as public updateAndPrimary;
         deleteAndPrimaryWithTable as public deleteAndPrimary;
         invalidAndPrimaryWithTable as public invalidAndPrimary;
+        reviseAndPrimaryWithTable as public reviseAndPrimary;
+        upgradeAndPrimaryWithTable as public upgradeAndPrimary;
         removeAndPrimaryWithTable as public removeAndPrimary;
         destroyAndPrimaryWithTable as public destroyAndPrimary;
         upsertAndPrimaryWithTable as public upsertAndPrimary;
@@ -1466,6 +1472,53 @@ class Database
             $wheres[$key] = $cond;
         }
         return $wheres;
+    }
+
+    private function _restrictWheres($tableName, $aliasName, $event)
+    {
+        assert(in_array(strtolower($event), ['update', 'delete']));
+        $identifier = [];
+
+        $schema = $this->getSchema();
+        $fkeys = $schema->getForeignKeys($tableName, null);
+        foreach ($fkeys as $fkey) {
+            if ($fkey->{"on$event"}() === null) {
+                $ltable = first_key($schema->getForeignTable($fkey));
+                $notexists = $this->select($ltable);
+                $notexists->setSubwhere($tableName, $aliasName, $fkey->getName());
+                $identifier[] = $notexists->notExists();
+            }
+        }
+        return $identifier;
+    }
+
+    private function _cascadeValues($data, ForeignKeyConstraint $fkey)
+    {
+        $subdata = [];
+        foreach (array_combine($fkey->getLocalColumns(), $fkey->getForeignColumns()) as $lcol => $fcol) {
+            if (array_key_exists($fcol, $data)) {
+                $subdata[$lcol] = $data[$fcol];
+            }
+        }
+        return $subdata;
+    }
+
+    private function _cascadeWheres($identifier, ForeignKeyConstraint $fkey, $opt)
+    {
+        $ltable = first_key($this->getSchema()->getForeignTable($fkey));
+        $pselect = $this->select([$fkey->getForeignTableName() => $fkey->getForeignColumns()], $identifier);
+        $subwhere = [];
+        if (array_get($opt, 'in')) {
+            $pvals = $pvals ?? $pselect->array();
+            $pvals2 = array_rmap($pvals, 'array_combine', $fkey->getLocalColumns());
+            $pcond = $this->getCompatiblePlatform()->getPrimaryCondition($pvals2, $ltable);
+            $subwhere[] = $this->queryInto($pcond) ?: 'FALSE';
+        }
+        else {
+            $ckey = implode(',', $fkey->getLocalColumns());
+            $subwhere["($ckey)"] = $pselect;
+        }
+        return $subwhere;
     }
 
     /**
@@ -5907,6 +5960,8 @@ class Database
             'destroy' => [],
             'remove'  => [],
             'delete'  => [],
+            'upgrade' => [], // 実質的な意味はなし（主キーの更新は連想配列の都合上実現できない）
+            'revise'  => [], // 実質的な意味はなし（主キーの更新は連想配列の都合上実現できない）
             'update'  => [],
             'upsert'  => [],
             'modify'  => [],
@@ -6571,6 +6626,137 @@ class Database
     }
 
     /**
+     * UPDATE 構文（RESTRICT/NO ACTION を除外）
+     *
+     * CASCADE/SET NULL はむしろ「消えて欲しい/NULL になって欲しい」状況だと考えられるので何も手を加えない。
+     * 簡単に言えば「外部キーエラーにならない**ような**」 UPDATE を実行する。
+     *
+     * ```php
+     * # childtable -> parenttable に RESTRICT な外部キーがある場合
+     * $db->revise('parenttable', ['id' => 2], ['id' => 1]);
+     * // UPDATE parenttable SET id = 2 WHERE id = 1 AND (NOT EXISTS (SELECT * FROM childtable WHERE parenttable.id = childtable.parent_id))
+     * ```
+     *
+     * @used-by reviseOrThrow()
+     * @used-by reviseAndPrimary()
+     * @used-by reviseIgnore()
+     *
+     * @param string|array $tableName テーブル名
+     * @param mixed $data UPDATE データ配列
+     * @param array|mixed $identifier WHERE 条件
+     * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
+     */
+    public function revise($tableName, $data, $identifier = [])
+    {
+        // 隠し引数 $opt
+        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
+
+        $tableName = $this->_preaffect($tableName, []);
+        $aliasName = null;
+
+        if ($tableName instanceof QueryBuilder) {
+            $originalBuilder = $tableName;
+            $froms = $originalBuilder->getQueryPart('from');
+            $from = reset($froms);
+            $tableName = $from['table'];
+            $aliasName = $from['alias'];
+        }
+
+        $tableName = $this->convertTableName($tableName);
+        $identifier = $this->_prewhere($tableName, $identifier);
+        $identifier = array_merge($identifier, $this->_restrictWheres($tableName, $aliasName, 'update'));
+
+        return $this->update($originalBuilder ?? $tableName, $data, $identifier, $opt);
+    }
+
+    /**
+     * UPDATE 構文（RESTRICT/NO ACTION も更新）
+     *
+     * RESTRICT/NO ACTION な子テーブルレコードを先に更新してから実行する。
+     * 簡単に言えば「外部キーエラーにならないように**してから**」 UPDATE を実行する。
+     *
+     * 実質的には RESTRICT/NO ACTION を無視して CASCADE 的な動作と同等なので注意して使用すべき。
+     * （RESTRICT/NO ACTION にしているのには必ず理由があるはず）。
+     *
+     * 相互参照外部キーでかつそれらが共に「RESTRICT/NO ACTION」だと無限ループになるので注意。
+     * （そのような外部キーはおかしいと思うので特にチェックしない）。
+     *
+     * さらに、複合カラム外部キーだと行値式 IN を使うので SQLServer では実行できない。また、 mysql 5.6 以下ではインデックスが効かないので注意。
+     * 単一カラム外部キーなら問題ない。
+     *
+     * ```php
+     * # childtable -> parenttable に RESTRICT な外部キーがある場合
+     * $db->upgrade('parenttable', ['pk' => 2], ['pk' => 1]);
+     * // UPDATE childtable SET fk = 2 WHERE (cid) IN (parenttable id FROM parenttable WHERE pk = 1)
+     * // UPDATE FROM parenttable SET pk = 2 WHERE pk = 1
+     * ```
+     *
+     * @used-by upgradeOrThrow()
+     * @used-by upgradeAndPrimary()
+     * @used-by upgradeIgnore()
+     *
+     * @param string|array $tableName テーブル名
+     * @param mixed $data UPDATE データ配列
+     * @param array|mixed $identifier WHERE 条件
+     * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
+     */
+    public function upgrade($tableName, $data, $identifier = [])
+    {
+        // 隠し引数 $opt
+        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
+
+        $tableName = $this->_preaffect($tableName, []);
+
+        $tableName = $this->convertTableName($tableName);
+
+        if (array_get($opt, 'extract') === 1) {
+            [$primary, $rowdata,] = $this->_extractPrimaryCondition($tableName, $data);
+            $identifier += $primary;
+            $data = $rowdata;
+        }
+
+        $identifier = $this->_prewhere($tableName, $identifier);
+
+        try {
+            $affecteds = [];
+            $recoveries = [];
+            $schema = $this->getSchema();
+            $fkeys = $schema->getForeignKeys($tableName, null);
+            foreach ($fkeys as $fkey) {
+                if ($fkey->onUpdate() === null) {
+                    $subdata = $this->_cascadeValues($data, $fkey);
+                    if (!$subdata) {
+                        continue;
+                    }
+                    // 外部キー無効を戻した瞬間に結果整合性でエラーになる RDBMS も居るため false -> update -> true にはできない
+                    // かといってトランザクションイベントまで巻き込みたくないため愚直に UPDATE 後（整合後）に戻す（ために覚えておく）
+                    $this->switchForeignKey(false, $fkey);
+                    $recoveries[] = $fkey;
+
+                    $ltable = first_key($schema->getForeignTable($fkey));
+                    $subwhere = $this->_cascadeWheres($identifier, $fkey, $opt);
+                    $affecteds = array_merge($affecteds, (array) $this->upgrade($ltable, $subdata, $subwhere, array_pickup($opt, ['in', 'ignore'])));
+                }
+            }
+
+            $affected = $this->update($tableName, $data, $identifier, $opt);
+        }
+        finally {
+            foreach ($recoveries as $recovery) {
+                $this->switchForeignKey(true, $recovery);
+            }
+        }
+
+        if ($this->getUnsafeOption('dryrun')) {
+            return array_merge($affecteds, (array) $affected);
+        }
+        if (is_int($affected)) {
+            return array_sum([...$affecteds, $affected]);
+        }
+        return $affected;
+    }
+
+    /**
      * DELETE 構文（RESTRICT/NO ACTION を除外）
      *
      * CASCADE/SET NULL はむしろ「消えて欲しい/NULL になって欲しい」状況だと考えられるので何も手を加えない。
@@ -6608,17 +6794,7 @@ class Database
 
         $tableName = $this->convertTableName($tableName);
         $identifier = $this->_prewhere($tableName, $identifier);
-
-        $schema = $this->getSchema();
-        $fkeys = $schema->getForeignKeys($tableName, null);
-        foreach ($fkeys as $fkey) {
-            if ($fkey->onDelete() === null) {
-                $ltable = first_key($schema->getForeignTable($fkey));
-                $notexists = $this->select($ltable);
-                $notexists->setSubwhere($tableName, $aliasName, $fkey->getName());
-                $identifier[] = $notexists->notExists();
-            }
-        }
+        $identifier = array_merge($identifier, $this->_restrictWheres($tableName, $aliasName, 'delete'));
 
         return $this->delete($originalBuilder ?? $tableName, $identifier, $opt);
     }
@@ -6677,18 +6853,7 @@ class Database
         foreach ($fkeys as $fkey) {
             if ($fkey->onDelete() === null) {
                 $ltable = first_key($schema->getForeignTable($fkey));
-                $pselect = $this->select([$tableName => $fkey->getForeignColumns()], $identifier);
-                $subwhere = [];
-                if (array_get($opt, 'in')) {
-                    $pvals = $pvals ?? $pselect->array();
-                    $pvals2 = array_rmap($pvals, 'array_combine', $fkey->getLocalColumns());
-                    $pcond = $this->getCompatiblePlatform()->getPrimaryCondition($pvals2, $ltable);
-                    $subwhere[] = $this->queryInto($pcond) ?: 'FALSE';
-                }
-                else {
-                    $ckey = implode(',', $fkey->getLocalColumns());
-                    $subwhere["($ckey)"] = $pselect;
-                }
+                $subwhere = $this->_cascadeWheres($identifier, $fkey, $opt);
                 $affecteds = array_merge($affecteds, (array) $this->destroy($ltable, $subwhere, array_pickup($opt, ['in', 'ignore'])));
             }
         }

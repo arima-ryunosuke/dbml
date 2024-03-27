@@ -114,6 +114,54 @@ trait AffectAndPrimaryTrait
     }
 
     /**
+     * 主キーを返す {@uses Database::revise()}
+     *
+     * @inheritdoc Database::revise()
+     * @return array|string
+     */
+    private function reviseAndPrimaryWithTable($tableName, $data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectAndPrimary('revise', func_get_args());
+    }
+
+    /**
+     * 主キーを返す {@uses TableGateway::revise()}
+     *
+     * @inheritdoc TableGateway::revise()
+     * @return array|string
+     */
+    private function reviseAndPrimaryWithoutTable($data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectAndPrimary('revise', func_get_args());
+    }
+
+    /**
+     * 主キーを返す {@uses Database::upgrade()}
+     *
+     * @inheritdoc Database::upgrade()
+     * @return array|string
+     */
+    private function upgradeAndPrimaryWithTable($tableName, $data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectAndPrimary('upgrade', func_get_args());
+    }
+
+    /**
+     * 主キーを返す {@uses TableGateway::upgrade()}
+     *
+     * @inheritdoc TableGateway::upgrade()
+     * @return array|string
+     */
+    private function upgradeAndPrimaryWithoutTable($data, $identifier = [])
+    {
+        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectAndPrimary('upgrade', func_get_args());
+    }
+
+    /**
      * 主キーを返す {@uses Database::remove()}
      *
      * @inheritdoc Database::remove()

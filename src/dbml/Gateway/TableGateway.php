@@ -411,6 +411,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         updateIgnoreWithoutTable as public updateIgnore;
         deleteIgnoreWithoutTable as public deleteIgnore;
         invalidIgnoreWithoutTable as public invalidIgnore;
+        reviseIgnoreWithoutTable as public reviseIgnore;
+        upgradeIgnoreWithoutTable as public upgradeIgnore;
         removeIgnoreWithoutTable as public removeIgnore;
         destroyIgnoreWithoutTable as public destroyIgnore;
         createIgnoreWithoutTable as public createIgnore;
@@ -428,6 +430,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         updateOrThrowWithoutTable as public updateOrThrow;
         deleteOrThrowWithoutTable as public deleteOrThrow;
         invalidOrThrowWithoutTable as public invalidOrThrow;
+        reviseOrThrowWithoutTable as public reviseOrThrow;
+        upgradeOrThrowWithoutTable as public upgradeOrThrow;
         removeOrThrowWithoutTable as public removeOrThrow;
         destroyOrThrowWithoutTable as public destroyOrThrow;
         reduceOrThrowWithoutTable as public reduceOrThrow;
@@ -440,6 +444,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         updateAndPrimaryWithoutTable as public updateAndPrimary;
         deleteAndPrimaryWithoutTable as public deleteAndPrimary;
         invalidAndPrimaryWithoutTable as public invalidAndPrimary;
+        reviseAndPrimaryWithoutTable as public reviseAndPrimary;
+        upgradeAndPrimaryWithoutTable as public upgradeAndPrimary;
         removeAndPrimaryWithoutTable as public removeAndPrimary;
         destroyAndPrimaryWithoutTable as public destroyAndPrimary;
         upsertAndPrimaryWithoutTable as public upsertAndPrimary;
@@ -2536,6 +2542,36 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         $this->resetResult();
         return $this->database->invalid($this->_redatawhere($data, $identifier), $identifier, $invalid_columns, ...array_slice(func_get_args(), 2));
+    }
+
+    /**
+     * 駆動表を省略できる <@uses Database::revise()>
+     *
+     * @used-by reviseOrThrow()
+     * @used-by reviseAndPrimary()
+     * @used-by reviseIgnore()
+     *
+     * @inheritdoc Database::revise()
+     */
+    public function revise($data, array $identifier = [])
+    {
+        $this->resetResult();
+        return $this->database->revise($this->_redatawhere($data, $identifier), $data, $identifier, ...array_slice(func_get_args(), 2));
+    }
+
+    /**
+     * 駆動表を省略できる <@uses Database::upgrade()>
+     *
+     * @used-by upgradeOrThrow()
+     * @used-by upgradeAndPrimary()
+     * @used-by upgradeIgnore()
+     *
+     * @inheritdoc Database::upgrade()
+     */
+    public function upgrade($data, array $identifier = [])
+    {
+        $this->resetResult();
+        return $this->database->upgrade($this->_redatawhere($data, $identifier), $data, $identifier, ...array_slice(func_get_args(), 2));
     }
 
     /**
