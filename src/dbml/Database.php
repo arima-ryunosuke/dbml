@@ -7364,17 +7364,53 @@ class Database
      *
      * @param string $tableName テーブル名
      * @param bool $cascade CASCADE フラグ。PostgreSql の場合のみ有効
-     * @return int|string|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|array|string 基本的には affected row. dryrun 中は文字列か配列
      */
     public function truncate($tableName, $cascade = false)
     {
+        $cplatform = $this->getCompatiblePlatform();
+        $schema = $this->getSchema();
+
         $tableName = $this->convertTableName($tableName);
-        $sql = $this->getCompatiblePlatform()->getTruncateTableSQL($tableName, $cascade);
-        $affected = $this->executeAffect($sql);
-        if (!$this->getCompatiblePlatform()->supportsResetAutoIncrementOnTruncate() && $this->getSchema()->getTableAutoIncrement($tableName)) {
+        $relations = [];
+        if ($cascade && !$cplatform->supportsTruncateCascade()) {
+            $relations = $schema->getForeignKeys($tableName, null);
+        }
+
+        $affecteds = [];
+
+        foreach ($relations as $fkey) {
+            $ltable = first_key($schema->getForeignTable($fkey));
+            $affecteds = array_merge($affecteds, (array) $this->truncate($ltable, $cascade));
+        }
+
+        foreach ($relations as $fkey) {
+            $this->switchForeignKey(false, $fkey);
+        }
+        try {
+            $affected = $this->executeAffect($cplatform->getTruncateTableSQL($tableName, $cascade));
+        }
+        finally {
+            foreach ($relations as $fkey) {
+                $this->switchForeignKey(true, $fkey);
+            }
+        }
+
+        if (!$cplatform->supportsResetAutoIncrementOnTruncate() && $schema->getTableAutoIncrement($tableName)) {
             $this->resetAutoIncrement($tableName);
         }
-        return $affected;
+
+        if ($this->getUnsafeOption('dryrun')) {
+            // for compatible
+            if ($affecteds) {
+                return array_merge($affecteds, (array) $affected);
+            }
+            return $affected;
+        }
+        if (is_int($affected)) {
+            return array_sum([...$affecteds, $affected]);
+        }
+        return $affected; // @codeCoverageIgnore Statement の可能性があるが、truncate を prepare で呼ぶ人はいないし用途もないのでテストしない
     }
 
     /**

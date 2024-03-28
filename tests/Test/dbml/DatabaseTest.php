@@ -7281,6 +7281,44 @@ INSERT INTO test (id, name) VALUES
     {
         $database->truncate('test');
         $this->assertEquals(0, $database->count('test'));
+
+        // 他の外部キーメソッドのようにメソッドを分けていないので dryrun の返り値は string|array になっている
+        $this->assertIsString($database->dryrun()->truncate('test'));
+        if (!$database->getCompatiblePlatform()->supportsTruncateCascade()) {
+            $this->assertIsArray($database->dryrun()->truncate('g_ancestor', true));
+        }
+
+        // SQLServer は truncate の CASCADE も外部キー無効も対応していない
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            $database->import([
+                'g_ancestor' => [
+                    [
+                        'ancestor_name' => 'A',
+                        'g_parent'      => [
+                            [
+                                'parent_name' => 'AA',
+                                'g_child'     => [
+                                    [
+                                        'child_name' => 'AAA',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+            // truncate の affected rows はバラバラなので int で緩く
+            $this->assertIsInt($database->truncate('g_ancestor', true));
+
+            // すべて消えている
+            $this->assertEquals(0, $database->count('g_ancestor'));
+            $this->assertEquals(0, $database->count('g_parent'));
+            $this->assertEquals(0, $database->count('g_child'));
+
+            // 制約の種類は問わない
+            $this->assertIsInt($database->truncate('foreign_p', true));
+        }
     }
 
     /**
