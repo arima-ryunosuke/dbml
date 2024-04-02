@@ -3078,6 +3078,26 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_perform($database)
     {
+        $database = $database->context(['checkSameKey' => 'noallow']);
+        $rows = [
+            $row1 = ['id' => 'k', 'value' => 'v1'],
+            $row2 = ['id' => 'k', 'value' => 'v2'],
+        ];
+
+        $this->assertException("duplicated key k", L($database)->perform($rows, 'assoc'));
+        $this->assertException("duplicated key k", L($database)->perform($rows, 'pairs'));
+        $this->assertException("missing value of k", L($database)->perform([['k']], 'pairs'));
+
+        $database = $database->context(['checkSameKey' => 'skip']);
+
+        $this->assertEquals(['k' => $row1], $database->perform($rows, 'assoc'));
+        $this->assertEquals(['k' => end($row1)], $database->perform($rows, 'pairs'));
+
+        $database = $database->context(['checkSameKey' => null]);
+
+        $this->assertEquals(['k' => $row2], $database->perform($rows, 'assoc'));
+        $this->assertEquals(['k' => end($row2)], $database->perform($rows, 'pairs'));
+
         $this->assertEquals(['hoge'], $database->perform([['hoge']], 'lists'));
         $this->assertException("unknown fetch method 'hoge'", L($database)->perform([], 'hoge'));
     }

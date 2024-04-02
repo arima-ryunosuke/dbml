@@ -275,6 +275,8 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * @method $this                  setInjectCallStack(string|array|callable $string)
  * @method bool                   getMasterMode()
  * @method $this                  setMasterMode($bool)
+ * @method string                 getCheckSameKey()
+ * @method $this                  setCheckSameKey($string)
  * @method string                 getCheckSameColumn()
  * @method $this                  setCheckSameColumn($string) {
  *     同名カラムをどのように扱うか設定する
@@ -565,6 +567,8 @@ class Database
                 // このように Type を渡すと（一度だけ） addType されると同時に select:convertToPHPValue, affect:convertToDatabaseValue が自動で設定される
                 'type'                  => new \Doctrine\DBAL\Types\DateTimeType(),
             ],
+            // assoc,pairs で同名キーがあった時どう振る舞うか[null:何もしない（後方優先。実質上書き）, 'noallow':例外, 'skip':スキップ（前方優先）]
+            'checkSameKey'              => null,
             // 同名カラムがあった時どう振る舞うか[null, 'noallow', 'strict', 'loose']
             'checkSameColumn'           => null,
             // SQL 実行時にコールスタックを埋め込むか(パスを渡す。!プレフィックスで否定、 null で無効化)
@@ -3566,6 +3570,8 @@ class Database
      */
     public function perform($row_provider, $fetch_mode, $converter = null)
     {
+        $checkSameKey = $this->getUnsafeOption('checkSameKey');
+
         $metadata = [];
         if ($row_provider instanceof Result) {
             $metadata = $this->getCompatibleConnection()->getMetadata($row_provider);
@@ -3589,11 +3595,17 @@ class Database
                 foreach ($row_provider as $row) {
                     $row = $converter ? $converter($row, $metadata) : $row;
                     foreach ($row as $e) {
-                        $key = $e;
+                        if ($checkSameKey !== null && array_keys_exist($e, $result)) {
+                            if ($checkSameKey === 'noallow') {
+                                throw new \LogicException("duplicated key $e for " . self::METHOD_ASSOC);
+                            }
+                            if ($checkSameKey === 'skip') {
+                                break;
+                            }
+                        }
+                        $result[$e] = $row;
                         break;
                     }
-                    /** @noinspection PhpUndefinedVariableInspection */
-                    $result[$key] = $row;
                 }
                 return $result;
 
@@ -3603,27 +3615,35 @@ class Database
                 foreach ($row_provider as $row) {
                     $row = $converter ? $converter($row, $metadata) : $row;
                     foreach ($row as $e) {
-                        $val = $e;
+                        $result[] = $e;
                         break;
                     }
-                    /** @noinspection PhpUndefinedVariableInspection */
-                    $result[] = $val;
                 }
                 return $result;
             case self::METHOD_PAIRS:
                 $result = [];
                 foreach ($row_provider as $row) {
                     $row = $converter ? $converter($row, $metadata) : $row;
-                    $i = 0;
+                    $key = null;
                     foreach ($row as $e) {
-                        if ($i++ === 1) {
-                            $val = $e;
-                            break;
+                        if (!isset($key)) {
+                            $key = $e;
+                            continue;
                         }
-                        $key = $e;
+                        if ($checkSameKey !== null && array_keys_exist($key, $result)) {
+                            if ($checkSameKey === 'noallow') {
+                                throw new \LogicException("duplicated key $key for " . self::METHOD_PAIRS);
+                            }
+                            if ($checkSameKey === 'skip') {
+                                break;
+                            }
+                        }
+                        $result[$key] = $e;
+                        break;
                     }
-                    /** @noinspection PhpUndefinedVariableInspection */
-                    $result[$key] = $val;
+                    if (!array_keys_exist($key, $result)) {
+                        throw new \LogicException("missing value of $key for " . self::METHOD_PAIRS);
+                    }
                 }
                 return $result;
 
