@@ -772,11 +772,11 @@ class Database
             $connections = array_pad($dbconfig, 2, reset($dbconfig));
         }
         else {
-            $master = $slave = $dbconfig;
+            $master = $slave = $dbconfig = Adhoc::parseParams($dbconfig);
             foreach ($dbconfig as $key => $value) {
-                if (is_array($value) && isset($value[0], $value[1])) {
+                if ($key !== 'driverOptions' && is_array($value) && isset($value[0], $value[1])) {
                     $master[$key] = $value[0];
-                    $slave[$key] = $value[1];
+                    $slave[$key] = $value[rand(1, count($value) - 1)];
                 }
             }
             if ($master === $slave) {

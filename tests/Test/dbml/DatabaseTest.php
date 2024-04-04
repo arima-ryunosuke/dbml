@@ -103,6 +103,29 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             'dbname' => 'masterslave',
         ], $db->getSlaveConnection()->getParams());
 
+        // URL 指定+ランダム slave
+        srand(1);
+        $db = new Database([
+            'url'  => 'mysqli+8.0.0:///masterslave',
+            'host' => ['master', 'slave1', 'slave2'],
+        ]);
+        $this->assertNotSame($db->getMasterConnection(), $db->getSlaveConnection());
+        $this->assertEquals([
+            "driver"        => "mysqli",
+            "serverVersion" => "8.0.0",
+            "host"          => "master",
+            "dbname"        => "masterslave",
+            "driverOptions" => [],
+        ], $db->getMasterConnection()->getParams());
+        $this->assertEquals([
+            "driver"        => "mysqli",
+            "serverVersion" => "8.0.0",
+            "host"          => "slave2",
+            "dbname"        => "masterslave",
+            "driverOptions" => [],
+        ], $db->getSlaveConnection()->getParams());
+        gc_collect_cycles();
+
         // logger and initCommand and cacheProvider
         $tmpdir = sys_get_temp_dir() . '/dbml/tmp';
         rm_rf($tmpdir);

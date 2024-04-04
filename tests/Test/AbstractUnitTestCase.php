@@ -21,6 +21,7 @@ use PHPUnit\Framework\SkippedTestError;
 use PHPUnit\Framework\TestCase;
 use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware;
+use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\PHPUnit\TestCaseTrait;
 use function ryunosuke\dbml\cacheobject;
 use function ryunosuke\dbml\class_shorten;
@@ -49,8 +50,7 @@ abstract class AbstractUnitTestCase extends TestCase
         };
 
         $prefix = strtoupper($dbms);
-        $parser = new DsnParser();
-        $params = $parser->parse($getconst("{$prefix}_URL"));
+        $params = Adhoc::parseParams(['url' => $getconst("{$prefix}_URL")]);
         $middlewares = [];
 
         if ($init) {
@@ -65,11 +65,6 @@ abstract class AbstractUnitTestCase extends TestCase
         if (strpos($dbms, 'sqlite') !== false) {
             $params['platform'] = new \ryunosuke\Test\Platforms\SqlitePlatform();
             $middlewares[] = new EnableForeignKeys();
-        }
-        if ($params['driver'] === 'pdo_mysql') {
-            $params['driverOptions'] = [
-                \PDO::MYSQL_ATTR_LOCAL_INFILE => true,
-            ];
         }
 
         $configuration = new Configuration();

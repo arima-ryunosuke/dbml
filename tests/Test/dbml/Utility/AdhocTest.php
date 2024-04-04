@@ -9,6 +9,62 @@ use ryunosuke\Test\StringEnum;
 
 class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
+    function test_parseParams()
+    {
+        $params = [
+            'driver'        => 'sql',
+            'serverVersion' => '1.0.0',
+            'host'          => 'localhost',
+            'port'          => 9999,
+            'user'          => 'user',
+            'password'      => 'pass',
+            'dbname'        => 'example',
+            'charset'       => 'utf8',
+            'driverOptions' => [
+                \PDO::ATTR_TIMEOUT          => 1234,
+                \PDO::ATTR_EMULATE_PREPARES => false,
+            ],
+        ];
+
+        // no url
+        $this->assertEquals($params, Adhoc::parseParams($params));
+
+        // only url
+        $this->assertEquals([
+            "driver"        => "mysql",
+            "serverVersion" => "8.1.2",
+            "host"          => "127.0.0.1",
+            "port"          => 3306,
+            "user"          => "U",
+            "password"      => "P",
+            "dbname"        => "dbname",
+            "charset"       => "utfmb4",
+            "socket"        => "tmp.socket",
+            "driverOptions" => [
+                \PDO::ATTR_TIMEOUT => "2345",
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            ],
+        ], Adhoc::parseParams(['url' => 'mysql+8.1.2://U:P@127.0.0.1:3306/dbname?charset=utfmb4&socket=tmp.socket#PDO::ATTR_TIMEOUT=2345&PDO::ATTR_ERRMODE=PDO::ERRMODE_EXCEPTION']));
+
+        // merge url
+        $this->assertEquals([
+            "driver"        => "sql",
+            "serverVersion" => "1.0.0",
+            "host"          => "localhost",
+            "port"          => 9999,
+            "user"          => "user",
+            "password"      => "pass",
+            "dbname"        => "example",
+            "charset"       => "utf8",
+            "socket"        => "tmp.socket",
+            "driverOptions" => [
+                \PDO::ATTR_TIMEOUT          => 1234,
+                \PDO::ATTR_EMULATE_PREPARES => false,
+                \PDO::ATTR_ERRMODE          => \PDO::ERRMODE_EXCEPTION,
+            ],
+        ], Adhoc::parseParams(['url' => 'mysql+8.1.2://U:P@127.0.0.1:3306/dbname?charset=utfmb4&socket=tmp.socket#PDO::ATTR_TIMEOUT=2345&PDO::ATTR_ERRMODE=PDO::ERRMODE_EXCEPTION'] + $params));
+    }
+
     function test_is_empty()
     {
         $this->assertTrue(Adhoc::is_empty([]));

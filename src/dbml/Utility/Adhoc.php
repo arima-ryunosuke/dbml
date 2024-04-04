@@ -3,6 +3,7 @@
 namespace ryunosuke\dbml\Utility;
 
 use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Tools\DsnParser;
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
 use function ryunosuke\dbml\is_stringable;
@@ -14,6 +15,73 @@ use function ryunosuke\dbml\type_exists;
  */
 class Adhoc
 {
+    /**
+     * DsnParser::parse をアレンジしたもの
+     *
+     * 下記の点が異なる。
+     *
+     * - url に pdo-mysql+8.1.2 のようなバージョン付きスキームが使える
+     *   - 指定されたバージョンは serverVersion に格納される
+     * - url の query は params の要素として解釈される
+     *   - これは doctrine と同じ（毎回迷うので併せて記載している）
+     * - url の fragment は driverOptions として働く
+     *   - その際、定数はキー・値ともに解決され、$params の driverOptions に追加される（上書きではない）
+     * - url の指定より params 直指定の方が優先される
+     *   - つまり、 url が共通設定のように作用する（url 文字列で指定できない配列や要エスケープ文字列を直に指定するイメージ）
+     *
+     * @param array $params パラメータ
+     * @return array 書き換えたパラメータ
+     */
+    public static function parseParams(array $params): array
+    {
+        $url = $params['url'] ?? null;
+        if (!strlen($url ?? '')) {
+            return $params;
+        }
+
+        // parse_url はホスト省略に対想定おらず false を返すので是正
+        $url = strtr($url, [':///' => '://127.0.0.1/']);
+
+        $urlParts = parse_url($url);
+        $urlParams = ['driverOptions' => []];
+
+        if (isset($urlParts['scheme']) && preg_match('#^(.+?)\+(\d+\.\d+\.\d+)$#', $urlParts['scheme'], $m)) {
+            $urlParams['driver'] = str_replace('-', '_', $m[1]);
+            $urlParams['serverVersion'] = $m[2];
+        }
+
+        if (isset($urlParts['fragment'])) {
+            parse_str($urlParts['fragment'], $fragments);
+            foreach ($fragments as $k => $v) {
+                if (defined($k)) {
+                    $k = constant($k);
+                }
+                if (defined($v)) {
+                    $v = constant($v);
+                }
+                $urlParams['driverOptions'][$k] = $v;
+            }
+        }
+
+        $params += $urlParams;
+        $params['driverOptions'] += $urlParams['driverOptions'];
+
+        // for compatible. DriverManager の挙動と併せるために必要だが、あまり必要性を感じないのでなくてよい
+        $driverSchemeAliases = [
+            'db2'        => 'ibm_db2',
+            'mssql'      => 'pdo_sqlsrv',
+            'mysql'      => 'pdo_mysql',
+            'mysql2'     => 'pdo_mysql',
+            'postgres'   => 'pdo_pgsql',
+            'postgresql' => 'pdo_pgsql',
+            'pgsql'      => 'pdo_pgsql',
+            'sqlite'     => 'pdo_sqlite',
+            'sqlite3'    => 'pdo_sqlite',
+        ];
+        unset($params['url']);
+        return $params + (new DsnParser($driverSchemeAliases))->parse($url);
+    }
+
     /**
      * 値が「空」なら true を返す
      *
