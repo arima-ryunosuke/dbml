@@ -3,6 +3,7 @@
 namespace ryunosuke\Test;
 
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Exception\DeadlockException;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Types\Types;
@@ -428,5 +429,58 @@ class IntegrationTest extends AbstractUnitTestCase
 
         $database->setAutoCastType([]);
         $database->getSchema()->refresh();
+    }
+
+    /**
+     * mysql の暗黙のロールバック関係
+     *
+     * @dataProvider provideDatabase
+     * @param Database $database
+     * @noinspection PhpUnusedLocalVariableInspection
+     */
+    function test_retry_mysql_deadlock($database)
+    {
+        if (!$database->getPlatform() instanceof MySQLPlatform) {
+            return;
+        }
+
+        $params = ['driver' => 'mysqli', 'driverOptions' => []] + $database->getMasterConnection()->getParams();
+        $other = new Database(DriverManager::getConnection($params));
+
+        $other->begin();
+        $async = null;
+
+        $transaction = $database->transaction(function () use ($database, $other, &$async) {
+            $select = 'select * from test where id=? for update';
+            $affect = 'update test set name=? where id=?';
+            // 1回目（$other のせいでデッドロックする）
+            if ($other->getMasterConnection()->isTransactionActive()) {
+                // @formatter:off
+                [$dummy, $dummy] = [$database->executeSelect($select, [1]),      $other->executeSelect($select, [2])     ];
+                [$dummy, $async] = [null,                                        $other->executeSelectAsync($select, [1])];
+                [$dummy, $dummy] = [$database->executeAffect($affect, ['Y', 2]), null                                    ]; // deadlock!!!
+                // @formatter:on
+            }
+            // 2回目（$other が終わっているのでデッドロックしない）
+            else {
+                $database->executeSelect($select, [1]);
+                $database->executeAffect($affect, ['Y', 2]);
+                // いまここがトランザクション内で実行されていることを担保するために例外を投げて rollback させる
+                throw new \RuntimeException();
+            }
+        });
+        $transaction->retries(function ($retryCount, $ex) use ($database, $other, &$async) {
+            // 1回目の実行で飛んでくる
+            if ($ex instanceof DeadlockException) {
+                $async();           // 回さないとデストラクタでエラーになる
+                $other->rollback(); // トランザクションを完了させる
+                return 0.1;
+            }
+        });
+        $transaction->perform(false);
+
+        // ロールバックされている（トランザクションのしがらみを切るため $other の方で取得する）
+        // 例えば「1回目」のリトライで暗黙のロールバックが走り、「2回目」の処理がトランザクション内で行われていなかったらロールバックできないはず
+        $this->assertEquals('b', $other->selectValue('test.name', ['id' => 2]));
     }
 }

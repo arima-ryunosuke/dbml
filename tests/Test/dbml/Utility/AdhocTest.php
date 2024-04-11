@@ -167,6 +167,7 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
         }, $quoter));
         $this->assertSame('string', Adhoc::stringifyParameter(new class() {
             public function __toString() { return 'string'; }
+
             public function __invoke() { return 'invoke'; }
         }, $quoter));
     }

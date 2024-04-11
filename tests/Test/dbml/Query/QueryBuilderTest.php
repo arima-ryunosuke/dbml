@@ -4419,7 +4419,7 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     {
         $builder->cache(10)->cache(false);
         $this->assertEquals(0, $builder->getCacheTtl());
-        
+
         $builder->cache(10)->column(['test' => 'name'])->where(['id' => [1, 2]])->orderBy(['name' => false]);
 
         $array = $builder->array();

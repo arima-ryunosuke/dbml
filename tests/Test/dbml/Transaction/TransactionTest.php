@@ -60,8 +60,8 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
             'savepointable' => true,
             'retries'       => null,
         ]);
-        $ex1 =(new \ReflectionClass(UniqueConstraintViolationException::class))->newInstanceWithoutConstructor();
-        $ex2 =(new \ReflectionClass(LockWaitTimeoutException::class))->newInstanceWithoutConstructor();
+        $ex1 = (new \ReflectionClass(UniqueConstraintViolationException::class))->newInstanceWithoutConstructor();
+        $ex2 = (new \ReflectionClass(LockWaitTimeoutException::class))->newInstanceWithoutConstructor();
         $this->assertEquals(null, ($transaction->retries)(100, $ex1, $database->getConnection()));
         $this->assertEquals(null, ($transaction->retries)(100, $ex2, $database->getConnection()));
         $this->assertEquals(0.1, ($transaction->retries)(0, $ex1, $database->getConnection()));
