@@ -24,6 +24,16 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.17
+
+- [feature] slave のランダム化と serverVersion や driverOptions などに対応した url を実装
+- [feature] checkSameKey オプションを追加
+- [feature] truncate の cascade を pgsql 以外でも対応
+- [feature] 外部キーをよしなにする UPDATE を実装
+- [feature] 外部キーの有効無効切り替え機能
+- [fixbug] 主キーが含まれていない場合にも例外が飛んでいたのを修正
+- [fixbug] bind parameter の型が渡らない不具合を修正
+
 ## 2.1.16
 
 - [feature] トランザクションのリトライ処理を改善
