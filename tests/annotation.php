@@ -68,6 +68,9 @@ trait TableGatewayProvider
     /** @var misctype_childTableGateway */
     public $misctype_child;
 
+    /** @var multifkeyTableGateway */
+    public $multifkey;
+
     /** @var multiprimaryTableGateway */
     public $multiprimary;
 
@@ -121,6 +124,9 @@ trait TableGatewayProvider
 
     /** @var tran_table2TableGateway */
     public $tran_table2;
+
+    /** @var tran_table3TableGateway */
+    public $tran_table3;
 
     /** @var v_blogTableGateway */
     public $v_blog;
@@ -185,6 +191,9 @@ trait TableGatewayProvider
     /** @return misctype_childTableGateway */
     public function misctype_child($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
+    /** @return multifkeyTableGateway */
+    public function multifkey($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
     /** @return multiprimaryTableGateway */
     public function multiprimary($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
@@ -238,6 +247,9 @@ trait TableGatewayProvider
 
     /** @return tran_table2TableGateway */
     public function tran_table2($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3TableGateway */
+    public function tran_table3($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogTableGateway */
     public function v_blog($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
@@ -1608,6 +1620,74 @@ class misctype_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function neighbor($predicates = [], $limit = 1) { }
 }
 
+class multifkeyTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
+{
+    use TableGatewayProvider;
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity|array{id: int, mainid: int, subid: int} */
+    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity|array{id: int, mainid: int, subid: int} */
+    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity|array{id: int, mainid: int, subid: int} */
+    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity|array{id: int, mainid: int, subid: int} */
+    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity|array{id: int, mainid: int, subid: int} */
+    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkeyEntity|array{id: int, mainid: int, subid: int} */
+    public function find($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return multifkeyEntity|array{id: int, mainid: int, subid: int} */
+    public function findInShare($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return multifkeyEntity|array{id: int, mainid: int, subid: int} */
+    public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return multifkeyEntity|array{id: int, mainid: int, subid: int} */
+    public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return multifkeyEntity|array{id: int, mainid: int, subid: int} */
+    public function findForAffect($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return multifkeyEntity[]|array<array{id: int, mainid: int, subid: int}> */
+    public function neighbor($predicates = [], $limit = 1) { }
+}
+
 class multiprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
@@ -2156,67 +2236,67 @@ class ArticleTableGateway extends \ryunosuke\Test\Gateway\Article
 {
     use TableGatewayProvider;
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int} */
     public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int} */
     public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int} */
     public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int} */
     public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int} */
     public function find($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int} */
     public function findInShare($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int} */
     public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int} */
     public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
+    /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int} */
     public function findForAffect($variadic_primary, $tableDescriptor = []) { }
 
-    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
+    /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int}> */
     public function neighbor($predicates = [], $limit = 1) { }
 }
 
@@ -2696,6 +2776,74 @@ class tran_table2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function neighbor($predicates = [], $limit = 1) { }
 }
 
+class tran_table3TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
+{
+    use TableGatewayProvider;
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity|array{id: int, master_id: int} */
+    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity|array{id: int, master_id: int} */
+    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity|array{id: int, master_id: int} */
+    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity|array{id: int, master_id: int} */
+    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity|array{id: int, master_id: int} */
+    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return tran_table3Entity|array{id: int, master_id: int} */
+    public function find($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return tran_table3Entity|array{id: int, master_id: int} */
+    public function findInShare($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return tran_table3Entity|array{id: int, master_id: int} */
+    public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return tran_table3Entity|array{id: int, master_id: int} */
+    public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return tran_table3Entity|array{id: int, master_id: int} */
+    public function findForAffect($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return tran_table3Entity[]|array<array{id: int, master_id: int}> */
+    public function neighbor($predicates = [], $limit = 1) { }
+}
+
 class v_blogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
@@ -3058,6 +3206,18 @@ class misctype_childEntity extends \ryunosuke\dbml\Entity\Entity
     public $cblob;
 }
 
+class multifkeyEntity extends \ryunosuke\dbml\Entity\Entity
+{
+    /** @var int */
+    public $id;
+
+    /** @var int */
+    public $mainid;
+
+    /** @var int */
+    public $subid;
+}
+
 class multiprimaryEntity extends \ryunosuke\dbml\Entity\Entity
 {
     /** @var int */
@@ -3197,21 +3357,6 @@ class ArticleEntity extends \ryunosuke\Test\Entity\Article
 
     /** @var int */
     public $vaffect;
-
-    /** @var int */
-    public $title_checks;
-
-    /** @var int */
-    public $upper_title;
-
-    /** @var string */
-    public $statement;
-
-    /** @var int */
-    public $closure;
-
-    /** @var int */
-    public $query_builder;
 }
 
 class CommentEntity extends \ryunosuke\Test\Entity\Comment
@@ -3278,6 +3423,15 @@ class tran_table1Entity extends \ryunosuke\dbml\Entity\Entity
 }
 
 class tran_table2Entity extends \ryunosuke\dbml\Entity\Entity
+{
+    /** @var int */
+    public $id;
+
+    /** @var int */
+    public $master_id;
+}
+
+class tran_table3Entity extends \ryunosuke\dbml\Entity\Entity
 {
     /** @var int */
     public $id;

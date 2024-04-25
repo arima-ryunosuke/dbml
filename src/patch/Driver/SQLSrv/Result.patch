@@ -1,0 +1,30 @@
+@@ -1,9 +1,13 @@
+ <?php
++//@formatter:off
++/**
++ * @see \Doctrine\DBAL\Driver\SQLSrv\Result
++ * @copyright 2006 Doctrine Project
++ * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
++ */
+ 
+-declare(strict_types=1);
++namespace ryunosuke\dbal\Driver\SQLSrv;
+ 
+-namespace Doctrine\DBAL\Driver\SQLSrv;
+-
+ use Doctrine\DBAL\Driver\FetchUtils;
+ use Doctrine\DBAL\Driver\Result as ResultInterface;
+ 
+@@ -15,10 +19,10 @@
+ use const SQLSRV_FETCH_ASSOC;
+ use const SQLSRV_FETCH_NUMERIC;
+ 
+-final class Result implements ResultInterface
++class Result implements ResultInterface
+ {
+     /** @var resource */
+-    private $statement;
++    protected $statement;
+ 
+     /**
+      * @internal The result can be only instantiated by its driver connection or statement.

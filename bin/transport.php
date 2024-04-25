@@ -43,4 +43,5 @@ $subcommand([
     'Driver/PgSQL/Result',
     'Driver/Mysqli/Result',
     'Driver/SQLite3/Result',
+    'Driver/SQLSrv/Result',
 ]);
