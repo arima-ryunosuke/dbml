@@ -20,6 +20,8 @@ use ryunosuke\dbml\Query\Parser;
  */
 class CompatibleConnection
 {
+    private static \WeakMap $storage;
+
     /** @var Connection */
     private $connection;
 
@@ -31,6 +33,8 @@ class CompatibleConnection
 
     public function __construct(Connection $connection)
     {
+        self::$storage ??= new \WeakMap();
+
         $this->connection = $connection;
 
         $driverConnection = $connection->getWrappedConnection();
@@ -39,6 +43,8 @@ class CompatibleConnection
         }
         $this->driverConnection = $driverConnection;
         $this->nativeConnection = $driverConnection->getNativeConnection();
+
+        self::$storage[$this->connection] = [];
     }
 
     public function getConnection()
@@ -48,17 +54,21 @@ class CompatibleConnection
 
     public function getName()
     {
+        if (isset(self::$storage[$this->connection][__FUNCTION__])) {
+            return self::$storage[$this->connection][__FUNCTION__];
+        }
+
         if ($this->driverConnection instanceof Driver\PDO\Connection) {
-            return 'pdo-' . $this->nativeConnection->getAttribute(\PDO::ATTR_DRIVER_NAME);
+            return self::$storage[$this->connection][__FUNCTION__] = 'pdo-' . $this->nativeConnection->getAttribute(\PDO::ATTR_DRIVER_NAME);
         }
         if ($this->driverConnection instanceof Driver\SQLite3\Connection) {
-            return 'sqlite3';
+            return self::$storage[$this->connection][__FUNCTION__] = 'sqlite3';
         }
         if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
-            return 'mysqli';
+            return self::$storage[$this->connection][__FUNCTION__] = 'mysqli';
         }
         if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
-            return 'pgsql';
+            return self::$storage[$this->connection][__FUNCTION__] = 'pgsql';
         }
 
         throw DBALException::notSupported(__METHOD__);
@@ -66,31 +76,39 @@ class CompatibleConnection
 
     public function isSupportedNamedPlaceholder()
     {
+        if (isset(self::$storage[$this->connection][__FUNCTION__])) {
+            return self::$storage[$this->connection][__FUNCTION__];
+        }
+
         if ($this->driverConnection instanceof Driver\PDO\Connection) {
             // pdo-sqlite はテスト用に対応していないとみなす
             if ($this->nativeConnection->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'sqlite') {
-                return false;
+                return self::$storage[$this->connection][__FUNCTION__] = false;
             }
             // pdo-mysql はエミュレーションモードを切ると使えない…と思ったら PDO が名前付きを連番に書き換えてくれるようだ
             //if ($this->nativeConnection->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'mysql') {
             //    return false;
             //}
-            return true;
+            return self::$storage[$this->connection][__FUNCTION__] = true;
         }
         // mysqli は本当に対応していない
         if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
-            return false;
+            return self::$storage[$this->connection][__FUNCTION__] = false;
         }
         // PgSql は対応していない…訳では無いが特殊なので doctrine に任せる
         if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
-            return false;
+            return self::$storage[$this->connection][__FUNCTION__] = false;
         }
 
-        return true;
+        return self::$storage[$this->connection][__FUNCTION__] = true;
     }
 
     public function getSupportedMetadata(): array
     {
+        if (isset(self::$storage[$this->connection][__FUNCTION__])) {
+            return self::$storage[$this->connection][__FUNCTION__];
+        }
+
         $base = [
             'actualTableName'  => false,
             'actualColumnName' => false,
@@ -104,13 +122,13 @@ class CompatibleConnection
             // https://learn.microsoft.com/ja-jp/sql/connect/php/pdostatement-getcolumnmeta?view=sql-server-ver16
             // > データベースで列を含むテーブルの名前を指定します。 常に空白です。
             if ($this->nativeConnection->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'sqlsrv') {
-                return array_replace($base, [
+                return self::$storage[$this->connection][__FUNCTION__] = array_replace($base, [
                     'aliasColumnName' => true,
                     'nativeType'      => true,
                 ]);
             }
             /** @see \PDOStatement::getColumnMeta() */
-            return array_replace($base, [
+            return self::$storage[$this->connection][__FUNCTION__] = array_replace($base, [
                 'actualTableName' => true,
                 'aliasColumnName' => true,
                 'nativeType'      => true,
@@ -119,14 +137,14 @@ class CompatibleConnection
         }
         if ($this->driverConnection instanceof Driver\SQLite3\Connection) {
             /** @see \SQLite3Result::columnName(), \SQLite3Result::columnType() */
-            return array_replace($base, [
+            return self::$storage[$this->connection][__FUNCTION__] = array_replace($base, [
                 'aliasColumnName' => true,
                 'nativeType'      => true,
             ]);
         }
         if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
             /** @see \mysqli_result::fetch_fields() */
-            return array_replace($base, [
+            return self::$storage[$this->connection][__FUNCTION__] = array_replace($base, [
                 'actualTableName'  => true,
                 'actualColumnName' => true,
                 'aliasTableName'   => true,
@@ -137,14 +155,14 @@ class CompatibleConnection
         }
         if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
             /** @see \pg_field_table(), \pg_field_name(), \pg_field_type() */
-            return array_replace($base, [
+            return self::$storage[$this->connection][__FUNCTION__] = array_replace($base, [
                 'actualTableName' => true,
                 'aliasColumnName' => true,
                 'nativeType'      => true,
                 'table&&column'   => true,
             ]);
         }
-        return $base;
+        return self::$storage[$this->connection][__FUNCTION__] = $base;
     }
 
     public function tryPDOAttribute($attribute_name, $attribute_value)
@@ -170,8 +188,7 @@ class CompatibleConnection
             $this->tryPDOAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $mode);
         }
         if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
-            // 直接代入はいつか壊れるが、いずれ WeakMap に変更したいのでとりあえず暫定
-            $this->driverConnection->bufferMode = $mode;
+            self::$storage[$this->connection]['setBufferMode'] = $mode;
         }
     }
 
@@ -186,7 +203,7 @@ class CompatibleConnection
         }
 
         if ($driverResult instanceof \ryunosuke\dbml\Driver\Mysqli\Result) {
-            if ($this->driverConnection->bufferMode ?? true) {
+            if (self::$storage[$this->connection]['setBufferMode'] ?? true) {
                 $driverResult->storeResult();
             }
         }

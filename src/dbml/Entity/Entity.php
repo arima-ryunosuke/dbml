@@ -47,8 +47,7 @@ class Entity implements Entityable, \IteratorAggregate, JsonSerializable
         unset($this->fields[$offset]);
     }
 
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->fields[$offset];
     }

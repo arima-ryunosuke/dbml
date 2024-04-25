@@ -211,46 +211,4 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
             'string' => 'string',
         ]));
     }
-
-    function test_stringifyType()
-    {
-        $type = (new \ReflectionFunction(fn(): int => null))->getReturnType();
-        $this->assertEquals('int', Adhoc::stringifyType($type));
-
-        $type = (new \ReflectionFunction(fn(): ?int => null))->getReturnType();
-        $this->assertEquals('?int', Adhoc::stringifyType($type));
-
-        $type = (new \ReflectionFunction(fn(): \stdClass => null))->getReturnType();
-        $this->assertEquals('\stdClass', Adhoc::stringifyType($type));
-
-        $type = (new \ReflectionFunction(fn(): ?\stdClass => null))->getReturnType();
-        $this->assertEquals('?\stdClass', Adhoc::stringifyType($type));
-
-        if (version_compare(PHP_VERSION, 8.0) >= 0) {
-            $type = (new \ReflectionFunction(eval("return fn(): int|string => null;")))->getReturnType();
-            $this->assertEquals('string|int', Adhoc::stringifyType($type));
-
-            $type = (new \ReflectionFunction(eval("return fn(): null|int|string => null;")))->getReturnType();
-            $this->assertEquals('string|int|null', Adhoc::stringifyType($type));
-
-            $type = (new \ReflectionFunction(eval("return fn(): \stdClass => null;")))->getReturnType();
-            $this->assertEquals('\stdClass', Adhoc::stringifyType($type));
-
-            $type = (new \ReflectionFunction(eval("return fn(): null|\stdClass => null;")))->getReturnType();
-            $this->assertEquals('?\stdClass', Adhoc::stringifyType($type));
-
-            $type = (new \ReflectionFunction(eval("return fn(): null|\stdClass|string => null;")))->getReturnType();
-            $this->assertEquals('\stdClass|string|null', Adhoc::stringifyType($type));
-        }
-
-        if (version_compare(PHP_VERSION, 8.1) >= 0) {
-            $type = (new \ReflectionFunction(eval("return fn(): \Countable&\Traversable => null;")))->getReturnType();
-            $this->assertEquals('\Countable&\Traversable', Adhoc::stringifyType($type));
-        }
-
-        if (version_compare(PHP_VERSION, 8.2) >= 0) {
-            $type = (new \ReflectionFunction(eval("return fn(): null|(\Countable&\Traversable) => null;")))->getReturnType();
-            $this->assertEquals('(\Countable&\Traversable)|null', Adhoc::stringifyType($type));
-        }
-    }
 }

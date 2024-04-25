@@ -33,7 +33,6 @@ use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\utility\attribute\Attribute\DebugInfo;
 use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
-use function ryunosuke\dbml\annotation_parse;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_get;
 use function ryunosuke\dbml\array_unset;
@@ -202,7 +201,7 @@ use function ryunosuke\dbml\split_noempty;
  * `(virtual|get|set)VirtualNameColumn` というメソッドを定義すると仮想カラムとしてアクセスできるようになる（仮想カラムに関しては {@link Database::overrideColumns()} を参照）。
  * 参照時は get, 更新時は set が呼ばれる。
  * virtual の場合は get で引数なし、 set で引数ありでコールされる。
- * 実処理はメソッド本体だが、アノテーションを用いて implicit や type 属性を指定できる（ここでは記述できないのでテストを参照）。
+ * 実処理はメソッド本体だが、属性を用いて implicit や type 属性を指定できる（ここでは記述できないのでテストを参照）。
  *
  * ```php
  * // full_name という仮想カラムを定義（取得）
@@ -599,18 +598,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             elseif ($method['type'] === 'vcolumn') {
                 $rmethod = new \ReflectionMethod($this, $method['method']);
 
-                $attribute = VirtualColumn::of($rmethod);
-                if ($attribute) {
-                    $attrs = $attribute->getNamedArguments();
-                }
-                else {
-                    // for compatible php7.4. in future scope delete Annotation
-                    $attrs = annotation_parse($rmethod, [
-                        'type'     => null,
-                        'lazy'     => true,
-                        'implicit' => true,
-                    ]);
-                }
+                $attrs = VirtualColumn::of($rmethod)?->getNamedArguments() ?? [];
                 $attrs['type'] = $attrs['type'] ?? null;
                 $attrs['lazy'] = flagval($attrs['lazy'] ?? true);
                 $attrs['implicit'] = flagval($attrs['implicit'] ?? false);
@@ -875,8 +863,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string $offset カラム名あるいはテーブル記法
      * @return $this|array|Entityable|mixed レコード・カラム値・自分自身
      */
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
             return $this->pk($offset);
@@ -943,16 +930,17 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param mixed $value カラム値
      * @return int|array 作用行
      */
-    #[\ReturnTypeWillChange]
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         if ($offset === null) {
-            return $this->insert($value);
+            $this->insert($value);
+            return;
         }
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
-            return $this->modify($value + $this->_primary($offset));
+            $this->modify($value + $this->_primary($offset));
+            return;
         }
-        return $this->update([$offset => $value]);
+        $this->update([$offset => $value]);
     }
 
     /**
@@ -970,11 +958,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param mixed $offset
      * @return int|array 作用行
      */
-    #[\ReturnTypeWillChange]
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
-            return $this->delete($this->_primary($offset));
+            $this->delete($this->_primary($offset));
+            return;
         }
         throw new \DomainException(__METHOD__ . ' is not supported.');
     }

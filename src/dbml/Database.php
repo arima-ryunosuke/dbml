@@ -1674,7 +1674,7 @@ class Database
                 $type = $column->getType();
                 $typename = $type->getName();
                 $reftype = (new \ReflectionMethod($type, 'convertToPHPValue'))->getReturnType();
-                $carry[$column->getName()] = Adhoc::stringifyType($reftype) ?? $special_types[$typename] ?? 'string';
+                $carry[$column->getName()] = reflect_type_resolve($reftype) ?? $special_types[$typename] ?? 'string';
             }, []);
             $shape = array_sprintf($column_types, '%2$s: %1$s', ', ');
             $props = array_sprintf($column_types, "/** @var %1\$s */\npublic \$%2\$s;");
@@ -1800,7 +1800,7 @@ class Database
                         $reftype = (new \ReflectionMethod($type, 'convertToPHPValue'))->getReturnType();
                     }
                 }
-                return Adhoc::stringifyType($reftype ?? null) ?? $special_types[$typename] ?? 'string';
+                return reflect_type_resolve($reftype ?? null) ?? $special_types[$typename] ?? 'string';
             }, $this->getSchema()->getTableColumns($tname));
             $entities[$entityname] = ($entities[$entityname] ?? []) + $columns;
         }

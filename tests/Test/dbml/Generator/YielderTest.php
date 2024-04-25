@@ -10,7 +10,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
     function test___debugInfo()
     {
-        $yielder = new Yielder(fn() => null, self::getDummyDatabase()->getConnection());
+        $yielder = new Yielder(static fn() => null, self::getDummyDatabase()->getConnection());
         $debugString = print_r($yielder, true);
         $this->assertStringContainsString('statement:', $debugString);
         $this->assertStringNotContainsString('database:', $debugString);

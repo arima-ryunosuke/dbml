@@ -688,7 +688,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 'sqlite'     => [true, true],
                 'mysql'      => [false, true],
                 'postgresql' => [false, true],
-                'mssql'      => [version_compare(PHP_VERSION, 8.1) < 0, true],
+                'mssql'      => [false, true],
             ];
 
             try {
