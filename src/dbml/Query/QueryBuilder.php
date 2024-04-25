@@ -32,11 +32,9 @@ use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_find;
 use function ryunosuke\dbml\array_flatten;
 use function ryunosuke\dbml\array_implode;
-use function ryunosuke\dbml\array_kmap;
 use function ryunosuke\dbml\array_lookup;
 use function ryunosuke\dbml\array_maps;
 use function ryunosuke\dbml\array_order;
-use function ryunosuke\dbml\array_put;
 use function ryunosuke\dbml\array_set;
 use function ryunosuke\dbml\array_sprintf;
 use function ryunosuke\dbml\array_strpad;
@@ -46,16 +44,14 @@ use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\first_key;
 use function ryunosuke\dbml\first_keyvalue;
 use function ryunosuke\dbml\first_value;
+use function ryunosuke\dbml\instance_of;
 use function ryunosuke\dbml\is_bindable_closure;
 use function ryunosuke\dbml\is_hasharray;
 use function ryunosuke\dbml\is_primitive;
-use function ryunosuke\dbml\optional;
 use function ryunosuke\dbml\preg_splice;
-use function ryunosuke\dbml\rbind;
 use function ryunosuke\dbml\split_noempty;
 use function ryunosuke\dbml\str_exists;
 use function ryunosuke\dbml\str_lchop;
-use function ryunosuke\dbml\throws;
 
 // @formatter:off
 /**
@@ -573,7 +569,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         }
 
         // FROM,JOIN 句に手を加える
-        array_maps(array_filter(array_column($builder->getFromPart(), 'table'), rbind('is_a', self::class)), ['wrap' => ['', '']]);
+        array_maps(array_filter(array_column($builder->getFromPart(), 'table'), fn($v) => is_a($v, self::class)), ['wrap' => ['', '']]);
 
         // ORDER BY 句に手を加える
         if ($builder->enableAutoOrder) {
@@ -582,7 +578,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 // EXISTS 述語も除外
                 if (!isset($builder->wrappers['EXISTS']) && !isset($builder->wrappers['NOT EXISTS'])) {
                     // COUNT を含むなら除外
-                    if (false === array_find($builder->sqlParts['select'], function ($s) { return strpos("$s", self::COUNT_ALIAS) !== false; })) {
+                    if (null === array_find($builder->sqlParts['select'], function ($s) { return strpos("$s", self::COUNT_ALIAS) !== false; })) {
                         if (($defaultOrder = $builder->getDefaultOrder()) !== null) {
                             if (is_bool($defaultOrder)) {
                                 $builder->orderByPrimary($defaultOrder, true);
@@ -788,7 +784,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             $subbuiler->lazyMode = $subbuiler->lazyMode ?? $this->getDefaultLazyMode();
             $subbuiler->lazyParent = Database::AUTO_PRIMARY_KEY . strtolower($name);
             $subbuiler->lazyColumns = $lazy_columns;
-            $subbuiler->lazyCondition = @optional($fkey ?? null, ForeignKeyConstraint::class)->getOption('condition') ?? [];
+            $subbuiler->lazyCondition = @instance_of($fkey ?? null, ForeignKeyConstraint::class)?->getOption('condition') ?? [];
             $subbuiler->sqlParts['select'][] = $concatPrimary(Database::AUTO_PARENT_KEY, array_keys($lazy_columns));
 
             // 「主キーから外部キーを差っ引いたものが空」はすなわち「親との結合」とみなすことができる
@@ -981,7 +977,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 if (!$is_toplevel) {
                     return false;
                 }
-                $from = reset($froms) ?: throws(new \UnexpectedValueException('base table not found.'));
+                $from = reset($froms) ?: throw new \UnexpectedValueException('base table not found.');
                 $pcols = $this->database->getSchema()->getTablePrimaryKey($from['table'])->getColumns();
                 $params = (array) $param;
                 if (count($pcols) !== 1 && count($params) !== 0 && array_depth($params) === 1) {
@@ -1141,7 +1137,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $ands = [];
         foreach ($predicates as $cond) {
             $placeholders = $this->database->whereInto(arrayize($cond), $params, 'OR', $this->emptyCondition);
-            array_put($ands, implode(' AND ', Adhoc::wrapParentheses($placeholders)), null, function ($v) { return !Adhoc::is_empty($v); });
+            array_set($ands, implode(' AND ', Adhoc::wrapParentheses($placeholders)), null, function ($v) { return !Adhoc::is_empty($v); });
         }
 
         if ($ands) {
@@ -1265,7 +1261,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         // [子供のキー => 親の値] の配列を作成
         $psep = $this->getPrimarySeparator();
         if (self::LAZY_MODES[$this->lazyMode]['prepared']) {
-            $childkeys = array_kmap($this->lazyColumns, function ($v, $k) { return str_replace('.', '__', $k); });
+            $childkeys = array_maps($this->lazyColumns, function ($v, $k) { return str_replace('.', '__', $k); });
         }
         else {
             $childkeys = array_keys($this->lazyColumns);
@@ -1631,7 +1627,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $pre_p = $alias ?: $table;
         $pre_c = $from['alias'];
         $this->andWhere(array_merge(
-            @optional($fkey ?? null, ForeignKeyConstraint::class)->getOption('condition') ?? [],
+            @instance_of($fkey ?? null, ForeignKeyConstraint::class)?->getOption('condition') ?? [],
             array_sprintf($mapper, "$pre_c.%2\$s = $pre_p.%1\$s"),
         ));
 
@@ -3396,8 +3392,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function chunk($chunk, $column = null)
     {
-        $from = first_value($this->getFromPart())['table'] ?? throws(new \UnexpectedValueException('from table is not set.'));
-        $column = $column ?: strval(optional($this->database->getSchema()->getTableAutoIncrement($from))->getName() ?: throws(new \UnexpectedValueException('not autoincrement column.')));
+        $from = first_value($this->getFromPart())['table'] ?? throw new \UnexpectedValueException('from table is not set.');
+        $column = $column ?: strval($this->database->getSchema()->getTableAutoIncrement($from)?->getName() ?: throw new \UnexpectedValueException('not autoincrement column.'));
         $orderasc = $column[0] !== '-';
         $column = ltrim($column, '-+');
 
@@ -3718,7 +3714,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function wrap($keyword1, $keyword2 = '', $name = null)
     {
-        array_set($this->wrappers, [$keyword1, $keyword2], $name, false);
+        array_set($this->wrappers, [$keyword1, $keyword2], $name);
         return $this->_dirty();
     }
 

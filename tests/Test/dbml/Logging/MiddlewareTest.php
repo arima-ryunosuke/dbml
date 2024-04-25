@@ -18,7 +18,7 @@ class MiddlewareTest extends \ryunosuke\Test\AbstractUnitTestCase
         $logger = new class() extends AbstractLogger {
             public array $logs = [];
 
-            public function log($level, $message, array $context = [])
+            public function log($level, $message, array $context = []): void
             {
                 $simple = Logger::simple();
                 $this->logs[$level][] = [

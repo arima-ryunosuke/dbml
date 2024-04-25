@@ -1,13 +1,9 @@
 <?php
 
-use ryunosuke\polyfill\attribute\Provider;
-use ryunosuke\SimpleCache\NullCache;
 use function ryunosuke\dbml\class_aliases;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../vendor/ryunosuke/phpunit-extension/inc/bootstrap.php';
-
-Provider::setCacheConfig(new NullCache());
 
 require_once __DIR__ . '/classess.php';
 

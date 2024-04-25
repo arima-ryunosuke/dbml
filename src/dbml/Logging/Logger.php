@@ -353,7 +353,7 @@ class Logger extends AbstractLogger
     /**
      * @inheritdoc
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         static $levels = null;
         $levels ??= array_flip(array_values((new ReflectionClass(LogLevel::class))->getConstants()));

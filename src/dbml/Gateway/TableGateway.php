@@ -33,6 +33,7 @@ use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\utility\attribute\Attribute\DebugInfo;
 use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
+use function ryunosuke\dbml\annotation_parse;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_get;
 use function ryunosuke\dbml\array_unset;
@@ -41,10 +42,8 @@ use function ryunosuke\dbml\cache_fetch;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\flagval;
 use function ryunosuke\dbml\parameter_length;
-use function ryunosuke\dbml\parse_annotation;
 use function ryunosuke\dbml\snake_case;
 use function ryunosuke\dbml\split_noempty;
-use function ryunosuke\dbml\throws;
 
 // @formatter:off
 /**
@@ -606,7 +605,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
                 }
                 else {
                     // for compatible php7.4. in future scope delete Annotation
-                    $attrs = parse_annotation($rmethod, [
+                    $attrs = annotation_parse($rmethod, [
                         'type'     => null,
                         'lazy'     => true,
                         'implicit' => true,
@@ -752,7 +751,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         $pcols = $this->database->getSchema()->getTablePrimaryKey($this->tableName)->getColumns();
         $pvals = array_values((array) $pkval);
-        return array_combine(array_slice($pcols, 0, count($pvals)), $pvals) ?: throws(new \InvalidArgumentException("array_combine: argument's length is not match primary columns."));
+        return array_combine(array_slice($pcols, 0, count($pvals)), $pvals) ?: throw new \InvalidArgumentException("array_combine: argument's length is not match primary columns.");
     }
 
     private function _accessor($name, $value)

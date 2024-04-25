@@ -19,7 +19,6 @@ use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\cache_fetch;
 use function ryunosuke\dbml\first_keyvalue;
 use function ryunosuke\dbml\fnmatch_or;
-use function ryunosuke\dbml\optional;
 
 /**
  * スキーマ情報の収集と保持とキャッシュを行うクラス
@@ -646,7 +645,7 @@ class Schema
     public function addForeignKey($fkey, $lTable = null)
     {
         /** @noinspection PhpDeprecationInspection */
-        $lTable ??= optional($fkey->getLocalTable())->getName();
+        $lTable ??= $fkey->getLocalTable()?->getName();
         if ($lTable === null) {
             throw new \InvalidArgumentException('$fkey\'s localTable is not set.');
         }
@@ -702,7 +701,7 @@ class Schema
         }
 
         /** @noinspection PhpDeprecationInspection */
-        $lTable ??= optional($fkey->getLocalTable())->getName();
+        $lTable ??= $fkey->getLocalTable()?->getName();
         if ($lTable === null) {
             throw new \InvalidArgumentException('$fkey\'s localTable is not set.');
         }

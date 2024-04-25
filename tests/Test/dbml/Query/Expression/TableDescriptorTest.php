@@ -6,7 +6,6 @@ use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\TableDescriptor;
 use ryunosuke\dbml\Query\QueryBuilder;
 use ryunosuke\Test\Database;
-use function ryunosuke\dbml\stdclass;
 
 class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -161,17 +160,17 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
         ]);
         $this->assertDescriptor(new TableDescriptor($database, 'test{id1, id2}', []), [
             'table'     => 'test',
-            'condition' => [stdclass(['id1' => 'id1', 'id2' => 'id2'])],
+            'condition' => [(object) ['id1' => 'id1', 'id2' => 'id2']],
             'key'       => 'test{id1, id2}',
         ]);
         $this->assertDescriptor(new TableDescriptor($database, 'test{tA: tB,uA: uB}', []), [
             'table'     => 'test',
-            'condition' => [stdclass(['tA' => 'tB', 'uA' => 'uB'])],
+            'condition' => [(object) ['tA' => 'tB', 'uA' => 'uB']],
             'key'       => 'test{tA: tB,uA: uB}',
         ]);
         $this->assertDescriptor(new TableDescriptor($database, 'test{id1, id2, tA: tB, uA: uB}', []), [
             'table'     => 'test',
-            'condition' => [stdclass(['id1' => 'id1', 'id2' => 'id2', 'tA' => 'tB', 'uA' => 'uB'])],
+            'condition' => [(object) ['id1' => 'id1', 'id2' => 'id2', 'tA' => 'tB', 'uA' => 'uB']],
             'key'       => 'test{id1, id2, tA: tB, uA: uB}',
         ]);
         $this->assertDescriptor(new TableDescriptor($database, 'test[cond1, cond2]', []), [
@@ -188,7 +187,7 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertDescriptor(new TableDescriptor($database, 'test[cond1, cond2]{id1: id2} T', []), [
             'table'     => 'test',
             'alias'     => 'T',
-            'condition' => ['cond1', 'cond2', stdclass(['id1' => 'id2'])],
+            'condition' => ['cond1', 'cond2', (object) ['id1' => 'id2']],
             'key'       => 'test[cond1, cond2]{id1: id2} T',
         ]);
 

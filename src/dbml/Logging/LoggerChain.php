@@ -19,7 +19,7 @@ class LoggerChain extends AbstractLogger implements LoggerAwareInterface
     /**
      * @inheritdoc
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         foreach ($this->loggers as $logger) {
             $logger->log($level, $message, $context);
@@ -29,7 +29,7 @@ class LoggerChain extends AbstractLogger implements LoggerAwareInterface
     /**
      * @inheritdoc
      */
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger): void
     {
         $this->loggers = [$logger];
     }

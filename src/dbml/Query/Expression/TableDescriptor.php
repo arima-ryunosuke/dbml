@@ -6,8 +6,8 @@ use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Query\QueryBuilder;
 use function ryunosuke\dbml\array_each;
-use function ryunosuke\dbml\array_put;
 use function ryunosuke\dbml\array_rekey;
+use function ryunosuke\dbml\array_set;
 use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\first_key;
@@ -16,7 +16,6 @@ use function ryunosuke\dbml\preg_splice;
 use function ryunosuke\dbml\quoteexplode;
 use function ryunosuke\dbml\split_noempty;
 use function ryunosuke\dbml\str_between;
-use function ryunosuke\dbml\throws;
 
 /**
  * テーブル記法の実装クラス
@@ -561,7 +560,7 @@ class TableDescriptor
             }
             // 上記以外は単純に追加すれば良い
             else {
-                array_put($this->column, $c, $k);
+                array_set($this->column, $c, is_int($k) ? null : $k);
             }
         }
 
@@ -615,7 +614,7 @@ class TableDescriptor
             if ("$this->joinsign" === "") {
                 return null;
             }
-            return array_search($this->joinsign, Database::JOIN_MAPPER, true) ?: throws(new \UnexpectedValueException('undefined joinsign.'));
+            return array_search($this->joinsign, Database::JOIN_MAPPER, true) ?: throw new \UnexpectedValueException('undefined joinsign.');
         }
         if (strcasecmp($name, 'fkeysuffix') === 0) {
             return concat(':', $this->fkeyname);

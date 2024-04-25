@@ -723,7 +723,7 @@ class Database
 
         $configure = function (Configuration $configuration) use ($options) {
             $middlewares = $configuration->getMiddlewares();
-            if (array_find($middlewares, fn($middleware) => $middleware instanceof LoggingMiddleware) === false) {
+            if (array_find($middlewares, fn($middleware) => $middleware instanceof LoggingMiddleware) === null) {
                 $middlewares[] = new LoggingMiddleware(new LoggerChain());
                 $configuration->setMiddlewares($middlewares);
             }
@@ -1004,9 +1004,9 @@ class Database
         $tablePrefix = !$this->getCompatibleConnection($this->getSlaveConnection())->getSupportedMetadata()['table&&column'];
 
         /** @var QueryBuilder $data_source */
-        $data_source = optional($data_source, QueryBuilder::class);
-        $rconverter = $data_source->getRowConverter();
-        $alias_table = array_lookup($data_source->getFromPart() ?: [], 'table');
+        $data_source = instance_of($data_source, QueryBuilder::class);
+        $rconverter = $data_source?->getRowConverter();
+        $alias_table = array_lookup($data_source?->getFromPart() ?: [], 'table');
 
         $getTableColumnType = function ($tableName, $columnName) use ($alias_table) {
             // クエリビルダ経由でエイリアスマップが得られるなら変換ができる
@@ -1212,7 +1212,7 @@ class Database
     {
         // これはメソッド冒頭に記述し、決して場所を移動しないこと
         $columns = $this->getSchema()->getTableColumns($table);
-        $autocolumn = optional($this->getSchema()->getTableAutoIncrement($table))->getName();
+        $autocolumn = $this->getSchema()->getTableAutoIncrement($table)?->getName();
 
         if ($row instanceof Entityable) {
             $row = $row->arrayize();
@@ -1429,7 +1429,7 @@ class Database
         }
         $pcols = $this->getSchema()->getTablePrimaryColumns($tableName);
         $primary = array_intersect_key($data, $pcols);
-        $autocolumn = optional($this->getSchema()->getTableAutoIncrement($tableName))->getName();
+        $autocolumn = $this->getSchema()->getTableAutoIncrement($tableName)?->getName();
         if ($autocolumn && !isset($primary[$autocolumn])) {
             $primary[$autocolumn] = $this->getLastInsertId($tableName, $autocolumn);
         }
@@ -1514,7 +1514,7 @@ class Database
         $subwhere = [];
         if (array_get($opt, 'in')) {
             $pvals = $pvals ?? $pselect->array();
-            $pvals2 = array_rmap($pvals, 'array_combine', $fkey->getLocalColumns());
+            $pvals2 = array_maps($pvals, fn($pval) => array_combine($fkey->getLocalColumns(), $pval));
             $pcond = $this->getCompatiblePlatform()->getPrimaryCondition($pvals2, $ltable);
             $subwhere[] = $this->queryInto($pcond) ?: 'FALSE';
         }
@@ -1707,7 +1707,7 @@ class Database
         }
 
         $gen = function ($type, $name, $body) {
-            $body = indent_php("\n" . implode("\n\n", array_flatten((array) $body)), ['baseline' => 0, 'indent' => 4]);
+            $body = php_indent("\n" . implode("\n\n", array_flatten((array) $body)), ['baseline' => 0, 'indent' => 4]);
             return "$type $name\n{{$body}\n}\n";
         };
         $namespace = $namespace ? "\nnamespace $namespace;\n" : '';
@@ -3190,9 +3190,9 @@ class Database
                     $cds = [];
                     foreach ($value as $op => $vs) {
                         $ors = $this->whereInto([$op => $vs], $params, $orand, $filterd);
-                        array_put($cds, implode(" $andor ", Adhoc::wrapParentheses($ors)), null, function ($v) { return !Adhoc::is_empty($v); });
+                        array_set($cds, implode(" $andor ", Adhoc::wrapParentheses($ors)), null, function ($v) { return !Adhoc::is_empty($v); });
                     }
-                    array_put($criteria, implode(" $andor ", Adhoc::wrapParentheses($cds)), null, function ($v) { return !Adhoc::is_empty($v); });
+                    array_set($criteria, implode(" $andor ", Adhoc::wrapParentheses($cds)), null, function ($v) { return !Adhoc::is_empty($v); });
                     continue;
                 }
 
@@ -3229,13 +3229,13 @@ class Database
                 $CANDOR = strtoupper($cond);
                 if ($CANDOR === 'AND' || $CANDOR === 'OR') {
                     $ors = $this->whereInto(arrayize($value), $params, $CANDOR === 'AND' ? 'OR' : 'AND', $filterd);
-                    array_put($criteria, implode(" $CANDOR ", Adhoc::wrapParentheses($ors)), null, function ($v) { return !Adhoc::is_empty($v); });
+                    array_set($criteria, implode(" $CANDOR ", Adhoc::wrapParentheses($ors)), null, function ($v) { return !Adhoc::is_empty($v); });
                     continue;
                 }
                 // 同じく、NOT も特別扱い
                 if ($CANDOR === 'NOT') {
                     $nots = $this->whereInto(arrayize($value), $params, $andor, $filterd);
-                    array_put($criteria, 'NOT (' . implode(" $orand ", Adhoc::wrapParentheses($nots)) . ')', null, function ($v) { return !Adhoc::is_empty($v); });
+                    array_set($criteria, 'NOT (' . implode(" $orand ", Adhoc::wrapParentheses($nots)) . ')', null, function ($v) { return !Adhoc::is_empty($v); });
                     continue;
                 }
 
@@ -5800,7 +5800,7 @@ class Database
         $plist = array_keys($pcols);
         $autocolumn = null;
         if ($uniquekey === 'PRIMARY') {
-            $autocolumn = optional($this->getSchema()->getTableAutoIncrement($tableName))->getName();
+            $autocolumn = $this->getSchema()->getTableAutoIncrement($tableName)?->getName();
         }
         $pksep = $this->getPrimarySeparator();
 
@@ -6175,7 +6175,7 @@ class Database
             else {
                 $primaries[$tname] = $changed;
                 foreach ($primaries[$tname] as $id => $pkval) {
-                    array_put($result, $pkval, preg_split($SEPARATOR_REGEX, $id));
+                    array_set($result, $pkval, preg_split($SEPARATOR_REGEX, $id));
                 }
             }
         }
@@ -6949,7 +6949,7 @@ class Database
             throw new \InvalidArgumentException("\$limit must be >= 0 ($limit).");
         }
 
-        $orderBy = array_kmap($orderBy, function ($v, $k) use ($simplize) {
+        $orderBy = array_maps($orderBy, function ($v, $k) use ($simplize) {
             if (is_int($k)) {
                 if (is_array($v)) {
                     return ($v[1] ? '+' : '-') . $simplize($v[0]);
@@ -7352,7 +7352,7 @@ class Database
         // しかし AUTO INCREMENT を期待して敢えて指定してないのかもしれない
         // したがって、「同じテーブルの場合は AUTO INCREMENT な主キーはselectしない」で対応できる（その結果例外が出てもそれは呼び出し側の責任）
         if ($sourceTable === $targetTable) {
-            $autocolumn = optional($this->getSchema()->getTableAutoIncrement($targetTable))->getName();
+            $autocolumn = $this->getSchema()->getTableAutoIncrement($targetTable)?->getName();
             $metasource = array_diff_key($metasource, [$autocolumn => null]);
         }
 
