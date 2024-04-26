@@ -285,19 +285,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
-     * TRUNCATE CASCADE をサポートするか否かを返す
-     *
-     * @return bool TRUNCATE CASCADE をサポートするなら true
-     */
-    public function supportsTruncateCascade()
-    {
-        if ($this->platform instanceof PostgreSQLPlatform) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * UNION が括弧をサポートするか否かを返す
      *
      * @return bool UNION が括弧をサポートするなら true

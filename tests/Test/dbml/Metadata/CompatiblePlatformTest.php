@@ -217,17 +217,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
-    function test_supportsTruncateCascade($cplatform, $platform)
-    {
-        $expected = $platform instanceof PostgreSQLPlatform;
-        $this->assertEquals($expected, $cplatform->supportsTruncateCascade());
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
     function test_supportsUnionParentheses($cplatform, $platform)
     {
         $expected = !$platform instanceof SqlitePlatform;

@@ -366,7 +366,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             // [] や Gateway 指定時のデフォルト sub lazy mode
             'defaultLazyMode'      => self::LAZY_MODE_EAGER,
             // TableGateway の暗黙的スコープ名
-            'defaultScope'         => [], // for compatible. In the future the default will be ['']
+            'defaultScope'         => [],
             // orderBy が無かったとき、あったとしても必ず最後に付与されるデフォルトの並び順
             'defaultOrder'         => null,
             // 自動 order by 有効/無効フラグ

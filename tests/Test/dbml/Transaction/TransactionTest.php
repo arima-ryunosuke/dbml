@@ -6,6 +6,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception\LockWaitTimeoutException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\DBAL\TransactionIsolationLevel;
 use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\Test\Database;
@@ -48,25 +49,14 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $transaction = new Transaction($database, [
             'savepointable' => true,
-            'retries'       => [1, 2, 3],
-        ]);
-        $this->assertEquals(true, $transaction->savepointable);
-        $this->assertEquals([1, 2, 3], $transaction->retries);
-        $this->assertFalse(call_user_func($transaction->retryable, new \Exception()));
-
-        // defaultRetryable. 本来は個別定義して専用でテストすべきだが過渡期なのでここで
-
-        $transaction = new Transaction($database, [
-            'savepointable' => true,
-            'retries'       => null,
         ]);
         $ex1 = (new \ReflectionClass(UniqueConstraintViolationException::class))->newInstanceWithoutConstructor();
         $ex2 = (new \ReflectionClass(LockWaitTimeoutException::class))->newInstanceWithoutConstructor();
-        $this->assertEquals(null, ($transaction->retries)(100, $ex1, $database->getConnection()));
-        $this->assertEquals(null, ($transaction->retries)(100, $ex2, $database->getConnection()));
-        $this->assertEquals(0.1, ($transaction->retries)(0, $ex1, $database->getConnection()));
-        $this->assertEquals(1.0, ($transaction->retries)(0, $ex2, $database->getConnection()));
-        $this->assertEquals(null, ($transaction->retries)(0, new \Exception(), $database->getConnection()));
+        $this->assertEquals(null, ($transaction->retryable)(100, $ex1, $database->getConnection()));
+        $this->assertEquals(null, ($transaction->retryable)(100, $ex2, $database->getConnection()));
+        $this->assertEquals(0.1, ($transaction->retryable)(0, $ex1, $database->getConnection()));
+        $this->assertEquals(1.0, ($transaction->retryable)(0, $ex2, $database->getConnection()));
+        $this->assertEquals(null, ($transaction->retryable)(0, new \Exception(), $database->getConnection()));
     }
 
     /**
@@ -76,8 +66,8 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test___getset($transaction, $database)
     {
-        $transaction->retries = [1, 2, 3];
-        $this->assertEquals([1, 2, 3], $transaction->retries);
+        $transaction->isolationLevel = TransactionIsolationLevel::SERIALIZABLE;
+        $this->assertEquals(TransactionIsolationLevel::SERIALIZABLE, $transaction->isolationLevel);
     }
 
     function test___debugInfo()
@@ -194,13 +184,15 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         $start = microtime(true);
 
         $count = 0;
-        $transaction->retryable(function () { return true; })->main(function () use ($database, &$count) {
+        $transaction->retryable(function (int $retryCount, \Exception $ex) {
+            return ($retryCount + 1) * 0.1;
+        })->main(function () use ($database, &$count) {
             // 3回目は成功させる
             if (++$count === 3) {
                 return $database->insert('test', ['id' => '99', 'name' => 'hoge']);
             }
             throw new \Exception('hoge');
-        })->retries([100, 200])->perform();
+        })->perform();
 
         // 1件増えてるはず
         $this->assertEquals($current + 1, $database->count('test'));
@@ -221,11 +213,16 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $count = 0;
         try {
-            $transaction->retryable(function () { return true; })->main(function () use (&$count) {
+            $transaction->retryable(function (int $retryCount, \Exception $ex) {
+                if ($retryCount >= 2) {
+                    return null;
+                }
+                return ($retryCount + 1) * 0.1;
+            })->main(function () use (&$count) {
                 // 常に失敗する
                 $count++;
                 throw new \Exception('fail 3 count');
-            })->retries([100, 200])->perform();
+            })->perform();
 
             $this->fail('ここまで来てはならない');
         }
@@ -255,11 +252,13 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $count = 0;
         try {
-            $transaction->retryable(function () { return false; })->main(function () use (&$count) {
+            $transaction->retryable(function (int $retryCount, \Exception $ex) {
+                return null;
+            })->main(function () use (&$count) {
                 // 常に失敗する
                 $count++;
                 throw new \Exception('fail 1 count');
-            })->retries([1000, 2000])->perform();
+            })->perform();
 
             $this->fail('ここまで来てはならない');
         }
@@ -287,7 +286,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         $start = microtime(true);
 
         $count = 1;
-        $transaction->retries(function ($retryCount, $ex) {
+        $transaction->retryable(function (int $retryCount, \Exception $ex) {
             if ($ex instanceof UniqueConstraintViolationException) {
                 return 0.1;
             }
@@ -366,7 +365,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $log = [];
 
-        $transaction->retryable(function () { return true; })->begin(function () use (&$log) {
+        $transaction->begin(function () use (&$log) {
             $log[] = 'begin';
         })->commit(function () use (&$log) {
             $log[] = 'commit';
@@ -383,14 +382,18 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         $log = [];
         $transaction->main(function () use (&$log) {
             $log[] = 'main';
-        }, 0)->retries([0])->perform(false);
+        }, 0)->retryable(function (int $retryCount, \Exception $ex) {
+            return $retryCount === 0 ? 0.1 : null;
+        })->perform(false);
         $this->assertEquals(['begin', 'main', 'commit', 'done'], $log);
 
         $log = [];
         $transaction->main(function () use (&$log) {
             $log[] = 'main';
             throw new \Exception('main');
-        }, 0)->retries([])->perform(false);
+        }, 0)->retryable(function (int $retryCount, \Exception $ex) {
+            return null;
+        })->perform(false);
         $this->assertEquals(['begin', 'main', 'rollback', 'fail'], $log);
 
         $rcount = 0;
@@ -401,14 +404,18 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
                 return null;
             }
             throw new \Exception('main');
-        }, 0)->retries([0])->perform(false);
+        }, 0)->retryable(function (int $retryCount, \Exception $ex) {
+            return $retryCount === 0 ? 0.1 : null;
+        })->perform(false);
         $this->assertEquals(['begin', 'main', 'rollback', 'fail', 'retry1', 'begin', 'main', 'commit', 'done'], $log);
 
         $log = [];
         $transaction->main(function () use (&$log) {
             $log[] = 'main';
             throw new \Exception('main');
-        }, 0)->retries([0])->perform(false);
+        }, 0)->retryable(function (int $retryCount, \Exception $ex) {
+            return $retryCount === 0 ? 0.1 : null;
+        })->perform(false);
         $this->assertEquals(['begin', 'main', 'rollback', 'fail', 'retry1', 'begin', 'main', 'rollback', 'fail'], $log);
     }
 
@@ -419,7 +426,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_event_ex($transaction, $database)
     {
-        $transaction->retryable(function () { return true; })->done(function () {
+        $transaction->done(function () {
             throw new \Exception('done');
         })->fail(function () {
             throw new \Exception('fail');
@@ -442,7 +449,9 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         // retry (同上)
         $ex = $transaction->fail(function () {
             //
-        }, 0)->retries([0])->__invoke(false);
+        }, 0)->retryable(function (int $retryCount, \Exception $ex) {
+            return $retryCount === 0 ? 0.1 : null;
+        })->__invoke(false);
         $this->assertEquals('retry', $ex->getMessage());
     }
 

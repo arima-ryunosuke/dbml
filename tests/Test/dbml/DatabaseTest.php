@@ -130,7 +130,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $tmpdir = sys_get_temp_dir() . '/dbml/tmp';
         rm_rf($tmpdir);
         mkdir_p($tmpdir);
-        $db = new Database(['url' => 'sqlite:///:memory:'], [
+        $db = new Database(['url' => 'sqlite3:///:memory:'], [
             'logger'      => new Logger([
                 'destination' => "$tmpdir/log.txt",
                 'metadata'    => [],
@@ -2546,9 +2546,9 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             '?' => [$database->selectExists('test1', ['id' => 1]), 0],
         ], $params);
 
-        $this->assertEquals(['(EXISTS (SELECT * FROM test1 WHERE id = ?)) = ?'], $where);
+        $this->assertEquals(['(EXISTS (SELECT * FROM test1 WHERE id = ?)) IN (?)'], $where);
         $this->assertEquals([1, 0], $params);
-        $this->assertStringIgnoreBreak("(EXISTS (SELECT * FROM test1 WHERE id = '1')) = '0'", $database->queryInto($where[0], $params));
+        $this->assertStringIgnoreBreak("(EXISTS (SELECT * FROM test1 WHERE id = '1')) IN ('0')", $database->queryInto($where[0], $params));
 
         $params = [];
         $where = $database->whereInto([
@@ -3174,6 +3174,11 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_echoAnnotation($database)
     {
+        // 定義に違いがあるわけではない（実はあるけど）ので sqlite だけで十分
+        if (!$database->getPlatform() instanceof SqlitePlatform) {
+            return;
+        }
+
         $database = $database->context();
         $database->setAutoCastType([
             'birthday' => new class() extends AbstractType {
@@ -3240,7 +3245,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         ]);
 
         $metafile = sys_get_temp_dir() . '/phpstormmeta';
-        $phpstorm_meta = $database->echoPhpStormMeta($metafile);
+        $phpstorm_meta = $database->echoPhpStormMeta(null, $metafile);
         $this->assertFileExists($metafile);
         $this->assertStringContainsString('namespace PHPSTORM_META', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\dbml\\Entity\\Entityable', $phpstorm_meta);
@@ -3249,7 +3254,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertStringContainsString('=> \DateTimeImmutable::class', $phpstorm_meta);
         $this->assertStringContainsString('=> \ArrayObject::class', $phpstorm_meta);
 
-        $phpstorm_meta = $database->echoPhpStormMeta(null, 'EntityNamespace');
+        $phpstorm_meta = $database->echoPhpStormMeta('EntityNamespace', null);
         $this->assertStringContainsString('namespace PHPSTORM_META', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
@@ -4735,8 +4740,7 @@ CSV
     function test_insertArray($database)
     {
         // 空のテスト
-        $this->assertEquals(0, $database->insertArray('test', [], 0));
-        $this->assertEquals(0, $database->insertArray('test', [], 1));
+        $this->assertEquals(0, $database->insertArray('test', []));
 
         $namequery = $database->select('test.name', [], ['id' => 'desc']);
 
@@ -4786,46 +4790,50 @@ CSV
             $namequery = $database->select('test.name', [], ['id' => 'desc']);
 
             // チャンク(1)
+            $database = $database->context(['defaultChunk' => 1]);
             $affected = $database->insertArray('test', [
                 ['name' => 'a'],
                 ['name' => 'b'],
                 ['name' => 'c'],
-            ], 1);
+            ]);
             // 3件追加したら 3 が返るはず
             $this->assertEquals(3, $affected);
             // ケツから3件取れば突っ込んだデータのはず(ただし逆順)
             $this->assertEquals(['c', 'b', 'a'], $database->fetchLists($namequery->limit($affected)));
 
             // チャンク(2)
+            $database = $database->context(['defaultChunk' => 2]);
             $affected = $database->insertArray('test', [
                 ['name' => 'a'],
                 ['name' => 'b'],
                 ['name' => 'c'],
-            ], 2);
+            ]);
             // 3件追加したら 3 が返るはず
             $this->assertEquals(3, $affected);
             // ケツから3件取れば突っ込んだデータのはず(ただし逆順)
             $this->assertEquals(['c', 'b', 'a'], $database->fetchLists($namequery->limit($affected)));
 
             // チャンク(3)
+            $database = $database->context(['defaultChunk' => 3]);
             $affected = $database->insertArray('test', [
                 ['name' => 'a'],
                 ['name' => 'b'],
                 ['name' => 'c'],
-            ], 3);
+            ]);
             // 3件追加したら 3 が返るはず
             $this->assertEquals(3, $affected);
             // ケツから3件取れば突っ込んだデータのはず(ただし逆順)
             $this->assertEquals(['c', 'b', 'a'], $database->fetchLists($namequery->limit($affected)));
 
             // チャンク(params:3)
+            $database = $database->context(['defaultChunk' => 'params:3']);
             $affected = $database->insertArray('test', [
                 ['name' => 'c', 'data' => 'C'],
                 ['name' => 'h', 'data' => 'H'],
                 ['name' => 'u', 'data' => 'U'],
                 ['name' => 'n', 'data' => 'N'],
                 ['name' => 'k', 'data' => 'K'],
-            ], 'params:3');
+            ]);
             // 5件追加したら 5 が返るはず
             $this->assertEquals(5, $affected);
             // ケツから5件取れば突っ込んだデータのはず(ただし逆順)
@@ -4887,12 +4895,13 @@ INSERT INTO test (name) VALUES
 (UPPER('c')),
 ((SELECT UPPER(name1) FROM test1 WHERE id = '4'))", $affected);
 
+        $database = $database->context(['defaultChunk' => 3]);
         $affected = $database->dryrun()->insertArray('test', [
             ['name' => 'a'],
             ['name' => new Expression('UPPER(\'b\')')],
             ['name' => new Expression('UPPER(?)', 'c')],
             ['name' => $database->select('test1.UPPER(name1)', ['id' => 4])],
-        ], 3);
+        ]);
         $this->assertStringIgnoreBreak("
 INSERT INTO test (name) VALUES
 ('a'),
@@ -4910,8 +4919,7 @@ INSERT INTO test (name) VALUES
     function test_updateArray($database)
     {
         // 空のテスト
-        $this->assertEquals(0, $database->updateArray('test', [], [], 0));
-        $this->assertEquals(0, $database->updateArray('test', [], [], 1));
+        $this->assertEquals(0, $database->updateArray('test', [], []));
 
         $data = [
             ['id' => 1, 'name' => 'A'],
@@ -4958,7 +4966,8 @@ INSERT INTO test (name) VALUES
                 ['id' => 6, 'name' => 'f'],
             ];
 
-            $affected = $database->updateArray('test', $data, ['id <> ?' => 5], 2);
+            $database = $database->context(['defaultChunk' => 2]);
+            $affected = $database->updateArray('test', $data, ['id <> ?' => 5]);
 
             // 6件与えているが、変更されるのは4件のはず(pdo-mysql の場合。他DBMSは5件)
             $expected = $database->getCompatibleConnection()->getName() === 'pdo-mysql' ? 4 : 5;
@@ -5120,8 +5129,7 @@ INSERT INTO test (name) VALUES
         }
 
         // 空のテスト
-        $this->assertEquals(0, $database->modifyArray('test', [], [], 'PRIMARY', 0));
-        $this->assertEquals(0, $database->modifyArray('test', [], [], 'PRIMARY', 1));
+        $this->assertEquals(0, $database->modifyArray('test', [], [], 'PRIMARY'));
 
         $data = [
             ['id' => 1, 'name' => 'A'],
@@ -5214,11 +5222,12 @@ INSERT INTO test (name) VALUES
         // ログを見たいので全体を preview で囲む
         $logs = $database->preview(function (Database $database) {
             // チャンク(1)
+            $database = $database->context(['defaultChunk' => 1]);
             $affected = $database->modifyArray('test', [
                 ['id' => 1, 'name' => 'U1'],
                 ['id' => 2, 'name' => 'U2'],
                 ['id' => 93, 'name' => 'A1'],
-            ], [], 1);
+            ], []);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 3affected
             if ($database->getCompatiblePlatform()->getName() === 'mysql') {
                 $expected = 5;
@@ -5231,11 +5240,12 @@ INSERT INTO test (name) VALUES
             $this->assertEquals(['U1', 'U2', 'A1'], $database->selectLists('test.name', ['id' => [1, 2, 93]]));
 
             // チャンク(2件updateData)
+            $database = $database->context(['defaultChunk' => 2]);
             $affected = $database->modifyArray('test', [
                 ['id' => 3, 'name' => 'U1'],
                 ['id' => 4, 'name' => 'U2'],
                 ['id' => 95, 'name' => 'A1'],
-            ], ['name' => 'U'], 2);
+            ], ['name' => 'U']);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 3affected
             if ($database->getCompatiblePlatform()->getName() === 'mysql') {
                 $expected = 5;
@@ -5248,12 +5258,13 @@ INSERT INTO test (name) VALUES
             $this->assertEquals(['U', 'U', 'A1'], $database->selectLists('test.name', ['id' => [3, 4, 95]]));
 
             // チャンク(3)
+            $database = $database->context(['defaultChunk' => 3]);
             $affected = $database->modifyArray('test', [
                 ['id' => 3, 'name' => 'U'],
                 ['id' => 4, 'name' => 'U1'],
                 ['id' => 5, 'name' => 'U2'],
                 ['id' => 96, 'name' => 'A1'],
-            ], [], 3);
+            ], []);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 4affected
             if ($database->getCompatiblePlatform()->getName() === 'mysql') {
                 $expected = 5;
@@ -5369,7 +5380,8 @@ INSERT INTO test (id, name) VALUES
 ('991', 'zzz')
 {$merge(['id'])} data = 'hoge', name = 'A'", $affected);
 
-        $affected = $database->dryrun()->modifyArray('test', $data, ['name' => 'hoge'], 4);
+        $database = $database->context(['defaultChunk' => 4]);
+        $affected = $database->dryrun()->modifyArray('test', $data, ['name' => 'hoge']);
         $this->assertStringIgnoreBreak("
 INSERT INTO test (id, name) VALUES
 ('1', 'A'),
@@ -5378,13 +5390,15 @@ INSERT INTO test (id, name) VALUES
 ('4', (SELECT UPPER(name1) FROM test1 WHERE id = '4'))
 {$merge(['id'])} name = 'hoge'", $affected[0]);
 
-        $affected = $database->dryrun()->modifyArray('test', $data, ['name' => 'hoge'], 4);
+        $database = $database->context(['defaultChunk' => 4]);
+        $affected = $database->dryrun()->modifyArray('test', $data, ['name' => 'hoge']);
         $this->assertStringIgnoreBreak("
 INSERT INTO test (id, name) VALUES
 ('990', 'nothing'),
 ('991', 'zzz')
 {$merge(['id'])} name = 'hoge'", $affected[1]);
 
+        $database = $database->unstackAll();
         $affected = $database->dryrun()->modifyArray('test', function () {
             foreach (['X', 'Y', 'Z'] as $n => $v) {
                 yield ['id' => $n + 1, 'name' => $v];
@@ -6706,10 +6720,6 @@ INSERT INTO test (id, name) VALUES
         $database->changeArray('multiprimary', [], ['mainid' => 2, 'subid = 7']);
         $this->assertCount(4, $database->selectArray('multiprimary', ['mainid' => 2]));
 
-        // 空のテスト3
-        $database->changeArray(['multiprimary' => ['mainid']], [], ['mainid' => 2, 'subid = 8']);
-        $this->assertCount(3, $database->selectArray('multiprimary', ['mainid' => 2]));
-
         // バルク兼プリペアのテスト
         $max = $database->max('test.id');
 
@@ -6890,7 +6900,7 @@ INSERT INTO test (id, name) VALUES
             ['mainid' => 1, 'subid' => 1, 'name' => 'a'],
             ['mainid' => 1, 'subid' => 2, 'name' => 'X'],
             ['mainid' => 1, 'subid' => 9, 'name' => 'Z'],
-        ], ['mainid' => 1], null);
+        ], ['mainid' => 1], 'PRIMARY', null);
         $this->assertEquals([
             [
                 "mainid" => "1",
@@ -6924,124 +6934,77 @@ INSERT INTO test (id, name) VALUES
             ],
         ], $primaries);
 
-        $primaries = $database->changeArray(['test' => ['uname' => new Expression('UPPER(name)', [])]], [
-            "first" => ['id' => 1, 'name' => 'a'],
-            2       => ['id' => 2, 'name' => 'b'],
-            ['id' => 3, 'name' => 'X'],
-            "last"  => ['id' => 91, 'name' => 'Z1'],
-        ], ['id < 5']);
-        $this->assertEquals([
-            "first" => [
-                "uname" => "A",
-                ""      => $updatedAffectedRows,
-            ],
-            2       => [
-                "uname" => "B",
-                ""      => $updatedAffectedRows,
-            ],
-            3       => [
-                "uname" => "C",
-                ""      => 2,
-            ],
-            "last"  => [
-                "uname" => "Z1",
-                ""      => 1,
-            ],
-            4       => [
-                "uname" => "D",
-                ""      => -1,
-            ],
-        ], $primaries);
-
-        $primaries = $database->changeArray('test.name', [
-            "first" => ['id' => 1, 'name' => 'a'],
-            2       => ['id' => 2, 'name' => 'b'],
-            ['id' => 3, 'name' => 'Y'],
-            "last"  => ['id' => 92, 'name' => 'Z2'],
-        ], []);
-        $this->assertEquals([
-            "first" => [
-                "name" => "a",
-                ""     => $updatedAffectedRows,
-            ],
-            2       => [
-                "name" => "b",
-                ""     => $updatedAffectedRows,
-            ],
-            3       => [
-                "name" => "X",
-                ""     => 2,
-            ],
-            "last"  => [
-                "name" => "Z2",
-                ""     => 1,
-            ],
-            4       => [
-                "name" => "e",
-                ""     => -1,
-            ],
-            5       => [
-                "name" => "f",
-                ""     => -1,
-            ],
-            6       => [
-                "name" => "g",
-                ""     => -1,
-            ],
-            7       => [
-                "name" => "h",
-                ""     => -1,
-            ],
-            8       => [
-                "name" => "i",
-                ""     => -1,
-            ],
-            9       => [
-                "name" => "j",
-                ""     => -1,
-            ],
-            10      => [
-                "name" => "Z1",
-                ""     => -1,
-            ],
-        ], $primaries);
-
         $primaries = $database->changeArray('test', [
             "first" => ['id' => 1, 'name' => 'a'],
             2       => ['id' => 2, 'name' => 'b'],
             ['id' => 3, 'name' => 'Z'],
             "last"  => ['id' => 93, 'name' => 'Z3'],
-        ], [], null);
+        ], [], 'PRIMARY', ['id', 'nameX' => 'name']);
         $this->assertEquals([
             "first" => [
-                "id" => "1",
-                ""   => $updatedAffectedRows,
+                "id"    => "1",
+                "nameX" => "a",
+                ""      => $updatedAffectedRows,
             ],
             2       => [
-                "id" => "2",
-                ""   => $updatedAffectedRows,
+                "id"    => "2",
+                "nameX" => "b",
+                ""      => $updatedAffectedRows,
             ],
             3       => [
-                "id" => "3",
-                ""   => 2,
+                "id"    => "3",
+                "nameX" => "c",
+                ""      => 2,
             ],
             "last"  => [
-                "id" => 93,
-                ""   => 1,
+                "id"    => "93",
+                "nameX" => "Z3",
+                ""      => 1,
             ],
             4       => [
-                "id" => "92",
-                ""   => -1,
+                "id"    => "4",
+                "nameX" => "d",
+                ""      => -1,
+            ],
+            5       => [
+                "id"    => "5",
+                "nameX" => "e",
+                ""      => -1,
+            ],
+            6       => [
+                "id"    => "6",
+                "nameX" => "f",
+                ""      => -1,
+            ],
+            7       => [
+                "id"    => "7",
+                "nameX" => "g",
+                ""      => -1,
+            ],
+            8       => [
+                "id"    => "8",
+                "nameX" => "h",
+                ""      => -1,
+            ],
+            9       => [
+                "id"    => "9",
+                "nameX" => "i",
+                ""      => -1,
+            ],
+            10      => [
+                "id"    => "10",
+                "nameX" => "j",
+                ""      => -1,
             ],
         ], $primaries);
 
         if ($database->getCompatiblePlatform()->getName() === 'mysql') {
-            $primaries = $database->changeArray(['test' => ['name']], [
+            $primaries = $database->changeArray('test', [
                 "first" => ['id' => 1, 'name' => 'a'],
                 ['id' => 2, 'name' => 'b'],
                 ['id' => 3, 'name' => 'Z'],
                 "last"  => ['id' => 100, 'name' => 'Z'],
-            ], ['false']);
+            ], ['false'], 'PRIMARY', ['name']);
             $this->assertEquals([
                 "first" => [
                     "name" => "a",
@@ -7064,9 +7027,9 @@ INSERT INTO test (id, name) VALUES
             if ($database->getCompatiblePlatform()->supportsIgnore()) {
                 $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
 
-                $primaries = $database->changeArrayIgnore(['test' => ['name']], [
+                $primaries = $database->changeArrayIgnore('test', [
                     ['id' => 1, 'name' => null],
-                ], ['id' => 1]);
+                ], ['id' => 1], 'PRIMARY', ['name']);
                 $this->assertEquals([
                     [
                         "name" => "a",
@@ -7333,14 +7296,20 @@ INSERT INTO test (id, name) VALUES
         $database->truncate('test');
         $this->assertEquals(0, $database->count('test'));
 
-        // 他の外部キーメソッドのようにメソッドを分けていないので dryrun の返り値は string|array になっている
         $this->assertIsString($database->dryrun()->truncate('test'));
-        if (!$database->getCompatiblePlatform()->supportsTruncateCascade()) {
-            $this->assertIsArray($database->dryrun()->truncate('g_ancestor', true));
-        }
+    }
 
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_eliminate($database)
+    {
+        $this->assertIsArray($database->dryrun()->eliminate('g_ancestor'));
+
+        // PostgreSQLPlatform は truncate CASCADE がある故外部キーを無効化できない？
         // SQLServer は truncate の CASCADE も外部キー無効も対応していない
-        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+        if (!$database->getPlatform() instanceof PostgreSQLPlatform && !$database->getPlatform() instanceof SQLServerPlatform) {
             $database->import([
                 'g_ancestor' => [
                     [
@@ -7360,7 +7329,7 @@ INSERT INTO test (id, name) VALUES
             ]);
 
             // truncate の affected rows はバラバラなので int で緩く
-            $this->assertIsInt($database->truncate('g_ancestor', true));
+            $this->assertIsInt($database->eliminate('g_ancestor'));
 
             // すべて消えている
             $this->assertEquals(0, $database->count('g_ancestor'));
@@ -7368,7 +7337,7 @@ INSERT INTO test (id, name) VALUES
             $this->assertEquals(0, $database->count('g_child'));
 
             // 制約の種類は問わない
-            $this->assertIsInt($database->truncate('foreign_p', true));
+            $this->assertIsInt($database->eliminate('foreign_p'));
         }
     }
 

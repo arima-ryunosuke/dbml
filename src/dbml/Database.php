@@ -187,7 +187,7 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * @method $this                  setUpdateEmpty($bool)
  * @method int|string             getDefaultChunk()
  * @method $this                  setDefaultChunk($int) {
- *     バルク系メソッドの $chunk に null が与えられた場合のデフォルトチャンクサイズを指定する
+ *     バルク系メソッドのデフォルトチャンクサイズを指定する
  *
  *     原則は int で、文字列指定で特殊な設定が行える。
  *     現在のところ `params:12345` で「bind parameter 数が 12345 を超えたとき」のみ。
@@ -517,10 +517,10 @@ class Database
             'insertSet'                 => false,
             // UPDATE で空データの時に意味のない更新をするか？（false だと構文エラーになる）
             'updateEmpty'               => true,
-            // バルク系メソッドの $chunk に null が与えられた場合のデフォルトチャンクサイズ（文字列指定で特殊なコールバックが設定できる）
-            'defaultChunk'              => PHP_INT_MAX,
+            // バルク系メソッドのデフォルトチャンクサイズ（文字列指定で特殊なコールバックが設定できる）
+            'defaultChunk'              => null,
             // insert 時などのデフォルトリトライ回数
-            'defaultRetry'              => 0, // for compatible
+            'defaultRetry'              => 0,
             // 無効化時のデフォルトカラム
             'defaultInvalidColumn'      => [
                 //'delete_flg'  => 1,
@@ -536,7 +536,7 @@ class Database
             // insert 時などに数値系カラムは真偽値を int として扱うか否か
             'convertBoolToInt'          => true,
             // insert 時などに日時カラムは int/float をタイムスタンプとして扱うか否か
-            'convertNumericToDatetime'  => false, // for compatible
+            'convertNumericToDatetime'  => true,
             // insert 時などに文字列カラムは length で切るか否か
             'truncateString'            => false,
             // 埋め込み条件の yaml パーサ
@@ -727,31 +727,32 @@ class Database
                 $middlewares[] = new LoggingMiddleware(new LoggerChain());
                 $configuration->setMiddlewares($middlewares);
             }
-            // for compatible
-            if (strlen($options['initCommand'] ?? '')) {
-                $middlewares[] = new class($options['initCommand']) implements \Doctrine\DBAL\Driver\Middleware {
-                    private $initCommand;
+            if ($options['initCommand'] ?? []) {
+                $middlewares[] = new class((array) $options['initCommand']) implements \Doctrine\DBAL\Driver\Middleware {
+                    private $initCommands;
 
-                    public function __construct($initCommand)
+                    public function __construct($initCommands)
                     {
-                        $this->initCommand = $initCommand;
+                        $this->initCommands = $initCommands;
                     }
 
                     public function wrap(Driver $driver): Driver
                     {
-                        return new class ($driver, $this->initCommand) extends AbstractDriverMiddleware {
-                            private $initCommand;
+                        return new class ($driver, $this->initCommands) extends AbstractDriverMiddleware {
+                            private $initCommands;
 
-                            public function __construct(Driver $wrappedDriver, $initCommand)
+                            public function __construct(Driver $wrappedDriver, $initCommands)
                             {
                                 parent::__construct($wrappedDriver);
-                                $this->initCommand = $initCommand;
+                                $this->initCommands = $initCommands;
                             }
 
                             public function connect(array $params): \Doctrine\DBAL\Driver\Connection
                             {
                                 $connection = parent::connect($params);
-                                $connection->exec($this->initCommand);
+                                foreach ($this->initCommands as $initCommand) {
+                                    $connection->exec($initCommand);
+                                }
                                 return $connection;
                             }
                         };
@@ -1144,13 +1145,9 @@ class Database
         return array_unique($traces);
     }
 
-    private function _getChunk($chunk, &$params)
+    private function _getChunk(&$params)
     {
-        $chunk = $chunk ?? $this->getUnsafeOption('defaultChunk');
-        // for compatible
-        if ($chunk === 0) {
-            return PHP_INT_MAX;
-        }
+        $chunk = $this->getUnsafeOption('defaultChunk');
         // 特殊設定: params の数でチャンク
         if (is_string($chunk) && preg_match('#^params:\s*(\d+)$#', trim($chunk), $matches)) {
             return function () use (&$params, $matches) { return count($params) < $matches[1]; };
@@ -1229,9 +1226,8 @@ class Database
 
         if ($this->getUnsafeOption('preparing')) {
             $row = array_each($row, function (&$carry, $v, $k) {
-                // for compatible. もともと "name" で ":name" のような bind 形式になる仕様だったが ":name" で明示する仕様になった
-                if (is_int($k) && is_string($v)) {
-                    $k = ltrim($v, ':'); // substr($v, 1);
+                if (is_int($k) && is_string($v) && str_starts_with($v, ':')) {
+                    $k = substr($v, 1);
                     $v = $this->raw(":$k");
                 }
                 $carry[$k] = $v;
@@ -1730,20 +1726,12 @@ class Database
      *
      * 存在するテーブル名や tableMapper などを利用して phpstorm.meta を作成する。
      *
-     * @param bool $innerOnly namespace PHPSTORM_META のような外側を含めるか（非推奨）
-     * @param ?string $filename ファイルとして吐き出す先
      * @param ?string $namespace エンティティの名前空間。未指定だと Entityable に集約される
+     * @param ?string $filename ファイルとして吐き出す先
      * @return string phpstorm.meta の内容
      */
-    public function echoPhpStormMeta($innerOnly = false, $filename = null, $namespace = null)
+    public function echoPhpStormMeta($namespace = null, $filename = null)
     {
-        // for compatible
-        if (!is_bool($innerOnly)) {
-            $namespace = $filename;
-            $filename = $innerOnly;
-            $innerOnly = false;
-        }
-
         $special_types = [
             Types::SIMPLE_ARRAY => 'array|string',
             Types::JSON         => 'array|string',
@@ -1814,9 +1802,7 @@ class Database
                 );
             META;
         }
-        if (!$innerOnly) {
-            $result = "<?php\nnamespace PHPSTORM_META {\n$result\n}";
-        }
+        $result = "<?php\nnamespace PHPSTORM_META {\n$result\n}";
 
         if ($filename) {
             file_set_contents($filename, $result);
@@ -3282,12 +3268,7 @@ class Database
                     $value = $subvalues;
 
                     if (strpos($cond, ':') === false && ($diff = count($value) - substr_count($cond, '?')) > 0) {
-                        if ($diff === 1) {
-                            $cond .= ' = ?'; // for compatible
-                        }
-                        else {
-                            $cond .= ' IN (' . implode(',', array_fill(0, $diff, '?')) . ')';
-                        }
+                        $cond .= ' IN (' . implode(',', array_fill(0, $diff, '?')) . ')';
                     }
                 }
 
@@ -3927,12 +3908,8 @@ class Database
         $chunk = null;
         $converter = $this->_getConverter($sql);
         if ($sql instanceof QueryBuilder) {
-            if ($chunk = $sql->getLazyChunk()) {
-                $converter = fn($rows, $metadata) => $sql->postselect(array_map(fn($row) => $converter($row, $metadata), $rows), false);
-            }
-            else {
-                $converter = fn($row, $metadata) => $sql->postselect([$converter($row, $metadata)], true)[0];
-            }
+            $chunk = $sql->getLazyChunk();
+            $converter = fn($rows, $metadata) => $sql->postselect(array_map(fn($row) => $converter($row, $metadata), $rows), !$chunk);
         }
         return new Yielder(fn($connection) => $this->_sqlToStmt($sql, $params, $connection), $this->getCompatibleConnection($this->getSlaveConnection()), null, $converter, $chunk);
     }
@@ -5295,7 +5272,7 @@ class Database
 
             $affected = [];
             $current = mb_internal_encoding();
-            foreach (iterator_chunk($file, $this->_getChunk($options['chunk'], $params), true) as $rows) {
+            foreach (iterator_chunk($file, ($chunk = $this->_getChunk($params)) ?? PHP_INT_MAX, true) as $rows) {
                 $values = $params = [];
 
                 foreach ($rows as $m => $fields) {
@@ -5342,7 +5319,7 @@ class Database
                 $affected[] = $this->executeAffect($sql, $params);
             }
             if ($this->getUnsafeOption('dryrun') || $this->getUnsafeOption('preparing')) {
-                return $options['chunk'] ? $affected : reset($affected);
+                return $chunk ? $affected : reset($affected);
             }
             return array_sum($affected);
         }
@@ -5411,13 +5388,12 @@ class Database
      *
      * @param string $tableName テーブル名
      * @param array|callable|\Generator $data カラムデータ配列あるいは Generator
-     * @param ?int $chunk 分割 insert する場合はそのチャンクサイズ
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function insertArray($tableName, $data, $chunk = null)
+    public function insertArray($tableName, $data)
     {
         // 隠し引数 $opt
-        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
+        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
         $tableName = $this->_preaffect($tableName, $data);
         if (is_array($tableName)) {
@@ -5430,7 +5406,7 @@ class Database
         $affected = [];
         $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
         $template = "INSERT {$ignore}INTO $tableName (%s) VALUES %s";
-        foreach (iterator_chunk($data, $this->_getChunk($chunk, $params)) as $rows) {
+        foreach (iterator_chunk($data, ($chunk = $this->_getChunk($params)) ?? PHP_INT_MAX) as $rows) {
             $values = [];
             $params = [];
             foreach ($rows as $row) {
@@ -5490,13 +5466,12 @@ class Database
      * @param string $tableName テーブル名
      * @param array|callable|\Generator $data カラムデータあるいは Generator あるいは Generator を返す callable
      * @param array|mixed $identifier 束縛条件
-     * @param ?int $chunk 分割 update する場合はそのチャンクサイズ
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function updateArray($tableName, $data, $identifier = [], $chunk = null)
+    public function updateArray($tableName, $data, $identifier = [])
     {
         // 隠し引数 $opt
-        $opt = func_num_args() === 5 ? func_get_arg(4) : [];
+        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
         $tableName = $this->_preaffect($tableName, $data);
         if (is_array($tableName)) {
@@ -5511,7 +5486,7 @@ class Database
         $condition = $this->_prewhere($tableName, $identifier);
 
         $affected = [];
-        foreach (iterator_chunk($data, $this->_getChunk($chunk, $params)) as $rows) {
+        foreach (iterator_chunk($data, ($chunk = $this->_getChunk($params)) ?? PHP_INT_MAX) as $rows) {
             $columns = $this->_normalizes($tableName, $rows, $pcols);
             $pkcols = array_intersect_key($columns, $pkey);
             $cvcols = array_diff_key($columns, $pkey);
@@ -5592,20 +5567,13 @@ class Database
      * @param string $tableName テーブル名
      * @param array|callable|\Generator $insertData カラムデータあるいは Generator
      * @param array $updateData カラムデータ
-     * @param string|int $uniquekey 重複チェックに使うユニークキー名
-     * @param ?int $chunk 分割 insert する場合はそのチャンクサイズ
+     * @param string $uniquekey 重複チェックに使うユニークキー名
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function modifyArray($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = null)
+    public function modifyArray($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
         // 隠し引数 $opt
-        $opt = func_num_args() === 6 ? func_get_arg(5) : [];
-
-        // for compatible
-        if (ctype_digit("$uniquekey")) {
-            $chunk = $uniquekey;
-            $uniquekey = 'PRIMARY';
-        }
+        $opt = func_num_args() === 5 ? func_get_arg(4) : [];
 
         $cplatform = $this->getCompatiblePlatform();
         if (!$cplatform->supportsBulkMerge()) {
@@ -5628,7 +5596,7 @@ class Database
         $refer = $cplatform->getReferenceSyntax('%1$s');
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
         $template = "INSERT {$ignore}INTO $tableName (%s) VALUES %s $merge %s";
-        foreach (iterator_chunk($insertData, $this->_getChunk($chunk, $params)) as $rows) {
+        foreach (iterator_chunk($insertData, ($chunk = $this->_getChunk($params)) ?? PHP_INT_MAX) as $rows) {
             $values = [];
             $params = [];
             foreach ($rows as $row) {
@@ -5696,7 +5664,7 @@ class Database
      *
      * 返り値は `[primaryKeys]` となり「その世界における主キー配列」を返す。
      *
-     * ただし $tableName に配列を渡すと 主キーをキーとしたレコード配列を返すようになる。
+     * $returning を渡すと 主キーをキーとしたレコード配列を返すようになる。
      * レコード配列には空文字キーで下記の値が自動で設定される。
      * - 1: レコードが作成された
      * - -1: レコードが削除された
@@ -5706,7 +5674,6 @@ class Database
      * - INSERT: 作成した後のレコード（元がないのだから新しいレコードしか返し得ない）
      * - DELETE: 削除する前のレコード（削除したのだから元のレコードしか返し得ない）
      * - UPDATE: 更新する前のレコード（「更新する値」は手元にあるわけなので更新前の値の方が有用度が高いため）
-     * 実用的には RETURNING に近く、変更のあった一覧を得ることができる。
      * ただし bulk は自動で無効になるので注意（上記で言うところの「標準速度」が最速になる）。
      *
      * dryrun 中は [[primaryKeys], [実行した SQL]] という2タプルの階層配列を返す。
@@ -5762,10 +5729,10 @@ class Database
      *
      * @used-by changeArrayIgnore()
      *
-     * @param string|array $tableName テーブル名
+     * @param string $tableName テーブル名
      * @param array $dataarray データ配列
      * @param array|mixed $identifier 束縛条件。 false を与えると DELETE 文自体を発行しない（速度向上と安全担保）
-     * @param string|array|null $uniquekey 重複チェックに使うユニークキー名
+     * @param string $uniquekey 重複チェックに使うユニークキー名
      * @param ?array $returning 返り値の制御変数。配列を与えるとそのカラムの SELECT 結果を返す（null は主キーを表す）
      * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
      */
@@ -5775,24 +5742,12 @@ class Database
         $opt = func_num_args() === 6 ? func_get_arg(5) : [];
         unset($opt['primary']); // 自身で処理するので不要
 
-        // for compatible
-        if (!is_string($uniquekey)) {
-            $returning = $uniquekey;
-            $uniquekey = 'PRIMARY';
-        }
-
         $dryrun = $this->getUnsafeOption('dryrun');
         $cplatform = $this->getCompatiblePlatform();
 
         $whereconds = arrayize($identifier);
 
         $tableName = $this->_preaffect($tableName, []);
-
-        // for compatiblle
-        if ($tableName instanceof QueryBuilder) {
-            $returning = $tableName->getQueryPart('select');
-            $tableName = first_key($tableName->getFromPart());
-        }
         $tableName = $this->convertTableName($tableName);
 
         // 主キー情報を漁っておく
@@ -5870,7 +5825,7 @@ class Database
                 $stmt = null;
                 if ($preparable && count($group['rows']) > 1) {
                     /** @noinspection PhpMethodParametersCountMismatchInspection */
-                    $stmt = $this->prepareModify($tableName, $group['cols'], [], $uniquekey, $opt);
+                    $stmt = $this->prepareModify($tableName, array_map(fn($c) => ":$c", $group['cols']), [], $uniquekey, $opt);
                 }
                 foreach ($group['rows'] as $n => $row) {
                     if ($stmt) {
@@ -7384,7 +7339,7 @@ class Database
      *
      * @param string $tableName テーブル名
      * @param bool $cascade CASCADE フラグ。PostgreSql の場合のみ有効
-     * @return int|array|string 基本的には affected row. dryrun 中は文字列か配列
+     * @return int|string 基本的には affected row. dryrun 中は文字列
      */
     public function truncate($tableName, $cascade = false)
     {
@@ -7392,23 +7347,48 @@ class Database
         $schema = $this->getSchema();
 
         $tableName = $this->convertTableName($tableName);
-        $relations = [];
-        if ($cascade && !$cplatform->supportsTruncateCascade()) {
-            $relations = $schema->getForeignKeys($tableName, null);
+
+        try {
+            return $this->executeAffect($cplatform->getTruncateTableSQL($tableName, $cascade));
         }
+        finally {
+            if (!$cplatform->supportsResetAutoIncrementOnTruncate() && $schema->getTableAutoIncrement($tableName)) {
+                $this->resetAutoIncrement($tableName);
+            }
+        }
+    }
+
+    /**
+     * TRUNCATE 構文（子テーブルも削除）
+     *
+     * ```php
+     * $db->eliminate('parenttable');
+     * // TRUNCATE childtable
+     * // TRUNCATE parenttable
+     * ```
+     *
+     * @param string $tableName テーブル名
+     * @return int|array|string 基本的には affected row. dryrun 中は文字列か配列
+     */
+    public function eliminate($tableName)
+    {
+        $schema = $this->getSchema();
+
+        $tableName = $this->convertTableName($tableName);
+        $relations = $schema->getForeignKeys($tableName, null);
 
         $affecteds = [];
 
         foreach ($relations as $fkey) {
             $ltable = first_key($schema->getForeignTable($fkey));
-            $affecteds = array_merge($affecteds, (array) $this->truncate($ltable, $cascade));
+            $affecteds = array_merge($affecteds, (array) $this->eliminate($ltable));
         }
 
         foreach ($relations as $fkey) {
             $this->switchForeignKey(false, $fkey);
         }
         try {
-            $affected = $this->executeAffect($cplatform->getTruncateTableSQL($tableName, $cascade));
+            $affecteds[] = $this->truncate($tableName);
         }
         finally {
             foreach ($relations as $fkey) {
@@ -7416,21 +7396,10 @@ class Database
             }
         }
 
-        if (!$cplatform->supportsResetAutoIncrementOnTruncate() && $schema->getTableAutoIncrement($tableName)) {
-            $this->resetAutoIncrement($tableName);
-        }
-
         if ($this->getUnsafeOption('dryrun')) {
-            // for compatible
-            if ($affecteds) {
-                return array_merge($affecteds, (array) $affected);
-            }
-            return $affected;
+            return $affecteds;
         }
-        if (is_int($affected)) {
-            return array_sum([...$affecteds, $affected]);
-        }
-        return $affected; // @codeCoverageIgnore Statement の可能性があるが、truncate を prepare で呼ぶ人はいないし用途もないのでテストしない
+        return array_sum($affecteds); // Statement の可能性があるが、truncate を prepare で呼ぶ人はいないし用途もないのでテストしない
     }
 
     /**

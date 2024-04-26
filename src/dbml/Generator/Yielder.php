@@ -43,17 +43,13 @@ class Yielder implements \IteratorAggregate
      * コンストラクタ
      *
      * @param Result|\Closure $statement 取得に使用される \Statement
-     * @param CompatibleConnection|Connection $cconnection 取得に使用するコネクション
+     * @param CompatibleConnection $cconnection 取得に使用するコネクション
      * @param ?string $method フェッチメソッド名
      * @param ?callable $callback $chunk 行ごとに呼ばれるコールバック処理
      * @param ?int $chunk コールバック処理のチャンク数。指定するとその数だけバッファリングされるので留意
      */
     public function __construct($statement, $cconnection, $method = null, $callback = null, $chunk = null)
     {
-        // for compatible
-        if ($cconnection instanceof Connection) {
-            $cconnection = new CompatibleConnection($cconnection);
-        }
         $this->statement = $statement;
         $this->cconnection = $cconnection;
         $this->connection = $cconnection->getConnection();
@@ -244,7 +240,7 @@ class Yielder implements \IteratorAggregate
             }
             else {
                 if ($this->callback) {
-                    $row = ($this->callback)($row, $metadata); // for compatible. future scope: $rows = ($this->callback)([$row])
+                    $row = ($this->callback)([$row], $metadata)[0];
                 }
 
                 yield from $loop([$row]);

@@ -17,13 +17,13 @@ class JsonGeneratorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $path = tempnam(sys_get_temp_dir(), 'export');
         $id = $database->getCompatiblePlatform()->getConcatExpression("''", 'id');
 
-        $y = new Yielder($database->executeSelect("select ($id) as id, test.name from test"), $database->getConnection());
+        $y = new Yielder($database->executeSelect("select ($id) as id, test.name from test"), $database->getCompatibleConnection());
         $g = new JsonGenerator(['buffered' => true, 'assoc' => false]);
         $g->generate($path, $y);
         $this->assertJson(file_get_contents($path));
         $this->assertStringEqualsFile($path, '[{"id":"1","name":"a"},{"id":"2","name":"b"},{"id":"3","name":"c"},{"id":"4","name":"d"},{"id":"5","name":"e"},{"id":"6","name":"f"},{"id":"7","name":"g"},{"id":"8","name":"h"},{"id":"9","name":"i"},{"id":"10","name":"j"}]');
 
-        $y = new Yielder($database->executeSelect("select ($id) as id, test.name from test"), $database->getConnection());
+        $y = new Yielder($database->executeSelect("select ($id) as id, test.name from test"), $database->getCompatibleConnection());
         $g = new JsonGenerator(['buffered' => true, 'assoc' => true]);
         $g->generate($path, $y);
         $this->assertJson(file_get_contents($path));

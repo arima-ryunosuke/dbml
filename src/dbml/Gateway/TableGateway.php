@@ -524,7 +524,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             // マジック JOIN 時のデフォルトモード
             'defaultJoinMethod' => 'auto',
             // affect 系で無視するスコープ
-            'ignoreAffectScope' => [], // for compatible. In the future the default will be ['']
+            'ignoreAffectScope' => [],
             // メソッドベーススコープの命名規則
             'scopeRenamer'      => function ($name) { return lcfirst($name); },
             // メソッドベース仮想カラムの命名規則
@@ -2374,10 +2374,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::insertArray()
      */
-    public function insertArray($data, $chunk = null)
+    public function insertArray($data)
     {
         $this->resetResult();
-        return $this->database->insertArray($this->tableName, $data, $chunk, ...array_slice(func_get_args(), 2));
+        return $this->database->insertArray($this->tableName, $data, ...array_slice(func_get_args(), 1));
     }
 
     /**
@@ -2387,10 +2387,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::updateArray()
      */
-    public function updateArray($data, $identifier = [], $chunk = null)
+    public function updateArray($data, $identifier = [])
     {
         $this->resetResult();
-        return $this->database->updateArray($this->tableName, $data, $identifier, $chunk, ...array_slice(func_get_args(), 3));
+        return $this->database->updateArray($this->tableName, $data, $identifier, ...array_slice(func_get_args(), 2));
     }
 
     /**
@@ -2400,10 +2400,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::modifyArray()
      */
-    public function modifyArray($insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = null)
+    public function modifyArray($insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
         $this->resetResult();
-        return $this->database->modifyArray($this->tableName, $insertData, $updateData, $uniquekey, $chunk, ...array_slice(func_get_args(), 4));
+        return $this->database->modifyArray($this->tableName, $insertData, $updateData, $uniquekey, ...array_slice(func_get_args(), 3));
     }
 
     /**
@@ -2654,10 +2654,21 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::truncate()
      */
-    public function truncate($cascade = false)
+    public function truncate()
     {
         $this->resetResult();
-        return $this->database->truncate($this->tableName, $cascade);
+        return $this->database->truncate($this->tableName);
+    }
+
+    /**
+     * 駆動表を省略できる <@uses Database::eliminate()>
+     *
+     * @inheritdoc Database::eliminate()
+     */
+    public function eliminate()
+    {
+        $this->resetResult();
+        return $this->database->eliminate($this->tableName);
     }
 
     /**

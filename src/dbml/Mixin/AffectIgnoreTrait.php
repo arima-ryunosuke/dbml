@@ -44,7 +44,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::insertArray()
      */
-    private function insertArrayIgnoreWithTable($tableName, $data, $chunk = null)
+    private function insertArrayIgnoreWithTable($tableName, $data)
     {
         assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('insertArray', func_get_args());
@@ -55,7 +55,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::insertArray()
      */
-    private function insertArrayIgnoreWithoutTable($data, $chunk = null)
+    private function insertArrayIgnoreWithoutTable($data)
     {
         assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('insertArray', func_get_args());
@@ -66,7 +66,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::updateArray()
      */
-    private function updateArrayIgnoreWithTable($tableName, $data, $identifier = [], $chunk = null)
+    private function updateArrayIgnoreWithTable($tableName, $data, $identifier = [])
     {
         assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('updateArray', func_get_args());
@@ -77,7 +77,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::updateArray()
      */
-    private function updateArrayIgnoreWithoutTable($data, $identifier = [], $chunk = null)
+    private function updateArrayIgnoreWithoutTable($data, $identifier = [])
     {
         assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('updateArray', func_get_args());
@@ -88,7 +88,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::modifyArray()
      */
-    private function modifyArrayIgnoreWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = null)
+    private function modifyArrayIgnoreWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('modifyArray', func_get_args());
@@ -99,7 +99,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::modifyArray()
      */
-    private function modifyArrayIgnoreWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', $chunk = null)
+    private function modifyArrayIgnoreWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('modifyArray', func_get_args());

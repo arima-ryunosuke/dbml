@@ -15,7 +15,7 @@ class ArrayGeneratorTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_all($database)
     {
         $path = tempnam(sys_get_temp_dir(), 'export');
-        $y = new Yielder($database->executeSelect('select * from test'), $database->getConnection());
+        $y = new Yielder($database->executeSelect('select * from test'), $database->getCompatibleConnection());
         $g = new ArrayGenerator([]);
         $g->generate($path, $y);
         $this->assertEquals([
@@ -80,7 +80,7 @@ class ArrayGeneratorTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $path = tempnam(sys_get_temp_dir(), 'export');
 
-        $y = new Yielder($database->executeSelect('select * from test'), $database->getConnection());
+        $y = new Yielder($database->executeSelect('select * from test'), $database->getCompatibleConnection());
         $g = new ArrayGenerator([
             'assoc' => false,
         ]);
@@ -88,7 +88,7 @@ class ArrayGeneratorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $rows = $database->fetchAssoc('select * from test');
         $this->assertEquals(array_values($rows), require $path);
 
-        $y = new Yielder($database->executeSelect('select * from test'), $database->getConnection());
+        $y = new Yielder($database->executeSelect('select * from test'), $database->getCompatibleConnection());
         $g = new ArrayGenerator([
             'assoc' => true,
         ]);

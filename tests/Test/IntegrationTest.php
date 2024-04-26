@@ -469,7 +469,7 @@ class IntegrationTest extends AbstractUnitTestCase
                 throw new \RuntimeException();
             }
         });
-        $transaction->retries(function ($retryCount, $ex) use ($database, $other, &$async) {
+        $transaction->retryable(function ($retryCount, $ex) use ($database, $other, &$async) {
             // 1回目の実行で飛んでくる
             if ($ex instanceof DeadlockException) {
                 $async();           // 回さないとデストラクタでエラーになる

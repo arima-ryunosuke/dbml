@@ -10,7 +10,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
     function test___debugInfo()
     {
-        $yielder = new Yielder(static fn() => null, self::getDummyDatabase()->getConnection());
+        $yielder = new Yielder(static fn() => null, self::getDummyDatabase()->getCompatibleConnection());
         $debugString = print_r($yielder, true);
         $this->assertStringContainsString('statement:', $debugString);
         $this->assertStringNotContainsString('database:', $debugString);
@@ -24,7 +24,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $g = new Yielder(function () {
             return;
-        }, $database->getConnection());
+        }, $database->getCompatibleConnection());
 
         $this->assertException(new \RuntimeException('invalid'), function () use ($g) {
             iterator_to_array($g);
@@ -37,7 +37,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_all($database)
     {
-        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getConnection(), 'array');
+        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getCompatibleConnection(), 'array');
         $actual = [];
         foreach ($g as $k => $v) {
             $actual[] = [$k => $v];
@@ -62,7 +62,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_assoc($database)
     {
-        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getConnection(), 'assoc');
+        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getCompatibleConnection(), 'assoc');
         $actual = [];
         foreach ($g as $k => $v) {
             $actual[] = [$k => $v];
@@ -79,7 +79,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_lists($database)
     {
-        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getConnection(), 'lists');
+        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getCompatibleConnection(), 'lists');
         $actual = [];
         foreach ($g as $k => $v) {
             $actual[] = [$k => $v];
@@ -104,7 +104,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_pairs($database)
     {
-        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getConnection(), 'pairs');
+        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getCompatibleConnection(), 'pairs');
         $actual = [];
         foreach ($g as $k => $v) {
             $actual[] = [$k => $v];
@@ -123,9 +123,11 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $g = new Yielder(function (Connection $c) {
             return $c->executeQuery('select * from multiprimary');
-        }, $database->getConnection(), 'pairs', function ($row) {
-            $row['subid'] = $row['subid'] * 10;
-            return $row;
+        }, $database->getCompatibleConnection(), 'pairs', function ($rows) {
+            foreach ($rows as &$row) {
+                $row['subid'] = $row['subid'] * 10;
+            }
+            return $rows;
         });
         $actual = [];
         foreach ($g as $k => $v) {
@@ -143,7 +145,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_method($database)
     {
-        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getConnection());
+        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getCompatibleConnection());
         $g->setFetchMethod('hoge');
         $ex = new \UnexpectedValueException("method 'hoge' is undefined.");
         try {
@@ -161,7 +163,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_unique($database)
     {
-        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getConnection(), 'pairs');
+        $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getCompatibleConnection(), 'pairs');
         $g->setEmulationUnique(false);
         $actual = [];
         foreach ($g as $k => $v) {
@@ -187,7 +189,7 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_chunk($database)
     {
-        $g = new Yielder($database->executeSelect('select subid from multiprimary'), $database->getConnection(), 'lists', function ($rows) {
+        $g = new Yielder($database->executeSelect('select subid from multiprimary'), $database->getCompatibleConnection(), 'lists', function ($rows) {
             foreach ($rows as $n => $row) {
                 $rows[$n]['subid'] = $rows[$n]['subid'] * 10;
             }

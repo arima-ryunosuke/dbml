@@ -29,12 +29,8 @@ use function ryunosuke\dbml\arrayize;
  *
  * ### リトライ
  *
- * $retries を設定するとリトライ回数・間隔を指定することができる。
- * 例えば `retries([5000, 10000])` は「1回目のリトライは5秒後、2回めのリトライは10秒後」を意味する（つまりこの場合、最悪15秒かかる）。
- * 指定形式の都合上、「無限リトライ」をすることはできない（実装を検討中。Generator を返すクロージャを与えるのが無難か？）
- *
- * 「リトライするか？」の判定は $retryable に「例外オブジェクトを受け取り真偽値を返す」クロージャを設定する。
- * 例外発生時にそのクロージャが呼び出され、 true を返って来たらリトライ処理を行う。
+ * 「リトライするか？」の判定は $retryable に「リトライ回数と例外オブジェクトを受け取り真偽値を返す」クロージャを設定する。
+ * 例外発生時にそのクロージャが呼び出され、 float が返って来たらその分待機してリトライ処理を行う。
  *
  * ### イベント
  *
@@ -129,7 +125,6 @@ use function ryunosuke\dbml\arrayize;
  * @property \Closure[] $retry retry イベント配列
  * @property \Closure[] $catch catch イベント配列
  * @property \Closure[] $finish finish イベント配列
- * @property \Closure|int[] $retries リトライ間隔
  * @property \Closure $retryable リトライ判定処理
  * @property bool $savepointable savepoint 有効/無効フラグ
  *
@@ -157,9 +152,6 @@ use function ryunosuke\dbml\arrayize;
  * @method $this           setCatch(array $closure) catch イベント配列を設定する
  * @method \Closure[]      getFinish() finish イベント配列を取得する
  * @method $this           setFinish(array $closure) finish イベント配列を設定する
- * @method $this|\Closure|int[] retries($closure = null) リトライ間隔を設定・取得する
- * @method int[]           getRetries()リトライ間隔を取得する
- * @method $this           setRetries($ints)リトライ間隔を設定する
  * @method $this|\Closure  retryable($closure = null) リトライ判定処理を設定・取得する
  * @method \Closure        getRetryable() リトライ判定処理を取得する
  * @method $this           setRetryable(\Closure $closure) リトライ判定処理を設定する
@@ -209,10 +201,22 @@ class Transaction
             'catch'          => [/* function () { }*/],
             // 完了イベント
             'finish'         => [/* function () { }*/],
-            // リトライ回数兼間隔
-            'retries'        => [], // for compatible. rename to retryable and default null in future scope
             // リトライ可能判定処理
-            'retryable'      => fn($ex) => $ex instanceof RetryableException, // for compatible.
+            'retryable'      => function (int $retryCount, \Exception $ex, Connection $connection): ?float {
+                // 無限リトライ防止
+                if ($retryCount > 5) {
+                    return null;
+                }
+                // id や uk がクロージャで、値が毎回変わることもある
+                if ($ex instanceof UniqueConstraintViolationException) {
+                    return 0.1;
+                }
+                // それ以外は doctrine に任せる
+                if ($ex instanceof RetryableException) {
+                    return 1.0;
+                }
+                return null;
+            },
             // セーブポイントを活かすか
             'savepointable'  => null,
         ];
@@ -227,25 +231,6 @@ class Transaction
     public function __construct(Database $database, $options = [])
     {
         $this->database = $database;
-
-        // for compatible. 将来的にデフォルト化する。今はリファレンス的意味合いが強い。
-        if (!isset($options['retries'])) {
-            $options['retries'] = function (int $retryCount, \Exception $ex, Connection $connection): ?float {
-                // 無限リトライ防止
-                if ($retryCount > 5) {
-                    return null;
-                }
-                // id や uk がクロージャで、値が毎回変わることもある
-                if ($ex instanceof UniqueConstraintViolationException) {
-                    return 0.1;
-                }
-                // それ以外は doctrine に任せる
-                if ($ex instanceof RetryableException) {
-                    return 1.0;
-                }
-                return null;
-            };
-        }
 
         $default = [];
         foreach ($database->getOptions() as $key => $value) {
@@ -399,23 +384,11 @@ class Transaction
             $this->_invokeArray($this->fail, $ex);
 
             // リトライ
-            if (is_callable($this->retries) && !is_null($retryable = ($this->retries)($this->retryCount, $ex, $connection))) {
+            if (is_callable($this->retryable) && !is_null($retryable = ($this->retryable)($this->retryCount, $ex, $connection))) {
                 usleep($retryable * 1000 * 1000);
                 $this->_invokeArray($this->retry, ++$this->retryCount);
 
                 return $this->_execute($connection, $previewMode);
-            }
-            // for compatible
-            if (is_array($retries = $this->retries)) {
-                if (isset($retries[$this->retryCount]) && ($this->retryable)($ex)) {
-                    usleep($retries[$this->retryCount] * 1000);
-                    $this->retryCount++;
-
-                    // retry
-                    $this->_invokeArray($this->retry, $this->retryCount);
-
-                    return $this->_execute($connection, $previewMode);
-                }
             }
 
             throw $ex;

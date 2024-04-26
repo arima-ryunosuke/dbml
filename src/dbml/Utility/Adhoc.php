@@ -65,20 +65,8 @@ class Adhoc
         $params += $urlParams;
         $params['driverOptions'] += $urlParams['driverOptions'];
 
-        // for compatible. DriverManager の挙動と併せるために必要だが、あまり必要性を感じないのでなくてよい
-        $driverSchemeAliases = [
-            'db2'        => 'ibm_db2',
-            'mssql'      => 'pdo_sqlsrv',
-            'mysql'      => 'pdo_mysql',
-            'mysql2'     => 'pdo_mysql',
-            'postgres'   => 'pdo_pgsql',
-            'postgresql' => 'pdo_pgsql',
-            'pgsql'      => 'pdo_pgsql',
-            'sqlite'     => 'pdo_sqlite',
-            'sqlite3'    => 'pdo_sqlite',
-        ];
         unset($params['url']);
-        return $params + (new DsnParser($driverSchemeAliases))->parse($url);
+        return $params + (new DsnParser())->parse($url);
     }
 
     /**

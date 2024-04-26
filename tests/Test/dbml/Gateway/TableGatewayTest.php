@@ -1743,13 +1743,20 @@ AND ((flag=1))", "$gw");
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function truncate($cascade = false)
+            public function truncate()
+            {
+                $this->called[] = __FUNCTION__;
+                return parent::{__FUNCTION__}(...func_get_args());
+            }
+
+            public function eliminate()
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
         };
         $gateway->truncate();
+        $gateway->eliminate();
         $gateway->createIgnore(['id' => 1]);
         $gateway->upsertOrThrow(['id' => 2]);
         $gateway->modifyConditionally(['id' => 3], ['id' => 3]);
@@ -1767,6 +1774,7 @@ AND ((flag=1))", "$gw");
         // サフィックス付きでもオーバーライドしたメソッドが呼ばれている
         $this->assertEquals([
             'truncate',
+            'eliminate',
             'create',
             'upsert',
             'modify',

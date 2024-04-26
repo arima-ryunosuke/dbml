@@ -1932,14 +1932,14 @@ AND (/* vcolumn raw1-2 */ UPPER(P.name))
 AND (/* vcolumn raw1-k */ UPPER(P.name) LIKE '%X%')
 AND (/* vcolumn raw1-k */ UPPER(P.name) LIKE '%X')
 AND (/* vcolumn raw2-3 */ id + 9 = '10')
-AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) = '0')
+AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) IN ('0'))
 AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) > '1')
 AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) BETWEEN '7' AND '9')
 AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) > '123')
 AND (/* vcolumn has_child-4 */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))))
-AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) = '0')
+AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) IN ('0'))
 AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) IN ('0','1'))
-AND (/* vcolumn children-k */ (EXISTS (SELECT * FROM foreign_c2 WHERE (foreign_c2.cid = P.id) AND (name = 'hoge'))) = 1)
+AND (/* vcolumn children-k */ (EXISTS (SELECT * FROM foreign_c2 WHERE (foreign_c2.cid = P.id) AND (name = 'hoge'))) IN (1))
 AND ('99' AND /* vcolumn raw1-k */ UPPER(P.name) = 'Y'
 AND /* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) = '2'
 AND /* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) IN('7','8','9'))
@@ -1972,8 +1972,8 @@ SQL
                 '*.article_id'    => 3,
             ],
             'A.article_id' => [
-                '*.*'            => 'injected1!',
-                '*.article_id'   => 'injected2!',
+                '*.*'          => 'injected1!',
+                '*.article_id' => 'injected2!',
                 [
                     '*.*' => 'injected3!',
                 ],
@@ -1995,7 +1995,7 @@ SQL
         $this->assertStringIgnoreBreak("SELECT A.*, A.article_id AS {$primary_key}c, NULL AS $C
 FROM t_article A
 WHERE ((A.article_id = '1')
-OR (/* vcolumn comment_count-k */ (SELECT COUNT(*) AS {$qi('*@count')} FROM t_comment WHERE t_comment.article_id = A.article_id) = '2')
+OR (/* vcolumn comment_count-k */ (SELECT COUNT(*) AS {$qi('*@count')} FROM t_comment WHERE t_comment.article_id = A.article_id) IN ('2'))
 OR (A.article_id = '3'))
 AND (FALSE)", $builder->queryInto());
         // 子供である C 条件が現れるのはインジェクションの危険性がある
@@ -2922,8 +2922,8 @@ SELECT
 $exists AS alias2
 FROM foreign_p P
 WHERE (1)
-AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) = '0')
-AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) = '1')
+AND (/* vcolumn count_child-k */ (SELECT COUNT(*) AS {$qi("*@count")} FROM foreign_c1 C1 WHERE (C1.id = '0') AND (C1.id = P.id)) IN ('0'))
+AND (/* vcolumn has_child-k */ (EXISTS (SELECT * FROM foreign_c2 C2 WHERE (C2.cid = '0') AND (C2.cid = P.id))) IN ('1'))
 SQL
             , $builder->queryInto());
 

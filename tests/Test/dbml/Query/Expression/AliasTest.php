@@ -54,6 +54,12 @@ class AliasTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('actual', $alias->getActual());
     }
 
+    function test_getModifier()
+    {
+        $alias = new Alias('alias', 'actual', 'table');
+        $this->assertEquals('table', $alias->getModifier());
+    }
+
     function test_isPlaceholdable()
     {
         $this->assertFalse((new Alias('alias', 'actual'))->isPlaceholdable());
