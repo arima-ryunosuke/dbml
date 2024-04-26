@@ -1849,7 +1849,7 @@ AND ((flag=1))", "$gw");
             try {
                 $gateway->where(['id' => 1])->orderBy('id')->limit(1)->update(['name' => 'XXX']);
             }
-            catch (\Exception $ex) {
+            catch (\Exception) {
                 $this->assertEquals(['UPDATE test SET name = ? WHERE test.id = ? ORDER BY id ASC LIMIT 1' => []], $lastsql());
             }
         }
@@ -1859,7 +1859,7 @@ AND ((flag=1))", "$gw");
             try {
                 $gateway->where(['id' => 1])->orderBy('id')->limit(1)->delete();
             }
-            catch (\Exception $ex) {
+            catch (\Exception) {
                 $this->assertEquals(['DELETE FROM test WHERE test.id = ? ORDER BY id ASC LIMIT 1' => []], $lastsql());
             }
         }
@@ -1869,7 +1869,7 @@ AND ((flag=1))", "$gw");
             try {
                 $gateway->joinOn(new TableGateway($database, 'test1'), '1=1')->where(['id' => 1])->update(['name' => 'XXX']);
             }
-            catch (\Exception $ex) {
+            catch (\Exception) {
                 $this->assertEquals(['UPDATE test INNER JOIN test1 test1 ON 1=1 SET name = ? WHERE test.id = ?' => ['XXX', 1]], $lastsql());
             }
         }
@@ -1879,7 +1879,7 @@ AND ((flag=1))", "$gw");
             try {
                 $gateway->joinOn(new TableGateway($database, 'test1'), '1=1')->where(['id' => 1])->delete();
             }
-            catch (\Exception $ex) {
+            catch (\Exception) {
                 $this->assertEquals(['DELETE test FROM test INNER JOIN test1 test1 ON 1=1 WHERE test.id = ?' => [1]], $lastsql());
             }
         }
@@ -1893,7 +1893,7 @@ AND ((flag=1))", "$gw");
                 $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
                 (new TableGateway($database, 'foreign_p'))->joinForeign((new TableGateway($database, 'foreign_c1'))->where(['seq' => 11]))->where(['id' => 2])->remove();
             }
-            catch (\Exception $ex) {
+            catch (\Exception) {
                 $this->assertEquals(["DELETE foreign_p FROM foreign_p INNER JOIN foreign_c1 foreign_c1 ON foreign_p.id = foreign_c1.id AND foreign_c1.seq = '11' WHERE (foreign_p.id = ?) AND ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE foreign_p.id = foreign_c1.id))) AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_p.id = foreign_c2.cid)))" => [2]], $lastsql());
             }
         }

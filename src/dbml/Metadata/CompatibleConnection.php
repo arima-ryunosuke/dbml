@@ -157,7 +157,7 @@ class CompatibleConnection
                 $supported_cache[$driverName][$attribute_name] = $this->nativeConnection->setAttribute($attribute_name, $attribute_value);
             }
         }
-        catch (\PDOException $t) {
+        catch (\PDOException) {
             $supported_cache[$driverName][$attribute_name] = false;
         }
 

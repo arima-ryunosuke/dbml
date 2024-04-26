@@ -875,7 +875,7 @@ abstract class AbstractUnitTestCase extends TestCase
             $database->executeSelect("$syntax");
             return true;
         }
-        catch (\Exception $e) {
+        catch (\Exception) {
             return false;
         }
     }
@@ -964,7 +964,7 @@ abstract class AbstractUnitTestCase extends TestCase
                     };
                 }
             }
-            catch (\ReflectionException $ex) {
+            catch (\ReflectionException) {
                 // __call を考慮するとどうしようもない
             }
         }

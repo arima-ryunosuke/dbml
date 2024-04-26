@@ -145,7 +145,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
 
             $this->fail('ここまで来てはならない');
         }
-        catch (\Exception $e) {
+        catch (\Exception) {
             // このコンテキストでは戻っているはず
             $this->assertEquals($current, $database->getConnection()->getTransactionIsolation());
         }

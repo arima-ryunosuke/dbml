@@ -2149,7 +2149,7 @@ class Database
         try {
             return !!$this->getPdo()->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
         }
-        catch (\PDOException $e) {
+        catch (\PDOException) {
             return true;
         }
     }
@@ -7549,7 +7549,7 @@ class Database
                 try {
                     $schema->getForeignColumns(...$args);
                 }
-                catch (\Throwable $t) {
+                catch (\Throwable) {
                     // through
                 }
             }

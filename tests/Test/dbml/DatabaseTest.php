@@ -695,14 +695,14 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 try {
                     $native->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
                 }
-                catch (\Exception $e) {
+                catch (\Exception) {
                 }
                 $this->assertSame($expected[$database->getCompatiblePlatform()->getName()][false], $database->isEmulationMode(true));
 
                 try {
                     $native->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
                 }
-                catch (\Exception $e) {
+                catch (\Exception) {
                 }
                 $this->assertSame($expected[$database->getCompatiblePlatform()->getName()][true], $database->isEmulationMode(true));
             }
@@ -710,7 +710,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
                 try {
                     $native->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
                 }
-                catch (\Exception $e) {
+                catch (\Exception) {
                 }
             }
         }
@@ -742,14 +742,14 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             $cx = $database->context();
             $cx->setInsertSet(true)->fetchTuple('invalid query.');
         }
-        catch (\Exception $ex) {
+        catch (\Exception) {
             $this->assertFalse($database->getInsertSet());
         }
         try {
             $st = $database->stack();
             $st->setInsertSet(true)->fetchTuple('invalid query.');
         }
-        catch (\Exception $ex) {
+        catch (\Exception) {
             $this->assertFalse($database->getInsertSet());
         }
     }
@@ -1840,7 +1840,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 throw new \Exception();
             });
         }
-        catch (\Exception $ex) {
+        catch (\Exception) {
             // ロールバックされているはず
             $this->assertEquals($current, $database->count('test'));
             return;
@@ -3372,7 +3372,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         try {
             $sleep1 = $database->queryInto($database->getCompatiblePlatform()->getSleepExpression(1));
         }
-        catch (\Throwable $t) {
+        catch (\Throwable) {
             $sleep1 = "sleep(1)";
         }
 
@@ -3434,7 +3434,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         try {
             $sleep1 = $database->queryInto($database->getCompatiblePlatform()->getSleepExpression(1));
         }
-        catch (\Throwable $t) {
+        catch (\Throwable) {
             $sleep1 = "sleep(1)";
         }
 
@@ -3462,7 +3462,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         try {
             $sleep1 = $database->queryInto($database->getCompatiblePlatform()->getSleepExpression(1));
         }
-        catch (\Throwable $t) {
+        catch (\Throwable) {
             $sleep1 = "sleep(1)";
         }
 
