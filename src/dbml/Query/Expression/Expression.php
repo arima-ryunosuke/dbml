@@ -135,6 +135,11 @@ class Expression implements Queryable
         return (string) $this->expr;
     }
 
+    public function setParams(array $params)
+    {
+        $this->params = $params;
+    }
+
     /**
      * @inheritdoc
      */

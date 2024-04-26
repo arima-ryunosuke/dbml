@@ -418,11 +418,8 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // テーブル記法＋OrThrowもきちんと動くことを担保
         if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            $this->assertEquals(['id' => 199], $database->insertOrThrow('test.id', 199));
-            $this->assertEquals(['id' => 199], $database->upsertOrThrow('test.id, name', [199, 'hogera']));
+            $this->assertEquals(['id' => 9], $database->updateOrThrow('test[id: 9]', ['name' => 'hogera']));
         }
-        $lastid = $database->insertOrThrow('test.name', 'foobar');
-        $this->assertEquals('foobar', $database->selectValue('test.name', $lastid));
 
         // Gateway 系
         $this->assertInstanceOf(TableGateway::class, $database->test());
@@ -1221,8 +1218,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'subid' => 10,
             ]);
             $this->assertEquals([
-                "DELETE tran_table1 FROM master_table LEFT JOIN tran_table1 ON (master_table.category = 'tran1') AND (tran_table1.master_id = master_table.subid) WHERE subid = '10'",
-                "UPDATE master_table LEFT JOIN tran_table2 ON (master_table.category = 'tran2') AND (tran_table2.master_id = master_table.subid) SET tran_table2.master_id = NULL WHERE subid = '10'",
+                "DELETE FROM tran_table1 WHERE tran_table1.master_id = '10'",
+                "UPDATE tran_table2 SET master_id = NULL WHERE tran_table2.master_id = '10'",
                 "DELETE FROM master_table WHERE subid = '10'",
             ], $sqls);
 
@@ -5430,6 +5427,12 @@ INSERT INTO test (id, name) VALUES
         ]);
         $this->assertEquals(['id' => 100], $result);
 
+        $result = $database->createConditionally('test[id:101]', [], [
+            'id'   => 101,
+            'name' => 'zzz',
+        ]);
+        $this->assertEquals(['id' => 101], $result);
+
         $sql = $database->dryrun()->createConditionally('test', ['id' => 1], [
             'id'   => 1,
             'name' => 'a',
@@ -5449,6 +5452,10 @@ INSERT INTO test (id, name) VALUES
             'name' => 'xx',
         ]);
         $this->assertEquals('xx', $database->selectValue('test.name', [], ['id' => 'desc'], 1));
+
+        // テーブル記法
+        $database->insert('test.name', 'yy');
+        $this->assertEquals('yy', $database->selectValue('test.name', [], ['id' => 'desc'], 1));
 
         // into
         $database->insert('test', [
@@ -5481,95 +5488,18 @@ INSERT INTO test (id, name) VALUES
         ]);
         $this->assertEquals(['id' => 100], $result);
 
+        $result = $database->insertConditionally('test[id:101]', [], [
+            'id'   => 101,
+            'name' => 'zzz',
+        ]);
+        $this->assertEquals(['id' => 101], $result);
+
         $sql = $database->dryrun()->insertConditionally('test', ['id' => 1], [
             'id'   => 1,
             'name' => 'a',
         ]);
         $this->assertStringContainsString('INSERT INTO test (id, name) SELECT', $sql);
         $this->assertStringContainsString('WHERE (NOT EXISTS (SELECT * FROM test WHERE id =', $sql);
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_insert_column($database)
-    {
-        // 1カラム
-        $this->assertEquals(1, $database->insert('test.name', 'XXX'));
-        $this->assertEquals('XXX', $database->selectValue('test.name', [], ['id' => 'desc'], 1));
-
-        // 複数カラム
-        $this->assertEquals(1, $database->insert('test.name, data', ['YYY', 'ZZZ']));
-        $this->assertEquals(['name' => 'YYY', 'data' => 'ZZZ'], $database->selectTuple('test.!id', [], ['id' => 'desc'], 1));
-
-        // 複数カラム(配列)
-        $this->assertEquals(1, $database->insert([
-            'test' => ['name', 'data'],
-        ], ['EEE', 'RRR']));
-        $this->assertEquals(['name' => 'EEE', 'data' => 'RRR'], $database->selectTuple('test.!id', [], ['id' => 'desc'], 1));
-
-        // 複数テーブル
-        $this->assertEquals(2, $database->insert([
-            'foreign_p P' => [
-                'id'   => 99,
-                'name' => 'hoge',
-            ],
-            '+foreign_c1' => [
-                'name' => new Expression("UPPER('fuga')"),
-            ],
-        ], ['seq' => 9]));
-        $this->assertEquals([
-            [
-                'id'    => '99',
-                'pname' => 'hoge',
-                'name'  => 'FUGA',
-                'seq'   => '9',
-            ],
-        ], $database->selectArray('foreign_p(99).*, name pname + foreign_c1.*'));
-
-        $sqls = $database->dryrun()->insert([
-            'foreign_p P' => [
-                'id'   => 99,
-                'name' => 'hoge',
-            ],
-            '+foreign_c1' => [
-                'name' => new Expression("UPPER('fuga')"),
-            ],
-        ], ['seq' => 9]);
-        $this->assertStringContainsString("INTO foreign_p (id, name) VALUES (99, 'hoge')", $sqls[0]);
-        $this->assertStringContainsString("INTO foreign_c1 (seq, name, id) VALUES ('9', UPPER('fuga'), '99')", $sqls[1]);
-
-        $this->assertException(new \InvalidArgumentException('specify multiple table'), L($database)->insert('test1,test2', ['X']));
-        $this->assertException(new \InvalidArgumentException('data array are difference'), L($database)->insert('test.name', ['X', 'Y']));
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_insert_join($database)
-    {
-        $result = $database->insert('horizontal1 < horizontal2', [
-            'name'    => 'name1',
-            'summary' => 'summary1',
-        ]);
-        $this->assertEquals(2, $result);
-        $this->assertEquals([
-            'name'    => 'name1',
-            'summary' => 'summary1',
-        ], $database->selectTuple('horizontal1.name + horizontal2.summary', [], [], 1));
-
-        $result = $database->insertOrThrow('horizontal1 + horizontal2', [
-            'name'    => 'name2',
-            'summary' => 'summary2',
-        ]);
-        $this->assertIsArray($result);
-        $result = reset($result);
-        $this->assertEquals([
-            'name'    => 'name2',
-            'summary' => 'summary2',
-        ], $database->selectTuple("horizontal1($result).name + horizontal2.summary", [], [], 1));
     }
 
     /**
@@ -5600,6 +5530,14 @@ INSERT INTO test (id, name) VALUES
         ], [
             'id' => 2,
         ]);
+        $this->assertEquals(1, $affected);
+
+        // テーブル記法
+        $affected = $database->update('test[id:2].name', 'td', []);
+        $this->assertEquals(1, $affected);
+        $affected = $database->update($database->descriptor('test[id: [?, ?]]', [3, 4]), [
+            'name' => 'td',
+        ], ['id IN (4, 5)']);
         $this->assertEquals(1, $affected);
 
         // 文字列 where
@@ -5647,100 +5585,16 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_update_column($database)
-    {
-        // 1カラム
-        $this->assertEquals(1, $database->update('test.name', 'XXX', ['id' => 1]));
-        $this->assertEquals('XXX', $database->selectValue('test.name', ['id' => 1]));
-
-        // 1カラム(Expression)
-        $this->assertEquals(1, $database->update('test.name', new Expression('LOWER(name)'), ['id' => 1]));
-        $this->assertEquals('xxx', $database->selectValue('test.name', ['id' => 1]));
-
-        // 複数カラム
-        $this->assertEquals(1, $database->update('test.name, data', ['YYY', 'ZZZ'], ['id' => 1]));
-        $this->assertEquals(['name' => 'YYY', 'data' => 'ZZZ'], $database->selectTuple('test.!id', ['id' => 1]));
-
-        // 複数カラム(配列)
-        $this->assertEquals(1, $database->update([
-            'test' => ['name', 'data'],
-        ], ['EEE', 'RRR'], ['id' => 1]));
-        $this->assertEquals(['name' => 'EEE', 'data' => 'RRR'], $database->selectTuple('test.!id', ['id' => 1]));
-
-        // 普通はこういうことはせず、 JOIN 時のみ有用なので mysql だけでテストする
-        if ($database->getPlatform() instanceof MySQLPlatform) {
-            $database->insert('foreign_p', ['id' => 1, 'name' => 'pname']);
-            $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'c1name1']);
-            $database->insert('foreign_c1', ['id' => 1, 'seq' => 2, 'name' => 'c1name2']);
-            $database->insert('foreign_c2', ['cid' => 1, 'seq' => 1, 'name' => 'c2name1']);
-            $database->insert('foreign_c2', ['cid' => 1, 'seq' => 2, 'name' => 'c2name2']);
-            $this->assertEquals(3, $database->update([
-                'foreign_p(1)'   => [
-                    'name' => 'hoge',
-                ],
-                '+foreign_c1 C1' => [
-                    'name' => new Expression('UPPER(C1.name)'),
-                ],
-            ], []));
-            $this->assertEquals([
-                [
-                    'id'    => 1,
-                    'pname' => 'hoge',
-                    'name'  => 'C1NAME1',
-                    'seq'   => 1,
-                ],
-                [
-                    'id'    => 1,
-                    'pname' => 'hoge',
-                    'name'  => 'C1NAME2',
-                    'seq'   => 2,
-                ],
-            ], $database->selectArray('foreign_p(1).*, name pname + foreign_c1.*'));
-        }
-
-        $this->assertException(new \InvalidArgumentException('specify multiple table'), L($database)->update('test1,test2', ['X']));
-        $this->assertException(new \InvalidArgumentException('data array are difference'), L($database)->update('test.name', ['X', 'Y']));
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_update_join($database)
-    {
-        if ($database->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
-            $this->assertEquals('UPDATE test T LEFT JOIN test1 T1 ON T.id = T1.id SET name = UPPER(T1.name1) WHERE 1=1', $database->dryrun()->update([
-                'test T',
-                '<test1 T1' => [['T.id = T1.id']],
-            ], ["name" => new Expression('UPPER(T1.name1)')], '1=1'));
-        }
-        if ($database->getCompatiblePlatform()->supportsUpdateJoin()) {
-            $affected = $database->update([
-                'test T',
-                '<test1 T1' => [['T.id = T1.id']],
-            ], ["name" => new Expression('UPPER(T1.name1)')], '1=1');
-            $this->assertEquals(10, $affected);
-        }
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
     function test_update_descriptor($database)
     {
         $this->assertEquals(1, $database->update('test(2)', ['name' => 'XXX']));
         $this->assertEquals('XXX', $database->selectValue('test(2).name'));
 
-        $this->assertEquals(2, $database->update('test(1, 2, 3)', ['name' => 'YYY'], ['id <> ?' => 2]));
-        $this->assertEquals('YYY', $database->selectValue('test(1).name'));
+        $database->test->addScope('affect', [], ['id <> ?' => 1]);
+        $this->assertEquals(1, $database->update('test(1, 2, 3)@affect', ['name' => 'YYY'], ['id <> ?' => 2]));
+        $this->assertEquals('a', $database->selectValue('test(1).name'));
         $this->assertEquals('XXX', $database->selectValue('test(2).name'));
         $this->assertEquals('YYY', $database->selectValue('test(3).name'));
-
-        if ($database->getCompatiblePlatform()->supportsUpdateJoin()) {
-            $this->assertEquals(1, $database->update('test(2)', ['name' => 'ZZZ']));
-            $this->assertEquals('ZZZ', $database->selectValue('test(2).name'));
-        }
     }
 
     /**
@@ -5767,33 +5621,21 @@ INSERT INTO test (id, name) VALUES
         ]);
         $this->assertEquals(1, $affected);
 
+        // テーブル記法
+        $affected = $database->delete('test[id:6]');
+        $this->assertEquals(1, $affected);
+        $affected = $database->delete($database->descriptor('test[id: [?, ?]]', [7, 8]), ['id IN (8, 9)']);
+        $this->assertEquals(1, $affected);
+
         // 文字列指定
         $affected = $database->delete('test', '1=1');
-        $this->assertEquals(5, $affected);
+        $this->assertEquals(3, $affected);
 
         // 条件なし1
         $affected = $database->delete('test1', []);
         $this->assertEquals(10, $affected);
         $affected = $database->delete('test2');
         $this->assertEquals(20, $affected);
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_delete_join($database)
-    {
-        if ($database->getCompatiblePlatform()->supportsDeleteJoin()) {
-            $database->delete('test1', 'id = 1');
-            $affected = $database->delete('test1.*', 'id = 2');
-            $this->assertEquals(1, $affected);
-            $affected = $database->delete([
-                'test T',
-                '+test1 T1' => [['T.id = T1.id']],
-            ], '1=1');
-            $this->assertEquals(8, $affected);
-        }
     }
 
     /**
@@ -5807,13 +5649,9 @@ INSERT INTO test (id, name) VALUES
         $this->assertEquals(1, $database->delete('test(2)'));
         $this->assertEquals($count - 1, $database->count('test'));
 
-        $this->assertEquals(2, $database->delete('test(1, 2, 3)', ['id <> ?' => 2]));
-        $this->assertEquals($count - 3, $database->count('test'));
-
-        if ($database->getCompatiblePlatform()->supportsDeleteJoin()) {
-            $this->assertEquals(1, $database->delete('test(4) AS T'));
-            $this->assertEquals($count - 4, $database->count('test'));
-        }
+        $database->test->addScope('affect', [], ['id <> ?' => 1]);
+        $this->assertEquals(1, $database->delete('test(1, 2, 3)[id <> 2]@affect'));
+        $this->assertEquals($count - 2, $database->count('test'));
     }
 
     /**
@@ -5914,26 +5752,6 @@ INSERT INTO test (id, name) VALUES
             $this->assertException('affected row is nothing', L($database)->reviseOrThrow('test', ['id' => -1], ['id' => -1]));
         }
 
-        if ($database->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
-            $logs = [];
-            $logger = new Logger([
-                'destination' => function ($sql, $params) use (&$logs) {
-                    $logs[] = compact('sql', 'params');
-                },
-                'level'       => 'debug',
-                'metadata'    => [],
-            ]);
-            try {
-                $database->setLogger($logger);
-                $database->revise('foreign_p P < foreign_c1 C', ['name' => 'revise'], ['C.id' => 99]);
-            }
-            catch (\Exception $ex) {
-                $last = reset($logs);
-                $this->assertEquals('UPDATE foreign_p P LEFT JOIN foreign_c1 C ON C.id = P.id SET name = ? WHERE (C.id = ?) AND ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = P.id))) AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = P.id)))', $last['sql']);
-            }
-            $database->setLogger(null);
-        }
-
         // 相互外部キー
         $this->assertEquals("UPDATE foreign_d1 SET name = 'hoge' WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id)))", $database->dryrun()->revise('foreign_d1', ['name' => 'hoge'], ['id' => 1]));
         $this->assertEquals("UPDATE foreign_d2 SET name = 'hoge' WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id)))", $database->dryrun()->revise('foreign_d2', ['name' => 'hoge'], ['id' => 1]));
@@ -6023,26 +5841,6 @@ INSERT INTO test (id, name) VALUES
             ['id' => 2, 'name' => 'name2'],
             ['id' => 4, 'name' => 'name4'],
         ], $database->selectArray('foreign_p'));
-
-        if ($database->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
-            $logs = [];
-            $logger = new Logger([
-                'destination' => function ($sql, $params) use (&$logs) {
-                    $logs[] = compact('sql', 'params');
-                },
-                'level'       => 'debug',
-                'metadata'    => [],
-            ]);
-            try {
-                $database->setLogger($logger);
-                $database->remove('foreign_p P < foreign_c1 C', ['C.id' => 99]);
-            }
-            catch (\Exception $ex) {
-                $last = reset($logs);
-                $this->assertEquals('DELETE P FROM foreign_p P LEFT JOIN foreign_c1 C ON C.id = P.id WHERE (C.id = ?) AND ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = P.id))) AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = P.id)))', $last['sql']);
-            }
-            $database->setLogger(null);
-        }
 
         // 相互外部キー
         $this->assertEquals('DELETE FROM foreign_d1 WHERE (NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id))', $database->dryrun()->remove('foreign_d1'));
@@ -6291,10 +6089,9 @@ INSERT INTO test (id, name) VALUES
         $this->assertEquals("2009-09-09", $database->max('oprlog.log_date', ['category' => 'category-9', 'primary_id' => 9]));
         $database->rollback();
 
-        // ↑のクエリビルダ版
+        // ↑のテーブル記法
         $database->begin();
-        $select = $database->select('oprlog-log_date#-5')->where(['log_date < ?' => '2009-07-04'])->groupBy('category', 'primary_id');
-        $this->assertEquals(11, $database->reduce($select));
+        $this->assertEquals(11, $database->reduce('oprlog["log_date<\'2009-07-04\'"]<category,primary_id>-log_date#-5'));
         $this->assertEquals(1, $database->count('oprlog', ['category' => 'category-9', 'primary_id' => 1]));
         $this->assertEquals(2, $database->count('oprlog', ['category' => 'category-9', 'primary_id' => 2]));
         $this->assertEquals(3, $database->count('oprlog', ['category' => 'category-9', 'primary_id' => 3]));
@@ -6442,26 +6239,6 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_upsert_column($database)
-    {
-        // 複数カラム
-        $this->assertEquals(2, $database->upsert('test.id, name', [1, 'YYY']));
-        $this->assertEquals('YYY', $database->selectValue('test.name', ['id' => 1]));
-
-        // updateData 指定
-        // sqlserver はID列を更新できない
-        if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            $this->assertEquals(2, $database->upsert('test.id, name', [1, 'YYY'], [1, 'ZZZ']));
-            $this->assertEquals('ZZZ', $database->selectValue('test.name', ['id' => 1]));
-        }
-
-        $this->assertException(new \InvalidArgumentException('is not supported Q'), L($database)->upsert('test.name', ['X' => 'Y']));
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
     function test_upsert_ex($database)
     {
         $this->assertException(new \UnexpectedValueException('no match primary key'), L($database)->upsert('noauto', ['name' => 'xx']));
@@ -6528,6 +6305,12 @@ INSERT INTO test (id, name) VALUES
         ]);
         $this->assertEquals(['id' => 100], $result);
 
+        $result = $database->upsertConditionally('test[id:101]', [], [
+            'id'   => 101,
+            'name' => 'zzz',
+        ]);
+        $this->assertEquals(['id' => 101], $result);
+
         $result = $database->upsertConditionally('test', ['id' => -1], [
             'id'   => 10,
             'name' => 'zzz',
@@ -6556,9 +6339,6 @@ INSERT INTO test (id, name) VALUES
         $this->assertEquals(['name' => 'repN2', 'data' => 'upD2'], $database->selectTuple('test.name,data', ['id' => $id]));
 
         if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            $database->modify(['test' => ['id', 'name']], [$id, 'repN2'], [$id, 'repN3']);
-            $this->assertEquals(['name' => 'repN3', 'data' => 'upD2'], $database->selectTuple('test.name,data', ['id' => $id]));
-
             $merge = function ($columns) use ($database) { return $database->getCompatiblePlatform()->getMergeSyntax($columns); };
             $refer = function ($column) use ($database) { return $database->getCompatiblePlatform()->getReferenceSyntax($column); };
 
@@ -6568,8 +6348,6 @@ INSERT INTO test (id, name) VALUES
             $affected = $database->dryrun()->modify('test', ['id' => 1, 'name' => 'name1'], ['data' => 'updateData', '*' => null]);
             $this->assertEquals("INSERT INTO test (id, name) VALUES ('1', 'name1') {$merge(['id'])} data = 'updateData', name = {$refer('name')}", $affected);
         }
-
-        $this->assertException(new \InvalidArgumentException('is not supported Q'), L($database)->modify('test.name', ['X' => 'Y']));
     }
 
     /**
@@ -6620,6 +6398,12 @@ INSERT INTO test (id, name) VALUES
             'name' => 'zzz',
         ]);
         $this->assertEquals(['id' => 100], $result);
+
+        $result = $database->modifyConditionally('test[id:101]', [], [
+            'id'   => 101,
+            'name' => 'zzz',
+        ]);
+        $this->assertEquals(['id' => 101], $result);
 
         $result = $database->modifyConditionally('test', ['id' => -1], [
             'id'   => 10,

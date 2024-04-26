@@ -15,9 +15,7 @@ use Doctrine\DBAL\Types\Types;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\SelectOption;
 use ryunosuke\dbml\Query\Queryable;
-use ryunosuke\dbml\Query\QueryBuilder;
 use function ryunosuke\dbml\array_each;
-use function ryunosuke\dbml\array_sprintf;
 use function ryunosuke\dbml\array_strpad;
 use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\class_shorten;
@@ -227,32 +225,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return true;
         }
         if ($this->platform instanceof MySQLPlatform) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * UPDATE + JOIN をサポートするか否かを返す
-     *
-     * @return bool UPDATE + JOIN をサポートするなら true
-     */
-    public function supportsUpdateJoin()
-    {
-        if ($this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * DELETE + JOIN をサポートするか否かを返す
-     *
-     * @return bool DELETE + JOIN をサポートするなら true
-     */
-    public function supportsDeleteJoin()
-    {
-        if ($this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform) {
             return true;
         }
         return false;
@@ -1155,84 +1127,5 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         }
 
         return new Expression($exists, $params);
-    }
-
-    /**
-     * SELECT 文を UPDATE 文に変換する
-     *
-     * @param QueryBuilder $builder 変換するクエリビルダ
-     * @return string クエリビルダ を UPDATE に変換した文字列
-     */
-    public function convertUpdateQuery(QueryBuilder $builder)
-    {
-        $froms = $builder->getFromPart();
-        $from = reset($froms);
-        $sets = array_sprintf($builder->getQueryPart('colval'), '%2$s = %1$s', ', ');
-
-        // JOIN がなければ変換はできる
-        if (count($froms) === 1 || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $this->platform instanceof MySQLPlatform) {
-            // SQLServerPlatform はエイリアス指定の update をサポートしていない
-            if ($from['alias'] !== $from['table'] && $this->platform instanceof SQLServerPlatform) {
-                throw new \DomainException($this->getName() . ' is not supported');
-            }
-            // select 化してクエリを取得して戻す
-            $builder->select('__dbml_from_maker');
-            $builder->innerJoinOn('__dbml_join_maker', 'TRUE', null);
-
-            $sql = preg_replace('#^SELECT __dbml_from_maker FROM#ui', 'UPDATE', (string) $builder);
-            return preg_replace('#INNER JOIN __dbml_join_maker ON TRUE#ui', "SET $sets", $sql);
-        }
-        if ($this->platform instanceof SQLServerPlatform) {
-            // select 化してクエリを取得して戻す
-            $builder->select('__dbml_from_maker');
-
-            return preg_replace('#^SELECT __dbml_from_maker#ui', "UPDATE {$from['alias']} SET $sets", (string) $builder);
-        }
-
-        // 上記以外は join update をサポートしていない
-        // 正確に言えば PostgreSql は using 構文をサポートしているが、select クエリから単純に変換できるものではない
-        throw new \DomainException($this->getName() . ' is not supported');
-    }
-
-    /**
-     * SELECT 文を DELETE 文に変換する
-     *
-     * @param QueryBuilder $builder 変換するクエリビルダ
-     * @param array $targets 対象テーブル
-     * @return string クエリビルダ を DELETE に変換した文字列
-     */
-    public function convertDeleteQuery(QueryBuilder $builder, $targets)
-    {
-        $froms = $builder->getFromPart();
-        $from = reset($froms);
-
-        // JOIN がなければ変換はできる。 MySql と SQLServer は共通でOK（\ryunosuke\dbml\Test\Platforms\SqlitePlatform はテスト用で実際には無理）
-        if (count($froms) === 1 || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform) {
-            $builder->select('__dbml_from_maker');
-
-            if ($targets) {
-                // SQLServerPlatform は複数指定 delete をサポートしていない
-                if (count($targets) > 1 && $this->platform instanceof SQLServerPlatform) {
-                    throw new \DomainException($this->getName() . ' is not supported');
-                }
-                $alias = implode(', ', $targets);
-            }
-            else {
-                $alias = '';
-                if (count($froms) > 1) {
-                    $alias = $from['alias'];
-                }
-                elseif ($from['alias'] !== $from['table'] && ($this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform)) {
-                    $alias = $from['alias'];
-                }
-            }
-
-            $alias = concat(' ', $alias);
-            return preg_replace('#^SELECT __dbml_from_maker FROM#ui', "DELETE{$alias} FROM", (string) $builder);
-        }
-
-        // 上記以外は join delete をサポートしていない
-        // 正確に言えば PostgreSql は using 構文をサポートしているが、select クエリから単純に変換できるものではない
-        throw new \DomainException($this->getName() . ' is not supported');
     }
 }

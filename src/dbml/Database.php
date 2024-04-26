@@ -1378,41 +1378,40 @@ class Database
         return $pvals + $cols;
     }
 
-    private function _preaffect($tableName, $data)
+    private function _preaffect($tableName, &$data, &$where, &$limit, &$orderBy, &$groupBy)
     {
+        $data ??= [];
+        $where ??= [];
+        $orderBy ??= [];
+        $groupBy ??= [];
+
         if (is_callable($data)) {
             $data = $data();
             if (!$data instanceof \Generator) {
                 throw new \InvalidArgumentException('"$data" must return Generator instance.');
             }
-            return [$tableName => $data];
         }
 
-        if (is_string($tableName) && str_exists($tableName, array_merge(Database::JOIN_MAPPER, [',', '.']))) {
-            $tableName = array_each(TableDescriptor::forge($this, $tableName, []), function (&$carry, TableDescriptor $td) {
-                $carry[$td->descriptor] = $td->column;
-            }, []);
-        }
         if (is_string($tableName) && str_exists($tableName, TableDescriptor::META_CHARACTORS)) {
-            $tableName = TableDescriptor::forge($this, $tableName, []);
+            $tableName = new TableDescriptor($this, $tableName, []);
         }
-        if (is_array($tableName)) {
-            $data = arrayize($data);
-            if ($data && !is_hasharray($data)) {
-                if (count($tableName) !== 1) {
-                    throw new \InvalidArgumentException('don\'t specify multiple table.');
+
+        if ($tableName instanceof TableDescriptor) {
+            if ($tableName->scope) {
+                $gateway = $this->{$tableName->table};
+                foreach ($tableName->scope as $scope => $args) {
+                    $gateway = $gateway->scope($scope, ...$args);
                 }
-                [$tableName, $columns] = first_keyvalue($tableName);
-                if (count($columns) !== count($data)) {
-                    throw new \InvalidArgumentException('specified column and data array are difference.');
-                }
-                return [$tableName => array_combine($columns, $data)];
+                $scp = $gateway->getScopeParamsForAffect();
             }
-
-            return $this->select($tableName);
+            $where = array_merge((array) $where, $tableName->condition, $scp['where'] ?? []);
+            $orderBy = array_merge((array) $orderBy, $tableName->order, $scp['orderBy'] ?? []);
+            $groupBy = array_merge((array) $groupBy, $tableName->group, $scp['groupBy'] ?? []);
+            $limit ??= $tableName->limit ?? $scp['limit'] ?? null;
+            $tableName = $tableName->table;
         }
 
-        return $tableName;
+        return $this->convertTableName($tableName);
     }
 
     private function _postaffect($tableName, $data)
@@ -1439,7 +1438,7 @@ class Database
         return $primary;
     }
 
-    private function _prewhere($tableName, $identifier)
+    private function _prewhere($tableName, $where)
     {
         $tableAlias = null;
         if (is_array($tableName)) {
@@ -1447,7 +1446,7 @@ class Database
         }
 
         $wheres = [];
-        foreach (arrayize($identifier) as $key => $cond) {
+        foreach (arrayize($where) as $key => $cond) {
             if ($key === '') {
                 $pcols = $this->getSchema()->getTablePrimaryKey($tableName)->getColumns();
                 $params = (array) $cond;
@@ -1474,10 +1473,10 @@ class Database
         return $wheres;
     }
 
-    private function _restrictWheres($tableName, $aliasName, $event)
+    private function _restrictWheres($tableName, $event)
     {
         assert(in_array(strtolower($event), ['update', 'delete']));
-        $identifier = [];
+        $where = [];
 
         $schema = $this->getSchema();
         $fkeys = $schema->getForeignKeys($tableName, null);
@@ -1485,11 +1484,11 @@ class Database
             if ($fkey->{"on$event"}() === null) {
                 $ltable = first_key($schema->getForeignTable($fkey));
                 $notexists = $this->select($ltable);
-                $notexists->setSubwhere($tableName, $aliasName, $fkey->getName());
-                $identifier[] = $notexists->notExists();
+                $notexists->setSubwhere($tableName, null, $fkey->getName());
+                $where[] = $notexists->notExists();
             }
         }
-        return $identifier;
+        return $where;
     }
 
     private function _cascadeValues($data, ForeignKeyConstraint $fkey)
@@ -1503,10 +1502,10 @@ class Database
         return $subdata;
     }
 
-    private function _cascadeWheres($identifier, ForeignKeyConstraint $fkey, $opt)
+    private function _cascadeWheres($where, ForeignKeyConstraint $fkey, $opt)
     {
         $ltable = first_key($this->getSchema()->getForeignTable($fkey));
-        $pselect = $this->select([$fkey->getForeignTableName() => $fkey->getForeignColumns()], $identifier);
+        $pselect = $this->select([$fkey->getForeignTableName() => $fkey->getForeignColumns()], $where);
         $subwhere = [];
         if (array_get($opt, 'in')) {
             $pvals = $pvals ?? $pselect->array();
@@ -2849,6 +2848,19 @@ class Database
     }
 
     /**
+     * 文字列とパラメータから TableDescriptor を生成する
+     *
+     * @param string $tableDescriptor テーブル記法
+     * @param iterable $params パラメータ
+     * @return TableDescriptor
+     */
+    public function descriptor($tableDescriptor, iterable $params = [])
+    {
+        $tableDescriptor = new TableDescriptor($this, $tableDescriptor, []);
+        return $tableDescriptor->bind($this, $params);
+    }
+
+    /**
      * 値を保持しつつプレースホルダーを返すオブジェクトを返す
      *
      * ```php
@@ -3145,19 +3157,19 @@ class Database
      * ];
      * ```
      *
-     * @param array $identifier where 配列
+     * @param array $where where 配列
      * @param ?array $params bind 値が格納される
      * @param string $andor 結合演算子（内部向け引数なので気にしなくて良い）
      * @param ?bool $filterd 条件が全て ! などでフィルタされたら true が格納される（内部向け引数なので気にしなくて良い）
      * @return array where 配列
      */
-    public function whereInto(array $identifier, ?array &$params, $andor = 'OR', &$filterd = null)
+    public function whereInto(array $where, ?array &$params, $andor = 'OR', &$filterd = null)
     {
         $params = $params ?? [];
         $orand = $andor === 'AND' ? 'OR' : 'AND';
         $criteria = [];
 
-        foreach ($identifier as $cond => $value) {
+        foreach ($where as $cond => $value) {
             if ($value instanceof \Closure) {
                 $value = $value($this);
             }
@@ -5344,7 +5356,7 @@ class Database
      *
      * @used-by insertSelectIgnore()
      *
-     * @param string $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param string|QueryBuilder $sql SELECT クエリ
      * @param array $columns カラム定義
      * @param iterable $params bind パラメータ
@@ -5355,7 +5367,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 5 ? func_get_arg(4) : [];
 
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         $query = $this->_builderToSql($sql, $params);
 
@@ -5386,7 +5398,7 @@ class Database
      *
      * @used-by insertArrayIgnore()
      *
-     * @param string $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param array|callable|\Generator $data カラムデータ配列あるいは Generator
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
@@ -5395,11 +5407,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, $data);
-        if (is_array($tableName)) {
-            [$tableName, $data] = first_keyvalue($tableName);
-        }
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         $columns = null;
 
@@ -5459,31 +5467,27 @@ class Database
      * あくまで UPDATE であり、存在しない行には関与しない。
      *
      * `$data` の引数配列に含めた主キーは WHERE 句に必ず追加される。
-     * したがって $identifier を指定するのは「`status_cd = 50` のもののみ」などといった「前提となるような条件」を書く。
+     * したがって $where を指定するのは「`status_cd = 50` のもののみ」などといった「前提となるような条件」を書く。
      *
      * @used-by updateArrayIgnore()
      *
-     * @param string $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param array|callable|\Generator $data カラムデータあるいは Generator あるいは Generator を返す callable
-     * @param array|mixed $identifier 束縛条件
+     * @param array|mixed $where 束縛条件
      * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function updateArray($tableName, $data, $identifier = [])
+    public function updateArray($tableName, $data, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, $data);
-        if (is_array($tableName)) {
-            [$tableName, $data] = first_keyvalue($tableName);
-        }
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         $pkey = $this->getSchema()->getTablePrimaryColumns($tableName);
         $pcols = array_keys($pkey);
         $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
 
-        $condition = $this->_prewhere($tableName, $identifier);
+        $condition = $this->_prewhere($tableName, $where);
 
         $affected = [];
         foreach (iterator_chunk($data, ($chunk = $this->_getChunk($params)) ?? PHP_INT_MAX) as $rows) {
@@ -5564,7 +5568,7 @@ class Database
      *
      * @used-by modifyArrayIgnore()
      *
-     * @param string $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param array|callable|\Generator $insertData カラムデータあるいは Generator
      * @param array $updateData カラムデータ
      * @param string $uniquekey 重複チェックに使うユニークキー名
@@ -5580,11 +5584,7 @@ class Database
             throw new \DomainException($cplatform->getName() . ' is not support modifyArray.');
         }
 
-        $tableName = $this->_preaffect($tableName, $insertData);
-        if (is_array($tableName)) {
-            [$tableName, $insertData] = first_keyvalue($tableName);
-        }
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $insertData, $where, $limit, $orderBy, $groupBy);
 
         $updates = null;
         $updateParams = [];
@@ -5729,14 +5729,14 @@ class Database
      *
      * @used-by changeArrayIgnore()
      *
-     * @param string $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param array $dataarray データ配列
-     * @param array|mixed $identifier 束縛条件。 false を与えると DELETE 文自体を発行しない（速度向上と安全担保）
+     * @param array|mixed $where 束縛条件。 false を与えると DELETE 文自体を発行しない（速度向上と安全担保）
      * @param string $uniquekey 重複チェックに使うユニークキー名
      * @param ?array $returning 返り値の制御変数。配列を与えるとそのカラムの SELECT 結果を返す（null は主キーを表す）
      * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
      */
-    public function changeArray($tableName, $dataarray, $identifier, $uniquekey = 'PRIMARY', $returning = [])
+    public function changeArray($tableName, $dataarray, $where, $uniquekey = 'PRIMARY', $returning = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 6 ? func_get_arg(5) : [];
@@ -5745,10 +5745,9 @@ class Database
         $dryrun = $this->getUnsafeOption('dryrun');
         $cplatform = $this->getCompatiblePlatform();
 
-        $whereconds = arrayize($identifier);
+        $whereconds = arrayize($where);
 
-        $tableName = $this->_preaffect($tableName, []);
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         // 主キー情報を漁っておく
         $pcols = $this->getSchema()->getTableUniqueColumns($tableName, $uniquekey);
@@ -5800,7 +5799,7 @@ class Database
         $oldrecords = [];
         if ($returning) {
             $pkcol = $cplatform->getConcatExpression(array_values(array_implode($plist, $this->quote($pksep))));
-            if ($identifier !== false) {
+            if ($where !== false) {
                 $oldrecords = $this->selectAssoc([$tableName => [self::AUTO_PRIMARY_KEY => $pkcol], '' => $returning], $whereconds);
             }
         }
@@ -5810,7 +5809,7 @@ class Database
         $inserteds = [];
 
         // 主キー外を削除（$cond を queryInto してるのは誤差レベルではなく速度に差が出るから）
-        if ($identifier !== false) {
+        if ($where !== false) {
             $delete_ids = array_filter($primaries, fn($pkval) => count(array_filter($pkval, fn($v) => $v !== null)) === count($pcols));
             $cond = $cplatform->getPrimaryCondition($delete_ids, $tableName);
             $sqls[] = $this->delete($tableName, array_merge($whereconds, $delete_ids ? [$this->queryInto("NOT ($cond)", $cond->getParams())] : []));
@@ -6175,32 +6174,15 @@ class Database
      * ]);
      * // INSERT INTO tablename (id, name) VALUES ('1', 'hoge')
      *
-     * # 特殊構文としてカラムとデータを別に与えられる
+     * # TableDescriptor を渡すとカラムとデータを別に与えられる
      * $db->insert('tablename.name', 'hoge');
      * // INSERT INTO tablename (name) VALUES ('hoge')
-     * $db->insert('tablename.id, name', ['1', 'hoge']);
-     * // INSERT INTO tablename (id, name) VALUES ('1', 'hoge')
+     * $db->insert('tablename.id, name', ['2', 'hoge']);
+     * // INSERT INTO tablename (id, name) VALUES ('2', 'hoge')
      *
-     * # TableDescriptor 的値や QueryBuilder を渡すと複数テーブルへ INSERT できる
-     * // この用途は「垂直分割したテーブルへの INSERT」である（主キーを混ぜてくれるので小細工をする必要がない）。
-     * $db->insert('t_article + t_article_misc', [
-     *     'title'     => 'article_title', // t_article 側のデータ
-     *     'misc_data' => 'misc_data',     // t_article_misc 側のデータ
-     * ]);
-     * // INSERT INTO t_article (title) VALUES ('article_title')
-     * // INSERT INTO t_article_misc (id, misc_data) VALUES ('1', 'misc_data')
-     *
-     * # 複数テーブルへ INSERT は配列でも表現できる
-     * $db->insert([
-     *     't_article' => [
-     *         'title' => 'article_title',
-     *     ],
-     *     '+t_article_misc' => [
-     *         'misc_data' => 'misc_data',
-     *     ],
-     * ], []);
-     * // INSERT INTO t_article (title) VALUES ('article_title')
-     * // INSERT INTO t_article_misc (id, misc_data) VALUES ('1', 'misc_data')
+     * # TableDescriptor で where を与えると条件付き INSERT になる
+     * $db->insert('tablename.name[id:3]', ['name' => 'hoge']);
+     * // INSERT INTO tablename (name) SELECT 'zzz' WHERE (NOT EXISTS (SELECT * FROM test WHERE id = '3'))
      * ```
      *
      * @used-by insertOrThrow()
@@ -6208,7 +6190,7 @@ class Database
      * @used-by insertIgnore()
      * @used-by insertConditionally()
      *
-     * @param string|array $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data INSERT データ配列
      * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
@@ -6217,45 +6199,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, $data);
-
-        // oracle には multiple insert なるものが有るらしいが・・・
-        if ($tableName instanceof QueryBuilder) {
-            $data += $tableName->getColval();
-            $result = null;
-            $affected = [];
-            foreach ($tableName->getFromPart() as $table) {
-                $owndata = array_map_key($data, function ($k) use ($table) {
-                    return str_lchop($k, "{$table['alias']}.");
-                });
-                $jtype = $table['type'] ?? '';
-                if ($jtype === '') {
-                    $result = $this->insert($table['table'], $owndata, $opt);
-                    $affected[] = $result;
-                }
-                elseif (strcasecmp($jtype, 'INNER') === 0) {
-                    $affected[] = $this->insert($table['table'], $owndata, ['ignore' => $this->getCompatiblePlatform()->supportsIgnore()] + $opt);
-                }
-                else {
-                    $affected[] = $this->insert($table['table'], $owndata, ['ignore' => false] + $opt);
-                }
-                $data += $this->_postaffect($table['table'], $owndata);
-            }
-            if ($this->getUnsafeOption('dryrun') || $this->getUnsafeOption('preparing')) {
-                return $affected;
-            }
-
-            $affected = array_sum($affected);
-            if (array_get($opt, 'primary')) {
-                return $result;
-            }
-            return $affected;
-        }
-        if (is_array($tableName)) {
-            [$tableName, $data] = first_keyvalue($tableName);
-        }
-
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         $params = [];
         $data = $this->_normalize($tableName, $data);
@@ -6266,7 +6210,7 @@ class Database
         $sql = "INSERT {$ignore}INTO $tableName ";
         if (($condition = array_get($opt, 'where')) !== null) {
             if (is_array($condition)) {
-                $condition = $this->selectNotExists($tableName, $condition);
+                $condition = $this->selectNotExists($tableName, array_merge($condition, $where));
             }
             if ($condition instanceof Queryable) {
                 $condition = $condition->merge($params);
@@ -6310,60 +6254,32 @@ class Database
      * ], ['id' => 1]);
      * // UPDATE tablename SET name = 'hoge' WHERE id = '1'
      *
-     * # 特殊構文としてカラムとデータを別に与えられる
-     * $db->update('tablename.name', 'hoge', ['id' => 1]);
-     * // UPDATE tablename SET name = 'hoge' WHERE id = '1'
-     *
-     * # TableDescriptor 的値や QueryBuilder を渡すと UPDATE JOIN になる（多分 mysql でしか動かない）
-     * $db->update('t_article + t_comment', [
-     *     'title'   => 'hoge',
-     *     'comment' => 'fuga',
-     * ]);
-     * // UPDATE t_article INNER JOIN t_comment ON t_comment.article_id = t_article.article_id SET title = "hoge", comment = "fuga"
-     *
-     * # UPDATE JOIN は配列でも表現できる（やはり mysql のみ）
-     * $db->update([
-     *     't_article' => [
-     *         'title' => 'hoge',
-     *     ],
-     *     '+t_comment' => [
-     *         'comment' => 'fuga',
-     *     ],
-     * ], []);
-     * // UPDATE t_article A INNER JOIN t_comment C ON C.article_id = A.article_id SET A.title = 'hoge', C.comment = 'fuga'
+     * # TableDescriptor を渡すとカラムとデータを別に与えたり条件を埋め込むことができる
+     * $db->update('tablename[id: 2].name', 'hoge');
+     * // UPDATE tablename SET name = 'hoge' WHERE id = '2'
      * ```
      *
      * @used-by updateOrThrow()
      * @used-by updateAndPrimary()
      * @used-by updateIgnore()
      *
-     * @param string|array|QueryBuilder $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
-     * @param array|mixed $identifier WHERE 条件
+     * @param array|mixed $where WHERE 条件
      * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function update($tableName, $data, $identifier = [])
+    public function update($tableName, $data, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, $data);
-
-        if ($tableName instanceof QueryBuilder) {
-            $tableName->set($data + $tableName->getColval())->andWhere($identifier);
-            return $this->executeAffect($this->getCompatiblePlatform()->convertUpdateQuery($tableName), $tableName->getParams());
-        }
-        if (is_array($tableName)) {
-            [$tableName, $data] = first_keyvalue($tableName);
-        }
-
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         $data = $this->_normalize($tableName, $data);
 
         if (array_get($opt, 'extract') === 1) {
             [$primary, $rowdata,] = $this->_extractPrimaryCondition($tableName, $data);
-            $identifier += $primary;
+            $where += $primary;
             $data = $rowdata;
         }
 
@@ -6376,7 +6292,7 @@ class Database
         $params = [];
         $set = $this->bindInto($data, $params);
         $sets = array_sprintf($set, '%2$s = %1$s', ', ');
-        $criteria = $this->whereInto($this->_prewhere($tableName, $identifier), $params);
+        $criteria = $this->whereInto($this->_prewhere($tableName, $where), $params);
 
         $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
         $affected = $this->executeAffect("UPDATE {$ignore}$tableName SET $sets" . ($criteria ? ' WHERE ' . implode(' AND ', Adhoc::wrapParentheses($criteria)) : ''), $params);
@@ -6385,10 +6301,10 @@ class Database
         }
 
         if (array_get($opt, 'primary') === 3) {
-            return $this->_postaffect($tableName, $data + arrayize($identifier));
+            return $this->_postaffect($tableName, $data + arrayize($where));
         }
         if ($affected !== 0 && array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, $data + arrayize($identifier));
+            return $this->_postaffect($tableName, $data + arrayize($where));
         }
         if ($affected === 0 && array_get($opt, 'primary') === 2) {
             return [];
@@ -6409,71 +6325,54 @@ class Database
      * $db->delete('tablename', ['id' => 1]);
      * // DELETE FROM tablename WHERE id = '1'
      *
-     * # TableDescriptor 的値や QueryBuilder を渡すと DELETE JOIN になる（多分 mysql でしか動かない）
-     * $db->delete('t_article + t_comment', [
-     *     't_article.article_id' => 1,
-     * ]);
-     * // DELETE t_article FROM t_article INNER JOIN t_comment ON t_comment.article_id = t_article.article_id WHERE t_article.article_id = 1
+     * # TableDescriptor を渡すと条件を埋め込むことができる
+     * $db->delete('tablename[id: 2]');
+     * // DELETE FROM tablename WHERE id = '2'
      * ```
      *
      * @used-by deleteOrThrow()
      * @used-by deleteAndPrimary()
      * @used-by deleteIgnore()
      *
-     * @param string|array|QueryBuilder $tableName テーブル名
-     * @param array|mixed $identifier WHERE 条件
+     * @param string|TableDescriptor $tableName テーブル名
+     * @param array|mixed $where WHERE 条件
      * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function delete($tableName, $identifier = [])
+    public function delete($tableName, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, []);
-
-        if ($tableName instanceof QueryBuilder) {
-            $tableName->andWhere($identifier);
-            return $this->executeAffect($this->getCompatiblePlatform()->convertDeleteQuery($tableName, []), $tableName->getParams());
-        }
-
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         if (array_get($opt, 'extract') === 1) {
-            [$primary, , $condition] = $this->_extractPrimaryCondition($tableName, $identifier);
-            $identifier = $primary + $condition;
+            [$primary, , $condition] = $this->_extractPrimaryCondition($tableName, $where);
+            $where = $primary + $condition;
         }
 
-        $prewhere = $this->_prewhere($tableName, $identifier);
+        $prewhere = $this->_prewhere($tableName, $where);
+
+        $affecteds = [];
 
         $schema = $this->getSchema();
-        $cascades = [];
-        $setnulls = [];
-        $sets = [];
         $fkeys = $schema->getForeignKeys($tableName, null);
         foreach ($fkeys as $fkey) {
             // 仮想でない通常の外部キーであれば RDBMS 側で削除・更新してくれるが、仮想外部キーは能動的に実行する必要がある
             if (@$fkey->getOption('virtual') === true && ($fkey->getOptions()['emulatable'] ?? true) === true) {
                 $onDelete = strtoupper($fkey->onDelete());
-                if ($onDelete === 'CASCADE') {
+                if (in_array($onDelete, ['CASCADE', 'SET NULL'])) {
                     $ltable = first_key($schema->getForeignTable($fkey));
-                    $cascades[$ltable] = "<$ltable:{$fkey->getName()}";
-                }
-                if ($onDelete === 'SET NULL') {
-                    $ltable = first_key($schema->getForeignTable($fkey));
-                    $setnulls[$ltable] = "<$ltable:{$fkey->getName()}";
-                    $sets = array_strpad(array_fill_keys($fkey->getLocalColumns(), null), "$ltable.");
+                    $pvals = $this->selectAssoc([$tableName => array_combine($fkey->getLocalColumns(), $fkey->getForeignColumns())], $prewhere);
+                    $ccond = $this->getCompatiblePlatform()->getPrimaryCondition($pvals, $ltable);
+
+                    if ($onDelete === 'CASCADE') {
+                        $affecteds[] = $this->delete($ltable, $ccond);
+                    }
+                    if ($onDelete === 'SET NULL') {
+                        $affecteds[] = $this->update($ltable, array_fill_keys($fkey->getLocalColumns(), null), $ccond);
+                    }
                 }
             }
-        }
-
-        $affecteds = [];
-        if ($cascades) {
-            $select = $this->select([$tableName => array_values($cascades)])->where($prewhere);
-            $affecteds[] = $this->executeAffect($this->getCompatiblePlatform()->convertDeleteQuery($select, array_keys($cascades)), $select->getParams());
-        }
-        if ($setnulls) {
-            $select = $this->select([$tableName => array_values($setnulls)])->where($prewhere)->set($sets);
-            $affecteds[] = $this->executeAffect($this->getCompatiblePlatform()->convertUpdateQuery($select), $select->getParams());
         }
 
         $params = [];
@@ -6489,10 +6388,10 @@ class Database
         }
 
         if (array_get($opt, 'primary') === 3) {
-            return $this->_postaffect($tableName, arrayize($identifier));
+            return $this->_postaffect($tableName, arrayize($where));
         }
         if ($affected !== 0 && array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, arrayize($identifier));
+            return $this->_postaffect($tableName, arrayize($where));
         }
         if ($affected === 0 && array_get($opt, 'primary') === 2) {
             return [];
@@ -6533,29 +6432,27 @@ class Database
      * @used-by invalidAndPrimary()
      * @used-by invalidIgnore()
      *
-     * @param string|array $tableName テーブル名
-     * @param array|mixed $identifier WHERE 条件
+     * @param string|TableDescriptor $tableName テーブル名
+     * @param array|mixed $where WHERE 条件
      * @param ?array $invalid_columns 無効カラム値
      * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
      */
-    public function invalid($tableName, $identifier, $invalid_columns = null)
+    public function invalid($tableName, $where, $invalid_columns = null)
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, []);
-
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         if (array_get($opt, 'extract') === 1) {
-            [$primary, $rowdata, $condition] = $this->_extractPrimaryCondition($tableName, $identifier);
+            [$primary, $rowdata, $condition] = $this->_extractPrimaryCondition($tableName, $where);
             $invalid_columns ??= $rowdata ?: null;
-            $identifier = $primary + $condition;
+            $where = $primary + $condition;
             // 実質 update なのでもう不要
             unset($opt['extract']);
         }
 
-        $identifier = $this->_prewhere($tableName, $identifier);
+        $where = $this->_prewhere($tableName, $where);
 
         $invalid_columns ??= $this->$tableName->invalidColumn();
         $invalid_columns ??= $this->getUnsafeOption('defaultInvalidColumn');
@@ -6573,7 +6470,7 @@ class Database
             }
             $ckey = implode(',', $fkey->getLocalColumns());
             $subwhere = [
-                "($ckey)" => $this->select([$tableName => $fkey->getForeignColumns()], $identifier),
+                "($ckey)" => $this->select([$tableName => $fkey->getForeignColumns()], $where),
             ];
 
             if ($fkey->onDelete() === null) {
@@ -6590,7 +6487,7 @@ class Database
             }
         }
 
-        $affected = $this->update($tableName, $invalid_columns, $identifier, $opt);
+        $affected = $this->update($tableName, $invalid_columns, $where, $opt);
         if ($this->getUnsafeOption('dryrun')) {
             return array_merge($affecteds, (array) $affected);
         }
@@ -6616,32 +6513,22 @@ class Database
      * @used-by reviseAndPrimary()
      * @used-by reviseIgnore()
      *
-     * @param string|array $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
-     * @param array|mixed $identifier WHERE 条件
+     * @param array|mixed $where WHERE 条件
      * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
      */
-    public function revise($tableName, $data, $identifier = [])
+    public function revise($tableName, $data, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, []);
-        $aliasName = null;
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
-        if ($tableName instanceof QueryBuilder) {
-            $originalBuilder = $tableName;
-            $froms = $originalBuilder->getQueryPart('from');
-            $from = reset($froms);
-            $tableName = $from['table'];
-            $aliasName = $from['alias'];
-        }
+        $where = $this->_prewhere($tableName, $where);
+        $where = array_merge($where, $this->_restrictWheres($tableName, 'update'));
 
-        $tableName = $this->convertTableName($tableName);
-        $identifier = $this->_prewhere($tableName, $identifier);
-        $identifier = array_merge($identifier, $this->_restrictWheres($tableName, $aliasName, 'update'));
-
-        return $this->update($originalBuilder ?? $tableName, $data, $identifier, $opt);
+        return $this->update($tableName, $data, $where, $opt);
     }
 
     /**
@@ -6670,27 +6557,25 @@ class Database
      * @used-by upgradeAndPrimary()
      * @used-by upgradeIgnore()
      *
-     * @param string|array $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
-     * @param array|mixed $identifier WHERE 条件
+     * @param array|mixed $where WHERE 条件
      * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
      */
-    public function upgrade($tableName, $data, $identifier = [])
+    public function upgrade($tableName, $data, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, []);
-
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         if (array_get($opt, 'extract') === 1) {
             [$primary, $rowdata,] = $this->_extractPrimaryCondition($tableName, $data);
-            $identifier += $primary;
+            $where += $primary;
             $data = $rowdata;
         }
 
-        $identifier = $this->_prewhere($tableName, $identifier);
+        $where = $this->_prewhere($tableName, $where);
 
         try {
             $affecteds = [];
@@ -6709,12 +6594,12 @@ class Database
                     $recoveries[] = $fkey;
 
                     $ltable = first_key($schema->getForeignTable($fkey));
-                    $subwhere = $this->_cascadeWheres($identifier, $fkey, $opt);
+                    $subwhere = $this->_cascadeWheres($where, $fkey, $opt);
                     $affecteds = array_merge($affecteds, (array) $this->upgrade($ltable, $subdata, $subwhere, array_pickup($opt, ['in', 'ignore'])));
                 }
             }
 
-            $affected = $this->update($tableName, $data, $identifier, $opt);
+            $affected = $this->update($tableName, $data, $where, $opt);
         }
         finally {
             foreach ($recoveries as $recovery) {
@@ -6747,31 +6632,21 @@ class Database
      * @used-by removeAndPrimary()
      * @used-by removeIgnore()
      *
-     * @param string|array|QueryBuilder $tableName テーブル名
-     * @param array|mixed $identifier WHERE 条件
+     * @param string|TableDescriptor $tableName テーブル名
+     * @param array|mixed $where WHERE 条件
      * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
-    public function remove($tableName, $identifier = [])
+    public function remove($tableName, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, []);
-        $aliasName = null;
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
-        if ($tableName instanceof QueryBuilder) {
-            $originalBuilder = $tableName;
-            $froms = $originalBuilder->getQueryPart('from');
-            $from = reset($froms);
-            $tableName = $from['table'];
-            $aliasName = $from['alias'];
-        }
+        $where = $this->_prewhere($tableName, $where);
+        $where = array_merge($where, $this->_restrictWheres($tableName, 'delete'));
 
-        $tableName = $this->convertTableName($tableName);
-        $identifier = $this->_prewhere($tableName, $identifier);
-        $identifier = array_merge($identifier, $this->_restrictWheres($tableName, $aliasName, 'delete'));
-
-        return $this->delete($originalBuilder ?? $tableName, $identifier, $opt);
+        return $this->delete($tableName, $where, $opt);
     }
 
     /**
@@ -6800,27 +6675,25 @@ class Database
      * @used-by destroyAndPrimary()
      * @used-by destroyIgnore()
      *
-     * @param string|array $tableName テーブル名
-     * @param array|mixed $identifier WHERE 条件
+     * @param string|TableDescriptor $tableName テーブル名
+     * @param array|mixed $where WHERE 条件
      * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
      */
-    public function destroy($tableName, $identifier = [])
+    public function destroy($tableName, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, []);
-
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         if (array_get($opt, 'extract') === 1) {
-            [$primary, , $condition] = $this->_extractPrimaryCondition($tableName, $identifier);
-            $identifier = $primary + $condition;
+            [$primary, , $condition] = $this->_extractPrimaryCondition($tableName, $where);
+            $where = $primary + $condition;
             // delete に移譲するのでもう不要
             unset($opt['extract']);
         }
 
-        $identifier = $this->_prewhere($tableName, $identifier);
+        $where = $this->_prewhere($tableName, $where);
 
         $affecteds = [];
         $schema = $this->getSchema();
@@ -6828,12 +6701,12 @@ class Database
         foreach ($fkeys as $fkey) {
             if ($fkey->onDelete() === null) {
                 $ltable = first_key($schema->getForeignTable($fkey));
-                $subwhere = $this->_cascadeWheres($identifier, $fkey, $opt);
+                $subwhere = $this->_cascadeWheres($where, $fkey, $opt);
                 $affecteds = array_merge($affecteds, (array) $this->destroy($ltable, $subwhere, array_pickup($opt, ['in', 'ignore'])));
             }
         }
 
-        $affected = $this->delete($tableName, $identifier, $opt);
+        $affected = $this->delete($tableName, $where, $opt);
         if ($this->getUnsafeOption('dryrun')) {
             return array_merge($affecteds, (array) $affected);
         }
@@ -6870,34 +6743,25 @@ class Database
      *
      * @used-by reduceOrThrow()
      *
-     * @param string|array $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param ?int $limit 残す件数
      * @param string|array $orderBy 並び順
      * @param string|array $groupBy グルーピング条件
-     * @param array|mixed $identifier WHERE 条件
+     * @param array|mixed $where WHERE 条件
      * @return int|string 基本的には affected row. dryrun 中は文字列
      */
-    public function reduce($tableName, $limit = null, $orderBy = [], $groupBy = [], $identifier = [])
+    public function reduce($tableName, $limit = null, $orderBy = [], $groupBy = [], $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 6 ? func_get_arg(5) : [];
 
         $orderBy = arrayize($orderBy);
         $groupBy = arrayize($groupBy);
-        $identifier = arrayize($identifier);
+        $where = arrayize($where);
 
         $simplize = function ($v) { return last_value(explode('.', $v)); };
 
-        $tableName = $this->_preaffect($tableName, []);
-        if ($tableName instanceof QueryBuilder) {
-            $limit = $tableName->getQueryPart('limit') ?: $limit;
-            $orderBy = array_merge($tableName->getQueryPart('orderBy'), $orderBy);
-            $groupBy = array_merge($tableName->getQueryPart('groupBy'), $groupBy);
-            if ($where = $tableName->getQueryPart('where')) {
-                $identifier[] = new Expression(implode(' AND ', Adhoc::wrapParentheses(array_map($simplize, $where))), $tableName->getParams('where'));
-            }
-            $tableName = first_value($tableName->getFromPart())['table'];
-        }
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         $limit = intval($limit);
         if ($limit < 0) {
@@ -6906,21 +6770,19 @@ class Database
 
         $orderBy = array_maps($orderBy, function ($v, $k) use ($simplize) {
             if (is_int($k)) {
-                if (is_array($v)) {
-                    return ($v[1] ? '+' : '-') . $simplize($v[0]);
-                }
                 return $simplize($v);
             }
+            $v = ['ASC' => true, 'DESC' => false][$v] ?? $v;
             return ($v ? '+' : '-') . $simplize($k);
         });
         if (count($orderBy) !== 1) {
             throw new \InvalidArgumentException("\$orderBy must be === 1.");
         }
+
         $orderBy = reset($orderBy);
-
         $groupBy = array_map($simplize, $groupBy);
+        $where = array_combine(array_map($simplize, array_keys($where)), $where);
 
-        $tableName = $this->convertTableName($tableName);
         $BASETABLE = '__dbml_base_table';
         $JOINTABLE = '__dbml_join_table';
         $TEMPTABLE = '__dbml_temp_table';
@@ -6934,20 +6796,20 @@ class Database
 
         // 境界値が得られるサブクエリ
         $subquery = $this->select(["$tableName $VALUETABLE" => $orderBy])
-            ->where($identifier)
+            ->where($where)
             ->andWhere(array_map(function ($gk) use ($GROUPTABLE, $VALUETABLE) { return "$GROUPTABLE.$gk = $VALUETABLE.$gk"; }, $groupBy))
             ->orderBy($groupBy + [$orderBy => $ascdesc])
             ->limit(1, $limit);
 
         // グルーピングしないなら主キー指定で消す必要はなく、直接比較で消すことができる（結果は変わらないがパフォーマンスが劇的に違う）
         if (!$groupBy) {
-            $identifier["$tableName.$orderBy $glsign ?"] = $subquery->wrap("SELECT * FROM", "AS $TEMPTABLE");
+            $where["$tableName.$orderBy $glsign ?"] = $subquery->wrap("SELECT * FROM", "AS $TEMPTABLE");
         }
         else {
             // グループキーと境界値が得られるサブクエリ
             $subtable = $this->select([
                 "$tableName $GROUPTABLE" => $groupBy + [$orderBy => $subquery],
-            ], $identifier)->groupBy($groupBy);
+            ], $where)->groupBy($groupBy);
             // ↑と JOIN して主キーが得られるサブクエリ
             $select = $this->select([
                 "$tableName $BASETABLE" => $pcols,
@@ -6957,10 +6819,10 @@ class Database
                 ])
             );
             // ↑を主キー where に設定する
-            $identifier["(" . implode(',', $pcols) . ")"] = $select->wrap("SELECT * FROM", "AS $TEMPTABLE");
+            $where["(" . implode(',', $pcols) . ")"] = $select->wrap("SELECT * FROM", "AS $TEMPTABLE");
         }
 
-        return $this->delete($tableName, $identifier, $opt);
+        return $this->delete($tableName, $where, $opt);
     }
 
     /**
@@ -6994,7 +6856,7 @@ class Database
      * @used-by upsertAndPrimary()
      * @used-by upsertConditionally()
      *
-     * @param string|array $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $insertData INSERT データ配列
      * @param mixed $updateData UPDATE データ配列
      * @return int|string|array 基本的には affected row. dryrun 中は文字列
@@ -7004,26 +6866,13 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, $insertData);
+        $tableName = $this->_preaffect($tableName, $insertData, $where, $limit, $orderBy, $groupBy);
 
-        if ($tableName instanceof QueryBuilder) {
-            throw new \InvalidArgumentException('upsert is not supported QueryBuilder.');
-        }
-        if (is_array($tableName)) {
-            [$tableName, $insertData] = first_keyvalue($tableName);
-            if ($updateData && !is_hasharray($updateData)) {
-                $updateData = array_combine(array_keys($insertData), $updateData);
-            }
-        }
-
-        $originalName = $tableName;
-        $tableName = $this->convertTableName($tableName);
-
-        $condition = array_get($opt, 'where');
+        $condition = array_unset($opt, 'where');
         if ($condition !== null) {
             $params = [];
             if (is_array($condition)) {
-                $condition = $this->selectNotExists($tableName, $condition);
+                $condition = $this->selectNotExists($tableName, array_merge($condition, $where));
             }
             if ($condition instanceof Queryable) {
                 $condition = $condition->merge($params);
@@ -7039,7 +6888,7 @@ class Database
 
         if (!count($wheres)) {
             if ($this->getSchema()->getTableAutoIncrement($tableName)) {
-                return $this->insert($originalName, $insertData, $opt);
+                return $this->insert($tableName, $insertData, $opt);
             }
         }
 
@@ -7052,10 +6901,10 @@ class Database
                 $updateData = array_diff_key($insertData, $pcols);
             }
             $updateData = $this->_wildUpdate($updateData, $insertData, $pcols);
-            $affected = $this->update($originalName, $updateData, $wheres, $opt);
+            $affected = $this->update($tableName, $updateData, $wheres, $opt);
             return is_int($affected) && $affected === 1 ? 2 : $affected;
         }
-        return $this->insert($originalName, $insertData, $opt);
+        return $this->insert($tableName, $insertData, $opt);
     }
 
     /**
@@ -7112,7 +6961,7 @@ class Database
      * @used-by modifyIgnore()
      * @used-by modifyConditionally()
      *
-     * @param string|array $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $insertData INSERT データ配列
      * @param mixed $updateData UPDATE データ配列
      * @param string $uniquekey 重複チェックに使うユニークキー名
@@ -7127,22 +6976,10 @@ class Database
             return $this->upsert($tableName, $insertData, $updateData ?: null, $opt);
         }
 
-        $tableName = $this->_preaffect($tableName, $insertData);
-
-        if ($tableName instanceof QueryBuilder) {
-            throw new \InvalidArgumentException('upsert is not supported QueryBuilder.');
-        }
-        if (is_array($tableName)) {
-            [$tableName, $insertData] = first_keyvalue($tableName);
-            if ($updateData && !is_hasharray($updateData)) {
-                $updateData = array_combine(array_keys($insertData), $updateData);
-            }
-        }
+        $tableName = $this->_preaffect($tableName, $insertData, $where, $limit, $orderBy, $groupBy);
 
         $schema = $this->getSchema();
         $pkcols = $schema->getTableUniqueColumns($tableName, $uniquekey);
-
-        $tableName = $this->convertTableName($tableName);
 
         $insertData = $this->_normalize($tableName, $insertData);
         $updateData = $this->_wildUpdate($updateData, $insertData, $pkcols);
@@ -7153,7 +6990,7 @@ class Database
         $sets1 = $this->bindInto($insertData, $params);
         $condition = array_get($opt, 'where');
         if (is_array($condition)) {
-            $condition = $this->selectNotExists($tableName, $condition);
+            $condition = $this->selectNotExists($tableName, array_merge($condition, $where));
         }
         if ($condition instanceof Queryable) {
             $condition = $condition->merge($params);
@@ -7216,7 +7053,7 @@ class Database
      * @used-by replaceOrThrow()
      * @used-by replaceAndPrimary()
      *
-     * @param string|array $tableName テーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data REPLACE データ配列
      * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
      */
@@ -7225,7 +7062,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
 
         $params = [];
         $data = $this->_normalize($tableName, $data);

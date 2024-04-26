@@ -51,7 +51,6 @@ use function ryunosuke\dbml\is_primitive;
 use function ryunosuke\dbml\preg_splice;
 use function ryunosuke\dbml\split_noempty;
 use function ryunosuke\dbml\str_exists;
-use function ryunosuke\dbml\str_lchop;
 
 // @formatter:off
 /**
@@ -269,7 +268,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         'from'     => [],
         'join'     => [],
         'hint'     => [],
-        'colval'   => [],
         'where'    => [],
         'groupBy'  => [],
         'having'   => [],
@@ -3081,43 +3079,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     public function unionAll($query)
     {
         return $this->union($query, true);
-    }
-
-    /**
-     * SET 句の設定
-     *
-     * ほぼ内部向け。
-     *
-     * @param array $sets SET 句
-     * @return $this 自分自身
-     */
-    public function set($sets = [])
-    {
-        foreach ($sets as $key => $set) {
-            $ps = [];
-            $this->sqlParts['colval'][$key] = new Expression($this->database->bindInto($set, $ps), $ps);
-        }
-
-        return $this->_dirty();
-    }
-
-    /**
-     * 設定されている SELECT 句から SET に流用できそうなカラムペアを返す
-     *
-     * @return array
-     */
-    public function getColval()
-    {
-        // Alias は SET に転用できる
-        return array_each($this->sqlParts['select'], function (&$carry, $v) {
-            if ($v instanceof Alias && $v->getModifier()) {
-                $actual = $v->getActual();
-                if (is_string($actual)) {
-                    $actual = str_lchop($actual, $v->getModifier());
-                }
-                $carry[$v->getModifier() . $v->getAlias()] = $actual;
-            }
-        }, []);
     }
 
     /**

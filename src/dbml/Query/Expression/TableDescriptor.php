@@ -4,6 +4,8 @@ namespace ryunosuke\dbml\Query\Expression;
 
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Gateway\TableGateway;
+use ryunosuke\dbml\Query\Parser;
+use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_rekey;
@@ -11,6 +13,7 @@ use function ryunosuke\dbml\array_set;
 use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\first_key;
+use function ryunosuke\dbml\first_keyvalue;
 use function ryunosuke\dbml\paml_import;
 use function ryunosuke\dbml\preg_splice;
 use function ryunosuke\dbml\quoteexplode;
@@ -108,10 +111,11 @@ use function ryunosuke\dbml\str_between;
  * #### <groupby>
  *
  * テーブルのサフィックスとして <group-key> で GROUP BY を表す。
- * "+" プレフィックスで昇順、 "-" プレフィックスで降順を表す。各指定の明確な区切りはない（≒[+-] のどちらかは必須）。
+ * キーを指定すると HAVING として扱われる。
  *
  * - e.g. `tablename<id>` （`GROUP BY id` となる）
  * - e.g. `tablename<year, month>` （`GROUP BY year, month` となる）
+ * - e.g. `tablename<year, month, "COUNT(*)>?" => 1>` （`GROUP BY year, month HAVING COUNT(*)>1` となる）
  *
  * #### +order-by
  *
@@ -184,6 +188,7 @@ use function ryunosuke\dbml\str_between;
  * @property array $condition
  * @property string $fkeyname
  * @property array $group
+ * @property array $having
  * @property array $order
  * @property int $offset
  * @property int $limit
@@ -196,7 +201,7 @@ use function ryunosuke\dbml\str_between;
 class TableDescriptor
 {
     /** @var string[] テーブル記法を表すメタ文字 */
-    public const META_CHARACTORS = ['(', ')', '@', '[', ']', '{', '}', '+', '-', '#'];
+    public const META_CHARACTORS = ['(', ')', '@', '[', ']', '{', '}', '+', '-', '#', '.'];
 
     /** @var string オリジナル文字列 */
     private $descriptor;
@@ -224,6 +229,9 @@ class TableDescriptor
 
     /** @var array GROUP */
     private $group = [];
+
+    /** @var array 集約条件 */
+    private $having = [];
 
     /** @var array 並び順 */
     private $order = [];
@@ -413,22 +421,18 @@ class TableDescriptor
         $joinsign = $m[1] ?? null;
         $table = $m[2] ?? null;
 
-        $descriptor = preg_splice("`(\[.*])`ui", '', trim($descriptor), $m);
-        $condition1 = $m[1] ?? null;
-        $descriptor = preg_splice("`({.+})`ui", '', trim($descriptor), $m);
-        $condition2 = $m[1] ?? null;
+        $condition1 = $this->_parseBlock($descriptor, '[', ']');
+        $condition2 = $this->_parseBlock($descriptor, '{', '}');
 
-        $descriptor = preg_splice("`(<.+>)`ui", '', trim($descriptor), $m);
-        $group = $m[1] ?? null;
+        $group = $this->_parseBlock($descriptor, '<', '>');
 
-        $descriptor = preg_splice("`(:[_0-9a-z]*)`ui", '', trim($descriptor), $m);
+        $descriptor = preg_splice("`(:$alnumscore*)`ui", '', trim($descriptor), $m);
         $fkeyname = $m[1] ?? null;
 
         $descriptor = preg_splice("`(@$alnumscore*(\((?:[^()]+|(?1))*\))?)+`ui", '', trim($descriptor), $m);
         $scope = $m[0] ?? null;
 
-        $descriptor = preg_splice("`(\(.*\))`ui", '', trim($descriptor), $m);
-        $primary = $m[1] ?? null;
+        $primary = $this->_parseBlock($descriptor, '(', ')');
 
         $descriptor = preg_splice("`(\s*[+-]$identifier*)+`ui", '', trim($descriptor), $m);
         if ($m) {
@@ -525,7 +529,21 @@ class TableDescriptor
         }
 
         if ($group !== null) {
-            $this->group = split_noempty(',', preg_replace('#^<|>$#u', '', $group));
+            foreach (paml_import(substr($group, 1, -1)) as $gkey => $gval) {
+                // 数値キーは GROUP BY 確定
+                if (is_int($gkey)) {
+                    $this->group[] = $gval;
+                }
+                // 文字キーは HAVING として扱うが空文字だけは連番配列にする（キーありきだとプレーンな条件が書けない）
+                else {
+                    if (strlen($gkey)) {
+                        $this->having[$gkey] = $gval;
+                    }
+                    else {
+                        $this->having[] = $gval;
+                    }
+                }
+            }
         }
 
         $this->column = split_noempty(',', "$column");
@@ -621,5 +639,67 @@ class TableDescriptor
         }
 
         throw new \InvalidArgumentException("'$name' is undefined.");
+    }
+
+    private function _parseBlock(string &$descriptor, string $s, string $e)
+    {
+        $descriptor = trim($descriptor);
+        $p = 0;
+        $block = str_between($descriptor, $s, $e, $p);
+        if ($block !== null) {
+            $block = "$s$block$e";
+            $descriptor = substr_replace($descriptor, '', $p - strlen($block), strlen($block));
+        }
+        return $block;
+    }
+
+    /**
+     * パラメータを bind（というか埋め込み）
+     *
+     * 要素の ? を $params の値で置き換える。
+     * エスケープは行われないし可変配列も未対応。
+     * 稀に「埋め込みがつらい文字列がある時に後から埋め込める」程度の機能。
+     *
+     * 今のところ用途の多い condition のみ。
+     * いずれ拡張するにしても全うなクエリ順にする見込み。
+     *
+     * @param Database $database データベースオブジェクト
+     * @param iterable $params bind params
+     * @return $this 自身
+     */
+    public function bind($database, $params)
+    {
+        $parser = new Parser($database->getPlatform()->createSQLParser());
+
+        $replace = function (&$cond, $name) use (&$replace, &$params, $parser) {
+            if ($cond instanceof Expression) {
+                $eparam = $cond->getParams();
+                array_walk_recursive($eparam, $replace);
+                $cond->setParams($eparam);
+                return;
+            }
+            if ($cond instanceof Queryable) {
+                return; // @codeCoverageIgnore 今のところ必要ではないけどいずれ実装したい
+            }
+            if (!$params) {
+                throw new \InvalidArgumentException(sprintf('parameter length is short (%s).', $name));
+            }
+
+            [$key, $val] = first_keyvalue($params);
+            if ($val instanceof Queryable) {
+                $cond = $val;
+                unset($params[$key]);
+                return;
+            }
+            $cond = $parser->convertQuotedSQL($cond, [$key => $val], function ($v) { return $v; });
+            unset($params[$key]);
+        };
+        array_walk_recursive($this->condition, $replace);
+
+        if ($params) {
+            throw new \InvalidArgumentException(sprintf('parameter length is long (%s).', implode(',', array_keys($params))));
+        }
+
+        return $this;
     }
 }

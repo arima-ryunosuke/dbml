@@ -66,7 +66,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::updateArray()
      */
-    private function updateArrayIgnoreWithTable($tableName, $data, $identifier = [])
+    private function updateArrayIgnoreWithTable($tableName, $data, $where = [])
     {
         assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('updateArray', func_get_args());
@@ -77,7 +77,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::updateArray()
      */
-    private function updateArrayIgnoreWithoutTable($data, $identifier = [])
+    private function updateArrayIgnoreWithoutTable($data, $where = [])
     {
         assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('updateArray', func_get_args());
@@ -110,7 +110,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::changeArray()
      */
-    private function changeArrayIgnoreWithTable($tableName, $dataarray, $identifier, $uniquekey = 'PRIMARY', $returning = [])
+    private function changeArrayIgnoreWithTable($tableName, $dataarray, $where, $uniquekey = 'PRIMARY', $returning = [])
     {
         assert(parameter_default([$this, 'changeArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('changeArray', func_get_args());
@@ -121,7 +121,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::changeArray()
      */
-    private function changeArrayIgnoreWithoutTable($dataarray, $identifier, $uniquekey = 'PRIMARY', $returning = [])
+    private function changeArrayIgnoreWithoutTable($dataarray, $where, $uniquekey = 'PRIMARY', $returning = [])
     {
         assert(parameter_default([$this, 'changeArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('changeArray', func_get_args());
@@ -198,7 +198,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::update()
      */
-    private function updateIgnoreWithTable($tableName, $data, $identifier = [])
+    private function updateIgnoreWithTable($tableName, $data, $where = [])
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('update', func_get_args());
@@ -209,7 +209,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::update()
      */
-    private function updateIgnoreWithoutTable($data, $identifier = [])
+    private function updateIgnoreWithoutTable($data, $where = [])
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('update', func_get_args());
@@ -220,7 +220,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::delete()
      */
-    private function deleteIgnoreWithTable($tableName, $identifier = [])
+    private function deleteIgnoreWithTable($tableName, $where = [])
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('delete', func_get_args());
@@ -231,7 +231,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::delete()
      */
-    private function deleteIgnoreWithoutTable($identifier = [])
+    private function deleteIgnoreWithoutTable($where = [])
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('delete', func_get_args());
@@ -242,7 +242,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::invalid()
      */
-    private function invalidIgnoreWithTable($tableName, $identifier, $invalid_columns = null)
+    private function invalidIgnoreWithTable($tableName, $where, $invalid_columns = null)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('invalid', func_get_args());
@@ -253,7 +253,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::invalid()
      */
-    private function invalidIgnoreWithoutTable($identifier = [], $invalid_columns = null)
+    private function invalidIgnoreWithoutTable($where = [], $invalid_columns = null)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('invalid', func_get_args());
@@ -264,7 +264,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::revise()
      */
-    private function reviseIgnoreWithTable($tableName, $data, $identifier = [])
+    private function reviseIgnoreWithTable($tableName, $data, $where = [])
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('revise', func_get_args());
@@ -275,7 +275,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::revise()
      */
-    private function reviseIgnoreWithoutTable($data, $identifier = [])
+    private function reviseIgnoreWithoutTable($data, $where = [])
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('revise', func_get_args());
@@ -286,7 +286,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::upgrade()
      */
-    private function upgradeIgnoreWithTable($tableName, $data, $identifier = [])
+    private function upgradeIgnoreWithTable($tableName, $data, $where = [])
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('upgrade', func_get_args());
@@ -297,7 +297,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::upgrade()
      */
-    private function upgradeIgnoreWithoutTable($data, $identifier = [])
+    private function upgradeIgnoreWithoutTable($data, $where = [])
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('upgrade', func_get_args());
@@ -308,7 +308,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::remove()
      */
-    private function removeIgnoreWithTable($tableName, $identifier = [])
+    private function removeIgnoreWithTable($tableName, $where = [])
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('remove', func_get_args());
@@ -319,7 +319,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::remove()
      */
-    private function removeIgnoreWithoutTable($identifier = [])
+    private function removeIgnoreWithoutTable($where = [])
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('remove', func_get_args());
@@ -330,7 +330,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc Database::destroy()
      */
-    private function destroyIgnoreWithTable($tableName, $identifier = [])
+    private function destroyIgnoreWithTable($tableName, $where = [])
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('destroy', func_get_args());
@@ -341,7 +341,7 @@ trait AffectIgnoreTrait
      *
      * @inheritdoc TableGateway::destroy()
      */
-    private function destroyIgnoreWithoutTable($identifier = [])
+    private function destroyIgnoreWithoutTable($where = [])
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
         return $this->_invokeAffectIgnore('destroy', func_get_args());

@@ -1683,37 +1683,37 @@ AND ((flag=1))", "$gw");
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function update($data, array $identifier = [])
+            public function update($data, array $where = [])
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function delete(array $identifier = [])
+            public function delete(array $where = [])
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function invalid(array $identifier = [], ?array $invalid_columns = null)
+            public function invalid(array $where = [], ?array $invalid_columns = null)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function remove(array $identifier = [])
+            public function remove(array $where = [])
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function destroy(array $identifier = [])
+            public function destroy(array $where = [])
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function reduce($limit = null, $orderBy = [], $groupBy = [], $identifier = [])
+            public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [])
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
@@ -1852,62 +1852,8 @@ AND ((flag=1))", "$gw");
         $gateway->bindScope('defdata', ['binding data'])->scope('defdata', 'current data')->update([]);
         $this->assertEquals(['UPDATE test SET data = ?' => ['current data']], $lastsql());
 
-        // ORDER,LIMIT が効いた update になる
-        if ($database->getPlatform() instanceof SqlitePlatform) {
-            try {
-                $gateway->where(['id' => 1])->orderBy('id')->limit(1)->update(['name' => 'XXX']);
-            }
-            catch (\Exception) {
-                $this->assertEquals(['UPDATE test SET name = ? WHERE test.id = ? ORDER BY id ASC LIMIT 1' => []], $lastsql());
-            }
-        }
-
-        // ORDER,LIMIT が効いた delete になる
-        if ($database->getPlatform() instanceof SqlitePlatform) {
-            try {
-                $gateway->where(['id' => 1])->orderBy('id')->limit(1)->delete();
-            }
-            catch (\Exception) {
-                $this->assertEquals(['DELETE FROM test WHERE test.id = ? ORDER BY id ASC LIMIT 1' => []], $lastsql());
-            }
-        }
-
-        // JOIN された update になる
-        if ($database->getPlatform() instanceof SqlitePlatform) {
-            try {
-                $gateway->joinOn(new TableGateway($database, 'test1'), '1=1')->where(['id' => 1])->update(['name' => 'XXX']);
-            }
-            catch (\Exception) {
-                $this->assertEquals(['UPDATE test INNER JOIN test1 test1 ON 1=1 SET name = ? WHERE test.id = ?' => ['XXX', 1]], $lastsql());
-            }
-        }
-
-        // JOIN された delete になる
-        if ($database->getPlatform() instanceof SqlitePlatform) {
-            try {
-                $gateway->joinOn(new TableGateway($database, 'test1'), '1=1')->where(['id' => 1])->delete();
-            }
-            catch (\Exception) {
-                $this->assertEquals(['DELETE test FROM test INNER JOIN test1 test1 ON 1=1 WHERE test.id = ?' => [1]], $lastsql());
-            }
-        }
-
-        // JOIN された deleteIfPossible になる
-        if ($database->getPlatform() instanceof SqlitePlatform) {
-            try {
-                $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
-                $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
-                $database->insert('foreign_p', ['id' => 3, 'name' => 'name3']);
-                $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
-                (new TableGateway($database, 'foreign_p'))->joinForeign((new TableGateway($database, 'foreign_c1'))->where(['seq' => 11]))->where(['id' => 2])->remove();
-            }
-            catch (\Exception) {
-                $this->assertEquals(["DELETE foreign_p FROM foreign_p INNER JOIN foreign_c1 foreign_c1 ON foreign_p.id = foreign_c1.id AND foreign_c1.seq = '11' WHERE (foreign_p.id = ?) AND ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE foreign_p.id = foreign_c1.id))) AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_p.id = foreign_c2.cid)))" => [2]], $lastsql());
-            }
-        }
-
-        $this->assertException('not allow affect query', L($gateway->having('1=1'))->update([]));
-        $this->assertException('not allow affect query', L($gateway->having('1=1'))->delete([]));
+        $this->assertException('not allow affect query', L($gateway->groupBy('name')->having('1=1'))->update([]));
+        $this->assertException('not allow affect query', L($gateway->groupBy('name')->having('1=1'))->delete([]));
 
         $database->setLogger([]);
         $database->setAutoOrder(true);

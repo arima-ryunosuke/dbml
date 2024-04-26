@@ -77,6 +77,13 @@ class ExpressionTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('hogera', $expr);
     }
 
+    function test_params()
+    {
+        $expr = new Expression('hogera', [1, 2]);
+        $expr->setParams([9]);
+        $this->assertEquals([9], $expr->getParams());
+    }
+
     function test_merge()
     {
         $expr = new Expression('hogera', [1, 2, 3]);

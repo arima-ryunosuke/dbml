@@ -173,28 +173,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
-    function test_supportsUpdateJoin($cplatform, $platform)
-    {
-        $expected = $platform instanceof MySQLPlatform || $platform instanceof SQLServerPlatform;
-        $this->assertEquals($expected, $cplatform->supportsUpdateJoin());
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
-    function test_supportsDeleteJoin($cplatform, $platform)
-    {
-        $expected = $platform instanceof MySQLPlatform || $platform instanceof SQLServerPlatform;
-        $this->assertEquals($expected, $cplatform->supportsDeleteJoin());
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
     function test_supportsUpdateLimit($cplatform, $platform)
     {
         $expected = $platform instanceof MySQLPlatform || $platform instanceof SQLServerPlatform;
@@ -946,82 +924,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $expected = $platform instanceof SQLServerPlatform ? 'CASE WHEN (select ?) THEN 1 ELSE 0 END' : 'select ?';
         $this->assertExpression($cplatform->convertSelectExistsQuery(new Expression('select ?', 1)), $expected, [1]);
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
-    function test_convertUpdateQuery($cplatform, $platform)
-    {
-        $builder = self::getDummyDatabase()->select('test')->set(['key' => 1]);
-        $this->assertEquals('UPDATE test SET key = ?', $cplatform->convertUpdateQuery($builder));
-
-        $builder = self::getDummyDatabase()->select('test T')->set(['key' => 1]);
-        if ($platform instanceof SQLServerPlatform) {
-            $this->assertException(new \DomainException('not supported'), L($cplatform)->convertUpdateQuery($builder));
-        }
-        else {
-            $this->assertEquals('UPDATE test T SET key = ?', $cplatform->convertUpdateQuery($builder));
-        }
-
-        $builder = self::getDummyDatabase()->select('foreign_c1 C, foreign_p')->set(['key' => 1]);
-        if ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $platform instanceof MySQLPlatform) {
-            $this->assertEquals('UPDATE foreign_c1 C, foreign_p SET key = ?', $cplatform->convertUpdateQuery($builder));
-        }
-        elseif ($platform instanceof SQLServerPlatform) {
-            $this->assertEquals('UPDATE C SET key = ? FROM foreign_c1 C, foreign_p', $cplatform->convertUpdateQuery($builder));
-        }
-        else {
-            $this->assertException(new \DomainException('not supported'), L($cplatform)->convertUpdateQuery($builder));
-        }
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
-    function test_convertDeleteQuery($cplatform, $platform)
-    {
-        $builder = self::getDummyDatabase()->select('test');
-        $this->assertEquals('DELETE FROM test', $cplatform->convertDeleteQuery($builder, []));
-
-        $builder = self::getDummyDatabase()->select('test T');
-        if ($platform instanceof MySQLPlatform || $platform instanceof SQLServerPlatform) {
-            $this->assertEquals('DELETE T FROM test T', $cplatform->convertDeleteQuery($builder, []));
-        }
-        else {
-            $this->assertEquals('DELETE FROM test T', $cplatform->convertDeleteQuery($builder, []));
-        }
-
-        $builder = self::getDummyDatabase()->select('foreign_c1 C, foreign_p');
-        if ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $platform instanceof MySQLPlatform) {
-            $this->assertEquals('DELETE C FROM foreign_c1 C, foreign_p', $cplatform->convertDeleteQuery($builder, []));
-        }
-        elseif ($platform instanceof SQLServerPlatform) {
-            $this->assertEquals('DELETE C FROM foreign_c1 C, foreign_p', $cplatform->convertDeleteQuery($builder, []));
-        }
-        else {
-            $this->assertException(new \DomainException('not supported'), L($cplatform)->convertDeleteQuery($builder, []));
-        }
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
-    function test_convertDeleteQuery_multi($cplatform, $platform)
-    {
-        $builder = self::getDummyDatabase()->select('foreign_c1 C, foreign_p P');
-        if ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $platform instanceof MySQLPlatform) {
-            $this->assertEquals('DELETE C, P FROM foreign_c1 C, foreign_p P', $cplatform->convertDeleteQuery($builder, ['C', 'P']));
-        }
-        else {
-            $this->assertException(new \DomainException('not supported'), L($cplatform)->convertDeleteQuery($builder, ['C', 'P']));
-        }
     }
 
     function assertExpression(Expression $expr, $expectedQuery, array $expectedparams)

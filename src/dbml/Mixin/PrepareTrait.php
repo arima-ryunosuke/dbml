@@ -51,7 +51,7 @@ trait PrepareTrait
      * @inheritdoc Database::update()
      * @return Statement
      */
-    private function prepareUpdateWithTable($tableName, $data, $identifier = [])
+    private function prepareUpdateWithTable($tableName, $data, $where = [])
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
         return try_finally([$this, 'update'], $this->getDatabase()->storeOptions(['preparing' => true]), ...func_get_args());
@@ -63,7 +63,7 @@ trait PrepareTrait
      * @inheritdoc TableGateway::update()
      * @return Statement
      */
-    private function prepareUpdateWithoutTable($data, $identifier = [])
+    private function prepareUpdateWithoutTable($data, $where = [])
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
         return try_finally([$this, 'update'], $this->getDatabase()->storeOptions(['preparing' => true]), ...func_get_args());
@@ -75,7 +75,7 @@ trait PrepareTrait
      * @inheritdoc Database::delete()
      * @return Statement
      */
-    private function prepareDeleteWithTable($tableName, $identifier = [])
+    private function prepareDeleteWithTable($tableName, $where = [])
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
         return try_finally([$this, 'delete'], $this->getDatabase()->storeOptions(['preparing' => true]), ...func_get_args());
@@ -87,7 +87,7 @@ trait PrepareTrait
      * @inheritdoc TableGateway::delete()
      * @return Statement
      */
-    private function prepareDeleteWithoutTable($identifier = [])
+    private function prepareDeleteWithoutTable($where = [])
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
         return try_finally([$this, 'delete'], $this->getDatabase()->storeOptions(['preparing' => true]), ...func_get_args());

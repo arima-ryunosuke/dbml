@@ -764,27 +764,28 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         return [];
     }
 
-    private function _redatawhere(&$data, &$where)
+    private function _preaffect(&$data, &$where, &$limit, &$orderBy, &$groupBy)
     {
         $data ??= [];
         $where ??= [];
+        $orderBy ??= [];
+        $groupBy ??= [];
 
-        $sp = $this->getScopeParamsForAffect([], $where);
+        $sp = $this->getScopeParamsForAffect([], $where, $orderBy, $groupBy);
+        // 集約系はどうしようもないので例外（集約を利用した update/delete なんて考慮したくない）
+        if (count($sp['groupBy']) > 0 && count($sp['having']) > 0) {
+            throw new \UnexpectedValueException('group or having is not allow affect query.');
+        }
+
         // まれに配列以外が来ることがある（entity とか builder とか）
         if (is_array($data)) {
             $data += $sp['colval'];
         }
         $where = $sp['where'];
+        $orderBy = $sp['orderBy'];
+        $groupBy = $sp['groupBy'];
+        $limit ??= $sp['limit'] ? reset($sp['limit']) : null;
 
-        // 集約系はどうしようもないので例外（集約を利用した update/delete なんて考慮したくない）
-        if (count($sp['groupBy']) > 0 || count($sp['having']) > 0) {
-            throw new \UnexpectedValueException('group or having is not allow affect query.');
-        }
-        // 順序・制限系クエリなら（mysql なら）それを活かした update/delete が実行できるのでそのようにする
-        if (count($sp['column']) > 1 || count($sp['orderBy']) > 0 || count($sp['limit']) > 0) {
-            $sp['where'] = [];
-            return $this->database->select(...array_values($sp));
-        }
         return $this->tableName;
     }
 
@@ -1561,14 +1562,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * SET 句を追加する（{@uses QueryBuilder::set()} を参照）
+     * SET 句を追加する
      *
-     * ```php
-     * // UPDATE tablename SET id = 'hoge'
-     * echo $gw->set(['name' => 'hoge']);
-     * ```
-     *
-     * @inheritdoc QueryBuilder::set()
+     * @param array $sets [col => val]
+     * @return $this 自分自身
      */
     public function set($sets)
     {
@@ -2387,10 +2384,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::updateArray()
      */
-    public function updateArray($data, $identifier = [])
+    public function updateArray($data, $where = [])
     {
         $this->resetResult();
-        return $this->database->updateArray($this->tableName, $data, $identifier, ...array_slice(func_get_args(), 2));
+        return $this->database->updateArray($this->tableName, $data, $where, ...array_slice(func_get_args(), 2));
     }
 
     /**
@@ -2413,10 +2410,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::changeArray()
      */
-    public function changeArray($dataarray, $identifier, $uniquekey = 'PRIMARY', $returning = [])
+    public function changeArray($dataarray, $where, $uniquekey = 'PRIMARY', $returning = [])
     {
         $this->resetResult();
-        return $this->database->changeArray($this->tableName, $dataarray, $identifier, $uniquekey, $returning, ...array_slice(func_get_args(), 4));
+        return $this->database->changeArray($this->tableName, $dataarray, $where, $uniquekey, $returning, ...array_slice(func_get_args(), 4));
     }
 
     /**
@@ -2456,7 +2453,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function create($data)
     {
         $this->resetResult();
-        return $this->database->create($this->_redatawhere($data, $identifier), ...func_get_args());
+        return $this->database->create($this->_preaffect($data, $where, $limit, $orderBy, $groupBy), ...func_get_args());
     }
 
     /**
@@ -2483,7 +2480,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         ) {
             return $this->database->insertSelect($this->tableName, $this->database->select(...array_values($sp)));
         }
-        return $this->database->insert($this->_redatawhere($data, $identifier), ...func_get_args());
+        return $this->database->insert($this->_preaffect($data, $where, $limit, $orderBy, $groupBy), ...func_get_args());
     }
 
     /**
@@ -2495,10 +2492,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::update()
      */
-    public function update($data, array $identifier = [])
+    public function update($data, array $where = [])
     {
         $this->resetResult();
-        return $this->database->update($this->_redatawhere($data, $identifier), $data, $identifier, ...array_slice(func_get_args(), 2));
+        return $this->database->update($this->_preaffect($data, $where, $limit, $orderBy, $groupBy), $data, $where, ...array_slice(func_get_args(), 2));
     }
 
     /**
@@ -2510,10 +2507,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::delete()
      */
-    public function delete(array $identifier = [])
+    public function delete(array $where = [])
     {
         $this->resetResult();
-        return $this->database->delete($this->_redatawhere($data, $identifier), $identifier, ...array_slice(func_get_args(), 1));
+        return $this->database->delete($this->_preaffect($data, $where, $limit, $orderBy, $groupBy), $where, ...array_slice(func_get_args(), 1));
     }
 
     /**
@@ -2525,10 +2522,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::invalid()
      */
-    public function invalid(array $identifier = [], ?array $invalid_columns = null)
+    public function invalid(array $where = [], ?array $invalid_columns = null)
     {
         $this->resetResult();
-        return $this->database->invalid($this->_redatawhere($data, $identifier), $identifier, $invalid_columns, ...array_slice(func_get_args(), 2));
+        return $this->database->invalid($this->_preaffect($data, $where, $limit, $orderBy, $groupBy), $where, $invalid_columns, ...array_slice(func_get_args(), 2));
     }
 
     /**
@@ -2540,10 +2537,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::revise()
      */
-    public function revise($data, array $identifier = [])
+    public function revise($data, array $where = [])
     {
         $this->resetResult();
-        return $this->database->revise($this->_redatawhere($data, $identifier), $data, $identifier, ...array_slice(func_get_args(), 2));
+        return $this->database->revise($this->_preaffect($data, $where, $limit, $orderBy, $groupBy), $data, $where, ...array_slice(func_get_args(), 2));
     }
 
     /**
@@ -2555,10 +2552,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::upgrade()
      */
-    public function upgrade($data, array $identifier = [])
+    public function upgrade($data, array $where = [])
     {
         $this->resetResult();
-        return $this->database->upgrade($this->_redatawhere($data, $identifier), $data, $identifier, ...array_slice(func_get_args(), 2));
+        return $this->database->upgrade($this->_preaffect($data, $where, $limit, $orderBy, $groupBy), $data, $where, ...array_slice(func_get_args(), 2));
     }
 
     /**
@@ -2570,10 +2567,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::remove()
      */
-    public function remove(array $identifier = [])
+    public function remove(array $where = [])
     {
         $this->resetResult();
-        return $this->database->remove($this->_redatawhere($data, $identifier), $identifier, ...array_slice(func_get_args(), 1));
+        return $this->database->remove($this->_preaffect($data, $where, $limit, $orderBy, $groupBy), $where, ...array_slice(func_get_args(), 1));
     }
 
     /**
@@ -2585,10 +2582,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::destroy()
      */
-    public function destroy(array $identifier = [])
+    public function destroy(array $where = [])
     {
         $this->resetResult();
-        return $this->database->destroy($this->_redatawhere($data, $identifier), $identifier, ...array_slice(func_get_args(), 1));
+        return $this->database->destroy($this->_preaffect($data, $where, $limit, $orderBy, $groupBy), $where, ...array_slice(func_get_args(), 1));
     }
 
     /**
@@ -2598,10 +2595,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::reduce()
      */
-    public function reduce($limit = null, $orderBy = [], $groupBy = [], $identifier = [])
+    public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [])
     {
         $this->resetResult();
-        return $this->database->reduce($this->select(), $limit, $orderBy, $groupBy, $identifier, ...array_slice(func_get_args(), 4));
+        $this->_preaffect($data, $where, $limit, $orderBy, $groupBy);
+        return $this->database->reduce($this->_preaffect($data, $where, $limit, $orderBy, $groupBy), $limit, $orderBy, $groupBy, $where, ...array_slice(func_get_args(), 4));
     }
 
     /**

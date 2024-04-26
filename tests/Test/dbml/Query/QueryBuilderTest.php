@@ -2664,35 +2664,6 @@ SELECT test.* FROM test", $builder);
     /**
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
-     */
-    function test_colval($builder)
-    {
-        $builder->column([
-            'test' => [
-                'id'   => 123,
-                'name' => new Expression('CONCAT(name, ?)', ['hoge']),
-                'data' => 'data',
-            ],
-        ]);
-        $colval = $builder->getColval();
-        $this->assertEquals([
-            'test.id'   => new Expression(123),
-            'test.name' => new Expression('CONCAT(name, ?)', ['hoge']),
-            'test.data' => 'data',
-        ], $colval);
-
-        $builder->set(['data' => 'hoge'] + $colval);
-        $this->assertEquals([
-            'data'      => new Expression('?', ['hoge']),
-            'test.id'   => new Expression(123),
-            'test.name' => new Expression('CONCAT(name, ?)', ['hoge']),
-            'test.data' => new Expression('?', ['data']),
-        ], $builder->getQueryPart('colval'));
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
      * @param Database $database
      */
     function test_vtable($builder, $database)

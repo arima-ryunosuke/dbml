@@ -20,6 +20,8 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
             'jointable' => [],
             'scope'     => [],
             'condition' => [],
+            'group'     => [],
+            'having'    => [],
             'fkeyname'  => null,
             'column'    => [],
             'remaining' => '',
@@ -247,6 +249,18 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
             'group' => ['id', 'cid'],
             'key'   => 'foreign_c1<id, cid>',
         ]);
+        $this->assertDescriptor(new TableDescriptor($database, 'foreign_c1<id, cid:"COUNT(*) > 1", "MIN(subid) <= ?":2>', []), [
+            'table'  => 'foreign_c1',
+            'group'  => ['id'],
+            'having' => ['cid' => 'COUNT(*) > 1', 'MIN(subid) <= ?' => '2'],
+            'key'    => 'foreign_c1<id, cid:"COUNT(*) > 1", "MIN(subid) <= ?":2>',
+        ]);
+        $this->assertDescriptor(new TableDescriptor($database, 'foreign_c1<id, cid:"COUNT(*) > 1", "MIN(subid) <= ?":2, "":"AVG(subid) > 3">', []), [
+            'table'  => 'foreign_c1',
+            'group'  => ['id'],
+            'having' => ['cid' => 'COUNT(*) > 1', 'MIN(subid) <= ?' => '2', 'AVG(subid) > 3'],
+            'key'    => 'foreign_c1<id, cid:"COUNT(*) > 1", "MIN(subid) <= ?":2, "":"AVG(subid) > 3">',
+        ]);
 
         // ORDER
         $this->assertDescriptor(new TableDescriptor($database, 'foreign_c1+aid-did', []), [
@@ -458,5 +472,57 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertSame([], $td->condition);
 
         $this->assertException('is undefined', L($td)->hogera);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_bind($database)
+    {
+        $td = new TableDescriptor($database, 'test[id:?, "name like ?"] T', []);
+        $this->assertDescriptor($td->bind($database, [1, $database->quote('hoge')]), [
+            'table'     => 'test',
+            'alias'     => 'T',
+            'accessor'  => 'T',
+            'condition' => [
+                'id' => '1',
+                0    => "name like 'hoge'",
+            ],
+        ]);
+
+        $td = new TableDescriptor($database, 'test[id:[?, ?, ?]] T', []);
+        $this->assertDescriptor($td->bind($database, [1, 2, 3]), [
+            'table'     => 'test',
+            'alias'     => 'T',
+            'accessor'  => 'T',
+            'condition' => [
+                'id' => ['1', '2', '3'],
+            ],
+        ]);
+
+        $td = new TableDescriptor($database, 'test(?) T', []);
+        $this->assertDescriptor($td->bind($database, [1]), [
+            'table'     => 'test',
+            'alias'     => 'T',
+            'accessor'  => 'T',
+            'condition' => [
+                new Expression('T.id = ?', 1),
+            ],
+        ]);
+
+        $td = new TableDescriptor($database, 'test[?] T', []);
+        $this->assertDescriptor($td->bind($database, [$E = $database->select('test', ['id' => 1])->existize()]), [
+            'table'     => 'test',
+            'alias'     => 'T',
+            'accessor'  => 'T',
+            'condition' => [
+                $E,
+            ],
+        ]);
+
+        $td = new TableDescriptor($database, 'test[id:?] T', []);
+        $this->assertException('short', L($td)->bind($database, []));
+        $this->assertException('long', L($td)->bind($database, [1, 2]));
     }
 }
