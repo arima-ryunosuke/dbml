@@ -270,8 +270,6 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * @method $this                  setYamlParser($callable)
  * @method array                  getAutoCastType()
  * @nethod self                   setAutoCastType($array) 実際に定義している
- * @method string                 getInjectCallStack()
- * @method $this                  setInjectCallStack(string|array|callable $string)
  * @method bool                   getMasterMode()
  * @method $this                  setMasterMode($bool)
  * @method string                 getCheckSameKey()
@@ -568,8 +566,6 @@ class Database
             'checkSameKey'              => null,
             // 同名カラムがあった時どう振る舞うか[null, 'noallow', 'strict', 'loose']
             'checkSameColumn'           => null,
-            // SQL 実行時にコールスタックを埋め込むか(パスを渡す。!プレフィックスで否定、 null で無効化)
-            'injectCallStack'           => null,
             // 更新クエリを実行せずクエリ文字列を返すようにするか
             'dryrun'                    => false,
             // 更新クエリを実行せずプリペアされたステートメントを返すようにするか
@@ -1068,47 +1064,6 @@ class Database
 
         // どうしようもない
         return fn() => null;
-    }
-
-    private function _getCallStack($filter_path)
-    {
-        // パスでフィルタするクロージャ
-        $filter_paths = arrayize($filter_path);
-        $match_path = function ($path) use ($filter_paths) {
-            foreach ($filter_paths as $filter_path) {
-                // クロージャ
-                if ($filter_path instanceof \Closure) {
-                    if (!$filter_path($path)) {
-                        return false;
-                    }
-                }
-                // パスの1文字目が!の場合は否定
-                elseif ($filter_path[0] === '!') {
-                    if (strpos($path, substr($filter_path, 1)) !== false) {
-                        return false;
-                    }
-                }
-                elseif (strpos($path, $filter_path) === false) {
-                    return false;
-                }
-            }
-            return true;
-        };
-
-        $cplatform = $this->getCompatiblePlatform();
-
-        // mysql のクエリログは trim してから行われるようなので位置揃えのためにそれっぽい文字列を入れておく
-        $traces = [$cplatform->commentize("callstack:")];
-        foreach (debug_backtrace() as $trace) {
-            if (isset($trace['file'], $trace['line'])) {
-                if ($match_path($trace['file'])) {
-                    $traces[] = $cplatform->commentize($trace['file'] . '#' . $trace['line']);
-                }
-            }
-        }
-
-        // magic call が多く、同ファイル同行が頻出するため unique する
-        return array_unique($traces);
     }
 
     private function _getChunk(&$params)
@@ -4411,10 +4366,6 @@ class Database
             return new Result(new ArrayResult($cache[$queryid]['data'], $cache[$queryid]['meta']), $this->getSlaveConnection());
         }
 
-        if ($filter_path = $this->getInjectCallStack()) {
-            $query = implode('', $this->_getCallStack($filter_path)) . $query;
-        }
-
         // コンテキストを戻すための try～catch
         try {
             $result = $this->getSlaveConnection()->executeQuery($query, $params, Adhoc::bindableTypes($params));
@@ -4452,10 +4403,6 @@ class Database
 
         if ($this->getUnsafeOption('preparing')) {
             return $this->prepare($query, $params);
-        }
-
-        if ($filter_path = $this->getInjectCallStack()) {
-            $query = implode('', $this->_getCallStack($filter_path)) . $query;
         }
 
         // コンテキストを戻すための try～catch
@@ -4566,10 +4513,6 @@ class Database
         if (is_array($queries)) {
             $queries = (function ($queries) {
                 foreach ($queries as $query => $params) {
-                    if ($filter_path = $this->getInjectCallStack()) {
-                        $query = implode('', $this->_getCallStack($filter_path)) . $query;
-                    }
-
                     if (array_depth($params, 2) === 1) {
                         $params = [$params];
                     }

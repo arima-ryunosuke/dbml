@@ -1710,47 +1710,6 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $database->setCheckSameColumn(null);
     }
 
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_injectCallStack($database)
-    {
-        $logs = [];
-        $logger = new Logger([
-            'destination' => function ($sql, $params) use (&$logs) {
-                $logs[] = compact('sql', 'params');
-            },
-            'metadata'    => [],
-        ]);
-        $database->setLogger($logger);
-
-        $database->setInjectCallStack('DatabaseTest.php');
-        $database->executeSelect('select * from test');
-        $this->assertStringContainsString(__FILE__, $logs[0]['sql']);
-
-        $database->setInjectCallStack('!vendor');
-        $database->executeSelect('select * from test');
-        $this->assertStringContainsString('Database.php#', $logs[1]['sql']);
-        $this->assertStringNotContainsString('phpunit', $logs[1]['sql']);
-
-        $database->setInjectCallStack(['DatabaseTest.php', '!phpunit']);
-        $database->executeSelect('select * from test');
-        $this->assertStringContainsString(__FILE__, $logs[2]['sql']);
-        $this->assertStringNotContainsString('phpunit', $logs[2]['sql']);
-
-        $database->setInjectCallStack('DatabaseTest.php');
-        $database->executeAffect("update test set name='hoge'");
-        $this->assertStringContainsString(__FILE__, $logs[3]['sql']);
-
-        $database->setInjectCallStack(function ($path) { return preg_match('/phpunit$/', $path); });
-        $database->executeAffect("update test set name='hoge'");
-        $this->assertStringContainsString('phpunit#', $logs[4]['sql']);
-
-        $database->setInjectCallStack(null);
-        $database->setLogger(null);
-    }
-
     function test_tx_method()
     {
         $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
@@ -3543,17 +3502,6 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $database->setOption('preparing', 1);
         $this->assertException('is not supported', L($database)->executeAsync(['SELECT 1' => []]));
         $database->setOption('preparing', 0);
-
-        $this->trapThrowable('is not supported');
-
-        try {
-            $database = $database->setInjectCallStack('DatabaseTest.php');
-            $result = $database->executeAsync(['SELECT 1' => []]);
-            $result();
-        }
-        finally {
-            $database->setInjectCallStack(null);
-        }
     }
 
     /**
