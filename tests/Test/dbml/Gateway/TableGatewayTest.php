@@ -1269,7 +1269,7 @@ AND ((flag=1))", "$gw");
     {
         // lock が活きてるか、同時指定できてるかが確認できればいいので sqlite のみでいい（ロッククエリはバラバラなので全RDBMSは辛い）
         if ($database->getCompatiblePlatform()->getWrappedPlatform() instanceof SqlitePlatform) {
-            $database->setAutoOrder(false);
+            $database->setDefaultOrder(null);
 
             $logs = [];
             $logger = new Logger([
@@ -1300,7 +1300,7 @@ AND ((flag=1))", "$gw");
             $this->assertEquals([0], $log['params']);
 
             $database->setLogger([]);
-            $database->setAutoOrder(true);
+            $database->setDefaultOrder(true);
         }
     }
 
@@ -1811,7 +1811,7 @@ AND ((flag=1))", "$gw");
             return [$last['sql'] => $last['params']];
         };
         $database->setLogger($logger);
-        $database->setAutoOrder(false);
+        $database->setDefaultOrder(null);
 
         // for SQLServer
         if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
@@ -1856,7 +1856,7 @@ AND ((flag=1))", "$gw");
         $this->assertException('not allow affect query', L($gateway->groupBy('name')->having('1=1'))->delete([]));
 
         $database->setLogger([]);
-        $database->setAutoOrder(true);
+        $database->setDefaultOrder(true);
 
         // for SQLServer
         if (!$database->getCompatiblePlatform()->supportsIdentityUpdate()) {

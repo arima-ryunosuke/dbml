@@ -1269,14 +1269,6 @@ GREATEST(1,2,3) FROM test1', $builder);
         $this->assertQuery("SELECT c1.id, c1.name FROM foreign_p P LEFT JOIN foreign_c1 c1 ON (c1.id = P.id) AND (a = ?) AND ((b = ?) OR (c = ?))", $builder);
         $this->assertEquals([1, 2, 3], $builder->getParams());
 
-        $builder->detectAutoOrder(true);
-        $builder->column([
-            'foreign_p P' => [
-                '<c1' => $database->foreign_c1()->scoping('*', '1=1', ['id' => 'DESC']),
-            ],
-        ]);
-        $this->assertQuery("SELECT c1.* FROM foreign_p P LEFT JOIN foreign_c1 c1 ON (c1.id = P.id) AND (1=1) ORDER BY P.id ASC, c1.id DESC", $builder);
-
         $builder->column([
             'foreign_p P' => [
                 '<c1{col1: col1, col2: col2}' => $database->foreign_c1()->scoping('*', '1=1', ['id' => 'DESC'], [], 'c1.id'),
@@ -2846,6 +2838,8 @@ SQL
             $builder->getDatabase()->getSchema()->getTable($table);
         }
 
+        $builder->reset()->setDefaultOrder(null);
+
         $logs = $builder->getDatabase()->preview(function ($a) use ($builder) {
             $builder->reset()->column('test');
             $this->assertEquals($builder->array(), iterator_to_array($builder->chunk(3), false));
@@ -3873,7 +3867,7 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
             $builder->array();
         }
 
-        $builder->detectAutoOrder(false);
+        $builder->detectAutoOrder(null)->detectAutoOrder(false);
         $builder->reset()->select('*')->from('test1')->wrap('HOGE', 'FUGA');
         $this->assertQuery('HOGE (SELECT * FROM test1) FUGA', $builder);
     }
@@ -4124,23 +4118,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
         $builder->reset()->setDefaultOrder(new Expression('NOW() DESC'));
         $this->assertQuery("SELECT test1.id FROM test1 ORDER BY NOW() DESC", $builder->column('test1.id'));
 
-        $builder->detectAutoOrder(false);
+        $builder->detectAutoOrder(null)->detectAutoOrder(false);
         $this->assertQuery("SELECT test1.id FROM test1", $builder->column('test1.id'));
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
-     */
-    function test_setAutoOrder($builder)
-    {
-        $builder->setAutoOrder(false);
-        $builder->detectAutoOrder(true);
-        $this->assertQuery("SELECT test1.id FROM test1", $builder->column('test1.id'));
-
-        $builder->setAutoOrder(true);
-        $builder->detectAutoOrder(true);
-        $this->assertQuery("SELECT test1.id FROM test1 ORDER BY test1.id ASC", $builder->column('test1.id'));
     }
 
     /**

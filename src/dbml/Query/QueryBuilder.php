@@ -88,13 +88,8 @@ use function ryunosuke\dbml\str_exists;
  *     true を指定すると主キーの昇順、 false を指定すると主キーの降順が付与される。
  *     あるいは任意の文字列や表現を渡すとそれが追加される。
  *
- *     つまり実質的に AutoOrder の上位互換として働く。
- *     （RDBMS によってはインデックスが効かなかったりするので注意すること）。
- *
  *     @param mixed $mixed 並び順
  * }
- * @method bool                   getAutoOrder()
- * @method $this                  setAutoOrder($bool) {自動で主キー順にするか（{@link detectAutoOrder()} を参照）}
  * @method string                 getPrimarySeparator()
  * @method $this                  setPrimarySeparator($string) {
  *     主キー区切り文字を設定する
@@ -351,8 +346,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     /** @var bool テーブル名プレフィックスを付与するか */
     private $autoTablePrefix = false;
 
-    /** @var bool デフォルト order by が有効か否か（基本的に単純な toString では効かせない） */
-    private $enableAutoOrder = false;
+    /** @var ?bool デフォルト order by が有効か否か（基本的に単純な toString では効かせない） */
+    private $enableAutoOrder = null;
 
     public static function getDefaultOptions()
     {
@@ -362,9 +357,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             // TableGateway の暗黙的スコープ名
             'defaultScope'         => [],
             // orderBy が無かったとき、あったとしても必ず最後に付与されるデフォルトの並び順
-            'defaultOrder'         => null,
-            // 自動 order by 有効/無効フラグ
-            'autoOrder'            => true,
+            'defaultOrder'         => true,
             // 複合主キーを単一主キーとみなすための結合文字列
             'primarySeparator'     => "\x1F",
             // aggregate 時（columnname@sum）の区切り文字
@@ -575,14 +568,13 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     if (null === array_find($builder->sqlParts['select'], function ($s) { return strpos("$s", self::COUNT_ALIAS) !== false; })) {
                         if (($defaultOrder = $builder->getDefaultOrder()) !== null) {
                             if (is_bool($defaultOrder)) {
-                                $builder->orderByPrimary($defaultOrder, true);
+                                if ($builder->sqlParts['from']) {
+                                    $builder->orderByPrimary($defaultOrder, true);
+                                }
                             }
                             else {
                                 $builder->addOrderBy($defaultOrder);
                             }
-                        }
-                        if ($builder->getAutoOrder() && !$builder->sqlParts['orderBy']) {
-                            $builder->orderByPrimary();
                         }
                     }
                 }
@@ -866,7 +858,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             // QueryBuilder なら文字列化したものをカッコつきで select + パラメータ追加
             elseif ($column instanceof QueryBuilder && !$column->lazyMode) {
                 // サブクエリで order は無意味
-                $column->setAutoOrder(false);
+                $column->detectAutoOrder(false);
 
                 // subexists はこの段階で where が確定する
                 if (($submethod = $column->getSubmethod()) !== null) {
@@ -2792,7 +2784,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
         }
 
-        return $this->_dirty();
+        $this->_dirty();
+
+        // id asc,id desc のような冗長な ORDER BY を許さない RDBMS がいる
+        return $this->database->getCompatiblePlatform()->supportsRedundantOrderBy() ? $this : $this->detectAutoOrder(false);
     }
 
     /**
@@ -3119,7 +3114,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
         $exister = $that->database->createQueryBuilder();
         $exister->select($that->database->getCompatiblePlatform()->convertSelectExistsQuery($that));
-        $exister->setAutoOrder(false);
+        $exister->detectAutoOrder(false);
         return $exister;
     }
 
@@ -3138,7 +3133,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     public function countize($column = '*')
     {
         $that = clone $this;
-        $that->setAutoOrder(false);
+        $that->detectAutoOrder(false);
         $that->resetQueryPart('orderBy');
         $that->resetQueryPart('offset');
         $that->resetQueryPart('limit');
@@ -3590,7 +3585,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     public function aggregate($aggregations, $select_limit = PHP_INT_MAX)
     {
         // 集約クエリで主キー順に意味は無い
-        $this->setAutoOrder(false);
+        $this->detectAutoOrder(false);
 
         // $aggregations が連想配列の場合は自由モード（かなりの制約がなくなるモード）
         if (is_array($aggregations) && is_hasharray($aggregations)) {
@@ -3758,12 +3753,13 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     /**
      * 自動 OrderBy の有効無効を設定する
      *
-     * @param bool $use 切り替えフラグ
+     * @param ?bool $use 切り替えフラグ
      * @return $this 自分自身
      */
     public function detectAutoOrder($use)
     {
-        if (!$this->getAutoOrder() && $this->getDefaultOrder() === null) {
+        // ビルド中に呼ばれることがあるが、最終的に Database の fetch でも呼ばれるため上書きされてしまうので1度きりの設定とする
+        if ($use !== null && $this->enableAutoOrder !== null) {
             return $this;
         }
 

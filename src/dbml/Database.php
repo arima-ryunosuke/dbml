@@ -325,8 +325,8 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * @method string                 getDefaultJoinMethod() {{@link TableGateway::getDefaultJoinMethod()} 参照@inheritdoc TableGateway::getDefaultJoinMethod()}
  * @method $this                  setDefaultJoinMethod($string) {{@link TableGateway::setDefaultJoinMethod()} 参照@inheritdoc TableGateway::setDefaultJoinMethod()}
  *
- * @method bool                   getAutoOrder() {{@link QueryBuilder::getAutoOrder()} 参照@inheritdoc QueryBuilder::getAutoOrder()}
- * @method $this                  setAutoOrder($bool) {{@link QueryBuilder::setAutoOrder()} 参照@inheritdoc QueryBuilder::setAutoOrder()}
+ * @method mixed                  getDefaultOrder() {{@link QueryBuilder::getDefaultOrder()} 参照@inheritdoc QueryBuilder::getDefaultOrder()}
+ * @method $this                  setDefaultOrder($mixed) {{@link QueryBuilder::setDefaultOrder()} 参照@inheritdoc QueryBuilder::setDefaultOrder()}
  * @method string                 getPrimarySeparator() {{@link QueryBuilder::getPrimarySeparator()} 参照@inheritdoc QueryBuilder::getPrimarySeparator()}
  * @method $this                  setPrimarySeparator($string) {{@link QueryBuilder::setPrimarySeparator()} 参照@inheritdoc QueryBuilder::setPrimarySeparator()}
  * @method string                 getAggregationDelimiter() {{@link QueryBuilder::getAggregationDelimiter()} 参照@inheritdoc QueryBuilder::getAggregationDelimiter()}
@@ -699,9 +699,9 @@ class Database
      * その場合、**そのクラスのインスタンスが生成されたときのデフォルト値**として作用する。
      *
      * ```php
-     * # autoOrder は本来 QueryBuilder のオプションだが、 Database のオプションとしても与えることができる
+     * # defaultOrder は本来 QueryBuilder のオプションだが、 Database のオプションとしても与えることができる
      * $db = new Database($dbconfig, [
-     *     'autoOrder' => false,
+     *     'defaultOrder' => true,
      * ]);
      * $db->selectArray('tablename'); // 上記で false を設定してるので自動で `ORDER BY 主キー` は付かない
      * ```
@@ -3536,7 +3536,7 @@ class Database
                 if ($index->hasOption('lengths')) {
                     $alias = $table_name . $DELIMITER . $index->getName();
                     $select = $this->select([$table_name => $cplatform->getCountExpression('*')]);
-                    $select->setAutoOrder(false);
+                    $select->detectAutoOrder(false);
                     $select->hint($cplatform->getIndexHintSQL($index->getName()));
                     $columns[$alias] = $select;
                 }
@@ -3544,7 +3544,7 @@ class Database
         }
 
         $result = [];
-        foreach ($this->createQueryBuilder()->setAutoOrder(false)->addSelect($columns)->tuple() as $key => $count) {
+        foreach ($this->createQueryBuilder()->addSelect($columns)->tuple() as $key => $count) {
             [$tname, $iname] = explode($DELIMITER, $key, 2);
             $result[$tname][$iname] = $count;
         }
@@ -4541,7 +4541,7 @@ class Database
         $select->from(new Expression('(' . implode(' UNION ', $selects) . ')', $params), $tmpname);
         $select->leftJoinOn($tablename, array_merge(arrayize($wheres), array_sprintf($joincols, "$tablename.%1\$s = $tmpname.%1\$s")));
         $select->where(array_sprintf($pkcols, "$tablename.%2\$s IS NULL"));
-        $select->setAutoOrder(false);
+        $select->detectAutoOrder(false);
 
         $rows = $select->assoc();
         $result = [];

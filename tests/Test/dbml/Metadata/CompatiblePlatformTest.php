@@ -254,6 +254,20 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_supportsRedundantOrderBy($cplatform, $platform)
+    {
+        $expected = true;
+        if ($platform instanceof SQLServerPlatform) {
+            $expected = false;
+        }
+        $this->assertEquals($expected, $cplatform->supportsRedundantOrderBy());
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_quoteIdentifierIfNeeded($cplatform, $platform)
     {
         $this->assertEquals('', $cplatform->quoteIdentifierIfNeeded(''));

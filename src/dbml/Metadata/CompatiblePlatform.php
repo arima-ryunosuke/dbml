@@ -320,6 +320,19 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * id asc,id desc のような冗長な ORDER BY を許すか
+     *
+     * @return bool
+     */
+    public function supportsRedundantOrderBy()
+    {
+        if ($this->platform instanceof SQLServerPlatform) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 必要に応じて識別子をエスケープする
      *
      * @param string $word エスケープする文字列
