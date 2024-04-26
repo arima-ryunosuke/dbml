@@ -1021,30 +1021,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                         $subcond[$from['alias'] . '.' . $column] = $param;
                     }
                 }
-                // サブビルダにも適用する
-                foreach ($this->subbuilders as $subbuilder) {
-                    $subbuilder->$subtype([$cond => $param]);
-                }
                 return $subcond;
-            }
-            // ネストカラム（T1/T2/T3.column_name）
-            if (is_string($cond) && strpos($cond, '/') !== false) {
-                if (!$is_toplevel) {
-                    return false;
-                }
-                [$subkey, $subcolumn] = explode('/', $cond, 2);
-                if (isset($this->subbuilders[$subkey])) {
-                    $this->subbuilders[$subkey]->$subtype([$subcolumn => $param]);
-                }
-                return false;
-            }
-            // サブカラム（['Sub' => [$condition]]）
-            if (isset($this->subbuilders[$cond])) {
-                if (!$is_toplevel) {
-                    return false;
-                }
-                $this->subbuilders[$cond]->$subtype($param);
-                return false;
             }
             // 仮想カラム（tablename.virtualname）@todo 何をしているか分からない
             $cond2 = $is_int ? $param : $cond;
@@ -2435,8 +2412,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * | No | where                         | 説明
      * | --:|:--                            |:--
      * | 30 | `['' => 123]`                 | キーを空文字にすると駆動表の主キーを表す
-     * | 31 | `['C' => 'childwhere']`       | サブビルダの名前をキーにして配列を渡すと「その子供ビルダの where」を意味する
-     * | 32 | `['C/childwhere']`            | サブビルダの名前を "/" で区切ると「その子供ビルダの where」を意味する
      * | 33 | `['*.delete_flg' => 1]`       | テーブル部分に `*` を指定すると「あらゆるテーブルのそのカラム」を意味する
      * | 34 | `['*' => "hoge"]`             | `*` を指定すると「よしなに検索」となる。{@link Database::anywhere()} も参照
      * | 40 | `['table.vcolumn' => "hoge"]` | 仮想カラム（単純なものに限る）も普通のカラムと同じように指定できる
@@ -2451,19 +2426,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * $qb->column('t_article')->where(['' => [123, 456]]);     // WHERE article_id IN (123, 456)
      * $qb->column('t_multi')->where(['' => [123, 456]]);       // WHERE id1 = 123 AND id2 = 456
      * $qb->column('t_multi')->where(['' => [[1, 2], [3, 4]]]); // WHERE (id1 = 1 AND id2 = 2) OR (id1 = 3 AND id2 = 4)
-     *
-     * # No.31, 32（糖衣構文であり、できることは同じ）
-     * $qb->column('t_parent P/t_child C')->where([
-     *     // P(親)の WHERE
-     *     'P.delete_time' => 0,
-     *     // エイリアスキーを指定して配列でネストすると子ビルダの WHERE を意味する
-     *     'C'             => [
-     *         // C(子)の WHERE
-     *         'C.approval_flg' => 1,
-     *     ],
-     *     // "/" 区切り。上記と全く同じ
-     *     'C/approval_flg' => 1, // 修飾する場合は 'C/C.approval_flg'
-     * ]);
      *
      * # No.33（例えば対象テーブルに delete_flg があり、 delete_flg = 0 を付与したい場合、下記のようにすると全てのテーブルに付与される）
      * $qb->column('table1 t1, table2 t2, table3 t3')->where(['*.delete_flg' => 0]); // WHERE (t1.delete_flg = 0) AND (t2.delete_flg = 0) AND (t3.delete_flg = 0)
@@ -2603,19 +2565,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * # 配列も指定できる。キーを与えるとテーブルプレフィックスになる
      * $qb->groupBy(['id1', 'id2']);          // GROUP BY id1, id2
      * $qb->groupBy(['T' => ['id1', 'id2']]); // GROUP BY T.id1, T.id2
-     *
-     * # 配列指定で子ビルダを設定
-     * $qb->column('t_parent P/t_child C')->groupBy([
-     *     // P(親)の GROUP BY
-     *     'parent_id',
-     *     // エイリアスキーを指定して配列でネストすると子ビルダの GROUP BY を意味する
-     *     'C'           => [
-     *         // C(子)の GROUP BY
-     *         'child_id',
-     *     ],
-     *      // "/" 区切り。上記と全く同じ
-     *     'C/child_id', // 修飾する場合は 'C/C.child_id'
-     * ]);
      * ```
      *
      * @param mixed $groupBy GROUP BY 句
@@ -2636,14 +2585,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         foreach ($groupBy as $groups) {
             foreach (arrayize($groups) as $tbl => $arg) {
                 foreach (arrayize($arg) as $col) {
-                    if (is_string($col) && strpos($col, '/') !== false) {
-                        [$t, $col] = explode('/', $col, 2);
-                        $this->getSubbuilder($t)->addGroupBy($col);
-                    }
-                    elseif (isset($this->subbuilders[$tbl])) {
-                        $this->getSubbuilder($tbl)->addGroupBy($col);
-                    }
-                    elseif (is_int($tbl)) {
+                    if (is_int($tbl)) {
                         $this->sqlParts['groupBy'][] = $col;
                     }
                     else {
@@ -2774,19 +2716,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *
      * # [col, col, col], ORD 形式
      * $qb->orderBy(['colA', 'colB', 'colC'], false);  // ORDER BY colA DESC, colB DESC, colC DESC
-     *
-     * # 配列指定で子ビルダを設定
-     * $qb->column('t_parent P/t_child C')->orderBy([
-     *     // P(親)の ORDER
-     *     'P.parent_id' => 'ASC',
-     *     // エイリアスキーを指定して配列でネストすると子ビルダの ORDER BY を意味する
-     *     'C'           => [
-     *         // C(子)の ORDER
-     *         'C.comment_time' => 'DESC',
-     *     ],
-     *      // "/" 区切り。上記と全く同じ
-     *     'C/comment_time' => 'DESC', // 修飾する場合は 'C/C.comment_time'
-     * ]);
      * ```
      *
      * 特殊な機能として、SQL レイヤではなく、「取得後にアプリレイヤでソートする」機能があり、クロージャを渡すとそのような動作になる。
@@ -2842,14 +2771,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 unset($sort['']);
             }
             foreach ($sort as $col => $ord) {
-                if (is_string($col) && strpos($col, '/') !== false) {
-                    [$col, $column] = explode('/', $col, 2);
-                    $ord = [$column => $ord];
-                }
-                if (isset($this->subbuilders[$col])) {
-                    $this->getSubbuilder($col)->addOrderBy($ord);
-                }
-                elseif (is_int($col) && is_array($ord)) {
+                if (is_int($col) && is_array($ord)) {
                     $this->addOrderBy($ord[0], $ord[1] ?? $order);
                 }
                 elseif (is_int($col)) {
@@ -3008,17 +2930,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * # 配列で指定（単純引数でも連想配列でも指定できる）。意味合いがスカラー指定と逆になっているので注意
      * $qb->limit([20, 10]);   // LIMIT 10 OFFSET 20
      * $qb->limit([20 => 10]); // LIMIT 10 OFFSET 20
-     *
-     * # 配列キー指定で子ビルダを設定
-     * $qb->column('t_parent P/t_child C')->limit([
-     *     // P(親)の LIMIT
-     *     [0 => 20],
-     *     // エイリアスキーを指定して配列でネストすると子ビルダの LIMIT を意味する
-     *     'C' => [
-     *         // C(子)の LIMIT
-     *         [0 => 10],
-     *     ],
-     * ]);
      * ```
      *
      * @param int|array|null $count 最大件数、あるいは[オフセット => 最大件数]な配列
@@ -3028,17 +2939,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     public function limit($count, $offset = null)
     {
         if (is_array($count)) {
-            foreach ($count as $sub => $args) {
-                if (isset($this->subbuilders[$sub])) {
-                    if (!is_array($args) || count($args) === 1) {
-                        $this->getSubbuilder($sub)->limit($args);
-                    }
-                    else {
-                        $this->getSubbuilder($sub)->limit(...$args);
-                    }
-                    unset($count[$sub]);
-                }
-            }
             $c = count($count);
             if ($c === 1) {
                 [$offset, $count] = first_keyvalue($count);

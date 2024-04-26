@@ -1685,59 +1685,6 @@ AND
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
-    function test_wheres_sub($builder)
-    {
-        $builder->column('t_article A')->where([
-            'OR' => [
-                'article_id > ?' => 10,
-                'article_id < ?' => -10,
-            ],
-        ]);
-        $this->assertEquals('SELECT A.* FROM t_article A WHERE (article_id > ?) OR (article_id < ?)', (string) $builder);
-        $this->assertEquals([10, -10], $builder->getParams());
-
-        // 配列ネスト
-        $builder->reset()->column('t_article A/t_comment C')->where([
-            'A.article_id' => [1, 2, 3],
-            'A.tag'        => 'hoge',
-            'C'            => [
-                'comment LIKE = ?' => 'message',
-                'delete_flg'       => 0,
-            ],
-        ]);
-
-        $t = $builder;
-        $this->assertEquals(['(A.article_id IN (?,?,?)) AND (A.tag = ?)'], $t->getQueryPart('where'));
-        $this->assertEquals([1, 2, 3, 'hoge'], $t->getParams());
-
-        $t = $builder->getSubbuilder('C');
-        $this->assertEquals(['(comment LIKE = ?) AND (delete_flg = ?)'], $t->getQueryPart('where'));
-        $this->assertEquals(['message', 0], $t->getParams());
-
-        // スラッシュネスト
-        $builder->reset()->column('t_article A/t_comment C')->where([
-            'A.article_id'       => [1, 2, 3],
-            'A.tag'              => 'hoge',
-            'C/comment LIKE = ?' => 'message',
-            'C/delete_flg'       => 0,
-        ]);
-
-        $t = $builder;
-        $this->assertEquals(['(A.article_id IN (?,?,?)) AND (A.tag = ?)'], $t->getQueryPart('where'));
-        $this->assertEquals([1, 2, 3, 'hoge'], $t->getParams());
-
-        $t = $builder->getSubbuilder('C');
-        $this->assertEquals([
-            '0'    => 'comment LIKE = ?',
-            'AND1' => 'delete_flg = ?',
-        ], $t->getQueryPart('where'));
-        $this->assertEquals(['message', 0], $t->getParams());
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
-     */
     function test_wheres_primary($builder)
     {
         // 単一主キー
@@ -1856,14 +1803,6 @@ AND
             '(A.article_id = ?) AND (A.title = ?)',
         ], $t->getQueryPart('where'));
         $this->assertEquals([9, 'hoge'], $t->getParams());
-
-        // C は ['*.article_id' => [1, 2, 3]] が適用され、*.comment が活きるはず
-        $t = $builder->getSubbuilder('C');
-        $this->assertEquals([
-            '0'    => 'C.article_id IN (?,?,?)',
-            'AND1' => 'C.comment = ?',
-        ], $t->getQueryPart('where'));
-        $this->assertEquals([1, 2, 3, 'fuga'], $t->getParams());
     }
 
     /**
@@ -1977,10 +1916,6 @@ SQL
                 [
                     '*.*' => 'injected3!',
                 ],
-                'C/C.delete_flg' => [1],
-                'C'              => [
-                    'C.comment_id' => 1,
-                ],
             ],
         ]);
         $qi = function ($str) use ($builder) {
@@ -1988,8 +1923,6 @@ SQL
         };
         $C = $builder->getDatabase()->getCompatiblePlatform()->quoteIdentifierIfNeeded('C');
         $primary_key = Database::AUTO_PRIMARY_KEY;
-        $parent_key = Database::AUTO_PARENT_KEY;
-        $child_key = Database::AUTO_CHILD_KEY;
 
         // OR でも効いている
         $this->assertStringIgnoreBreak("SELECT A.*, A.article_id AS {$primary_key}c, NULL AS $C
@@ -1998,10 +1931,6 @@ WHERE ((A.article_id = '1')
 OR (/* vcolumn comment_count-k */ (SELECT COUNT(*) AS {$qi('*@count')} FROM t_comment WHERE t_comment.article_id = A.article_id) IN ('2'))
 OR (A.article_id = '3'))
 AND (FALSE)", $builder->queryInto());
-        // 子供である C 条件が現れるのはインジェクションの危険性がある
-        $this->assertStringIgnoreBreak("SELECT C.comment_id AS $child_key, C.*, C.article_id AS $parent_key
-FROM t_comment C
-WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
     }
 
     /**
@@ -2388,31 +2317,6 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
-    function test_orderBy_sub($builder)
-    {
-        // 配列ネスト
-        $builder->reset()->column('t_article A/t_comment C')->orderBy([
-            'A.article_id' => 'DESC',
-            'C'            => [
-                'C.comment_id' => 'DESC',
-            ],
-        ]);
-        $this->assertEquals([['A.article_id', false, null]], $builder->getQueryPart('orderBy'));
-        $this->assertEquals([['C.comment_id', false, null]], $builder->getSubbuilder('C')->getQueryPart('orderBy'));
-
-        // スラッシュネスト
-        $builder->reset()->column('t_article A/t_comment C')->orderBy([
-            'A.article_id' => 'DESC',
-            'C/comment_id' => 'DESC',
-        ]);
-        $this->assertEquals([['A.article_id', false, null]], $builder->getQueryPart('orderBy'));
-        $this->assertEquals([['comment_id', false, null]], $builder->getSubbuilder('C')->getQueryPart('orderBy'));
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
-     */
     function test_orderBySecure($builder)
     {
         $builder->getDatabase()->declareVirtualTable('vt_test_orderBySecure', ['misctype']);
@@ -2658,31 +2562,6 @@ SELECT test.* FROM test", $builder);
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
-    function test_groupBy_sub($builder)
-    {
-        $builder->reset()->column('t_article A/t_comment C')->groupBy('A.article_id', 'C/C.article_id');
-        $this->assertEquals(['A.article_id'], $builder->getQueryPart('groupBy'));
-        $this->assertEquals(['C.article_id'], $builder->getSubbuilder('C')->getQueryPart('groupBy'));
-
-        $builder->reset()->column('t_article A/t_comment C')->groupBy([
-            'A.article_id',
-            'C/C.article_id',
-        ]);
-        $this->assertEquals(['A.article_id'], $builder->getQueryPart('groupBy'));
-        $this->assertEquals(['C.article_id'], $builder->getSubbuilder('C')->getQueryPart('groupBy'));
-
-        $builder->reset()->column('t_article A/t_comment C')->groupBy([
-            'A' => 'article_id',
-            'C' => 'C.article_id',
-        ]);
-        $this->assertEquals(['A.article_id'], $builder->getQueryPart('groupBy'));
-        $this->assertEquals(['C.article_id'], $builder->getSubbuilder('C')->getQueryPart('groupBy'));
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
-     */
     function test_limit($builder)
     {
         $builder->column('test');
@@ -2708,45 +2587,6 @@ SELECT test.* FROM test", $builder);
         $this->assertSame(0, $builder->getQueryPart('limit'));
 
         $this->assertException(new \InvalidArgumentException('1 or 2'), L($builder)->limit([3, 7, 9]));
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
-     */
-    function test_limit_sub($builder)
-    {
-        $builder->column('t_article A/t_comment C')->limit([
-            1   => 3,
-            'C' => 5,
-        ]);
-        $this->assertSame(1, $builder->getQueryPart('offset'));
-        $this->assertSame(3, $builder->getQueryPart('limit'));
-        $this->assertSame(null, $builder->getSubbuilder('C')->getQueryPart('offset'));
-        $this->assertSame(5, $builder->getSubbuilder('C')->getQueryPart('limit'));
-
-        $builder->reset()->column('t_article A/t_comment C')->limit([
-            'C' => [
-                5 => 10,
-            ],
-            1   => 3,
-        ]);
-        $this->assertSame(1, $builder->getQueryPart('offset'));
-        $this->assertSame(3, $builder->getQueryPart('limit'));
-        $this->assertSame(5, $builder->getSubbuilder('C')->getQueryPart('offset'));
-        $this->assertSame(10, $builder->getSubbuilder('C')->getQueryPart('limit'));
-
-        $builder->reset()->column('t_article A/t_comment C')->limit([
-            3,
-            'C' => [
-                10,
-                5,
-            ],
-        ]);
-        $this->assertSame(0, $builder->getQueryPart('offset'));
-        $this->assertSame(3, $builder->getQueryPart('limit'));
-        $this->assertSame(5, $builder->getSubbuilder('C')->getQueryPart('offset'));
-        $this->assertSame(10, $builder->getSubbuilder('C')->getQueryPart('limit'));
     }
 
     /**

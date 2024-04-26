@@ -271,19 +271,13 @@ class IntegrationTest extends AbstractUnitTestCase
         $database->insert('t_comment', ['article_id' => 1, 'comment_id' => 6, 'comment' => 'コメント6です']);
         $database->insert('t_article', ['article_id' => 3, 'title' => 'new', 'checks' => '']);
 
-        $rows = $database->selectAssoc('t_article A/t_comment C.comment', [
-            'A.article_id <> ?' => 2,
-            'C'                 => [
-                'C.comment_id <> ?' => 1,
-            ],
-        ], [
-            'C' => [
-                'C.comment_id' => 'DESC',
-            ],
-        ], [
-            1,
-            'C' => [
-                1 => 3,
+        $rows = $database->selectAssoc([
+            't_article A#0' => [
+                't_comment C-comment_id#1-4' => [
+                    'comment',
+                    ['C.comment_id <> ?' => 1],
+                ],
+                ['A.article_id <> ?' => 2],
             ],
         ]);
         $this->assertEquals([
