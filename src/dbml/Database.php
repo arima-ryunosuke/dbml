@@ -61,7 +61,6 @@ use ryunosuke\dbml\Mixin\SelectOrThrowTrait;
 use ryunosuke\dbml\Mixin\SubAggregateTrait;
 use ryunosuke\dbml\Mixin\SubSelectTrait;
 use ryunosuke\dbml\Mixin\YieldTrait;
-use ryunosuke\dbml\Query\Expression\Alias;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\Expression\TableDescriptor;
@@ -315,8 +314,6 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  *
  *     @param string $string [null | "noallow" | "strict" | "loose"]
  * }
- * @method array                  getAnywhereOption()
- * @method $this                  setAnywhereOption($array)
  * @method array                  getExportClass()
  * @method $this                  setExportClass($array)
  *
@@ -579,37 +576,6 @@ class Database
             'preparing'                 => false,
             // 参照系クエリをマスターで実行するか(「スレーブに書き込みたい」はまずあり得ないが「マスターから読み込みたい」はままある)
             'masterMode'                => false,
-            // anywhere のデフォルトオプション
-            'anywhereOption'            => [
-                // そもそも有効か否か
-                'enable'         => true,
-                // 強欲にマッチさせるか（false にすると文字列 LIKE されづらくなる）
-                'greedy'         => true,
-                // 数値マッチをキー系に限定するか（true にすると主キー・外部キーカラムしか見なくなる）
-                'keyonly'        => false,
-                // 文字列 LIKE 時の collate
-                'collate'        => '',
-                // 一意化のためのコメント文字列（false 相当でコメントが埋め込まれなくなる）
-                'comment'        => 'anywhere',
-                // マッチタイプ
-                'type'           => null,
-                // テーブルごとの設定（サンプルも兼ねるのでマッチしないであろうテーブル名を記述してある）
-                "\0hoge-table\0" => [
-                    'enable'          => true,
-                    'greedy'          => true,
-                    'keyonly'         => false,
-                    'collate'         => '',
-                    'comment'         => 'anywhere',
-                    'type'            => null,
-                    // カラムごとの設定（サンプルも兼ねるのでマッチしないであろうカラム名を記述してある）
-                    "\0hoge-column\0" => [
-                        'enable'  => true,
-                        'collate' => '',
-                        'comment' => 'anywhere',
-                        'type'    => 'integer',
-                    ],
-                ],
-            ],
             // CompatiblePlatform のクラス名 or インスタンス
             'compatiblePlatform'        => CompatiblePlatform::class,
             // exportXXX 呼び出し時にどのクラスを使用するか
@@ -2445,8 +2411,6 @@ class Database
      *         'checkd_option'      => [
      *             // checkd_option という実際に存在するカラムの型を simple_array に上書きできる
      *             'type'     => Type::getType('simple_array'),
-     *             // カラムオプションを変更できる
-     *             'anywhere' => [],
      *         ],
      *     ],
      * ]);
@@ -2456,7 +2420,6 @@ class Database
      * php 側の型が活用される箇所はそう多くないが、例えば下記のような処理では上書きすると有用なことがある。
      *
      * - {@link Database::setAutoCastType()} による型による自動キャスト
-     * - {@link Database::anywhere()} によるよしなに検索
      *
      * @param array $definition 仮想カラム定義
      * @return $this 自分自身
@@ -3310,189 +3273,6 @@ class Database
         }
 
         return $criteria;
-    }
-
-    /**
-     * テーブル名とワードを与えると「なんとなくよしなに検索してくれるだろう」where 配列を返す
-     *
-     * 具体的には基本的に下記。
-     * - 数値は数値カラムで =
-     * - 日時っぽいなら日時カラムで BETWEEN
-     *     - 足りない部分は最大の範囲で補完
-     * - 文字列なら文字列カラムで LIKE
-     *     - スペースは%に変換（順序維持 LIKE）
-     *
-     * 検索オプションは下記。
-     * - hoge: テーブルに紐付かないグローバルオプション
-     *     - e.g. collate LIKE 時の照合順序
-     * - tablename.columnname: テーブルのカラム毎のオプション（使用時のエイリアスではなくテーブル名を指定）
-     *     - `['enable' => false]`: 何もしないで無視する
-     *     - `['type' => 'datetime']`: このカラムの型名
-     *     - `['collate' => 'hoge']`: このカラムの照合順序
-     *
-     * オプションの優先順位は下記（下に行くほど高い）。
-     * - テーブルコメントパース結果
-     * - カラムコメントパース結果
-     * - Database の anywhereOption オプション
-     *
-     * ```php
-     * # テーブル定義は下記とする
-     * # - tablename
-     * #   - id: int
-     * #   - parent_id: int(外部キー)
-     * #   - title: string
-     * #   - content: text
-     * #   - create_date: datetime
-     *
-     * # 全ての数値カラムの完全一致検索
-     * $db->whereInto($db->anywhere('tablename', 123), $params);
-     * // WHERE (id = '123') OR (parent_id = '123')
-     *
-     * # 全ての文字列カラムの包含検索（スペースは%に変換される）
-     * $db->whereInto($db->anywhere('tablename', 'ho ge'), $params);
-     * // WHERE (title LIKE '%ho%ge%') OR (content LIKE '%ho%ge%')
-     *
-     * # 全ての日時カラムの範囲検索
-     * $db->whereInto($db->anywhere('tablename', '2000/12/04'), $params);
-     * // WHERE (create_date BETWEEN '2000-12-04 00:00:00' AND '2000-12-04 23:59:59')
-     *
-     * # 上記で 00:00:00 が補完されているのは指定が年月日だからであり、 2000/12 だけを指定すると下記のようになる
-     * $db->whereInto($db->anywhere('tablename', '2000/12'), $params);
-     * // WHERE (create_date BETWEEN '2000-12-01 00:00:00' AND '2000-12-31 23:59:59')
-     * ```
-     *
-     * 上記のようにまさに「よしなに」検索してくれる機能で、画面の右上に1つの検索窓を配置するような場合に適している。
-     * ただし、想像の通り恐ろしく重いクエリとなりがちなので使い所を見極めるのが肝要。
-     * 一応少しカラムを減らせるオプションを用意してあるが、説明は省く（そんなに多くないのでソースを直確認を推奨）。
-     *
-     * もっとも、このメソッド自体を明示的に使うことは少ないと思われる。もっぱら {@link QueryBuilder::where()} で自動的に使われる。
-     *
-     * @param string $table テーブル名
-     * @param string $word 検索ワード
-     * @return array where 配列
-     */
-    public function anywhere($table, $word)
-    {
-        // クオートの判定（json_decode を使ってるのは手抜きだけど別段問題ないはず）
-        $json = json_decode((string) $word);
-        $quoted = is_string($json);
-        if ($quoted) {
-            $word = $json;
-        }
-
-        // ! を付けるまでもなく空値は何もしない仕様とする（「よしなに」の定義に"!"も含まれている）
-        if (Adhoc::is_empty($word)) {
-            return [];
-        }
-
-        $schema = $this->getSchema();
-
-        // テーブル名の正規化（tablename as aliasname を受け付ける）
-        [$alias, $tname] = Alias::split($table);
-        $tname = $this->convertTableName($tname);
-        $alias = $alias ?: $tname;
-
-        // オプションを取得しておく
-        $goptions = $this->getUnsafeOption('anywhereOption');
-        $toptions = $schema->getTable($tname)->getOptions();
-
-        // リレーションを漁る
-        $keys = array_fill_keys($schema->getTablePrimaryKey($tname)->getColumns(), true);
-        foreach ($schema->getForeignKeys($tname, null) as $fkey) {
-            $keys += array_fill_keys($fkey->getForeignColumns(), true);
-        }
-        foreach ($schema->getForeignKeys(null, $tname) as $fkey) {
-            $keys += array_fill_keys($fkey->getLocalColumns(), true);
-        }
-
-        // 検索ワードの正規化
-        $is_numeric = !$quoted && is_numeric($word);
-        $date_fromto = $quoted ? false : date_fromto(null, $word);
-        if ($quoted) {
-            $inwords = '%' . $this->getCompatiblePlatform()->escapeLike($word) . '%';
-        }
-        else {
-            $inwords = '%' . preg_replace('#[\s　]+#u', '%', $this->getCompatiblePlatform()->escapeLike($word)) . '%';
-        }
-
-        $where = [];
-        foreach ($schema->getTableColumns($tname) as $cname => $column) {
-            $coptions = $column->getPlatformOptions();
-            $coptions = array_replace_recursive(
-                $goptions,
-                $toptions['anywhere'] ?? [],
-                $coptions['anywhere'] ?? [],
-                $goptions[$tname] ?? [],
-                $goptions[$tname][$cname] ?? []
-            );
-            if (!$coptions['enable']) {
-                continue;
-            }
-            $type = $coptions['type'] ?: $column->getType()->getName();
-            $comment = $coptions['comment'] ? $this->getCompatiblePlatform()->commentize($coptions['comment'], true) . ' ' : '';
-            $key = $alias . '.' . $cname;
-            switch ($type) {
-                // 完全一致系
-                case Types::BOOLEAN:
-                case Types::BIGINT:
-                case Types::INTEGER:
-                case Types::SMALLINT:
-                case Types::FLOAT:
-                case Types::DECIMAL:
-                    if ($is_numeric) {
-                        if ($coptions['keyonly'] && (!isset($keys[$cname]))) {
-                            break;
-                        }
-                        $where[$comment . $key . ' = ?'] = $word;
-                    }
-                    break;
-
-                // 範囲系
-                case Types::DATETIME_MUTABLE:
-                case Types::DATETIME_IMMUTABLE:
-                case Types::DATETIMETZ_MUTABLE:
-                case Types::DATETIMETZ_IMMUTABLE:
-                case Types::DATE_MUTABLE:
-                case Types::DATE_IMMUTABLE:
-                    if ($date_fromto) {
-                        if (!$coptions['greedy'] && $is_numeric) {
-                            break;
-                        }
-                        $format = 'Y-m-d';
-                        if ($type !== Types::DATE_MUTABLE && $type !== Types::DATE_IMMUTABLE) {
-                            $format .= ' H:i:s';
-                        }
-                        $from = date($format, $date_fromto[0]);
-                        $to = date($format, $date_fromto[1] - 1);
-                        $where[$comment . $key . " BETWEEN ? AND ?"] = [$from, $to];
-                    }
-                    break;
-
-                // 包含系
-                case Types::STRING:
-                case Types::TEXT:
-                    if (!$coptions['greedy'] && ($is_numeric || $date_fromto)) {
-                        break;
-                    }
-                    $collate = '';
-                    if ($coptions['collate']) {
-                        $collate = ' collate ' . $coptions['collate'];
-                    }
-                    $where[$comment . $key . $collate . " LIKE ?"] = $inwords;
-                    break;
-
-                // いかんともしがたいので無視（array や json はなんとかなるかもしれない ）
-                case Types::GUID:
-                case Types::OBJECT:
-                case Types::ARRAY:
-                case Types::SIMPLE_ARRAY:
-                case Types::JSON:
-                case Types::BINARY:
-                case Types::BLOB:
-                default:
-            }
-        }
-        return $where;
     }
 
     /**

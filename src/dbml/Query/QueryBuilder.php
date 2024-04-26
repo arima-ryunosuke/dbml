@@ -948,13 +948,12 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     private function _buildCondition($type, $predicates, $ack, $andor)
     {
         $andor = strtoupper($andor);
-        $subtype = "$andor$type";
 
         $froms = array_filter($this->getFromPart(), function ($from) {
             return is_string($from['table']);
         });
 
-        $predicates = array_convert($predicates, function ($cond, &$param, $keys) use ($subtype, $froms) {
+        $predicates = array_convert($predicates, function ($cond, &$param, $keys) use ($froms) {
             $is_int = is_int($cond);
             $is_toplevel = array_filter($keys, 'is_int') === $keys; // flipflop の仕様がある
 
@@ -977,22 +976,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     $carry[] = array_combine($pcols, $pvals);
                 });
                 return [$this->database->getCompatiblePlatform()->getPrimaryCondition($pvals, $from['alias'])];
-            }
-            // エニーカラム（*.*）
-            if (is_string($cond) && preg_match('#^((.*)\.)?\*$#u', $cond, $matches)) {
-                if (!$is_toplevel) {
-                    return false;
-                }
-                [, , $alias] = $matches + [2 => '*'];
-                $wcond = [];
-                foreach ($froms as $from) {
-                    if ($alias === '*' || $from['alias'] === $alias) {
-                        $taname = $from['table'] . ' ' . $from['alias'];
-                        $wcond += $this->database->anywhere($taname, $param);
-                    }
-                }
-                $param = $wcond;
-                return true;
             }
             // エニーカラム（*.column_name）
             if (is_string($cond) && strpos($cond, '*.') === 0) {
@@ -2399,7 +2382,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * | --:|:--                            |:--
      * | 30 | `['' => 123]`                 | キーを空文字にすると駆動表の主キーを表す
      * | 33 | `['*.delete_flg' => 1]`       | テーブル部分に `*` を指定すると「あらゆるテーブルのそのカラム」を意味する
-     * | 34 | `['*' => "hoge"]`             | `*` を指定すると「よしなに検索」となる。{@link Database::anywhere()} も参照
      * | 40 | `['table.vcolumn' => "hoge"]` | 仮想カラム（単純なものに限る）も普通のカラムと同じように指定できる
      * | 41 | `['table.vcolumn' => [cond]]` | 仮想カラム（実態が subselect に限る）に配列パラメータを与えると「追加の WHERE で EXISTS」となる。この記法は whereInto と同じく、ユーザ入力を直接与えると SQL インジェクションの危険があるため、**決してユーザ由来の値を渡してはならない**
      *
@@ -2415,10 +2397,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *
      * # No.33（例えば対象テーブルに delete_flg があり、 delete_flg = 0 を付与したい場合、下記のようにすると全てのテーブルに付与される）
      * $qb->column('table1 t1, table2 t2, table3 t3')->where(['*.delete_flg' => 0]); // WHERE (t1.delete_flg = 0) AND (t2.delete_flg = 0) AND (t3.delete_flg = 0)
-     *
-     * # No.34（table1, table2, table3 から "hoge" でよしなに検索する）
-     * $qb->column('table1 t1, table2 t2, table3 t3')->where(['*.*' => 'hoge']); // テーブル定義次第だが、全テーブルのあらゆるテキスト系カラムで LIKE "%hoge%" される
-     * $qb->column('table1 t1, table2 t2, table3 t3')->where(['t2.*' => 'hoge']); // "*.*" ではなく "エイリアス名.*" とすると全テーブルではなく指定したものだけよしなにされる
      *
      * # No.40（仮想カラムを指定。仮想カラムは「親に紐づく子供の COUNT」とする）
      * $qb->column('t_parent')->where(['t_parent.child_count' => 0]); // WHERE (SELECT COUNT(*) FROM t_child WHERE (t_child.parent_id = t_parent.id)) = 0

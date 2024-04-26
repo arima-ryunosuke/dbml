@@ -38,7 +38,6 @@ use function ryunosuke\dbml\fnmatch_or;
  *
  * setTableColumn でスキーマの型やメタ情報を変更・追加することが出来る。
  * 設定されているスキーマ・メタ情報は `getTableColumnMetadata` メソッドで取得することができる。
- * （ただし、現在のところこのメタ情報を活用している機能は非常に少なく、実質 anywhere のみ）。
  */
 class Schema
 {

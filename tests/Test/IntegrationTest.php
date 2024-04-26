@@ -247,14 +247,6 @@ class IntegrationTest extends AbstractUnitTestCase
             'delete_at'  => null,
         ], $database->t_article->as('A')->select('!', $pk)->tuple());
 
-        $where = (string) $database->t_article->where([
-            '*' => 'aaa',
-        ]);
-        // vcolumn で collate を指定してるので含まれる
-        $this->assertStringContainsString('t_article.title collate utf8_bin LIKE', $where);
-        // vcolumn で type: simple_array にしているので含まれない
-        $this->assertStringNotContainsString('t_article.checks LIKE', $where);
-
         $database->setAutoCastType([]);
     }
 

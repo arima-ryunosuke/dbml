@@ -1718,66 +1718,6 @@ AND
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
-    function test_wheres_anytable($builder)
-    {
-        // クエリビルダは無視されるはずなのでその検証用
-        $builder->from($builder->getDatabase()->select('t_article T'));
-        $builder->addColumn('t_article A+t_comment C')->where([
-            'A.article_id' => 9,
-        ]);
-
-        // *.* で JOIN されているすべてのテーブル
-        $t = clone $builder;
-        $t->andWhere([
-            '*.*' => 'hoge',
-        ]);
-        $this->assertEquals([
-            '0'    => 'A.article_id = ?',
-            'AND1' => '(/* anywhere */ A.title collate utf8_bin LIKE ?) OR (/* anywhere */ C.comment LIKE ?)',
-        ], $t->getQueryPart('where'));
-        $this->assertEquals([9, '%hoge%', '%hoge%'], $t->getParams());
-
-        // * も同じ
-        $t = clone $builder;
-        $t->andWhere([
-            '*' => 'hoge',
-        ]);
-        $this->assertEquals([
-            '0'    => 'A.article_id = ?',
-            'AND1' => '(/* anywhere */ A.title collate utf8_bin LIKE ?) OR (/* anywhere */ C.comment LIKE ?)',
-        ], $t->getQueryPart('where'));
-        $this->assertEquals([9, '%hoge%', '%hoge%'], $t->getParams());
-
-        // A.* で A だけ
-        $t = clone $builder;
-        $t->andWhere([
-            'A.*' => 'hoge',
-        ]);
-        $this->assertEquals([
-            '0'    => 'A.article_id = ?',
-            'AND1' => '/* anywhere */ A.title collate utf8_bin LIKE ?',
-        ], $t->getQueryPart('where'));
-        $this->assertEquals([9, '%hoge%'], $t->getParams());
-
-        // [[]] でも AND にはならない
-        $t = clone $builder;
-        $t->andWhere([
-            [
-                'A.*' => 'hoge',
-                'C.*' => 'hoge',
-            ],
-        ]);
-        $this->assertEquals([
-            '0'    => 'A.article_id = ?',
-            'AND1' => '(/* anywhere */ A.title collate utf8_bin LIKE ?) OR (/* anywhere */ C.comment LIKE ?)',
-        ], $t->getQueryPart('where'));
-        $this->assertEquals([9, '%hoge%', '%hoge%'], $t->getParams());
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
-     */
     function test_wheres_anycolumn($builder)
     {
         // クエリビルダは無視されるはずなのでその検証用
