@@ -3334,7 +3334,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *
      * @return Paginator Paginator オブジェクト
      */
-    public function paginate($currentpage = null, $countperpage = null, $shownpage = null)
+    public function paginate($currentpage = null, $countperpage = null)
     {
         $p = new Paginator($this);
         if (func_num_args()) {
@@ -3352,7 +3352,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *
      * @return Sequencer
      */
-    public function sequence($condition, $count, $orderbyasc = true, $bidirection = true)
+    public function sequence($condition, $count, $orderbyasc = true)
     {
         $p = new Sequencer($this);
         if (func_num_args()) {
@@ -3400,8 +3400,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $sequencer = new Sequencer($this);
         $items = [];
         do {
-            $n = end($items)[$column] ?? 0;
-            $sequencer->sequence([$column => $n], $chunk, $orderasc, null);
+            $n = end($items)[$column] ?? null;
+            $sequencer->sequence([$column => $n], $chunk, $orderasc);
             $items = $sequencer->getItems();
             yield from $items;
         } while ($items);

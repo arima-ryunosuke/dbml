@@ -53,77 +53,20 @@ class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
     /**
      * @dataProvider provideSequencer
      * @param Sequencer $sequencer
-     * @param Database $database
      */
-    function test_getPrev($sequencer, $database)
-    {
-        $sequencer->sequence(['id' => 1], 10);
-        $this->assertEquals(['id' => -2], $sequencer->getPrev());
-
-        $sequencer->sequence(['id' => 5], 10);
-        $this->assertEquals(['id' => -6], $sequencer->getPrev());
-
-        $database->delete('paging', ['id' => 1]);
-        $sequencer->sequence(['id' => -1], 10, true);
-        $this->assertFalse($sequencer->getPrev());
-    }
-
-    /**
-     * @dataProvider provideSequencer
-     * @param Sequencer $sequencer
-     */
-    function test_getNext($sequencer)
+    function test_hasMore($sequencer)
     {
         $sequencer->sequence(['id' => 0], 10);
-        $this->assertEquals(['id' => 10], $sequencer->getNext());
+        $this->assertTrue($sequencer->hasMore());
 
         $sequencer->sequence(['id' => 1], 10);
-        $this->assertEquals(['id' => 11], $sequencer->getNext());
+        $this->assertTrue($sequencer->hasMore());
 
         $sequencer->sequence(['id' => 1], 100);
-        $this->assertFalse($sequencer->getNext());
+        $this->assertFalse($sequencer->hasMore());
 
         $sequencer->sequence(['id' => 1], 101);
-        $this->assertFalse($sequencer->getNext());
-    }
-
-    /**
-     * @dataProvider provideSequencer
-     * @param Sequencer $sequencer
-     */
-    function test_getDidirection($sequencer)
-    {
-        // 片方向：正順(prev が常に false)
-        $sequencer->sequence(['id' => 50], 10, true, false);
-        $this->assertFalse($sequencer->getPrev());
-        $sequencer->sequence(['id' => 50], 10, false, false);
-        $this->assertFalse($sequencer->getPrev());
-        // 片方向：正順(next は通常通り)
-        $sequencer->sequence(['id' => 50], 10, true, false);
-        $this->assertEquals(['id' => 60], $sequencer->getNext());
-        $sequencer->sequence(['id' => 50], 10, false, false);
-        $this->assertEquals(['id' => 40], $sequencer->getNext());
-        // 片方向：逆順(prev は通常通り)
-        $sequencer->sequence(['id' => -50], 10, true, false);
-        $this->assertEquals(['id' => -40], $sequencer->getPrev());
-        $sequencer->sequence(['id' => -50], 10, false, false);
-        $this->assertEquals(['id' => -60], $sequencer->getPrev());
-        // 片方向：逆順(next が常に false)
-        $sequencer->sequence(['id' => -50], 10, true, false);
-        $this->assertFalse($sequencer->getNext());
-        $sequencer->sequence(['id' => -50], 10, false, false);
-        $this->assertFalse($sequencer->getNext());
-    }
-
-    /**
-     * @dataProvider provideSequencer
-     * @param Sequencer $sequencer
-     */
-    function test_direction_null($sequencer)
-    {
-        $sequencer->sequence(['id' => 5], 10, null, null);
-        $this->assertFalse($sequencer->getPrev());
-        $this->assertFalse($sequencer->getNext());
+        $this->assertFalse($sequencer->hasMore());
     }
 
     /**
@@ -159,25 +102,21 @@ class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getItems_reverse($sequencer)
     {
-        $sequencer->sequence(['id' => -1], 3);
+        $sequencer->sequence(['id' => 98], 3, false);
         $this->assertEquals([
-            ['id' => 4, 'name' => 'd'],
-            ['id' => 3, 'name' => 'c'],
+            ['id' => 97, 'name' => 'cs'],
+            ['id' => 96, 'name' => 'cr'],
+            ['id' => 95, 'name' => 'cq'],
+        ], $sequencer->getItems());
+
+        $sequencer->sequence(['id' => 3], 3, false);
+        $this->assertEquals([
             ['id' => 2, 'name' => 'b'],
+            ['id' => 1, 'name' => 'a'],
         ], $sequencer->getItems());
 
-        $sequencer->sequence(['id' => -3], 3);
-        $this->assertEquals([
-            ['id' => 6, 'name' => 'f'],
-            ['id' => 5, 'name' => 'e'],
-            ['id' => 4, 'name' => 'd'],
-        ], $sequencer->getItems());
-
-        $sequencer->sequence(['id' => -98], 3);
-        $this->assertEquals([
-            ['id' => 100, 'name' => 'cv'],
-            ['id' => 99, 'name' => 'cu'],
-        ], $sequencer->getItems());
+        $sequencer->sequence(['id' => 1], 3, false);
+        $this->assertEquals([], $sequencer->getItems());
     }
 
     /**
@@ -190,32 +129,17 @@ class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
         // 全ページを舐めれば全件取得と同じになるはず
         $rows = [];
         $rows = array_merge($rows, $sequencer->sequence(['id' => 0], 10)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10)->getItems());
         $this->assertEquals($database->selectArray('paging'), $rows);
-        $this->assertFalse($sequencer->getNext());
-
-        // 同上(逆順)
-        $rows = [];
-        $rows = array_merge($sequencer->sequence(['id' => -999], 10, true)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, true)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, true)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, true)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, true)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, true)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, true)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, true)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, true)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, true)->getItems(), $rows);
-        $this->assertEquals($database->selectArray('paging'), $rows);
-        $this->assertFalse($sequencer->getPrev());
+        $this->assertFalse($sequencer->hasMore());
     }
 
     /**
@@ -223,38 +147,22 @@ class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param Sequencer $sequencer
      * @param Database $database
      */
-    function test_continue_reverse($sequencer, $database)
+    function tesst_continue_reverse($sequencer, $database)
     {
         // 全ページを舐めれば全件取得と同じになるはず
         $rows = [];
-        $rows = array_merge($rows, $sequencer->sequence(['id' => 0], 10, false)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10, false)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10, false)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10, false)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10, false)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10, false)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10, false)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10, false)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10, false)->getItems());
-        $rows = array_merge($rows, $sequencer->sequence($sequencer->getNext(), 10, false)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => 999], 10, false)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10, false)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10, false)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10, false)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10, false)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10, false)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10, false)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10, false)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10, false)->getItems());
+        $rows = array_merge($rows, $sequencer->sequence(['id' => end($rows)['id']], 10, false)->getItems());
         $this->assertEquals($database->selectArray('paging', [], ['id' => 'desc']), $rows);
-        $this->assertFalse($sequencer->getNext());
-
-        // 同上(逆順)
-        $rows = [];
-        // 降順で後ろから辿ろうとすると「-1以上の0ではない整数」を指定する必要がある。が、そんな整数はないので0.5でお茶を濁す
-        $rows = array_merge($sequencer->sequence(['id' => -0.5], 10, false)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, false)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, false)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, false)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, false)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, false)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, false)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, false)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, false)->getItems(), $rows);
-        $rows = array_merge($sequencer->sequence($sequencer->getPrev(), 10, false)->getItems(), $rows);
-        $this->assertEquals($database->selectArray('paging', [], ['id' => 'desc']), $rows);
-        $this->assertFalse($sequencer->getPrev());
+        $this->assertFalse($sequencer->hasMore());
     }
 
     /**

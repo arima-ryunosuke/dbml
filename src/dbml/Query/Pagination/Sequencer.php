@@ -49,14 +49,8 @@ class Sequencer implements \IteratorAggregate, \Countable
     /** @var bool 昇順/降順 */
     private $order;
 
-    /** @var bool 双方向サポート */
-    private $bidirection;
-
-    /** @var mixed 前の要素 */
-    private $prev;
-
-    /** @var mixed 次の要素 */
-    private $next;
+    /** @var bool 次の要素 */
+    private $more;
 
     /**
      * コンストラクタ
@@ -68,44 +62,20 @@ class Sequencer implements \IteratorAggregate, \Countable
         $this->builder = $builder;
         $this->setProvider(function () {
             [$key, $value] = first_keyvalue($this->condition);
-            $order = !($value >= 0 xor $this->order);
-            $bind = intval(abs($value)) ?: '';
             $currentby = $this->builder->getQueryPart('orderBy');
-
-            // 補足行を取得
-            $appendix = false;
-            if ($this->bidirection === true) {
-                $appender = clone $this->builder;
-                $appender->andWhere(["!$key " . (!$order ? '>= ?' : '<= ?') => $bind]);
-                $appender->orderBy([$key => !$order] + $currentby);
-                $appender->limit(1, 0);
-                $appendix = $appender->array();
-            }
 
             // アイテムを取得
             $provider = clone $this->builder;
-            $provider->andWhere(["!$key " . ($order ? '> ?' : '< ?') => $bind]);
-            $provider->orderBy([$key => $order] + $currentby);
-            $provider->limit($this->count + ($this->bidirection === null ? 0 : 1), 0);
+            $provider->andWhere(["!$key " . ($this->order ? '> ?' : '< ?') => $value]);
+            $provider->orderBy([$key => $this->order] + $currentby);
+            $provider->limit($this->count + 1, 0);
             $items = $provider->array();
 
-            // 昇順・降順・正順・逆順に基づいて prev/next を設定
-            if ($this->bidirection !== null) {
-                $garbage = count($items) > $this->count ? array_pop($items) : false;
-                if ($value >= 0) {
-                    // $items が無い場合は 0 になって頭から始まってしまうので $appendix + 1 にする
-                    $last = end($items);
-                    $last = $last === false ? [] : $last;
-                    $this->prev = $appendix && $value ? [$key => (reset($items)[$key] ?: reset($appendix)[$key] + 1) * -1] : false;
-                    $this->next = $garbage ? [$key => $last[$key] ?? null] : false;
-                }
-                else {
-                    $items = array_reverse($items);
-                    $last = end($items);
-                    $last = $last === false ? [] : $last;
-                    $this->prev = $garbage && $value ? [$key => reset($items)[$key] * -1] : false;
-                    $this->next = $appendix ? [$key => $last[$key] ?? null] : false;
-                }
+            // 1件多く取っているので指定件数以上なら「次がある」になる
+            $this->more = false;
+            if ($this->count < count($items)) {
+                array_pop($items);
+                $this->more = true;
             }
 
             return $items;
@@ -115,24 +85,21 @@ class Sequencer implements \IteratorAggregate, \Countable
     /**
      * 読み取り範囲を設定する
      *
-     * $condition は UNSIGNED な INT カラムを1つだけ含む配列である必要がある。なぜならば
+     * $condition は SIGNED な INT カラムを1つだけ含む配列である必要がある。なぜならば
      *
-     * - 負数は降順として表現される
      * - 2つ以上のタプルの大小関係定義が困難
      *
      * が理由（大抵の場合 AUTO INCREMENT だろうから負数だったりタプルだったりは考慮しないことにする）。
      *
      * @param array $condition シーク条件として使用する [カラム => 値]（大抵は主キー、あるいはインデックスカラム）
      * @param int $count 読み取り行数
-     * @param bool|null $orderbyasc 昇順/降順。 null を渡すと $condition の符号に応じて自動判別する
-     * @param bool|null $bidirection 双方向サポート。双方向だと2クエリ投げられる。 null を渡すと指定数以上取らない（ただし内部仕様）
+     * @param bool $orderbyasc 昇順/降順
      * @return $this 自分自身
      */
-    public function sequence($condition, $count, $orderbyasc = null, $bidirection = true)
+    public function sequence($condition, $count, $orderbyasc = true)
     {
         // 再生成のために null っとく
-        $this->prev = false;
-        $this->next = false;
+        $this->more = false;
         $this->resetResult();
 
         // シーク条件は1つしかサポートしない(タプルの大小比較は動的生成がとてつもなくめんどくさい。行値式が使えれば別だが…)
@@ -147,8 +114,7 @@ class Sequencer implements \IteratorAggregate, \Countable
 
         $this->condition = $condition;
         $this->count = $count;
-        $this->order = $orderbyasc === null ? reset($condition) >= 0 : !!$orderbyasc;
-        $this->bidirection = $bidirection;
+        $this->order = $orderbyasc;
 
         return $this;
     }
@@ -164,28 +130,15 @@ class Sequencer implements \IteratorAggregate, \Countable
     }
 
     /**
-     * 前以前が存在するならそれを、無いなら false を返す
+     * 次アイテムが存在するかを返す
      *
-     * @return array|false 前レコードが存在するならその配列、無いなら false
+     * @return bool 次アイテムが存在するか
      */
-    public function getPrev()
+    public function hasMore()
     {
         // クエリを投げないと分からないため、呼んでおく必要がある
         $this->getItems();
 
-        return $this->prev;
-    }
-
-    /**
-     * 次以降が存在するならそれを、無いなら false を返す
-     *
-     * @return array|false 次レコードが存在するならその配列、無いなら false
-     */
-    public function getNext()
-    {
-        // クエリを投げないと分からないため、呼んでおく必要がある
-        $this->getItems();
-
-        return $this->next;
+        return $this->more;
     }
 }

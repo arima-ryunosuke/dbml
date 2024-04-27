@@ -46,9 +46,6 @@ class Paginator implements \IteratorAggregate, \Countable
     /** @var int 現在ページ */
     private $page;
 
-    /** @var int 表示するページ数 */
-    private $shownPage;
-
     /**
      * コンストラクタ
      *
@@ -68,10 +65,9 @@ class Paginator implements \IteratorAggregate, \Countable
      *
      * @param int $currentpage 現在ページ数。1ベース
      * @param int $countperpage 1ページ内のアイテム数
-     * @param ?int $shownpage 表示するページ数。奇数が望ましい。省略時全ページ表示
      * @return $this 自分自身
      */
-    public function paginate($currentpage, $countperpage, $shownpage = null)
+    public function paginate($currentpage, $countperpage)
     {
         $this->resetResult();
 
@@ -86,8 +82,6 @@ class Paginator implements \IteratorAggregate, \Countable
         $this->page = intval($currentpage - 1);
 
         $this->builder->limit($countperpage, $this->page * $countperpage);
-
-        $this->shownPage = $shownpage; // for compatible
 
         return $this;
     }
@@ -117,12 +111,12 @@ class Paginator implements \IteratorAggregate, \Countable
      *
      * 総数が0の時は0を返す
      *
-     * @return int 最初のインデックス
+     * @return ?int 最初のインデックス
      */
     public function getFirst()
     {
         if ($this->getTotal() === 0) {
-            return 0;
+            return null;
         }
         return $this->builder->getQueryPart('offset') + 1;
     }
@@ -132,12 +126,12 @@ class Paginator implements \IteratorAggregate, \Countable
      *
      * 総数が0の時は0を返す
      *
-     * @return int 最後のインデックス
+     * @return ?int 最後のインデックス
      */
     public function getLast()
     {
         if ($this->getTotal() === 0) {
-            return 0;
+            return null;
         }
         return $this->getFirst() + count($this->getItems()) - 1;
     }
@@ -163,8 +157,6 @@ class Paginator implements \IteratorAggregate, \Countable
      */
     public function getPageRange($shownPage = null)
     {
-        $shownPage ??= $this->shownPage;
-
         $pagecount = $this->getPageCount();
         if ($shownPage === null) {
             return range(1, $pagecount);

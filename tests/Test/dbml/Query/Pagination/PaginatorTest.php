@@ -41,14 +41,14 @@ class PaginatorTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_paginate($paginator, $database)
     {
         $database->delete('paging', []);
-        $paginator->paginate(2, 9, 5);
-        $this->assertEquals(0, $paginator->getFirst());
-        $this->assertEquals(0, $paginator->getLast());
-        $this->assertEquals(0, $paginator->getTotal());
-        $this->assertEquals(0, $paginator->getPageCount());
-        $this->assertEquals([], $paginator->getPageRange());
+        $paginator->paginate(2, 9);
+        $this->assertSame(null, $paginator->getFirst());
+        $this->assertSame(null, $paginator->getLast());
+        $this->assertSame(0, $paginator->getTotal());
+        $this->assertSame(0, $paginator->getPageCount());
+        $this->assertSame([], $paginator->getPageRange(5));
 
-        $this->assertException(new \InvalidArgumentException('must be positive number'), L($paginator)->paginate(2, 0, 5));
+        $this->assertException(new \InvalidArgumentException('must be positive number'), L($paginator)->paginate(2, 0));
     }
 
     /**
@@ -110,14 +110,14 @@ class PaginatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertSame(range(1, 12), $paginator->getPageRange());
 
         // $shownpage を指定すれば指定分のはず
-        $paginator->paginate(2, 9, 5);
-        $this->assertSame(range(1, 5), $paginator->getPageRange());
+        $paginator->paginate(2, 9);
+        $this->assertSame(range(1, 5), $paginator->getPageRange(5));
         $this->assertSame(range(1, 3), $paginator->getPageRange(3));
 
         // 1ページしか表示しないなら最初のページだけのはず
-        $this->assertSame([2], $paginator->paginate(2, 9, 1)->getPageRange());
-        $this->assertSame([3], $paginator->paginate(3, 9, 1)->getPageRange());
-        $this->assertSame([4], $paginator->paginate(4, 9, 1)->getPageRange(1));
+        $this->assertSame([2], $paginator->paginate(2, 9)->getPageRange(1));
+        $this->assertSame([3], $paginator->paginate(3, 9)->getPageRange(1));
+        $this->assertSame([4], $paginator->paginate(4, 9)->getPageRange(1));
     }
 
     /**
@@ -134,7 +134,7 @@ class PaginatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(12, $paginator->getPageCount());
 
         // $shownpage に関わらず 12 ページ固定のはず
-        $paginator->paginate(2, 9, 5);
+        $paginator->paginate(2, 9);
         $this->assertEquals(12, $paginator->getPageCount());
 
         // 12 ページはセーフだが 13 ページは例外

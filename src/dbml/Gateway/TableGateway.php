@@ -2287,7 +2287,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc QueryBuilder::paginate()
      */
-    public function paginate($currentpage = null, $countperpage = null, $shownpage = null)
+    public function paginate($currentpage = null, $countperpage = null)
     {
         return $this->select()->paginate(...func_get_args());
     }
@@ -2299,7 +2299,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc QueryBuilder::sequence()
      */
-    public function sequence($condition, $count, $orderbyasc = true, $bidirection = true)
+    public function sequence($condition, $count, $orderbyasc = true)
     {
         return $this->select()->sequence(...func_get_args());
     }
