@@ -20,9 +20,38 @@
 
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
-- TableGateway の column/where などを個別メソッド化する（可変引数などに対応できていないので）
-- returning 句に対応したい
-- AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
+
+## 3.0.0
+
+- [change] php>=8.0
+- [*change] 古い仕様・互換用の仕様を廃止
+  - 一部のクラス名・メソッド名を変更
+  - 暗黙の外部キーの affected rows は結果に含めない
+  - update,delete,invalid が完全に外部キーを見るようになった
+  - upsert が「存在チェックしてから insert/update」という挙動から「insert してダメなら update」という挙動になった
+  - dryrun は常に文字列配列を返すようになった
+  - insertArray が主キー配列を返せるようになった
+  - orderByPrimary -> OrderBy::primary()
+  - orderBySecure -> OrderBy::secure()
+  - orderByRandom -> OrderBy::random()
+  - Conditionally トレイトの廃止
+  - Prepare トレイトの廃止
+  - クエリビルダ書き換えによる型キャストを廃止
+  - mysql の FoundRows サポートを廃止
+  - 存在するカラムの時は単一値クロージャになる仕様を廃止
+  - PDO の特別扱いを廃止
+  - yamlParser を廃止
+  - getAnnotation の廃止
+  - injectCallStack を廃止
+  - anywhere を廃止
+  - autoOrder を廃止
+  - orderByPhp の仕様を廃止
+  - QueryBuilder を affect 系の SET や JOIN に流用する仕様を廃止
+  - column 以外のスラッシュネスト仕様を廃止
+  - Paginator が0件の時の first/last を null に変更
+  - Sequencer の双方向サポートを廃止
+  - Sequencer の負数降順を廃止
+  - Sequencer の has メソッド改名
 
 ## 2.1.18
 
