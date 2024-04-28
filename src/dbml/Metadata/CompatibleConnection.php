@@ -103,6 +103,21 @@ class CompatibleConnection
         return self::$storage[$this->connection][__FUNCTION__] = true;
     }
 
+    public function isEmulationMode(): bool
+    {
+        if (!$this->driverConnection instanceof Driver\PDO\Connection) {
+            return false;
+        }
+
+        // driver ごとにエミュレーションサポートが異なる上、全ては調べてられないので実際に取得してダメだったら false とする
+        try {
+            return $this->nativeConnection->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
+        }
+        catch (\PDOException) {
+            return false;
+        }
+    }
+
     public function getSupportedMetadata(): array
     {
         if (isset(self::$storage[$this->connection][__FUNCTION__])) {

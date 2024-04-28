@@ -1907,121 +1907,6 @@ class Database
     }
 
     /**
-     * トランザクション接続の PDO を返す
-     *
-     * トランザクション接続とは基本的に「マスター接続」を指す。
-     * シングルコネクション環境なら気にしなくて良い。
-     *
-     * @return \PDO PDO オブジェクト
-     */
-    public function getPdo()
-    {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return $this->getConnection()->getNativeConnection();
-    }
-
-    /**
-     * マスター接続の PDO を返す
-     *
-     * @return \PDO PDO オブジェクト
-     */
-    public function getMasterPdo()
-    {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return $this->getMasterConnection()->getNativeConnection();
-    }
-
-    /**
-     * スレーブ接続の PDO を返す
-     *
-     * @return \PDO PDO オブジェクト
-     */
-    public function getSlavePdo()
-    {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return $this->getSlaveConnection()->getNativeConnection();
-    }
-
-    /**
-     * PDO の属性を変更する
-     *
-     * 返り値として「元に戻すためのクロージャ」を返す。
-     * この返り値をコールすれば変更した属性を元に戻すことができる。
-     *
-     * 属性によってはコンストラクタでしか受け付けてくれないものがあるので注意。
-     *
-     * ```php
-     * # 一時的に PDO のエラーモードを SILENT にする
-     * $restore = $db->setPdoAttribute([\PDO::ATTR_ERRMODE => \PDO::ERRMODE_SILENT]);
-     *
-     * # 返り値のクロージャを呼ぶと元に戻る
-     * $restore();
-     * ```
-     *
-     * @param array $attributes 設定する属性のペア配列
-     * @param array|string|null $target "master" か "slave" でそちら側のみ変更する。未指定/null で両方変更する
-     * @return \Closure 元に戻すためのクロージャ
-     */
-    public function setPdoAttribute($attributes, $target = null)
-    {
-        if ($target === null) {
-            $target = ['master', 'slave'];
-        }
-        $target = (array) $target;
-
-        $masterPdo = $this->getMasterPdo();
-        $slavePdo = $this->getSlavePdo();
-
-        /** @var \PDO[] $pdos */
-        $pdos = [];
-        if ($masterPdo === $slavePdo) {
-            $pdos['master'] = $masterPdo;
-        }
-        else {
-            $pdos['master'] = $masterPdo;
-            $pdos['slave'] = $slavePdo;
-        }
-
-        $backup = [];
-        foreach ($target as $type) {
-            if (isset($pdos[$type])) {
-                foreach ($attributes as $name => $value) {
-                    $backup[$type][$name] = $pdos[$type]->getAttribute($name);
-                    $pdos[$type]->setAttribute($name, $value);
-                }
-            }
-        }
-
-        return function () use ($pdos, $backup) {
-            foreach ($backup as $type => $attrs) {
-                foreach ($attrs as $name => $value) {
-                    $pdos[$type]->setAttribute($name, $value);
-                }
-            }
-        };
-    }
-
-    /**
-     * PDO の prepare がエミュレーションモードかを返す
-     *
-     * @return bool エミュレーションモードなら true
-     */
-    public function isEmulationMode()
-    {
-        if (!$this->getPdo() instanceof \PDO) {
-            return false;
-        }
-
-        // driver ごとにエミュレーションサポートが異なる上、全ては調べてられないので実際に取得してダメだったら true とする
-        try {
-            return !!$this->getPdo()->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
-        }
-        catch (\PDOException) {
-            return true;
-        }
-    }
-
-    /**
      * {@link AbstractPlatform dbal のプラットフォーム}を取得する
      *
      * @return AbstractPlatform dbal プラットフォーム
@@ -5449,7 +5334,7 @@ class Database
 
         // modifyArray や prepareModify が使えるか
         $bulkable = array_get($opt, 'bulk', true) && $cplatform->supportsBulkMerge();
-        $preparable = !$dryrun && array_get($opt, 'prepare', true) && $cplatform->supportsMerge() && !$this->isEmulationMode();
+        $preparable = !$dryrun && array_get($opt, 'prepare', true) && $cplatform->supportsMerge() && !$this->getCompatibleConnection()->isEmulationMode();
 
         // カラムの種類でグルーピングする
         $primaries = [];

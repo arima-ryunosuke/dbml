@@ -83,19 +83,6 @@ namespace ryunosuke\Test {
             }
         }
 
-        /**
-         * カバレッジ確保のためにテスト中は常にエミュレーションOFFとする
-         *
-         * @inheritdoc
-         */
-        public function isEmulationMode($delegate_original = false)
-        {
-            if ($delegate_original) {
-                return parent::isEmulationMode();
-            }
-            return false;
-        }
-
         public function executeAffect($query, iterable $params = [], ?int $retry = null)
         {
             $this->is_dirty = true;
