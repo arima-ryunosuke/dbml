@@ -920,6 +920,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     function test_declareCommonTable($database)
     {
         $database->refresh();
+        $database->recache();
 
         $database->declareCommonTable([
             'fibonacci(n0, n)' => 'select 0, 1 union all select n, n0 + n from fibonacci WHERE n < 50',
@@ -3102,26 +3103,6 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertInstanceOf(Schema\Column::class, $database->describe('t_article.article_id'));
         $this->assertInstanceOf(Schema\Index::class, $database->describe('t_article.secondary'));
         $this->assertException('undefined schema object', L($database)->describe('hogera'));
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_getAnnotation($database)
-    {
-        $annotation = $database->getAnnotation();
-        $this->assertStringContainsString('$t_article', $annotation);
-        $this->assertStringContainsString('$Comment', $annotation);
-        $this->assertStringContainsString(\ryunosuke\dbml\Gateway\TableGateway::class, $annotation);
-        $this->assertStringContainsString(\ryunosuke\Test\Gateway\Article::class, $annotation);
-        $this->assertStringContainsString(\ryunosuke\Test\Gateway\Comment::class, $annotation);
-
-        $annotation = $database->getAnnotation(['t_article', 'Comment']);
-        $this->assertStringNotContainsString('$t_article', $annotation);
-        $this->assertStringNotContainsString('$Comment', $annotation);
-
-        $this->assertNull($database->getAnnotation('*'));
     }
 
     /**

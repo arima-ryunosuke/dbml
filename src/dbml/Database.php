@@ -1506,41 +1506,6 @@ class Database
     }
 
     /**
-     * コード補完用のアノテーションコメントを取得する
-     *
-     * 存在するテーブル名や tableMapper を利用してアノテーションコメントを作成する。
-     * このメソッドで得られたコメントを基底クラスなどに貼り付ければ補完が効くようになる。
-     *
-     * @param string|array 除外テーブル名（fnmatch で除外される）
-     * @return string アノテーションコメント
-     */
-    public function getAnnotation($ignore = [])
-    {
-        $classess = [];
-        foreach ($this->getSchema()->getTableNames() as $tname) {
-            $ename = $this->convertEntityName($tname);
-            if ($ignore && fnmatch_or($ignore, $tname)) {
-                continue;
-            }
-            $classess[$tname] = '\\' . get_class($this->$tname);
-            if ($ignore && fnmatch_or($ignore, $ename)) {
-                continue;
-            }
-            $classess[$ename] = '\\' . get_class($this->$ename);
-        }
-        if (!$classess) {
-            return null;
-        }
-        $maxlen = max(array_map('strlen', $classess));
-        $result = [];
-        foreach ($classess as $name => $class) {
-            $result[] = sprintf("* @property %-{$maxlen}s \$%s", $class, $name);
-            $result[] = sprintf("* @method   %-{$maxlen}s %s", $class, $name) . '($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])';
-        }
-        return implode("\n", $result) . "\n";
-    }
-
-    /**
      * コード補完用のアノテーショントレイトを取得する
      *
      * 存在するテーブル名や tableMapper などを利用して mixin 用のトレイトを作成する。
