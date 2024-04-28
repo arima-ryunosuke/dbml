@@ -34,7 +34,6 @@ use function ryunosuke\dbml\array_flatten;
 use function ryunosuke\dbml\array_implode;
 use function ryunosuke\dbml\array_lookup;
 use function ryunosuke\dbml\array_maps;
-use function ryunosuke\dbml\array_order;
 use function ryunosuke\dbml\array_set;
 use function ryunosuke\dbml\array_sprintf;
 use function ryunosuke\dbml\array_strpad;
@@ -288,9 +287,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
     /** @var array JOIN 順 */
     private $joinOrders = [];
-
-    /** @var mixed|null php レイヤのソート順 */
-    private $phpOrders;
 
     /** @var array[] before/after フィルタ */
     private $applyments = [
@@ -2757,17 +2753,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             return $this->orderByPrimary($sort, true);
         }
 
-        // クロージャは行自体の比較関数
-        if ($sort instanceof \Closure) {
-            $this->phpOrders = $sort;
-        }
-        // 配列は ['column' => 'order'] 形式
-        elseif (is_array($sort)) {
-            // 空文字キーは特殊で php レイヤーのルールとみなす
-            if (isset($sort[''])) {
-                $this->phpOrders = $sort[''];
-                unset($sort['']);
-            }
+        if (is_array($sort)) {
             foreach ($sort as $col => $ord) {
                 if (is_int($col) && is_array($ord)) {
                     $this->addOrderBy($ord[0], $ord[1] ?? $order);
@@ -3118,7 +3104,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         // EXISTS だけなのでこの辺は全部不要
         $that->subbuilders = [];
         $that->callbacks = [];
-        $that->phpOrders = [];
         $that->caster = null;
 
         if ($affirmation) {
@@ -3161,7 +3146,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         // COUNT だけなのでこの辺は全部不要
         $that->subbuilders = [];
         $that->callbacks = [];
-        $that->phpOrders = [];
         $that->caster = null;
 
         if ($that->sqlParts['groupBy'] || $that->sqlParts['having']) {
@@ -3449,7 +3433,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function postselect($parents, $continuity = false)
     {
-        assert(!$continuity || ($continuity && $this->phpOrders === null), 'yield not support php order');
         assert(!$continuity || ($continuity && $this->applyments['before'] === null), 'yield not support before apply');
         assert(!$continuity || ($continuity && $this->applyments['after'] === null), 'yield not support after apply');
 
@@ -3527,16 +3510,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                         $parents[$n][$name] = $parents[$n][$name]->bindTo($row_class);
                     }
                 }
-            }
-        }
-
-        // orderphp
-        if ($this->phpOrders !== null) {
-            if ($this->phpOrders instanceof \Closure) {
-                uasort($parents, $this->phpOrders);
-            }
-            else {
-                $parents = array_order($parents, $this->phpOrders, true);
             }
         }
 
@@ -3978,11 +3951,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             $this->submethod = null;
             $this->subwhere = null;
             $this->emptyCondition = null;
-        }
-
-        // 同上（orderBy）
-        if ($queryPartName === 'orderBy') {
-            $this->phpOrders = null;
         }
 
         return $this->_dirty();

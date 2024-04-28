@@ -2257,66 +2257,6 @@ AND (FALSE)", $builder->queryInto());
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
-    function test_orderBy_php($builder)
-    {
-        $builder->column([
-            'test' => [
-                'id' => \Closure::fromCallable('intval'),
-                'name',
-            ],
-        ])->limit(3);
-
-        // orderBy
-        $builder->orderBy([
-            '' => [
-                'id' => [2, 1, 3],
-            ],
-        ]);
-        $this->assertSame([
-            1 => ['id' => 2, 'name' => 'b'],
-            0 => ['id' => 1, 'name' => 'a'],
-            2 => ['id' => 3, 'name' => 'c'],
-        ], $builder->array());
-
-        // クロージャで行ソート(array)
-        $builder->orderBy(function ($a, $b) { return $b['id'] - $a['id']; });
-        $this->assertSame([
-            2 => ['id' => 3, 'name' => 'c'],
-            1 => ['id' => 2, 'name' => 'b'],
-            0 => ['id' => 1, 'name' => 'a'],
-        ], $builder->array());
-
-        // ルールで列ソート(array)
-        $builder->orderBy(['' => ['id' => [2, 1, 3]]]);
-        $this->assertSame([
-            1 => ['id' => 2, 'name' => 'b'],
-            0 => ['id' => 1, 'name' => 'a'],
-            2 => ['id' => 3, 'name' => 'c'],
-        ], $builder->array());
-
-        // ルールで列ソート(pairs)
-        $builder->orderBy(['' => ['name' => ['b', 'a', 'c']]]);
-        $this->assertSame([
-            2 => 'b',
-            1 => 'a',
-            3 => 'c',
-        ], $builder->pairs());
-
-        $builder->column('test.name as name@string')->limit(3);
-
-        // クロージャで行ソート(lists)
-        $builder->orderBy(function ($a, $b) { return strcmp($b, $a); });
-        $this->assertSame([
-            2 => 'c',
-            1 => 'b',
-            0 => 'a',
-        ], $builder->lists());
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
-     */
     function test_orderBySecure($builder)
     {
         $builder->getDatabase()->declareVirtualTable('vt_test_orderBySecure', ['misctype']);
@@ -3069,12 +3009,10 @@ SQL
         $original = clone $builder;
         $builder->column([
             't_article' => [
-                'phpe'       => function () { },
                 't_comment'  => ['*'],
                 '+t_comment' => ['*'],
             ],
         ]);
-        $builder->orderBy(['' => function () { }]);
         $builder->hint('hint');
         $builder->lockForUpdate('SKIP');
         $builder->addSelectOption('SOP');
