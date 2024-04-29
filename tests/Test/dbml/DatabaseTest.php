@@ -751,20 +751,6 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         }
     }
 
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_parseYaml($database)
-    {
-        // パース可能
-        $this->assertEquals(['a', 'b', 'c'], $database->parseYaml('[a, b, c]', false));
-        $this->assertEquals((object) ['a' => 'A'], $database->parseYaml('{a: A}', false));
-        $this->assertEquals(['a' => 1, 'b' => 2], $database->parseYaml('[a: 1, b: 2]', false));
-        // 不正なシンタックス
-        $this->assertException('syntax error', L($database)->parseYaml('[a,b,c', false));
-    }
-
     function test_setLogger()
     {
         $configuration = new Configuration();

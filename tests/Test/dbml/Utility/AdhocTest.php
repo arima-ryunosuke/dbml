@@ -6,6 +6,7 @@ use Doctrine\DBAL\ParameterType;
 use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\Test\IntEnum;
 use ryunosuke\Test\StringEnum;
+use function ryunosuke\dbml\cacheobject;
 
 class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -63,6 +64,24 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
                 \PDO::ATTR_ERRMODE          => \PDO::ERRMODE_EXCEPTION,
             ],
         ], Adhoc::parseParams(['url' => 'mysql+8.1.2://U:P@127.0.0.1:3306/dbname?charset=utfmb4&socket=tmp.socket#PDO::ATTR_TIMEOUT=2345&PDO::ATTR_ERRMODE=PDO::ERRMODE_EXCEPTION'] + $params));
+    }
+
+    function test_cacheByHash()
+    {
+        $cacheobject = cacheobject(sys_get_temp_dir() . '/cacheByHash');
+        $cacheobject->clear();
+        $called = 0;
+        $provider = static function () use (&$called) {
+            return ++$called;
+        };
+        $this->assertEquals(1, Adhoc::cacheByHash($cacheobject, 'hoge:1', $provider, 1));
+        $this->assertEquals(1, Adhoc::cacheByHash($cacheobject, 'hoge:1', $provider, 1));
+        sleep(2);
+        $this->assertEquals(2, Adhoc::cacheByHash($cacheobject, 'hoge:1', $provider, 1));
+        $this->assertEquals(3, Adhoc::cacheByHash($cacheobject, 'hoge:2', $provider, 1));
+
+        $this->assertEquals(null, Adhoc::cacheByHash($cacheobject, 'null', static fn() => null));
+        $this->assertCount(2, $cacheobject->keys());
     }
 
     function test_is_empty()

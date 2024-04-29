@@ -266,8 +266,6 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  *
  *     @param bool $bool length で切り落とすなら true
  * }
- * @method callable               getYamlParser()
- * @method $this                  setYamlParser($callable)
  * @method array                  getAutoCastType()
  * @nethod self                   setAutoCastType($array) 実際に定義している
  * @method bool                   getMasterMode()
@@ -534,8 +532,6 @@ class Database
             'convertNumericToDatetime'  => true,
             // insert 時などに文字列カラムは length で切るか否か
             'truncateString'            => false,
-            // 埋め込み条件の yaml パーサ
-            'yamlParser'                => function ($yaml) { return \ryunosuke\dbml\paml_import($yaml)[0]; },
             // DB型で自動キャストする型設定。select,affect 要素を持つ（多少無駄になるがサンプルも兼ねて冗長に記述してある）
             'autoCastType'              => [
                 // 正式な与え方。select は取得（SELECT）時、affect は設定（INSERT/UPDATE）時を表す
@@ -4320,29 +4316,24 @@ class Database
     {
         $params = Adhoc::bindableParameters($params);
 
-        /** @var CacheInterface $cacher */
-        $cacher = $this->getUnsafeOption('cacheProvider');
-
-        $queryid = $query . ':' . json_encode($params);
-        $cacheid = "Database-" . hash('fnv164', $queryid) . "-fetch";
-
-        $cache = $cacher->get($cacheid) ?? [];
-        if (array_key_exists($queryid, $cache)) {
-            return new Result(new ArrayResult($cache[$queryid]['data'], $cache[$queryid]['meta']), $this->getSlaveConnection());
-        }
-
         // コンテキストを戻すための try～catch
         try {
-            $result = $this->getSlaveConnection()->executeQuery($query, $params, Adhoc::bindableTypes($params));
-            if ($ttl !== 0) {
+            $result = null;
+            $cache = Adhoc::cacheByHash($this->getUnsafeOption('cacheProvider'), "$query:" . json_encode($params), function () use ($query, $params, $ttl, &$result) {
+                $result = $this->getSlaveConnection()->executeQuery($query, $params, Adhoc::bindableTypes($params));
+                if ($ttl === 0) {
+                    return null;
+                }
                 $cconnection = $this->getCompatibleConnection($this->getSlaveConnection());
-                $cache[$queryid] = [
+                $cache = [
                     'meta' => $cconnection->getMetadata($result),
                     'data' => $result->fetchAllNumeric(),
                 ];
-                $cacher->set($cacheid, $cache, $ttl);
                 $result->free();
-                $result = new Result(new ArrayResult($cache[$queryid]['data'], $cache[$queryid]['meta']), $this->getSlaveConnection());
+                return $cache;
+            }, $ttl);
+            if ($cache) {
+                return new Result(new ArrayResult($cache['data'], $cache['meta']), $this->getSlaveConnection());
             }
             return $result;
         }
@@ -6977,28 +6968,6 @@ class Database
     public function getAffectedRows()
     {
         return $this->affectedRows;
-    }
-
-    /**
-     * yaml 文字列をパースする
-     *
-     * @ignore
-     *
-     * @param string $yaml yaml 文字列
-     * @param bool $usecache キャッシュするか（テスト用）
-     * @return mixed yaml パース結果
-     */
-    public function parseYaml($yaml, $usecache = true)
-    {
-        static $cache = [];
-        if (!$usecache || !isset($cache[$yaml])) {
-            $result = $this->getUnsafeOption('yamlParser')($yaml);
-            if (is_string($result)) {
-                throw new \InvalidArgumentException("syntax error ($yaml)");
-            }
-            $cache[$yaml] = $result;
-        }
-        return $cache[$yaml];
     }
 
     /**

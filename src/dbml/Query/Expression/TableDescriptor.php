@@ -7,6 +7,7 @@ use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Query\Parser;
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_rekey;
 use function ryunosuke\dbml\array_set;
@@ -37,8 +38,8 @@ use function ryunosuke\dbml\str_between;
  * | (pkval)            | 任意 | 主キーの値を指定する
  * | @scope             | 任意 | 対応する Gateway がありかつ `scope` というスコープが定義されているならそのスコープを当てる（複数可）
  * | :fkeyname          | 任意 | JOIN に使用する外部キー名を指定する
- * | [condition]        | 任意 | 絞り込み条件を yaml で指定する（where 記法）
- * | {condition}        | 任意 | 絞り込み条件を yaml で指定する（カラム結合）
+ * | [condition]        | 任意 | 絞り込み条件を paml で指定する（where 記法）
+ * | {condition}        | 任意 | 絞り込み条件を paml で指定する（カラム結合）
  * | &lt;groupby&gt;    | 任意 | GROUP BY を指定する
  * | +order-by          | 任意 | ORDER BY を指定する
  * | #offset-limit      | 任意 | LIMIT, OFFSET を指定する
@@ -96,7 +97,7 @@ use function ryunosuke\dbml\str_between;
  *
  * #### [condition]
  *
- * テーブルのサフィックスとして yaml 記法で絞り込み条件を表す。
+ * テーブルのサフィックスとして paml 記法で絞り込み条件を表す。
  * 駆動表に設定されている場合はただの WHERE 条件として働く。
  * 結合表に設定されている場合は ON 条件として働く。
  *
@@ -104,7 +105,7 @@ use function ryunosuke\dbml\str_between;
  *
  * #### {condition}
  *
- * テーブルのサフィックスとして yaml 記法で絞り込み条件を表す。
+ * テーブルのサフィックスとして paml 記法で絞り込み条件を表す。
  *
  * - e.g. `tablename{selfid: otherid}` （`selfid = otherid` となる（カラムで結合する））
  *
@@ -172,7 +173,7 @@ use function ryunosuke\dbml\str_between;
  * 例えば `@scope(1, 2)` これは「引数つきスコープ」なのか「引数なしスコープの後に (pkval)が来ている」のか区別ができない。
  * 見た目的な意味（あたかも関数コールのように見えて美しい）でも (pkval) はテーブル名の直後に置くのが望ましい。
  *
- * また、 yaml の中にまでは言及しないため、 "#" や "@" 等がリテラル内にある場合は誤作動を引き起こす。
+ * また、 paml の中にまでは言及しないため、 "#" や "@" 等がリテラル内にある場合は誤作動を引き起こす。
  * 構文解析までするのは仰々しいため、仕方のない仕様として許容する。
  *
  * なお、**テーブル記法に決してユーザ入力を埋め込んではならない**。
@@ -518,11 +519,13 @@ class TableDescriptor
             $this->condition[] = $database->getCompatiblePlatform()->getPrimaryCondition($pvals, $this->accessor);
         }
         if ($condition1 !== null) {
-            $this->condition = array_merge($this->condition, $database->parseYaml(trim($condition1)));
+            $this->condition = array_merge($this->condition,
+                Adhoc::cacheByHash($database->getCacheProvider(), $condition1, fn($v) => paml_import($v)[0]),
+            );
         }
         if ($condition2 !== null) {
             $this->condition = array_merge($this->condition, [
-                (object) array_rekey((array) $database->parseYaml(trim($condition2)), function ($k, $v) {
+                (object) array_rekey((array) Adhoc::cacheByHash($database->getCacheProvider(), $condition2, fn($v) => paml_import($v)[0]), function ($k, $v) {
                     return is_int($k) ? $v : $k;
                 }),
             ]);

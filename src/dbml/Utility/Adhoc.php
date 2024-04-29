@@ -4,6 +4,7 @@ namespace ryunosuke\dbml\Utility;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Tools\DsnParser;
+use Psr\SimpleCache\CacheInterface;
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\QueryBuilder;
 use function ryunosuke\dbml\is_stringable;
@@ -67,6 +68,30 @@ class Adhoc
 
         unset($params['url']);
         return $params + (new DsnParser())->parse($url);
+    }
+
+    /**
+     * キャッシュに有ったらそれを、無かったら登録して返す
+     *
+     * @param CacheInterface $cacher
+     * @param string $key キー（任意の文字列が使える）
+     * @param \Closure $provider
+     * @return mixed キャッシュ or $provider の返り値
+     */
+    public static function cacheByHash(CacheInterface $cacher, string $key, \Closure $provider, ?int $ttl = null)
+    {
+        $cacheid = "Adhoc-" . hash('fnv164', $key . (new \ReflectionFunction($provider)));
+
+        $cache = $cacher->get($cacheid) ?? [];
+        if (!array_key_exists($key, $cache)) {
+            $result = $provider($key);
+            if ($result === null) {
+                return null;
+            }
+            $cache[$key] = $result;
+            $cacher->set($cacheid, $cache, $ttl);
+        }
+        return $cache[$key];
     }
 
     /**
