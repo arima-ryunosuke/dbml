@@ -7948,13 +7948,13 @@ ORDER BY T.id DESC, name ASC
         $select = $database->select([
             'test' => [
                 'id',
-                'name' => function ($name) { return $name . '-1'; },
+                'name' => function ($name = null) { return $name . '-1'; },
             ],
         ])->limit(1);
         $this->assertEquals([1 => 'a-1'], $select->pairs());
 
         $select = $database->select([
-            'test' => ['id' => function ($row) { return $row + 1; }],
+            'test' => ['id' => function ($id = null) { return $id + 1; }],
         ])->limit(1);
         $this->assertEquals([0 => 2], $select->lists());
     }

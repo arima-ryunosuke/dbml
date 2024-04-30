@@ -694,12 +694,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $accessor = $alias ?: $table;
         $prefix = $accessor ? $accessor . '.' : '';
 
-        $actuals = $schema->hasTable($table) ? array_each($schema->getTableColumns($table), function (&$carry, Column $col, $key) {
-            if (!($col->getPlatformOptions()['virtual'] ?? false)) {
-                $carry[$key] = $col;
-            }
-        }, []) : [];
-
         // '*' や '!nocol' は差分をとったり仮想カラムを追加したりしなければならないので事前処理が必要
         if ($schema->hasTable($table)) {
             $ignores = [];
@@ -879,46 +873,29 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
             // Closure は callbacks に入れる
             elseif ($column instanceof \Closure) {
-                [$colalias, $colactuals] = Alias::split($key, $key);
-                $params = (new \ReflectionFunction($column))->getParameters();
-                $defaults = array_map(fn(\ReflectionParameter $p) => $p->isDefaultValueAvailable() && is_string($p->getDefaultValue()) ? $p->getDefaultValue() : null, $params);
-                if (array_all($defaults, 'is_null')) {
-                    $colactuals = split_noempty(',', $colactuals);
-                }
-                else {
-                    $colactuals = $defaults;
-                }
                 $args = [];
-                foreach ($colactuals as $colactual) {
-                    if ($colactual === null) {
-                        $args[] = null;
-                        continue;
-                    }
-                    if (strpos($colactual, '.') !== false) {
-                        [$prefix, $colactual] = explode('.', $colactual, 2);
-                        $prefix .= '.';
-                    }
-                    if (isset($actuals[$colactual])) {
-                        if ($colalias === $colactual) {
-                            $result[] = $prefix . $colactual;
-                            $args[] = $colactual;
+                foreach ((new \ReflectionFunction($column))->getParameters() as $n => $param) {
+                    if ($param->isDefaultValueAvailable()) {
+                        if (is_null($param->getDefaultValue())) {
+                            $args[$n] = $key;
+                            $result[] = Alias::forge($args[$n], $key, $prefix);
+                        }
+                        elseif (is_string($param->getDefaultValue())) {
+                            [$modifier, $colname] = array_pad(explode('.', $param->getDefaultValue(), 2), -2, $accessor);
+                            $args[$n] = Database::AUTO_DEPEND_KEY . "{$modifier}___{$colname}";
+                            $result[] = Alias::forge($key, 'NULL');
+                            $result[] = Alias::forge($args[$n], "{$modifier}.{$colname}", $prefix);
                         }
                         else {
-                            $arg = Database::AUTO_DEPEND_KEY . $accessor . '_' . $colactual;
-                            $result[] = new Alias($arg, $prefix . $colactual);
-                            $args[] = $arg;
+                            throw new \InvalidArgumentException('Currently only ?string is allowed as default values.');
                         }
                     }
                     else {
-                        if ($args) {
-                            throw new \InvalidArgumentException('actual column and alias cannot be mixed.');
-                        }
+                        $args[$n] = null;
+                        $result[] = Alias::forge($key, 'NULL');
                     }
                 }
-                if (!isset($actuals[$colalias])) {
-                    $result[] = new Alias($colalias, 'NULL');
-                }
-                $this->callbacks[$colalias] = [$column, $args];
+                $this->callbacks[$key] = [$column, array_all($args, 'is_null') ? [] : $args];
             }
             // Expression なら文字列化したものをそのまま select
             elseif ($column instanceof Expression) {
@@ -1794,9 +1771,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * | 11 | `new Expression("NOW()")`                        | {@link Expression} を与えると一切加工せずそのまま文字列を表す
      * | 12 | `"NOW()"`                                        | 上と同じ。 `()` を含む文字列は自動で {@link Expression} 化される
      * | 21 | `['alias|typename' => 'column']`                 | 配列のキーをパイプでつなぐとその型に変換されて取得できる
-     * | 22 | `['alias' => function($row){}]`                  | キーが存在しないカラム指定のクロージャは行全体が渡ってくるコールバックになる
-     * | 25 | `['cname' => function($cname){}]`                | キーが存在するカラム指定のクロージャはカラム値が単一で渡ってくるコールバックになる
-     * | 26 | `['alias' => function($c1='id', $c2='name'){}]`  | クロージャの引数にデフォルト値が設定されている場合はそれぞれが個別で渡ってくるコールバックになる
+     * | 22 | `['alias' => function($row){}]`                  | デフォルト値がないクロージャは行全体が渡ってくるコールバックになる
+     * | 25 | `['cname' => function($cname=null){}]`           | デフォルト値が null のクロージャはカラム値が単一で渡ってくるコールバックになる
+     * | 26 | `['alias' => function($c1='id', $c2='name'){}]`  | デフォルト値が文字列のクロージャそれぞれが個別で渡ってくるコールバックになる
      * | 27 | `function(){return function($v){return $v;};}`   | クロージャの亜種。クロージャを返すクロージャはそのままクロージャとして活きるのでメソッドのような扱いにできる
      * | 30 | `Gateway object`                                 | Gateway の表すテーブルとの {@link Database::subselect()} 相当の動作
      * | 31 | `['+alias' => Gateway object]`                   | Gateway の表すテーブルとの JOIN を表す
@@ -1804,7 +1781,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * | 51 | `['+TableDescriptor' => ['*']]`                  | 「テーブル名」を書く場所にはテーブル記法が使用できる（JOIN）
      * | 80 | `SelectOption::DISTINCT()`                       | SelectOption インスタンスを与えると `addSelectOption` と同等の効果を示す
      * | 98 | `['' => ['expression']]`                         | 空キーは「テーブルに紐付かないカラム指定」を表す
-     * | 99 | `['alias' => 'expression']`                      | 上と同じ。存在しないテーブルは「テーブルに紐付かないカラム指定」とみなされる（notableAsColumn オプションが必要）
      *
      * 上記の通り、尋常ではないほど複雑なのでサンプルコードを以下に記す。
      *
@@ -1875,13 +1851,13 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *     ],
      * ]);
      *
-     * # No.25： カラム値を受け取るクロージャ
+     * # No.25, 26： カラム値を受け取るクロージャ
      * $qb->column([
      *     't_article' => [
-     *         // AS 指定するとキーで指定した値を単一で受け取るクロージャになる
-     *         'id AS idmul10'      => function($id){return $id * 10;},
-     *         // カンマ区切りで複数指定すれば複数渡ってくる
-     *         'id, name AS idname'      => function($id, $name){return "$id: $name";},
+     *         // デフォルト値を null にするとキーのカラム値が渡ってくる
+     *         'id'     => function($id=null){return $id * 10;},
+     *         // デフォルト値でカラムを指定できる
+     *         'idname' => function($id='id', $name='name'){return "$id: $name";},
      *     ],
      * ]);
      *
@@ -1938,14 +1914,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *         'ttc' => 't_table.colA',                 // 修飾子として動作する
      *         'ope' => ['column_name:LIKE' => 'hoge'], // operator として動作する
      *     ],
-     * ]);
-     *
-     * # No.99： フラット指定によるテーブルに紐付かないカラム指定（同上。ただし、 now,ttc,ope のようなテーブルが存在しないことが条件）
-     * $qb->column([
-     *     't_table' => '*',
-     *     'now' => 'NOW()',
-     *     'ttc' => 't_table.colA',                 // 修飾子として動作する
-     *     'ope' => ['column_name:LIKE' => 'hoge'], // operator として動作する
      * ]);
      * ```
      *

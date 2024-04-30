@@ -515,34 +515,42 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
-    function test_column_expression($builder)
+    function test_column_closure($builder)
     {
         $builder->column([
-            'test' => [
+            'test1 t1' => [
                 'id',
-                'mixed' => function ($row, $name = 'test.name', $data = 'data') { return "{$row['id']}-$name-$data"; },
+                'mixed1'    => function ($row, $name = 't2.name2') { return "{$row['id']}-$name"; },
+                '+test2 t2' => [
+                    ['t1.id = t2.id'],
+                    'mixed2' => function ($row, $name = 't1.name1') { return "{$row['id']}-$name"; },
+                ],
             ],
         ]);
-        $this->assertEquals('SELECT test.id, test.name AS __dbml_auto_column_dependtest_name, test.data AS __dbml_auto_column_dependtest_data, NULL AS mixed FROM test', (string) $builder);
+        $this->assertQuery("SELECT t1.id,
+NULL AS mixed1,
+t2.name2 AS __dbml_auto_column_dependt2___name2,
+NULL AS mixed2,
+t1.name1 AS __dbml_auto_column_dependt1___name1
+FROM test1 t1 INNER JOIN test2 t2 ON t1.id = t2.id", $builder);
         $this->assertEquals([
-            'id'    => '1',
-            'mixed' => '1-a-',
+            'id'     => '1',
+            "mixed1" => "1-A",
+            "mixed2" => "1-a",
         ], $builder->limit(1)->tuple());
 
         $builder->reset()->column([
             'test1' => [
-                'piyo'          => function ($row) { return 'xx-' . $row['name1']; },
-                'name1'         => function ($v) { return 'ss_' . $v; },
-                'id,name1 idn1' => function ($id, $name) { return "$id-$name"; },
-                'idn2'          => function ($id = 'id', $name = 'name1') { return "$id-$name"; },
-                'idn3'          => function ($row, $name = 'name1') { return "{$row['idn2']}-" . strtoupper($name); },
-                'last'          => new Expression("'dbval'"),
+                'piyo'  => function ($row) { return 'xx-' . $row['name1']; },
+                'name1' => function ($v = null) { return 'ss_' . $v; },
+                'idn2'  => function ($id = 'id', $name = 'name1') { return "$id-$name"; },
+                'idn3'  => function ($row, $name = 'name1') { return "{$row['idn2']}-" . strtoupper($name); },
+                'last'  => new Expression("'dbval'"),
             ],
         ]);
         $this->assertEquals([
             'name1' => 'ss_a',
             'piyo'  => 'xx-ss_a',
-            'idn1'  => '1-a',
             'idn2'  => '1-a',
             'idn3'  => '1-a-A',
             'last'  => 'dbval',
@@ -553,16 +561,16 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
 
         $builder->reset()->column([
             'test1' => [
-                'name1' => \Closure::fromCallable('strtoupper'),
+                'name1' => fn($v = null) => strtoupper($v),
             ],
         ]);
         $this->assertEquals([
             'name1' => 'A',
         ], $builder->limit(1)->tuple());
 
-        $this->assertException('cannot be mixed', L($builder->reset())->column([
+        $this->assertException('only ?string is allowed', L($builder->reset())->column([
             'test1' => [
-                'id,name idn' => function ($id, $name) { return "$id-$name"; },
+                'id' => function ($id = 123) { },
             ],
         ]));
     }
