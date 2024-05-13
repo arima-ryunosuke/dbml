@@ -40,7 +40,6 @@ namespace {
 
 namespace ryunosuke\Test {
 
-    use Doctrine\DBAL\Platforms\SQLServerPlatform;
     use ryunosuke\polyfill\enum\IntBackedEnum;
     use ryunosuke\polyfill\enum\StringBackedEnum;
 
@@ -87,70 +86,6 @@ namespace ryunosuke\Test {
         {
             $this->is_dirty = true;
             return parent::executeAffect($query, $params, $retry);
-        }
-
-        /**
-         * SQLServer は AUTO_INCREMENT なカラムを明示指定できないので小細工する
-         *
-         * @inheritdoc
-         */
-        public function insert($tableName, $data)
-        {
-            if ($this->getPlatform() instanceof SQLServerPlatform && is_string($tableName) && strpos($tableName, ' ') === false && strpos($tableName, '.') === false && strpos($tableName, ',') === false) {
-                $tableName2 = $this->convertTableName($tableName);
-                $pcols = $this->getSchema()->getTablePrimaryColumns($tableName2);
-                $specified_id = count($pcols) === 1 && reset($pcols)->getAutoincrement() && ($data[key($pcols)] ?? '') !== '';
-
-                if ($specified_id) {
-                    $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($tableName2, true));
-                }
-
-                try {
-                    $result = parent::insert(...func_get_args());
-                }
-                finally {
-                    if ($specified_id) {
-                        $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($tableName2, false));
-                    }
-                }
-
-                return $result;
-            }
-
-            return parent::insert(...func_get_args());
-        }
-
-        /**
-         * SQLServer は AUTO_INCREMENT なカラムを明示指定できないので小細工する
-         *
-         * @inheritdoc
-         */
-        public function duplicate($targetTable, array $overrideData = [], $where = [], $sourceTable = null)
-        {
-            if ($this->getPlatform() instanceof SQLServerPlatform) {
-                $targetTable2 = $this->convertTableName($targetTable);
-                $sourceTable2 = $this->convertTableName($sourceTable);
-                $pcols1 = $this->getSchema()->getTablePrimaryColumns($targetTable2);
-                $pcols2 = $this->getSchema()->getTablePrimaryColumns($sourceTable2 ?: $targetTable2);
-                $specified_id = (count($pcols1) === 1 && reset($pcols1)->getAutoincrement() && array_key_exists(key($pcols1), $overrideData));
-                if ($sourceTable2) {
-                    $specified_id = $specified_id || isset($pcols2[key($pcols1)]);
-                }
-
-                if ($specified_id) {
-                    $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($targetTable2, true));
-                }
-
-                $result = parent::duplicate(...func_get_args());
-
-                if ($specified_id) {
-                    $this->getConnection()->executeStatement($this->getCompatiblePlatform()->getIdentityInsertSQL($targetTable2, false));
-                }
-
-                return $result;
-            }
-
-            return parent::duplicate(...func_get_args());
         }
     }
 }

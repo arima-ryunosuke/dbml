@@ -415,9 +415,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         }
 
         // テーブル記法＋OrThrowもきちんと動くことを担保
-        if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            $this->assertEquals(['id' => 9], $database->updateOrThrow('test[id: 9]', ['name' => 'hogera']));
-        }
+        $this->assertEquals(['id' => 9], $database->updateOrThrow('test[id: 9]', ['name' => 'hogera']));
 
         // Gateway 系
         $this->assertInstanceOf(TableGateway::class, $database->test());
@@ -3444,11 +3442,6 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_migrate_bulk($database)
     {
-        // SqlServer はいろいろと辛いので除外（ID 列さえ除けば多分動くはず）
-        if (!$database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            return;
-        }
-
         $records = [
             [
                 'id'         => '11',

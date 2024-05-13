@@ -174,6 +174,8 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * @method CacheInterface         getCacheProvider()
  * @method bool                   getInsertSet()
  * @method $this                  setInsertSet($bool)
+ * @method bool                   getAutoIdentityInsert()
+ * @method $this                  setAutoIdentityInsert($bool)
  * @method bool                   getUpdateEmpty()
  * @method $this                  setUpdateEmpty($bool)
  * @method int|string             getDefaultChunk()
@@ -485,6 +487,8 @@ class Database
             'tableMapper'               => function ($table) { return pascal_case($table); },
             // 拡張 INSERT SET 構文を使うか否か（mysql 以外は無視される）
             'insertSet'                 => false,
+            // SET IDENTITY_INSERT を自動発行するか（SQLServer 以外は無視される）
+            'autoIdentityInsert'        => true,
             // UPDATE で空データの時に意味のない更新をするか？（false だと構文エラーになる）
             'updateEmpty'               => true,
             // バルク系メソッドのデフォルトチャンクサイズ（文字列指定で特殊なコールバックが設定できる）
@@ -1343,6 +1347,21 @@ class Database
             $wheres[$key] = $cond;
         }
         return $wheres;
+    }
+
+    private function _setIdentityInsert($tableName, $data)
+    {
+        $cplatform = $this->getCompatiblePlatform();
+        if ($this->getUnsafeOption('autoIdentityInsert') && !$cplatform->supportsIdentityUpdate()) {
+            // @codeCoverageIgnoreStart
+            $autocol = $this->getSchema()->getTableAutoIncrement($tableName);
+            if ($autocol && array_key_exists($autocol->getName(), $data)) {
+                $this->getConnection()->executeStatement($cplatform->getIdentityInsertSQL($tableName, true));
+                return fn() => $this->getConnection()->executeStatement($cplatform->getIdentityInsertSQL($tableName, false));
+            }
+            // @codeCoverageIgnoreEnd
+        }
+        return fn() => null;
     }
 
     private function _restrictWheres($tableName, $event)
@@ -5711,7 +5730,14 @@ class Database
         else {
             $sql .= sprintf("(%s) VALUES (%s)", implode(', ', array_keys($set)), implode(', ', $set));
         }
-        $affected = $this->executeAffect($sql, $params);
+
+        $unseter = $this->_setIdentityInsert($tableName, $data);
+        try {
+            $affected = $this->executeAffect($sql, $params);
+        }
+        finally {
+            $unseter();
+        }
         if (!is_int($affected)) {
             return $affected;
         }
@@ -6648,7 +6674,13 @@ class Database
         $select = $this->select([$sourceTable => $overrideSet], $where);
         $sql = "INSERT INTO $targetTable (" . implode(', ', array_keys($overrideSet)) . ") $select";
 
-        return $this->executeAffect($sql, array_merge($params, $select->getParams()));
+        $unseter = $this->_setIdentityInsert($targetTable, $overrideData + ($targetTable === $sourceTable ? [] : $this->getSchema()->getTablePrimaryColumns($sourceTable)));
+        try {
+            return $this->executeAffect($sql, array_merge($params, $select->getParams()));
+        }
+        finally {
+            $unseter();
+        }
     }
 
     /**
