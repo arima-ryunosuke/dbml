@@ -339,28 +339,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
-    function test_getFoundRowsOption($cplatform, $platform)
-    {
-        $expected = $platform instanceof MySQLPlatform ? 'SQL_CALC_FOUND_ROWS' : '';
-        $this->assertEquals($expected, $cplatform->getFoundRowsOption());
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
-    function test_getFoundRowsQuery($cplatform, $platform)
-    {
-        $expected = $platform instanceof MySQLPlatform ? 'SELECT FOUND_ROWS()' : '';
-        $this->assertEquals($expected, $cplatform->getFoundRowsQuery());
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
     function test_getMergeSyntax($cplatform, $platform)
     {
         $expected = false;

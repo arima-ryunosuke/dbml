@@ -13,7 +13,6 @@ use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Types\Types;
 use ryunosuke\dbml\Query\Expression\Expression;
-use ryunosuke\dbml\Query\Expression\SelectOption;
 use ryunosuke\dbml\Query\Queryable;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_strpad;
@@ -417,32 +416,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     {
         if ($this->platform instanceof MySQLPlatform) {
             return 'dual';
-        }
-        return '';
-    }
-
-    /**
-     * CALC_FOUND_ROWS が使える場合にその SelectOption を返す
-     *
-     * @return SelectOption CALC_FOUND_ROWS が使えるなら SelectOption::SQL_CALC_FOUND_ROWS
-     */
-    public function getFoundRowsOption()
-    {
-        if ($this->platform instanceof MySQLPlatform) {
-            return SelectOption::SQL_CALC_FOUND_ROWS();
-        }
-        return null;
-    }
-
-    /**
-     * CALC_FOUND_ROWS が使える場合にその関数名を返す
-     *
-     * @return string CALC_FOUND_ROWS が使えるなら FOUND_ROWS
-     */
-    public function getFoundRowsQuery()
-    {
-        if ($this->platform instanceof MySQLPlatform) {
-            return 'SELECT FOUND_ROWS()';
         }
         return '';
     }

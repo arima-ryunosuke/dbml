@@ -46,6 +46,9 @@ class Paginator implements \IteratorAggregate, \Countable
     /** @var int 現在ページ */
     private $page;
 
+    /** @var int 全件数 */
+    private $total;
+
     /**
      * コンストラクタ
      *
@@ -53,8 +56,7 @@ class Paginator implements \IteratorAggregate, \Countable
      */
     public function __construct(QueryBuilder $builder)
     {
-        $option = $builder->getDatabase()->getCompatiblePlatform()->getFoundRowsOption();
-        $this->builder = $builder->addSelectOption($option)->setRowCountable(true);
+        $this->builder = $builder;
         $this->setProvider(function () {
             return $this->builder->array();
         });
@@ -143,10 +145,7 @@ class Paginator implements \IteratorAggregate, \Countable
      */
     public function getTotal()
     {
-        // for mysql
-        $this->getItems();
-
-        return $this->builder->getRowCount();
+        return $this->total ??= (int) $this->builder->countize()->value();
     }
 
     /**

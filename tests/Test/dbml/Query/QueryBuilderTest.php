@@ -2693,10 +2693,19 @@ SQL
         $this->assertQuery('SELECT COUNT(*) AS __dbml_auto_cnt FROM (SELECT 1 FROM test WHERE pid = ? GROUP BY test_id) __dbml_auto_table', $counter);
         $this->assertEquals([1], $counter->getParams());
 
-        // ただし、having がある場合はかなり特殊な動きになる
-        $counter = $builder->reset()->column(['test' => new Expression('? as ccc', 99)])->where(['pid' => 1])->groupBy('test_id')->having(['aggrc' => 2])->countize('*');
-        $this->assertQuery('SELECT COUNT(*) AS __dbml_auto_cnt FROM (SELECT ? as ccc FROM test WHERE pid = ? GROUP BY test_id HAVING aggrc = ?) __dbml_auto_table', $counter);
-        $this->assertEquals([99, 1, 2], $counter->getParams());
+        // having も同様
+        $counter = $builder->reset()->column(['test' => new Expression('? as ccc', 99)])->where(['pid' => 1])->having(['aggrc' => 2])->countize('*');
+        $this->assertQuery('SELECT COUNT(*) AS __dbml_auto_cnt FROM (SELECT 1 FROM test WHERE pid = ? HAVING aggrc = ?) __dbml_auto_table', $counter);
+        $this->assertEquals([1, 2], $counter->getParams());
+
+        // ただし、select 句を group by,having が使っている場合はかなり特殊な動きになる
+        $counter = $builder->reset()->column(['aggregate' => ['gk' => new Expression('group_id1'), 'hk' => new Expression('SUM(group_id2)')]])->groupBy('gk')->having(['hk >= ?' => 40])->countize('*');
+        $this->assertQuery('SELECT COUNT(*) AS __dbml_auto_cnt FROM (SELECT group_id1 AS gk, SUM(group_id2) AS hk FROM aggregate GROUP BY gk HAVING hk >= ?) __dbml_auto_table', $counter);
+        $this->assertEquals([40], $counter->getParams());
+        // かなり特殊なので実際に投げておく
+        if ($builder->getDatabase()->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $builder->getDatabase()->getPlatform() instanceof MySQLPlatform) {
+            $this->assertEquals(2, $counter->value());
+        }
 
         // 上記全てを複合しためちゃくちゃ複雑な count(クエリとしての意味はない。というか無茶苦茶なので mysql でしかテストできない)
         $db = $builder->getDatabase();
@@ -2875,25 +2884,6 @@ SQL
 
         // 例外
         $this->assertException('$predicates is empty', L($builder)->neighbor([]));
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
-     */
-    function test_rowcount($builder)
-    {
-        $builder->column('test')->limit(5, 5);
-
-        $this->assertNull($builder->getRowCount());
-        $builder->array();
-        $this->assertNull($builder->getRowCount());
-
-        $builder->setRowCountable(true);
-        $this->assertException('yet', L($builder)->getRowCount());
-
-        $builder->array();
-        $this->assertEquals(10, $builder->getRowCount());
     }
 
     /**

@@ -334,9 +334,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     /** @var ?int subselect 時のチャンク数 */
     private $lazyChunk;
 
-    /** @var bool|int クエリを投げると同時に limit を外した件数を取得するか */
-    private $rowcount = false;
-
     /** @var string|callable fetch 時のタイプ */
     private $caster;
 
@@ -3089,15 +3086,22 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $that->callbacks = [];
         $that->caster = null;
 
+        // groupBy,having がある時は集約クエリなのでラップしたクエリで count する
         if ($that->sqlParts['groupBy'] || $that->sqlParts['having']) {
-            if ($that->sqlParts['having']) {
-                assert(true); // for inspection
-                // having があるときは select をクリアすることは出来ない(select as alias が条件に使われているかもしれない)
-                // が、消さないと mysql で「1060: Duplicate column name」が出る可能性がある
-                // ひとまず安全を取り、消さない方向で↑が出たら呼び出し側で重複カラムを取り除く使い方とする
+            // その際 select 句は不要だが、select 句を group,having に指定できる RDBMS もあるのでそれは残さなければならない
+            $conditions = array_map('strval', array_merge($that->sqlParts['groupBy'], $that->sqlParts['having']));
+            foreach ($that->sqlParts['select'] as $n => $select) {
+                if ($select instanceof Alias) {
+                    // group はともかく、having からカラム名を抽出するのは容易ではないので暫定措置（まぁ大抵は先頭だろう）
+                    // ここの処理で SQL エラーが出るようなら呼び元で何とかするしかない
+                    if (preg_grep('#^' . preg_quote($select->getAlias()) . '([^_0-9a-z]|$)#', $conditions)) {
+                        continue;
+                    }
+                }
+                unset($that->sqlParts['select'][$n]);
             }
-            else {
-                $that->resetQueryPart('select')->select('1');
+            if (!$that->sqlParts['select']) {
+                $that->addSelect('1');
             }
             $counter = $that->database->createQueryBuilder();
             $counter->select(new Alias(self::COUNT_ALIAS, "COUNT($column)"));
@@ -3266,40 +3270,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     }
 
     /**
-     * クエリの結果行数を返すようにするか
-     *
-     * @ignore
-     *
-     * @param bool $countable
-     * @return $this
-     */
-    public function setRowCountable($countable)
-    {
-        $this->rowcount = $countable;
-        return $this;
-    }
-
-    /**
-     * クエリの結果行数を返す
-     *
-     * @ignore
-     *
-     * @return int|null クエリの結果行数
-     */
-    public function getRowCount()
-    {
-        if ($this->rowcount === true) {
-            throw new \UnexpectedValueException('query is not executed yet.');
-        }
-
-        if (is_int($this->rowcount)) {
-            return $this->rowcount;
-        }
-
-        return null;
-    }
-
-    /**
      * 行レベルの変換クロージャを返す
      *
      * @ignore 内部用
@@ -3376,13 +3346,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     {
         assert(!$continuity || ($continuity && $this->applyments['before'] === null), 'yield not support before apply');
         assert(!$continuity || ($continuity && $this->applyments['after'] === null), 'yield not support after apply');
-
-        // mysql の FOUND_ROWS のためにあらかじめ呼んでおく必要がある(途中にクエリが挟まると取得できなくなる)
-        if ($this->rowcount === true) {
-            $foundRowsQuery = $this->database->getCompatiblePlatform()->getFoundRowsQuery();
-            $this->rowcount = false; // stop recursion
-            $this->rowcount = intval($this->database->fetchValue($foundRowsQuery ?: $this->countize()));
-        }
 
         BEFORE:
 
@@ -3917,7 +3880,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $this->wrappers = [];
         $this->lockMode = LockMode::NONE;
         $this->lockOption = null;
-        $this->rowcount = false;
         $this->applyments = [
             'before' => null,
             'after'  => null,
