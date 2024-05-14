@@ -1,12 +1,11 @@
 <?php
 
-namespace ryunosuke\dbml\Query\Expression;
+namespace ryunosuke\dbml\Query;
 
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Gateway\TableGateway;
-use ryunosuke\dbml\Query\Parser;
-use ryunosuke\dbml\Query\Queryable;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\Clause\Select;
+use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_rekey;
@@ -27,7 +26,7 @@ use function ryunosuke\dbml\str_between;
  * テーブル記法の概念については {@link \ryunosuke\dbml\ dbml} を参照。
  * なお、内部的に使用されるだけで能動的に new したり活用されたりするようなクラスではない。
  *
- * 下記に記法としての定義を記載する。組み合わせた場合の使用例は {@link QueryBuilder::column()} を参照。
+ * 下記に記法としての定義を記載する。組み合わせた場合の使用例は {@link SelectBuilder::column()} を参照。
  *
  * `'(joinsign)tablename(pkval)@scope:fkeyname[condition]<groupby>+order-by#offset-limit AS Alias.col1, col2 AS C2'`
  *
@@ -179,7 +178,7 @@ use function ryunosuke\dbml\str_between;
  * なお、**テーブル記法に決してユーザ入力を埋め込んではならない**。
  * (pkval) などは埋め込みたくなるが、テーブル記法は値のエスケープなどを一切行わないので致命的な脆弱性となりうる。
  *
- * @property string|QueryBuilder|TableGateway|mixed $descriptor
+ * @property string|SelectBuilder|TableGateway|mixed $descriptor
  * @property string $joinsign
  * @property string $table
  * @property string $alias
@@ -475,7 +474,7 @@ class TableDescriptor
         if ($this->alias === null && $this->table !== $table) {
             $this->alias = $table;
         }
-        if ($cols instanceof QueryBuilder) {
+        if ($cols instanceof SelectBuilder) {
             if ($cols->getSubmethod() === null) {
                 $this->alias = $table;
                 $this->table = $cols;
@@ -559,7 +558,7 @@ class TableDescriptor
             elseif (is_string($c) && preg_match("#^[$joinsigns]$identifier*#ui", trim($c), $m)) {
                 $join = new self($database, $c, []);
                 foreach ($join->column as $c2) {
-                    $this->column[] = new Alias(...Alias::split($join->accessor . '.' . $c2, is_int($k) ? null : $k));
+                    $this->column[] = new Select(...Select::split($join->accessor . '.' . $c2, is_int($k) ? null : $k));
                 }
                 $join->descriptor = [];
                 $this->jointable[] = $join;
@@ -568,7 +567,7 @@ class TableDescriptor
             elseif (preg_match("#^[$joinsigns].#u", trim($k), $m)) {
                 $join = new self($database, $k, []);
                 foreach ($join->column as $c2) {
-                    $this->column[] = new Alias(...Alias::split($join->accessor . '.' . $c2, null));
+                    $this->column[] = new Select(...Select::split($join->accessor . '.' . $c2, null));
                 }
                 // ['+Alias' => $db->t_table] のために特殊なことをしなければならない（テーブル名部分がなくエイリアス部分だけなので読み替える）
                 if ($c instanceof TableGateway && $c->tableName() !== $join->table) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace ryunosuke\dbml\Query\Expression;
+namespace ryunosuke\dbml\Query\Clause;
 
 /**
  * SELECT オプションクラス

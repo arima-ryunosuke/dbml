@@ -61,11 +61,11 @@ use ryunosuke\dbml\Mixin\SubSelectTrait;
 use ryunosuke\dbml\Mixin\YieldTrait;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
-use ryunosuke\dbml\Query\Expression\TableDescriptor;
 use ryunosuke\dbml\Query\Parser;
 use ryunosuke\dbml\Query\Queryable;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\dbml\Query\Statement;
+use ryunosuke\dbml\Query\TableDescriptor;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\utility\attribute\Attribute\DebugInfo;
@@ -312,16 +312,16 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * @method string                 getDefaultJoinMethod() {{@link TableGateway::getDefaultJoinMethod()} 参照@inheritdoc TableGateway::getDefaultJoinMethod()}
  * @method $this                  setDefaultJoinMethod($string) {{@link TableGateway::setDefaultJoinMethod()} 参照@inheritdoc TableGateway::setDefaultJoinMethod()}
  *
- * @method mixed                  getDefaultOrder() {{@link QueryBuilder::getDefaultOrder()} 参照@inheritdoc QueryBuilder::getDefaultOrder()}
- * @method $this                  setDefaultOrder($mixed) {{@link QueryBuilder::setDefaultOrder()} 参照@inheritdoc QueryBuilder::setDefaultOrder()}
- * @method string                 getPrimarySeparator() {{@link QueryBuilder::getPrimarySeparator()} 参照@inheritdoc QueryBuilder::getPrimarySeparator()}
- * @method $this                  setPrimarySeparator($string) {{@link QueryBuilder::setPrimarySeparator()} 参照@inheritdoc QueryBuilder::setPrimarySeparator()}
- * @method string                 getAggregationDelimiter() {{@link QueryBuilder::getAggregationDelimiter()} 参照@inheritdoc QueryBuilder::getAggregationDelimiter()}
- * @method $this                  setAggregationDelimiter($string) {{@link QueryBuilder::setAggregationDelimiter()} 参照@inheritdoc QueryBuilder::setAggregationDelimiter()}
- * @method bool                   getPropagateLockMode() {{@link QueryBuilder::getPropagateLockMode()} 参照@inheritdoc QueryBuilder::getPropagateLockMode()}
- * @method $this                  setPropagateLockMode($bool) {{@link QueryBuilder::setPropagateLockMode()} 参照@inheritdoc QueryBuilder::setPropagateLockMode()}
- * @method bool                   getInjectChildColumn() {{@link QueryBuilder::getInjectChildColumn()} 参照@inheritdoc QueryBuilder::getInjectChildColumn()}
- * @method $this                  setInjectChildColumn($bool) {{@link QueryBuilder::setInjectChildColumn()} 参照@inheritdoc QueryBuilder::setInjectChildColumn()}
+ * @method mixed                  getDefaultOrder() {{@link SelectBuilder::getDefaultOrder()} 参照@inheritdoc SelectBuilder::getDefaultOrder()}
+ * @method $this                  setDefaultOrder($mixed) {{@link SelectBuilder::setDefaultOrder()} 参照@inheritdoc SelectBuilder::setDefaultOrder()}
+ * @method string                 getPrimarySeparator() {{@link SelectBuilder::getPrimarySeparator()} 参照@inheritdoc SelectBuilder::getPrimarySeparator()}
+ * @method $this                  setPrimarySeparator($string) {{@link SelectBuilder::setPrimarySeparator()} 参照@inheritdoc SelectBuilder::setPrimarySeparator()}
+ * @method string                 getAggregationDelimiter() {{@link SelectBuilder::getAggregationDelimiter()} 参照@inheritdoc SelectBuilder::getAggregationDelimiter()}
+ * @method $this                  setAggregationDelimiter($string) {{@link SelectBuilder::setAggregationDelimiter()} 参照@inheritdoc SelectBuilder::setAggregationDelimiter()}
+ * @method bool                   getPropagateLockMode() {{@link SelectBuilder::getPropagateLockMode()} 参照@inheritdoc SelectBuilder::getPropagateLockMode()}
+ * @method $this                  setPropagateLockMode($bool) {{@link SelectBuilder::setPropagateLockMode()} 参照@inheritdoc SelectBuilder::setPropagateLockMode()}
+ * @method bool                   getInjectChildColumn() {{@link SelectBuilder::getInjectChildColumn()} 参照@inheritdoc SelectBuilder::getInjectChildColumn()}
+ * @method $this                  setInjectChildColumn($bool) {{@link SelectBuilder::setInjectChildColumn()} 参照@inheritdoc SelectBuilder::setInjectChildColumn()}
  */
 // @formatter:on
 #[DebugInfo(false)]
@@ -563,7 +563,7 @@ class Database
 
         // 他クラスのオプションをマージ
         $default_options += TableGateway::getDefaultOptions();
-        $default_options += QueryBuilder::getDefaultOptions();
+        $default_options += SelectBuilder::getDefaultOptions();
         $default_options += array_each(Transaction::getDefaultOptions(), function (&$carry, $v, $k) {
             // Transaction のオプション名は簡易すぎるので "transaction" を付与する
             $carry['transaction' . ucfirst($k)] = $v;
@@ -634,11 +634,11 @@ class Database
      * 第2引数のオプションは getDefaultOptions で与えるものを指定する。
      * 基本的には未指定でもそれなりに動作するが、 cacheProvider だけは明示的に与えたほうが良い。
      *
-     * さらに、このクラスのオプションは少し特殊で、 {@link QueryBuilder} や {@link TableGateway} のオプションも複合で与えることができる。
+     * さらに、このクラスのオプションは少し特殊で、 {@link SelectBuilder} や {@link TableGateway} のオプションも複合で与えることができる。
      * その場合、**そのクラスのインスタンスが生成されたときのデフォルト値**として作用する。
      *
      * ```php
-     * # defaultOrder は本来 QueryBuilder のオプションだが、 Database のオプションとしても与えることができる
+     * # defaultOrder は本来 SelectBuilder のオプションだが、 Database のオプションとしても与えることができる
      * $db = new Database($dbconfig, [
      *     'defaultOrder' => true,
      * ]);
@@ -898,7 +898,7 @@ class Database
         if ($sql instanceof Statement) {
             $stmt = $sql->executeSelect($params, $connection);
         }
-        elseif ($sql instanceof QueryBuilder) {
+        elseif ($sql instanceof SelectBuilder) {
             $stmt = $sql->getPreparedStatement();
             if ($stmt) {
                 $stmt = $stmt->executeSelect($params, $connection);
@@ -920,8 +920,8 @@ class Database
     {
         $fetch_params = $fetch_params instanceof \Traversable ? iterator_to_array($fetch_params) : $fetch_params;
 
-        // QueryBuilder なら文字列化 && $params を置換
-        if ($builder instanceof QueryBuilder) {
+        // SelectBuilder なら文字列化 && $params を置換
+        if ($builder instanceof SelectBuilder) {
             $builder_params = $builder->getParams();
             // $builder も params を持っていて fetch の引数も指定されていたらどっちを使えばいいのかわからない
             if (count($fetch_params) > 0 && count($builder_params) > 0) {
@@ -943,8 +943,8 @@ class Database
         $platform = $this->getPlatform();
         $cast_type = $this->getUnsafeOption('autoCastType');
 
-        /** @var QueryBuilder $data_source */
-        $data_source = instance_of($data_source, QueryBuilder::class);
+        /** @var SelectBuilder $data_source */
+        $data_source = instance_of($data_source, SelectBuilder::class);
         $rconverter = $data_source?->getRowConverter();
         $alias_table = array_lookup($data_source?->getFromPart() ?: [], 'table');
 
@@ -1304,7 +1304,7 @@ class Database
         if ($autocolumn && !isset($primary[$autocolumn])) {
             $primary[$autocolumn] = $this->getLastInsertId($tableName, $autocolumn);
         }
-        // Expression や QueryBuilder はどうしようもないのでクエリを投げて取得
+        // Expression や SelectBuilder はどうしようもないのでクエリを投げて取得
         // 例えば modify メソッドの列に↑のようなオブジェクトが来てかつ UPDATE された場合、lastInsertId は得られない
         foreach ($primary as $val) {
             if (is_object($val)) {
@@ -1340,7 +1340,7 @@ class Database
                 continue;
             }
 
-            if ($cond instanceof QueryBuilder && $cond->getSubmethod() !== null) {
+            if ($cond instanceof SelectBuilder && $cond->getSubmethod() !== null) {
                 $cond->setSubwhere($tableName, $tableAlias, null);
             }
 
@@ -2011,7 +2011,7 @@ class Database
     public function declareVirtualTable($vtableName, $tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         assert(!$this->getSchema()->hasTable($vtableName));
-        $this->vtables[$vtableName] = array_combine(QueryBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]);
+        $this->vtables[$vtableName] = array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]);
         return $this;
     }
 
@@ -2042,7 +2042,7 @@ class Database
                 $expression = $expression($this);
             }
             if (is_array($expression)) {
-                $expression = $this->createQueryBuilder()->build($expression);
+                $expression = $this->createSelectBuilder()->build($expression);
             }
 
             $cols = '';
@@ -2220,7 +2220,7 @@ class Database
                     if (!isset($def['type']) && $def['select'] instanceof TableGateway) {
                         $def['type'] = 'array';
                     }
-                    if (!isset($def['type']) && $def['select'] instanceof QueryBuilder) {
+                    if (!isset($def['type']) && $def['select'] instanceof SelectBuilder) {
                         $submethod = $def['select']->getSubmethod();
                         if (is_null($submethod)) {
                             $def['type'] = 'integer';
@@ -2536,7 +2536,7 @@ class Database
     /**
      * 引数内では AND、引数間では OR する Expression を返す
      *
-     * 得られる結果としては {@link QueryBuilder::where()}とほぼ同じ。
+     * 得られる結果としては {@link SelectBuilder::where()}とほぼ同じ。
      * ただし、あちらはクエリビルダで WHERE 専用であるのに対し、こちらは Expression を返すだけなので SELECT 句に埋め込むことができる。
      *
      * ```php
@@ -2767,7 +2767,7 @@ class Database
      *
      * | No | where                                          | result                             | 説明
      * | --:|:--                                             |:--                                 |:--
-     * |  0 | `''`                                           | -                                  | 値が(phpで)空判定される場合、その条件はスルーされる。空とは `null || '' || [] || 全てが!で除外された QueryBuilder` のこと
+     * |  0 | `''`                                           | -                                  | 値が(phpで)空判定される場合、その条件はスルーされる。空とは `null || '' || [] || 全てが!で除外された SelectBuilder` のこと
      * |  1 | `'hoge = 1'`                                   | `hoge = 1`                         | `['hoge = 1']` と同じ。単一文字列指定は配列化される
      * |  2 | `['hoge = 1']`                                 | `hoge = 1`                         | キーを持たないただの配列はそのまま条件文になる
      * |  3 | `['hoge = ?' => 1]`                            | `hoge = 1`                         | キーに `?` を含む配列は普通に想起されるプリペアードステートメントになる
@@ -2784,8 +2784,8 @@ class Database
      * | 22 | `['!hoge' => '']`                              | -                                  | キーが "!" で始まるかつ bind 値が(phpで)空判定される場合、その条件文自体が抹消される（記号は同じだが前述の `:!演算子` とは全く別個）
      * | 23 | `['AND/OR' => ['hoge' => 1, 'fuga' => 2]]`     | `hoge = 1 OR fuga = 2`             | キーが "AND/OR" の場合は特別扱いされ、AND/OR コンテキストの切り替えが行わる
      * | 24 | `['NOT' => ['hoge' => 1, 'fuga' => 2]]`        | `NOT(hoge = 1 AND fuga = 2)`       | キーが "NOT" の場合も特別扱いされ、その要素を NOT で反転する
-     * | 25 | `[QueryBuilder]`                               | 略                                 | QueryBuilder の文字列表現をそのまま埋め込む。EXISTS などでよく使用されるが、使い方を誤ると「Operand should contain 1 column(s)」とか「Subquery returns more than 1 row」とか言われるので注意
-     * | 26 | `['hoge' => QueryBuilder]`                     | 略                                 | キー付きで QueryBuilder を渡すとサブクエリで条件演算される。左記の場合は `hoge IN (QueryBuilder)` となる
+     * | 25 | `[SelectBuilder]`                               | 略                                 | SelectBuilder の文字列表現をそのまま埋め込む。EXISTS などでよく使用されるが、使い方を誤ると「Operand should contain 1 column(s)」とか「Subquery returns more than 1 row」とか言われるので注意
+     * | 26 | `['hoge' => SelectBuilder]`                     | 略                                 | キー付きで SelectBuilder を渡すとサブクエリで条件演算される。左記の場合は `hoge IN (SelectBuilder)` となる
      * | 27 | `[Operator]`                                   | 略                                 | 条件式の代わりに `Operator` インスタンスを渡すことができるが、難解なので説明は省略
      * | 28 | `['hoge' => Operator::equal(1)]`               | 略                                 | No.5 と同じだが、 equal を別のメソッドに変えればシンプルな key => value 配列を保ちつつ演算子が使える
      * | 31 | `['hoge' => function () {}]`                   | 略                                 | クロージャを渡すとクロージャの実行結果が「あたかもそこにあるかのように」振る舞う
@@ -2794,7 +2794,7 @@ class Database
      * 組み込みの演算子は {@link Operator} を参照。
      *
      * このメソッドは内部で頻繁に使用される。
-     * 具体的には QueryBuilder::select の第2引数、 JOIN の ON 指定、 update/delete などの WHERE 条件など。
+     * 具体的には SelectBuilder::select の第2引数、 JOIN の ON 指定、 update/delete などの WHERE 条件など。
      * これらの箇所ではすべて上記の記法が使用できる。
      *
      * ```php
@@ -2803,7 +2803,7 @@ class Database
      *     $wheres['id'] = $id;
      * }
      * $wheres['!id'] = $id; // 上記コードとほぼ同義
-     * // 空の定義には「全ての条件が!で除外されたQueryBuilder」も含むので、下記のコードは空の WHERE になる
+     * // 空の定義には「全ての条件が!で除外されたSelectBuilder」も含むので、下記のコードは空の WHERE になる
      * $wheres['!subid IN(?)'] = $db->select('subtable.id', ['!name' => ''])->exists();
      *
      * # No.9,10（ややこしいことをしないで手軽に演算子が埋め込める）
@@ -2996,7 +2996,7 @@ class Database
                 // Queryable はマージしたものを
                 if ($value instanceof Queryable) {
                     if (strpos($cond, '?') === false) {
-                        $cond .= $value instanceof QueryBuilder ? ' IN ?' : ' = ?'; // IN のカッコはビルダが付けてくれる
+                        $cond .= $value instanceof SelectBuilder ? ' IN ?' : ' = ?'; // IN のカッコはビルダが付けてくれる
                     }
                     $criteria[] = str_replace('?', $value->merge($params), $cond);
                     if ($emptyfilter) {
@@ -3057,13 +3057,13 @@ class Database
     /**
      * クエリビルダを生成して返す
      *
-     * 極力 new QueryBuilder せずにこのメソッドを介すこと。
+     * 極力 new SelectBuilder せずにこのメソッドを介すこと。
      *
-     * @return QueryBuilder クエリビルダオブジェクト
+     * @return SelectBuilder クエリビルダオブジェクト
      */
-    public function createQueryBuilder()
+    public function createSelectBuilder()
     {
-        return new QueryBuilder($this);
+        return new SelectBuilder($this);
     }
 
     /**
@@ -3103,7 +3103,7 @@ class Database
         }
 
         $result = [];
-        foreach ($this->createQueryBuilder()->addSelect($columns)->tuple() as $key => $count) {
+        foreach ($this->createSelectBuilder()->addSelect($columns)->tuple() as $key => $count) {
             [$tname, $iname] = explode($DELIMITER, $key, 2);
             $result[$tname][$iname] = $count;
         }
@@ -3250,7 +3250,7 @@ class Database
      * @used-by fetchTupleOrThrow()
      * @used-by fetchValueOrThrow()
      *
-     * @param string|QueryBuilder|Statement $sql クエリ
+     * @param string|SelectBuilder|Statement $sql クエリ
      * @param iterable $params bind パラメータ
      * @return false|array|Entityable[] クエリ結果
      */
@@ -3263,7 +3263,7 @@ class Database
         if ($result === false) {
             return false;
         }
-        if ($sql instanceof QueryBuilder) {
+        if ($sql instanceof SelectBuilder) {
             if (self::METHODS[$method]['keyable'] === null) {
                 $result = $sql->postselect([$result])[0];
             }
@@ -3302,12 +3302,12 @@ class Database
      *
      * $tableDescriptor, $where はかなり多彩な指定が可能。下記のメソッドも参照。
      *
-     * - see {@link QueryBuilder::column()}
-     * - see {@link QueryBuilder::where()}
-     * - see {@link QueryBuilder::orderBy()}
-     * - see {@link QueryBuilder::limit()}
-     * - see {@link QueryBuilder::groupBy()}
-     * - see {@link QueryBuilder::having()}
+     * - see {@link SelectBuilder::column()}
+     * - see {@link SelectBuilder::where()}
+     * - see {@link SelectBuilder::orderBy()}
+     * - see {@link SelectBuilder::limit()}
+     * - see {@link SelectBuilder::groupBy()}
+     * - see {@link SelectBuilder::having()}
      * - see {@link fetchArray()}
      * - see {@link fetchAssoc()}
      * - see {@link fetchLists()}
@@ -3347,17 +3347,17 @@ class Database
      * @used-by selectValueForAffect()
      *
      * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
-     * @param array|string $where WHERE 条件（{@link QueryBuilder::where()}）
-     * @param array|string $orderBy 並び順（{@link QueryBuilder::orderBy()}）
-     * @param array|int $limit 取得件数（{@link QueryBuilder::limit()}）
-     * @param array|string $groupBy グルーピング（{@link QueryBuilder::groupBy()}）
-     * @param array|string $having HAVING 条件（{@link QueryBuilder::having()}）
-     * @return QueryBuilder クエリビルダオブジェクト
+     * @param array|string $where WHERE 条件（{@link SelectBuilder::where()}）
+     * @param array|string $orderBy 並び順（{@link SelectBuilder::orderBy()}）
+     * @param array|int $limit 取得件数（{@link SelectBuilder::limit()}）
+     * @param array|string $groupBy グルーピング（{@link SelectBuilder::groupBy()}）
+     * @param array|string $having HAVING 条件（{@link SelectBuilder::having()}）
+     * @return SelectBuilder クエリビルダオブジェクト
      */
     public function select($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        $builder = $this->createQueryBuilder();
-        return $builder->build(array_combine(QueryBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]), true);
+        $builder = $this->createSelectBuilder();
+        return $builder->build(array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]), true);
     }
 
     /**
@@ -3377,13 +3377,13 @@ class Database
      *
      * $tableDescriptor, $where はかなり多彩な指定が可能。下記のメソッドも参照。
      *
-     * - see {@link QueryBuilder::cast()}
-     * - see {@link QueryBuilder::column()}
-     * - see {@link QueryBuilder::where()}
-     * - see {@link QueryBuilder::orderBy()}
-     * - see {@link QueryBuilder::limit()}
-     * - see {@link QueryBuilder::groupBy()}
-     * - see {@link QueryBuilder::having()}
+     * - see {@link SelectBuilder::cast()}
+     * - see {@link SelectBuilder::column()}
+     * - see {@link SelectBuilder::where()}
+     * - see {@link SelectBuilder::orderBy()}
+     * - see {@link SelectBuilder::limit()}
+     * - see {@link SelectBuilder::groupBy()}
+     * - see {@link SelectBuilder::having()}
      *
      * @used-by entityArray()
      * @used-by entityArrayOrThrow()
@@ -3434,7 +3434,7 @@ class Database
      * @param array|string $where 条件
      * @param array|string $groupBy カラム名かその配列
      * @param array|string $having 条件
-     * @return QueryBuilder 集約クエリビルダ
+     * @return SelectBuilder 集約クエリビルダ
      */
     public function selectAggregate($aggregation, $column, $where = [], $groupBy = [], $having = [])
     {
@@ -3464,7 +3464,7 @@ class Database
      * @used-by yieldLists()
      * @used-by yieldPairs()
      *
-     * @param string|QueryBuilder $sql SQL
+     * @param string|SelectBuilder $sql SQL
      * @param iterable $params SQL パラメータ
      * @return Yielder foreach で回せるオブジェクト
      */
@@ -3472,7 +3472,7 @@ class Database
     {
         $chunk = null;
         $converter = $this->_getConverter($sql);
-        if ($sql instanceof QueryBuilder) {
+        if ($sql instanceof SelectBuilder) {
             $chunk = $sql->getLazyChunk();
             $converter = fn($rows, $metadata) => $sql->postselect(array_map(fn($row) => $converter($row, $metadata), $rows), !$chunk);
         }
@@ -3508,7 +3508,7 @@ class Database
      * @used-by exportJson()
      *
      * @param string|AbstractGenerator $generator 出力タイプ
-     * @param string|QueryBuilder $sql SQL
+     * @param string|SelectBuilder $sql SQL
      * @param iterable $params SQL パラメータ
      * @param array $config 出力パラメータ
      * @param string|resource|null $file 出力先。 null を与えると標準出力に書き出される
@@ -3591,12 +3591,12 @@ class Database
      *
      * @inheritdoc select()
      *
-     * @return QueryBuilder サブクエリビルダオブジェクト
+     * @return SelectBuilder サブクエリビルダオブジェクト
      */
     public function subselect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        $builder = $this->createQueryBuilder();
-        return $builder->setLazyMode()->build(array_combine(QueryBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]));
+        $builder = $this->createSelectBuilder();
+        return $builder->setLazyMode()->build(array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]));
     }
 
     /**
@@ -3637,19 +3637,19 @@ class Database
      * @used-by notSubexists()
      *
      * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
-     * @param array|string $where WHERE 条件（{@link QueryBuilder::where()}）
-     * @param array|string $orderBy 並び順（{@link QueryBuilder::orderBy()}）
-     * @param array|int $limit 取得件数（{@link QueryBuilder::limit()}）
-     * @param array|string $groupBy グルーピング（{@link QueryBuilder::groupBy()}）
-     * @param array|string $having HAVING 条件（{@link QueryBuilder::having()}）
-     * @return QueryBuilder クエリビルダオブジェクト
+     * @param array|string $where WHERE 条件（{@link SelectBuilder::where()}）
+     * @param array|string $orderBy 並び順（{@link SelectBuilder::orderBy()}）
+     * @param array|int $limit 取得件数（{@link SelectBuilder::limit()}）
+     * @param array|string $groupBy グルーピング（{@link SelectBuilder::groupBy()}）
+     * @param array|string $having HAVING 条件（{@link SelectBuilder::having()}）
+     * @return SelectBuilder クエリビルダオブジェクト
      */
     public function subquery($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         // build 前にあらかじめ setSubmethod して分岐する必要がある
-        $builder = $this->createQueryBuilder();
+        $builder = $this->createSelectBuilder();
         $builder->setSubmethod('query');
-        return $builder->build(array_combine(QueryBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]), true);
+        return $builder->build(array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]), true);
     }
 
     /**
@@ -3719,7 +3719,7 @@ class Database
      * @param array|string $aggregate 集約関数名
      * @param array|string $column サブテーブル名
      * @param array $where WHERE 条件
-     * @return QueryBuilder クエリビルダオブジェクト
+     * @return SelectBuilder クエリビルダオブジェクト
      */
     public function subaggregate($aggregate, $column, $where = [])
     {
@@ -3859,14 +3859,14 @@ class Database
      * // → クエリビルダも使える（倍の行を取得できる。あくまで例なので意味はない）
      * ```
      *
-     * @param array|string|QueryBuilder $unions union サブクエリ
+     * @param array|string|SelectBuilder $unions union サブクエリ
      * @param array|string $column 取得カラム [column]
      * @param array|string $where 条件
      * @param array|string $orderBy 単カラム名か[column=>asc/desc]な連想配列
      * @param array|int $limit 単数値か[offset=>count]な連想配列
      * @param array|string $groupBy カラム名かその配列
      * @param array|string $having 条件
-     * @return QueryBuilder クエリビルダオブジェクト
+     * @return SelectBuilder クエリビルダオブジェクト
      */
     public function union($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
@@ -3878,14 +3878,14 @@ class Database
      *
      * ALL で UNION される以外は {@link union()} と全く同じ。
      *
-     * @param array|string|QueryBuilder $unions union サブクエリ
+     * @param array|string|SelectBuilder $unions union サブクエリ
      * @param array|string $column 取得カラム [column]
      * @param array|string $where 条件
      * @param array|string $orderBy 単カラム名か[column=>asc/desc]な連想配列
      * @param array|int $limit 単数値か[offset=>count]な連想配列
      * @param array|string $groupBy カラム名かその配列
      * @param array|string $having 条件
-     * @return QueryBuilder クエリビルダオブジェクト
+     * @return SelectBuilder クエリビルダオブジェクト
      */
     public function unionAll($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
@@ -3895,9 +3895,9 @@ class Database
     /**
      * 特定レコードの前後のレコードを返す
      *
-     * {@link QueryBuilder::neighbor()} へのプロキシメソッド。
+     * {@link SelectBuilder::neighbor()} へのプロキシメソッド。
      *
-     * @inheritdoc QueryBuilder::neighbor()
+     * @inheritdoc SelectBuilder::neighbor()
      *
      * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
      */
@@ -4089,7 +4089,7 @@ class Database
             return [];
         }
 
-        $select = $this->createQueryBuilder();
+        $select = $this->createSelectBuilder();
         $select->select("$tmpname.$keyname");
         $select->from(new Expression('(' . implode(' UNION ', $selects) . ')', $params), $tmpname);
         $select->leftJoinOn($tablename, array_merge(arrayize($wheres), array_sprintf($joincols, "$tablename.%1\$s = $tmpname.%1\$s")));
@@ -4866,7 +4866,7 @@ class Database
      * @used-by insertSelectIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
-     * @param string|QueryBuilder $sql SELECT クエリ
+     * @param string|SelectBuilder $sql SELECT クエリ
      * @param array $columns カラム定義
      * @param iterable $params bind パラメータ
      * @return int|string|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement

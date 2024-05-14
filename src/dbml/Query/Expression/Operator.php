@@ -3,7 +3,6 @@
 namespace ryunosuke\dbml\Query\Expression;
 
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
-use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\array_depth;
 use function ryunosuke\dbml\array_each;
@@ -82,7 +81,7 @@ use function ryunosuke\dbml\str_subreplace;
  * @method static $this phrase($phrase) {フレーズ演算子}
  */
 // @formatter:on
-class Operator implements Queryable
+class Operator extends Expression
 {
     /// 内部演算子
     public const RAW    = '__RAW__';
@@ -163,12 +162,6 @@ class Operator implements Queryable
     /** @var bool 否定フラグ */
     private $not = false;
 
-    /** @var string __toString で返される文字列 */
-    private $string;
-
-    /** @var array パラメータ */
-    private $params;
-
     /**
      * 演算子を定義する
      *
@@ -236,6 +229,8 @@ class Operator implements Queryable
      */
     public function __construct($platform, $operator, $operand1, $operand2)
     {
+        parent::__construct(null, []);
+
         $this->platform = $platform;
         $this->operator = trim($operator);
         $this->operand1 = $operand1;
@@ -260,10 +255,10 @@ class Operator implements Queryable
      */
     public function __toString()
     {
-        if ($this->string === null) {
-            $this->string = $this->_getString();
+        if ($this->expr === null) {
+            $this->expr = $this->_getString();
         }
-        return $this->string;
+        return $this->expr;
     }
 
     /**
@@ -291,7 +286,7 @@ class Operator implements Queryable
         if (isset(self::$registereds[$this->operator])) {
             $callback = self::$registereds[$this->operator];
             $result = $callback($this->operand1, $this->operand2);
-            [$this->string, $this->params] = first_keyvalue($result);
+            [$this->expr, $this->params] = first_keyvalue($result);
         }
         else {
             $method = self::METHODS[strlen($this->operator) ? strtoupper($this->operator) : self::COLVAL] ?? self::METHODS[''];
@@ -300,11 +295,11 @@ class Operator implements Queryable
             }
         }
 
-        if ($this->not && $this->string) {
-            $this->string = 'NOT (' . $this->string . ')';
+        if ($this->not && $this->expr) {
+            $this->expr = 'NOT (' . $this->expr . ')';
         }
 
-        return $this->string;
+        return $this->expr;
     }
 
     private function _default()
@@ -313,7 +308,7 @@ class Operator implements Queryable
         if (count($this->operand2) > 1) {
             $operands = "($operands)";
         }
-        $this->string = $this->operand1 . ' ' . strtoupper($this->operator) . concat(' ', $operands);
+        $this->expr = $this->operand1 . ' ' . strtoupper($this->operator) . concat(' ', $operands);
         $this->params = $this->operand2;
     }
 
@@ -333,7 +328,7 @@ class Operator implements Queryable
                 $params[] = $v;
             }
         }
-        $this->string = str_subreplace($this->operand1, '?', $maps);
+        $this->expr = str_subreplace($this->operand1, '?', $maps);
         $this->params = $params;
     }
 
@@ -358,13 +353,13 @@ class Operator implements Queryable
         if (count($this->operand2) !== 1) {
             throw new \UnexpectedValueException("SPACESHIP's operand2 must be array contains 1 elements.");
         }
-        $this->string = $this->platform->getSpaceshipSyntax($this->operand1);
-        $this->params = array_fill(0, substr_count($this->string, '?'), reset($this->operand2));
+        $this->expr = $this->platform->getSpaceshipSyntax($this->operand1);
+        $this->params = array_fill(0, substr_count($this->expr, '?'), reset($this->operand2));
     }
 
     private function _isnull()
     {
-        $this->string = $this->operand1 . ' ' . strtoupper($this->operator);
+        $this->expr = $this->operand1 . ' ' . strtoupper($this->operator);
         $this->params = [];
     }
 
@@ -373,7 +368,7 @@ class Operator implements Queryable
         if (count($this->operand2) !== 2) {
             throw new \UnexpectedValueException("BETWEEN's operand2 must be array contains 2 elements.");
         }
-        $this->string = $this->operand1 . ' ' . strtoupper($this->operator) . ' ? AND ?';
+        $this->expr = $this->operand1 . ' ' . strtoupper($this->operator) . ' ? AND ?';
         $this->params = array_map(function ($value) {
             // 無限指定は未指定と同じだが、 BETWEEN の構文上未指定は許されないので現実的な最小大値で代替する
             if (is_float($value) && is_infinite($value)) {
@@ -392,20 +387,20 @@ class Operator implements Queryable
         }
         $placeholder = implode(',', array_fill(0, count($this->operand2), $ph));
         $ORNULL = $allownull && in_array(null, $this->operand2, true) ? " OR {$this->operand1} IS NULL" : '';
-        $this->string = ($placeholder ? $this->operand1 . ' IN (' . $placeholder . ')' : "FALSE") . $ORNULL;
+        $this->expr = ($placeholder ? $this->operand1 . ' IN (' . $placeholder . ')' : "FALSE") . $ORNULL;
         $this->params = array_flatten($this->operand2);
     }
 
     private function _like($l, $r)
     {
-        $this->string = $this->operand1 . ' LIKE ?';
+        $this->expr = $this->operand1 . ' LIKE ?';
         $this->params = arrayize($l . $this->platform->escapeLike($this->operand2[0]) . $r);
     }
 
     private function _likein($l, $r)
     {
         $likes = array_fill(0, count($this->operand2), $this->operand1 . ' LIKE ?');
-        $this->string = implode(' OR ', $likes);
+        $this->expr = implode(' OR ', $likes);
         $this->params = array_map(function ($operand) use ($l, $r) {
             return $l . $this->platform->escapeLike($operand) . $r;
         }, $this->operand2);
@@ -457,7 +452,7 @@ class Operator implements Queryable
             }
             $patterns[$i] = implode(' AND ', Adhoc::wrapParentheses($patterns[$i]));
         }
-        $this->string = implode(' OR ', Adhoc::wrapParentheses($patterns));
+        $this->expr = implode(' OR ', Adhoc::wrapParentheses($patterns));
         $this->params = $params;
     }
 
@@ -480,7 +475,7 @@ class Operator implements Queryable
                 }
             }
         }, []);
-        $this->string = implode(' AND ', array_keys($cond));
+        $this->expr = implode(' AND ', array_keys($cond));
         $this->params = array_flatten($cond);
     }
 
@@ -492,7 +487,7 @@ class Operator implements Queryable
     public function not()
     {
         // string に null を入れて再生成を促す必要がある
-        $this->string = null;
+        $this->expr = null;
 
         $this->not = true;
         return $this;
@@ -510,37 +505,5 @@ class Operator implements Queryable
         $this->platform = $platform ?? $this->platform;
         $this->operand1 = $operand1;
         return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getParams()
-    {
-        // getString で params を入れているので呼ぶ必要がある
-        if ($this->string === null) {
-            $this->string = $this->_getString();
-        }
-        return $this->params;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getQuery()
-    {
-        return $this->__toString();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function merge(?array &$params)
-    {
-        $params = $params ?? [];
-        foreach ($this->getParams() as $param) {
-            $params[] = $param;
-        }
-        return $this->getQuery();
     }
 }

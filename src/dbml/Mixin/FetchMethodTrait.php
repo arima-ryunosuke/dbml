@@ -3,7 +3,7 @@
 namespace ryunosuke\dbml\Mixin;
 
 use ryunosuke\dbml\Database;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 
 trait FetchMethodTrait
 {
@@ -34,7 +34,7 @@ trait FetchMethodTrait
     }
 
     /**
-     * @uses QueryBuilder::fetch()
+     * @uses SelectBuilder::fetch()
      * @inheritdoc FetchMethodTrait::fetchArrayWithSql()
      */
     private function fetchArrayWithoutSql(iterable $params = [])
@@ -69,7 +69,7 @@ trait FetchMethodTrait
     }
 
     /**
-     * @uses QueryBuilder::fetch()
+     * @uses SelectBuilder::fetch()
      * @inheritdoc FetchMethodTrait::fetchArrayWithSql()
      */
     private function fetchAssocWithoutSql(iterable $params = [])
@@ -98,7 +98,7 @@ trait FetchMethodTrait
     }
 
     /**
-     * @uses QueryBuilder::fetch()
+     * @uses SelectBuilder::fetch()
      * @inheritdoc FetchMethodTrait::fetchArrayWithSql()
      */
     private function fetchListsWithoutSql(iterable $params = [])
@@ -127,7 +127,7 @@ trait FetchMethodTrait
     }
 
     /**
-     * @uses QueryBuilder::fetch()
+     * @uses SelectBuilder::fetch()
      * @inheritdoc FetchMethodTrait::fetchArrayWithSql()
      */
     private function fetchPairsWithoutSql(iterable $params = [])
@@ -164,7 +164,7 @@ trait FetchMethodTrait
     }
 
     /**
-     * @uses QueryBuilder::fetch()
+     * @uses SelectBuilder::fetch()
      * @inheritdoc FetchMethodTrait::fetchArrayWithSql()
      */
     private function fetchTupleWithoutSql(iterable $params = [])
@@ -198,7 +198,7 @@ trait FetchMethodTrait
     }
 
     /**
-     * @uses QueryBuilder::fetch()
+     * @uses SelectBuilder::fetch()
      * @inheritdoc FetchMethodTrait::fetchArrayWithSql()
      */
     private function fetchValueWithoutSql(iterable $params = [])

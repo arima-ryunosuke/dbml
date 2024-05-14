@@ -8,7 +8,7 @@
  * ### データベーススキーマ
  *
  * まず大前提として**別スキーマへのクエリは一切サポートしない**。
- * ただし、 {@link TableGateway} や {@link QueryBuilder} の話であり、 {@link Database::fetchArray} などで直接クエリを投げる場合はこの限りではない。
+ * ただし、 {@link TableGateway} や {@link SelectBuilder} の話であり、 {@link Database::fetchArray} などで直接クエリを投げる場合はこの限りではない。
  *
  * スキーマ情報はキャッシュに保存される。
  * このキャッシュは {@link Database::__construct()} のオプションで指定する。
@@ -230,7 +230,7 @@
  * ```
  *
  * ここまで来ると文字列ではなくほぼ php 構文になるのでかなり直感的になる。
- * テーブル記法については {@link QueryBuilder::column()} や {@link TableDescriptor} にも記載があるのでそちらも参照。
+ * テーブル記法については {@link SelectBuilder::column()} や {@link TableDescriptor} にも記載があるのでそちらも参照。
  *
  * ### テーブル名 ⇔ エンティティ名の自動変換
  *
@@ -282,7 +282,7 @@
  * |:--                                                     |:--
  * | t_article で select すると キーが Article で返ってくる | 単に返ってくるキーの違いであり、 自動でエンティティ化したりはしない。エンティティで欲しい場合は常に `cast()` を呼ぶ
  * | t_ancestor.*** で取得する子供列がエンティティ名になる  | 上記の派生。テーブル名を指定できない以上、エンティティで返すしかないため
- * | `$qb->cast(null)` するとエンティティインスタンスを返す | {@link QueryBuilder::cast()} を参照
+ * | `$qb->cast(null)` するとエンティティインスタンスを返す | {@link SelectBuilder::cast()} を参照
  * | `$db->Article` が取得可能になる                        | `Article` にあたるものは本来テーブル名だが、エンティティ名でも TableGateway が取得できるようになる
  *
  * 最後の項目について補足すると t_article ⇔ Article というマッピングが存在するとして、
@@ -404,7 +404,7 @@
  *
  * 原則として仮想カラムを引っ張るためには明示的な指定が必要で、 `*` や `!ignore` で引っ張ったとしても取得列に含まれることはない。
  * ただし追加するときに `implicit` を true にすると取得列に含まれるようになる（それでも `*` は不可）。
- * 仮想カラムを含めた全てを取得したい場合は '!' とする（{@link QueryBuilder::column()} を参照）。
+ * 仮想カラムを含めた全てを取得したい場合は '!' とする（{@link SelectBuilder::column()} を参照）。
  *
  * 明示使用の場合でも今のところ select, where, having でのみ使用可能。
  * orderBy は select に含めて指定すれば実現できるし、having も mysql であれば（設定次第で）直接式を指定することができるので、実質的には select, where でのみの使用となることが多いはず。
@@ -414,11 +414,11 @@ namespace ryunosuke\dbml {
     // ドキュメント内の名前解決用に use しているだけで深い意味はない
     use ryunosuke\dbml\Gateway\TableGateway;
     use ryunosuke\dbml\Metadata\Schema;
-    use ryunosuke\dbml\Query\Expression\TableDescriptor;
-    use ryunosuke\dbml\Query\QueryBuilder;
+    use ryunosuke\dbml\Query\SelectBuilder;
+    use ryunosuke\dbml\Query\TableDescriptor;
 
     assert(class_exists(TableGateway::class));
     assert(class_exists(Schema::class));
     assert(class_exists(TableDescriptor::class));
-    assert(class_exists(QueryBuilder::class));
+    assert(class_exists(SelectBuilder::class));
 }

@@ -3,14 +3,14 @@
 namespace ryunosuke\dbml\Mixin;
 
 use ryunosuke\dbml\Database;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 
 trait YieldTrait
 {
-    private function _convertQueryBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)
+    private function _convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)
     {
-        if ($tableDescriptor instanceof QueryBuilder) {
-            return $tableDescriptor->build(array_combine(QueryBuilder::CLAUSES, [[], $where, $orderBy, $limit, $groupBy, $having]), true);
+        if ($tableDescriptor instanceof SelectBuilder) {
+            return $tableDescriptor->build(array_combine(SelectBuilder::CLAUSES, [[], $where, $orderBy, $limit, $groupBy, $having]), true);
         }
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
     }
@@ -22,7 +22,7 @@ trait YieldTrait
      */
     public function yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->yield($this->_convertQueryBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('array');
+        return $this->getDatabase()->yield($this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('array');
     }
 
     /**
@@ -32,7 +32,7 @@ trait YieldTrait
      */
     public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->yield($this->_convertQueryBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('assoc');
+        return $this->getDatabase()->yield($this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('assoc');
     }
 
     /**
@@ -42,7 +42,7 @@ trait YieldTrait
      */
     public function yieldLists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->yield($this->_convertQueryBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('lists');
+        return $this->getDatabase()->yield($this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('lists');
     }
 
     /**
@@ -52,6 +52,6 @@ trait YieldTrait
      */
     public function yieldPairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
-        return $this->getDatabase()->yield($this->_convertQueryBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('pairs');
+        return $this->getDatabase()->yield($this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('pairs');
     }
 }

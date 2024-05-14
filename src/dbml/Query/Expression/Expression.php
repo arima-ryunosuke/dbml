@@ -13,10 +13,10 @@ use function ryunosuke\dbml\arrayize;
 class Expression implements Queryable
 {
     /** @var string 文字列表現 */
-    private $expr;
+    protected $expr;
 
     /** @var array bind パラメータ(optional) */
-    private $params;
+    protected $params;
 
     /**
      * 値を Expression 化して返す
@@ -145,6 +145,7 @@ class Expression implements Queryable
      */
     public function getParams()
     {
+        $this->__toString(); // 実質的なビルド
         return $this->params;
     }
 

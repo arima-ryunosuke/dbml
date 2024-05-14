@@ -2,14 +2,14 @@
 
 namespace ryunosuke\dbml\Mixin;
 
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 
 trait JoinTrait
 {
     /**
-     * 結合方法が INNER で結合条件指定の {@uses QueryBuilder::join()}
+     * 結合方法が INNER で結合条件指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function joinOn($table, $on, $from = null)
     {
@@ -17,9 +17,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が INNER で結合条件指定の {@uses QueryBuilder::join()}
+     * 結合方法が INNER で結合条件指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function innerJoinOn($table, $on, $from = null)
     {
@@ -27,9 +27,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が LEFT で結合条件指定の {@uses QueryBuilder::join()}
+     * 結合方法が LEFT で結合条件指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function leftJoinOn($table, $on, $from = null)
     {
@@ -37,9 +37,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が RIGHT で結合条件指定の {@uses QueryBuilder::join()}
+     * 結合方法が RIGHT で結合条件指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function rightJoinOn($table, $on, $from = null)
     {
@@ -47,9 +47,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が AUTO で外部キー指定の {@uses QueryBuilder::join()}
+     * 結合方法が AUTO で外部キー指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function joinForeign($table, $fkeyname = null, $from = null)
     {
@@ -57,9 +57,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が AUTO で外部キー指定の {@uses QueryBuilder::join()}
+     * 結合方法が AUTO で外部キー指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function autoJoinForeign($table, $fkeyname = null, $from = null)
     {
@@ -67,9 +67,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が INNER で外部キー指定の {@uses QueryBuilder::join()}
+     * 結合方法が INNER で外部キー指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function innerJoinForeign($table, $fkeyname = null, $from = null)
     {
@@ -77,9 +77,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が LEFT で外部キー指定の {@uses QueryBuilder::join()}
+     * 結合方法が LEFT で外部キー指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function leftJoinForeign($table, $fkeyname = null, $from = null)
     {
@@ -87,9 +87,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が RIGHT で外部キー指定の {@uses QueryBuilder::join()}
+     * 結合方法が RIGHT で外部キー指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function rightJoinForeign($table, $fkeyname = null, $from = null)
     {
@@ -97,7 +97,7 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が AUTO で結合条件・外部キー指定の {@uses QueryBuilder::join()}
+     * 結合方法が AUTO で結合条件・外部キー指定の {@uses SelectBuilder::join()}
      *
      * @inheritdoc TableGateway::join()
      */
@@ -107,9 +107,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が AUTO で結合条件・外部キー指定の {@uses QueryBuilder::join()}
+     * 結合方法が AUTO で結合条件・外部キー指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function autoJoinForeignOn($table, $on, $fkeyname = null, $from = null)
     {
@@ -117,9 +117,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が INNER で結合条件・外部キー指定の {@uses QueryBuilder::join()}
+     * 結合方法が INNER で結合条件・外部キー指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function innerJoinForeignOn($table, $on, $fkeyname = null, $from = null)
     {
@@ -127,9 +127,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が LEFT で結合条件・外部キー指定の {@uses QueryBuilder::join()}
+     * 結合方法が LEFT で結合条件・外部キー指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function leftJoinForeignOn($table, $on, $fkeyname = null, $from = null)
     {
@@ -137,9 +137,9 @@ trait JoinTrait
     }
 
     /**
-     * 結合方法が RIGHT で結合条件・外部キー指定の {@uses QueryBuilder::join()}
+     * 結合方法が RIGHT で結合条件・外部キー指定の {@uses SelectBuilder::join()}
      *
-     * @inheritdoc QueryBuilder::join()
+     * @inheritdoc SelectBuilder::join()
      */
     public function rightJoinForeignOn($table, $on, $fkeyname = null, $from = null)
     {

@@ -1,10 +1,11 @@
 <?php
 
-namespace ryunosuke\dbml\Query\Expression;
+namespace ryunosuke\dbml\Query\Clause;
 
 use Doctrine\DBAL\Types\PhpIntegerMappingType;
 use ryunosuke\dbml\Database;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\Expression\Expression;
+use ryunosuke\dbml\Query\SelectBuilder;
 use function ryunosuke\dbml\array_maps;
 use function ryunosuke\dbml\random_range;
 
@@ -17,7 +18,7 @@ use function ryunosuke\dbml\random_range;
  * 原則として「limit 件数」を返すことを期待してはならない。
  * 多く返すことはないが、少なく返すことはある。
  *
- * 将来的には現在 QueryBuilder に生えている byPrimary や bySecure などをここに移して管理する。
+ * 将来的には現在 SelectBuilder に生えている byPrimary や bySecure などをここに移して管理する。
  *
  * ```php
  * $db->select('tablename.columname')->orderBy(OrderBy::randomOrder());
@@ -30,7 +31,7 @@ class OrderBy
     public const CTE_TABLE_ALIAS = '__dbml_cte_table_alias';
     public const CTE_AUTO_PKEY   = Database::AUTO_DEPEND_KEY . '_cte';
 
-    public function __invoke(QueryBuilder $builder) { }
+    public function __invoke(SelectBuilder $builder) { }
 
     /**
      * 状態や統計に基づいてランダム化する
@@ -42,7 +43,7 @@ class OrderBy
     public static function random()
     {
         return new class extends OrderBy {
-            public function __invoke(QueryBuilder $builder)
+            public function __invoke(SelectBuilder $builder)
             {
                 $froms = $builder->getFromPart();
                 $alias = array_key_first($froms);
@@ -76,7 +77,7 @@ class OrderBy
     public static function randomOrder()
     {
         return new class extends OrderBy {
-            public function __invoke(QueryBuilder $builder)
+            public function __invoke(SelectBuilder $builder)
             {
                 return $builder->orderByRandom();
             }
@@ -94,7 +95,7 @@ class OrderBy
     public static function randomWhere()
     {
         return new class extends OrderBy {
-            public function __invoke(QueryBuilder $builder)
+            public function __invoke(SelectBuilder $builder)
             {
                 $random = $builder->getDatabase()->getCompatiblePlatform()->getRandomExpression(null);
                 $count = (int) $builder->countize()->value() ?: -1;
@@ -115,11 +116,11 @@ class OrderBy
     public static function randomOffset()
     {
         return new class extends OrderBy {
-            public function __invoke(QueryBuilder $builder)
+            public function __invoke(SelectBuilder $builder)
             {
                 $count = (int) $builder->countize()->value();
                 $offsets = $count ? random_range(0, $count - 1, $builder->getQueryPart('limit') ?? PHP_INT_MAX) : [];
-                $base = $builder->getDatabase()->createQueryBuilder()->from(self::CTE_TABLE);
+                $base = $builder->getDatabase()->createSelectBuilder()->from(self::CTE_TABLE);
                 $queries = array_maps($offsets, fn($offset) => (clone $base)->limit(1, $offset)) ?: $base;
                 $that = (clone $builder)->resetQueryPart(['orderBy', 'offset', 'limit']);
                 return $builder->getDatabase()->union($queries)->with(self::CTE_TABLE, $that)->orderByRandom();
@@ -138,7 +139,7 @@ class OrderBy
     public static function randomPK()
     {
         return new class extends OrderBy {
-            public function __invoke(QueryBuilder $builder)
+            public function __invoke(SelectBuilder $builder)
             {
                 $froms = $builder->getFromPart();
                 $alias = array_key_first($froms);
@@ -151,11 +152,11 @@ class OrderBy
                 foreach ($pkcols as $name => $column) {
                     $aliasname = self::CTE_AUTO_PKEY . "_{$alias}_{$name}";
                     $pkcolumns[] = $aliasname;
-                    $pkaliases[] = new Alias($aliasname, "$alias.$name", null, true);
+                    $pkaliases[] = new Select($aliasname, "$alias.$name", null, true);
                 }
                 $pkkeys = implode(',', $pkcolumns);
                 $pkkeys = count($pkcols) > 1 ? "($pkkeys)" : $pkkeys;
-                $pkwhere = $builder->getDatabase()->createQueryBuilder()->from(self::CTE_TABLE)->select(...$pkcolumns)->orderByRandom();
+                $pkwhere = $builder->getDatabase()->createSelectBuilder()->from(self::CTE_TABLE)->select(...$pkcolumns)->orderByRandom();
                 if ($limit) {
                     $pkwhere->limit($limit)->wrap('SELECT * FROM', self::CTE_TABLE_ALIAS); // for mysql (This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery)
                 }
@@ -181,7 +182,7 @@ class OrderBy
     public static function randomPKMinMax()
     {
         return new class extends OrderBy {
-            public function __invoke(QueryBuilder $builder)
+            public function __invoke(SelectBuilder $builder)
             {
                 $froms = $builder->getFromPart();
                 $alias = array_key_first($froms);
@@ -209,7 +210,7 @@ class OrderBy
     public static function randomPKMinMax2()
     {
         return new class extends OrderBy {
-            public function __invoke(QueryBuilder $builder)
+            public function __invoke(SelectBuilder $builder)
             {
                 $froms = $builder->getFromPart();
                 $alias = array_key_first($froms);
@@ -221,7 +222,7 @@ class OrderBy
                 $that = (clone $builder)->resetQueryPart(['orderBy', 'offset', 'limit']);
                 [$min, $max] = array_values((clone $that)->cast('array')->resetQueryPart('select')->select("$alias.$pkkey")->aggregate(['MIN', 'MAX'])->tuple());
                 $pkvals = random_range($min ?? 0, $max ?? 0, $limit ?? PHP_INT_MAX);
-                $base = $builder->getDatabase()->createQueryBuilder()->from(self::CTE_TABLE)->limit(1);
+                $base = $builder->getDatabase()->createSelectBuilder()->from(self::CTE_TABLE)->limit(1);
                 $queries = array_maps($pkvals, fn($pkval) => (clone $base)->where(["$pkkey >= ?" => $pkval]));
                 return $builder->getDatabase()->union($queries)->with(self::CTE_TABLE, $that)->orderByRandom();
             }

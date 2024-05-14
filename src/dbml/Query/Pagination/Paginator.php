@@ -4,7 +4,7 @@ namespace ryunosuke\dbml\Query\Pagination;
 
 use ryunosuke\dbml\Exception\InvalidCountException;
 use ryunosuke\dbml\Mixin\IteratorTrait;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 
 /**
  * クエリビルダを渡して paginate するとページングしてくれるクラス
@@ -40,7 +40,7 @@ class Paginator implements \IteratorAggregate, \Countable
 {
     use IteratorTrait;
 
-    /** @var QueryBuilder クエリビルダ */
+    /** @var SelectBuilder クエリビルダ */
     private $builder;
 
     /** @var int 現在ページ */
@@ -52,9 +52,9 @@ class Paginator implements \IteratorAggregate, \Countable
     /**
      * コンストラクタ
      *
-     * @param QueryBuilder $builder ページングに使用するクエリビルダ
+     * @param SelectBuilder $builder ページングに使用するクエリビルダ
      */
-    public function __construct(QueryBuilder $builder)
+    public function __construct(SelectBuilder $builder)
     {
         $this->builder = $builder;
         $this->setProvider(function () {

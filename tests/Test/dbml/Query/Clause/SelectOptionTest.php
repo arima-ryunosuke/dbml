@@ -1,8 +1,8 @@
 <?php
 
-namespace ryunosuke\Test\dbml\Query\Expression;
+namespace ryunosuke\Test\dbml\Query\Clause;
 
-use ryunosuke\dbml\Query\Expression\SelectOption;
+use ryunosuke\dbml\Query\Clause\SelectOption;
 
 class SelectOptionTest extends \ryunosuke\Test\AbstractUnitTestCase
 {

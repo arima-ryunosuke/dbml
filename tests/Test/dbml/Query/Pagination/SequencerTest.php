@@ -3,7 +3,7 @@
 namespace ryunosuke\Test\dbml\Query\Pagination;
 
 use ryunosuke\dbml\Query\Pagination\Sequencer;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\Test\Database;
 
 class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
@@ -12,7 +12,7 @@ class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         return array_map(function ($v) {
             return [
-                new Sequencer((new QueryBuilder($v[0]))->column('paging')),
+                new Sequencer((new SelectBuilder($v[0]))->column('paging')),
                 $v[0],
             ];
         }, parent::provideDatabase());

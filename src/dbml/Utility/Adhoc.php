@@ -6,7 +6,7 @@ use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Tools\DsnParser;
 use Psr\SimpleCache\CacheInterface;
 use ryunosuke\dbml\Query\Queryable;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 use function ryunosuke\dbml\is_stringable;
 use function ryunosuke\dbml\preg_capture;
 
@@ -111,7 +111,7 @@ class Adhoc
         if ($value === '') {
             return true;
         }
-        if ($value instanceof QueryBuilder && $value->isEmptyCondition()) {
+        if ($value instanceof SelectBuilder && $value->isEmptyCondition()) {
             return true;
         }
 
@@ -180,8 +180,8 @@ class Adhoc
 
         $result = [];
         foreach ($array as $key => $val) {
-            // QueryBuilder で submethod ならプレフィックスを付けない
-            if ($val instanceof QueryBuilder && ($val->getSubmethod() !== null && $val->getSubmethod() !== 'query')) {
+            // SelectBuilder で submethod ならプレフィックスを付けない
+            if ($val instanceof SelectBuilder && ($val->getSubmethod() !== null && $val->getSubmethod() !== 'query')) {
                 $result[$key] = $val;
                 continue;
             }

@@ -3,7 +3,7 @@
 namespace ryunosuke\dbml\Query\Pagination;
 
 use ryunosuke\dbml\Mixin\IteratorTrait;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 use function ryunosuke\dbml\first_keyvalue;
 
 /**
@@ -37,7 +37,7 @@ class Sequencer implements \IteratorAggregate, \Countable
 {
     use IteratorTrait;
 
-    /** @var QueryBuilder クエリビルダ */
+    /** @var SelectBuilder クエリビルダ */
     private $builder;
 
     /** @var array 検索カラム */
@@ -55,9 +55,9 @@ class Sequencer implements \IteratorAggregate, \Countable
     /**
      * コンストラクタ
      *
-     * @param QueryBuilder $builder ページングに使用するクエリビルダ
+     * @param SelectBuilder $builder ページングに使用するクエリビルダ
      */
-    public function __construct(QueryBuilder $builder)
+    public function __construct(SelectBuilder $builder)
     {
         $this->builder = $builder;
         $this->setProvider(function () {

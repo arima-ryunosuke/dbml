@@ -159,7 +159,7 @@ namespace ryunosuke\Test\Gateway {
             };
         }
 
-        public function getQueryBuilderColumn(Database $db)
+        public function getSelectBuilderColumn(Database $db)
         {
             return $db->subcount('t_comment');
         }

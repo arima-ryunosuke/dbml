@@ -3,7 +3,7 @@
 namespace ryunosuke\dbml\Mixin;
 
 use ryunosuke\dbml\Database;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 
 trait SelectAggregateTrait
 {
@@ -20,7 +20,7 @@ trait SelectAggregateTrait
      *
      * @inheritdoc Database::exists()
      *
-     * @return QueryBuilder EXISTS クエリビルダ
+     * @return SelectBuilder EXISTS クエリビルダ
      */
     public function selectExists($tableDescriptor = [], $where = [], $for_update = false)
     {
@@ -38,7 +38,7 @@ trait SelectAggregateTrait
      *
      * @inheritdoc Database::exists()
      *
-     * @return QueryBuilder NOT EXISTS クエリビルダ
+     * @return SelectBuilder NOT EXISTS クエリビルダ
      */
     public function selectNotExists($tableDescriptor = [], $where = [], $for_update = false)
     {

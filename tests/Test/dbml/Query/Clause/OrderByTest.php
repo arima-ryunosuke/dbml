@@ -1,8 +1,8 @@
 <?php
 
-namespace ryunosuke\Test\dbml\Query\Expression;
+namespace ryunosuke\Test\dbml\Query\Clause;
 
-use ryunosuke\dbml\Query\Expression\OrderBy;
+use ryunosuke\dbml\Query\Clause\OrderBy;
 use function ryunosuke\dbml\sql_format;
 
 class OrderByTest extends \ryunosuke\Test\AbstractUnitTestCase
@@ -24,7 +24,7 @@ class OrderByTest extends \ryunosuke\Test\AbstractUnitTestCase
             ['id' => 9],
         ]);
 
-        $builder = $db->createQueryBuilder();
+        $builder = $db->createSelectBuilder();
 
         $random = $builder->getDatabase()->getCompatiblePlatform()->getRandomExpression(null);
 

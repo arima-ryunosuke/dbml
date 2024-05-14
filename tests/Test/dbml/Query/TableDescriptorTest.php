@@ -1,10 +1,10 @@
 <?php
 
-namespace ryunosuke\Test\dbml\Query\Expression;
+namespace ryunosuke\Test\dbml\Query;
 
 use ryunosuke\dbml\Query\Expression\Expression;
-use ryunosuke\dbml\Query\Expression\TableDescriptor;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
+use ryunosuke\dbml\Query\TableDescriptor;
 use ryunosuke\Test\Database;
 
 class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
@@ -457,7 +457,7 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // qb
         $td = new TableDescriptor($database, 'test', $database->select('t_child'));
-        $this->assertInstanceOf(QueryBuilder::class, $td->table);
+        $this->assertInstanceOf(SelectBuilder::class, $td->table);
     }
 
     /**

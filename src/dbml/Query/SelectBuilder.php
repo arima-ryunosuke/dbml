@@ -15,12 +15,11 @@ use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\IteratorTrait;
 use ryunosuke\dbml\Mixin\JoinTrait;
 use ryunosuke\dbml\Mixin\OptionTrait;
-use ryunosuke\dbml\Query\Expression\Alias;
+use ryunosuke\dbml\Query\Clause\OrderBy;
+use ryunosuke\dbml\Query\Clause\Select;
+use ryunosuke\dbml\Query\Clause\SelectOption;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
-use ryunosuke\dbml\Query\Expression\OrderBy;
-use ryunosuke\dbml\Query\Expression\SelectOption;
-use ryunosuke\dbml\Query\Expression\TableDescriptor;
 use ryunosuke\dbml\Query\Pagination\Paginator;
 use ryunosuke\dbml\Query\Pagination\Sequencer;
 use ryunosuke\dbml\Utility\Adhoc;
@@ -53,9 +52,7 @@ use function ryunosuke\dbml\str_exists;
 
 // @formatter:off
 /**
- * クエリビルダークラス
- *
- * SELECT に特化していて、 AFFECT 系クエリをビルドすることはできない。
+ * SELECT ビルダークラス
  *
  * ### IteratorAggregate, Countable
  *
@@ -200,7 +197,7 @@ use function ryunosuke\dbml\str_exists;
  * @method $this|array|Entityable[] array(iterable $params = [])
  */
 // @formatter:on
-class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
+class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
 {
     use DebugInfoTrait;
     use OptionTrait;
@@ -307,7 +304,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     /** @var Statement prepare されたステートメント */
     private $statement;
 
-    /** @var QueryBuilder[] サブビルダー配列 */
+    /** @var SelectBuilder[] サブビルダー配列 */
     private $subbuilders = [];
 
     /** @var null|bool submethod(null で無効、true で有効、false で否定有効、文字列で集約関数) */
@@ -378,7 +375,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $this->setDefault($database->getOptions());
         // $this だと gc されずに参照が残り続けるので無名クラスのコンテキストにする（どうせ実行時に再バインドされる）
         $this->setProvider(\Closure::bind(function () {
-            /** @var QueryBuilder $this */
+            /** @var SelectBuilder $this */
             return $this->array();
         }, new class ( ) { }));
     }
@@ -493,19 +490,19 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
         // SELECT 句に手を加える
         foreach ($builder->sqlParts['select'] as $n => $select) {
-            if ($select instanceof Alias) {
+            if ($select instanceof Select) {
                 $alias = $select->getAlias();
                 $actual = $select->getActual();
 
                 $qalias = $cplatform->quoteIdentifierIfNeeded($alias);
                 if ($qalias !== $alias) {
-                    $builder->sqlParts['select'][$n] = new Alias($qalias, $actual, null, $select->isPlaceholdable());
+                    $builder->sqlParts['select'][$n] = new Select($qalias, $actual, null, $select->isPlaceholdable());
                 }
             }
         }
         // 全て自動系カラムだと実質空（後で伏せられるため）なので * を追加する
         if (array_all($builder->sqlParts['select'], function ($select) {
-            return $select instanceof Alias && $select->isPlaceholdable();
+            return $select instanceof Select && $select->isPlaceholdable();
         }, false)) {
             foreach ($builder->getFromPart() as $from) {
                 $builder->sqlParts['select'][] = $from['alias'] . '.*';
@@ -513,14 +510,14 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         }
         // 子セレクトを埋め込む
         if ($builder->subbuilders && $builder->getInjectChildColumn() && count($builder->sqlParts['select']) > 0) {
-            $toParentColumns = array_sprintf($builder->subbuilders, function (QueryBuilder $subbuilder, $key) {
+            $toParentColumns = array_sprintf($builder->subbuilders, function (SelectBuilder $subbuilder, $key) {
                 $that = clone $subbuilder;
 
                 // 自身の subbuilder は再帰しない(そいつの実行時にどうせ実行される)
                 $selects = $that->getQueryPart('select');
                 $that->resetQueryPart('select');
                 $selects = array_filter($selects, function ($select) {
-                    return !($select instanceof Alias && $select->isPlaceholdable());
+                    return !($select instanceof Select && $select->isPlaceholdable());
                 });
                 $that->select(...$selects);
 
@@ -699,7 +696,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
         }
 
-        $detectForeign = function (QueryBuilder $subbuiler, TableDescriptor $parsed, $table, $from, $name) use ($prefix) {
+        $detectForeign = function (SelectBuilder $subbuiler, TableDescriptor $parsed, $table, $from, $name) use ($prefix) {
             if ($subbuiler->getPreparedStatement()) {
                 throw new \UnexpectedValueException("subquery does not support prepared statement.");
             }
@@ -736,7 +733,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             $concatPrimary = function ($alias, $columns) {
                 $psep = $this->database->quote($this->getPrimarySeparator());
                 $cplatform = $this->database->getCompatiblePlatform();
-                return new Alias($alias, $cplatform->getConcatExpression(array_values(array_implode($columns, $psep))), null, true);
+                return new Select($alias, $cplatform->getConcatExpression(array_values(array_implode($columns, $psep))), null, true);
             };
 
             $lazy_columns = array_strpad($fcols, $from['alias'] . '.', $prefix);
@@ -763,7 +760,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             $this->subbuilders[$name] = $subbuiler;
             return [
                 $concatPrimary($subbuiler->lazyParent, $lazy_columns),
-                new Alias($name, 'NULL', null, true),
+                new Select($name, 'NULL', null, true),
             ];
         };
 
@@ -818,8 +815,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     is_int($key) ? $column->modifier() : ($parsed->accessor ?: first_key($parsed->column))
                 );
             }
-            // QueryBuilder の遅延モードなら subbuilders に追加するだけ
-            elseif ($column instanceof QueryBuilder && $column->lazyMode) {
+            // SelectBuilder の遅延モードなら subbuilders に追加するだけ
+            elseif ($column instanceof SelectBuilder && $column->lazyMode) {
                 $parsed = new TableDescriptor($this->database, $key, []);
                 $result[] = $detectForeign(
                     clone $column,
@@ -829,8 +826,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     $parsed->condition ? ($parsed->accessor ?? $key) : $key
                 );
             }
-            // QueryBuilder なら文字列化したものをカッコつきで select + パラメータ追加
-            elseif ($column instanceof QueryBuilder && !$column->lazyMode) {
+            // SelectBuilder なら文字列化したものをカッコつきで select + パラメータ追加
+            elseif ($column instanceof SelectBuilder && !$column->lazyMode) {
                 // サブクエリで order は無意味
                 $column->detectAutoOrder(false);
 
@@ -841,14 +838,14 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                         $column = $this->database->getCompatiblePlatform()->convertSelectExistsQuery($column);
                     }
                 }
-                $result[] = Alias::forge($key, new Expression($column->getQuery(), $column->getParams()), $prefix);
+                $result[] = Select::forge($key, new Expression($column->getQuery(), $column->getParams()), $prefix);
             }
             // SelectOption は単純に addSelectOption するだけ
             elseif ($column instanceof SelectOption) {
                 $this->addSelectOption($column);
             }
             // Alias はそのまま
-            elseif ($column instanceof Alias) {
+            elseif ($column instanceof Select) {
                 $result[] = $column;
             }
             // Closure は callbacks に入れる
@@ -858,13 +855,13 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     if ($param->isDefaultValueAvailable()) {
                         if (is_null($param->getDefaultValue())) {
                             $args[$n] = $key;
-                            $result[] = Alias::forge($args[$n], $key, $prefix);
+                            $result[] = Select::forge($args[$n], $key, $prefix);
                         }
                         elseif (is_string($param->getDefaultValue())) {
                             [$modifier, $colname] = array_pad(explode('.', $param->getDefaultValue(), 2), -2, $accessor);
                             $args[$n] = Database::AUTO_DEPEND_KEY . "{$modifier}___{$colname}";
-                            $result[] = Alias::forge($key, 'NULL');
-                            $result[] = Alias::forge($args[$n], "{$modifier}.{$colname}", $prefix);
+                            $result[] = Select::forge($key, 'NULL');
+                            $result[] = Select::forge($args[$n], "{$modifier}.{$colname}", $prefix);
                         }
                         else {
                             throw new \InvalidArgumentException('Currently only ?string is allowed as default values.');
@@ -872,25 +869,25 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     }
                     else {
                         $args[$n] = null;
-                        $result[] = Alias::forge($key, 'NULL');
+                        $result[] = Select::forge($key, 'NULL');
                     }
                 }
                 $this->callbacks[$key] = [$column, array_all($args, 'is_null') ? [] : $args];
             }
             // Expression なら文字列化したものをそのまま select
             elseif ($column instanceof Expression) {
-                $result[] = Alias::forge($key, $column, $prefix);
+                $result[] = Select::forge($key, $column, $prefix);
             }
             // .. プレフィクスなら「親カラムの参照」（識別のために $prefix を付与しないで追加する）
             elseif (is_string($column) && strpos($column, '..') === 0) {
-                $result[] = Alias::forge($key, $column);
+                $result[] = Select::forge($key, $column);
             }
             // 上記以外。文字列として扱う
             else {
                 foreach (split_noempty(',', (string) $column) as $col) {
                     // エイリアスをバラす
-                    [$key, $col] = Alias::split($col, $key);
-                    $result[] = Alias::forge($key, $prefix . $col, $prefix);
+                    [$key, $col] = Select::split($col, $key);
+                    $result[] = Select::forge($key, $prefix . $col, $prefix);
                 }
             }
         }
@@ -979,14 +976,14 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                             }
                             elseif ($vcol instanceof Queryable) {
                                 $vcolq = clone $vcol;
-                                if ($vcolq instanceof QueryBuilder && ($vcolq->submethod !== null || $vcolq->lazyMode !== null)) {
+                                if ($vcolq instanceof SelectBuilder && ($vcolq->submethod !== null || $vcolq->lazyMode !== null)) {
                                     foreach ($froms as $from) {
                                         if ($vcolq->setSubwhere($from['table'], $from['alias'])) {
                                             break;
                                         }
                                     }
                                 }
-                                if ($vcolq instanceof QueryBuilder && $vcolq->lazyMode !== null) {
+                                if ($vcolq instanceof SelectBuilder && $vcolq->lazyMode !== null) {
                                     $vcolq->andWhere($cols)->exists();
                                     $cols = [true];
                                 }
@@ -1015,7 +1012,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 }
             }
             // サブクエリビルダ(subexists, submax, sub...)
-            if ($param instanceof QueryBuilder && ($submethod = $param->getSubmethod()) !== null) {
+            if ($param instanceof SelectBuilder && ($submethod = $param->getSubmethod()) !== null) {
                 // "P" or "P:fkey" or "colname|P" or "colname|P:fkey"
                 $conds = is_bool($submethod) ? "|$cond" : $cond;
                 $colname = preg_splice('#\|([a-z0-9_]+)(:([a-z0-9_]+))?#ui', '', $conds, $matches);
@@ -1078,7 +1075,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             // SELECT 句と比較
             foreach ($this->sqlParts['select'] as $select) {
                 // エイリアス指定ならそれを使う
-                if ($select instanceof Alias) {
+                if ($select instanceof Select) {
                     $select = $select->getAlias();
                 }
 
@@ -1096,8 +1093,8 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
             // FROM 句と比較
             foreach ($this->getFromPart() as $table) {
-                // QueryBuilder なら更に再帰
-                if ($table['table'] instanceof QueryBuilder) {
+                // SelectBuilder なら更に再帰
+                if ($table['table'] instanceof SelectBuilder) {
                     if ($table['table']->_isSecureColumn($column, $table['alias'])) {
                         return true;
                     }
@@ -1110,7 +1107,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                         assert($vtable); // @codeCoverageIgnore
                     }
                     if ($cte = $this->sqlParts['with'][$table['table']] ?? null) {
-                        if ($cte instanceof QueryBuilder && $cte->_isSecureColumn($column, $table['alias'])) {
+                        if ($cte instanceof SelectBuilder && $cte->_isSecureColumn($column, $table['alias'])) {
                             return true;
                         }
                     }
@@ -1149,7 +1146,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $selects = $this->getQueryPart('select');
         foreach ($selects as $n => $select) {
             $palias = null;
-            if ($select instanceof Alias && is_string($select->getActual())) {
+            if ($select instanceof Select && is_string($select->getActual())) {
                 $palias = $select->getAlias();
                 $select = $select->getActual();
             }
@@ -1970,7 +1967,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                     }
                 }
 
-                if ($jointable instanceof QueryBuilder) {
+                if ($jointable instanceof SelectBuilder) {
                     $this->from($jointable, $join->accessor, $join->jointype, $jcondition, $join->fkeyname, $parent);
                 }
                 else {
@@ -2028,7 +2025,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
                 elseif (ctype_digit("$alias")) {
                     $unset = $n === intval($alias);
                 }
-                elseif ($select instanceof Alias) {
+                elseif ($select instanceof Select) {
                     $unset = $alias === $select->getAlias() || Database::AUTO_PRIMARY_KEY . $alias === $select->getAlias();
                 }
                 else {
@@ -2037,7 +2034,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
                 if ($unset) {
                     unset($this->sqlParts['select'][$n]);
-                    if ($select instanceof Alias) {
+                    if ($select instanceof Select) {
                         unset($this->callbacks[$select->getAlias()]);
                         unset($this->subbuilders[$select->getAlias()]);
                     }
@@ -2055,7 +2052,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *
      * 結合タイプや結合条件をまとめて指定して FROM, JOIN を構成できるが、複雑極まりないので使用は非推奨（FROM 句の設定は {@link column()} を使用すれば基本的に不要）。
      *
-     * @param string|array|QueryBuilder $table 対象テーブル
+     * @param string|array|SelectBuilder $table 対象テーブル
      * @param ?string $alias テーブルエイリアス
      * @param ?string $type INNER, LEFT などの JOIN タイプ
      * @param array|string|null $condition 結合条件。 {@link where()} と同じ形式が使える
@@ -2074,7 +2071,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             [$alias, $table] = first_keyvalue($table);
         }
         if (!$alias && is_string($table)) {
-            [$alias, $table] = Alias::split($table, $alias);
+            [$alias, $table] = Select::split($table, $alias);
         }
         if ($table instanceof Queryable) {
             if ($alias === null) {
@@ -2200,10 +2197,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             return $this->andWhere($condition);
         }
 
-        $qb = new QueryBuilder($this->database);
+        $qb = new SelectBuilder($this->database);
         $qb->sqlParts = $this->sqlParts;
         $qb->where($condition);
-        if ($table instanceof QueryBuilder) {
+        if ($table instanceof SelectBuilder) {
             $qb->andWhere($table->onConditions);
         }
         $conditionExpr = new Expression($this->_getConditionClause($qb->sqlParts['where'] ?: [1]), $qb->getParams('where'));
@@ -2271,7 +2268,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * @used-by rightJoinForeignOn()
      *
      * @param string $type 結合タイプ（CROSS, INNER, LEFT, RIGHT, AUTO）
-     * @param string|array|QueryBuilder $table 結合するテーブル
+     * @param string|array|SelectBuilder $table 結合するテーブル
      * @param string|array $on 結合条件。 {@link where()} と同じ形式が使える
      * @param ?string $fkeyname 外部キー名称。省略時は唯一の外部キーを使用（無かったり2個以上ある場合は例外）
      * @param ?string $from 結合させるテーブル。省略時は自動判別
@@ -2780,7 +2777,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     public function orderByPrimary($is_asc = true, $append = false)
     {
         if (!$frompart = $this->sqlParts['from']) {
-            throw new \UnexpectedValueException('query builder is not set "from".');
+            throw new \UnexpectedValueException('select builder is not set "from".');
         }
 
         $fromtable = reset($frompart);
@@ -2807,7 +2804,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     /**
      * 乱数による orderBy
      *
-     * ORDER BY RANDOM による素朴な方法で、特に工夫はない（QueryBuilder なので）。
+     * ORDER BY RANDOM による素朴な方法で、特に工夫はない（SelectBuilder なので）。
      * 原則として ORDER BY はリセットされる。
      * これは「指定 ORDER より先は不定」という RDBMS の動作に基づく。
      * （`ORDER BY A,B,C,RAND()` として A,B,C は保証されるがその先の保証はない（≒実質的にランダムと言える））
@@ -2960,7 +2957,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * // WHERE status = 'active'
      * ```
      *
-     * @param string|QueryBuilder $query クエリ
+     * @param string|SelectBuilder $query クエリ
      * @return $this 自分自身
      */
     public function union($query)
@@ -2980,7 +2977,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *
      * ALL で UNION される以外は {@link union()} と全く同じ。
      *
-     * @param string|QueryBuilder $query
+     * @param string|SelectBuilder $query
      * @return $this 自分自身
      */
     public function unionAll($query)
@@ -3038,7 +3035,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             $that->lockForUpdate();
         }
 
-        $exister = $that->database->createQueryBuilder();
+        $exister = $that->database->createSelectBuilder();
         $exister->select($that->database->getCompatiblePlatform()->convertSelectExistsQuery($that));
         $exister->detectAutoOrder(false);
         return $exister;
@@ -3074,7 +3071,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             // その際 select 句は不要だが、select 句を group,having に指定できる RDBMS もあるのでそれは残さなければならない
             $conditions = array_map('strval', array_merge($that->sqlParts['groupBy'], $that->sqlParts['having']));
             foreach ($that->sqlParts['select'] as $n => $select) {
-                if ($select instanceof Alias) {
+                if ($select instanceof Select) {
                     // group はともかく、having からカラム名を抽出するのは容易ではないので暫定措置（まぁ大抵は先頭だろう）
                     // ここの処理で SQL エラーが出るようなら呼び元で何とかするしかない
                     if (preg_grep('#^' . preg_quote($select->getAlias()) . '([^_0-9a-z]|$)#', $conditions)) {
@@ -3086,13 +3083,13 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             if (!$that->sqlParts['select']) {
                 $that->addSelect('1');
             }
-            $counter = $that->database->createQueryBuilder();
-            $counter->select(new Alias(self::COUNT_ALIAS, "COUNT($column)"));
+            $counter = $that->database->createSelectBuilder();
+            $counter->select(new Select(self::COUNT_ALIAS, "COUNT($column)"));
             $counter->from(['__dbml_auto_table' => $that]);
         }
         else {
             $that->resetQueryPart('select');
-            $counter = $that->select(new Alias(self::COUNT_ALIAS, "COUNT($column)"));
+            $counter = $that->select(new Select(self::COUNT_ALIAS, "COUNT($column)"));
         }
 
         return $counter;
@@ -3292,7 +3289,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * - before: ほぼ「SELECT クエリの直後」であり、サブビルダやクロージャの解決前
      * - after: ほぼ「return 直前」であり、サブビルダやクロージャの解決後
      *
-     * 引数は大本の行配列で、 $this は QueryBuilder で bind される。
+     * 引数は大本の行配列で、 $this は SelectBuilder で bind される。
      *
      * @param \Closure|null $callback コールバック
      * @return $this
@@ -3317,7 +3314,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     }
 
     /**
-     * 行フェッチ後に QueryBuilder 特有の処理を行う
+     * 行フェッチ後に SelectBuilder 特有の処理を行う
      *
      * ほぼ内部処理で明示的に呼ぶことはない。
      *
@@ -3529,7 +3526,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             $method = $tuples[$n]['method'];
             $aggregate = $tuples[$n]['aggregate'];
             $field = strpos($field, '*') === false ? $field : '*'; // for example: COUNT(TableName.*) -> COUNT(*)
-            $fields[$n] = new Alias($field . $delimiter . $aggregate, $platform->$method($field));
+            $fields[$n] = new Select($field . $delimiter . $aggregate, $platform->$method($field));
         }
         $this->sqlParts['select'] = array_merge($this->sqlParts['groupBy'], $fields);
 
@@ -4040,7 +4037,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $parts = $queryPartName ? $this->sqlParts[$queryPartName] : $this->sqlParts;
         $params = [];
         array_walk_recursive($parts, function ($param) use (&$params) {
-            if ($param instanceof Alias) {
+            if ($param instanceof Select) {
                 $param = $param->getActual();
             }
             if ($param instanceof Queryable) {

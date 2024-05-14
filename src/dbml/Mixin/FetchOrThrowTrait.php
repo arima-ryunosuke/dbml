@@ -3,7 +3,7 @@
 namespace ryunosuke\dbml\Mixin;
 
 use ryunosuke\dbml\Database;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 
 trait FetchOrThrowTrait
 {
@@ -18,9 +18,9 @@ trait FetchOrThrowTrait
     }
 
     /**
-     * {@uses QueryBuilder::array()} の例外送出版
+     * {@uses SelectBuilder::array()} の例外送出版
      *
-     * @inheritdoc QueryBuilder::array()
+     * @inheritdoc SelectBuilder::array()
      */
     private function fetchArrayOrThrowWithoutSql(iterable $params = [])
     {
@@ -38,9 +38,9 @@ trait FetchOrThrowTrait
     }
 
     /**
-     * {@uses QueryBuilder::assoc()} の例外送出版
+     * {@uses SelectBuilder::assoc()} の例外送出版
      *
-     * @inheritdoc QueryBuilder::assoc()
+     * @inheritdoc SelectBuilder::assoc()
      */
     private function fetchAssocOrThrowWithoutSql(iterable $params = [])
     {
@@ -58,9 +58,9 @@ trait FetchOrThrowTrait
     }
 
     /**
-     * {@uses QueryBuilder::lists()} の例外送出版
+     * {@uses SelectBuilder::lists()} の例外送出版
      *
-     * @inheritdoc QueryBuilder::lists()
+     * @inheritdoc SelectBuilder::lists()
      */
     private function fetchListsOrThrowWithoutSql(iterable $params = [])
     {
@@ -78,9 +78,9 @@ trait FetchOrThrowTrait
     }
 
     /**
-     * {@uses QueryBuilder::pairs()} の例外送出版
+     * {@uses SelectBuilder::pairs()} の例外送出版
      *
-     * @inheritdoc QueryBuilder::pairs()
+     * @inheritdoc SelectBuilder::pairs()
      */
     private function fetchPairsOrThrowWithoutSql(iterable $params = [])
     {
@@ -98,9 +98,9 @@ trait FetchOrThrowTrait
     }
 
     /**
-     * {@uses QueryBuilder::tuple()} の例外送出版
+     * {@uses SelectBuilder::tuple()} の例外送出版
      *
-     * @inheritdoc QueryBuilder::tuple()
+     * @inheritdoc SelectBuilder::tuple()
      */
     private function fetchTupleOrThrowWithoutSql(iterable $params = [])
     {
@@ -118,9 +118,9 @@ trait FetchOrThrowTrait
     }
 
     /**
-     * {@uses QueryBuilder::value()} の例外送出版
+     * {@uses SelectBuilder::value()} の例外送出版
      *
-     * @inheritdoc QueryBuilder::value()
+     * @inheritdoc SelectBuilder::value()
      */
     private function fetchValueOrThrowWithoutSql(iterable $params = [])
     {

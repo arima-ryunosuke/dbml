@@ -3,8 +3,8 @@
 namespace ryunosuke\dbml\Mixin;
 
 use ryunosuke\dbml\Database;
-use ryunosuke\dbml\Query\Expression\TableDescriptor;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
+use ryunosuke\dbml\Query\TableDescriptor;
 
 trait SubAggregateTrait
 {
@@ -48,8 +48,8 @@ trait SubAggregateTrait
      * ```
      *
      * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
-     * @param array|string $where WHERE 条件（{@link QueryBuilder::where()}）
-     * @return QueryBuilder クエリビルダオブジェクト
+     * @param array|string $where WHERE 条件（{@link SelectBuilder::where()}）
+     * @return SelectBuilder クエリビルダオブジェクト
      */
     public function subexists($tableDescriptor = [], $where = [])
     {

@@ -24,11 +24,11 @@ use ryunosuke\dbml\Mixin\SelectOrThrowTrait;
 use ryunosuke\dbml\Mixin\SubAggregateTrait;
 use ryunosuke\dbml\Mixin\SubSelectTrait;
 use ryunosuke\dbml\Mixin\YieldTrait;
-use ryunosuke\dbml\Query\Expression\TableDescriptor;
 use ryunosuke\dbml\Query\Pagination\Paginator;
 use ryunosuke\dbml\Query\Pagination\Sequencer;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\dbml\Query\Statement;
+use ryunosuke\dbml\Query\TableDescriptor;
 use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\utility\attribute\Attribute\DebugInfo;
 use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
@@ -48,7 +48,7 @@ use function ryunosuke\dbml\split_noempty;
  * ゲートウェイクラス
  *
  * Database の各種メソッドで「$table に自身に指定した」かのように動作する。
- * Database や QueryBuilder に実装されているメソッドは大抵利用できるが、コード補完に出ないメソッドはなるべく使用しないほうがよい。
+ * Database や SelectBuilder に実装されているメソッドは大抵利用できるが、コード補完に出ないメソッドはなるべく使用しないほうがよい。
  *
  * ```php
  * // ゲートウェイはこのように Database 経由で取得する
@@ -819,7 +819,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * $row = $gw['*'];
      * // ただし、WHERE を指定しないとエラーになるので通常はこのように使用する
      * $row = $gw->[1]['*'];  // 主キー=1 の全カラムを返す（SELECT * FROM t_table WHERE id = 1）
-     * $row = $gw->[1]['**']; // 怠惰取得も可能（怠惰取得については QueryBuilder::column() を参照）
+     * $row = $gw->[1]['**']; // 怠惰取得も可能（怠惰取得については SelectBuilder::column() を参照）
      *
      * # カラム値を返す
      * $title = $gw['article_title'];
@@ -1482,14 +1482,14 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * SELECT 句を追加する（{@uses QueryBuilder::column()} を参照）
+     * SELECT 句を追加する（{@uses SelectBuilder::column()} を参照）
      *
      * ```php
      * // SELECT id, name FROM tablename
      * echo $gw->column('id, name');
      * ```
      *
-     * @inheritdoc QueryBuilder::column()
+     * @inheritdoc SelectBuilder::column()
      */
     public function column($tableDescriptor)
     {
@@ -1497,14 +1497,14 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * WHERE 句を追加する（{@uses QueryBuilder::where()} を参照）
+     * WHERE 句を追加する（{@uses SelectBuilder::where()} を参照）
      *
      * ```php
      * // SELECT * FROM tablename WHERE id = 99
      * echo $gw->where(['id' => 99]);
      * ```
      *
-     * @inheritdoc QueryBuilder::where()
+     * @inheritdoc SelectBuilder::where()
      */
     public function where($where)
     {
@@ -1512,14 +1512,14 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * ORDER BY 句を追加する（{@uses QueryBuilder::orderBy()} を参照）
+     * ORDER BY 句を追加する（{@uses SelectBuilder::orderBy()} を参照）
      *
      * ```php
      * // SELECT * FROM tablename ORDER BY id ASC
      * echo $gw->orderBy(['id']);
      * ```
      *
-     * @inheritdoc QueryBuilder::orderBy()
+     * @inheritdoc SelectBuilder::orderBy()
      */
     public function orderBy($orderBy)
     {
@@ -1527,14 +1527,14 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * LIMIT 句を追加する（{@uses QueryBuilder::limit()} を参照）
+     * LIMIT 句を追加する（{@uses SelectBuilder::limit()} を参照）
      *
      * ```php
      * // SELECT * FROM tablename LIMIT 50 OFFSET 40
      * echo $gw->limit([40 => 50]);
      * ```
      *
-     * @inheritdoc QueryBuilder::limit()
+     * @inheritdoc SelectBuilder::limit()
      */
     public function limit($limit)
     {
@@ -1542,14 +1542,14 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * GROUP BY 句を追加する（{@uses QueryBuilder::groupBy()} を参照）
+     * GROUP BY 句を追加する（{@uses SelectBuilder::groupBy()} を参照）
      *
      * ```php
      * // SELECT * FROM tablename GROUP BY group_key
      * echo $gw->groupBy('group_key');
      * ```
      *
-     * @inheritdoc QueryBuilder::groupBy()
+     * @inheritdoc SelectBuilder::groupBy()
      */
     public function groupBy($groupBy)
     {
@@ -1557,14 +1557,14 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * HAVING 句を追加する（{@uses QueryBuilder::having()} を参照）
+     * HAVING 句を追加する（{@uses SelectBuilder::having()} を参照）
      *
      * ```php
      * // SELECT * FROM tablename HAVING id = 99
      * echo $gw->having(['id' => 99]);
      * ```
      *
-     * @inheritdoc QueryBuilder::having()
+     * @inheritdoc SelectBuilder::having()
      */
     public function having($having)
     {
@@ -2117,7 +2117,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @param mixed $variadic_primary 主キー値あるいは配列
      * @param mixed $tableDescriptor 取得カラム
-     * @return QueryBuilder 主キーが指定されたクエリビルダ
+     * @return SelectBuilder 主キーが指定されたクエリビルダ
      */
     public function selectFind($variadic_primary, $tableDescriptor = [])
     {
@@ -2240,9 +2240,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * 前後のレコードを返す（{@uses QueryBuilder::neighbor()} を参照）
+     * 前後のレコードを返す（{@uses SelectBuilder::neighbor()} を参照）
      *
-     * @inheritdoc QueryBuilder::neighbor()
+     * @inheritdoc SelectBuilder::neighbor()
      */
     public function neighbor($predicates = [], $limit = 1)
     {
@@ -2292,7 +2292,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * 引数が与えられている場合は {@link Paginator::paginate()} も同時に行う。
      *
-     * @inheritdoc QueryBuilder::paginate()
+     * @inheritdoc SelectBuilder::paginate()
      */
     public function paginate($currentpage = null, $countperpage = null)
     {
@@ -2304,7 +2304,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * 引数が与えられている場合は {@link Sequencer::sequence()} も同時に行う。
      *
-     * @inheritdoc QueryBuilder::sequence()
+     * @inheritdoc SelectBuilder::sequence()
      */
     public function sequence($condition, $count, $orderbyasc = true)
     {
@@ -2314,9 +2314,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 分割して sequence してレコードジェネレータを返す
      *
-     * Gateway 版の {@link QueryBuilder::chunk()} 。
+     * Gateway 版の {@link SelectBuilder::chunk()} 。
      *
-     * @inheritdoc QueryBuilder::chunk()
+     * @inheritdoc SelectBuilder::chunk()
      */
     public function chunk($count, $column = null)
     {

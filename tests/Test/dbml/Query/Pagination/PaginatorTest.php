@@ -3,7 +3,7 @@
 namespace ryunosuke\Test\dbml\Query\Pagination;
 
 use ryunosuke\dbml\Query\Pagination\Paginator;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\Test\Database;
 
 class PaginatorTest extends \ryunosuke\Test\AbstractUnitTestCase
@@ -12,7 +12,7 @@ class PaginatorTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         return array_map(function ($v) {
             return [
-                new Paginator((new QueryBuilder($v[0]))->column('paging')),
+                new Paginator((new SelectBuilder($v[0]))->column('paging')),
                 $v[0],
             ];
         }, parent::provideDatabase());

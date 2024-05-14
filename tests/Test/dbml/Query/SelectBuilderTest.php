@@ -13,22 +13,22 @@ use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Generator\Yielder;
-use ryunosuke\dbml\Query\Expression\Alias;
+use ryunosuke\dbml\Query\Clause\Select;
+use ryunosuke\dbml\Query\Clause\SelectOption;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
-use ryunosuke\dbml\Query\Expression\SelectOption;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\Test\Database;
 use function ryunosuke\dbml\arrayval;
 use function ryunosuke\dbml\try_return;
 
-class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
+class SelectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
-    public static function provideQueryBuilder()
+    public static function provideSelectBuilder()
     {
         return array_map(function ($v) {
             return [
-                new QueryBuilder($v[0]),
+                new SelectBuilder($v[0]),
                 $v[0],
             ];
         }, parent::provideDatabase());
@@ -41,7 +41,7 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_getDefaultOptions($connection)
     {
         $database = new Database($connection);
-        $builder = new QueryBuilder($database);
+        $builder = new SelectBuilder($database);
         $options = $builder::getDefaultOptions();
         foreach ($options as $key => $dummy) {
             $this->assertSame($builder, $builder->{'set' . $key}($key));
@@ -52,8 +52,8 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_fetchXXX($builder)
     {
@@ -73,8 +73,8 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_yield($builder)
     {
@@ -211,8 +211,8 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test___call($builder)
     {
@@ -233,7 +233,7 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test___debugInfo()
     {
-        $builder = new QueryBuilder(self::getDummyDatabase());
+        $builder = new SelectBuilder(self::getDummyDatabase());
         $debugString = print_r($builder, true);
         $this->assertStringContainsString('sqlParts:', $debugString);
         $this->assertStringNotContainsString('database:', $debugString);
@@ -241,8 +241,8 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_iterate($builder)
     {
@@ -254,8 +254,8 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_cast($builder)
     {
@@ -293,8 +293,8 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_builder($builder)
     {
@@ -316,8 +316,8 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_scope($builder)
     {
@@ -331,8 +331,8 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_with($builder)
     {
@@ -377,15 +377,15 @@ class QueryBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_selects($builder)
     {
         $builder->column('foreign_p + foreign_c1');
         $builder->addSelect(1, 2);
         $builder->addSelect('NOW1()', 'NOW2()');
-        $builder->addSelect(new Alias('alias', 'actual'));
+        $builder->addSelect(new Select('alias', 'actual'));
         $builder->addSelect(['now' => 'NOW()']);
         $this->assertStringIgnoreBreak("
 SELECT foreign_p.*, foreign_c1.*,
@@ -402,8 +402,8 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_from($builder)
     {
@@ -430,8 +430,8 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_from_on($builder)
     {
@@ -443,8 +443,8 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column($builder)
     {
@@ -482,8 +482,8 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_ignore($builder)
     {
@@ -494,8 +494,8 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_string($builder)
     {
@@ -512,8 +512,8 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_closure($builder)
     {
@@ -576,8 +576,8 @@ FROM test1 t1 INNER JOIN test2 t2 ON t1.id = t2.id", $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_special($builder)
     {
@@ -608,8 +608,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_alias($builder)
     {
@@ -631,8 +631,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_entity($builder)
     {
@@ -641,8 +641,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_from($builder)
     {
@@ -672,8 +672,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_sub($builder)
     {
@@ -681,20 +681,20 @@ GREATEST(1,2,3) FROM test1', $builder);
         $this->assertEquals([
             'A.*',
             'A.article_id',
-            Alias::forge(Database::AUTO_PRIMARY_KEY . "c", 'A.article_id'),
-            Alias::forge("C", 'NULL'),
-            Alias::forge(Database::AUTO_PRIMARY_KEY . "comment", 'A.article_id'),
-            Alias::forge("Comment", 'NULL'),
+            Select::forge(Database::AUTO_PRIMARY_KEY . "c", 'A.article_id'),
+            Select::forge("C", 'NULL'),
+            Select::forge(Database::AUTO_PRIMARY_KEY . "comment", 'A.article_id'),
+            Select::forge("Comment", 'NULL'),
         ], $builder->getQueryPart('select'));
         $this->assertEquals([
-            Alias::forge(Database::AUTO_CHILD_KEY, 'C.comment_id'),
+            Select::forge(Database::AUTO_CHILD_KEY, 'C.comment_id'),
             'C.comment',
-            Alias::forge(Database::AUTO_PARENT_KEY, 'C.article_id'),
+            Select::forge(Database::AUTO_PARENT_KEY, 'C.article_id'),
         ], $builder->getSubbuilder('C')->getQueryPart('select'));
         $this->assertEquals([
-            Alias::forge(Database::AUTO_CHILD_KEY, 't_comment.comment_id'),
+            Select::forge(Database::AUTO_CHILD_KEY, 't_comment.comment_id'),
             't_comment.*',
-            Alias::forge(Database::AUTO_PARENT_KEY, 't_comment.article_id'),
+            Select::forge(Database::AUTO_PARENT_KEY, 't_comment.article_id'),
         ], $builder->getSubbuilder('Comment')->getQueryPart('select'));
 
         $builder->reset()->column([
@@ -703,13 +703,13 @@ GREATEST(1,2,3) FROM test1', $builder);
             ],
         ]);
         $this->assertEquals([
-            Alias::forge(Database::AUTO_PARENT_KEY, 't_article.article_id'),
+            Select::forge(Database::AUTO_PARENT_KEY, 't_article.article_id'),
         ], $builder->getSubbuilder('Article')->getQueryPart('select'));
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_arrayFetch($builder)
     {
@@ -764,8 +764,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_asterisk($builder)
     {
@@ -913,8 +913,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_notable($builder)
     {
@@ -999,8 +999,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_column_scope($builder, $database)
@@ -1058,8 +1058,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_primary($builder)
     {
@@ -1084,8 +1084,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_group($builder)
     {
@@ -1097,8 +1097,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_order($builder)
     {
@@ -1110,8 +1110,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_range($builder)
     {
@@ -1129,8 +1129,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_virtual($builder)
     {
@@ -1143,8 +1143,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_join_string($builder)
     {
@@ -1194,8 +1194,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_join_descripter($builder)
     {
@@ -1209,8 +1209,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_join_builder($builder)
     {
@@ -1223,8 +1223,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_join_auto($builder)
     {
@@ -1249,8 +1249,8 @@ GREATEST(1,2,3) FROM test1', $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_column_join_gateway($builder, $database)
@@ -1292,8 +1292,8 @@ ORDER BY P.id DESC
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_join_on($builder)
     {
@@ -1317,8 +1317,8 @@ ORDER BY P.id DESC
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_join_foreign($builder)
     {
@@ -1368,8 +1368,8 @@ ORDER BY P.id DESC
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_column_join_condition($builder)
     {
@@ -1402,8 +1402,8 @@ INNER JOIN foreign_c2 ON (foreign_c2.cid = foreign_p.id) AND (condition = 2)",
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_column_join_subcondition($builder, $database)
@@ -1501,8 +1501,8 @@ AND
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_unselect($builder)
     {
@@ -1540,7 +1540,7 @@ AND
         ], $builder->tuple());
 
         $builder->unselect(function ($select) {
-            return $select instanceof Alias && $select->getAlias() === 'id';
+            return $select instanceof Select && $select->getAlias() === 'id';
         });
         $this->assertStringContainsString('article_id', (string) $builder);
         $this->assertStringNotContainsString('AS id', (string) $builder);
@@ -1550,8 +1550,8 @@ AND
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_wheres($builder)
     {
@@ -1584,8 +1584,8 @@ AND
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_notWheres($builder)
     {
@@ -1617,8 +1617,8 @@ AND
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_andNotWheres($builder)
     {
@@ -1631,8 +1631,8 @@ AND
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_orWheres($builder)
     {
@@ -1645,8 +1645,8 @@ AND
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_orNotWheres($builder)
     {
@@ -1659,8 +1659,8 @@ AND
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_endWheres($builder)
     {
@@ -1682,8 +1682,8 @@ AND
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_wheres_primary($builder)
     {
@@ -1723,8 +1723,8 @@ AND
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_wheres_anycolumn($builder)
     {
@@ -1746,8 +1746,8 @@ AND
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_wheres_vcolumn($builder, $database)
@@ -1837,8 +1837,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_wheres_injection($builder)
     {
@@ -1874,8 +1874,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_wheres_builder($builder)
     {
@@ -1944,8 +1944,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_wheres_empty($builder)
     {
@@ -1959,8 +1959,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_wheres_filter($builder)
     {
@@ -2014,8 +2014,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_groupBy($builder)
     {
@@ -2029,8 +2029,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_havings($builder)
     {
@@ -2065,8 +2065,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_notHavings($builder)
     {
@@ -2098,8 +2098,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_andNotHavings($builder)
     {
@@ -2112,8 +2112,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_orHavings($builder)
     {
@@ -2126,8 +2126,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_orNotHavings($builder)
     {
@@ -2140,8 +2140,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_endHavings($builder)
     {
@@ -2163,8 +2163,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_orderBy($builder)
     {
@@ -2194,8 +2194,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_orderBySecure($builder)
     {
@@ -2306,8 +2306,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_orderByPrimary($builder)
     {
@@ -2326,12 +2326,12 @@ AND (FALSE)", $builder->queryInto());
         $this->assertQuery('SELECT test1.id FROM test1 ORDER BY hoge ASC, test1.id ASC, test1.id DESC', $builder->orderByPrimary(false, true));
 
         $builder->reset();
-        $this->assertException(new \UnexpectedValueException('query builder is not set'), L($builder)->orderByPrimary());
+        $this->assertException(new \UnexpectedValueException('select builder is not set'), L($builder)->orderByPrimary());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_orderByRandom($builder)
     {
@@ -2358,8 +2358,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_orderByNulls($builder)
     {
@@ -2404,8 +2404,8 @@ AND (FALSE)", $builder->queryInto());
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_comment($builder)
     {
@@ -2439,8 +2439,8 @@ SELECT test.* FROM test", $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_limit($builder)
     {
@@ -2470,8 +2470,8 @@ SELECT test.* FROM test", $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_page($builder)
     {
@@ -2512,8 +2512,8 @@ SELECT test.* FROM test", $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_union($builder)
     {
@@ -2542,8 +2542,8 @@ SELECT test.* FROM test", $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_vtable($builder, $database)
@@ -2572,8 +2572,8 @@ SELECT test.* FROM test", $builder);
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_vcolumn_lazy($builder, $database)
@@ -2627,8 +2627,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_existize($builder)
     {
@@ -2646,8 +2646,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_countize($builder)
     {
@@ -2749,8 +2749,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_paginate($builder)
     {
@@ -2767,8 +2767,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_sequence($builder)
     {
@@ -2785,8 +2785,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_chunk($builder)
     {
@@ -2821,8 +2821,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_neighbor($builder)
     {
@@ -2887,8 +2887,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_getSubbuilder($builder)
     {
@@ -2915,8 +2915,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_resetQueryPart($builder)
     {
@@ -2933,8 +2933,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_reset($builder)
     {
@@ -2955,8 +2955,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_subquery($builder)
     {
@@ -3027,8 +3027,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_subquery_fk($builder)
     {
@@ -3038,8 +3038,8 @@ SQL
             ],
         ]);
         $this->assertEquals([
-            Alias::forge(Database::AUTO_PRIMARY_KEY . 'foreign_d2', 'foreign_d1.d2_id'),
-            Alias::forge('foreign_d2', 'NULL'),
+            Select::forge(Database::AUTO_PRIMARY_KEY . 'foreign_d2', 'foreign_d1.d2_id'),
+            Select::forge('foreign_d2', 'NULL'),
         ], $builder->getQueryPart('select'));
 
         $builder->reset()->column([
@@ -3048,8 +3048,8 @@ SQL
             ],
         ]);
         $this->assertEquals([
-            Alias::forge(Database::AUTO_PRIMARY_KEY . 'foreign_d2', 'foreign_d1.id'),
-            Alias::forge('foreign_d2', 'NULL'),
+            Select::forge(Database::AUTO_PRIMARY_KEY . 'foreign_d2', 'foreign_d1.id'),
+            Select::forge('foreign_d2', 'NULL'),
         ], $builder->getQueryPart('select'));
 
         $this->assertException('ambiguous foreign keys', function () use ($builder) {
@@ -3062,8 +3062,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_subquery_refparent($builder, $database)
@@ -3113,8 +3113,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_subquery_noparent($builder, $database)
@@ -3150,8 +3150,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_subquery_limit($builder)
     {
@@ -3168,7 +3168,7 @@ SQL
             ],
         ];
 
-        foreach (QueryBuilder::LAZY_MODES as $mode => $opt) {
+        foreach (SelectBuilder::LAZY_MODES as $mode => $opt) {
             $actual = $builder->getDatabase()->selectTuple([
                 'multiprimary' => [
                     'sub{mainid}' => $builder->setLazyMode($mode)->column('multiprimary')->limit(2, 2)->array(),
@@ -3182,8 +3182,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_inheritLockMode($builder, $database)
@@ -3194,8 +3194,8 @@ SQL
         $writelock = trim($platform->getWriteLockSQL());
         $writelock = $writelock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_WRITE));
 
-        $parent = $database->createQueryBuilder();
-        $stringify = function (QueryBuilder $parent) use ($database) {
+        $parent = $database->createSelectBuilder();
+        $stringify = function (SelectBuilder $parent) use ($database) {
             return implode("\n", $database->preview(function () use ($parent) { $parent->tuple(); }));
         };
 
@@ -3228,8 +3228,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_gateway($builder, $database)
@@ -3243,8 +3243,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_lazymode($builder, $database)
@@ -3274,7 +3274,7 @@ SQL
             ],
         ];
 
-        foreach (QueryBuilder::LAZY_MODES as $mode => $opt) {
+        foreach (SelectBuilder::LAZY_MODES as $mode => $opt) {
             $actual = $builder->setDefaultLazyMode($mode)->column($columns)->where(['id' => 1])->tuple();
             if ($opt['generated']) {
                 $this->assertInstanceOf(\Generator::class, $actual['C1']);
@@ -3291,8 +3291,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_postselect($builder)
     {
@@ -3341,8 +3341,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_before_after($builder)
     {
@@ -3353,13 +3353,13 @@ SQL
         ]);
         $self = $this;
         $builder->before(function ($rows) use ($self) {
-            $self->assertInstanceOf(QueryBuilder::class, $this);
+            $self->assertInstanceOf(SelectBuilder::class, $this);
             $self->assertCount(2, $rows);
             $self->assertNull($rows[0]['func']);
             return $rows;
         });
         $builder->after(function ($rows) use ($self) {
-            $self->assertInstanceOf(QueryBuilder::class, $this);
+            $self->assertInstanceOf(SelectBuilder::class, $this);
             $self->assertCount(2, $rows);
             $self->assertEquals('A', $rows[0]['func']);
             unset($rows[1]);
@@ -3392,8 +3392,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_addSelectOption($builder)
     {
@@ -3406,8 +3406,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_join($builder)
     {
@@ -3420,8 +3420,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_join_on($builder)
     {
@@ -3440,8 +3440,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_join_subquery($builder)
     {
@@ -3456,8 +3456,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_join_implicit($builder)
     {
@@ -3475,8 +3475,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_innerJoinOn_table($builder)
     {
@@ -3490,8 +3490,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_innerJoinOn_alias($builder)
     {
@@ -3505,8 +3505,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_innerJoinOn_object($builder)
     {
@@ -3521,8 +3521,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_innerJoinOn_exec($builder)
     {
@@ -3540,8 +3540,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_autoJoinOn($builder)
     {
@@ -3572,8 +3572,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_leftJoinOn($builder)
     {
@@ -3583,8 +3583,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_rightJoinOn($builder)
     {
@@ -3594,8 +3594,8 @@ SQL
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_joinForeign($builder)
     {
@@ -3793,8 +3793,8 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_wrap($builder, $database)
@@ -3811,8 +3811,8 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_exists($builder, $database)
@@ -3828,8 +3828,8 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_setSubmethod($builder)
     {
@@ -3842,8 +3842,8 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_setSubwhere_fkey($builder)
     {
@@ -3877,8 +3877,8 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_setSubwhere_cond($builder)
     {
@@ -3895,8 +3895,8 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_setSubwhere_same($builder)
     {
@@ -3916,8 +3916,8 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_operatize($builder, $database)
@@ -3948,8 +3948,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_aggregate($builder)
     {
@@ -3983,8 +3983,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_hint($builder)
     {
@@ -3993,8 +3993,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_lockInShare($builder)
     {
@@ -4007,8 +4007,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_lockForUpdate($builder)
     {
@@ -4026,8 +4026,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_unlock($builder)
     {
@@ -4037,8 +4037,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_setDefaultOrder($builder)
     {
@@ -4061,8 +4061,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_cache($builder)
     {
@@ -4097,8 +4097,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_cache_sub($builder, $database)
@@ -4125,8 +4125,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_parameter($builder)
     {
@@ -4148,8 +4148,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_getSql_select($builder)
     {
@@ -4165,8 +4165,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_queryInto($builder)
     {
@@ -4175,8 +4175,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
     }
 
     /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      */
     function test_injectChildColumn($builder)
     {

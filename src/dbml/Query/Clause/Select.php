@@ -1,6 +1,6 @@
 <?php
 
-namespace ryunosuke\dbml\Query\Expression;
+namespace ryunosuke\dbml\Query\Clause;
 
 use ryunosuke\dbml\Database;
 use function ryunosuke\dbml\concat;
@@ -10,7 +10,7 @@ use function ryunosuke\dbml\concat;
  *
  * `new Alias('alias', 'actual')` を select に与えると "actual AS alias" に展開される。
  */
-class Alias
+class Select
 {
     /** @var string エイリアス名 */
     private $alias;
@@ -41,7 +41,7 @@ class Alias
         if (count($actuals) !== 1) {
             throw new \InvalidArgumentException('argument\'s length must be 1.');
         }
-        return new Alias($alias, $actuals[0]);
+        return new Select($alias, $actuals[0]);
     }
 
     /**
@@ -68,7 +68,7 @@ class Alias
      * @param string $alias エイリアス名
      * @param mixed $actual 実名
      * @param string|null $modifier $actual の修飾子
-     * @return Alias|mixed Alias 化できたら Alias オブジェクト、できなかったら $actual をそのまま返す
+     * @return Select|mixed Alias 化できたら Alias オブジェクト、できなかったら $actual をそのまま返す
      */
     public static function forge($alias, $actual, $modifier = null)
     {

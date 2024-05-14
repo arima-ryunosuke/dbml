@@ -2422,18 +2422,18 @@ FROM t_article Article", $Article->column([
         ]);
         // get から始まるメソッドで仮想カラムの取得ができる
         $this->assertEquals([
-            'article_id'    => '1',
-            'title'         => 'HELLO WORLD',
-            'checks'        => '',
-            'delete_at'     => null,
-            'statement'     => 'HELLO WORLD',
-            'closure'       => '1-HELLO WORLD',
-            'query_builder' => '3',
+            'article_id'     => '1',
+            'title'          => 'HELLO WORLD',
+            'checks'         => '',
+            'delete_at'      => null,
+            'statement'      => 'HELLO WORLD',
+            'closure'        => '1-HELLO WORLD',
+            'select_builder' => '3',
         ], $database->t_article->scope('id', 1)->tuple([
             '*',
             'statement',
             'closure',
-            'query_builder',
+            'select_builder',
         ]));
 
         // virtual から始まるメソッドで仮想カラムの更新・取得ができる

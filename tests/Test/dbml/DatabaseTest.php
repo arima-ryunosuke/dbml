@@ -24,10 +24,10 @@ use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
+use ryunosuke\dbml\Query\Clause\OrderBy;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
-use ryunosuke\dbml\Query\Expression\OrderBy;
-use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\dbml\Types\AbstractType;
@@ -209,7 +209,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertIsFloat($database->avg('test.id'));
 
         // select は select のはず
-        $this->assertInstanceOf(QueryBuilder::class, $database->select('t', []));
+        $this->assertInstanceOf(SelectBuilder::class, $database->select('t', []));
 
         // select 系
         $this->assertEquals($database->selectArray('test'), $database->select('test')->array());
@@ -778,7 +778,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $database->declareCommonTable([
             'fibonacci(n0, n)' => 'select 0, 1 union all select n, n0 + n from fibonacci WHERE n < 50',
-            'querybuilder'     => fn() => $database->selectAvg('aggregate.group_id2', [], 'group_id1'),
+            'selectbuilder'    => fn() => $database->selectAvg('aggregate.group_id2', [], 'group_id1'),
             'arrays'           => [
                 'column'  => ['aggregate' => ['group_id1', 'max_id2' => 'MAX(group_id2)']],
                 'groupBy' => 'group_id1',
@@ -792,7 +792,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             3 => 15.0,
             4 => 20.0,
             5 => 20.0,
-        ], $database->selectPairs('querybuilder'));
+        ], $database->selectPairs('selectbuilder'));
         $this->assertEquals([
             1 => 10.0,
             2 => 10.0,
@@ -4516,7 +4516,7 @@ CSV
         // 件数が一致するはず
         $this->assertCount($database->count('test'), $database->selectArray('multiprimary', 'mainid > 1000'));
 
-        // QueryBuilder でも同じ
+        // SelectBuilder でも同じ
         $database->insertSelect('multiprimary', $database->select('test.id - ?, id, name'), ['mainid', 'subid', 'name'], [-2000]);
         $this->assertCount($database->count('test'), $database->selectArray('multiprimary', 'mainid > 2000'));
 
@@ -6125,7 +6125,7 @@ INSERT INTO test (id, name) VALUES
         $primary = $database->modifyOrThrow('test', ['id' => new Expression('?', 13), 'name' => 'modify3_2']);
         $this->assertEquals(['id' => 13], $primary);
 
-        // QueryBuilder も数値で返るはず
+        // SelectBuilder も数値で返るはず
         $primary = $database->modifyOrThrow('test', ['id' => $database->select(['test T' => 'id+100'], ['id' => 1]), 'name' => 'modify4_1']);
         $this->assertEquals(['id' => 101], $primary);
         $primary = $database->modifyOrThrow('test', ['id' => $database->select(['test T' => 'id'], ['id' => 1]), 'name' => 'modify4_2']);
