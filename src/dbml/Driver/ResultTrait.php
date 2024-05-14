@@ -6,6 +6,11 @@ trait ResultTrait
 {
     protected $checkSameMethod;
 
+    public static function doctrineType(int|string $nativeType): ?string
+    {
+        return null;
+    }
+
     public function setSameCheckMethod(string $method)
     {
         $this->checkSameMethod = $method;

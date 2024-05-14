@@ -748,6 +748,34 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_getNowExpression($cplatform, $platform)
+    {
+        if ($platform instanceof SqlitePlatform) {
+            $this->assertExpression($cplatform->getNowExpression(0), "strftime('%Y-%m-%d %H:%M:%S', datetime('now', 'localtime'))", []);
+            $this->assertExpression($cplatform->getNowExpression(3), "strftime('%Y-%m-%d %H:%M:%f', datetime('now', 'localtime'))", []);
+        }
+        elseif ($platform instanceof MySQLPlatform) {
+            $this->assertExpression($cplatform->getNowExpression(0), "NOW(0)", []);
+            $this->assertExpression($cplatform->getNowExpression(3), "NOW(3)", []);
+        }
+        elseif ($platform instanceof PostgreSQLPlatform) {
+            $this->assertExpression($cplatform->getNowExpression(0), "LOCALTIMESTAMP(0)", []);
+            $this->assertExpression($cplatform->getNowExpression(3), "LOCALTIMESTAMP(3)", []);
+        }
+        elseif ($platform instanceof SQLServerPlatform) {
+            $this->assertExpression($cplatform->getNowExpression(0), "CAST(FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm:ss') as DATETIME)", []);
+            $this->assertExpression($cplatform->getNowExpression(3), "CAST(FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm:ss.fff') as DATETIME)", []);
+        }
+        else {
+            $this->assertExpression($cplatform->getNowExpression(99), 'NOW()', []);
+        }
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_getSleepExpression($cplatform, $platform)
     {
         if ($platform instanceof MySQLPlatform) {

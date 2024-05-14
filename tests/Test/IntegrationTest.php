@@ -6,9 +6,14 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception\DeadlockException;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\Comment;
+use function ryunosuke\dbml\try_return;
 
 /**
  * 複数のクラスをまたがる結合テストのようなテスト（その他大勢とも言う）
@@ -219,12 +224,12 @@ class IntegrationTest extends AbstractUnitTestCase
 
         $row = $database->t_article->as('A')->select([
             'title',
-            'titlex' => 'title2',
+            'titlex'              => 'title2',
             'title2',
             'title3',
             'title4',
             'comment_count',
-            'checks',
+            'checks|simple_array' => 'checks',
         ], $pk)->tuple();
 
         $this->assertEquals([
@@ -241,11 +246,10 @@ class IntegrationTest extends AbstractUnitTestCase
         $this->assertEquals([
             'article_id' => '9',
             'title'      => 'dummy title',
-            'checks'     => [1, 2, 3],
             'statement'  => 'DUMMY TITLE',
             'title5'     => 'DUMMY TITLE',
             'delete_at'  => null,
-        ], $database->t_article->as('A')->select('!', $pk)->tuple());
+        ], $database->t_article->as('A')->select('!checks', $pk)->tuple());
 
         $database->setAutoCastType([]);
     }
@@ -297,6 +301,92 @@ class IntegrationTest extends AbstractUnitTestCase
             // A.article_id <> 2 が効くので 2 の t_article は含まれない
             // LIMIT 2 が効くので 3 の t_article は含まれない
         ], $rows);
+    }
+
+    /**
+     * native type 関係
+     *
+     * native type が簡単に得られないのと直の値の確認が困難なので表示用に近い。
+     *
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_native_type($database)
+    {
+        $alltype = new Table('t_alltype',
+            [
+                new Column('id', Type::getType(Types::BIGINT), ['autoincrement' => true]),
+
+                new Column('c_boolean', Type::getType(Types::BOOLEAN), []),
+
+                new Column('c_smallint', Type::getType(Types::SMALLINT), []),
+                new Column('c_integer', Type::getType(Types::INTEGER), []),
+
+                new Column('c_float', Type::getType(Types::FLOAT), []),
+                new Column('c_decimal', Type::getType(Types::DECIMAL), []),
+
+                new Column('c_dateinterval', Type::getType(Types::DATEINTERVAL), []),
+                new Column('c_date', Type::getType(Types::DATE_MUTABLE), []),
+                new Column('c_time', Type::getType(Types::TIME_MUTABLE), []),
+                new Column('c_datetime', Type::getType(Types::DATETIME_MUTABLE), []),
+                new Column('c_datetimetz', Type::getType(Types::DATETIMETZ_MUTABLE), []),
+
+                new Column('c_string', Type::getType(Types::STRING), []),
+                new Column('c_binary', Type::getType(Types::BINARY), []),
+                new Column('c_text', Type::getType(Types::TEXT), []),
+                new Column('c_blob', Type::getType(Types::BLOB), []),
+            ],
+            [new Index('PRIMARY', ['id'], true, true)]
+        );
+        $smanager = $database->getConnection()->createSchemaManager();
+        try_return([$smanager, 'dropTable'], 't_alltype');
+
+        $smanager->createTable($alltype);
+        $database->getSchema()->refresh();
+
+        $result = $database->executeSelect('select * from t_alltype');
+        $metadata = $database->getCompatibleConnection()->getMetadata($result);
+        $result->fetchAllAssociative();
+        $nativeTypes = array_column($metadata, 'nativeType', 'aliasColumnName');
+        $doctrineTypes = array_column($metadata, 'doctrineType', 'aliasColumnName');
+
+        $this->assertIsArray($nativeTypes);
+        $this->assertIsArray($doctrineTypes);
+
+        //\ryunosuke\dbml\var_pretty($nativeTypes);
+        //\ryunosuke\dbml\var_pretty($doctrineTypes);
+        // sqlite3 はほとんど情報が得られないので飛ばす
+        if ($database->getCompatibleConnection()->getName() !== 'sqlite3') {
+            $this->assertEquals('integer', $doctrineTypes['id']);
+            $this->assertEquals('boolean', $doctrineTypes['c_boolean']);
+            $this->assertEquals('integer', $doctrineTypes['c_smallint']);
+            $this->assertEquals('integer', $doctrineTypes['c_integer']);
+            $this->assertEquals('float', $doctrineTypes['c_float']);
+            $this->assertEquals('decimal', $doctrineTypes['c_decimal']);
+            $this->assertEquals('string', $doctrineTypes['c_dateinterval']);
+            $this->assertEquals('date', $doctrineTypes['c_date']);
+            $this->assertEquals('time', $doctrineTypes['c_time']);
+            $this->assertEquals('datetime', $doctrineTypes['c_datetime']);
+            $this->assertStringStartsWith('datetime', $doctrineTypes['c_datetimetz']);
+            $this->assertEquals('string', $doctrineTypes['c_string']);
+            $this->assertThat($doctrineTypes['c_binary'], $this->logicalOr(
+                $this->equalTo('blob'),
+                $this->equalTo('string'),
+                $this->equalTo('binary'),
+            ));
+            $this->assertThat($doctrineTypes['c_text'], $this->logicalOr(
+                $this->equalTo('text'),
+                $this->equalTo('blob'),
+                $this->equalTo('binary'),
+            ));
+            $this->assertThat($doctrineTypes['c_blob'], $this->logicalOr(
+                $this->equalTo('blob'),
+                $this->equalTo('binary'),
+            ));
+        }
+
+        $smanager->dropTable($alltype->getName());
+        $database->getSchema()->refresh();
     }
 
     /**
@@ -407,7 +497,12 @@ class IntegrationTest extends AbstractUnitTestCase
                 as_set        = "A,B"
         SQL,);
 
+        // executeSelect だと型変換が効かないので明示的に変換する
         $syncrows = $database->executeSelect('SELECT * FROM t_alltype')->fetchAllAssociative();
+        $syncrows = array_map(function ($row) {
+            $row['as_json'] = json_decode($row['as_json'], true);
+            return $row;
+        }, $syncrows);
         $asyncrows = $database->executeSelectAsync('SELECT * FROM t_alltype')();
         $this->assertSame($syncrows, $asyncrows);
 

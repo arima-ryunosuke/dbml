@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace ryunosuke\dbal\Driver\PDO;
 
+use Doctrine\DBAL\Driver\PDO\Exception;
 use Doctrine\DBAL\Driver\Result as ResultInterface;
 use PDO;
 use PDOException;

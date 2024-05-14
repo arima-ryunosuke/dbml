@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Driver\PDO;
 
+use Doctrine\DBAL\Types\Types;
 use PDOStatement;
 use ryunosuke\dbml\Driver\ResultInterface;
 use ryunosuke\dbml\Driver\ResultTrait;
@@ -52,19 +53,105 @@ final class Result extends \ryunosuke\dbal\Driver\PDO\Result implements ResultIn
          * len: 32,
          * precision: 0,
          */
-
         $metadata = [];
         for ($i = 0, $l = $statement->columnCount(); $i < $l; $i++) {
             $meta = $statement->getColumnMeta($i);
+            $driverName = null;
+            foreach ($meta as $key => $value) {
+                if (preg_match('#(.+):(.+)#', $key, $m)) {
+                    $meta[$m[2]] = $value;
+                    $driverName = $m[1];
+                }
+            }
             $metadata[$i] = [
                 'actualTableName'  => $meta['table'] ?? "",
                 'actualColumnName' => null,
                 'aliasTableName'   => null,
                 'aliasColumnName'  => $meta['name'] ?? "",
-                'nativeType'       => $meta['native_type'] ?? "",
+                'nativeType'       => $meta['decl_type'] ?? $meta['native_type'] ?? "",
+                'doctrineType'     => self::doctrineType($meta['decl_type'] ?? $meta['native_type'] ?? "", $driverName),
             ];
         }
         return $metadata;
+    }
+
+    public static function doctrineType(int|string $nativeType, ?string $driverName = null): ?string
+    {
+        [$type,] = explode('(', strtolower($nativeType), 2);
+        switch ($type) {
+            case 'bit':
+            case 'bool':
+            case 'boolean':
+            case 'tiny':
+                return Types::BOOLEAN;
+
+            case 'int':
+            case 'int2':
+            case 'int4':
+            case 'int8':
+            case 'short':
+            case 'smallint':
+            case 'long':
+            case 'longlong':
+            case 'integer':
+            case 'int identity':
+            case 'bigint identity':
+                return Types::INTEGER;
+
+            case 'float':
+            case 'float4':
+            case 'float8':
+            case 'double':
+            case 'double precision':
+                return Types::FLOAT;
+
+            case 'numeric':
+            case 'newdecimal':
+                return Types::DECIMAL;
+
+            case 'date':
+                return Types::DATE_MUTABLE;
+
+            case 'time':
+                return Types::TIME_MUTABLE;
+
+            case 'datetime':
+            case 'datetime2':
+            case 'timestamp':
+                return Types::DATETIME_MUTABLE;
+
+            case 'timestamptz':
+            case 'datetimeoffset':
+                return Types::DATETIMETZ_MUTABLE;
+
+            case 'nvarchar':
+            case 'var_string':
+            case 'string':
+                return Types::STRING;
+
+            case 'bytea':
+            case 'varbinary':
+                return Types::BINARY;
+
+            case 'varchar':
+                return match ($driverName) {
+                    'sqlsrv' => Types::TEXT,
+                    default  => Types::STRING,
+                };
+
+            case 'text':
+            case 'clob':
+                return Types::TEXT;
+
+            case 'blob':
+                return Types::BLOB;
+
+            case 'json':
+                return Types::JSON;
+
+            default:
+                return null;
+        }
     }
 
     public function getMetadata(): array

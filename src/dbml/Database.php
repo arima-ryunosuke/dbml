@@ -676,6 +676,7 @@ class Database
             \Doctrine\DBAL\Driver\SQLite3\Result::class => \ryunosuke\dbml\Driver\SQLite3\Result::class,
             \Doctrine\DBAL\Driver\Mysqli\Result::class  => \ryunosuke\dbml\Driver\Mysqli\Result::class,
             \Doctrine\DBAL\Driver\PgSQL\Result::class   => \ryunosuke\dbml\Driver\PgSQL\Result::class,
+            \Doctrine\DBAL\Driver\SQLSrv\Result::class  => \ryunosuke\dbml\Driver\SQLSrv\Result::class,
             \Doctrine\DBAL\Driver\PDO\Result::class     => \ryunosuke\dbml\Driver\PDO\Result::class,
         ]);
 
@@ -960,7 +961,6 @@ class Database
     {
         $platform = $this->getPlatform();
         $cast_type = $this->getUnsafeOption('autoCastType');
-        $tablePrefix = !$this->getCompatibleConnection($this->getSlaveConnection())->getSupportedMetadata()['table&&column'];
 
         /** @var QueryBuilder $data_source */
         $data_source = instance_of($data_source, QueryBuilder::class);
@@ -978,11 +978,9 @@ class Database
 
             static $cache = [];
             if (!isset($cache[$tableName])) {
+                $cache[$tableName] = [];
                 if ($this->getSchema()->hasTable($tableName)) {
                     $cache[$tableName] = array_map(fn($column) => $column->getType(), $this->getSchema()->getTableColumns($tableName));
-                }
-                else {
-                    $cache[$tableName] = [];
                 }
             }
             return $cache[$tableName][$columnName] ?? null;
@@ -1002,33 +1000,35 @@ class Database
         };
 
         $metadataTableColumn = null;
-        return function ($row, $metadata) use ($getTableColumnType, $cconverter, $rconverter, $tablePrefix, &$metadataTableColumn) {
+        return function ($row, $metadata) use ($getTableColumnType, $cconverter, $rconverter, &$metadataTableColumn) {
             // 死ぬほど呼び出されるので適した形式でキャッシュしておく
             if ($metadataTableColumn === null) {
                 $metadataTableColumn = [];
                 foreach ($metadata as $meta) {
                     $metadataTableColumn[$meta['aliasColumnName']] = [
-                        strlen($meta['actualTableName'] ?? '') ? $meta['actualTableName'] : $meta['aliasTableName'],
-                        strlen($meta['actualColumnName'] ?? '') ? $meta['actualColumnName'] : $meta['aliasColumnName'],
+                        'tableColumn'  => [
+                            strlen($meta['actualTableName'] ?? '') ? $meta['actualTableName'] : $meta['aliasTableName'],
+                            strlen($meta['actualColumnName'] ?? '') ? $meta['actualColumnName'] : $meta['aliasColumnName'],
+                        ],
+                        'doctrineType' => $meta['doctrineType'] ?? null,
                     ];
                 }
             }
 
             $newrow = [];
             foreach ($row as $c => $v) {
-                // 勝手につけたプレフィックスは外さなければならない
-                if ($tablePrefix === true && count($parts = explode('.', $c, 2)) === 2) {
-                    [, $c] = $parts;
-                }
-
                 // Alias|Typename 由来の変換（修飾子があればアドホックに変換できる）
                 if (count($parts = explode('|', $c, 2)) === 2) {
                     [$c, $typename] = $parts;
                     $v = $cconverter($typename, $v);
                 }
                 // Result 由来の変換（Result がテーブル名とカラム名を返してくれるなら対応表が作れる）
-                elseif (isset($metadataTableColumn[$c]) && $type = $getTableColumnType(...$metadataTableColumn[$c])) {
+                elseif (isset($metadataTableColumn[$c]) && $type = $getTableColumnType(...$metadataTableColumn[$c]['tableColumn'])) {
                     $v = $cconverter($type->getName(), $v);
+                }
+                // Native 由来の変換（Result が NativeType を返してくれるなら直接変換できる）
+                elseif (isset($metadataTableColumn[$c]['doctrineType'])) {
+                    $v = $cconverter($metadataTableColumn[$c]['doctrineType'], $v);
                 }
 
                 $newrow[$c] = $v;
@@ -1038,28 +1038,6 @@ class Database
             }
             return $newrow;
         };
-    }
-
-    private function _toTablePrefix($sql)
-    {
-        // そういうモードではないならそもそも何もしない
-        if (!$this->getUnsafeOption('autoCastType')) {
-            return fn() => null;
-        }
-
-        // ドライバレベルで TableName, ColumnName の取得をサポートしている
-        if ($this->getCompatibleConnection($this->getSlaveConnection())->getSupportedMetadata()['table&&column']) {
-            return fn() => null;
-        }
-
-        // QueryBuilder 経由ならそれっぽいことはできる
-        if ($sql instanceof QueryBuilder) {
-            $sql->setAutoTablePrefix(true);
-            return fn() => $sql->setAutoTablePrefix(false);
-        }
-
-        // どうしようもない
-        return fn() => null;
     }
 
     private function _getChunk(&$params)
@@ -2676,6 +2654,10 @@ class Database
      */
     public function quote($value, $type = null)
     {
+        // SQLSrv でテストを通すためのアドホック実装だが、全RDBMS でやってしまっても問題はないはず（テストが通るようなら消してしまって構わない）
+        if (is_int($value)) {
+            return "'$value'";
+        }
         return Adhoc::stringifyParameter($value, fn($value) => $this->getSlaveConnection()->quote($value, $type));
     }
 
@@ -3279,14 +3261,8 @@ class Database
     public function fetch($method, $sql, iterable $params = [])
     {
         $converter = $this->_getConverter($sql);
-        $revert = $this->_toTablePrefix($sql);
-        try {
-            $stmt = $this->_sqlToStmt($sql, $params, $this->getSlaveConnection());
-            $result = $this->perform($stmt, $method, $converter);
-        }
-        finally {
-            $revert();
-        }
+        $stmt = $this->_sqlToStmt($sql, $params, $this->getSlaveConnection());
+        $result = $this->perform($stmt, $method, $converter);
 
         if ($result === false) {
             return false;

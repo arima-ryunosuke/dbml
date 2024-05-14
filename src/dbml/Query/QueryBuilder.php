@@ -340,9 +340,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
     /** @var bool '!' 付き条件で全てがフィルタされたか */
     private $emptyCondition;
 
-    /** @var bool テーブル名プレフィックスを付与するか */
-    private $autoTablePrefix = false;
-
     /** @var ?bool デフォルト order by が有効か否か（基本的に単純な toString では効かせない） */
     private $enableAutoOrder = null;
 
@@ -496,23 +493,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
 
         // SELECT 句に手を加える
         foreach ($builder->sqlParts['select'] as $n => $select) {
-            if ($builder->autoTablePrefix && is_string($select)) {
-                $parts = explode('.', $select);
-                if (count($parts) === 2 && $parts[1] !== '*') {
-                    $qalias = $cplatform->quoteIdentifierIfNeeded($select);
-                    $builder->sqlParts['select'][$n] = new Alias($qalias, $select);
-                }
-            }
-            elseif ($select instanceof Alias) {
+            if ($select instanceof Alias) {
                 $alias = $select->getAlias();
                 $actual = $select->getActual();
-
-                if ($builder->autoTablePrefix && is_string($actual) && !$select->isPlaceholdable()) {
-                    $parts = explode('.', $actual);
-                    if (count($parts) === 2 && $parts[1] !== '*') {
-                        $alias = $parts[0] . '.' . $alias;
-                    }
-                }
 
                 $qalias = $cplatform->quoteIdentifierIfNeeded($alias);
                 if ($qalias !== $alias) {
@@ -3676,21 +3659,6 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $this->enableAutoOrder = $use;
 
         if ($current !== $this->enableAutoOrder) {
-            $this->_dirty();
-        }
-        return $this;
-    }
-
-    /**
-     * @ignore
-     *
-     * @param bool $enable
-     * @return $this 自分自身
-     */
-    public function setAutoTablePrefix($enable)
-    {
-        if ($this->autoTablePrefix !== $enable) {
-            $this->autoTablePrefix = $enable;
             $this->_dirty();
         }
         return $this;

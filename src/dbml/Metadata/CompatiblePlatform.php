@@ -924,6 +924,36 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * now 表現を返す
+     *
+     * dbal では非推奨だがたまに使うことがある。
+     * ローカルタイム限定で形式も Y-m-d H:i:s.v のみ。
+     *
+     * @param int $precision 精度
+     * @return Expression NOW Expression
+     */
+    public function getNowExpression(int $precision = 0)
+    {
+        if ($this->platform instanceof SqlitePlatform) {
+            assert($precision === 0 || $precision === 3);
+            $f = $precision === 0 ? '%S' : '%f';
+            return new Expression("strftime('%Y-%m-%d %H:%M:$f', datetime('now', 'localtime'))");
+        }
+        if ($this->platform instanceof MySQLPlatform) {
+            return new Expression("NOW($precision)"); // パラメータで渡せない？
+        }
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            return new Expression("LOCALTIMESTAMP($precision)"); // パラメータで渡せない？
+        }
+        if ($this->platform instanceof SQLServerPlatform) {
+            $f = $precision ? '.' . str_repeat('f', $precision) : "";
+            return new Expression("CAST(FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm:ss$f') as DATETIME)"); // キャストしないと日付型にならない
+        }
+
+        return new Expression("NOW()");
+    }
+
+    /**
      * sleep 表現を返す
      *
      * @param float second 秒数

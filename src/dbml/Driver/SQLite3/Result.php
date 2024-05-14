@@ -20,9 +20,16 @@ final class Result extends \ryunosuke\dbal\Driver\SQLite3\Result implements Resu
                 'aliasTableName'   => null,
                 'aliasColumnName'  => $result->columnName($i),
                 'nativeType'       => (string) $result->columnType($i),
+                'doctrineType'     => self::doctrineType($result->columnType($i)),
             ];
         }
         return $metadata;
+    }
+
+    public static function doctrineType(int|string $nativeType): ?string
+    {
+        // なんか columnType が全て false になる？
+        return null;
     }
 
     public function getMetadata(): array

@@ -70,6 +70,9 @@ class CompatibleConnection
         if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
             return self::$storage[$this->connection][__FUNCTION__] = 'pgsql';
         }
+        if ($this->driverConnection instanceof Driver\SQLSrv\Connection) {
+            return 'sqlsrv';
+        }
 
         throw DBALException::notSupported(__METHOD__);
     }
@@ -97,6 +100,10 @@ class CompatibleConnection
         }
         // PgSql は対応していない…訳では無いが特殊なので doctrine に任せる
         if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
+            return self::$storage[$this->connection][__FUNCTION__] = false;
+        }
+        // SqlSrv は本当に対応していない
+        if ($this->driverConnection instanceof Driver\SQLSrv\Connection) {
             return self::$storage[$this->connection][__FUNCTION__] = false;
         }
 
@@ -177,6 +184,13 @@ class CompatibleConnection
                 'table&&column'   => true,
             ]);
         }
+        if ($this->driverConnection instanceof Driver\SQLSrv\Connection) {
+            /** @see \sqlsrv_field_metadata() */
+            return self::$storage[$this->connection][__FUNCTION__] = array_replace($base, [
+                'aliasColumnName' => true,
+                'nativeType'      => true,
+            ]);
+        }
         return self::$storage[$this->connection][__FUNCTION__] = $base;
     }
 
@@ -231,19 +245,7 @@ class CompatibleConnection
         $driverResult = (fn() => $this->result)->bindTo($result, Result::class)($result);
 
         if ($driverResult instanceof \ryunosuke\dbml\Driver\ResultInterface) {
-            $metadata = $driverResult->getMetadata();
-            // アクセステーブルのメタデータに対応していない場合、クエリレベルで強制的に付与しているので分解しなければならない
-            /** @see \ryunosuke\dbml\Database::_toTablePrefix() */
-            if (!$this->getSupportedMetadata()['table&&column']) {
-                foreach ($metadata as $n => $metadatum) {
-                    $parts = explode('.', $metadatum['aliasColumnName'], 2);
-                    if (count($parts) === 2 && !strlen($metadatum['aliasTableName'] ?? '')) {
-                        $metadata[$n]['aliasTableName'] = $parts[0];
-                        $metadata[$n]['aliasColumnName'] = $parts[1];
-                    }
-                }
-            }
-            return $metadata;
+            return $driverResult->getMetadata();
         }
 
         return [];

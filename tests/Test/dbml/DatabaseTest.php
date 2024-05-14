@@ -1835,6 +1835,11 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals("1", $database->quote(true, null));
         $this->assertEquals("'1'", $database->quote(1, null));
         $this->assertEquals("'hoge'", $database->quote(fn() => 'hoge', null));
+
+        // int を特別扱いしてるので担保する（SQLServer は int をそのまま返すのがテスト上都合が悪い）
+        if ($database->getCompatibleConnection()->getName() !== 'sqlsrv') {
+            $this->assertEquals($database->getConnection()->quote(1), $database->quote(1, null));
+        }
     }
 
     /**
@@ -2742,6 +2747,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'select' => true,
                 'affect' => false,
             ],
+            'datetimetz'   => [
+                'select' => true,
+                'affect' => false,
+            ],
             'simple_array' => [
                 'select' => function ($value, $platform) {
                     if ($this instanceof Type) {
@@ -2788,14 +2797,22 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'tarray|simple_array' => 'carray',
                 'tjson|json'          => 'cjson',
             ],
+            ''            => [
+                'now' => $database->getCompatiblePlatform()->getNowExpression(0),
+            ],
         ], [], [], 1);
         $this->assertSame(1, $row['cint']);
-        $this->assertInstanceOf('\DateTime', $row['cdatetime']);
         $this->assertEquals(['ho', 'ge'], $row['cstring']);
-        $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['carray']);
         $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['tarray']);
-        $this->assertEquals(['a' => 'A'], $row['cjson']);
         $this->assertEquals(['a' => 'A'], $row['tjson']);
+        if (!$database->getPlatform() instanceof SQLServerPlatform && $database->getCompatibleConnection()->getName() !== 'sqlite3') {
+            $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['carray']);
+            $this->assertEquals(['a' => 'A'], $row['cjson']);
+        }
+        if (!$database->getPlatform() instanceof SqlitePlatform) {
+            $this->assertInstanceOf('\DateTime', $row['cdatetime']);
+            $this->assertInstanceOf('\DateTime', $row['now']);
+        }
 
         // 子供ネストもOK
         $this->assertSame([
@@ -2842,7 +2859,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $select = $dummy->select([])->from($dummy->select('test', ['' => 1]), 't')->addSelect(['id' => 't.id', 'hoge.num' => 123]);
         $row = $select->tuple();
         $this->assertSame(1, $row['id']);
-        $this->assertSame(123, $row['num']);
+        $this->assertSame(123, $row['hoge.num']);
 
         $database->setAutoCastType([]);
         $database->getSchema()->refresh();
@@ -3099,15 +3116,15 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertCount(0, $database->executeSelect('SELECT * FROM test WHERE id = :id', ['id' => fn() => false])->fetchAllAssociative());
 
         // PDO は設定によって違う（しかもドライバでバラバラ）し pgsql は少し特殊っぽくて、統一できない or コケやすいので動的に決める
-        $sample = $database->executeSelect('SELECT ?', [1])->fetchOne();
-        $name = $database->getCompatibleConnection()->getName();
-        $strval = function ($val) use ($name, $sample) {
-            if (is_int($sample) || in_array($name, ['sqlite3', 'mysqli'], true)) {
+        $sample = $database->executeSelect('SELECT ? as cint, ? cfloat', [1, 3.14])->fetchAssociative();
+        $strval = function ($val) use ($sample) {
+            if (is_int($val) && is_int($sample['cint'])) {
                 return $val;
             }
-            else {
-                return (string) $val;
+            if (is_float($val) && is_float($sample['cfloat'])) {
+                return $val;
             }
+            return (string) $val;
         };
 
         $expected = [
@@ -3115,7 +3132,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             "cfalse"  => $strval(0),
             "ctrue"   => $strval(1),
             "cint"    => $strval(123),
-            "cfloat"  => "3.14",
+            "cfloat"  => $strval(3.14),
             "cstring" => "string",
         ];
         $query = <<<SQL

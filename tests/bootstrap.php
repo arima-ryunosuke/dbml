@@ -13,6 +13,7 @@ class_aliases([
     \Doctrine\DBAL\Driver\SQLite3\Result::class => \ryunosuke\dbml\Driver\SQLite3\Result::class,
     \Doctrine\DBAL\Driver\Mysqli\Result::class  => \ryunosuke\dbml\Driver\Mysqli\Result::class,
     \Doctrine\DBAL\Driver\PgSQL\Result::class   => \ryunosuke\dbml\Driver\PgSQL\Result::class,
+    \Doctrine\DBAL\Driver\SQLSrv\Result::class  => \ryunosuke\dbml\Driver\SQLSrv\Result::class,
     \Doctrine\DBAL\Driver\PDO\Result::class     => \ryunosuke\dbml\Driver\PDO\Result::class,
 ]);
 

@@ -4064,23 +4064,6 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
-    function test_setAutoTablePrefix($builder)
-    {
-        $q1 = $builder->getDatabase()->getPlatform()->quoteSingleIdentifier('test1.id');
-        $q2 = $builder->getDatabase()->getPlatform()->quoteSingleIdentifier('test1.aid');
-        $builder->column(['test1' => ['id', 'aid' => 'id']]);
-
-        $builder->setAutoTablePrefix(true);
-        $this->assertQuery("SELECT test1.id AS $q1, test1.id AS $q2 FROM test1", $builder);
-
-        $builder->setAutoTablePrefix(false);
-        $this->assertQuery("SELECT test1.id, test1.id AS aid FROM test1", $builder);
-    }
-
-    /**
-     * @dataProvider provideQueryBuilder
-     * @param QueryBuilder $builder
-     */
     function test_cache($builder)
     {
         $builder->cache(10)->cache(false);

@@ -8,6 +8,12 @@ use ryunosuke\dbml\Driver\ResultTrait;
 
 class ResultTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
+    function test_doctrineType()
+    {
+        // for coverage
+        $this->assertNull(Result::doctrineType('hoge'));
+    }
+
     function test_fetchAssociative()
     {
         $result = new Result([
