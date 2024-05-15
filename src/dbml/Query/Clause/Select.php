@@ -10,7 +10,7 @@ use function ryunosuke\dbml\concat;
  *
  * `new Alias('alias', 'actual')` を select に与えると "actual AS alias" に展開される。
  */
-class Select
+class Select extends AbstractClause
 {
     /** @var string エイリアス名 */
     private $alias;

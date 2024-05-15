@@ -32,7 +32,7 @@ class OrderByTest extends \ryunosuke\Test\AbstractUnitTestCase
         SELECT test.*
         FROM test
         ORDER BY $random
-        SQL, $builder->reset()->column('test')->orderBy(OrderBy::random()));
+        SQL, $builder->reset()->column('test')->orderBy(OrderBy::randomSuitably()));
 
         $this->assertEqualsSQL(<<<SQL
         SELECT test.*
@@ -40,7 +40,7 @@ class OrderByTest extends \ryunosuke\Test\AbstractUnitTestCase
         WHERE test.id IN(?,?)
         ORDER BY $random
         LIMIT 1
-        SQL, $builder->reset()->column('test')->limit(1)->orderBy(OrderBy::random()));
+        SQL, $builder->reset()->column('test')->limit(1)->orderBy(OrderBy::randomSuitably()));
 
         $this->assertEqualsSQL(<<<SQL
         WITH RECURSIVE __dbml_cte_table AS (
@@ -58,13 +58,7 @@ class OrderByTest extends \ryunosuke\Test\AbstractUnitTestCase
           ) __dbml_cte_table_alias
         )
         ORDER BY $random
-        SQL, $builder->reset()->column('test')->where(['id > ?' => 5])->limit(1)->orderBy(OrderBy::random()));
-
-        $this->assertEqualsSQL(<<<SQL
-        SELECT test.*
-        FROM test
-        ORDER BY $random
-        SQL, $builder->reset()->column('test')->orderBy(OrderBy::randomOrder()));
+        SQL, $builder->reset()->column('test')->where(['id > ?' => 5])->limit(1)->orderBy(OrderBy::randomSuitably()));
 
         $this->assertEqualsSQL(<<<SQL
         SELECT test.*

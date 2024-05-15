@@ -8,6 +8,7 @@ use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Logging\Logger;
+use ryunosuke\dbml\Query\Clause\OrderBy;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\Test\Database;
@@ -765,14 +766,14 @@ AND ((flag=1))", "$gw");
         $t_article = new TableGateway($database, 't_article');
         $t_comment = new TableGateway($database, 't_comment');
 
-        $this->assertEquals([2, 1], $t_article->setSecureOrderBy(true)->select('article_id', [], ['-undefined', '-article_id'], 2)->lists());
+        $this->assertEquals([2, 1], $t_article->select('article_id', [], OrderBy::secure(['-undefined', '-article_id']), 2)->lists());
 
         $this->assertEquals([
             "article_id"  => 1,
             "comment_ids" => [3, 2, 1],
         ], $t_article->select([
             'article_id',
-            'comment_ids' => $t_comment->setSecureOrderBy(true)->subselect('comment_id', [], ['-undefined', '-comment_id'])->lists(),
+            'comment_ids' => $t_comment->subselect('comment_id', [], OrderBy::secure(['-undefined', '-comment_id']))->lists(),
         ], ['article_id' => 1])->tuple());
 
         // pgsql は ORDER BY をつけられない/mssql は GROUP_CONCAT が使えない（mysql はいけるがそもそも subquery で secure はほぼ用途がないので気にしない）
@@ -782,7 +783,7 @@ AND ((flag=1))", "$gw");
                 "comment_ids" => '1 2 3', // 全体の ORDER BY と GROUP_CONCAT の ORDER BY は相関しない（クエリレベルで確かめたのでよしとする）
             ], $t_article->select([
                 'article_id',
-                'comment_ids' => $t_comment->setSecureOrderBy(true)->subquery($database->getCompatiblePlatform()->getGroupConcatSyntax('comment_id', ' '), [], ['-undefined', '-comment_id']),
+                'comment_ids' => $t_comment->subquery($database->getCompatiblePlatform()->getGroupConcatSyntax('comment_id', ' '), [], OrderBy::secure(['-undefined', '-comment_id'])),
             ], ['article_id' => 1])->tuple());
         }
     }

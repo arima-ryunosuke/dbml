@@ -25,8 +25,8 @@ use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Clause\OrderBy;
+use ryunosuke\dbml\Query\Clause\Where;
 use ryunosuke\dbml\Query\Expression\Expression;
-use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Transaction\Transaction;
@@ -1722,17 +1722,17 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             $this->assertEquals($expectedParams, $actualParams);
         };
 
-        // 基本的には whereInto と同じだし、実装も真似ている
+        // 基本的には Where::build と同じだし、実装も真似ている
         // のでここでは代表的な演算子のみに留める
 
         // = になるはず
-        $assert('(column_name = ?)', [1], $database->operator('column_name', 1));
+        $assert('(column_name = ?)', [1], $database->operator(['column_name' => 1]));
         // IN になるはず
-        $assert('(column_name IN (?,?,?))', [1, 2, 3], $database->operator('column_name', [1, 2, 3]));
+        $assert('(column_name IN (?,?,?))', [1, 2, 3], $database->operator(['column_name' => [1, 2, 3]]));
         // LIKE演算子明示
-        $assert('(column_name LIKE ?)', ['%hogera%'], $database->operator('column_name:%LIKE%', ['hogera']));
+        $assert('(column_name LIKE ?)', ['%hogera%'], $database->operator(['column_name:%LIKE%' => ['hogera']]));
         // 区間演算子明示
-        $assert('(column_name >= ? AND column_name <= ?)', [1, 99], $database->operator('column_name:[~]', [1, 99]));
+        $assert('(column_name >= ? AND column_name <= ?)', [1, 99], $database->operator(['column_name:[~]' => [1, 99]]));
         // 上記すべての複合
         $assert(
             '((column_nameE = ?) AND (column_nameI IN (?,?,?)) AND (column_name LIKE ?) AND (column_name >= ? AND column_name <= ?))',
@@ -1913,467 +1913,6 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $bind = $database->bindInto(['colA' => new Expression('FUNC(?)', [99]), 'colB' => $subquery], $params);
         $this->assertEquals(['colA' => 'FUNC(?)', 'colB' => "($subquery)"], $bind);
         $this->assertEquals([99, 1], $params);
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_whereInto($database)
-    {
-        $params = [];
-        $whereInto = function ($conds) use ($database, &$params) {
-            $params = [];
-            return $database->whereInto(is_array($conds) ? $conds : [$conds], $params);
-        };
-
-        $this->assertEquals([], $whereInto([]));
-        $this->assertEquals([], $params);
-
-        $this->assertEquals(['hoge IS NULL'], $whereInto(['hoge' => null]));
-        $this->assertEquals([], $params);
-
-        $this->assertEquals(['FALSE'], $whereInto(['hoge' => []]));
-        $this->assertEquals([], $params);
-
-        $this->assertEquals(['hoge = 1'], $whereInto(['hoge = 1']));
-        $this->assertEquals([], $params);
-
-        $this->assertEquals(['hoge = ?'], $whereInto(['hoge' => 1]));
-        $this->assertEquals([1], $params);
-
-        $this->assertEquals(['hoge = ?'], $whereInto(['hoge = ?' => 1]));
-        $this->assertEquals([1], $params);
-
-        $this->assertEquals(['hoge = ?'], $whereInto(['hoge = ?' => [1]]));
-        $this->assertEquals([1], $params);
-
-        $this->assertEquals(['hoge IN (?)'], $whereInto(['hoge' => [1]]));
-        $this->assertEquals([1], $params);
-
-        $this->assertEquals(['hoge IN (?,?)'], $whereInto(['hoge' => [1, 2]]));
-        $this->assertEquals([1, 2], $params);
-
-        $this->assertEquals(['hoge IN (?,?)'], $whereInto(['hoge IN (?)' => [1, 2]]));
-        $this->assertEquals([1, 2], $params);
-
-        $this->assertEquals(['hoge IN(?) OR fuga IN(?,?)'], $whereInto(['hoge IN(?) OR fuga IN(?)' => [[1], [2, 3]]]));
-        $this->assertEquals([1, 2, 3], $params);
-
-        $this->assertEquals(['hoge = ? OR fuga = ?'], $whereInto(['hoge = ? OR fuga = ?' => [1, 2]]));
-        $this->assertEquals([1, 2], $params);
-
-        $this->assertEquals(['hoge = ? OR fuga = ?'], $whereInto(['hoge = ? OR fuga = ?' => [[1], [2]]]));
-        $this->assertEquals([1, 2], $params);
-
-        $this->assertEquals(['hoge = ? OR fuga IN (?,?)'], $whereInto(['hoge = ? OR fuga IN (?)' => [1, [2, 3]]]));
-        $this->assertEquals([1, 2, 3], $params);
-
-        $this->assertEquals(['hoge = ? OR fuga IN (?,?)'], $whereInto(['hoge = ? OR fuga IN (?)' => [[1], [2, 3]]]));
-        $this->assertEquals([1, 2, 3], $params);
-
-        $this->assertEquals(['cond = ?', 'id = :id', 'condition'], $whereInto(['cond' => 1, ':id', 'condition']));
-        $this->assertEquals([1], $params);
-
-        $this->assertEquals(['hoge IN(?) OR fuga IN(?,?)'], $whereInto([
-            'hoge IN(?) OR fuga IN(?)' => new \ArrayObject([
-                new \ArrayObject([1]),
-                new \ArrayObject([2, 3]),
-            ]),
-        ]));
-        $this->assertEquals([1, 2, 3], $params);
-
-        $this->assertEquals([
-            'b1 = ?',
-            'b2 IN (?)',
-        ], $whereInto([
-            // 含まれない
-            '!a1' => null,
-            '!a2' => [],
-            // 含まれる
-            '!b1' => 1,
-            '!b2' => [1],
-        ]));
-        $this->assertEquals([1, 1], $params);
-
-        $this->assertEquals([
-            'id3 IN (?,?)',
-            'id4 LIKE ? OR id4 LIKE ?',
-            'NOT (id5 IN (?,?))',
-            'NOT (id6 IN (?,?))',
-        ], $whereInto([
-            'id3:IN'       => ['x', 'y'],
-            'id4:%LIKEIN%' => ['x', 'y'],
-            'id5:!IN'      => ['x1', 'y1'],
-            'id6:!'        => ['x2', 'y2'],
-        ]));
-        $this->assertEquals(['x', 'y', '%x%', '%y%', 'x1', 'y1', 'x2', 'y2'], $params);
-
-        $this->assertEquals(['(scalar) OR (value)'], $whereInto([['scalar', 'value']]));
-
-        $this->assertEquals(['FALSE'], $whereInto([[], 'C' => []]));
-        $this->assertEquals([], $params);
-
-        $this->assertEquals(['FUNC(99)'], $whereInto([new Expression('FUNC(99)')]));
-        $this->assertEquals([], $params);
-
-        $this->assertEquals(['FUNC(?)'], $whereInto([new Expression('FUNC(?)', [99])]));
-        $this->assertEquals([99], $params);
-
-        $this->assertEquals(['col IN (?,?)'], $whereInto(['col' => Operator::is(1, 2)]));
-        $this->assertEquals([1, 2], $params);
-
-        $this->assertEquals(['col IS NULL'], $whereInto(['col' => Operator::is(null)]));
-        $this->assertEquals([], $params);
-
-        $this->assertEquals(['(SELECT test.hoge FROM test)'], $whereInto([$database->select('test.hoge')]));
-        $this->assertEquals([], $params);
-
-        $this->assertEquals(['id = (SELECT test.id FROM test)'], $whereInto(['id = ?' => $database->select('test.id')]));
-        $this->assertEquals([], $params);
-
-        $this->assertEquals(['id IN((SELECT test.id FROM test))'], $whereInto(['id IN(?)' => $database->select('test.id')]));
-        $this->assertEquals([], $params);
-
-        $this->assertEquals(['id IN (SELECT test.id FROM test)'], $whereInto(['id' => $database->select('test.id')]));
-        $this->assertEquals([], $params);
-
-        $this->assertException(
-            new \InvalidArgumentException('notfound search string'),
-            L($database)->whereInto(['hoge = ?' => [[1, 2], 3]], $params)
-        );
-
-        $this->assertException(
-            new \UnexpectedValueException('both specified'),
-            L($database)->whereInto(['col:OP' => Operator::is(null)], $params)
-        );
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_whereInto_ignore($database)
-    {
-        $params = [];
-        $filtered = [];
-        $where = $database->whereInto([
-            '!rid11'   => 11,
-            '!rid12'   => 12,
-            '!id11'    => null,
-            '!id12'    => '',
-            '!id13'    => [],
-            [
-                '!rid21' => 21,
-                '!rid22' => 22,
-                '!id21'  => null,
-                '!id22'  => '',
-                '!id23'  => [],
-                [
-                    '!rid31' => 31,
-                    '!rid32' => 32,
-                    '!id31'  => null,
-                    '!id32'  => '',
-                    '!id33'  => [],
-                ],
-            ],
-            '!id9:!IN' => null,
-            '!ids:[~]' => [null, null],
-            '!str'     => Operator::likeIn(''), // 意図的
-            '!query'   => $database->select('test'),
-            '!exists'  => $database->select('test', [
-                '!piyo:[~]' => [null, null],
-            ]),
-        ], $params, 'OR', $filtered);
-        // '!' 付きで空値はシカトされている
-        $this->assertEquals([
-            'rid11 = ?',
-            'rid12 = ?',
-            '(rid21 = ?) OR (rid22 = ?) OR ((rid31 = ?) AND (rid32 = ?))',
-            'str LIKE ?',
-            'query IN (SELECT test.* FROM test)',
-        ], $where);
-        // '!' 付きで空値はバインドされない
-        $this->assertEquals([11, 12, 21, 22, 31, 32, '%%'], $params);
-        // フィルタ結果が格納される
-        $this->assertEquals(false, $filtered);
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_whereInto_closure($database)
-    {
-        $params = [];
-        $whereInto = function ($conds, $andor = 'OR') use ($database, &$params) {
-            $params = [];
-            return $database->whereInto(is_array($conds) ? $conds : [$conds], $params, $andor);
-        };
-
-        $wheres = $whereInto([
-            // 数値キーで配列を返す
-            function () { return ['A', 'B']; },
-            // 数値キーで連想配列を返す
-            function () { return ['a' => 'A', 'b' => 'B']; },
-            // 数値キーで非配列を返す
-            function () { return 'this is cond.'; },
-            // 数値キーでクエリビルダを返す
-            function (Database $db) { return $db->select('test1')->exists(); },
-            // 数値キーで空値を返す
-            function () { return null; },
-            function () { return ''; },
-            function () { return []; },
-            // 文字キーで配列を返す
-            'columnA'  => function () { return ['Y', 'Z']; },
-            // 文字キーで連想配列を返す
-            'columnH'  => function () { return ['y' => 'Y', 'z' => 'Z']; },
-            // 文字キーで非配列を返す
-            'columnC'  => function () { return 'this is cond.'; },
-            // 文字キーで空値を返す
-            'empty1'   => function () { return null; },
-            'empty2'   => function () { return ''; },
-            'empty3'   => function () { return []; },
-            // !文字キーで空値を返す
-            '!iempty1' => function () { return null; },
-            '!iempty2' => function () { return ''; },
-            '!iempty3' => function () { return []; },
-            // 文字キーでクエリビルダを返す
-            'subquery' => function (Database $db) { return $db->select('test2'); },
-        ]);
-        $this->assertEquals([
-            '(A) OR (B)',
-            '(a = ?) OR (b = ?)',
-            'this is cond.',
-            '(EXISTS (SELECT * FROM test1))',
-            'columnA IN (?,?)',
-            'columnH IN (?,?)',
-            'columnC = ?',
-            'empty1 IS NULL',
-            'empty2 = ?',
-            'FALSE',
-            'subquery IN (SELECT test2.* FROM test2)',
-        ], $wheres);
-        $this->assertEquals([
-            'A',
-            'B',
-            'Y',
-            'Z',
-            'Y',
-            'Z',
-            'this is cond.',
-            '',
-        ], $params);
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_whereInto_flipflop($database)
-    {
-        $whereInto = function ($conds, $andor = 'OR') use ($database, &$params) {
-            $params = [];
-            return $database->whereInto(is_array($conds) ? $conds : [$conds], $params, $andor);
-        };
-
-        $nesting = [
-            'condA' => 1,
-            [
-                'condB1' => 21,
-                'condB2' => 22,
-            ],
-            'condC' => 3,
-            [
-                'condD1' => 41,
-                [
-                    'condD21' => 421,
-                    'condD22' => 422,
-                ],
-                'condD3' => 42,
-            ],
-            'AND'   => [
-                'condE1' => 51,
-                [
-                    'condE21' => 521,
-                    'condE22' => 522,
-                ],
-                'condE3' => 52,
-            ],
-        ];
-
-        $this->assertEquals([
-            'condA = ?',
-            '(condB1 = ?) OR (condB2 = ?)',
-            'condC = ?',
-            '(condD1 = ?) OR ((condD21 = ?) AND (condD22 = ?)) OR (condD3 = ?)',
-            '(condE1 = ?) AND ((condE21 = ?) OR (condE22 = ?)) AND (condE3 = ?)',
-        ], $whereInto($nesting, 'OR'));
-
-        $this->assertEquals([
-            'condA = ?',
-            '(condB1 = ?) AND (condB2 = ?)',
-            'condC = ?',
-            '(condD1 = ?) AND ((condD21 = ?) OR (condD22 = ?)) AND (condD3 = ?)',
-            '(condE1 = ?) AND ((condE21 = ?) OR (condE22 = ?)) AND (condE3 = ?)',
-        ], $whereInto($nesting, 'AND'));
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_whereInto_not($database)
-    {
-
-        $params = [];
-        $where = $database->whereInto([
-            'cond1' => 1,
-            // NOT はコンテキストを変えないのでこれは AND
-            'NOT'   => [
-                'cond2' => 2,
-                'cond3' => 3,
-                // NOT はコンテキストを変えないのでこれは OR
-                [
-                    'cond4' => 4,
-                    'cond5' => 5,
-                ],
-                // NOT はコンテキストを変えないのでこれは AND
-                'NOT'   => [
-                    'cond6' => 6,
-                    // NOT はコンテキストを変えないのでこれは OR
-                    [
-                        'cond7' => 7,
-                        'cond8' => 8,
-                    ],
-                ],
-            ],
-        ], $params);
-        $this->assertEquals([
-            'cond1 = ?',
-            'NOT ((cond2 = ?) AND (cond3 = ?) AND ((cond4 = ?) OR (cond5 = ?)) AND (NOT ((cond6 = ?) AND ((cond7 = ?) OR (cond8 = ?)))))',
-        ], $where);
-        $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8], $params);
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_whereInto_notallohashwhere($database)
-    {
-        $params = [];
-        $where = $database->whereInto([
-            'id' => ['evil1' => 'evil1'],
-            [
-                'opt1' => ['evil2' => 'evil2'],
-                'opt2' => ['evil3', 'evil4'],
-            ],
-        ], $params);
-        $this->assertEquals(['id IN (?)', '(opt1 IN (?)) OR (opt2 IN (?,?))'], $where);
-        $this->assertEquals(['evil1', 'evil2', 'evil3', 'evil4'], $params);
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_whereInto_rowconstructor($database)
-    {
-        $params = [];
-        $where = $database->whereInto([
-            '(mainid, subid)' => [],
-        ], $params);
-        $this->assertEquals(['FALSE'], $where);
-        $this->assertEquals([], $params);
-
-        $params = [];
-        $where = $database->whereInto([
-            '(mainid, subid)' => $database->select('multiprimary S.mainid,subid', ['name' => ['a', 'c']]),
-        ], $params);
-        $this->assertEquals(['(mainid, subid) IN (SELECT S.mainid, S.subid FROM multiprimary S WHERE name IN (?,?))'], $where);
-        $this->assertEquals(['a', 'c'], $params);
-
-        $params = [];
-        $where = $database->whereInto([
-            '(mainid, subid)' => [[1, 2], [3, 4]],
-        ], $params);
-        $this->assertEquals(['(mainid, subid) IN ((?,?),(?,?))'], $where);
-        $this->assertEquals([1, 2, 3, 4], $params);
-
-        // 行値式を解す DB では実際に投げて確認する
-        if ($database->getCompatiblePlatform()->supportsRowConstructor()) {
-            $this->assertEquals([], $database->selectArray('multiprimary M', [
-                '(mainid, subid)' => [],
-            ]));
-            $this->assertEquals([
-                [
-                    'mainid' => '1',
-                    'subid'  => '1',
-                    'name'   => 'a',
-                ],
-                [
-                    'mainid' => '1',
-                    'subid'  => '2',
-                    'name'   => 'b',
-                ],
-            ], $database->selectArray('multiprimary M', [
-                '(mainid, subid)' => [[1, 1], [1, 2]],
-            ]));
-        }
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
-    function test_whereInto_queryable_array($database)
-    {
-        $params = [];
-        $where = $database->whereInto([
-            '? and ? and ? and ? and ?' => [
-                null,
-                $database->selectCount('test1', ['id' => 0, 'name1' => 'hoge']),
-                $database->selectExists('test2', ['id' => 1, 'name2' => 'fuga']),
-                'dummy',
-                $database->raw('(select 1)'),
-            ],
-        ], $params);
-
-        $count = $database->getPlatform()->quoteIdentifier('*@count');
-        $this->assertEquals([
-            implode(" and ", [
-                "?",
-                "(SELECT COUNT(*) AS $count FROM test1 WHERE (id = ?) AND (name1 = ?))",
-                "(EXISTS (SELECT * FROM test2 WHERE (id = ?) AND (name2 = ?)))",
-                "?",
-                "(select 1)",
-            ]),
-        ], $where);
-        $this->assertEquals([null, 0, 'hoge', 1, 'fuga', 'dummy'], $params);
-        $this->assertStringIgnoreBreak("NULL and
-(SELECT COUNT(*) AS $count FROM test1 WHERE (id = '0') AND (name1 = 'hoge')) and
-(EXISTS (SELECT * FROM test2 WHERE (id = '1') AND (name2 = 'fuga'))) and
-'dummy' and
-(select 1)", $database->queryInto($where[0], $params));
-
-        $params = [];
-        $where = $database->whereInto([
-            '?' => [$database->selectExists('test1', ['id' => 1]), 0],
-        ], $params);
-
-        $this->assertEquals(['(EXISTS (SELECT * FROM test1 WHERE id = ?)) IN (?)'], $where);
-        $this->assertEquals([1, 0], $params);
-        $this->assertStringIgnoreBreak("(EXISTS (SELECT * FROM test1 WHERE id = '1')) IN ('0')", $database->queryInto($where[0], $params));
-
-        $params = [];
-        $where = $database->whereInto([
-            '?' => [$database->selectExists('test1', ['id' => 1]), 2, 3],
-        ], $params);
-
-        $this->assertEquals(['(EXISTS (SELECT * FROM test1 WHERE id = ?)) IN (?,?)'], $where);
-        $this->assertEquals([1, 2, 3], $params);
-        $this->assertStringIgnoreBreak("(EXISTS (SELECT * FROM test1 WHERE id = '1')) IN ('2','3')", $database->queryInto($where[0], $params));
     }
 
     /**
@@ -6953,7 +6492,7 @@ INSERT INTO test (id, name) VALUES
     {
         $prewhere = self::forcedCallize($database, '_prewhere');
         $params = [];
-        $actual = $database->whereInto($prewhere(['A' => 'foreign_p'], $database->subexists('foreign_c1')), $params);
+        $actual = Where::build($database, $prewhere(['A' => 'foreign_p'], $database->subexists('foreign_c1')), $params);
         $this->assertEquals(['(EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = A.id))'], $actual);
 
         $cx = $database->dryrun();
@@ -7375,30 +6914,30 @@ ORDER BY T.id DESC, name ASC
     {
         // これらのテストは 1/120 の確率でコケるが気にしなくてよい（再実行でパスすれば OK）
 
-        $random = $database->selectAssoc('test', ['id > ?' => 5], OrderBy::random(), 5);
+        $random = $database->selectAssoc('test', ['id > ?' => 5], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectAssoc('test', ['id > ?' => 5], 'id', 5);
         $this->assertNotSame($sorted, $random);
         $this->assertSame($sorted, kvsort($random, fn($av, $bv, $ak, $bk) => $ak <=> $bk));
 
-        $random = $database->selectLists('test.id', ['id > ?' => 5], OrderBy::random(), 5);
+        $random = $database->selectLists('test.id', ['id > ?' => 5], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectLists('test.id', ['id > ?' => 5], 'id', 5);
         $this->assertNotSame($sorted, $random);
         $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av) <=> intval($bv))));
 
-        $random = $database->selectPairs('test.id,name', ['id > ?' => 5], OrderBy::random(), 5);
+        $random = $database->selectPairs('test.id,name', ['id > ?' => 5], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectPairs('test.id,name', ['id > ?' => 5], 'id', 5);
         $this->assertNotSame($sorted, $random);
         $this->assertSame($sorted, kvsort($random, fn($av, $bv, $ak, $bk) => $ak <=> $bk));
 
-        $random = $database->selectValue('test.id', ['id > ?' => 5], OrderBy::random(), 1);
+        $random = $database->selectValue('test.id', ['id > ?' => 5], OrderBy::randomSuitably(), 1);
         $sorted = $database->selectValue('test.id', ['id' => $random]);
         $this->assertSame($sorted, $random);
 
-        $random = $database->selectTuple('test.id,name', ['id > ?' => 5], OrderBy::random(), 1);
+        $random = $database->selectTuple('test.id,name', ['id > ?' => 5], OrderBy::randomSuitably(), 1);
         $sorted = $database->selectTuple('test.id,name', ['id' => $random['id']]);
         $this->assertSame($sorted, $random);
 
-        $random = $database->selectArray('multiprimary', ['mainid' => 2], OrderBy::random(), 5);
+        $random = $database->selectArray('multiprimary', ['mainid' => 2], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectArray('multiprimary', ['mainid' => 2], 'subid', 5);
         $this->assertNotSame($sorted, $random);
         $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['subid']) <=> intval($bv['subid']))));
@@ -7409,7 +6948,7 @@ ORDER BY T.id DESC, name ASC
             $database->insert('noauto', ['id' => 'b', 'name' => 'name2']);
             $database->insert('noauto', ['id' => 'c', 'name' => 'name3']);
 
-            $random = $database->selectArray('noauto', [], OrderBy::random());
+            $random = $database->selectArray('noauto', [], OrderBy::randomSuitably());
             $sorted = $database->selectArray('noauto');
             $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => $av['id'] <=> $bv['id'])));
         }
@@ -7426,7 +6965,7 @@ ORDER BY T.id DESC, name ASC
                 'foreign_c2 C2' => ['*'],
             ],
         ];
-        $random = $database->selectArray($columns, [], OrderBy::random(), 5);
+        $random = $database->selectArray($columns, [], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectArray($columns, [], [], 5);
         $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['id']) <=> intval($bv['id']))));
 
@@ -7436,7 +6975,7 @@ ORDER BY T.id DESC, name ASC
                 '<foreign_c2 C2' => ['*'],
             ],
         ];
-        $random = $database->selectArray($columns, [], OrderBy::random(), 5);
+        $random = $database->selectArray($columns, [], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectArray($columns, [], [], 5);
         $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['id']) <=> intval($bv['id']))));
     }

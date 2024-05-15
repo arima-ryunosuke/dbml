@@ -19,7 +19,7 @@ namespace ryunosuke\dbml\Query\Clause;
  * @method static $this   SQL_CALC_FOUND_ROWS()
  * @method static $this   STRAIGHT_JOIN()
  */
-class SelectOption
+class SelectOption extends AbstractClause
 {
     /// 固定プション文字列（よく使われるのをコード補完のために定数化しているだけでそれ以上の意味はない）
     public const DISTINCT            = 'DISTINCT';

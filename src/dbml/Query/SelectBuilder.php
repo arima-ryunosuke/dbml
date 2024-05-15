@@ -15,9 +15,12 @@ use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\IteratorTrait;
 use ryunosuke\dbml\Mixin\JoinTrait;
 use ryunosuke\dbml\Mixin\OptionTrait;
+use ryunosuke\dbml\Query\Clause\AbstractClause;
+use ryunosuke\dbml\Query\Clause\Having;
 use ryunosuke\dbml\Query\Clause\OrderBy;
 use ryunosuke\dbml\Query\Clause\Select;
 use ryunosuke\dbml\Query\Clause\SelectOption;
+use ryunosuke\dbml\Query\Clause\Where;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\Pagination\Paginator;
@@ -419,6 +422,27 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
     }
 
     /**
+     * 句を追加する
+     *
+     * 例えば OrderBy の場合 `$builder->orderBy(OrderBy::primary());` となり表現が冗長となる。
+     * この invoke を使えば `$builder(OrderBy::primary());` となり表現が平易となる。
+     */
+    public function __invoke(AbstractClause ...$clauses): static
+    {
+        foreach ($clauses as $clause) {
+            match (true) {
+                $clause instanceof SelectOption => $this->addSelectOption($clause),
+                $clause instanceof Select       => $this->addSelect($clause),
+                $clause instanceof Where        => $this->andWhere($clause),
+                $clause instanceof Having       => $this->andHaving($clause),
+                $clause instanceof OrderBy      => $this->addOrderBy($clause),
+            };
+        }
+
+        return $this;
+    }
+
+    /**
      * クエリ文字列を返す
      *
      * @return string エスケープされていないクエリ文字列
@@ -480,7 +504,7 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
 
         // Random ORDER（OrderBy はかなりアドホックに書き換えることがあるので別軸で行わなければならない）
         foreach ($builder->sqlParts['orderBy'] as $n => $orderBy) {
-            if ($orderBy instanceof OrderBy) {
+            if ($orderBy instanceof OrderBy && $orderBy->isRewritable()) {
                 unset($builder->sqlParts['orderBy'][$n]);
                 $sql = $orderBy($builder);
                 $this->sqlParts = $sql->sqlParts;
@@ -544,14 +568,7 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
                     // COUNT を含むなら除外
                     if (null === array_find($builder->sqlParts['select'], function ($s) { return strpos("$s", self::COUNT_ALIAS) !== false; })) {
                         if (($defaultOrder = $builder->getDefaultOrder()) !== null) {
-                            if (is_bool($defaultOrder)) {
-                                if ($builder->sqlParts['from']) {
-                                    $builder->orderByPrimary($defaultOrder, true);
-                                }
-                            }
-                            else {
-                                $builder->addOrderBy($defaultOrder);
-                            }
+                            $builder->addOrderBy($defaultOrder);
                         }
                     }
                 }
@@ -1036,7 +1053,7 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
         $params = [];
         $ands = [];
         foreach ($predicates as $cond) {
-            $placeholders = $this->database->whereInto(arrayize($cond), $params, 'OR', $this->emptyCondition);
+            $placeholders = Where::build($this->database, arrayize($cond), $params, 'OR', $this->emptyCondition);
             array_set($ands, implode(' AND ', Adhoc::wrapParentheses($placeholders)), null, function ($v) { return !Adhoc::is_empty($v); });
         }
 
@@ -1051,83 +1068,6 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
         }
 
         return $this->_dirty();
-    }
-
-    private function _isSecureColumn($column, $alias = null)
-    {
-        // Expression は信頼できる
-        if ($column instanceof Expression) {
-            return true;
-        }
-
-        // 文字列は select,from,join 句を調べて一致するもののみ
-        if (is_string($column)) {
-            // テーブル記法は再帰
-            if (str_exists($column, ['+', '-'])) {
-                foreach (preg_split('#([+-])#', $column, -1, PREG_SPLIT_NO_EMPTY) as $part) {
-                    if (!$this->_isSecureColumn($part)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            // SELECT 句と比較
-            foreach ($this->sqlParts['select'] as $select) {
-                // エイリアス指定ならそれを使う
-                if ($select instanceof Select) {
-                    $select = $select->getAlias();
-                }
-
-                // 完全に一致するならそれはセキュア
-                if ($column === $select) {
-                    return true;
-                }
-            }
-
-            // 修飾をバラす
-            $col = $column;
-            if (strpos($col, '.') !== false) {
-                [$modifier, $col] = explode('.', $col, 2);
-            }
-
-            // FROM 句と比較
-            foreach ($this->getFromPart() as $table) {
-                // SelectBuilder なら更に再帰
-                if ($table['table'] instanceof SelectBuilder) {
-                    if ($table['table']->_isSecureColumn($column, $table['alias'])) {
-                        return true;
-                    }
-                    continue;
-                }
-                // テーブルが存在しない場合は仮想テーブルだったり cte だったりする
-                if (!$this->database->getSchema()->hasTable($table['table'])) {
-                    if ($vtable = $this->database->getVirtualTable($table['table'])) {
-                        // と思ったが build 時点で組み込まれているのでここここにくることはない（備忘のためにコードは残す）
-                        assert($vtable); // @codeCoverageIgnore
-                    }
-                    if ($cte = $this->sqlParts['with'][$table['table']] ?? null) {
-                        if ($cte instanceof SelectBuilder && $cte->_isSecureColumn($column, $table['alias'])) {
-                            return true;
-                        }
-                    }
-                    continue;
-                }
-                // 修飾されていたならテーブル名と比較しないと '1; DELETE FROM tablename -- .id' で攻撃が可能
-                if (isset($modifier) && ($modifier !== $table['table'] && $modifier !== $table['alias'] && $modifier !== $alias)) {
-                    continue;
-                }
-                // テーブルにカラムが存在しないなら次へ
-                if (!array_key_exists($col, $this->database->getSchema()->getTableColumns($table['table']))) {
-                    continue;
-                }
-
-                return true;
-            }
-        }
-
-        // 上記で引っかからなかったら false
-        return false;
     }
 
     /**
@@ -2321,7 +2261,7 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
     /**
      * 引数内では AND、引数間では OR する where（クリア版）
      *
-     * 基本は {@link Database::whereInto()} の where 記法と同じ。加えて下記の記法が使用できる。
+     * 基本は {@link Where::build()} の where 記法と同じ。加えて下記の記法が使用できる。
      *
      * | No | where                         | 説明
      * | --:|:--                            |:--
@@ -2665,7 +2605,17 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
     {
         // bool は特別扱いで主キーとする
         if (is_bool($sort)) {
-            return $this->orderByPrimary($sort, true);
+            return $this->addOrderBy(OrderBy::primary(), $sort);
+        }
+
+        if ($sort instanceof OrderBy) {
+            if (!$sort->isRewritable()) {
+                return $this->addOrderBy($sort($this), $order);
+            }
+
+            // 超特殊な処理（build 時に遅延構築する）
+            $this->sqlParts['orderBy'][] = $sort;
+            goto ESCAPE;
         }
 
         if (is_array($sort)) {
@@ -2689,10 +2639,7 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
             }
         }
         else {
-            if ($sort instanceof OrderBy) {
-                $this->sqlParts['orderBy'][] = $sort;
-            }
-            elseif ($sort instanceof Queryable && $order === null) {
+            if ($sort instanceof Queryable && $order === null) {
                 $this->sqlParts['orderBy'][] = [$sort, null, $nullsOrder];
             }
             else {
@@ -2707,116 +2654,12 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
             }
         }
 
+        ESCAPE:
+
         $this->_dirty();
 
         // id asc,id desc のような冗長な ORDER BY を許さない RDBMS がいる
         return $this->database->getCompatiblePlatform()->supportsRedundantOrderBy() ? $this : $this->detectAutoOrder(false);
-    }
-
-    /**
-     * 実在するカラムやエイリアスをチェックするセキュアな orderBy
-     *
-     * - from,join 句にあるテーブルカラムの実名
-     * - select 句にあるエイリアス名
-     * - Expression インスタンス
-     *
-     * 以外は何もせずスルーされる。
-     * その性質上、事前に実行しておくことは出来ない。
-     *
-     * ```php
-     * // test に id カラムは存在するので order by id される
-     * $db->select('test')->orderBySecure('id');
-     *
-     * // 修飾しても OK
-     * $db->select('test')->orderBySecure('test.id');
-     *
-     * // Expression インスタンスは無条件で OK
-     * $db->select('test.id AS hoge')->orderBySecure(new Expression('NOW()'));
-     *
-     * // test に hoge カラムは存在しないが id のエイリアスなので OK
-     * $db->select('test.id AS hoge')->orderBySecure('hoge');
-     *
-     * // test に fuga カラムは存在せず、エイリアスもないため、このメソッドは何も行わない
-     * $db->select('test.id as hoge')->orderBySecure('fuga');
-     * ```
-     *
-     * エラーや例外が出ないので挙動が分かりにくいが、下手にエラーを出すと「攻撃が可能そう」に見えてしまうのでこのような動作にしている。
-     *
-     * @inheritdoc orderBy()
-     */
-    public function orderBySecure($sort, $order = null)
-    {
-        // 配列は再帰
-        if (is_array($sort)) {
-            foreach ($sort as $col => $ord) {
-                if (is_int($col)) {
-                    $this->orderBySecure($ord, $order);
-                }
-                else {
-                    $this->orderBySecure($col, $ord);
-                }
-            }
-            return $this;
-        }
-
-        // セキュア？
-        if ($this->_isSecureColumn($sort)) {
-            $this->addOrderBy($sort, $order);
-        }
-
-        return $this;
-    }
-
-    /**
-     * 主キーによる orderBy
-     *
-     * @param bool $is_asc ASC なら true
-     * @param bool $append 追加なら true
-     * @return $this 自分自身
-     */
-    public function orderByPrimary($is_asc = true, $append = false)
-    {
-        if (!$frompart = $this->sqlParts['from']) {
-            throw new \UnexpectedValueException('select builder is not set "from".');
-        }
-
-        $fromtable = reset($frompart);
-        if (!$this->database->getSchema()->hasTable($fromtable['table'])) {
-            return $this;
-        }
-
-        $primary = $this->database->getSchema()->getTablePrimaryKey($fromtable['table']);
-        if ($primary === null) {
-            return $this;
-        }
-
-        $columns = $primary->getColumns();
-
-        $tablename = $fromtable['alias'] ?: $fromtable['table'];
-        if ($append) {
-            return $this->addOrderBy(array_strpad($columns, '', $tablename . '.'), $is_asc);
-        }
-        else {
-            return $this->orderBy(array_strpad($columns, '', $tablename . '.'), $is_asc);
-        }
-    }
-
-    /**
-     * 乱数による orderBy
-     *
-     * ORDER BY RANDOM による素朴な方法で、特に工夫はない（SelectBuilder なので）。
-     * 原則として ORDER BY はリセットされる。
-     * これは「指定 ORDER より先は不定」という RDBMS の動作に基づく。
-     * （`ORDER BY A,B,C,RAND()` として A,B,C は保証されるがその先の保証はない（≒実質的にランダムと言える））
-     *
-     * @param ?int $seed 乱数のシード
-     * @return $this 自分自身
-     */
-    public function orderByRandom($seed = null)
-    {
-        $this->orderBy($this->database->getCompatiblePlatform()->getRandomExpression($seed));
-        $this->detectAutoOrder(false);
-        return $this;
     }
 
     /**
@@ -3759,11 +3602,14 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
     /**
      * SQL の各句を返す
      *
-     * @param string $queryPartName 句名
+     * @param ?string $queryPartName 句名
      * @return mixed 句
      */
     public function getQueryPart($queryPartName)
     {
+        if ($queryPartName === null) {
+            return $this->sqlParts;
+        }
         return $this->sqlParts[$queryPartName];
     }
 

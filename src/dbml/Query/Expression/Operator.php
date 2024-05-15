@@ -3,6 +3,7 @@
 namespace ryunosuke\dbml\Query\Expression;
 
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
+use ryunosuke\dbml\Query\Clause\Where;
 use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\array_depth;
 use function ryunosuke\dbml\array_each;
@@ -23,7 +24,7 @@ use function ryunosuke\dbml\str_subreplace;
  * 内部的に使用されるだけで、明示的に使用する箇所はほとんど無い。
  * ただし、下記の演算子登録を使用する場合は {@link define()} で登録する必要がある。
  *
- * 組み込みの演算子は下記。これらは何もしなくても {@link Database::whereInto()} で使用することができる。
+ * 組み込みの演算子は下記。これらは何もしなくても {@link Where::build()} で使用することができる。
  *
  * | operator                                       | result                                       | 説明
  * |:--                                             |:--                                           |:--
@@ -191,7 +192,7 @@ class Operator extends Expression
      * - equal
      * - 他多数（クラスの method を参照）
      *
-     * これを利用すると {@link Database::whereInto()} で演算子を指定せずシンプルな条件指定が出来るようになる（クラス冒頭を参照）。
+     * これを利用すると {@link Where::build()} で演算子を指定せずシンプルな条件指定が出来るようになる（クラス冒頭を参照）。
      *
      * @param string $operator 演算子
      * @param array $operands 演算値

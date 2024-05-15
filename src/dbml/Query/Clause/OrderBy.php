@@ -7,31 +7,227 @@ use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\SelectBuilder;
 use function ryunosuke\dbml\array_maps;
+use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\random_range;
+use function ryunosuke\dbml\str_exists;
 
 /**
  * ORDER BY 句クラス
  *
  * このクラスのインスタンスを orderBy すると、特殊な ORDER BY として扱われる。
  *
- * 現在の用途としては「ランダム取得」である。
- * 原則として「limit 件数」を返すことを期待してはならない。
+ * ランダム系は原則として「limit 件数」を返すことを期待してはならない。
  * 多く返すことはないが、少なく返すことはある。
- *
- * 将来的には現在 SelectBuilder に生えている byPrimary や bySecure などをここに移して管理する。
  *
  * ```php
  * $db->select('tablename.columname')->orderBy(OrderBy::randomOrder());
  * // SELECT columnname FROM tablename ORDER BY RAND()
  * ```
  */
-class OrderBy
+class OrderBy extends AbstractClause
 {
     public const CTE_TABLE       = '__dbml_cte_table';
     public const CTE_TABLE_ALIAS = '__dbml_cte_table_alias';
     public const CTE_AUTO_PKEY   = Database::AUTO_DEPEND_KEY . '_cte';
 
+    public function __construct(private bool $rewritable)
+    {
+        $this->rewritable = $rewritable;
+    }
+
     public function __invoke(SelectBuilder $builder) { }
+
+    public function isRewritable(): bool
+    {
+        return $this->rewritable;
+    }
+
+    /**
+     * 主キーで ORDER BY する
+     */
+    public static function primary(): static
+    {
+        return new class(false) extends OrderBy {
+            public function __invoke(SelectBuilder $builder)
+            {
+                $sqlParts = $builder->getQueryPart(null);
+
+                if (!$frompart = $sqlParts['from']) {
+                    return [];
+                }
+
+                $fromtable = reset($frompart);
+                if (!$builder->getDatabase()->getSchema()->hasTable($fromtable['table'])) {
+                    return [];
+                }
+
+                $primary = $builder->getDatabase()->getSchema()->getTablePrimaryKey($fromtable['table']);
+                if ($primary === null) {
+                    return [];
+                }
+
+                $tablename = $fromtable['alias'] ?: $fromtable['table'];
+                return array_map(fn($c) => "$tablename.$c", $primary->getColumns());
+            }
+        };
+    }
+
+    /**
+     * 実在するカラムやエイリアスをチェックするセキュアな ORDER BY
+     *
+     * - from,join 句にあるテーブルカラムの実名
+     * - select 句にあるエイリアス名
+     * - Expression インスタンス
+     *
+     * 以外は何もせずスルーされる。
+     * その性質上、事前に実行しておくことは出来ない。
+     *
+     * ```php
+     * // test に id カラムは存在するので order by id される
+     * $db->select('test')->orderBySecure('id');
+     *
+     * // 修飾しても OK
+     * $db->select('test')->orderBySecure('test.id');
+     *
+     * // Expression インスタンスは無条件で OK
+     * $db->select('test.id AS hoge')->orderBySecure(new Expression('NOW()'));
+     *
+     * // test に hoge カラムは存在しないが id のエイリアスなので OK
+     * $db->select('test.id AS hoge')->orderBySecure('hoge');
+     *
+     * // test に fuga カラムは存在せず、エイリアスもないため、このメソッドは何も行わない
+     * $db->select('test.id as hoge')->orderBySecure('fuga');
+     * ```
+     *
+     * エラーや例外が出ないので挙動が分かりにくいが、下手にエラーを出すと「攻撃が可能そう」に見えてしまうのでこのような動作にしている。
+     */
+    public static function secure($columns): static
+    {
+        return new class(arrayize($columns)) extends OrderBy {
+            public function __construct(private array $columns)
+            {
+                parent::__construct(false);
+            }
+
+            public function __invoke(SelectBuilder $builder)
+            {
+                $secure_columns = [];
+                foreach ($this->columns as $k => $column) {
+                    if (is_int($k)) {
+                        $order = null;
+                    }
+                    else {
+                        $order = $column;
+                        $column = $k;
+                    }
+                    if ($this->isSecureColumn($builder, $column)) {
+                        $secure_columns[] = [$column, $order];
+                    }
+                }
+                return $secure_columns;
+            }
+
+            private static function isSecureColumn(SelectBuilder $builder, $column, $alias = null)
+            {
+                $sqlParts = $builder->getQueryPart(null);
+                $database = $builder->getDatabase();
+                $schema = $database->getSchema();
+
+                // Expression は信頼できる
+                if ($column instanceof Expression) {
+                    return true;
+                }
+
+                // 文字列は select,from,join 句を調べて一致するもののみ
+                if (is_string($column)) {
+                    // テーブル記法は再帰
+                    if (str_exists($column, ['+', '-'])) {
+                        foreach (preg_split('#([+-])#', $column, -1, PREG_SPLIT_NO_EMPTY) as $part) {
+                            if (!self::isSecureColumn($builder, $part)) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+
+                    // SELECT 句と比較
+                    foreach ($sqlParts['select'] as $select) {
+                        // エイリアス指定ならそれを使う
+                        if ($select instanceof Select) {
+                            $select = $select->getAlias();
+                        }
+
+                        // 完全に一致するならそれはセキュア
+                        if ($column === $select) {
+                            return true;
+                        }
+                    }
+
+                    // 修飾をバラす
+                    [$modifier, $col] = array_pad(explode('.', $column, 2), -2, null);
+
+                    // FROM 句と比較
+                    foreach ($builder->getFromPart() as $table) {
+                        // SelectBuilder なら更に再帰
+                        if ($table['table'] instanceof SelectBuilder) {
+                            if (self::isSecureColumn($table['table'], $column, $table['alias'])) {
+                                return true;
+                            }
+                            continue;
+                        }
+                        // テーブルが存在しない場合は仮想テーブルだったり cte だったりする
+                        if (!$schema->hasTable($table['table'])) {
+                            if ($vtable = $database->getVirtualTable($table['table'])) {
+                                // と思ったが build 時点で組み込まれているのでここここにくることはない（備忘のためにコードは残す）
+                                assert($vtable); // @codeCoverageIgnore
+                            }
+                            if ($cte = $sqlParts['with'][$table['table']] ?? null) {
+                                if ($cte instanceof SelectBuilder && self::isSecureColumn($cte, $column, $table['alias'])) {
+                                    return true;
+                                }
+                            }
+                            continue;
+                        }
+                        // 修飾されていたならテーブル名と比較しないと '1; DELETE FROM tablename -- .id' で攻撃が可能
+                        if (isset($modifier) && ($modifier !== $table['table'] && $modifier !== $table['alias'] && $modifier !== $alias)) {
+                            continue;
+                        }
+                        // テーブルにカラムが存在しないなら次へ
+                        if (!array_key_exists($col, $schema->getTableColumns($table['table']))) {
+                            continue;
+                        }
+
+                        return true;
+                    }
+                }
+
+                // 上記で引っかからなかったら false
+                return false;
+            }
+        };
+    }
+
+    /**
+     * シンプルに ORDER BY RANDOM() する
+     *
+     * - pros: 良い意味で速度のブレが少ない（状態や引数に依存して遅くなったりしない）
+     * - cons: 悪い意味で速度のブレが少ない（状態や引数に依存して速くなったりしない）
+     */
+    public static function random($seed = null): static
+    {
+        return new class($seed) extends OrderBy {
+            public function __construct(private $seed)
+            {
+                parent::__construct(false);
+            }
+
+            public function __invoke(SelectBuilder $builder)
+            {
+                $builder->detectAutoOrder(false);
+                return $builder->getDatabase()->getCompatiblePlatform()->getRandomExpression($this->seed);
+            }
+        };
+    }
 
     /**
      * 状態や統計に基づいてランダム化する
@@ -40,9 +236,9 @@ class OrderBy
      *
      * @return static
      */
-    public static function random()
+    public static function randomSuitably()
     {
-        return new class extends OrderBy {
+        return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
             {
                 $froms = $builder->getFromPart();
@@ -55,31 +251,13 @@ class OrderBy
 
                 // limit がないならどうせ全件走査, join があると PK系は使えない（駆動表の主キーで取得するので偏りが生まれる）, 複合主キーなら行値式が必要
                 if ($limit === null || count($froms) > 1 || (count($pkcols) > 1 && !$builder->getDatabase()->getCompatiblePlatform()->supportsRowConstructor())) {
-                    return self::randomOrder()($builder);
+                    return $builder->orderBy(OrderBy::random()($builder));
                 }
                 // 数値系単一主キーなら minmax で引っ張れるが、where があると歯抜けが発生しまくるので除外
                 if (!$where && count($pkcols) === 1 && $pkcols[$pkkey]->getType() instanceof PhpIntegerMappingType) {
-                    return self::randomPKMinMax()($builder);
+                    return OrderBy::randomPKMinMax()($builder);
                 }
-                return self::randomPK()($builder);
-            }
-        };
-    }
-
-    /**
-     * シンプルに ORDER BY RANDOM() する
-     *
-     * - pros: 良い意味で速度のブレが少ない（状態や引数に依存して遅くなったりしない）
-     * - cons: 悪い意味で速度のブレが少ない（状態や引数に依存して速くなったりしない）
-     *
-     * @return static
-     */
-    public static function randomOrder()
-    {
-        return new class extends OrderBy {
-            public function __invoke(SelectBuilder $builder)
-            {
-                return $builder->orderByRandom();
+                return OrderBy::randomPK()($builder);
             }
         };
     }
@@ -94,13 +272,13 @@ class OrderBy
      */
     public static function randomWhere()
     {
-        return new class extends OrderBy {
+        return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
             {
                 $random = $builder->getDatabase()->getCompatiblePlatform()->getRandomExpression(null);
                 $count = (int) $builder->countize()->value() ?: -1;
                 $where = new Expression("$random <= (? / ?)", [$builder->getQueryPart('limit') ?? PHP_INT_MAX, $count]);
-                return $builder->andWhere($where)->orderByRandom();
+                return $builder->andWhere($where)->orderBy(OrderBy::random());
             }
         };
     }
@@ -115,7 +293,7 @@ class OrderBy
      */
     public static function randomOffset()
     {
-        return new class extends OrderBy {
+        return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
             {
                 $count = (int) $builder->countize()->value();
@@ -123,7 +301,7 @@ class OrderBy
                 $base = $builder->getDatabase()->createSelectBuilder()->from(self::CTE_TABLE);
                 $queries = array_maps($offsets, fn($offset) => (clone $base)->limit(1, $offset)) ?: $base;
                 $that = (clone $builder)->resetQueryPart(['orderBy', 'offset', 'limit']);
-                return $builder->getDatabase()->union($queries)->with(self::CTE_TABLE, $that)->orderByRandom();
+                return $builder->getDatabase()->union($queries)->with(self::CTE_TABLE, $that)->orderBy(OrderBy::random());
             }
         };
     }
@@ -138,7 +316,7 @@ class OrderBy
      */
     public static function randomPK()
     {
-        return new class extends OrderBy {
+        return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
             {
                 $froms = $builder->getFromPart();
@@ -156,7 +334,7 @@ class OrderBy
                 }
                 $pkkeys = implode(',', $pkcolumns);
                 $pkkeys = count($pkcols) > 1 ? "($pkkeys)" : $pkkeys;
-                $pkwhere = $builder->getDatabase()->createSelectBuilder()->from(self::CTE_TABLE)->select(...$pkcolumns)->orderByRandom();
+                $pkwhere = $builder->getDatabase()->createSelectBuilder()->from(self::CTE_TABLE)->select(...$pkcolumns)->orderBy(OrderBy::random());
                 if ($limit) {
                     $pkwhere->limit($limit)->wrap('SELECT * FROM', self::CTE_TABLE_ALIAS); // for mysql (This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery)
                 }
@@ -166,7 +344,7 @@ class OrderBy
                     ->from(self::CTE_TABLE)
                     ->select('*')
                     ->where([$pkkeys => $pkwhere])
-                    ->orderByRandom();
+                    ->orderBy(OrderBy::random());
             }
         };
     }
@@ -181,7 +359,7 @@ class OrderBy
      */
     public static function randomPKMinMax()
     {
-        return new class extends OrderBy {
+        return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
             {
                 $froms = $builder->getFromPart();
@@ -194,7 +372,7 @@ class OrderBy
                 $that = (clone $builder)->cast('array')->resetQueryPart(['select', 'orderBy', 'offset', 'limit'])->select("$alias.$pkkey");
                 [$min, $max] = array_values($that->aggregate(['MIN', 'MAX'])->tuple());
                 $pkvals = random_range($min ?? 0, $max ?? 0, $limit === null ? PHP_INT_MAX : $limit * 2); // 歯抜けを考慮して2倍程度取る
-                return $builder->andWhere(["$alias.$pkkey" => $pkvals])->orderByRandom();
+                return $builder->andWhere(["$alias.$pkkey" => $pkvals])->orderBy(OrderBy::random());
             }
         };
     }
@@ -209,7 +387,7 @@ class OrderBy
      */
     public static function randomPKMinMax2()
     {
-        return new class extends OrderBy {
+        return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
             {
                 $froms = $builder->getFromPart();
@@ -224,7 +402,7 @@ class OrderBy
                 $pkvals = random_range($min ?? 0, $max ?? 0, $limit ?? PHP_INT_MAX);
                 $base = $builder->getDatabase()->createSelectBuilder()->from(self::CTE_TABLE)->limit(1);
                 $queries = array_maps($pkvals, fn($pkval) => (clone $base)->where(["$pkkey >= ?" => $pkval]));
-                return $builder->getDatabase()->union($queries)->with(self::CTE_TABLE, $that)->orderByRandom();
+                return $builder->getDatabase()->union($queries)->with(self::CTE_TABLE, $that)->orderBy(OrderBy::random());
             }
         };
     }

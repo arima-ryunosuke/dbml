@@ -13,8 +13,10 @@ use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Generator\Yielder;
+use ryunosuke\dbml\Query\Clause\OrderBy;
 use ryunosuke\dbml\Query\Clause\Select;
 use ryunosuke\dbml\Query\Clause\SelectOption;
+use ryunosuke\dbml\Query\Clause\Where;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\SelectBuilder;
@@ -229,6 +231,26 @@ class SelectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertException(new \BadMethodCallException("is undefined"), [$builder, 'fetchHoge']);
         $this->assertException(new \BadMethodCallException("is undefined"), [$builder, 'joinHoge']);
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
+    function test___invoke($builder)
+    {
+        /** @noinspection PhpUndefinedMethodInspection */
+        $builder->reset()->column('test')(
+            SelectOption::DISTINCT(),
+        )(
+            Select::hoge('id'),
+        )(
+            Where::and(['k1' => 1, 'k2' => 2]),
+            Where::or(['k8' => 8, 'k9' => 9]),
+        )(
+            OrderBy::primary(),
+        );
+        $this->assertEquals("SELECT DISTINCT test.*, id AS hoge FROM test WHERE ((k1 = '1') AND (k2 = '2')) AND ((k8 = '8') OR (k9 = '9')) ORDER BY test.id ASC", $builder->queryInto());
     }
 
     function test___debugInfo()
@@ -2221,87 +2243,87 @@ AND (FALSE)", $builder->queryInto());
             ->innerJoinOn($builder->getDatabase()->select('test'), 'TRUE');
 
         // 't_article.article_id' は SELECT に出現するので許容されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('t_article.article_id');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('t_article.article_id'));
         $this->assertStringContainsString('ORDER BY t_article.article_id ASC', "$builder");
 
         // 'article_id' は SELECT 句に出現しないがカラムは存在するので許容されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('article_id');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('article_id'));
         $this->assertStringContainsString('ORDER BY article_id ASC', "$builder");
 
         // 'test2.id' も同様
-        $builder->resetQueryPart('orderBy')->orderBySecure('test2.id');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('test2.id'));
         $this->assertStringContainsString('ORDER BY test2.id ASC', "$builder");
 
         // 仮想カラムは許容されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('title2');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('title2'));
         $this->assertStringContainsString('ORDER BY title2 ASC', "$builder");
 
         // 仮想テーブルは許容されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('pid');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('pid'));
         $this->assertStringContainsString('ORDER BY pid ASC', "$builder");
 
         // 同上。エイリアス版
-        $builder->resetQueryPart('orderBy')->orderBySecure('prid');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('prid'));
         $this->assertStringContainsString('ORDER BY prid ASC', "$builder");
 
         // エイリアス名は許容されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('hoge');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('hoge'));
         $this->assertStringContainsString('ORDER BY hoge ASC', "$builder");
 
         // インラインなエイリアスも許容されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('title9');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('title9'));
         $this->assertStringContainsString('ORDER BY title9 ASC', "$builder");
 
         // サブクエリな from でも解釈可能なら許容されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('data');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('data'));
         $this->assertStringContainsString('ORDER BY data ASC', "$builder");
 
         // CTE でも中身がクエリビルダなら許容されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('fcte.name1');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('fcte.name1'));
         $this->assertStringContainsString('ORDER BY fcte.name1 ASC', "$builder");
 
         // 同上。エイリアス版
-        $builder->resetQueryPart('orderBy')->orderBySecure('test1name1');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('test1name1'));
         $this->assertStringContainsString('ORDER BY test1name1 ASC', "$builder");
 
         // なんだかよくわからないテーブルは許容されないはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('t_unknown.id');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('t_unknown.id'));
         $this->assertStringNotContainsString('ORDER BY ', "$builder");
 
         // なんだかよくわからないカラムは許容されないはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('t_article.unknown');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('t_article.unknown'));
         $this->assertStringNotContainsString('ORDER BY ', "$builder");
 
         // 'NOW()' は許容されないはず
-        $builder->resetQueryPart('orderBy')->orderBySecure('NOW()');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure('NOW()'));
         $this->assertStringNotContainsString('ORDER BY ', "$builder");
 
         // しかし Expression 化すれば許容されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure(new Expression('NOW()'));
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure(new Expression('NOW()')));
         $this->assertStringContainsString('ORDER BY NOW()', "$builder");
 
         // 配列は全て実行されるが不正なものは除外されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure(['t_article.article_id', 'invalid', 'test2.id' => 'ASC'], false);
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure(['t_article.article_id', 'invalid', 'test2.id' => 'ASC']), false);
         $this->assertStringContainsString('ORDER BY t_article.article_id DESC, test2.id ASC', "$builder");
 
         // 明らかな攻撃クエリ
-        $builder->resetQueryPart('orderBy')->orderBySecure(';DELETE FROM tablename -- .id');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure(';DELETE FROM tablename -- .id'));
         $this->assertStringNotContainsString('ORDER BY ', "$builder");
 
         // 順序に変な文字を与えても ASC 化されるはず
-        $builder->resetQueryPart('orderBy')->orderBySecure(['t_article.article_id', 'invalid', 'test2.id' => 'invalid1'], 'invalid2');
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure(['t_article.article_id', 'invalid', 'test2.id' => 'invalid1']), 'invalid2');
         $this->assertStringContainsString('ORDER BY t_article.article_id ASC, test2.id ASC', "$builder");
 
         // +-プレフィックス
-        $builder->resetQueryPart('orderBy')->orderBySecure(['-t_article.article_id', '+test2.id']);
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure(['-t_article.article_id', '+test2.id']));
         $this->assertStringContainsString('ORDER BY t_article.article_id DESC, test2.id ASC', "$builder");
 
         // 複合+-プレフィックス
-        $builder->resetQueryPart('orderBy')->orderBySecure(['-t_article.article_id', '+test2.id-test2.name2']);
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure(['-t_article.article_id', '+test2.id-test2.name2']));
         $this->assertStringContainsString('ORDER BY t_article.article_id DESC, test2.id ASC, test2.name2 DESC', "$builder");
 
         // 複合+-プレフィックスは1つでもダメなら丸ごと除外される
-        $builder->resetQueryPart('orderBy')->orderBySecure(['+test2.invalid-test2.name2']);
+        $builder->resetQueryPart('orderBy')->orderBy(OrderBy::secure(['+test2.invalid-test2.name2']));
         $this->assertStringNotContainsString('ORDER BY ', "$builder");
     }
 
@@ -2312,21 +2334,20 @@ AND (FALSE)", $builder->queryInto());
     function test_orderByPrimary($builder)
     {
         $builder->column('noprimary.id');
-        $this->assertQuery('SELECT noprimary.id FROM noprimary', $builder->orderByPrimary());
+        $this->assertQuery('SELECT noprimary.id FROM noprimary', $builder->orderBy(OrderBy::primary()));
 
         $builder->column('v_blog.*');
-        $this->assertQuery('SELECT v_blog.* FROM v_blog', $builder->orderByPrimary());
+        $this->assertQuery('SELECT v_blog.* FROM v_blog', $builder->orderBy(OrderBy::primary()));
 
         $builder->reset()->column('test1.id');
-        $this->assertQuery('SELECT test1.id FROM test1 ORDER BY test1.id ASC', $builder->orderByPrimary());
-        $this->assertQuery('SELECT test1.id FROM test1 ORDER BY test1.id DESC', $builder->orderByPrimary(false));
+        $this->assertQuery('SELECT test1.id FROM test1 ORDER BY test1.id ASC', $builder->orderBy(OrderBy::primary()));
+        $this->assertQuery('SELECT test1.id FROM test1 ORDER BY test1.id DESC', $builder->orderBy(OrderBy::primary(), false));
 
         $builder->reset()->column('test1.id')->orderBy('hoge');
-        $this->assertQuery('SELECT test1.id FROM test1 ORDER BY hoge ASC, test1.id ASC', $builder->orderByPrimary(true, true));
-        $this->assertQuery('SELECT test1.id FROM test1 ORDER BY hoge ASC, test1.id ASC, test1.id DESC', $builder->orderByPrimary(false, true));
+        $this->assertQuery('SELECT test1.id FROM test1 ORDER BY hoge ASC, test1.id ASC', $builder->addOrderBy(OrderBy::primary()));
 
-        $builder->reset();
-        $this->assertException(new \UnexpectedValueException('select builder is not set'), L($builder)->orderByPrimary());
+        $builder->reset()->select(['now' => 'NOW()']);
+        $this->assertQuery('SELECT NOW() AS now', $builder->addOrderBy(OrderBy::primary()));
     }
 
     /**
@@ -2337,13 +2358,13 @@ AND (FALSE)", $builder->queryInto());
     {
         /// 方言があるのでクエリレベルではなく結果レベルでテストしている
 
-        $sorted = $builder->getDatabase()->select('test.id')->orderByPrimary()->lists();
-        $select = $builder->getDatabase()->select('test.id')->orderByRandom();
+        $sorted = $builder->getDatabase()->select('test.id')->orderBy(OrderBy::primary())->lists();
+        $select = $builder->getDatabase()->select('test.id')->orderBy(OrderBy::random());
         $this->assertNotEquals($select->lists(), $sorted);
 
         // mysql だけは seed が活きる
         if ($builder->getDatabase()->getCompatiblePlatform()->getName() === 'mysql') {
-            $select = $builder->getDatabase()->select('test.id')->orderByRandom(123);
+            $select = $builder->getDatabase()->select('test.id')->orderBy(OrderBy::random(123));
             $this->assertEquals($select->lists(), $select->lists());
         }
 

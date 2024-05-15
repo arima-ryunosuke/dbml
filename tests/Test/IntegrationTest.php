@@ -45,8 +45,8 @@ class IntegrationTest extends AbstractUnitTestCase
             $select = $database->select([
                 't_article' => ['*'],
                 ''          => [
-                    'cond_id_in'      => $database->operator('article_id', [1, 3]),
-                    'cond_title_like' => $database->operator('title:%LIKE%', 'タイトル'),
+                    'cond_id_in'      => $database->operator(['article_id' => [1, 3]]),
+                    'cond_title_like' => $database->operator(['title:%LIKE%' => 'タイトル']),
                 ],
             ]);
             $select->having([
