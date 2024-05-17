@@ -199,6 +199,20 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             [new Index('PRIMARY', ['mainid', 'subid'], true, true)]
                         ),
+                        new Table('multifkey',
+                            [
+                                new Column('id', Type::getType('integer'), ['autoincrement' => true]),
+                                new Column('mainid', Type::getType('integer')),
+                                new Column('subid', Type::getType('integer')),
+                            ],
+                            [
+                                new Index('PRIMARY', ['id'], true, true),
+                            ],
+                            [],
+                            [
+                                new ForeignKeyConstraint(['mainid', 'subid'], 'multiprimary', ['mainid', 'subid'], 'fk_multifkey1', []),
+                            ]
+                        ),
                         new Table('multiunique',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
@@ -445,6 +459,13 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
                         ),
+                        new Table('tran_table3',
+                            [
+                                new Column('id', Type::getType('integer')),
+                                new Column('master_id', Type::getType('integer'), ['notnull' => false]),
+                            ],
+                            [new Index('PRIMARY', ['id'], true, true)],
+                        ),
                         new Table('heavy',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
@@ -659,13 +680,15 @@ abstract class AbstractUnitTestCase extends TestCase
                 $db->truncate('oprlog');
                 $db->truncate('noprimary');
                 $db->truncate('nullable');
-                $db->truncate('multiprimary');
                 $db->truncate('multiunique');
                 $db->truncate('misctype');
                 $db->truncate('misctype_child');
                 $db->truncate('master_table');
                 $db->truncate('tran_table1');
                 $db->truncate('tran_table2');
+                $db->truncate('tran_table3');
+                $db->truncate('multifkey');
+                $db->delete('multiprimary');
                 $db->delete('foreign_c1');
                 $db->delete('foreign_c2');
                 $db->delete('foreign_p');
@@ -761,6 +784,14 @@ abstract class AbstractUnitTestCase extends TestCase
                             }
                         }
                     }
+                    $db->insert("tran_table3", [
+                        'id'        => 1,
+                        'master_id' => 100,
+                    ]);
+                    $db->insert("tran_table3", [
+                        'id'        => 2,
+                        'master_id' => 100,
+                    ]);
                     $db->insert('t_article', [
                         'article_id' => 1,
                         'title'      => 'タイトルです',

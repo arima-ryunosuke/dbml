@@ -59,6 +59,7 @@ use ryunosuke\dbml\Mixin\SelectOrThrowTrait;
 use ryunosuke\dbml\Mixin\SubAggregateTrait;
 use ryunosuke\dbml\Mixin\SubSelectTrait;
 use ryunosuke\dbml\Mixin\YieldTrait;
+use ryunosuke\dbml\Query\AffectBuilder;
 use ryunosuke\dbml\Query\Clause\Where;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Parser;
@@ -172,12 +173,8 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * 原則的に外部入力を Expression 化したり、値以外の入力として使用するのは全く推奨できない。
  *
  * @method CacheInterface         getCacheProvider()
- * @method bool                   getInsertSet()
- * @method $this                  setInsertSet($bool)
  * @method bool                   getAutoIdentityInsert()
  * @method $this                  setAutoIdentityInsert($bool)
- * @method bool                   getUpdateEmpty()
- * @method $this                  setUpdateEmpty($bool)
  * @method int|string             getDefaultChunk()
  * @method $this                  setDefaultChunk($int) {
  *     バルク系メソッドのデフォルトチャンクサイズを指定する
@@ -190,76 +187,6 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * }
  * @method int                    getDefaultRetry()
  * @method $this                  setDefaultRetry($int)
- * @method array                  getDefaultInvalidColumn()
- * @method $this                  setDefaultInvalidColumn($array) {
- *     論理削除時のカラムを指定する
- *
- *     この設定で ['delete_at' => now()] などとすると invalid コール時に delete_at が now で更新されるようになる。
- *
- *     @param array $array 論理削除時のカラム
- * }
- * @method bool                   getFilterNoExistsColumn()
- * @method $this                  setFilterNoExistsColumn($bool) {
- *     存在しないカラムをフィルタするか指定する
- *
- *     この設定を true にすると INSERT/UPDATE 時に「対象テーブルに存在しないカラム」が自動で伏せられるようになる。
- *     余計なキーが有るだけでエラーになるのは多くの場合めんどくさいだけなので true にするのは有用。
- *
- *     ただし、スペルミスなどでキーの指定を誤ると何も言わずに伏せてしまうので気づきにくい不具合になるので注意。
- *
- *     なお、デフォルトは true。
- *
- *     @param bool $bool 存在しないカラムをフィルタするなら true
- * }
- * @method bool                   getFilterNullAtNotNullColumn()
- * @method $this                  setFilterNullAtNotNullColumn($bool) {
- *     not null なカラムの null をフィルタするか指定する
- *
- *     この設定を true にすると INSERT/UPDATE 時に「not null なのに null が来たカラム」が自動で伏せられるようになる。
- *     呼び出し側の都合などで null を予約的に扱い、キーとして存在してしまうことはよくある。
- *     どうせエラーになるので、結局呼び出し直前に if 分岐で unset したりするのでいっそのこと自動で伏せてしまったほうが便利なことは多い。
- *
- *     @param bool $bool not null なカラムの null をフィルタするなら true
- * }
- * @method bool                   getConvertEmptyToNull()
- * @method $this                  setConvertEmptyToNull($bool) {
- *     NULLABLE に空文字が来たときの挙動を指定する
- *
- *     この設定を true にすると、例えば `hoge_no: INTEGER NOT NULL` なカラムに空文字を与えて INSERT/UPDATE した場合に自動で NULL に変換されるようになる。
- *     Web システムにおいては空文字でパラメータが来ることが多いのでこれを true にしておくといちいち変換せずに済む。
- *
- *     よくあるのは「年齢」というカラムがあり、入力画面で必須ではない場合。
- *     未入力で空文字が飛んでくるので、設定にもよるがそのまま mysql に突っ込んでしまうと 0 になるかエラーになる。
- *     これはそういったケースで楽をするための設定。
- *
- *     なお、デフォルトは true。
- *
- *     @param bool $bool 空文字を NULL に変換するなら true
- * }
- * @method bool                   getConvertBoolToInt()
- * @method $this                  setConvertBoolToInt($bool) {
- *     数値系カラムに真偽値が来たときの挙動を指定する
- *
- *     この設定を true にすると、数値系カラムに真偽値が来た場合に自動で int に変換されるようになる。
- *
- *     @param bool $bool 真偽値を int に変換するなら true
- * }
- * @method bool                   getConvertNumericToDatetime()
- * @method $this                  setConvertNumericToDatetime($bool) {
- *     日時系カラムに int/float が来たときの挙動を指定する
- *
- *     この設定を true にすると、日時系カラムに int/float が来た場合にタイムスタンプとみなすようになる。
- *
- *     @param bool $bool int/float をタイムスタンプとみなすなら true
- * }
- * @method bool                   getTruncateString()
- * @method $this                  setTruncateString($bool) {
- *     文字列系カラムに length を超える文字列が来たときの挙動を指定する
- *
- *     この設定を true にすると、文字列系カラムに length を超える文字列が来た場合に切り落とされるようになる。
- *
- *     @param bool $bool length で切り落とすなら true
- * }
  * @method array                  getAutoCastType()
  * @nethod self                   setAutoCastType($array) 実際に定義している
  * @method bool                   getMasterMode()
@@ -322,6 +249,24 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * @method $this                  setPropagateLockMode($bool) {{@link SelectBuilder::setPropagateLockMode()} 参照@inheritdoc SelectBuilder::setPropagateLockMode()}
  * @method bool                   getInjectChildColumn() {{@link SelectBuilder::getInjectChildColumn()} 参照@inheritdoc SelectBuilder::getInjectChildColumn()}
  * @method $this                  setInjectChildColumn($bool) {{@link SelectBuilder::setInjectChildColumn()} 参照@inheritdoc SelectBuilder::setInjectChildColumn()}
+ * @method bool                   getInsertSet() {{@link AffectBuilder::getInsertSet()} 参照@inheritdoc AffectBuilder::getInsertSet()}
+ * @method $this                  setInsertSet($bool) {{@link AffectBuilder::setInsertSet()} 参照@inheritdoc AffectBuilder::setInsertSet()}
+ * @method bool                   getUpdateEmpty() {{@link AffectBuilder::getUpdateEmpty()} 参照@inheritdoc AffectBuilder::getUpdateEmpty()}
+ * @method $this                  setUpdateEmpty($bool) {{@link AffectBuilder::setUpdateEmpty()} 参照@inheritdoc AffectBuilder::setUpdateEmpty()}
+ * @method array                  getDefaultInvalidColumn() {{@link AffectBuilder::getDefaultInvalidColumn()} 参照@inheritdoc AffectBuilder::getDefaultInvalidColumn()}
+ * @method $this                  setDefaultInvalidColumn($array) {{@link AffectBuilder::setDefaultInvalidColumn()} 参照@inheritdoc AffectBuilder::setDefaultInvalidColumn()}
+ * @method bool                   getFilterNoExistsColumn() {{@link AffectBuilder::getFilterNoExistsColumn()} 参照@inheritdoc AffectBuilder::getFilterNoExistsColumn()}
+ * @method $this                  setFilterNoExistsColumn($bool) {{@link AffectBuilder::setFilterNoExistsColumn()} 参照@inheritdoc AffectBuilder::setFilterNoExistsColumn()}
+ * @method bool                   getFilterNullAtNotNullColumn() {{@link AffectBuilder::getFilterNullAtNotNullColumn()} 参照@inheritdoc AffectBuilder::getFilterNullAtNotNullColumn()}
+ * @method $this                  setFilterNullAtNotNullColumn($bool) {{@link AffectBuilder::setFilterNullAtNotNullColumn()} 参照@inheritdoc AffectBuilder::setFilterNullAtNotNullColumn()}
+ * @method bool                   getConvertEmptyToNull() {{@link AffectBuilder::getConvertEmptyToNull()} 参照@inheritdoc AffectBuilder::getConvertEmptyToNull()}
+ * @method $this                  setConvertEmptyToNull($bool) {{@link AffectBuilder::setConvertEmptyToNull()} 参照@inheritdoc AffectBuilder::setConvertEmptyToNull()}
+ * @method bool                   getConvertBoolToInt() {{@link AffectBuilder::getConvertBoolToInt()} 参照@inheritdoc AffectBuilder::getConvertBoolToInt()}
+ * @method $this                  setConvertBoolToInt($bool) {{@link AffectBuilder::setConvertBoolToInt()} 参照@inheritdoc AffectBuilder::setConvertBoolToInt()}
+ * @method bool                   getConvertNumericToDatetime() {{@link AffectBuilder::getConvertNumericToDatetime()} 参照@inheritdoc AffectBuilder::getConvertNumericToDatetime()}
+ * @method $this                  setConvertNumericToDatetime($bool) {{@link AffectBuilder::setConvertNumericToDatetime()} 参照@inheritdoc AffectBuilder::setConvertNumericToDatetime()}
+ * @method bool                   getTruncateString() {{@link AffectBuilder::getTruncateString()} 参照@inheritdoc AffectBuilder::getTruncateString()}
+ * @method $this                  setTruncateString($bool) {{@link AffectBuilder::setTruncateString()} 参照@inheritdoc AffectBuilder::setTruncateString()}
  */
 // @formatter:on
 #[DebugInfo(false)]
@@ -385,6 +330,8 @@ class Database
         modifyIgnoreWithTable as public modifyIgnore;
     }
     use AffectOrThrowTrait {
+        insertArrayOrThrowWithTable as public insertArrayOrThrow;
+        createWithTable as public create;
         insertOrThrowWithTable as public insertOrThrow;
         updateOrThrowWithTable as public updateOrThrow;
         deleteOrThrowWithTable as public deleteOrThrow;
@@ -476,45 +423,23 @@ class Database
     {
         $default_options = [
             // キャッシュオブジェクト
-            'cacheProvider'             => null,
+            'cacheProvider'      => null,
             // 初期化後の SQL コマンド（mysql@PDO でいう MYSQL_ATTR_INIT_COMMAND）
-            'initCommand'               => null,
+            'initCommand'        => null,
             // スキーマを必要としたときのコールバック
-            'onRequireSchema'           => function (Database $db) { },
+            'onRequireSchema'    => function (Database $db) { },
             // テーブルを必要としたときのコールバック（スキーマアクセス時に一度だけ呼ばれる）
-            'onIntrospectTable'         => function (Table $table) { },
+            'onIntrospectTable'  => function (Table $table) { },
             // テーブル名 => Entity クラス名のコンバータ
-            'tableMapper'               => function ($table) { return pascal_case($table); },
-            // 拡張 INSERT SET 構文を使うか否か（mysql 以外は無視される）
-            'insertSet'                 => false,
+            'tableMapper'        => function ($table) { return pascal_case($table); },
             // SET IDENTITY_INSERT を自動発行するか（SQLServer 以外は無視される）
-            'autoIdentityInsert'        => true,
-            // UPDATE で空データの時に意味のない更新をするか？（false だと構文エラーになる）
-            'updateEmpty'               => true,
+            'autoIdentityInsert' => true,
             // バルク系メソッドのデフォルトチャンクサイズ（文字列指定で特殊なコールバックが設定できる）
-            'defaultChunk'              => null,
+            'defaultChunk'       => null,
             // insert 時などのデフォルトリトライ回数
-            'defaultRetry'              => 0,
-            // 無効化時のデフォルトカラム
-            'defaultInvalidColumn'      => [
-                //'delete_flg'  => 1,
-                //'delete_user' => fn() => Auth()::id(),
-                //'delete_time' => fn() => date('Y-m-d H:i:s'),
-            ],
-            // insert 時などにテーブルに存在しないカラムを自動でフィルタするか否か
-            'filterNoExistsColumn'      => true,
-            // insert 時などに not null な列に null が来た場合に自動でフィルタするか否か
-            'filterNullAtNotNullColumn' => true,
-            // insert 時などに NULLABLE NUMERIC カラムは 空文字を null として扱うか否か
-            'convertEmptyToNull'        => true,
-            // insert 時などに数値系カラムは真偽値を int として扱うか否か
-            'convertBoolToInt'          => true,
-            // insert 時などに日時カラムは int/float をタイムスタンプとして扱うか否か
-            'convertNumericToDatetime'  => true,
-            // insert 時などに文字列カラムは length で切るか否か
-            'truncateString'            => false,
+            'defaultRetry'       => 0,
             // DB型で自動キャストする型設定。select,affect 要素を持つ（多少無駄になるがサンプルも兼ねて冗長に記述してある）
-            'autoCastType'              => [
+            'autoCastType'       => [
                 // 正式な与え方。select は取得（SELECT）時、affect は設定（INSERT/UPDATE）時を表す
                 // 個人的には DATETIME で設定したい。出すときは DateTime で返ってくれると便利だけど、入れるときは文字列で入れたい
                 'hoge'                  => [
@@ -540,30 +465,31 @@ class Database
                 'type'                  => new \Doctrine\DBAL\Types\DateTimeType(),
             ],
             // assoc,pairs で同名キーがあった時どう振る舞うか[null:何もしない（後方優先。実質上書き）, 'noallow':例外, 'skip':スキップ（前方優先）]
-            'checkSameKey'              => null,
+            'checkSameKey'       => null,
             // 同名カラムがあった時どう振る舞うか[null, 'noallow', 'strict', 'loose']
-            'checkSameColumn'           => null,
+            'checkSameColumn'    => null,
             // 更新クエリを実行せずクエリ文字列を返すようにするか
-            'dryrun'                    => false,
+            'dryrun'             => false,
             // 更新クエリを実行せずプリペアされたステートメントを返すようにするか
-            'preparing'                 => false,
+            'preparing'          => false,
             // 参照系クエリをマスターで実行するか(「スレーブに書き込みたい」はまずあり得ないが「マスターから読み込みたい」はままある)
-            'masterMode'                => false,
+            'masterMode'         => false,
             // CompatiblePlatform のクラス名 or インスタンス
-            'compatiblePlatform'        => CompatiblePlatform::class,
+            'compatiblePlatform' => CompatiblePlatform::class,
             // exportXXX 呼び出し時にどのクラスを使用するか
-            'exportClass'               => [
+            'exportClass'        => [
                 'array' => ArrayGenerator::class,
                 'csv'   => CsvGenerator::class,
                 'json'  => JsonGenerator::class,
             ],
             // ロギングオブジェクト（LoggerInterface）
-            'logger'                    => null,
+            'logger'             => null,
         ];
 
         // 他クラスのオプションをマージ
         $default_options += TableGateway::getDefaultOptions();
         $default_options += SelectBuilder::getDefaultOptions();
+        $default_options += AffectBuilder::getDefaultOptions();
         $default_options += array_each(Transaction::getDefaultOptions(), function (&$carry, $v, $k) {
             // Transaction のオプション名は簡易すぎるので "transaction" を付与する
             $carry['transaction' . ucfirst($k)] = $v;
@@ -904,7 +830,14 @@ class Database
                 $stmt = $stmt->executeSelect($params, $connection);
             }
             else {
-                $stmt = $this->executeSelect($this->_builderToSql($sql, $params), $params, $sql->getCacheTtl());
+                $builder_params = $sql->getParams();
+                $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
+                // $builder も params を持っていて fetch の引数も指定されていたらどっちを使えばいいのかわからない
+                if (count($params) > 0 && count($builder_params) > 0) {
+                    throw new \UnexpectedValueException('specified parameter both $builder and fetch argument.');
+                }
+                $sql->detectAutoOrder(true);
+                $stmt = $this->executeSelect((string) $sql, $builder_params ?: $params, $sql->getCacheTtl());
             }
         }
         else {
@@ -914,28 +847,6 @@ class Database
         $stmt = $this->getCompatibleConnection($connection)->customResult($stmt, $this->getUnsafeOption('checkSameColumn'));
 
         return $stmt;
-    }
-
-    private function _builderToSql($builder, iterable &$fetch_params)
-    {
-        $fetch_params = $fetch_params instanceof \Traversable ? iterator_to_array($fetch_params) : $fetch_params;
-
-        // SelectBuilder なら文字列化 && $params を置換
-        if ($builder instanceof SelectBuilder) {
-            $builder_params = $builder->getParams();
-            // $builder も params を持っていて fetch の引数も指定されていたらどっちを使えばいいのかわからない
-            if (count($fetch_params) > 0 && count($builder_params) > 0) {
-                throw new \UnexpectedValueException('specified parameter both $builder and fetch argument.');
-            }
-            if ($builder_params) {
-                $fetch_params = $builder_params;
-            }
-
-            $builder->detectAutoOrder(true);
-            return (string) $builder;
-        }
-
-        return $builder;
     }
 
     private function _getConverter($data_source)
@@ -1021,332 +932,90 @@ class Database
         };
     }
 
-    private function _getChunk(&$params)
+    private function _getChunk()
     {
+        // ステートメントが複数に分かれても全く嬉しくないので prepare 中は無効にする
+        if ($this->getUnsafeOption('preparing')) {
+            return null;
+        }
+
         $chunk = $this->getUnsafeOption('defaultChunk');
         // 特殊設定: params の数でチャンク
         if (is_string($chunk) && preg_match('#^params:\s*(\d+)$#', trim($chunk), $matches)) {
-            return function () use (&$params, $matches) { return count($params) < $matches[1]; };
+            $count = 0;
+            return static function ($row) use (&$count, $matches) {
+                $count += count($row);
+                $result = $count < $matches[1];
+                if (!$result) {
+                    $count = 0;
+                }
+                return $result;
+            };
         }
         return $chunk;
     }
 
-    private function _extractPrimaryCondition($tableName, $data)
+    private function _postaffect(AffectBuilder $builder, $opt)
     {
-        $primary = $rowdata = $condition = [];
+        $affected = $builder->getAffectedRows();
+        if ($this->getUnsafeOption('dryrun')) {
+            return arrayize($affected);
+        }
+        if (!is_int($affected)) {
+            return $affected;
+        }
 
-        $pkcols = $this->getSchema()->getTablePrimaryColumns($tableName);
-        foreach ($data as $col => $value) {
-            if (is_string($col)) {
-                if (array_key_exists($col, $pkcols)) {
-                    $primary[$col] = $value;
-                }
-                else {
-                    $rowdata[$col] = $value;
+        if (($seq = $builder->getAutoIncrementSeq()) !== false) {
+            $this->resetAutoIncrement($builder->getTable(), $seq);
+        }
+
+        // 歴史的な経緯で primary:1 は例外モード
+        if (array_get($opt, 'primary') === 1 && $affected === 0) {
+            throw new NonAffectedException('affected row is nothing.');
+        }
+        // 同上。 primary:2 は空配列返しモード
+        if (array_get($opt, 'primary') === 2 && $affected === 0) {
+            return [];
+        }
+        // 同上。 primary:3 は主キー返しモード
+        if (array_get($opt, 'primary')) {
+            $data = $builder->getSet() + $builder->getWhere();
+            foreach ($data as $k => $v) {
+                $kk = str_lchop($k, "{$builder->getTable()}.");
+                if (!isset($data[$kk])) {
+                    $data[$kk] = $v;
                 }
             }
-            else {
-                $condition[$col] = $value;
+            $pcols = $this->getSchema()->getTablePrimaryColumns($builder->getTable());
+            $primary = array_intersect_key($data, $pcols);
+            $autocolumn = $this->getSchema()->getTableAutoIncrement($builder->getTable())?->getName();
+            if ($autocolumn && !isset($primary[$autocolumn])) {
+                $primary[$autocolumn] = $this->getLastInsertId($builder->getTable(), $autocolumn);
             }
+            // Expression や SelectBuilder はどうしようもないのでクエリを投げて取得
+            // 例えば modify メソッドの列に↑のようなオブジェクトが来てかつ UPDATE された場合、lastInsertId は得られない
+            foreach ($primary as $val) {
+                if (is_object($val)) {
+                    return $this->selectTuple([$builder->getTable() => array_keys($pcols)], $primary);
+                }
+            }
+            return $primary;
         }
-        if ($primary && count($pkcols) !== count($primary)) {
-            throw new \UnexpectedValueException(sprintf("primary data mismatch(%s.%s != %s)", $tableName, json_encode(array_keys($pkcols)), json_encode($primary)));
-        }
-        return [$primary, $rowdata, $condition];
+        return $affected;
     }
 
-    private function _wildUpdate($updateData, $insertData, $ignoreColumn)
+    private function _postaffects(AffectBuilder $builder, array $affecteds)
     {
-        // この分岐はなくても実質同じだが無駄にループをまわしたくないので早期リターン
-        if (!array_key_exists('*', $updateData)) {
-            return $updateData;
+        if ($this->getUnsafeOption('dryrun')) {
+            return $affecteds;
         }
-
-        // 特別な意味はないがなんとなく * の位置で保持しておく
-        $newUpdateData = [];
-        foreach ($updateData as $uColumn => $uDatum) {
-            if ($uColumn === '*') {
-                $uDatum ??= function ($updateColumn, $insertData) {
-                    $reference = $this->getCompatiblePlatform()->getReferenceSyntax($updateColumn);
-                    return $reference === false ? $insertData[$updateColumn] : $this->raw($reference);
-                };
-                foreach (array_diff_key($insertData, $updateData) as $iColumn => $iData) {
-                    $newUpdateData[$iColumn] = ($uDatum instanceof \Closure) ? $uDatum($iColumn, $insertData) : $uDatum;
-                }
-            }
-            else {
-                $newUpdateData[$uColumn] = $uDatum;
-            }
-        }
-        return array_diff_key($newUpdateData, $ignoreColumn);
-    }
-
-    private function _normalize($table, $row)
-    {
-        // これはメソッド冒頭に記述し、決して場所を移動しないこと
-        $columns = $this->getSchema()->getTableColumns($table);
-        $autocolumn = $this->getSchema()->getTableAutoIncrement($table)?->getName();
-
-        if ($row instanceof Entityable) {
-            $row = $row->arrayize();
-        }
-
-        foreach ($columns as $cname => $column) {
-            if (array_key_exists($cname, $row) && ($vaffect = $this->getSchema()->getTableColumnExpression($table, $cname, 'affect'))) {
-                $row = $vaffect($row[$cname], $row) + $row;
-            }
-            if ($column->getPlatformOptions()['virtual'] ?? null) {
-                unset($columns[$cname]);
-            }
-        }
-
         if ($this->getUnsafeOption('preparing')) {
-            $row = array_each($row, function (&$carry, $v, $k) {
-                if (is_int($k) && is_string($v) && str_starts_with($v, ':')) {
-                    $k = substr($v, 1);
-                    $v = $this->raw(":$k");
-                }
-                $carry[$k] = $v;
-            }, []);
+            return $builder->getAffectedRows();
         }
-
-        if ($this->getUnsafeOption('filterNoExistsColumn')) {
-            $row = array_intersect_key($row, $columns);
+        if (($seq = $builder->getAutoIncrementSeq()) !== false) {
+            $this->resetAutoIncrement($builder->getTable(), $seq);
         }
-
-        $filterNullAtNotNullColumn = $this->getUnsafeOption('filterNullAtNotNullColumn');
-        $convertEmptyToNull = $this->getUnsafeOption('convertEmptyToNull');
-        $convertBoolToInt = $this->getUnsafeOption('convertBoolToInt');
-        $convertNumericToDatetime = $this->getUnsafeOption('convertNumericToDatetime');
-        $truncateString = $this->getUnsafeOption('truncateString');
-        $autoCastType = $this->getUnsafeOption('autoCastType');
-        $compatibleCharAndBinary = $this->getCompatiblePlatform()->supportsCompatibleCharAndBinary();
-
-        $integerTypes = [Types::BOOLEAN => true, Types::INTEGER => true, Types::SMALLINT => true, Types::BIGINT => true];
-        $decimalTypes = [Types::DECIMAL => true, Types::FLOAT => true];
-        $numericTypes = $integerTypes + $decimalTypes;
-        $dateTypes = [Types::DATE_MUTABLE => true, Types::DATE_IMMUTABLE => true];
-        $datetimeTypes = [Types::DATETIME_MUTABLE => true, Types::DATETIME_IMMUTABLE => true];
-        $datetimeTZTypes = [Types::DATETIMETZ_MUTABLE => true, Types::DATETIMETZ_IMMUTABLE => true];
-        $datetimableTypes = $dateTypes + $datetimeTypes + $datetimeTZTypes;
-        $clobTypes = [Types::STRING => true, Types::TEXT => true];
-        $blobTypes = [Types::BINARY => true, Types::BLOB => true];
-        $stringTypes = $clobTypes + $blobTypes;
-
-        foreach ($columns as $cname => $column) {
-            if (array_key_exists($cname, $row)) {
-                $type = $column->getType();
-                $typename = $type->getName();
-                $nullable = !$column->getNotnull();
-
-                if ($filterNullAtNotNullColumn && $row[$cname] === null && !$nullable && $cname !== $autocolumn) {
-                    unset($row[$cname]);
-                    continue;
-                }
-
-                if ($convertEmptyToNull && $row[$cname] === '' && ($cname === $autocolumn || (!isset($stringTypes[$typename]) && $nullable))) {
-                    $row[$cname] = null;
-                }
-
-                if ($convertBoolToInt && is_bool($row[$cname]) && isset($numericTypes[$typename])) {
-                    $row[$cname] = (int) $row[$cname];
-                }
-
-                if ($convertNumericToDatetime && (is_int($row[$cname]) || is_float($row[$cname])) && isset($datetimableTypes[$typename])) {
-                    $dt = new \DateTime();
-                    $dt->setTimestamp($row[$cname]);
-                    $dt->modify(((int) (($row[$cname] - (int) $row[$cname]) * 1000 * 1000)) . " microsecond");
-                    $format = null;
-                    $format ??= isset($dateTypes[$typename]) ? $this->getPlatform()->getDateFormatString() : null;
-                    $format ??= isset($datetimeTypes[$typename]) ? $this->getPlatform()->getDateTimeFormatString() : null;
-                    $format ??= isset($datetimeTZTypes[$typename]) ? $this->getPlatform()->getDateTimeTzFormatString() : null;
-                    $row[$cname] = $dt->format($format);
-                }
-
-                if ($truncateString && is_string($row[$cname]) && isset($stringTypes[$typename])) {
-                    $row[$cname] = $this->getCompatiblePlatform()->truncateString($row[$cname], $column);
-                }
-
-                if (($converter = $autoCastType[$typename]['affect'] ?? null) && !$row[$cname] instanceof Queryable) {
-                    if ($converter instanceof \Closure) {
-                        $row[$cname] = $converter($row[$cname], $this->getPlatform());
-                    }
-                    else {
-                        $row[$cname] = $type->convertToDatabaseValue($row[$cname], $this->getPlatform());
-                    }
-                }
-
-                if (!$compatibleCharAndBinary && is_string($row[$cname]) && isset($blobTypes[$typename])) {
-                    $row[$cname] = $this->getCompatiblePlatform()->getBinaryExpression($row[$cname]);
-                }
-            }
-        }
-
-        // mysql は null を指定すれば自動採番されるが、他の RDBMS では伏せないと採番されないようだ
-        if ($autocolumn && !isset($row[$autocolumn]) && !$this->getCompatiblePlatform()->supportsIdentityNullable()) {
-            unset($row[$autocolumn]);
-        }
-
-        $row = $this->$table->normalize($row);
-
-        return $row;
-    }
-
-    private function _normalizes($table, $rows, $unique_cols = null)
-    {
-        $columns = $this->getSchema()->getTableColumns($table);
-        if ($unique_cols === null) {
-            $unique_cols = $this->getSchema()->getTablePrimaryColumns($table);
-        }
-        else {
-            $unique_cols = array_flip($unique_cols);
-        }
-        $singleuk = count($unique_cols) === 1 ? first_key($unique_cols) : null;
-
-        $params = array_fill_keys(array_keys($columns), []);
-        $pvals = [];
-        $result = [];
-        foreach ($rows as $row) {
-            if (!is_array($row)) {
-                throw new \InvalidArgumentException('$data\'s element must be array.');
-            }
-
-            foreach ($unique_cols as $pcol => $dummy) {
-                if (!isset($row[$pcol])) {
-                    throw new \InvalidArgumentException('$data\'s must be contain primary key.');
-                }
-                if (!is_scalar($row[$pcol])) {
-                    throw new \InvalidArgumentException('$data\'s primary key must be scalar value.');
-                }
-            }
-
-            $row = $this->_normalize($table, $row);
-
-            foreach ($columns as $col => $val) {
-                if (!array_key_exists($col, $row)) {
-                    continue;
-                }
-                if (isset($unique_cols[$col])) {
-                    $pvals[$col][] = $row[$col];
-                    continue;
-                }
-
-                if ($singleuk) {
-                    $pv = $this->bindInto($row[$singleuk], $params[$col]);
-                }
-                else {
-                    $pv = [];
-                    foreach ($unique_cols as $pcol => $dummy) {
-                        $pv[] = $pcol . ' = ' . $this->bindInto($row[$pcol], $params[$col]);
-                    }
-                    $pv = implode(' AND ', $pv);
-                }
-                $tv = $this->bindInto($row[$col], $params[$col]);
-                $result[$col][] = "WHEN $pv THEN $tv";
-            }
-        }
-
-        $cols = [];
-        foreach ($result as $column => $exprs) {
-            $cols[$column] = $this->raw('CASE ' . concat($singleuk ?: '', ' ') . implode(' ', $exprs) . " ELSE $column END", $params[$column]);
-        }
-
-        return $pvals + $cols;
-    }
-
-    private function _preaffect($tableName, &$data, &$where, &$limit, &$orderBy, &$groupBy)
-    {
-        $data ??= [];
-        $where ??= [];
-        $orderBy ??= [];
-        $groupBy ??= [];
-
-        if (is_callable($data)) {
-            $data = $data();
-            if (!$data instanceof \Generator) {
-                throw new \InvalidArgumentException('"$data" must return Generator instance.');
-            }
-        }
-
-        if (is_string($tableName) && str_exists($tableName, TableDescriptor::META_CHARACTORS)) {
-            $tableName = new TableDescriptor($this, $tableName, []);
-        }
-
-        if ($tableName instanceof TableDescriptor) {
-            if ($tableName->scope) {
-                $gateway = $this->{$tableName->table};
-                foreach ($tableName->scope as $scope => $args) {
-                    $gateway = $gateway->scope($scope, ...$args);
-                }
-                $scp = $gateway->getScopeParamsForAffect();
-            }
-            $where = array_merge((array) $where, $tableName->condition, $scp['where'] ?? []);
-            $orderBy = array_merge((array) $orderBy, $tableName->order, $scp['orderBy'] ?? []);
-            $groupBy = array_merge((array) $groupBy, $tableName->group, $scp['groupBy'] ?? []);
-            $limit ??= $tableName->limit ?? $scp['limit'] ?? null;
-            $tableName = $tableName->table;
-        }
-
-        return $this->convertTableName($tableName);
-    }
-
-    private function _postaffect($tableName, $data)
-    {
-        foreach ($data as $k => $v) {
-            $kk = str_lchop($k, "$tableName.");
-            if (!isset($data[$kk])) {
-                $data[$kk] = $v;
-            }
-        }
-        $pcols = $this->getSchema()->getTablePrimaryColumns($tableName);
-        $primary = array_intersect_key($data, $pcols);
-        $autocolumn = $this->getSchema()->getTableAutoIncrement($tableName)?->getName();
-        if ($autocolumn && !isset($primary[$autocolumn])) {
-            $primary[$autocolumn] = $this->getLastInsertId($tableName, $autocolumn);
-        }
-        // Expression や SelectBuilder はどうしようもないのでクエリを投げて取得
-        // 例えば modify メソッドの列に↑のようなオブジェクトが来てかつ UPDATE された場合、lastInsertId は得られない
-        foreach ($primary as $val) {
-            if (is_object($val)) {
-                return $this->selectTuple([$tableName => array_keys($pcols)], $primary);
-            }
-        }
-        return $primary;
-    }
-
-    private function _prewhere($tableName, $where)
-    {
-        $tableAlias = null;
-        if (is_array($tableName)) {
-            [$tableAlias, $tableName] = first_keyvalue($tableName);
-        }
-
-        $wheres = [];
-        foreach (arrayize($where) as $key => $cond) {
-            if ($key === '') {
-                $pcols = $this->getSchema()->getTablePrimaryKey($tableName)->getColumns();
-                $params = (array) $cond;
-                if (count($pcols) !== 1 && count($params) !== 0 && array_depth($params) === 1) {
-                    $params = [$params];
-                }
-                $pvals = array_each($params, function (&$carry, $pval) use ($pcols) {
-                    $pvals = (array) $pval;
-                    if (count($pcols) !== count($pvals)) {
-                        throw new \InvalidArgumentException('argument\'s length is not match primary columns.');
-                    }
-                    $carry[] = array_combine($pcols, $pvals);
-                });
-                $wheres[] = $this->getCompatiblePlatform()->getPrimaryCondition($pvals, $tableAlias ?? $tableName);
-                continue;
-            }
-
-            if ($cond instanceof SelectBuilder && $cond->getSubmethod() !== null) {
-                $cond->setSubwhere($tableName, $tableAlias, null);
-            }
-
-            $wheres[$key] = $cond;
-        }
-        return $wheres;
+        return array_sum($affecteds);
     }
 
     private function _setIdentityInsert($tableName, $data)
@@ -1364,51 +1033,21 @@ class Database
         return fn() => null;
     }
 
-    private function _restrictWheres($tableName, $event)
+    private function _throwForeignKeyConstraintViolationException(ForeignKeyConstraint $fkey)
     {
-        assert(in_array(strtolower($event), ['update', 'delete']));
-        $where = [];
-
-        $schema = $this->getSchema();
-        $fkeys = $schema->getForeignKeys($tableName, null);
-        foreach ($fkeys as $fkey) {
-            if ($fkey->{"on$event"}() === null) {
-                $ltable = first_key($schema->getForeignTable($fkey));
-                $notexists = $this->select($ltable);
-                $notexists->setSubwhere($tableName, null, $fkey->getName());
-                $where[] = $notexists->notExists();
-            }
+        if (!$this->getUnsafeOption('dryrun')) {
+            $message = vsprintf("`%s`, CONSTRAINT `%s` FOREIGN KEY (%s) REFERENCES `%s` (%s)", [
+                first_key($this->getSchema()->getForeignTable($fkey)),
+                $fkey->getName(),
+                implode(',', array_map(fn($column) => "`$column`", $fkey->getLocalColumns())),
+                $fkey->getForeignTableName(),
+                implode(',', array_map(fn($column) => "`$column`", $fkey->getForeignColumns())),
+            ]);
+            $driverException = new class("Cannot delete or update a parent row: a foreign key constraint fails ($message)") extends \Exception implements Driver\Exception {
+                public function getSQLState() { return '10000'; } // @codeCoverageIgnore
+            };
+            throw new ForeignKeyConstraintViolationException($driverException, null);
         }
-        return $where;
-    }
-
-    private function _cascadeValues($data, ForeignKeyConstraint $fkey)
-    {
-        $subdata = [];
-        foreach (array_combine($fkey->getLocalColumns(), $fkey->getForeignColumns()) as $lcol => $fcol) {
-            if (array_key_exists($fcol, $data)) {
-                $subdata[$lcol] = $data[$fcol];
-            }
-        }
-        return $subdata;
-    }
-
-    private function _cascadeWheres($where, ForeignKeyConstraint $fkey, $opt)
-    {
-        $ltable = first_key($this->getSchema()->getForeignTable($fkey));
-        $pselect = $this->select([$fkey->getForeignTableName() => $fkey->getForeignColumns()], $where);
-        $subwhere = [];
-        if (array_get($opt, 'in')) {
-            $pvals = $pvals ?? $pselect->array();
-            $pvals2 = array_maps($pvals, fn($pval) => array_combine($fkey->getLocalColumns(), $pval));
-            $pcond = $this->getCompatiblePlatform()->getPrimaryCondition($pvals2, $ltable);
-            $subwhere[] = $this->queryInto($pcond) ?: 'FALSE';
-        }
-        else {
-            $ckey = implode(',', $fkey->getLocalColumns());
-            $subwhere["($ckey)"] = $pselect;
-        }
-        return $subwhere;
     }
 
     /**
@@ -2276,7 +1915,7 @@ class Database
      *
      * addForeignKey を複数呼ぶのとほぼ等しいが、遅延実行されて必要になったときに追加される。
      * options で onUpdate/Delete や条件付き外部キーとして condition が与えられる。
-     * onDelete CASCADE はアプリレイヤーで可能な限りエミュレーションされる（onUpdate は未対応）。
+     * CASCADE・RESTRICT はアプリレイヤーで可能な限りエミュレーションされる。
      * condition を指定すると条件付き外部キーとなり、JOIN するときに暗黙的に条件が含まれるようになる（subselect 等も同様）。
      * これは「マスターテーブル」のようなごちゃまぜテーブルに対してテーブルごとの外部キーを張らざるを得ない状況を想定している。
      * condition は現在のところ文字列での指定しかできない。
@@ -2390,11 +2029,13 @@ class Database
         $level = $this->foreignKeySwitchingLevels[$levelkey] ?? 0;
 
         if ($enable && ++$level === 0) {
+            $this->getSchema()->setForeignKeyMetadata($fkeyname, ['enable' => $enable]);
             foreach ($this->getCompatiblePlatform()->getSwitchForeignKeyExpression($enable, $table_name, $fkeyname) as $sql) {
                 $this->executeAffect($sql);
             }
         }
         if (!$enable && $level-- === 0) {
+            $this->getSchema()->setForeignKeyMetadata($fkeyname, ['enable' => $enable]);
             foreach ($this->getCompatiblePlatform()->getSwitchForeignKeyExpression($enable, $table_name, $fkeyname) as $sql) {
                 $this->executeAffect($sql);
             }
@@ -2697,60 +2338,27 @@ class Database
     }
 
     /**
-     * ? 込みのキー名を正規化する
-     *
-     * 具体的には引数 $params に bind 値を格納して返り値として（? を含んだ）クエリ文字列を返す。
-     *
-     * ```php
-     * # 単純に文字列で渡す（あまり用途はない）
-     * $db->bindInto('col', $params);
-     * // results: "?", $params: ['col']
-     *
-     * # Queryable も渡せる
-     * $db->bindInto(new Expression('col', [1]), $params);
-     * // results: ['col1'], $params: [1]
-     *
-     * # 配列で渡す（混在可能。メイン用途）
-     * $db->bindInto(['col1' => new Expression('UPPER(?)', [1]), 'col2' => 2], $params);
-     * // results: ['col1' => 'UPPER(?)', 'col2' => '?'], $params: [1, 2]
-     * ```
-     *
-     * @param mixed $data ? が含まれている bind 配列
-     * @param ?array $params bind 値が渡される
-     * @return mixed ? が埋め込まれた正規化されたクエリ文字列
-     */
-    public function bindInto($data, ?array &$params)
-    {
-        $params = $params ?? [];
-
-        // 配列は再帰
-        if (is_array($data)) {
-            return array_each($data, function (&$carry, $value, $columnName) use (&$params) {
-                $carry[$columnName] = $this->bindInto($value, $params);
-            }, []);
-        }
-
-        // Queryable なら文字列化して params を bind
-        if ($data instanceof Queryable) {
-            return $data->merge($params);
-        }
-        // それ以外は $value を bind
-        else {
-            $params[] = $data;
-            return '?';
-        }
-    }
-
-    /**
-     * クエリビルダを生成して返す
+     * SELECT ビルダを生成して返す
      *
      * 極力 new SelectBuilder せずにこのメソッドを介すこと。
      *
-     * @return SelectBuilder クエリビルダオブジェクト
+     * @return SelectBuilder SELECT ビルダオブジェクト
      */
     public function createSelectBuilder()
     {
         return new SelectBuilder($this);
+    }
+
+    /**
+     * AFFECT ビルダを生成して返す
+     *
+     * 極力 new AffectBuilder せずにこのメソッドを介すこと。
+     *
+     * @return AffectBuilder AFFECT ビルダオブジェクト
+     */
+    public function createAffectBuilder()
+    {
+        return new AffectBuilder($this);
     }
 
     /**
@@ -4395,7 +4003,7 @@ class Database
      * @param string|array $tableName テーブル名 or テーブル記法
      * @param string $filename CSV ファイル名
      * @param array $options CSV オプション
-     * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function loadCsv($tableName, $filename, $options = [])
     {
@@ -4472,64 +4080,16 @@ class Database
             $file->setFlags(\SplFileObject::READ_CSV | \SplFileObject::READ_AHEAD | \SplFileObject::SKIP_EMPTY | \SplFileObject::DROP_NEW_LINE);
             $file->setCsvControl($options['delimiter'], $options['enclosure'], $options['escape']);
 
-            $columns = $column ?: array_keys(array_filter($this->getSchema()->getTableColumns($tableName), function (Column $column) {
-                return !($column->getPlatformOptions()['virtual'] ?? false);
-            }));
-            $colnames = array_filter(array_keys(array_rekey($columns, function ($k, $v) { return is_int($k) ? $v : $k; })), 'strlen');
-            $template = "INSERT INTO $tableName (%s) VALUES %s";
+            $builder = $this->createAffectBuilder();
+            $builder->build(['table' => $tableName]);
+            $affecteds = [];
+            foreach (iterator_chunk($file, $this->_getChunk() ?? PHP_INT_MAX, true) as $rows) {
+                $builder->loadCsv(null, $column, $rows, $options);
 
-            $affected = [];
-            $current = mb_internal_encoding();
-            foreach (iterator_chunk($file, ($chunk = $this->_getChunk($params)) ?? PHP_INT_MAX, true) as $rows) {
-                $values = $params = [];
-
-                foreach ($rows as $m => $fields) {
-                    if ($m < $options['skip']) {
-                        continue;
-                    }
-
-                    if ($current !== $options['encoding']) {
-                        mb_convert_variables($current, $options['encoding'], $fields);
-                    }
-
-                    $r = -1;
-                    $row = [];
-                    foreach ($columns as $cname => $expr) {
-                        $r++;
-                        // 範囲外は全部直値（マップするキーがないのでどうしようもない）
-                        if (!isset($fields[$r])) {
-                            $row[$cname] = $expr;
-                        }
-                        // 値のみ指定ならそれをカラム名として CSV 列値を使う（ただし、 null はスキップ）
-                        elseif (is_int($cname)) {
-                            if ($expr === null) {
-                                continue;
-                            }
-                            $row[$expr] = $fields[$r];
-                        }
-                        // Expression はマーカーとしての役割なので作り直す
-                        elseif ($expr instanceof Expression) {
-                            $row[$cname] = new Expression($expr, $fields[$r]);
-                        }
-                        elseif ($expr instanceof \Closure) {
-                            $row[$cname] = $expr($fields[$r]);
-                        }
-                        else {
-                            $row[$cname] = $expr;
-                        }
-                    }
-                    $row = $this->_normalize($tableName, $row);
-                    $set = $this->bindInto($row, $params);
-                    $values[] = '(' . implode(', ', $set) . ')';
-                }
-
-                $sql = sprintf($template, implode(', ', $colnames), implode(', ', $values));
-                $affected[] = $this->executeAffect($sql, $params);
+                $affecteds[] = $builder->execute();
             }
-            if ($this->getUnsafeOption('dryrun') || $this->getUnsafeOption('preparing')) {
-                return $chunk ? $affected : reset($affected);
-            }
-            return array_sum($affected);
+
+            return $this->_postaffects($builder, $affecteds);
         }
     }
 
@@ -4556,21 +4116,31 @@ class Database
      * @param string|SelectBuilder $sql SELECT クエリ
      * @param array $columns カラム定義
      * @param iterable $params bind パラメータ
-     * @return int|string|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function insertSelect($tableName, $sql, $columns = [], iterable $params = [])
+    public function insertSelect($tableName, $sql, $columns = [], array $params = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 5 ? func_get_arg(4) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
+        if ($sql instanceof SelectBuilder) {
+            $sql->detectAutoOrder(true);
+            $sql->merge($params);
+            $sql = (string) $sql;
+        }
 
-        $query = $this->_builderToSql($sql, $params);
+        $builder = $this->createAffectBuilder();
+        $builder->build([
+            'table'  => $tableName,
+            'column' => $columns,
+            'select' => $sql,
+        ]);
+        $builder->insertSelect(opt: $opt)->merge($params);
 
-        $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $sql = "INSERT {$ignore}INTO $tableName " . concat('(', implode(', ', $columns), ') ') . $query;
+        $affected = $this->executeAffect($builder->getQuery(), $params);
+        $affecteds = [$affected];
 
-        return $this->executeAffect($sql, $params);
+        return $this->_postaffects($builder, $affecteds);
     }
 
     /**
@@ -4593,52 +4163,71 @@ class Database
      * ```
      *
      * @used-by insertArrayIgnore()
+     * @used-by insertArrayOrThrow()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|callable|\Generator $data カラムデータ配列あるいは Generator
-     * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function insertArray($tableName, $data)
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->build([
+            'table' => $tableName,
+        ]);
 
-        $columns = null;
+        $schema = $this->getSchema();
+        $autocol = $schema->getTableAutoIncrement($builder->getTable());
+        $autocolname = $autocol?->getName();
 
-        $affected = [];
-        $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $template = "INSERT {$ignore}INTO $tableName (%s) VALUES %s";
-        foreach (iterator_chunk($data, ($chunk = $this->_getChunk($params)) ?? PHP_INT_MAX) as $rows) {
-            $values = [];
-            $params = [];
-            foreach ($rows as $row) {
-                if (!is_array($row)) {
-                    throw new \InvalidArgumentException('$data\'s element must be array.');
+        // 主キー返しに対応しているのはオートインクリメントのみ
+        $orPkThrow = array_get($opt, 'primary') === 1;
+        if ($orPkThrow && $autocol === null) {
+            throw new \UnexpectedValueException('insertArrayOrThrow supports only autoincrement table');
+        }
+
+        $pkvals = [];
+        $affecteds = [];
+        foreach (iterator_chunk($data, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
+            $builder->build([
+                'values' => $rows,
+            ]);
+            $builder->insertArray(opt: $opt);
+
+            $affecteds[] = $builder->execute();
+
+            if ($orPkThrow) {
+                foreach ($builder->getValues() as $row) {
+                    if (isset($row[$autocolname])) {
+                        $pkvals[] = $row[$autocolname];
+                    }
                 }
-
-                $row = $this->_normalize($tableName, $row);
-                $set = $this->bindInto($row, $params);
-
-                if (!isset($columns)) {
-                    $columns = array_keys($set);
-                }
-                elseif ($columns !== array_keys($set)) {
-                    throw new \UnexpectedValueException('columns are not match.');
-                }
-
-                $values[] = '(' . implode(', ', $set) . ')';
             }
-
-            $sql = sprintf($template, implode(', ', $columns), implode(', ', $values));
-            $affected[] = $this->executeAffect($sql, $params);
         }
 
-        if ($this->getUnsafeOption('dryrun') || $this->getUnsafeOption('preparing')) {
-            return $chunk ? $affected : reset($affected);
+        $affected = $this->_postaffects($builder, $affecteds);
+        if (!$orPkThrow || !is_int($affected)) {
+            return $affected;
         }
-        return array_sum($affected);
+
+        // ignore や不測の事態で挿入されてない行があると破綻する（ので OrThrow のみの対応としている）
+        if ($affected === 0) {
+            throw new NonAffectedException('affected row is nothing.');
+        }
+
+        // 指定されているならそれを取ればいい
+        $pkeyselect = $this->select([$builder->getTable() => [$autocolname]], [$autocolname => $pkvals]);
+        // 自動採番なら後ろから（作用行 - 指定行）件を取れば追加されたやつのはず（ピッタリだと limit 0 になってエラーになるので if 分岐）
+        if ($limit = ($affected - count($pkvals))) {
+            $lastselect = $this->select([$builder->getTable() => [$autocolname]], ["$autocolname:!" => $pkvals], [$autocolname => false], $limit);
+            // SQLITE が UNION の括弧をサポートしていないので ORDER と LIMIT が全体に掛かってしまう
+            // どうしようもないので2回に分ける（条件演算子で1行化してるのはカバレッジのため）
+            return $this->getCompatiblePlatform()->supportsUnionParentheses() ? $this->unionAll([$pkeyselect, $lastselect])->array() : array_merge($pkeyselect->array(), $lastselect->array());
+        }
+        return $pkeyselect->array();
     }
 
     /**
@@ -4670,41 +4259,31 @@ class Database
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|callable|\Generator $data カラムデータあるいは Generator あるいは Generator を返す callable
      * @param array|mixed $where 束縛条件
-     * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function updateArray($tableName, $data, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->build([
+            'table' => $tableName,
+            'where' => $where,
+        ]);
 
-        $pkey = $this->getSchema()->getTablePrimaryColumns($tableName);
-        $pcols = array_keys($pkey);
-        $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
+        $affecteds = [];
+        foreach (iterator_chunk($data, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
+            $builder->build([
+                'values' => $rows,
+                'column' => [], // 可変なので指定しない
+            ]);
+            $builder->updateArray(opt: $opt);
 
-        $condition = $this->_prewhere($tableName, $where);
-
-        $affected = [];
-        foreach (iterator_chunk($data, ($chunk = $this->_getChunk($params)) ?? PHP_INT_MAX) as $rows) {
-            $columns = $this->_normalizes($tableName, $rows, $pcols);
-            $pkcols = array_intersect_key($columns, $pkey);
-            $cvcols = array_diff_key($columns, $pkey);
-
-            $params = [];
-            $set = $this->bindInto($cvcols, $params);
-            $sets = array_sprintf($set, '%2$s = %1$s', ', ');
-
-            $pkcond = $this->getCompatiblePlatform()->getPrimaryCondition(array_uncolumns($pkcols), $tableName);
-            $criteria = Where::and(array_merge($condition, [$pkcond]))($this)->merge($params);
-
-            $affected[] = $this->executeAffect("UPDATE {$ignore}$tableName SET $sets WHERE $criteria", $params);
+            $affecteds[] = $builder->execute();
         }
 
-        if ($this->getUnsafeOption('dryrun') || $this->getUnsafeOption('preparing')) {
-            return $chunk ? $affected : reset($affected);
-        }
-        return array_sum($affected);
+        return $this->_postaffects($builder, $affecteds);
     }
 
     /**
@@ -4768,7 +4347,7 @@ class Database
      * @param array|callable|\Generator $insertData カラムデータあるいは Generator
      * @param array $updateData カラムデータ
      * @param string $uniquekey 重複チェックに使うユニークキー名
-     * @return int|string|string[]|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function modifyArray($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
@@ -4780,64 +4359,24 @@ class Database
             throw new \DomainException($cplatform->getName() . ' is not support modifyArray.');
         }
 
-        $tableName = $this->_preaffect($tableName, $insertData, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->build([
+            'table'      => $tableName,
+            'constraint' => $uniquekey,
+        ]);
 
-        $updates = null;
-        $updateParams = [];
-        $columns = null;
+        $affecteds = [];
+        foreach (iterator_chunk($insertData, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
+            $builder->build([
+                'values' => $rows,
+                'merge'  => $updateData,
+            ]);
+            $builder->modifyArray(opt: $opt);
 
-        $affected = [];
-        $ukcols = $this->getSchema()->getTableUniqueColumns($tableName, $uniquekey);
-        $merge = $cplatform->getMergeSyntax(array_keys($ukcols));
-        $refer = $cplatform->getReferenceSyntax('%1$s');
-        $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
-        $template = "INSERT {$ignore}INTO $tableName (%s) VALUES %s $merge %s";
-        foreach (iterator_chunk($insertData, ($chunk = $this->_getChunk($params)) ?? PHP_INT_MAX) as $rows) {
-            $values = [];
-            $params = [];
-            foreach ($rows as $row) {
-                if (!is_array($row)) {
-                    throw new \InvalidArgumentException('$data\'s element must be array.');
-                }
-
-                $row = $this->_normalize($tableName, $row);
-                $set = $this->bindInto($row, $params);
-
-                if (!isset($columns)) {
-                    $columns = array_keys($set);
-                }
-                elseif ($columns !== array_keys($set)) {
-                    throw new \UnexpectedValueException('columns are not match.');
-                }
-
-                if (!isset($updates)) {
-                    if ($updateData) {
-                        $updateData = $this->_wildUpdate($updateData, $row, $ukcols);
-                        $updateData = $this->_normalize($tableName, $updateData);
-                        $updateData = $this->bindInto($updateData, $updateParams);
-                        $updates = array_sprintf($updateData, '%2$s = %1$s', ', ');
-                    }
-                    else {
-                        $updates = array_sprintf($columns, '%1$s = ' . $refer, ', ');
-                    }
-                }
-
-                $values[] = '(' . implode(', ', $set) . ')';
-            }
-
-            $sql = sprintf($template, implode(', ', $columns), implode(', ', $values), $updates);
-            $affected[] = $this->executeAffect($sql, array_merge($params, $updateParams));
+            $affecteds[] = $builder->execute();
         }
 
-        if ($this->getUnsafeOption('dryrun') || $this->getUnsafeOption('preparing')) {
-            return $chunk ? $affected : reset($affected);
-        }
-
-        if (!$cplatform->supportsIdentityAutoUpdate() && $this->getSchema()->getTableAutoIncrement($tableName) !== null) {
-            $this->resetAutoIncrement($tableName, null);
-        }
-
-        return array_sum($affected);
+        return $this->_postaffects($builder, $affecteds);
     }
 
     /**
@@ -4938,19 +4477,23 @@ class Database
         $opt = func_num_args() === 6 ? func_get_arg(5) : [];
         unset($opt['primary']); // 自身で処理するので不要
 
+        $builder = $this->createAffectBuilder();
+        $builder->build([
+            'table'  => $tableName,
+            'where'  => $where,
+            'values' => $dataarray,
+            'column' => [], // 可変なので指定しない
+        ]);
+
         $dryrun = $this->getUnsafeOption('dryrun');
         $cplatform = $this->getCompatiblePlatform();
 
-        $whereconds = arrayize($where);
-
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
-
         // 主キー情報を漁っておく
-        $pcols = $this->getSchema()->getTableUniqueColumns($tableName, $uniquekey);
+        $pcols = $this->getSchema()->getTableUniqueColumns($builder->getTable(), $uniquekey);
         $plist = array_keys($pcols);
         $autocolumn = null;
         if ($uniquekey === 'PRIMARY') {
-            $autocolumn = $this->getSchema()->getTableAutoIncrement($tableName)?->getName();
+            $autocolumn = $this->getSchema()->getTableAutoIncrement($builder->getTable())?->getName();
         }
         $pksep = $this->getPrimarySeparator();
 
@@ -4971,10 +4514,7 @@ class Database
         // カラムの種類でグルーピングする
         $primaries = [];
         $col_group = [];
-        foreach ($dataarray as $n => $row) {
-            // prepare する可能性があるのでこの段階で normalize する必要がある
-            // prepare しなかった場合に2回呼ばれることになって無駄だがそもそもバラバラのカラムで呼ぶことをあまり想定していない
-            $row = $this->_normalize($tableName, $row);
+        foreach ($builder->getValues() as $n => $row) {
             $primaries[$n] = array_intersect_key($row, $pcols);
 
             $cols = array_keys($row);
@@ -4996,7 +4536,7 @@ class Database
         if ($returning) {
             $pkcol = $cplatform->getConcatExpression(array_values(array_implode($plist, $this->quote($pksep))));
             if ($where !== false) {
-                $oldrecords = $this->selectAssoc([$tableName => [self::AUTO_PRIMARY_KEY => $pkcol], '' => $returning], $whereconds);
+                $oldrecords = $this->selectAssoc([$builder->getTable() => [self::AUTO_PRIMARY_KEY => $pkcol], '' => $returning], $builder->getWhere());
             }
         }
 
@@ -5007,30 +4547,30 @@ class Database
         // 主キー外を削除（$cond を queryInto してるのは誤差レベルではなく速度に差が出るから）
         if ($where !== false) {
             $delete_ids = array_filter($primaries, fn($pkval) => count(array_filter($pkval, fn($v) => $v !== null)) === count($pcols));
-            $cond = $cplatform->getPrimaryCondition($delete_ids, $tableName);
-            $sqls[] = $this->delete($tableName, array_merge($whereconds, $delete_ids ? [$this->queryInto("NOT ($cond)", $cond->getParams())] : []));
+            $cond = $cplatform->getPrimaryCondition($delete_ids, $builder->getTable());
+            $sqls[] = $this->delete($builder->getTable(), array_merge($builder->getWhere(), $delete_ids ? [$this->queryInto("NOT ($cond)", $cond->getParams())] : []));
         }
 
         foreach ($col_group as $group) {
             if ($group['bulks'] ?? []) {
-                $sqls[] = $this->modifyArray($tableName, $group['bulks'], [], $uniquekey, null, $opt);
+                $sqls[] = $this->modifyArray($builder->getTable(), $group['bulks'], [], $uniquekey, null, $opt);
             }
             if ($group['rows'] ?? []) {
                 // 2件以上じゃないとプリペアの旨味が少ない
                 $stmt = null;
                 if ($preparable && count($group['rows']) > 1) {
-                    $stmt = $this->prepare()->modify($tableName, array_map(fn($c) => ":$c", $group['cols']), [], $uniquekey, $opt);
+                    $stmt = $this->prepare()->modify($builder->getTable(), array_map(fn($c) => ":$c", $group['cols']), [], $uniquekey, $opt);
                 }
                 foreach ($group['rows'] as $n => $row) {
                     if ($stmt) {
                         $affected = $sqls[] = $stmt->executeAffect($row);
                     }
                     else {
-                        $affected = $sqls[] = $this->modify($tableName, $row, [], $uniquekey, $opt);
+                        $affected = $sqls[] = $this->modify($builder->getTable(), $row, [], $uniquekey, $opt);
                     }
 
                     if ($autocolumn !== null && !isset($primaries[$n][$autocolumn])) {
-                        $primaries[$n][$autocolumn] = $this->getLastInsertId($tableName, $autocolumn);
+                        $primaries[$n][$autocolumn] = $this->getLastInsertId($builder->getTable(), $autocolumn);
                     }
 
                     // returning モード
@@ -5063,10 +4603,10 @@ class Database
                 $newrecords = $inserteds;
             }
             else {
-                $cond = $cplatform->getPrimaryCondition($inserteds, $tableName);
-                $newrecords = $this->selectAssoc([$tableName => [self::AUTO_PRIMARY_KEY => $pkcol], '' => $returning], [
+                $cond = $cplatform->getPrimaryCondition($inserteds, $builder->getTable());
+                $newrecords = $this->selectAssoc([$builder->getTable() => [self::AUTO_PRIMARY_KEY => $pkcol], '' => $returning], [
                     [
-                        $whereconds,
+                        $builder->getWhere(),
                         $inserteds ? [$this->queryInto("$cond", $cond->getParams())] : [],
                     ],
                 ]);
@@ -5124,6 +4664,11 @@ class Database
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
         $opt['method_key'] = '@method';
 
+        $builder = $this->createAffectBuilder();
+        $builder->build([
+            'table' => $tableName,
+        ]);
+
         // 処理順は下記で固定とする（概して delete 系は制約違反が少なく、insert 系が制約違反になりやすい）
         $affects = [
             'destroy' => [],
@@ -5145,16 +4690,38 @@ class Database
                 throw new \InvalidArgumentException("$method is invalid($n th)");
             }
 
-            $affects[$method][$n] = $row;
+            $primary = $rowdata = [];
+
+            $pkcols = $this->getSchema()->getTablePrimaryColumns($builder->getTable());
+            foreach ($row as $col => $value) {
+                if (array_key_exists($col, $pkcols)) {
+                    $primary[$col] = $value;
+                }
+                else {
+                    $rowdata[$col] = $value;
+                }
+            }
+            if ($primary && count($pkcols) !== count($primary)) {
+                throw new \UnexpectedValueException(sprintf("primary data mismatch(%s.%s != %s)", $this->table, json_encode(array_keys($pkcols)), json_encode($primary)));
+            }
+
+            $args = match ($method) {
+                'update', 'revise', 'upgrade' => [$rowdata, $primary + $builder->getWhere()],
+                'delete', 'remove', 'destroy' => [$primary + $builder->getWhere()],
+                'invalid'                     => [$primary + $builder->getWhere(), $rowdata],
+                default                       => [$row],
+            };
+
+            $affects[$method][$n] = [$builder->getTable(), ...$args];
         }
 
         $dryrunning = $this->getUnsafeOption('dryrun');
 
         $results = [];
         foreach ($affects as $method => $rows) {
-            foreach ($rows as $n => $row) {
-                $arguments = parameter_default([$this, $method], [$tableName, $row]);
-                $arguments[] = ['primary' => 3, 'extract' => 1] + $opt;
+            foreach ($rows as $n => $args) {
+                $arguments = parameter_default([$this, $method], $args);
+                $arguments[] = ['primary' => 3] + $opt;
 
                 /** @var int|string $n */
                 $results[$n] = $this->$method(...$arguments);
@@ -5336,28 +4903,6 @@ class Database
     }
 
     /**
-     * insertOrThrow のエイリアス
-     *
-     * updateOrThrow や deleteOrThrow を使う機会はそう多くなく、実質的に主キーを得たいがために insertOrThrow を使うことが多い。
-     * となると対称性がなく、コードリーディング時に余計な思考を挟むことが多い（「なぜ insert だけ OrThrow なんだろう？」）のでエイリアスを用意した。
-     *
-     * @used-by createIgnore()
-     *
-     * @param string|array $tableName テーブル名
-     * @param mixed $data INSERT データ配列
-     * @return string|array|Statement 基本的には主キー. dryrun 中は文字列、preparing 中は Statement
-     */
-    public function create($tableName, $data)
-    {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
-        $opt['throw'] = true;
-        $opt['primary'] = $opt['primary'] ?? 1;
-
-        return $this->insert($tableName, $data, $opt);
-    }
-
-    /**
      * INSERT 構文
      *
      * ```php
@@ -5385,63 +4930,24 @@ class Database
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data INSERT データ配列
-     * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function insert($tableName, $data)
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->insert($tableName, $data, opt: $opt);
 
-        $params = [];
-        $data = $this->_normalize($tableName, $data);
-        $set = $this->bindInto($data, $params);
-
-        $cplatform = $this->getCompatiblePlatform();
-        $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
-        $sql = "INSERT {$ignore}INTO $tableName ";
-        if (($condition = array_get($opt, 'where')) !== null) {
-            if (is_array($condition)) {
-                $condition = $this->selectNotExists($tableName, array_merge($condition, $where));
-            }
-            if ($condition instanceof Queryable) {
-                $condition = $condition->merge($params);
-            }
-            $fromDual = concat(' FROM ', $cplatform->getDualTable());
-            $sql .= sprintf("(%s) SELECT %s$fromDual WHERE $condition", implode(', ', array_keys($set)), implode(', ', $set));
-        }
-        elseif (count($data) && $cplatform->supportsInsertSet() && $this->getUnsafeOption('insertSet')) {
-            $sql .= "SET " . array_sprintf($set, '%2$s = %1$s', ', ');
-        }
-        else {
-            $sql .= sprintf("(%s) VALUES (%s)", implode(', ', array_keys($set)), implode(', ', $set));
-        }
-
-        $unseter = $this->_setIdentityInsert($tableName, $data);
+        $unseter = $this->_setIdentityInsert($builder->getTable(), $builder->getSet());
         try {
-            $affected = $this->executeAffect($sql, $params);
+            $builder->execute();
+            return $this->_postaffect($builder, $opt);
         }
         finally {
             $unseter();
         }
-        if (!is_int($affected)) {
-            return $affected;
-        }
-
-        if (array_get($opt, 'primary') === 3) {
-            return $this->_postaffect($tableName, $data);
-        }
-        if ($affected === 0 && array_get($opt, 'primary') === 2) {
-            return [];
-        }
-        if ($affected !== 0 && array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, $data);
-        }
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
-        }
-        return $affected;
     }
 
     /**
@@ -5466,53 +4972,51 @@ class Database
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
      * @param array|mixed $where WHERE 条件
-     * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function update($tableName, $data, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->update($tableName, $data, $where, opt: $opt);
 
-        $data = $this->_normalize($tableName, $data);
+        $affecteds = [];
 
-        if (array_get($opt, 'extract') === 1) {
-            [$primary, $rowdata,] = $this->_extractPrimaryCondition($tableName, $data);
-            $where += $primary;
-            $data = $rowdata;
-        }
+        $schema = $this->getSchema();
+        $fkeys = $schema->getForeignKeys($builder->getTable(), null);
+        foreach ($fkeys as $fkey) {
+            // 仮想でない通常の外部キーであれば RDBMS 側で同期してくれるが、仮想外部キーは能動的に実行する必要がある
+            $fkopt = $fkey->getOptions();
+            if (($fkopt['virtual'] ?? false) && ($fkopt['emulatable'] ?? true) && ($fkopt['enable'] ?? true)) {
+                $ltable = first_key($schema->getForeignTable($fkey));
 
-        if (!count($data) && $this->getUnsafeOption('updateEmpty')) {
-            foreach ($this->getSchema()->getTablePrimaryColumns($tableName) as $pk => $column) {
-                $data[$pk] = $this->raw($pk);
+                $onUpdate = $fkey->onUpdate();
+                if ($onUpdate === null) {
+                    if ($this->exists($ltable, $builder->cascadeWheres($fkey))) {
+                        $this->_throwForeignKeyConstraintViolationException($fkey);
+                    }
+                }
+                else {
+                    if ($onUpdate === 'CASCADE') {
+                        $subdata = $builder->cascadeValues($fkey);
+                        if ($subdata) {
+                            $affecteds = array_merge($affecteds, arrayize($this->update($ltable, $subdata, $builder->cascadeWheres($fkey))));
+                        }
+                    }
+                    if ($onUpdate === 'SET NULL') {
+                        $affecteds = array_merge($affecteds, arrayize($this->update($ltable, array_fill_keys($fkey->getLocalColumns(), null), $builder->cascadeWheres($fkey))));
+                    }
+                }
             }
         }
 
-        $params = [];
-        $set = $this->bindInto($data, $params);
-        $sets = array_sprintf($set, '%2$s = %1$s', ', ');
-        $criteria = Where::and($this->_prewhere($tableName, $where))($this)->merge($params);
-
-        $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $affected = $this->executeAffect("UPDATE {$ignore}$tableName SET $sets" . ($criteria ? " WHERE $criteria" : ''), $params);
-        if (!is_int($affected)) {
-            return $affected;
+        $affected = $builder->execute();
+        if ($this->getUnsafeOption('dryrun')) {
+            return array_merge($affecteds, arrayize($affected));
         }
-
-        if (array_get($opt, 'primary') === 3) {
-            return $this->_postaffect($tableName, $data + arrayize($where));
-        }
-        if ($affected !== 0 && array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, $data + arrayize($where));
-        }
-        if ($affected === 0 && array_get($opt, 'primary') === 2) {
-            return [];
-        }
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
-        }
-        return $affected;
+        return $this->_postaffect($builder, $opt);
     }
 
     /**
@@ -5536,70 +5040,49 @@ class Database
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
-     * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function delete($tableName, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
-
-        if (array_get($opt, 'extract') === 1) {
-            [$primary, , $condition] = $this->_extractPrimaryCondition($tableName, $where);
-            $where = $primary + $condition;
-        }
-
-        $prewhere = $this->_prewhere($tableName, $where);
+        $builder = $this->createAffectBuilder();
+        $builder->delete($tableName, $where, opt: $opt);
 
         $affecteds = [];
 
         $schema = $this->getSchema();
-        $fkeys = $schema->getForeignKeys($tableName, null);
+        $fkeys = $schema->getForeignKeys($builder->getTable(), null);
         foreach ($fkeys as $fkey) {
-            // 仮想でない通常の外部キーであれば RDBMS 側で削除・更新してくれるが、仮想外部キーは能動的に実行する必要がある
-            if (@$fkey->getOption('virtual') === true && ($fkey->getOptions()['emulatable'] ?? true) === true) {
-                $onDelete = strtoupper($fkey->onDelete());
-                if (in_array($onDelete, ['CASCADE', 'SET NULL'])) {
-                    $ltable = first_key($schema->getForeignTable($fkey));
-                    $pvals = $this->selectAssoc([$tableName => array_combine($fkey->getLocalColumns(), $fkey->getForeignColumns())], $prewhere);
-                    $ccond = $this->getCompatiblePlatform()->getPrimaryCondition($pvals, $ltable);
+            // 仮想でない通常の外部キーであれば RDBMS 側で同期してくれるが、仮想外部キーは能動的に実行する必要がある
+            $fkopt = $fkey->getOptions();
+            if (($fkopt['virtual'] ?? false) && ($fkopt['emulatable'] ?? true) && ($fkopt['enable'] ?? true)) {
+                $ltable = first_key($schema->getForeignTable($fkey));
+                $subwhere = $builder->cascadeWheres($fkey);
 
+                $onDelete = $fkey->onDelete();
+                if ($onDelete === null) {
+                    if ($this->exists($ltable, $subwhere)) {
+                        $this->_throwForeignKeyConstraintViolationException($fkey);
+                    }
+                }
+                else {
                     if ($onDelete === 'CASCADE') {
-                        $affecteds[] = $this->delete($ltable, $ccond);
+                        $affecteds = array_merge($affecteds, arrayize($this->delete($ltable, $subwhere)));
                     }
                     if ($onDelete === 'SET NULL') {
-                        $affecteds[] = $this->update($ltable, array_fill_keys($fkey->getLocalColumns(), null), $ccond);
+                        $affecteds = array_merge($affecteds, arrayize($this->update($ltable, array_fill_keys($fkey->getLocalColumns(), null), $subwhere)));
                     }
                 }
             }
         }
 
-        $params = [];
-        $criteria = Where::and($prewhere)($this)->merge($params);
-
-        $ignore = array_get($opt, 'ignore') ? $this->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $affected = $this->executeAffect("DELETE {$ignore}FROM $tableName" . ($criteria ? " WHERE $criteria" : ''), $params);
-        if (!is_int($affected)) {
-            if ($affecteds) {
-                return array_merge($affecteds, (array) $affected);
-            }
-            return $affected;
+        $affected = $builder->execute();
+        if ($this->getUnsafeOption('dryrun')) {
+            return array_merge($affecteds, arrayize($affected));
         }
-
-        if (array_get($opt, 'primary') === 3) {
-            return $this->_postaffect($tableName, arrayize($where));
-        }
-        if ($affected !== 0 && array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, arrayize($where));
-        }
-        if ($affected === 0 && array_get($opt, 'primary') === 2) {
-            return [];
-        }
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
-        }
-        return $affected;
+        return $this->_postaffect($builder, $opt);
     }
 
     /**
@@ -5635,64 +5118,50 @@ class Database
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
      * @param ?array $invalid_columns 無効カラム値
-     * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function invalid($tableName, $where, $invalid_columns = null)
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->build(['table' => $tableName, 'where' => $where]);
 
-        if (array_get($opt, 'extract') === 1) {
-            [$primary, $rowdata, $condition] = $this->_extractPrimaryCondition($tableName, $where);
-            $invalid_columns ??= $rowdata ?: null;
-            $where = $primary + $condition;
-            // 実質 update なのでもう不要
-            unset($opt['extract']);
-        }
-
-        $where = $this->_prewhere($tableName, $where);
-
-        $invalid_columns ??= $this->$tableName->invalidColumn();
+        $invalid_columns ??= $this->{$builder->getTable()}->invalidColumn();
         $invalid_columns ??= $this->getUnsafeOption('defaultInvalidColumn');
         assert(!empty($invalid_columns));
 
         $affecteds = [];
         $schema = $this->getSchema();
-        $fkeys = $schema->getForeignKeys($tableName, null);
+        $fkeys = $schema->getForeignKeys($builder->getTable(), null);
         uasort($fkeys, fn($a, $b) => ($a->onDelete() ? 1 : 0) <=> ($b->onDelete() ? 1 : 0));
         foreach ($fkeys as $fkey) {
-            $ltable = first_key($schema->getForeignTable($fkey));
-            $lcolumns = array_intersect_key($invalid_columns, $schema->getTableColumns($ltable));
-            if (!$lcolumns) {
-                continue;
-            }
-            $ckey = implode(',', $fkey->getLocalColumns());
-            $subwhere = [
-                "($ckey)" => $this->select([$tableName => $fkey->getForeignColumns()], $where),
-            ];
+            // UPDATE/DELETE と違い、INVALID という DML は存在せず、アプリケーション実装確定なので virtual, emulatable は見なくてよい
+            $fkopt = $fkey->getOptions();
+            if (($fkopt['enable'] ?? true)) {
+                $ltable = first_key($schema->getForeignTable($fkey));
+                $lcolumns = array_intersect_key($invalid_columns, $schema->getTableColumns($ltable));
+                if (!$lcolumns) {
+                    continue;
+                }
+                $subwhere = $builder->cascadeWheres($fkey);
 
-            if ($fkey->onDelete() === null) {
-                $invalid_where = array_map(fn($column) => $this->raw("$column IS NULL"), array_keys($lcolumns));
-                if ($this->exists($ltable, array_merge($subwhere, $invalid_where))) {
-                    $driverException = new class("Cannot invalid a parent row: a foreign key constraint fails ($ltable, CONSTRAINT {$fkey->getName()})") extends \Exception implements Driver\Exception {
-                        public function getSQLState() { return '10000'; } // @codeCoverageIgnore
-                    };
-                    throw new ForeignKeyConstraintViolationException($driverException, null);
+                if ($fkey->onDelete() === null) {
+                    $invalid_where = array_map(fn($column) => $this->raw("$column IS NULL"), array_keys($lcolumns));
+                    if ($this->exists($ltable, array_merge($subwhere, $invalid_where))) {
+                        $this->_throwForeignKeyConstraintViolationException($fkey);
+                    }
+                }
+                else {
+                    $affecteds = array_merge($affecteds, arrayize($this->invalid($ltable, $subwhere, $lcolumns, array_remove($opt, ['primary']))));
                 }
             }
-            else {
-                $affecteds = array_merge($affecteds, (array) $this->invalid($ltable, $subwhere, $lcolumns, $opt));
-            }
         }
 
-        $affected = $this->update($tableName, $invalid_columns, $where, $opt);
+        $affected = $this->update($builder->getTable(), $invalid_columns, $builder->getWhere(), $opt);
         if ($this->getUnsafeOption('dryrun')) {
-            return array_merge($affecteds, (array) $affected);
-        }
-        if (is_int($affected)) {
-            return array_sum([...$affecteds, $affected]);
+            return array_merge($affecteds, arrayize($affected));
         }
         return $affected;
     }
@@ -5716,19 +5185,20 @@ class Database
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
      * @param array|mixed $where WHERE 条件
-     * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function revise($tableName, $data, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->build(['table' => $tableName, 'set' => $data, 'where' => $where]);
+        $builder->build([
+            'where' => $builder->restrictWheres('update'),
+        ], true);
 
-        $where = $this->_prewhere($tableName, $where);
-        $where = array_merge($where, $this->_restrictWheres($tableName, 'update'));
-
-        return $this->update($tableName, $data, $where, $opt);
+        return $this->update($builder->getTable(), $builder->getSet(), $builder->getWhere(), $opt);
     }
 
     /**
@@ -5760,31 +5230,24 @@ class Database
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
      * @param array|mixed $where WHERE 条件
-     * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function upgrade($tableName, $data, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
-
-        if (array_get($opt, 'extract') === 1) {
-            [$primary, $rowdata,] = $this->_extractPrimaryCondition($tableName, $data);
-            $where += $primary;
-            $data = $rowdata;
-        }
-
-        $where = $this->_prewhere($tableName, $where);
+        $builder = $this->createAffectBuilder();
+        $builder->build(['table' => $tableName, 'set' => $data, 'where' => $where]);
 
         try {
             $affecteds = [];
             $recoveries = [];
             $schema = $this->getSchema();
-            $fkeys = $schema->getForeignKeys($tableName, null);
+            $fkeys = $schema->getForeignKeys($builder->getTable(), null);
             foreach ($fkeys as $fkey) {
                 if ($fkey->onUpdate() === null) {
-                    $subdata = $this->_cascadeValues($data, $fkey);
+                    $subdata = $builder->cascadeValues($fkey);
                     if (!$subdata) {
                         continue;
                     }
@@ -5794,12 +5257,12 @@ class Database
                     $recoveries[] = $fkey;
 
                     $ltable = first_key($schema->getForeignTable($fkey));
-                    $subwhere = $this->_cascadeWheres($where, $fkey, $opt);
-                    $affecteds = array_merge($affecteds, (array) $this->upgrade($ltable, $subdata, $subwhere, array_pickup($opt, ['in', 'ignore'])));
+                    $subwhere = $builder->cascadeWheres($fkey);
+                    $affecteds = array_merge($affecteds, arrayize($this->upgrade($ltable, $subdata, $subwhere, array_remove($opt, ['primary']))));
                 }
             }
 
-            $affected = $this->update($tableName, $data, $where, $opt);
+            $affected = $this->update($builder->getTable(), $builder->getSet(), $builder->getWhere(), $opt);
         }
         finally {
             foreach ($recoveries as $recovery) {
@@ -5808,10 +5271,7 @@ class Database
         }
 
         if ($this->getUnsafeOption('dryrun')) {
-            return array_merge($affecteds, (array) $affected);
-        }
-        if (is_int($affected)) {
-            return array_sum([...$affecteds, $affected]);
+            return array_merge($affecteds, arrayize($affected));
         }
         return $affected;
     }
@@ -5834,19 +5294,20 @@ class Database
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
-     * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function remove($tableName, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->build(['table' => $tableName, 'where' => $where]);
+        $builder->build([
+            'where' => $builder->restrictWheres('delete'),
+        ], true);
 
-        $where = $this->_prewhere($tableName, $where);
-        $where = array_merge($where, $this->_restrictWheres($tableName, 'delete'));
-
-        return $this->delete($tableName, $where, $opt);
+        return $this->delete($builder->getTable(), $builder->getWhere(), $opt);
     }
 
     /**
@@ -5877,41 +5338,30 @@ class Database
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
-     * @return int|string[] 基本的には affected row. dryrun 中は文字列配列
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function destroy($tableName, $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
-
-        if (array_get($opt, 'extract') === 1) {
-            [$primary, , $condition] = $this->_extractPrimaryCondition($tableName, $where);
-            $where = $primary + $condition;
-            // delete に移譲するのでもう不要
-            unset($opt['extract']);
-        }
-
-        $where = $this->_prewhere($tableName, $where);
+        $builder = $this->createAffectBuilder();
+        $builder->build(['table' => $tableName, 'where' => $where]);
 
         $affecteds = [];
         $schema = $this->getSchema();
-        $fkeys = $schema->getForeignKeys($tableName, null);
+        $fkeys = $schema->getForeignKeys($builder->getTable(), null);
         foreach ($fkeys as $fkey) {
             if ($fkey->onDelete() === null) {
                 $ltable = first_key($schema->getForeignTable($fkey));
-                $subwhere = $this->_cascadeWheres($where, $fkey, $opt);
-                $affecteds = array_merge($affecteds, (array) $this->destroy($ltable, $subwhere, array_pickup($opt, ['in', 'ignore'])));
+                $subwhere = $builder->cascadeWheres($fkey);
+                $affecteds = array_merge($affecteds, arrayize($this->destroy($ltable, $subwhere, array_remove($opt, ['primary']))));
             }
         }
 
-        $affected = $this->delete($tableName, $where, $opt);
+        $affected = $this->delete($builder->getTable(), $builder->getWhere(), $opt);
         if ($this->getUnsafeOption('dryrun')) {
-            return array_merge($affecteds, (array) $affected);
-        }
-        if (is_int($affected)) {
-            return array_sum([...$affecteds, $affected]);
+            return array_merge($affecteds, arrayize($affected));
         }
         return $affected;
     }
@@ -5948,95 +5398,31 @@ class Database
      * @param string|array $orderBy 並び順
      * @param string|array $groupBy グルーピング条件
      * @param array|mixed $where WHERE 条件
-     * @return int|string 基本的には affected row. dryrun 中は文字列
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function reduce($tableName, $limit = null, $orderBy = [], $groupBy = [], $where = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 6 ? func_get_arg(5) : [];
 
-        $orderBy = arrayize($orderBy);
-        $groupBy = arrayize($groupBy);
-        $where = arrayize($where);
+        $builder = $this->createAffectBuilder();
+        $builder->reduce($tableName, $limit, $orderBy, $groupBy, $where, $opt);
 
-        $simplize = function ($v) { return last_value(explode('.', $v)); };
-
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
-
-        $limit = intval($limit);
-        if ($limit < 0) {
-            throw new \InvalidArgumentException("\$limit must be >= 0 ($limit).");
-        }
-
-        $orderBy = array_maps($orderBy, function ($v, $k) use ($simplize) {
-            if (is_int($k)) {
-                return $simplize($v);
-            }
-            $v = ['ASC' => true, 'DESC' => false][$v] ?? $v;
-            return ($v ? '+' : '-') . $simplize($k);
-        });
-        if (count($orderBy) !== 1) {
-            throw new \InvalidArgumentException("\$orderBy must be === 1.");
-        }
-
-        $orderBy = reset($orderBy);
-        $groupBy = array_map($simplize, $groupBy);
-        $where = array_combine(array_map($simplize, array_keys($where)), $where);
-
-        $BASETABLE = '__dbml_base_table';
-        $JOINTABLE = '__dbml_join_table';
-        $TEMPTABLE = '__dbml_temp_table';
-        $GROUPTABLE = '__dbml_group_table';
-        $VALUETABLE = '__dbml_value_table';
-
-        $pcols = $this->getSchema()->getTablePrimaryKey($tableName)->getColumns();
-        $ascdesc = $orderBy[0] !== '-';
-        $glsign = ($ascdesc ? '>=' : '<=');
-        $orderBy = ltrim($orderBy, '-+');
-
-        // 境界値が得られるサブクエリ
-        $subquery = $this->select(["$tableName $VALUETABLE" => $orderBy])
-            ->where($where)
-            ->andWhere(array_map(function ($gk) use ($GROUPTABLE, $VALUETABLE) { return "$GROUPTABLE.$gk = $VALUETABLE.$gk"; }, $groupBy))
-            ->orderBy($groupBy + [$orderBy => $ascdesc])
-            ->limit(1, $limit);
-
-        // グルーピングしないなら主キー指定で消す必要はなく、直接比較で消すことができる（結果は変わらないがパフォーマンスが劇的に違う）
-        if (!$groupBy) {
-            $where["$tableName.$orderBy $glsign ?"] = $subquery->wrap("SELECT * FROM", "AS $TEMPTABLE");
-        }
-        else {
-            // グループキーと境界値が得られるサブクエリ
-            $subtable = $this->select([
-                "$tableName $GROUPTABLE" => $groupBy + [$orderBy => $subquery],
-            ], $where)->groupBy($groupBy);
-            // ↑と JOIN して主キーが得られるサブクエリ
-            $select = $this->select([
-                "$tableName $BASETABLE" => $pcols,
-            ])->innerJoinOn([$JOINTABLE => $subtable],
-                array_merge(array_map(function ($gk) use ($BASETABLE, $JOINTABLE) { return "$JOINTABLE.$gk = $BASETABLE.$gk"; }, $groupBy), [
-                    "$BASETABLE.$orderBy $glsign $JOINTABLE.$orderBy",
-                ])
-            );
-            // ↑を主キー where に設定する
-            $where["(" . implode(',', $pcols) . ")"] = $select->wrap("SELECT * FROM", "AS $TEMPTABLE");
-        }
-
-        return $this->delete($tableName, $where, $opt);
+        $builder->execute();
+        return $this->_postaffect($builder, $opt);
     }
 
     /**
      * 行が無かったら INSERT、有ったら UPDATE
      *
-     * アプリレイヤーで SELECT EXISTS（排他ロック） で行を確認し、無ければ INSERT 有れば UPDATE する。
-     * RDBMS に依存せず癖が少ない行置換メソッドであるが、 mysql ではギャップロック同士が競合せず deadlock になるケースが極稀に存在する。
+     * アプリレイヤーで INSERT し、エラーが起きたら UPDATE へフォールバックする。
      *
      * OrThrow 版の戻り値は「本当に更新した主キー配列」になる。
      * 下記のパターンがある。
      *
-     * - 存在しなかったので insert を行った (≒ lastInsertId を含む主キーを返す)
-     * - 存在したので update を行った (＝ 存在した行の主キーを返す)
-     * - 存在したが更新データに主キーが含まれていたので**主キーも含めて更新を行った** (＝ 存在した行の**更新後**の主キーを返す)
+     * - insert が成功した (≒ lastInsertId を含む主キーを返す)
+     * - update を行った (＝ 存在した行の主キーを返す)
+     * - update で**主キーも含めて更新を行った** (＝ 存在した行の**更新後**の主キーを返す)
      *
      * 言い換えれば「更新したその行にアクセスするに足る主キー配列」を返す。
      *
@@ -6058,52 +5444,41 @@ class Database
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $insertData INSERT データ配列
      * @param mixed $updateData UPDATE データ配列
-     * @return int|string|array 基本的には affected row. dryrun 中は文字列
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function upsert($tableName, $insertData, $updateData = [])
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $tableName = $this->_preaffect($tableName, $insertData, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->build(['table' => $tableName, 'constraint' => 'PRIMARY']);
 
-        $condition = array_unset($opt, 'where');
-        if ($condition !== null) {
-            $params = [];
-            if (is_array($condition)) {
-                $condition = $this->selectNotExists($tableName, array_merge($condition, $where));
-            }
-            if ($condition instanceof Queryable) {
-                $condition = $condition->merge($params);
-            }
-            $fromDual = concat(' FROM ', $this->getCompatiblePlatform()->getDualTable());
-            if (!$this->fetchValue("SELECT 1$fromDual WHERE $condition", $params)) {
-                return [];
-            }
-        }
+        try {
+            $builder->insert(data: $insertData, opt: $opt);
 
-        $pcols = $this->getSchema()->getTablePrimaryColumns($tableName);
-        $wheres = array_intersect_key($insertData, $pcols);
-
-        if (!count($wheres)) {
-            if ($this->getSchema()->getTableAutoIncrement($tableName)) {
-                return $this->insert($tableName, $insertData, $opt);
+            $unseter = $this->_setIdentityInsert($builder->getTable(), $builder->getSet());
+            try {
+                $builder->execute();
+                return $this->_postaffect($builder, $opt);
+            }
+            finally {
+                $unseter();
             }
         }
+        catch (UniqueConstraintViolationException) {
+            $pkcols = $this->getSchema()->getTableUniqueColumns($builder->getTable(), $builder->getConstraint());
+            $updateData = $builder->wildUpdate($updateData, $insertData, false);
 
-        if (count($wheres) !== count($pcols)) {
-            throw new \UnexpectedValueException("no match primary key's data");
-        }
+            $builder->build([
+                'set'   => $updateData ?: array_diff_key($builder->getSet(), $pkcols),
+                'where' => array_intersect_key($builder->getSet(), $pkcols),
+            ]);
+            $builder->update(opt: $opt);
 
-        if ($this->exists($tableName, $wheres, true)) {
-            if (!$updateData) {
-                $updateData = array_diff_key($insertData, $pcols);
-            }
-            $updateData = $this->_wildUpdate($updateData, $insertData, $pcols);
-            $affected = $this->update($tableName, $updateData, $wheres, $opt);
-            return is_int($affected) && $affected === 1 ? 2 : $affected;
+            $builder->execute();
+            return $this->_postaffect($builder, $opt);
         }
-        return $this->insert($tableName, $insertData, $opt);
     }
 
     /**
@@ -6163,7 +5538,7 @@ class Database
      * @param mixed $insertData INSERT データ配列
      * @param mixed $updateData UPDATE データ配列
      * @param string $uniquekey 重複チェックに使うユニークキー名
-     * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function modify($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
@@ -6171,66 +5546,14 @@ class Database
         $opt = func_num_args() === 5 ? func_get_arg(4) : [];
 
         if (!$this->getCompatiblePlatform()->supportsMerge()) {
-            return $this->upsert($tableName, $insertData, $updateData ?: null, $opt);
+            return $this->upsert($tableName, $insertData, $updateData ?: [], $opt);
         }
 
-        $tableName = $this->_preaffect($tableName, $insertData, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->modify($tableName, $insertData, $updateData, $uniquekey, $opt);
 
-        $schema = $this->getSchema();
-        $pkcols = $schema->getTableUniqueColumns($tableName, $uniquekey);
-
-        $insertData = $this->_normalize($tableName, $insertData);
-        $updateData = $this->_wildUpdate($updateData, $insertData, $pkcols);
-        $updateData = $this->_normalize($tableName, $updateData);
-        $updateData = $this->getCompatiblePlatform()->convertMergeData($insertData, $updateData);
-
-        $params = [];
-        $sets1 = $this->bindInto($insertData, $params);
-        $condition = array_get($opt, 'where');
-        if (is_array($condition)) {
-            $condition = $this->selectNotExists($tableName, array_merge($condition, $where));
-        }
-        if ($condition instanceof Queryable) {
-            $condition = $condition->merge($params);
-        }
-        $sets2 = $this->bindInto($updateData, $params);
-
-        $cplatform = $this->getCompatiblePlatform();
-        $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
-        $sql = "INSERT {$ignore}INTO $tableName ";
-        if ($condition !== null) {
-            $fromDual = concat(' FROM ', $cplatform->getDualTable());
-            $sql .= sprintf("(%s) SELECT %s$fromDual WHERE $condition", implode(', ', array_keys($sets1)), implode(', ', $sets1));
-        }
-        elseif (count($insertData) && $cplatform->supportsInsertSet() && $this->getUnsafeOption('insertSet')) {
-            $sql .= "SET " . array_sprintf($sets1, '%2$s = %1$s', ', ');
-        }
-        else {
-            $sql .= sprintf("(%s) VALUES (%s)", implode(', ', array_keys($sets1)), implode(', ', $sets1));
-        }
-        $sql .= ' ' . $cplatform->getMergeSyntax(array_keys($pkcols)) . ' ' . array_sprintf($sets2, '%2$s = %1$s', ', ');
-        $affected = $this->executeAffect($sql, $params);
-        if (!is_int($affected)) {
-            return $affected;
-        }
-
-        if (!$cplatform->supportsIdentityAutoUpdate() && $this->getSchema()->getTableAutoIncrement($tableName) !== null) {
-            $this->resetAutoIncrement($tableName, null);
-        }
-
-        if (array_get($opt, 'primary') === 3) {
-            return $this->_postaffect($tableName, $insertData + $updateData);
-        }
-        if ($affected !== 0 && array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, $insertData + $updateData);
-        }
-        if ($affected === 0 && array_get($opt, 'primary') === 2) {
-            return [];
-        }
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            throw new NonAffectedException('affected row is nothing.');
-        }
-        return $affected;
+        $builder->execute();
+        return $this->_postaffect($builder, $opt);
     }
 
     /**
@@ -6253,57 +5576,18 @@ class Database
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data REPLACE データ配列
-     * @return int|string|array|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function replace($tableName, $data)
     {
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $tableName = $this->_preaffect($tableName, $data, $where, $limit, $orderBy, $groupBy);
+        $builder = $this->createAffectBuilder();
+        $builder->replace($tableName, $data, $opt);
 
-        $params = [];
-        $data = $this->_normalize($tableName, $data);
-        $sets = $this->bindInto($data, $params);
-
-        $primary = $this->getSchema()->getTablePrimaryColumns($tableName);
-        $columns = array_filter($this->getSchema()->getTableColumns($tableName), function (Column $column) {
-            return !($column->getPlatformOptions()['virtual'] ?? false);
-        });
-
-        $cplatform = $this->getCompatiblePlatform();
-        $defaults = $this->getEmptyRecord($tableName);
-        $selects = [];
-        foreach ($columns as $cname => $column) {
-            if (array_key_exists($cname, $sets)) {
-                $selects[$cname] = $sets[$cname];
-            }
-            else {
-                $pkisnull = array_sprintf($primary, "$tableName.%2\$s IS NULL", ' AND ');
-                $default = $this->raw($this->quote($defaults[$cname]));
-                $selects[$cname] = $cplatform->getCaseWhenSyntax(null, [$pkisnull => $default], $this->raw($cname))->merge($params);
-            }
-        }
-
-        $criteria = Where::and(array_intersect_key($data, $primary))($this)->merge($params);
-
-        $sql = "REPLACE INTO $tableName (" . implode(', ', array_keys($selects)) . ") ";
-        $sql .= "SELECT " . implode(', ', $selects) . " FROM (SELECT NULL) __T ";
-        $sql .= "LEFT JOIN $tableName ON " . ($criteria ? $criteria : '1=0');
-
-        $affected = $this->executeAffect($sql, $params);
-        if (!is_int($affected)) {
-            return $affected;
-        }
-
-        /** @noinspection PhpStatementHasEmptyBodyInspection REPLACE が 0 を返すことはない */
-        if ($affected === 0 && array_get($opt, 'throw')) {
-            // throw new NonAffectedException('affected row is nothing.');
-        }
-        if (array_get($opt, 'primary')) {
-            return $this->_postaffect($tableName, $data);
-        }
-        return $affected;
+        $builder->execute();
+        return $this->_postaffect($builder, $opt);
     }
 
     /**
@@ -6321,49 +5605,20 @@ class Database
      * // INSERT INTO tablename (name, other_columns) SELECT 'copied' AS name, other_columns AS other_columns FROM tablename WHERE id = '1'
      * ```
      *
-     * @param string $targetTable 挿入するテーブル名
+     * @param string|TableDescriptor $tableName テーブル名
      * @param array $overrideData selectしたデータを上書きするデータ
      * @param array|mixed $where 検索条件
      * @param ?string $sourceTable 元となるテーブル名。省略すると $targetTable と同じになる
-     * @return int|string|Statement 基本的には affected row. dryrun 中は文字列、preparing 中は Statement
+     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function duplicate($targetTable, array $overrideData = [], $where = [], $sourceTable = null)
+    public function duplicate($tableName, array $overrideData = [], $where = [], $sourceTable = null)
     {
-        $sourceTable = $sourceTable === null ? $targetTable : $sourceTable;
-        $targetTable = $this->convertTableName($targetTable);
-        $sourceTable = $this->convertTableName($sourceTable);
+        $builder = $this->createAffectBuilder();
+        $builder->duplicate($tableName, $overrideData, $where, $sourceTable);
 
-        $metatarget = array_filter($this->getSchema()->getTableColumns($targetTable), function (Column $column) {
-            return !($column->getPlatformOptions()['virtual'] ?? false);
-        });
-        $metasource = $this->getSchema()->getTableColumns($sourceTable);
-
-        // 主キーが指定されてないなんておかしい（必ず重複してしまう）
-        // しかし AUTO INCREMENT を期待して敢えて指定してないのかもしれない
-        // したがって、「同じテーブルの場合は AUTO INCREMENT な主キーはselectしない」で対応できる（その結果例外が出てもそれは呼び出し側の責任）
-        if ($sourceTable === $targetTable) {
-            $autocolumn = $this->getSchema()->getTableAutoIncrement($targetTable)?->getName();
-            $metasource = array_diff_key($metasource, [$autocolumn => null]);
-        }
-
-        $overrideData = $this->_normalize($targetTable, $overrideData);
-
-        $params = [];
-        $overrideSet = $this->bindInto($overrideData, $params);
-        $overrideSet = array_map(function ($v) { return new Expression($v); }, $overrideSet);
-
-        foreach ($metasource as $name => $dummy) {
-            if (array_key_exists($name, $metatarget) && !array_key_exists($name, $overrideSet)) {
-                $overrideSet[$name] = new Expression($name);
-            }
-        }
-
-        $select = $this->select([$sourceTable => $overrideSet], $where);
-        $sql = "INSERT INTO $targetTable (" . implode(', ', array_keys($overrideSet)) . ") $select";
-
-        $unseter = $this->_setIdentityInsert($targetTable, $overrideData + ($targetTable === $sourceTable ? [] : $this->getSchema()->getTablePrimaryColumns($sourceTable)));
+        $unseter = $this->_setIdentityInsert($builder->getTable(), $builder->getSet());
         try {
-            return $this->executeAffect($sql, array_merge($params, $select->getParams()));
+            return $builder->execute();
         }
         finally {
             $unseter();
@@ -6380,23 +5635,17 @@ class Database
      *
      * @param string $tableName テーブル名
      * @param bool $cascade CASCADE フラグ。PostgreSql の場合のみ有効
-     * @return int|string 基本的には affected row. dryrun 中は文字列
+     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function truncate($tableName, $cascade = false)
     {
-        $cplatform = $this->getCompatiblePlatform();
-        $schema = $this->getSchema();
+        $opt = ['cascade' => $cascade];
 
-        $tableName = $this->convertTableName($tableName);
+        $builder = $this->createAffectBuilder();
+        $builder->truncate($tableName, $opt);
 
-        try {
-            return $this->executeAffect($cplatform->getTruncateTableSQL($tableName, $cascade));
-        }
-        finally {
-            if (!$cplatform->supportsResetAutoIncrementOnTruncate() && $schema->getTableAutoIncrement($tableName)) {
-                $this->resetAutoIncrement($tableName);
-            }
-        }
+        $builder->execute();
+        return $this->_postaffect($builder, $opt);
     }
 
     /**
@@ -6409,27 +5658,29 @@ class Database
      * ```
      *
      * @param string $tableName テーブル名
-     * @return int|array|string 基本的には affected row. dryrun 中は文字列か配列
+     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function eliminate($tableName)
     {
         $schema = $this->getSchema();
 
-        $tableName = $this->convertTableName($tableName);
-        $relations = $schema->getForeignKeys($tableName, null);
+        $builder = $this->createAffectBuilder();
+        $builder->build(['table' => $tableName]);
+
+        $relations = $schema->getForeignKeys($builder->getTable(), null);
 
         $affecteds = [];
 
         foreach ($relations as $fkey) {
             $ltable = first_key($schema->getForeignTable($fkey));
-            $affecteds = array_merge($affecteds, (array) $this->eliminate($ltable));
+            $affecteds = array_merge($affecteds, arrayize($this->eliminate($ltable)));
         }
 
         foreach ($relations as $fkey) {
             $this->switchForeignKey(false, $fkey);
         }
         try {
-            $affecteds[] = $this->truncate($tableName);
+            $affecteds = array_merge($affecteds, arrayize($this->truncate($builder->getTable())));
         }
         finally {
             foreach ($relations as $fkey) {
@@ -6437,10 +5688,7 @@ class Database
             }
         }
 
-        if ($this->getUnsafeOption('dryrun')) {
-            return $affecteds;
-        }
-        return array_sum($affecteds); // Statement の可能性があるが、truncate を prepare で呼ぶ人はいないし用途もないのでテストしない
+        return $this->_postaffects($builder, $affecteds);
     }
 
     /**

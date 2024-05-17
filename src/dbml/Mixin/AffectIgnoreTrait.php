@@ -13,7 +13,7 @@ trait AffectIgnoreTrait
     {
         $arity = parameter_length([$this, $method]);
         $arguments = parameter_default([$this, $method], $arguments);
-        $arguments[$arity] = ['primary' => 2, 'ignore' => true] + ($arguments[$arity] ?? []);
+        $arguments[$arity] = ($arguments[$arity] ?? []) + ['primary' => 2, 'ignore' => true];
         return $this->$method(...$arguments);
     }
 

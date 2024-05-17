@@ -14,8 +14,63 @@ trait AffectOrThrowTrait
     {
         $arity = parameter_length([$this, $method]);
         $arguments = parameter_default([$this, $method], $arguments);
-        $arguments[$arity] = ['primary' => 1, 'throw' => true] + ($arguments[$arity] ?? []);
+        $arguments[$arity] = ($arguments[$arity] ?? []) + ['primary' => 1];
         return $this->$method(...$arguments);
+    }
+
+    /**
+     * 作用行が 0 のときに例外を投げる {@uses Database::insertArray()}
+     *
+     * 返り値として挿入した主キー配列の配列を返す（自動採番テーブルのみ）。
+     * この機能は実験的な機能で、予告なく変更されることがある。
+     *
+     * @inheritdoc Database::insertArray()
+     * @return array|string
+     * @throws NonAffectedException
+     */
+    public function insertArrayOrThrowWithTable($tableName, $data)
+    {
+        assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectOrThrow('insertArray', func_get_args());
+    }
+
+    /**
+     * 作用行が 0 のときに例外を投げる {@uses TableGateway::insertArray()}
+     *
+     * @inheritdoc TableGateway::insertArray()
+     * @return array|string
+     * @throws NonAffectedException
+     */
+    private function insertArrayOrThrowWithoutTable($data)
+    {
+        assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectOrThrow('insertArray', func_get_args());
+    }
+
+    /**
+     * insertOrThrow のエイリアス
+     *
+     * updateOrThrow や deleteOrThrow を使う機会はそう多くなく、実質的に主キーを得たいがために insertOrThrow を使うことが多い。
+     * となると対称性がなく、コードリーディング時に余計な思考を挟むことが多い（「なぜ insert だけ OrThrow なんだろう？」）のでエイリアスを用意した。
+     *
+     * @inheritdoc Database::insert()
+     * @return array|string
+     * @throws NonAffectedException
+     */
+    public function createWithTable($tableName, $data)
+    {
+        return $this->insertOrThrowWithTable(...func_get_args());
+    }
+
+    /**
+     * insertOrThrow のエイリアス
+     *
+     * @inheritdoc TableGateway::insert()
+     * @see createWithTable()
+     */
+    public function createWithoutTable($data)
+    {
+        return $this->insertOrThrowWithoutTable(...func_get_args());
     }
 
     /**

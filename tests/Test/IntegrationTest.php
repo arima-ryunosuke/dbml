@@ -11,6 +11,7 @@ use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
+use ryunosuke\dbml\Query\Clause\Where;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\Comment;
 use function ryunosuke\dbml\try_return;
@@ -301,6 +302,50 @@ class IntegrationTest extends AbstractUnitTestCase
             // A.article_id <> 2 が効くので 2 の t_article は含まれない
             // LIMIT 2 が効くので 3 の t_article は含まれない
         ], $rows);
+    }
+
+    /**
+     * DB context 関係
+     *
+     * DB を渡す処理系が仮に循環参照などでインスタンスを握り続けるとコンテキストは戻らない。
+     * 多少の設定ならともかく dryrun,prepare 等だとあらゆる処理がコケ始めるので担保しておく。
+     *
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_context($database)
+    {
+        $db = $database->context(['defaultChunk' => 10]);
+        $t = $db->transaction(fn(Database $db) => $db->fetchValue('select 1'));
+        $this->assertEquals('1', $t->perform());
+        unset($t);
+        unset($db);
+        $this->assertNull($database->getDefaultChunk());
+
+        $database->test(); // 一度は作っておく
+        $db = $database->context(['defaultChunk' => 10]);
+        $t = $database->test;
+        $t->array();
+        unset($t);
+        unset($db);
+        $this->assertNull($database->getDefaultChunk());
+
+        $db = $database->context(['defaultChunk' => 10]);
+        $where = Where::and([fn() => 0, Where::or([1, 2, 3]), 'name' => ['a', 'b', 'c']])($db);
+        $this->assertEquals('(0) AND ((1) OR (2) OR (3)) AND (name IN (?,?,?))', $where->getQuery());
+        //unset($where); // $where は $db を握らないはず
+        unset($db);
+        $this->assertNull($database->getDefaultChunk());
+
+        $db = $database->context(['defaultChunk' => 10]);
+        $selecter = $db->createSelectBuilder();
+        $selecter->column('test')->where(['id > ?' => 5])->orderBy('-id')->groupBy('name')->limit(10);
+        $affecter = $db->createAffectBuilder();
+        $affecter->reduce('test', 10, '-id', 'name', ['id > ?' => 5]);
+        unset($selecter);
+        unset($affecter);
+        unset($db);
+        $this->assertNull($database->getDefaultChunk());
     }
 
     /**

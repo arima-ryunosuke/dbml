@@ -14,7 +14,6 @@ use ryunosuke\dbml\Mixin\FetchMethodTrait;
 use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\IteratorTrait;
 use ryunosuke\dbml\Mixin\JoinTrait;
-use ryunosuke\dbml\Mixin\OptionTrait;
 use ryunosuke\dbml\Query\Clause\AbstractClause;
 use ryunosuke\dbml\Query\Clause\Having;
 use ryunosuke\dbml\Query\Clause\OrderBy;
@@ -26,10 +25,7 @@ use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\Pagination\Paginator;
 use ryunosuke\dbml\Query\Pagination\Sequencer;
 use ryunosuke\dbml\Utility\Adhoc;
-use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 use function ryunosuke\dbml\array_all;
-use function ryunosuke\dbml\array_convert;
-use function ryunosuke\dbml\array_depth;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_find;
 use function ryunosuke\dbml\array_flatten;
@@ -49,7 +45,6 @@ use function ryunosuke\dbml\instance_of;
 use function ryunosuke\dbml\is_bindable_closure;
 use function ryunosuke\dbml\is_hasharray;
 use function ryunosuke\dbml\is_primitive;
-use function ryunosuke\dbml\preg_splice;
 use function ryunosuke\dbml\split_noempty;
 use function ryunosuke\dbml\str_exists;
 
@@ -200,12 +195,9 @@ use function ryunosuke\dbml\str_exists;
  * @method $this|array|Entityable[] array(iterable $params = [])
  */
 // @formatter:on
-class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
+class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Countable
 {
-    use DebugInfoTrait;
-    use OptionTrait;
     use IteratorTrait;
-
     use JoinTrait;
 
     use FetchMethodTrait {
@@ -271,9 +263,6 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
         'operator' => null,
     ];
 
-    /** @var string 生成した SQL（キャッシュ） */
-    private $sql;
-
     /** @var array キャッシュモード */
     private $cache = [];
 
@@ -300,12 +289,6 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
 
     /** @var string ロックオプション */
     private $lockOption;
-
-    /** @var Database データベース */
-    private $database;
-
-    /** @var Statement prepare されたステートメント */
-    private $statement;
 
     /** @var SelectBuilder[] サブビルダー配列 */
     private $subbuilders = [];
@@ -374,8 +357,8 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function __construct(Database $database)
     {
-        $this->database = $database;
-        $this->setDefault($database->getOptions());
+        parent::__construct($database);
+
         // $this だと gc されずに参照が残り続けるので無名クラスのコンテキストにする（どうせ実行時に再バインドされる）
         $this->setProvider(\Closure::bind(function () {
             /** @var SelectBuilder $this */
@@ -401,24 +384,6 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
         };
         $this->sqlParts = $clone($this->sqlParts);
         $this->subbuilders = $clone($this->subbuilders);
-    }
-
-    /**
-     * @ignore
-     *
-     * @param string $name メソッド名
-     * @param array $arguments 引数配列
-     * @return mixed
-     */
-    public function __call($name, $arguments)
-    {
-        // OptionTrait へ移譲
-        $result = $this->OptionTrait__callGetSet($name, $arguments, $called);
-        if ($called) {
-            return $result;
-        }
-
-        throw new \BadMethodCallException("'$name' is undefined.");
     }
 
     /**
@@ -449,12 +414,7 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function __toString()
     {
-        return $this->_getSql();
-    }
-
-    private function _getSql()
-    {
-        if ($this->sql !== null) {
+        if (isset($this->sql)) {
             return $this->sql;
         }
 
@@ -920,135 +880,10 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
     {
         $andor = strtoupper($andor);
 
-        $froms = array_filter($this->getFromPart(), function ($from) {
-            return is_string($from['table']);
-        });
+        $froms = array_filter($this->getFromPart(), fn($from) => is_string($from['table']));
+        $tables = array_column($froms, 'table', 'alias');
 
-        $predicates = array_convert($predicates, function ($cond, &$param, $keys) use ($froms) {
-            $is_int = is_int($cond);
-            $is_toplevel = array_filter($keys, 'is_int') === $keys; // flipflop の仕様がある
-
-            // 主キー
-            if ($cond === '') {
-                if (!$is_toplevel) {
-                    return false;
-                }
-                $from = reset($froms) ?: throw new \UnexpectedValueException('base table not found.');
-                $pcols = $this->database->getSchema()->getTablePrimaryKey($from['table'])->getColumns();
-                $params = (array) $param;
-                if (count($pcols) !== 1 && count($params) !== 0 && array_depth($params) === 1) {
-                    $params = [$params];
-                }
-                $pvals = array_each($params, function (&$carry, $pval) use ($pcols) {
-                    $pvals = (array) $pval;
-                    if (count($pcols) !== count($pvals)) {
-                        throw new \InvalidArgumentException('argument\'s length is not match primary columns.');
-                    }
-                    $carry[] = array_combine($pcols, $pvals);
-                });
-                return [$this->database->getCompatiblePlatform()->getPrimaryCondition($pvals, $from['alias'])];
-            }
-            // エニーカラム（*.column_name）
-            if (is_string($cond) && strpos($cond, '*.') === 0) {
-                if (!$is_toplevel) {
-                    return false;
-                }
-                [, $column] = explode('.', $cond, 2);
-                $subcond = [];
-                foreach ($froms as $from) {
-                    $columns = $this->database->getSchema()->getTableColumns($from['table']);
-                    if (array_key_exists($column, $columns)) {
-                        $subcond[$from['alias'] . '.' . $column] = $param;
-                    }
-                }
-                return $subcond;
-            }
-            // 仮想カラム（tablename.virtualname）@todo 何をしているか分からない
-            $cond2 = $is_int ? $param : $cond;
-            if (is_string($cond2) && preg_match('#([a-z_][a-z0-9_]*)\.([a-z_][a-z0-9_]*)#ui', $cond2, $matches) && $is_toplevel) {
-                $modifier = $matches[1];
-                $tablename = $froms[$modifier]['table'] ?? $modifier;
-                if ($this->database->getSchema()->hasTable($tablename)) {
-                    $vcolumns = array_filter($this->database->getSchema()->getTableColumns($tablename), function (Column $col) {
-                        return $col->hasPlatformOption('select');
-                    });
-                    if ($vcolumns) {
-                        $newparam = $is_int ? [] : $param;
-                        $cols = arrayize($newparam);
-                        $params = [];
-                        $vnames = implode('|', array_map(function ($v) { return preg_quote($v, '#'); }, array_keys($vcolumns)));
-                        $expr = preg_replace_callback("#(\\?)|$modifier\\.($vnames)(?![_a-zA-Z0-9])#u", function ($m) use ($cond, $froms, $modifier, $tablename, &$cols, &$params) {
-                            $vname = $m[2] ?? null;
-                            if ($vname === null) {
-                                if ($cols) {
-                                    $params[] = array_shift($cols);
-                                }
-                                return '?';
-                            }
-
-                            $prefix = "/* vcolumn $vname-" . (is_int($cond) ? $cond : 'k') . " */";
-                            $vcol = $this->database->getSchema()->getTableColumnExpression($tablename, $vname, 'select', $this->database);
-                            if (is_string($vcol)) {
-                                return "$prefix " . sprintf($vcol, $modifier);
-                            }
-                            elseif ($vcol instanceof Queryable) {
-                                $vcolq = clone $vcol;
-                                if ($vcolq instanceof SelectBuilder && ($vcolq->submethod !== null || $vcolq->lazyMode !== null)) {
-                                    foreach ($froms as $from) {
-                                        if ($vcolq->setSubwhere($from['table'], $from['alias'])) {
-                                            break;
-                                        }
-                                    }
-                                }
-                                if ($vcolq instanceof SelectBuilder && $vcolq->lazyMode !== null) {
-                                    $vcolq->andWhere($cols)->exists();
-                                    $cols = [true];
-                                }
-
-                                $params[] = $vcolq;
-                                return "$prefix ?";
-                            }
-                        }, $cond2, -1, $count);
-
-                        if (!$count || $cond2 === $expr) {
-                            return;
-                        }
-
-                        if ($params) {
-                            $params = array_merge($params, $cols);
-                            if ($params !== arrayize($param)) {
-                                $param = $params;
-                            }
-                        }
-                        elseif ($is_int) {
-                            $param = $expr;
-                            return null;
-                        }
-                        return $expr;
-                    }
-                }
-            }
-            // サブクエリビルダ(subexists, submax, sub...)
-            if ($param instanceof SelectBuilder && ($submethod = $param->getSubmethod()) !== null) {
-                // "P" or "P:fkey" or "colname|P" or "colname|P:fkey"
-                $conds = is_bool($submethod) ? "|$cond" : $cond;
-                $colname = preg_splice('#\|([a-z0-9_]+)(:([a-z0-9_]+))?#ui', '', $conds, $matches);
-                $falias = $matches[1] ?? null;
-                $fkname = $matches[3] ?? null;
-                if (array_key_exists($falias, $froms)) {
-                    if ($param->setSubwhere($froms[$falias]['table'], $froms[$falias]['alias'], $fkname)) {
-                        return is_string($submethod) ? $colname : true;
-                    }
-                }
-                else {
-                    foreach ($froms as $from) {
-                        if ($param->setSubwhere($from['table'], $from['alias'])) {
-                            return null;
-                        }
-                    }
-                }
-            }
-        }, true);
+        $predicates = $this->_precondition($tables, $predicates);
 
         $params = [];
         $ands = [];
@@ -1255,19 +1090,9 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
 
     private function _dirty()
     {
-        $this->sql = null;
+        unset($this->sql);
         $this->resetResult();
         return $this;
-    }
-
-    /**
-     * データベースを返す
-     *
-     * @return Database 保持している Database オブジェクト
-     */
-    public function getDatabase()
-    {
-        return $this->database;
     }
 
     /**
@@ -3672,18 +3497,14 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
         return $this->_dirty();
     }
 
-    /**
-     * すべてを無に帰す
-     *
-     * @return $this 自分自身
-     */
     public function reset()
     {
+        parent::reset();
+
         // キャッシュ解除は真っ先に行う（配下のフィールドにもあてるため）
         $this->cache(false);
 
         // 固有なフィールドをクリア
-        $this->statement = null;
         $this->caster = null;
         $this->subbuilders = [];
         $this->callbacks = [];
@@ -3706,44 +3527,6 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
         $this->resetQueryPart();
 
         return $this->_dirty();
-    }
-
-    /**
-     * 現在のビルダの状態で固定して prepare する
-     *
-     * 「preparedStatement を返す」のではなく「prepare 状態にするだけ」なのに注意。
-     * preparedStatement は {@link getPreparedStatement()} で取得する。
-     *
-     * ```php
-     * $qb->column('t_article', ['state' => 'active', 'id = :id']);
-     * # 現在の状態で prepare する
-     * $qb->prepare();
-     * // この段階では state: active は固定されているが、:id は未確定
-     * $stmt = $qb->getPreparedStatement();
-     * // ここで実行することで id: 1 がプリペアで実行される
-     * $stmt->executeSelect(['id' => 1]); // SELECT t_article.* FROM t_article WHERE (id = 1) AND (state = "active")
-     * // さらに続けてプリペアで id: 2 を実行できる
-     * $stmt->executeSelect(['id' => 2]); // SELECT t_article.* FROM t_article WHERE (id = 2) AND (state = "active")
-     * ```
-     *
-     * @return $this 自分自身
-     */
-    public function prepare()
-    {
-        $this->statement = new Statement((string) $this, $this->getParams(), $this->database);
-        return $this;
-    }
-
-    /**
-     * prepare したステートメントを返す
-     *
-     * {@link prepare()} の例も参照。
-     *
-     * @return Statement プリペアされたステートメント
-     */
-    public function getPreparedStatement()
-    {
-        return $this->statement;
     }
 
     /**
@@ -3853,21 +3636,21 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
     /**
      * 内部向け
      *
+     * @return string|null
+     */
+    public function getLazyMode()
+    {
+        return $this->lazyMode;
+    }
+
+    /**
+     * 内部向け
+     *
      * @return int|null
      */
     public function getLazyChunk()
     {
         return $this->lazyChunk;
-    }
-
-    /**
-     * パラメータを利用してクエリ化
-     *
-     * @return string エスケープ済みの完全なクエリ
-     */
-    public function queryInto()
-    {
-        return $this->database->queryInto($this->__toString(), $this->getParams());
     }
 
     public function getQuery()
@@ -3878,7 +3661,7 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
     public function getParams($queryPartName = null)
     {
         // _getSql で内部構造が変わることがあるので呼んでおく必要がある
-        $this->_getSql();
+        $this->__toString();
 
         $parts = $queryPartName ? $this->sqlParts[$queryPartName] : $this->sqlParts;
         $params = [];
@@ -3891,14 +3674,5 @@ class SelectBuilder implements Queryable, \IteratorAggregate, \Countable
             }
         });
         return $params;
-    }
-
-    public function merge(?array &$params)
-    {
-        $params = $params ?? [];
-        foreach ($this->getParams() as $param) {
-            $params[] = $param;
-        }
-        return $this->getQuery();
     }
 }

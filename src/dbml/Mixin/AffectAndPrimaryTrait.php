@@ -13,7 +13,7 @@ trait AffectAndPrimaryTrait
     {
         $arity = parameter_length([$this, $method]);
         $arguments = parameter_default([$this, $method], $arguments);
-        $arguments[$arity] = ['primary' => 3] + ($arguments[$arity] ?? []);
+        $arguments[$arity] = ($arguments[$arity] ?? []) + ['primary' => 3];
         return $this->$method(...$arguments);
     }
 

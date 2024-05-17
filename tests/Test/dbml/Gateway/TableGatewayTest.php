@@ -428,7 +428,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
-            'colval'  => [],
+            'set'     => [],
         ], $gateway->getScopeParts('x1'));
 
         // デフォルト引数よりスコープパラメータの方が強い
@@ -439,7 +439,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
-            'colval'  => [],
+            'set'     => [],
         ], $gateway->getScopeParts('x1', 1));
 
         // プリセットパラメータが使用される
@@ -450,7 +450,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
-            'colval'  => [],
+            'set'     => [],
         ], $gateway->getScopeParts('x2'));
 
         // プリセットパラメータは上書きできない。与えた 999 は次のスコープパラメータとして使用される
@@ -461,7 +461,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
-            'colval'  => [],
+            'set'     => [],
         ], $gateway->getScopeParts('x2', 999));
 
         // 合成と同時に新しいスコープを当てたもの（合成のネストできるかのテストで値に特に意味はない）
@@ -472,7 +472,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
-            'colval'  => [],
+            'set'     => [],
         ], $gateway->getScopeParts('x3', 1));
 
         // 上記のクロージャ版
@@ -483,7 +483,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
-            'colval'  => [],
+            'set'     => [],
         ], $gateway->getScopeParts('x4', 1, -2));
 
         // 可変引数の合成スコープ dv
@@ -494,7 +494,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
-            'colval'  => [],
+            'set'     => [],
         ], $gateway->getScopeParts('dv', 1, 2, 3, 4));
 
         // 可変引数の合成スコープ dv1
@@ -505,7 +505,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [3 => 4],
             'groupBy' => [],
             'having'  => [],
-            'colval'  => [],
+            'set'     => [],
         ], $gateway->getScopeParts('dv1', 2, 3, 4));
 
         // 合成スコープを合成した合成スコープ（合成のネストできるかのテストで値に特に意味はない）
@@ -516,7 +516,7 @@ AND ((flag=1))", "$gw");
             'limit'   => [999],
             'groupBy' => [],
             'having'  => [],
-            'colval'  => [],
+            'set'     => [],
         ], $gateway->getScopeParts('mixmix'));
 
         // これはエラーになる（c の引数がどこにも現れていない）
@@ -1383,8 +1383,8 @@ AND ((flag=1))", "$gw");
      */
     function test_dryrun($gateway)
     {
-        // クエリ文字列を返す
-        $this->assertEquals("DELETE FROM test WHERE test.id = '1'", $gateway->dryrun()->delete(['id' => 1]));
+        // クエリ文字列配列を返す
+        $this->assertEquals(["DELETE FROM test WHERE test.id = '1'"], $gateway->dryrun()->delete(['id' => 1]));
 
         // Context で実装されているのでこの段階では普通に実行される
         $this->assertEquals(1, $gateway->delete(['id' => 2]));
@@ -1660,8 +1660,14 @@ AND ((flag=1))", "$gw");
             return;
         }
 
-        $gateway = new class($database, 'test') extends TableGateway {
+        $gateway = new class($database, 'test', null, $called) extends TableGateway {
             public $called = [];
+
+            public function __construct(Database $database, string $table_name, ?string $entity_name = null, &$called = [])
+            {
+                parent::__construct($database, $table_name, $entity_name);
+                $this->called = &$called;
+            }
 
             public function insert($data)
             {
@@ -1745,9 +1751,9 @@ AND ((flag=1))", "$gw");
         $gateway->eliminate();
         $gateway->createIgnore(['id' => 1]);
         $gateway->upsertOrThrow(['id' => 2]);
-        $gateway->modifyConditionally(['id' => 3], ['id' => 3]);
+        $gateway->where(['id' => 3])->modify(['id' => 3]);
         $gateway->insertIgnore(['id' => 4]);
-        $gateway->insertConditionally(['id' => 5], ['id' => 5]);
+        $gateway->where(['id' => 5])->insert(['id' => 5]);
         $gateway->updateIgnore(['name' => 'aaa'], ['id' => 1]);
         $gateway->updateOrThrow(['name' => 'aaa'], ['id' => 2]);
         $gateway->replaceOrThrow(['id' => 3, 'name' => 'aaa']);
@@ -1762,6 +1768,7 @@ AND ((flag=1))", "$gw");
             'truncate',
             'eliminate',
             'create',
+            'insert',
             'upsert',
             'modify',
             'insert',
@@ -1774,7 +1781,7 @@ AND ((flag=1))", "$gw");
             'remove',
             'destroy',
             'reduce',
-        ], $gateway->called);
+        ], $called);
     }
 
     /**
@@ -1817,7 +1824,7 @@ AND ((flag=1))", "$gw");
         $gateway->addScope('defname', [], [], [], [], [], [], ['name' => 'scoped name']);
         $gateway->addScope('defdata', function ($data) {
             return [
-                'colval' => ['data' => $data],
+                'set' => ['data' => $data],
             ];
         });
         $gateway->scope('defid defname')->scope('defdata', 'scoped data')->update([]);
@@ -1826,9 +1833,6 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(['UPDATE test SET data = ?' => ['binding data']], $lastsql());
         $gateway->bindScope('defdata', ['binding data'])->scope('defdata', 'current data')->update([]);
         $this->assertEquals(['UPDATE test SET data = ?' => ['current data']], $lastsql());
-
-        $this->assertException('not allow affect query', L($gateway->groupBy('name')->having('1=1'))->update([]));
-        $this->assertException('not allow affect query', L($gateway->groupBy('name')->having('1=1'))->delete([]));
 
         $database->setLogger([]);
         $database->setDefaultOrder(true);
@@ -1981,7 +1985,7 @@ AND ((flag=1))", "$gw");
         ]);
 
         // 指定していない 3 しか残らない
-        $this->assertEquals(3, $affected);
+        $this->assertEquals(2, $affected);
         $this->assertEquals([3], $foreign_p->lists('id'));
     }
 
