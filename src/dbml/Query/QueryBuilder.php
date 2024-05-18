@@ -3887,7 +3887,7 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      */
     public function prepare()
     {
-        $this->statement = $this->database->prepare($this);
+        $this->statement = new Statement((string) $this, $this->getParams(), $this->database);
         return $this;
     }
 

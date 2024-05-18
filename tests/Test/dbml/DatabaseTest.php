@@ -28,6 +28,7 @@ use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\Expression\OrderBy;
 use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\dbml\Types\AbstractType;
 use ryunosuke\Test\Database;
@@ -1281,7 +1282,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     {
         // fetchXXX 系は stmt を受け付けてくれるはず
         $hogefuga = $database->getCompatiblePlatform()->getConcatExpression('?', ':fuga');
-        $stmt = $database->prepare("select $hogefuga as hogefuga", ['hoge']);
+        $stmt = new Statement("select $hogefuga as hogefuga", ['hoge'], $database);
         $this->assertEquals([
             'hogefuga' => 'hogefuga',
         ], $database->fetchTuple($stmt, ['fuga' => 'fuga']));
@@ -1321,7 +1322,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals($stmt->executeSelect(['id' => 2])->fetchAllAssociative(), $database->fetchArray($stmt, ['id' => 2]));
 
         // insert
-        $stmt = $database->prepareInsert('test', ['id' => $database->raw(':id'), ':name']);
+        $stmt = $database->prepare()->insert('test', ['id' => $database->raw(':id'), ':name']);
         if (!$database->getCompatiblePlatform()->supportsIdentityUpdate()) {
             $database->getConnection()->executeStatement($database->getCompatiblePlatform()->getIdentityInsertSQL('test', true));
         }
@@ -1333,26 +1334,26 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals(['XXX', 'YYY'], $database->selectLists('test.name', ['id' => [101, 102]]));
 
         // update
-        $stmt = $database->prepareUpdate('test', [':name'], ['id = :id']);
+        $stmt = $database->prepare()->update('test', [':name'], ['id = :id']);
         $stmt->executeAffect(['id' => 101, 'name' => 'updateXXX']);
         $stmt->executeAffect(['id' => 102, 'name' => 'updateYYY']);
         $this->assertEquals(['updateXXX', 'updateYYY'], $database->selectLists('test.name', ['id' => [101, 102]]));
 
         // :hoge, :fuga の簡易記法
-        $stmt = $database->prepareUpdate('test', [':name'], [':id']);
+        $stmt = $database->prepare()->update('test', [':name'], [':id']);
         $stmt->executeAffect(['id' => 101, 'name' => 'bindXXX']);
         $stmt->executeAffect(['id' => 102, 'name' => 'bindYYY']);
         $this->assertEquals(['bindXXX', 'bindYYY'], $database->selectLists('test.name', ['id' => [101, 102]]));
 
         // delete
-        $stmt = $database->prepareDelete('test', ['id = :id']);
+        $stmt = $database->prepare()->delete('test', ['id = :id']);
         $stmt->executeAffect(['id' => 101]);
         $stmt->executeAffect(['id' => 102]);
         $this->assertEquals([], $database->selectLists('test.name', ['id' => [101, 102]]));
 
         if ($database->getCompatiblePlatform()->supportsReplace()) {
             // replace
-            $stmt = $database->prepareReplace('test', [':id', ':name', ':data']);
+            $stmt = $database->prepare()->replace('test', [':id', ':name', ':data']);
             $stmt->executeAffect(['id' => 101, 'name' => 'replaceXXX', 'data' => '']);
             $stmt->executeAffect(['id' => 102, 'name' => 'replaceXXX', 'data' => '']);
             $this->assertEquals(['replaceXXX', 'replaceXXX'], $database->selectLists('test.name', ['id' => [101, 102]]));
@@ -1360,7 +1361,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         if ($database->getCompatiblePlatform()->supportsMerge()) {
             // modify
-            $stmt = $database->prepareModify('test', [':id', ':name', ':data']);
+            $stmt = $database->prepare()->modify('test', [':id', ':name', ':data']);
             $stmt->executeAffect(['id' => 101, 'name' => 'modifyXXX', 'data' => '']);
             $stmt->executeAffect(['id' => 102, 'name' => 'modifyYYY', 'data' => '']);
             $stmt->executeAffect(['id' => 103, 'name' => 'modifyZZZ', 'data' => '']);
@@ -1369,7 +1370,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         // 例外発生時は元に戻るはず
         $database->setOption('preparing', 0);
-        $this->assertException(Schema\SchemaException::tableDoesNotExist('notfound'), L($database)->prepareInsert('notfound', []));
+        $this->assertException(Schema\SchemaException::tableDoesNotExist('notfound'), L($database->prepare())->insert('notfound', []));
         $this->assertSame(0, $database->getOption('preparing'));
     }
 
@@ -3154,7 +3155,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         ];
 
         $this->assertSame($expected, $database->executeSelect($query, $params)->fetchAssociative());
-        $this->assertSame($expected, $database->prepare($query, $params)->executeSelect()->fetchAssociative());
+        $this->assertSame($expected, (new Statement($query, $params, $database))->executeSelect()->fetchAssociative());
     }
 
     /**

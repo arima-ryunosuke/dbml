@@ -48,8 +48,8 @@ class Statement implements Queryable
     /** @var array */
     private $paramMap = [];
 
-    /** @var Database */
-    private $database;
+    /** @var Connection */
+    private $master, $slave;
 
     /** @var \Doctrine\DBAL\Statement[] */
     #[DebugInfo(false)]
@@ -65,7 +65,8 @@ class Statement implements Queryable
         $this->namedSupported = $database->getCompatibleConnection()->isSupportedNamedPlaceholder();
 
         // コネクションを保持
-        $this->database = $database;
+        $this->master = $database->getMasterConnection();
+        $this->slave = $database->getSlaveConnection();
     }
 
     private function _execute($method, iterable $params, Connection $connection)
@@ -110,7 +111,7 @@ class Statement implements Queryable
      */
     public function executeSelect(iterable $params = [], Connection $connection = null)
     {
-        return $this->_execute('executeQuery', $params, $connection ?: $this->database->getSlaveConnection());
+        return $this->_execute('executeQuery', $params, $connection ?: $this->slave);
     }
 
     /**
@@ -122,7 +123,7 @@ class Statement implements Queryable
      */
     public function executeAffect(iterable $params = [], Connection $connection = null)
     {
-        return $this->_execute('executeStatement', $params, $connection ?: $this->database->getMasterConnection());
+        return $this->_execute('executeStatement', $params, $connection ?: $this->master);
     }
 
     /**

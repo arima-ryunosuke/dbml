@@ -958,7 +958,7 @@ AND ((flag=1))", "$gw");
         $this->assertStringContainsString("(NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = foreign_p.id))", $queryInto($stmt, ['id' => 1]));
 
         // insert
-        $stmt = $gateway->prepareInsert([':name', 'id' => new Expression(':id')]);
+        $stmt = $gateway->prepare()->insert([':name', 'id' => new Expression(':id')]);
         $this->assertEquals("INSERT INTO test (name, id) VALUES ('xxx', '1')", $queryInto($stmt, ['id' => 1, 'name' => 'xxx']));
         if (!$cplatform->supportsIdentityUpdate()) {
             $database->getConnection()->executeStatement($cplatform->getIdentityInsertSQL($gateway->tableName(), true));
@@ -971,7 +971,7 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(['XXX', 'YYY'], $gateway->lists('name', ['id' => [101, 102]]));
 
         // update
-        $stmt = $gateway->prepareUpdate([':name'], ['id = :id']);
+        $stmt = $gateway->prepare()->update([':name'], ['id = :id']);
         $this->assertEquals("UPDATE test SET name = 'xxx' WHERE id = '1'", $queryInto($stmt, ['id' => 1, 'name' => 'xxx']));
         $stmt->executeAffect(['id' => 101, 'name' => 'updateXXX']);
         $stmt->executeAffect(['id' => 102, 'name' => 'updateYYY']);
@@ -979,7 +979,7 @@ AND ((flag=1))", "$gw");
 
         // modify
         if ($database->getCompatiblePlatform()->supportsMerge()) {
-            $stmt = $gateway->prepareModify([':id', ':name']);
+            $stmt = $gateway->prepare()->modify([':id', ':name']);
             $this->assertStringContainsString("UPDATE", $queryInto($stmt, ['id' => 1, 'name' => 'yyy']));
             $stmt->executeAffect(['id' => 102, 'name' => 'modifyXXX']);
             $stmt->executeAffect(['id' => 103, 'name' => 'modifyYYY']);
@@ -988,7 +988,7 @@ AND ((flag=1))", "$gw");
 
         // replace
         if ($database->getCompatiblePlatform()->supportsReplace()) {
-            $stmt = $gateway->prepareReplace([':id', ':name']);
+            $stmt = $gateway->prepare()->replace([':id', ':name']);
             $this->assertStringContainsString("REPLACE", $queryInto($stmt, ['id' => 1, 'name' => 'zzz']));
             $stmt->executeAffect(['id' => 103, 'name' => 'replaceXXX']);
             $stmt->executeAffect(['id' => 104, 'name' => 'replaceYYY']);
@@ -996,11 +996,14 @@ AND ((flag=1))", "$gw");
         }
 
         // delete
-        $stmt = $gateway->prepareDelete(['id = :id']);
+        $stmt = $gateway->prepare()->delete(['id = :id']);
         $this->assertEquals("DELETE FROM test WHERE id = '1'", $queryInto($stmt, ['id' => 1]));
         $stmt->executeAffect(['id' => 101]);
         $stmt->executeAffect(['id' => 102]);
         $this->assertEquals([], $gateway->lists('name', ['id' => [101, 102]]));
+
+        // stmt を通して実行しているので clean が呼ばれない（context のインスタンスに対して _dirty されてる）
+        $gateway->delete();
     }
 
     /**

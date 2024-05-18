@@ -16,7 +16,6 @@ use ryunosuke\dbml\Mixin\FindTrait;
 use ryunosuke\dbml\Mixin\IteratorTrait;
 use ryunosuke\dbml\Mixin\JoinTrait;
 use ryunosuke\dbml\Mixin\OptionTrait;
-use ryunosuke\dbml\Mixin\PrepareTrait;
 use ryunosuke\dbml\Mixin\SelectAggregateTrait;
 use ryunosuke\dbml\Mixin\SelectForAffectTrait;
 use ryunosuke\dbml\Mixin\SelectForUpdateTrait;
@@ -30,6 +29,7 @@ use ryunosuke\dbml\Query\Expression\TableDescriptor;
 use ryunosuke\dbml\Query\Pagination\Paginator;
 use ryunosuke\dbml\Query\Pagination\Sequencer;
 use ryunosuke\dbml\Query\QueryBuilder;
+use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\utility\attribute\Attribute\DebugInfo;
 use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
@@ -449,13 +449,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         upsertAndPrimaryWithoutTable as public upsertAndPrimary;
         modifyAndPrimaryWithoutTable as public modifyAndPrimary;
         replaceAndPrimaryWithoutTable as public replaceAndPrimary;
-    }
-    use PrepareTrait {
-        prepareInsertWithoutTable as public prepareInsert;
-        prepareUpdateWithoutTable as public prepareUpdate;
-        prepareDeleteWithoutTable as public prepareDelete;
-        prepareModifyWithoutTable as public prepareModify;
-        prepareReplaceWithoutTable as public prepareReplace;
     }
 
     protected function getDatabase() { return $this->database; }
@@ -1262,6 +1255,32 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         $that = $this->context();
         $that->database = $that->database->dryrun();
         return $that;
+    }
+
+    /**
+     * prepare モードに移行する
+     *
+     * Gateway 版の {@link Database::prepare()} 。
+     *
+     * @return $this 自分自身
+     */
+    public function prepare()
+    {
+        $that = $this->context();
+        $that->database = $that->database->prepare();
+        return $that;
+    }
+
+    /**
+     * 取得系クエリをプリペアする
+     *
+     * Gateway 版の {@link Database::prepareSelect()} 。
+     *
+     * @return Statement
+     */
+    public function prepareSelect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->select(...func_get_args())->prepare()->getPreparedStatement();
     }
 
     /**

@@ -51,7 +51,6 @@ use ryunosuke\dbml\Mixin\ExportTrait;
 use ryunosuke\dbml\Mixin\FetchMethodTrait;
 use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\OptionTrait;
-use ryunosuke\dbml\Mixin\PrepareTrait;
 use ryunosuke\dbml\Mixin\SelectAggregateTrait;
 use ryunosuke\dbml\Mixin\SelectForAffectTrait;
 use ryunosuke\dbml\Mixin\SelectForUpdateTrait;
@@ -422,13 +421,6 @@ class Database
         upsertAndPrimaryWithTable as public upsertAndPrimary;
         modifyAndPrimaryWithTable as public modifyAndPrimary;
         replaceAndPrimaryWithTable as public replaceAndPrimary;
-    }
-    use PrepareTrait {
-        prepareInsertWithTable as public prepareInsert;
-        prepareUpdateWithTable as public prepareUpdate;
-        prepareDeleteWithTable as public prepareDelete;
-        prepareModifyWithTable as public prepareModify;
-        prepareReplaceWithTable as public prepareReplace;
     }
 
     protected function getDatabase() { return $this; }
@@ -4111,61 +4103,70 @@ class Database
     }
 
     /**
-     * prepare されたステートメントを取得する
+     * dryrun モードへ移行する
      *
-     * ほぼ内部メソッドであり、実際は下記のように暗黙のうちに使用され、明示的に呼び出す必要はあまりない。
+     * このメソッドを呼んだ直後は、更新系メソッドが実際には実行せずに実行されるクエリを返すようになる。
+     * 後述する insertArray/updateArray などでクエリを取得したいときやテスト・確認などで便利。
+     *
+     * このメソッドは `setOption` を利用した {@link context()} メソッドで実装されている。つまり
+     *
+     * - `setOption('dryrun', true);`
+     * - `context(['dryrun' => true]);`
+     *
+     * などと実質的にはほとんど同じ（後者に至っては全く同じ=移譲・糖衣構文）。
+     * {@link context()} で実装されているということは下記のような処理が可能になる。
      *
      * ```php
-     * # プリペアドステートメントを実行する
-     * // UPDATE
-     * // prepare した地点で疑問符パラメータである name は固定される
-     * $stmt = $db->prepare('UPDATE t_table SET name = ? WHERE id = :id', ['hoge']);
-     * // あとから id パラメータを与えて実行することができる
-     * $stmt->executeAffect(['id' => 1]); // UPDATE t_table SET name = 'hoge' WHERE id = 1
-     * $stmt->executeAffect(['id' => 2]); // UPDATE t_table SET name = 'hoge' WHERE id = 2
+     * $db->dryrun()->update('t_table', $data, $where);
+     * // ↑の文を抜けると dryrun モードは解除されている
      *
-     * // SELECT
-     * // 得られた Statement は fetchXXX に与えることができる
-     * $stmt = $db->prepare('SELECT * FROM t_table WHERE id = :id');
-     * $db->fetchTuple($stmt, ['id' => 1]); // SELECT * FROM t_table WHERE id = 1
-     * $db->fetchTuple($stmt, ['id' => 2]); // SELECT * FROM t_table WHERE id = 2
+     * $db->dryrun();
+     * $db->update('t_table', $data, $where);
+     * // 逆に言うとこのようなことはできない（dryrun モードになった直後にコンテキストが破棄され、元に戻っている）
      *
-     * # 実際は DML のプロキシメソッドがあるのでそっちを使うことが多い（":id" のような省略記法を使っている。詳細は Statement の方を参照）
-     * // SELECT
-     * $stmt = $db->prepareSelect('t_table', ':id');
-     * $db->fetchTuple($stmt, ['id' => 1]); // SELECT * FROM t_table WHERE id = 1
-     * $db->fetchTuple($stmt, ['id' => 2]); // SELECT * FROM t_table WHERE id = 2
-     * // INSERT
-     * $stmt = $db->prepareInsert('t_table', [':id', ':name']);
-     * $stmt->executeAffect(['id' => 101, 'name' => 'hoge']);
-     * $stmt->executeAffect(['id' => 102, 'name' => 'fuga']);
-     * // UPDATE
-     * $stmt = $db->prepareUpdate('t_table', [':name'], [':id']);
-     * $stmt->executeAffect(['id' => 101, 'name' => 'HOGE']);
-     * $stmt->executeAffect(['id' => 102, 'name' => 'FUGA']);
-     * // DELETE
-     * $stmt = $db->prepareDelete('t_table', [':id']);
-     * $stmt->executeAffect(['id' => 101]);
-     * $stmt->executeAffect(['id' => 102]);
+     * $db->dryrun()->t_table->update($data, $where);
+     * // ただし、Gateway で dryrun したくてもこれは出来ない。 `->t_table` の時点で GC が実行され、 `->update` 実行時点では何も変わらなくなっているため
+     *
+     * $db->t_table->dryrun()->update($data, $where);
+     * // Gateway で使いたい場合はこのように Gateway クラスに dryrun が生えているのでそれを使用する
      * ```
      *
-     * @used-by prepareSelect()
-     * @used-by prepareInsert()
-     * @used-by prepareUpdate()
-     * @used-by prepareDelete()
-     * @used-by prepareModify()
-     * @used-by prepareReplace()
-     *
-     * @param string|QueryBuilder $sql クエリ
-     * @param iterable $params パラメータ
-     * @return Statement プリペアドステートメント
+     * @return $this 自分自身（のようなもの）
      */
-    public function prepare($sql, iterable $params = [])
+    public function dryrun()
     {
-        if ($sql instanceof QueryBuilder) {
-            return $this->prepare((string) $sql, $sql->getParams());
-        }
-        return new Statement($sql, $params, $this);
+        return $this->context(['dryrun' => true]);
+    }
+
+    /**
+     * prepare モードへ移行する
+     *
+     * このメソッドを呼んだ直後は、更新系メソッドが実際には実行せずに prepare されたステートメントを返すようになる。
+     *
+     * このメソッドは `setOption` を利用した {@link context()} メソッドで実装されている。つまり
+     *
+     * - `setOption('prepare', true);`
+     * - `context(['prepare' => true]);`
+     *
+     * などと実質的にはほとんど同じ（後者に至っては全く同じ=移譲・糖衣構文）。
+     * つまりは {@link dryrun()} と同じなのでそちらも参照。
+     *
+     * @return $this 自分自身（のようなもの）
+     */
+    public function prepare()
+    {
+        return $this->context(['preparing' => true]);
+    }
+
+    /**
+     * 取得系クエリをプリペアする
+     *
+     * @inheritdoc Database::select()
+     * @return Statement
+     */
+    public function prepareSelect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    {
+        return $this->select(...func_get_args())->prepare()->getPreparedStatement();
     }
 
     /**
@@ -4219,7 +4220,7 @@ class Database
         }
 
         if ($this->getUnsafeOption('preparing')) {
-            return $this->prepare($query, $params);
+            return new Statement($query, $params, $this);
         }
 
         // コンテキストを戻すための try～catch
@@ -4341,42 +4342,6 @@ class Database
         }
 
         return $this->getCompatibleConnection($connection)->executeAsync($queries, $this->_getConverter(null), $this->affectedRows);
-    }
-
-    /**
-     * dryrun モードへ移行する
-     *
-     * このメソッドを呼んだ直後は、更新系メソッドが実際には実行せずに実行されるクエリを返すようになる。
-     * 後述する insertArray/updateArray などでクエリを取得したいときやテスト・確認などで便利。
-     *
-     * このメソッドは `setOption` を利用した {@link context()} メソッドで実装されている。つまり
-     *
-     * - `setOption('dryrun', true);`
-     * - `context(['dryrun' => true]);`
-     *
-     * などと実質的にはほとんど同じ（後者に至っては全く同じ=移譲・糖衣構文）。
-     * {@link context()} で実装されているということは下記のような処理が可能になる。
-     *
-     * ```php
-     * $db->dryrun()->update('t_table', $data, $where);
-     * // ↑の文を抜けると dryrun モードは解除されている
-     *
-     * $db->dryrun();
-     * $db->update('t_table', $data, $where);
-     * // 逆に言うとこのようなことはできない（dryrun モードになった直後にコンテキストが破棄され、元に戻っている）
-     *
-     * $db->dryrun()->t_table->update($data, $where);
-     * // ただし、Gateway で dryrun したくてもこれは出来ない。 `->t_table` の時点で GC が実行され、 `->update` 実行時点では何も変わらなくなっているため
-     *
-     * $db->t_table->dryrun()->update($data, $where);
-     * // Gateway で使いたい場合はこのように Gateway クラスに dryrun が生えているのでそれを使用する
-     * ```
-     *
-     * @return $this 自分自身（のようなもの）
-     */
-    public function dryrun()
-    {
-        return $this->context(['dryrun' => true]);
     }
 
     /**
@@ -5363,8 +5328,7 @@ class Database
                 // 2件以上じゃないとプリペアの旨味が少ない
                 $stmt = null;
                 if ($preparable && count($group['rows']) > 1) {
-                    /** @noinspection PhpMethodParametersCountMismatchInspection */
-                    $stmt = $this->prepareModify($tableName, array_map(fn($c) => ":$c", $group['cols']), [], $uniquekey, $opt);
+                    $stmt = $this->prepare()->modify($tableName, array_map(fn($c) => ":$c", $group['cols']), [], $uniquekey, $opt);
                 }
                 foreach ($group['rows'] as $n => $row) {
                     if ($stmt) {
