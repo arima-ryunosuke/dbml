@@ -34,27 +34,20 @@ namespace ryunosuke\dbml\Mixin;
  */
 trait OptionTrait
 {
-    /** @var array オプション保持配列 */
-    private $__options = [];
+    private array $__options = [];
 
-    /** @var \ArrayObject スタッキング配列 */
-    private $__stacking = null;
+    private \ArrayObject $__stacking;
 
-    /** @var OptionTrait clone 元 */
-    private $__original = null;
+    private self $__original;
 
     /**
      * オプションのデフォルト値を返す static メソッド
      *
      * このメソッドの返り値が構成要素とデフォルト値を担っていて、その配列以外のキーは基本的に保持できない。
-     *
-     * @return array
      */
-    public static function getDefaultOptions()
+    public static function getDefaultOptions(): array
     {
         throw new \DomainException('must be implemented getDefaultOptions.');
-        /** @noinspection PhpUnreachableStatementInspection */
-        return [];
     }
 
     /**
@@ -66,13 +59,8 @@ trait OptionTrait
      * マッチしてコールされたら $called に true が格納される。
      *
      * @ignoreinherit
-     *
-     * @param string $name getter/setter 名
-     * @param array $arguments getter/setter に渡される引数配列
-     * @param bool $called オプションが存在し、コールされたら true が代入される
-     * @return mixed getter の場合のその返り値、 setter の場合は未定義（void）
      */
-    protected function OptionTrait__callGetSet($name, $arguments, &$called)
+    protected function OptionTrait__callGetSet(string $name, array $arguments, ?bool &$called): mixed
     {
         $called = false;
         if (preg_match('#^(get|set)(.+)$#u', $name, $m)) {
@@ -81,6 +69,7 @@ trait OptionTrait
             array_unshift($arguments, lcfirst($m[2]));
             return $this->$getset(...$arguments);
         }
+        return null;
     }
 
     /**
@@ -92,13 +81,8 @@ trait OptionTrait
      * マッチしてコールされたら $called に true が格納される
      *
      * @ignoreinherit
-     *
-     * @param string $name オプション名
-     * @param array $arguments getter/setter に渡される引数配列
-     * @param bool $called オプションが存在し、コールされたら true が代入される
-     * @return mixed getter の場合のその返り値、 setter の場合は未定義（void）
      */
-    protected function OptionTrait__callOption($name, $arguments, &$called)
+    protected function OptionTrait__callOption(string $name, array $arguments, ?bool &$called): mixed
     {
         $called = false;
         if ($this->existsOption($name)) {
@@ -106,6 +90,7 @@ trait OptionTrait
             array_unshift($arguments, $name);
             return $this->option(...$arguments);
         }
+        return null;
     }
 
     /**
@@ -114,12 +99,8 @@ trait OptionTrait
      * OptionTrait\_\_callGetSet と OptionTrait\_\_callOption を呼び出し、マッチしなければ例外を投げる。
      *
      * @ignoreinherit
-     *
-     * @param string $name オプション名
-     * @param array $arguments getter/setter に渡される引数配列
-     * @return mixed getter の場合のその返り値、 setter の場合は未定義（void）
      */
-    protected function OptionTrait__call($name, $arguments)
+    protected function OptionTrait__call(string $name, array $arguments): mixed
     {
         $result = $this->OptionTrait__callGetSet($name, $arguments, $called);
         if ($called) {
@@ -142,7 +123,7 @@ trait OptionTrait
      */
     public function OptionTrait__destruct()
     {
-        if ($this->__original && $this->_getStacking()->count()) {
+        if (isset($this->__original) && $this->_getStacking()->count()) {
             $this->unstack();
         }
     }
@@ -163,7 +144,7 @@ trait OptionTrait
     private function _getStacking()
     {
         // コンストラクタでの生成は use 先で強制できないので getter で生成する
-        return $this->__stacking ?: $this->__stacking = new \ArrayObject();
+        return $this->__stacking ??= new \ArrayObject();
     }
 
     /**
@@ -172,16 +153,13 @@ trait OptionTrait
      * このメソッドでオプション項目が確定するので、これを呼ばないと何も出来ない。
      *
      * @ignoreinherit
-     *
-     * @param array $overridden デフォルト値を上書きするオプション配列
-     * @return $this 自分自身
      */
-    public function setDefault($overridden = [])
+    public function setDefault(array $overridden = []): static
     {
         $default = static::getDefaultOptions();
         $this->__options = array_intersect_key($overridden, $default) + $default;
 
-        if ($this->__original) {
+        if (isset($this->__original)) {
             $this->__original->setDefault($this->__options);
         }
 
@@ -194,13 +172,11 @@ trait OptionTrait
      * {@link context()} している場合に、オリジナルの $this を返す。
      *
      * @ignoreinherit
-     *
-     * @return $this オリジナルインスタンス
      */
-    public function getOriginal()
+    public function getOriginal(): static
     {
         $that = $this;
-        while ($that->__original) {
+        while (isset($that->__original)) {
             $that = $that->__original;
         }
         return $that;
@@ -220,11 +196,8 @@ trait OptionTrait
      * ```
      *
      * @ignoreinherit
-     *
-     * @param array $options 生成後に設定される配列
-     * @return $this 一過性のインスタンス
      */
-    public function context($options = [])
+    public function context(array $options = []): static
     {
         $this->stack();
 
@@ -251,11 +224,8 @@ trait OptionTrait
      * ```
      *
      * @ignoreinherit
-     *
-     * @param array $options 積んだ後設定される配列
-     * @return $this 自分自身
      */
-    public function stack($options = [])
+    public function stack(array $options = []): static
     {
         $stack = $this->_getStacking();
 
@@ -268,10 +238,8 @@ trait OptionTrait
      * {@link stack()} で積んだオプションを復元する
      *
      * @ignoreinherit
-     *
-     * @return $this 自分自身
      */
-    public function unstack()
+    public function unstack(): static
     {
         $stack = $this->_getStacking();
 
@@ -291,10 +259,8 @@ trait OptionTrait
      * 戻せるまで {@link unstack()} する
      *
      * @ignoreinherit
-     *
-     * @return $this 自分自身
      */
-    public function unstackAll()
+    public function unstackAll(): static
     {
         $stack = $this->_getStacking();
 
@@ -311,10 +277,8 @@ trait OptionTrait
      * 全オプション値を返却する
      *
      * @ignoreinherit
-     *
-     * @return array オプション配列
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return $this->__options;
     }
@@ -325,11 +289,8 @@ trait OptionTrait
      * オプション名が存在しない場合、例外が飛ぶ。
      *
      * @ignoreinherit
-     *
-     * @param string $name オプション名
-     * @return mixed オプション値
      */
-    public function getOption($name)
+    public function getOption(string $name): mixed
     {
         if (!$this->existsOption($name)) {
             throw new \InvalidArgumentException("$name is not option.");
@@ -343,11 +304,8 @@ trait OptionTrait
      * オプション名が存在しない場合、例外は飛ばないが notice は出るかもしれない。
      *
      * @ignoreinherit
-     *
-     * @param string $name オプション名
-     * @return mixed オプション値
      */
-    protected function getUnsafeOption($name)
+    protected function getUnsafeOption(string $name): mixed
     {
         return $this->__options[$name];
     }
@@ -356,11 +314,8 @@ trait OptionTrait
      * 配列でオプション値を設定する
      *
      * @ignoreinherit
-     *
-     * @param array $options オプション配列
-     * @return $this 自分自身
      */
-    public function setOptions($options)
+    public function setOptions(array $options): static
     {
         foreach ($options as $key => $value) {
             if ($this->existsOption($key)) {
@@ -377,12 +332,8 @@ trait OptionTrait
      * オプション名が存在しない場合、例外が飛ぶ。
      *
      * @ignoreinherit
-     *
-     * @param string $name オプション名
-     * @param mixed $value オプション値
-     * @return $this 自分自身
      */
-    public function setOption($name, $value)
+    public function setOption(string $name, mixed $value): static
     {
         if (!$this->existsOption($name)) {
             throw new \InvalidArgumentException("$name is not option.");
@@ -396,16 +347,12 @@ trait OptionTrait
      * オプション名が存在しない場合、例外は飛ばないし、 getDefaultOptions で規定されている項目外も設定可能。
      *
      * @ignoreinherit
-     *
-     * @param string $name オプション名
-     * @param mixed $value オプション値
-     * @return $this 自分自身
      */
-    protected function setUnsafeOption($name, $value)
+    protected function setUnsafeOption(string $name, mixed $value): static
     {
         $this->__options[$name] = $value;
 
-        if ($this->__original) {
+        if (isset($this->__original)) {
             $this->__original->setUnsafeOption($name, $value);
         }
 
@@ -425,11 +372,8 @@ trait OptionTrait
      * ```
      *
      * @ignoreinherit
-     *
-     * @param array $options 設定するオプション配列
-     * @return \Closure 設定を元に戻すクロージャ
      */
-    public function storeOptions($options)
+    public function storeOptions(array $options): \Closure
     {
         $backup = [];
         foreach ($options as $key => $value) {
@@ -447,45 +391,34 @@ trait OptionTrait
      * 配列のオプション値をマージする
      *
      * @ignoreinherit
-     *
-     * @param string $name オプション名
-     * @param array $value オプション値
-     * @return $this 自分自身
      */
-    public function mergeOption($name, $value)
+    public function mergeOption(string $name, array $options): static
     {
         if (!$this->existsOption($name)) {
             throw new \InvalidArgumentException("$name is not option.");
         }
-        if (!(is_array($value) && is_array($this->__options[$name]))) {
+        if (!(is_array($options) && is_array($this->__options[$name]))) {
             throw new \InvalidArgumentException("$name requires array.");
         }
-        return $this->mergeUnsafeOption($name, $value);
+        return $this->mergeUnsafeOption($name, $options);
     }
 
     /**
      * 配列のオプション値をマージする(キーチェックなし)
      *
      * @ignoreinherit
-     *
-     * @param string $name オプション名
-     * @param array $value オプション値
-     * @return $this 自分自身
      */
-    protected function mergeUnsafeOption($name, $value)
+    protected function mergeUnsafeOption(string $name, array $options): static
     {
-        return $this->setUnsafeOption($name, array_replace_recursive($this->__options[$name], $value));
+        return $this->setUnsafeOption($name, array_replace_recursive($this->__options[$name], $options));
     }
 
     /**
      * オプションが存在するなら true を返す
      *
      * @ignoreinherit
-     *
-     * @param string $name オプション名
-     * @return bool 存在するなら true
      */
-    public function existsOption($name)
+    public function existsOption(string $name): bool
     {
         return array_key_exists($name, $this->__options);
     }
@@ -501,12 +434,8 @@ trait OptionTrait
      * ```
      *
      * @ignoreinherit
-     *
-     * @param string $name オプション名
-     * @param mixed $value オプション値
-     * @return $this|null getter ならその値、 setter なら自分自身
      */
-    public function option($name, $value = null)
+    public function option(string $name, mixed $value = null): mixed
     {
         if (func_num_args() === 1) {
             return $this->getOption($name);

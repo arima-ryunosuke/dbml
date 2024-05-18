@@ -40,19 +40,14 @@ class Paginator implements \IteratorAggregate, \Countable
 {
     use IteratorTrait;
 
-    /** @var SelectBuilder クエリビルダ */
-    private $builder;
+    private SelectBuilder $builder;
 
-    /** @var int 現在ページ */
-    private $page;
+    private int $page;
 
-    /** @var int 全件数 */
-    private $total;
+    private int $total;
 
     /**
      * コンストラクタ
-     *
-     * @param SelectBuilder $builder ページングに使用するクエリビルダ
      */
     public function __construct(SelectBuilder $builder)
     {
@@ -64,16 +59,11 @@ class Paginator implements \IteratorAggregate, \Countable
 
     /**
      * 現在ページとページ内アイテム数を設定する
-     *
-     * @param int $currentpage 現在ページ数。1ベース
-     * @param int $countperpage 1ページ内のアイテム数
-     * @return $this 自分自身
      */
-    public function paginate($currentpage, $countperpage)
+    public function paginate(int $currentpage, int $countperpage): static
     {
         $this->resetResult();
 
-        $countperpage = intval($countperpage);
         if ($countperpage <= 0) {
             throw new \InvalidArgumentException('$countperpage must be positive number.');
         }
@@ -81,7 +71,7 @@ class Paginator implements \IteratorAggregate, \Countable
         if ($currentpage < 1) {
             $currentpage = 1;
         }
-        $this->page = intval($currentpage - 1);
+        $this->page = $currentpage - 1;
 
         $this->builder->limit($countperpage, $this->page * $countperpage);
 
@@ -90,32 +80,26 @@ class Paginator implements \IteratorAggregate, \Countable
 
     /**
      * 現在アイテムを取得する
-     *
-     * @return array 現在ページ内のアイテム配列
      */
-    public function getItems()
+    public function getItems(): array
     {
         return $this->getResult();
     }
 
     /**
      * 現在ページを返す
-     *
-     * @return int 現在ページ
      */
-    public function getPage()
+    public function getPage(): int
     {
-        return $this->page + 1;
+        return ($this->page ?? 0) + 1;
     }
 
     /**
      * 最初のインデックスを返す
      *
-     * 総数が0の時は0を返す
-     *
-     * @return ?int 最初のインデックス
+     * 総数が0の時はnullを返す
      */
-    public function getFirst()
+    public function getFirst(): ?int
     {
         if ($this->getTotal() === 0) {
             return null;
@@ -126,11 +110,9 @@ class Paginator implements \IteratorAggregate, \Countable
     /**
      * 最後のインデックスを返す
      *
-     * 総数が0の時は0を返す
-     *
-     * @return ?int 最後のインデックス
+     * 総数が0の時はnullを返す
      */
-    public function getLast()
+    public function getLast(): ?int
     {
         if ($this->getTotal() === 0) {
             return null;
@@ -140,10 +122,8 @@ class Paginator implements \IteratorAggregate, \Countable
 
     /**
      * 全アイテム数を返す
-     *
-     * @return int 全アイテム数
      */
-    public function getTotal()
+    public function getTotal(): int
     {
         return $this->total ??= (int) $this->builder->countize()->value();
     }
@@ -151,10 +131,9 @@ class Paginator implements \IteratorAggregate, \Countable
     /**
      * 表示ページを配列で返す
      *
-     * @param ?int $shownPage 表示するページ数。奇数が望ましい。省略時全ページ表示
-     * @return array 表示ページ配列
+     * $shownPage 表示するページ数。奇数が望ましい。省略時全ページ表示。
      */
-    public function getPageRange($shownPage = null)
+    public function getPageRange(?int $shownPage = null): array
     {
         $pagecount = $this->getPageCount();
         if ($shownPage === null) {
@@ -172,10 +151,8 @@ class Paginator implements \IteratorAggregate, \Countable
 
     /**
      * 全ページ数を返す
-     *
-     * @return int 全ページ数
      */
-    public function getPageCount()
+    public function getPageCount(): int
     {
         // paginate が呼ばれていない時は 0 を返す（=ページングを行わない）
         if ($this->builder->getQueryPart('limit') === null) {
@@ -194,20 +171,16 @@ class Paginator implements \IteratorAggregate, \Countable
 
     /**
      * 前ページが存在するかを返す
-     *
-     * @return bool 前ページが存在するか
      */
-    public function hasPrev()
+    public function hasPrev(): bool
     {
         return $this->getPage() > 1;
     }
 
     /**
      * 次ページが存在するかを返す
-     *
-     * @return bool 次ページが存在するか
      */
-    public function hasNext()
+    public function hasNext(): bool
     {
         return $this->getPage() < $this->getPageCount();
     }

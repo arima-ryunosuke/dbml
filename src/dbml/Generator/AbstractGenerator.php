@@ -9,8 +9,7 @@ abstract class AbstractGenerator
 {
     protected const BOM = "\xEF\xBB\xBF";
 
-    /** @var array */
-    protected $config;
+    protected array $config;
 
     public function __construct(array $config = [])
     {
@@ -28,10 +27,10 @@ abstract class AbstractGenerator
      * 出力場所とデータプロバイダを与えて出力する
      *
      * @param string|resource $location 出力場所。null を与えると標準出力、文字列を与えるとファイルになる
-     * @param \Traversable|array $provider 行を1行ずつ返す行プロバイダ
+     * @param iterable $provider 行を1行ずつ返す行プロバイダ
      * @return int 書き込みバイト数
      */
-    final public function generate($location, $provider)
+    final public function generate($location, iterable $provider)
     {
         $resource = $location;
         $resource_flg = true;
@@ -87,9 +86,9 @@ abstract class AbstractGenerator
      *
      * @ignoreinherit
      *
-     * @param \Traversable|array $provider 行を1行ずつ返す行プロバイダ
+     * @param iterable $provider 行を1行ずつ返す行プロバイダ
      */
-    abstract protected function initProvider($provider);
+    abstract protected function initProvider(iterable $provider);
 
     /**
      * head を出力する

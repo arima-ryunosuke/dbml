@@ -6,6 +6,7 @@ use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use ryunosuke\dbml\Database;
+use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
@@ -244,8 +245,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     private const COUNT_ALIAS = '__dbml_auto_cnt';
 
-    /** @var array SQL の各句 */
-    private $sqlParts = [
+    private array $sqlParts = [
         'comment'  => [],
         'with'     => [],
         'option'   => [],
@@ -263,70 +263,44 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         'operator' => null,
     ];
 
-    /** @var array キャッシュモード */
-    private $cache = [];
+    private array $cache = [];
 
-    /** @var array php コールバック */
-    private $callbacks = [];
+    private array $callbacks = [];
 
-    /** @var array JOIN 順 */
-    private $joinOrders = [];
-
-    /** @var array[] before/after フィルタ */
-    private $applyments = [
+    private array $applyments = [
         'before' => null,
         'after'  => null,
     ];
 
-    /** @var array join されたときの ON 条件 */
-    private $onConditions = [];
+    private array $joinOrders = [];
 
-    /** @var array ラッピング文字列配列 */
-    private $wrappers = [];
+    private array $onConditions = [];
 
-    /** @var int ロックモード定数（LockMode::XXX） */
-    private $lockMode = LockMode::NONE;
+    private array $wrappers = [];
 
-    /** @var string ロックオプション */
-    private $lockOption;
+    private int    $lockMode   = LockMode::NONE;
+    private string $lockOption = '';
 
-    /** @var SelectBuilder[] サブビルダー配列 */
-    private $subbuilders = [];
+    /** @var SelectBuilder[] */
+    private array            $subbuilders = [];
+    private null|bool|string $submethod   = null;
+    private ?string          $subwhere    = null;
 
-    /** @var null|bool submethod(null で無効、true で有効、false で否定有効、文字列で集約関数) */
-    private $submethod;
-
-    /** @var null|string submethod の対象テーブル（複数回呼ぶと複数回設定される不具合があったので暫定対応） */
-    private $subwhere;
-
-    /** @var string 遅延実行モード(select|batch|fetch|yield) */
-    private $lazyMode;
-
-    /** @var string サブセレクト時の fetch メソッド */
-    private $lazyMethod;
-
-    /** @var string 親カラム */
-    private $lazyParent;
-
-    /** @var array 関連カラム */
-    private $lazyColumns = [];
-
-    /** @var array 束縛条件 */
-    private $lazyCondition = [];
-
-    /** @var ?int subselect 時のチャンク数 */
-    private $lazyChunk;
+    private ?string $lazyMode      = null;
+    private ?string $lazyMethod    = null;
+    private ?string $lazyParent    = null;
+    private array   $lazyColumns   = [];
+    private array   $lazyCondition = [];
+    private ?int    $lazyChunk     = null;
 
     /** @var string|callable fetch 時のタイプ */
     private $caster;
 
-    /** @var bool '!' 付き条件で全てがフィルタされたか */
-    private $emptyCondition;
+    private ?bool $emptyCondition = null;
 
-    /** @var ?bool デフォルト order by が有効か否か（基本的に単純な toString では効かせない） */
-    private $enableAutoOrder = null;
+    private ?bool $enableAutoOrder = null;
 
-    public static function getDefaultOptions()
+    public static function getDefaultOptions(): array
     {
         return [
             // [] や Gateway 指定時のデフォルト sub lazy mode
@@ -352,8 +326,6 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     /**
      * コンストラクタ
-     *
-     * @param Database $database データベースオブジェクト
      */
     public function __construct(Database $database)
     {
@@ -409,10 +381,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     /**
      * クエリ文字列を返す
-     *
-     * @return string エスケープされていないクエリ文字列
      */
-    public function __toString()
+    public function __toString(): string
     {
         if (isset($this->sql)) {
             return $this->sql;
@@ -478,7 +448,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 $alias = $select->getAlias();
                 $actual = $select->getActual();
 
-                $qalias = $cplatform->quoteIdentifierIfNeeded($alias);
+                $qalias = $cplatform->quoteIdentifierIfNeeded($alias ?? '');
                 if ($qalias !== $alias) {
                     $builder->sqlParts['select'][$n] = new Select($qalias, $actual, null, $select->isPlaceholdable());
                 }
@@ -596,7 +566,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         return $this->sql = $comments . $sql;
     }
 
-    private function _getFromClauses()
+    private function _getFromClauses(): array
     {
         $platform = $this->getDatabase()->getPlatform();
         $fromClauses = [];
@@ -613,7 +583,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         return $fromClauses;
     }
 
-    private function _getJoinClauses($fromAlias)
+    private function _getJoinClauses(string $fromAlias): string
     {
         $sql = $jsql = '';
         foreach ($this->sqlParts['join'][$fromAlias] ?? [] as $join) {
@@ -628,7 +598,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         return $sql . $jsql;
     }
 
-    private function _getConditionClause($conditions)
+    private function _getConditionClause(array $conditions): string
     {
         $result = "";
         foreach (Adhoc::wrapParentheses($conditions) as $n => $condition) {
@@ -639,7 +609,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         return $result;
     }
 
-    private function _buildColumn($columns, $table = null, $alias = null)
+    private function _buildColumn($columns, $table = null, ?string $alias = null): static
     {
         $result = [];
 
@@ -649,7 +619,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         $prefix = $accessor ? $accessor . '.' : '';
 
         // '*' や '!nocol' は差分をとったり仮想カラムを追加したりしなければならないので事前処理が必要
-        if ($schema->hasTable($table)) {
+        if ($schema->hasTable($table ?? '')) {
             $ignores = [];
             foreach ($columns as $key => $column) {
                 if (is_string($column) && $column[0] === '!') {
@@ -710,7 +680,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             $concatPrimary = function ($alias, $columns) {
                 $psep = $this->database->quote($this->getPrimarySeparator());
                 $cplatform = $this->database->getCompatiblePlatform();
-                return new Select($alias, $cplatform->getConcatExpression(array_values(array_implode($columns, $psep))), null, true);
+                return new Select($alias, $cplatform->getConcatExpression(...array_values(array_implode($columns, $psep))), null, true);
             };
 
             $lazy_columns = array_strpad($fcols, $from['alias'] . '.', $prefix);
@@ -752,7 +722,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             }
 
             // 仮想カラム
-            if ($schema->hasTable($table) && is_string($column) && $vcolumn = $schema->getTableColumnExpression($table, $column, 'select', $this->database)) {
+            if ($schema->hasTable($table ?? '') && is_string($column) && $vcolumn = $schema->getTableColumnExpression($table, $column, 'select', $this->database)) {
                 $key = is_int($key) ? $column : $key;
                 // 仮想カラムは修飾子を付与するチャンスを与えなければ実質使い物にならない（エイリアスが動的だから）
                 $column = is_string($vcolumn) ? sprintf($vcolumn, $accessor) : $vcolumn;
@@ -876,7 +846,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         return $this->_dirty();
     }
 
-    private function _buildCondition($type, $predicates, $ack, $andor)
+    private function _buildCondition(string $type, array $predicates, bool $ack, string $andor): static
     {
         $andor = strtoupper($andor);
 
@@ -907,12 +877,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     /**
      * サブクエリを実行する
-     *
-     * @param array $parents 親行配列
-     * @param string $column 親行に格納するキー
-     * @return array サブクエリ結果が埋め込まれた $parents
      */
-    private function _subquery($parents, $column)
+    private function _subquery(array $parents, string $column): array
     {
         $subdatabase = $this->getDatabase();
 
@@ -1088,7 +1054,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         return $parents;
     }
 
-    private function _dirty()
+    private function _dirty(): static
     {
         unset($this->sql);
         $this->resetResult();
@@ -1135,16 +1101,18 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * これらは配列を返すメソッドであり、「レコード」という概念が通用しない。 `value` もスカラー値なので同様。
      *
      * @param null|string|callable $classname 取得クラス
-     * @return $this 自分自身
      */
-    public function cast($classname = null)
+    public function cast($classname = null): static
     {
         // null は特別扱い(駆動表をエンティティにする)
         if ($classname === null) {
             $froms = $this->getFromPart();
             $from = reset($froms);
             $from = $from === false ? [] : $from;
-            $classname = $this->database->getEntityClass([$from['alias'] ?? null, $from['table'] ?? null]);
+            $classname = $this->database->getEntityClass($from['alias'] ?? '');
+            if ($classname === Entity::class) {
+                $classname = $this->database->getEntityClass($from['table'] ?? '');
+            }
             foreach ($this->subbuilders as $subselect) {
                 if ($subselect->caster === null) {
                     $subselect->cast(null);
@@ -1160,7 +1128,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
         // callable は素で OK
         if (is_callable($classname)) {
-            $this->caster = $classname;
+            $this->caster = \Closure::fromCallable($classname);
             return $this;
         }
 
@@ -1180,10 +1148,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * 行キャストクロージャを取得する
      *
      * @ignore
-     *
-     * @return callable 行キャストクロージャ
      */
-    public function getCaster()
+    public function getCaster(): ?\Closure
     {
         if ($this->caster === null || $this->caster === 'array') {
             return null;
@@ -1210,11 +1176,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * Database 経由・あるいは内部から呼ばれる前提で外からは呼ばれない。
      *
      * @ignore
-     *
-     * @param null|bool|string $method サブメソッド
-     * @return $this 自分自身
      */
-    public function setSubmethod($method)
+    public function setSubmethod(null|bool|string $method): static
     {
         if ($method === null) {
             $this->submethod = $method;
@@ -1233,17 +1196,16 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             return $this;
         }
 
-        throw new \DomainException('submethod is invalid type.');
+        // 今のところあり得ないが将来に備えて例外は投げておく
+        throw new \DomainException('submethod is invalid type.'); // @codeCoverageIgnore
     }
 
     /**
      * submethod を取得する
      *
      * @ignore
-     *
-     * @return null|bool|string サブメソッド
      */
-    public function getSubmethod()
+    public function getSubmethod(): null|bool|string
     {
         return $this->submethod;
     }
@@ -1251,14 +1213,11 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     /**
      * subexists の where 句を設定する
      *
-     * @ignore
+     * 設定されたら true を返す
      *
-     * @param string $table テーブル名
-     * @param string|null $alias エイリアス名
-     * @param string|null $fkeyname 外部キー名
-     * @return bool 関連が見つかり、設定されたら true
+     * @ignore
      */
-    public function setSubwhere($table, $alias = null, $fkeyname = null)
+    public function setSubwhere(string $table, ?string $alias = null, ?string $fkeyname = null): bool
     {
         $froms = $this->getFromPart();
         $from = reset($froms);
@@ -1314,12 +1273,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * ]);
      * // SELECT A.* FROM t_article A WHERE (SELECT COUNT(*) FROM t_comment C WHERE C.article_id = A.article_id) >= 10
      * ```
-     *
-     * @param string|null $operator 演算子
-     * @param mixed $operands 右オペランド
-     * @return $this 自分自身
      */
-    public function operatize($operator, $operands = [])
+    public function operatize(?string $operator, mixed $operands = []): static
     {
         if ($operator === null) {
             $this->sqlParts['operator'] = null;
@@ -1345,12 +1300,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * - see {@link limit()}
      * - see {@link groupBy()}
      * - see {@link having()}
-     *
-     * @param array $queryParts 句毎の連想配列
-     * @param bool $append true を指定すると現状の状態が維持される。 false を指定するとクリアされる
-     * @return $this 自分自身
      */
-    public function build($queryParts, $append = false)
+    public function build(array $queryParts, bool $append = false): static
     {
         if (array_key_exists('column', $queryParts) && $queryParts['column']) {
             $this->{($append ? 'add' : '') . 'column'}($queryParts['column']);
@@ -1376,13 +1327,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     /**
      * スコープを当てる
-     *
-     * @param string $tablename テーブル名
-     * @param string|array $scope 当てるスコープ
-     * @param array $args スコープの引数
-     * @return $this 自分自身
      */
-    public function scope($tablename, $scope, ...$args)
+    public function scope(string $tablename, string|array $scope, ...$args): static
     {
         $gateway = $this->database->$tablename->clone();
         $gateway->scope($scope, $args);
@@ -1402,11 +1348,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * - batch: 最初のアクセス時に一括取得する（親キーの IN の Generator）
      * - fetch: 都度クエリを投げる（prepared statement）
      * - yield: 必要になったらクエリを投げる（prepared statement の Generator）
-     *
-     * @param string|null $lazyMode 遅延モード文字列
-     * @return $this 自分自身
      */
-    public function setLazyMode($lazyMode = null)
+    public function setLazyMode(?string $lazyMode = null): static
     {
         if ($lazyMode !== null && !isset(self::LAZY_MODES[$lazyMode])) {
             throw new \InvalidArgumentException('$mode is must be self::LAZY_MODE_* (' . implode('|', array_keys(self::LAZY_MODES)) . ')');
@@ -1423,12 +1366,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * 今のところ (colname) などもここに含める用途となる。
      *
      * $query に null を指定すると削除として働く。
-     *
-     * @param string $name CTE の名前
-     * @param string|Queryable|null $query CTE のサブクエリ
-     * @return $this 自分自身
      */
-    public function with($name, $query)
+    public function with(string $name, null|string|Queryable $query): static
     {
         if ($query === null) {
             unset($this->sqlParts['with'][$name]);
@@ -1449,11 +1388,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->addSelectOption(SelectOption::SQL_CACHE)->column('test');
      * // SELECT SQL_CACHE test.* FROM test
      * ```
-     *
-     * @param string|SelectOption $option 'SQL_CALC_FOUND_ROWS' とか 'STRAIGHT_JOIN' とか。
-     * @return $this 自分自身
      */
-    public function addSelectOption($option)
+    public function addSelectOption(?string $option): static
     {
         if (!$option) {
             return $this;
@@ -1658,11 +1594,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *     ],
      * ]);
      * ```
-     *
-     * @param array|string $tableDescriptor テーブル名
-     * @return $this 自分自身
      */
-    public function column($tableDescriptor)
+    public function column($tableDescriptor): static
     {
         return $this->resetQueryPart(['select', 'from', 'join', 'where', 'groupBy', 'orderBy'])->addColumn($tableDescriptor);
     }
@@ -1672,7 +1605,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc column()
      */
-    public function addColumn($tableDescriptor, $parent = null, $defaultScoped = false)
+    public function addColumn($tableDescriptor, ?string $parent = null, bool $defaultScoped = false): static
     {
         foreach (TableDescriptor::forge($this->database, $tableDescriptor, $this->getSubmethod() === 'query' ? [] : ['*']) as $descriptor) {
             $this->_buildColumn($descriptor->column, $descriptor->table, $descriptor->alias);
@@ -1746,11 +1679,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     /**
      * select 列を設定する（クリア版）
-     *
-     * @param array $selects select 列
-     * @return $this 自分自身
      */
-    public function select(...$selects)
+    public function select(...$selects): static
     {
         $this->sqlParts['select'] = [];
         return $this->addSelect(...$selects);
@@ -1758,11 +1688,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     /**
      * select 列を設定する（{@link select()} の追加版）
-     *
-     * @param array $selects select 列
-     * @return $this 自分自身
      */
-    public function addSelect(...$selects)
+    public function addSelect(...$selects): static
     {
         foreach ($selects as $select) {
             $this->_buildColumn($select);
@@ -1776,11 +1703,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * クロージャを与えるとコールバックされ、 true 相当を返した時に取り除かれる。
      * 文字列を与えるとエイリアス or 完全カラムに一致した時に取り除かれる。
      * 数値を与えるとその番目が取り除かれる（都度連番はリセットされるので注意）。
-     *
-     * @param array $aliases 取り除く select 列
-     * @return $this 自分自身
      */
-    public function unselect(...$aliases)
+    public function unselect(...$aliases): static
     {
         foreach ($this->sqlParts['select'] as $n => $select) {
             foreach ($aliases as $alias) {
@@ -1816,16 +1740,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * FROM 句（JOIN 込）を構成する
      *
      * 結合タイプや結合条件をまとめて指定して FROM, JOIN を構成できるが、複雑極まりないので使用は非推奨（FROM 句の設定は {@link column()} を使用すれば基本的に不要）。
-     *
-     * @param string|array|SelectBuilder $table 対象テーブル
-     * @param ?string $alias テーブルエイリアス
-     * @param ?string $type INNER, LEFT などの JOIN タイプ
-     * @param array|string|null $condition 結合条件。 {@link where()} と同じ形式が使える
-     * @param ?string $fkeyname 外部キー名
-     * @param ?string $fromAlias 結合させるテーブル。省略時は自動判別
-     * @return $this 自分自身
      */
-    public function from($table, $alias = null, $type = null, $condition = [], $fkeyname = null, $fromAlias = null)
+    public function from($table, ?string $alias = null, ?string $type = null, $condition = [], ?string $fkeyname = null, ?string $fromAlias = null): static
     {
         $tables = $this->getFromPart();
         $froms = array_lookup($tables, 'table');
@@ -1887,7 +1803,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         $direction = null;
         if ($type !== null && $fkeyname !== '') {
             $fkey = $fkeyname;
-            $fcols = $schema->getForeignColumns($table, $fromTable, $fkey, $direction) ?: [];
+            $fcols = $schema->getForeignColumns($table ?? '', $fromTable ?? '', $fkey, $direction) ?: [];
             if (!$fcols && $fromTable !== null && "$fkeyname" !== "") {
                 throw new \UnexpectedValueException("foreign key '$fkeyname' is not exists between $table<->$fromTable.");
             }
@@ -2031,15 +1947,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * @used-by innerJoinForeignOn()
      * @used-by leftJoinForeignOn()
      * @used-by rightJoinForeignOn()
-     *
-     * @param string $type 結合タイプ（CROSS, INNER, LEFT, RIGHT, AUTO）
-     * @param string|array|SelectBuilder $table 結合するテーブル
-     * @param string|array $on 結合条件。 {@link where()} と同じ形式が使える
-     * @param ?string $fkeyname 外部キー名称。省略時は唯一の外部キーを使用（無かったり2個以上ある場合は例外）
-     * @param ?string $from 結合させるテーブル。省略時は自動判別
-     * @return $this 自分自身
      */
-    public function join($type, $table, $on, $fkeyname = null, $from = null)
+    public function join(string $type, $table, $on, ?string $fkeyname = null, ?string $from = null): static
     {
         return $this->from($table, null, $type, $on, $fkeyname, $from);
     }
@@ -2073,11 +1982,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * // LEFT JOIN t_comment C ON (C.article_id = A.article_id) AND (C.comment_id = t.maxid)
      *
      *```
-     *
-     * @param mixed $condition ON 条件
-     * @return $this 自分自身
      */
-    public function on($condition)
+    public function on($condition): static
     {
         $this->onConditions = arrayize($condition);
         return $this->_dirty();
@@ -2113,11 +2019,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * # No.41（仮想カラムを指定。仮想カラムは「親に紐づく子供の subselect」とする）
      * $qb->column('t_parent')->where(['t_parent.children' => ['delete_flg' => 0]]); // WHERE EXISTS(SELECT * FROM t_child WHERE (t_child.parent_id = t_parent.id AND delete_flg = 0)) = 0
      * ```
-     *
-     * @param mixed $predicates 条件配列
-     * @return $this 自分自身
      */
-    public function where(...$predicates)
+    public function where(...$predicates): static
     {
         return $this->resetQueryPart('where')->_buildCondition('where', $predicates, true, 'AND');
     }
@@ -2129,7 +2032,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc where()
      */
-    public function notWhere(...$predicates)
+    public function notWhere(...$predicates): static
     {
         return $this->resetQueryPart('where')->_buildCondition('where', $predicates, false, 'AND');
     }
@@ -2147,7 +2050,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc where()
      */
-    public function andWhere(...$predicates)
+    public function andWhere(...$predicates): static
     {
         return $this->_buildCondition('where', $predicates, true, 'AND');
     }
@@ -2159,7 +2062,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc where()
      */
-    public function andNotWhere(...$predicates)
+    public function andNotWhere(...$predicates): static
     {
         return $this->_buildCondition('where', $predicates, false, 'AND');
     }
@@ -2177,7 +2080,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc where()
      */
-    public function orWhere(...$predicates)
+    public function orWhere(...$predicates): static
     {
         return $this->_buildCondition('where', $predicates, true, 'OR');
     }
@@ -2189,7 +2092,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc where()
      */
-    public function orNotWhere(...$predicates)
+    public function orNotWhere(...$predicates): static
     {
         return $this->_buildCondition('where', $predicates, false, 'OR');
     }
@@ -2216,7 +2119,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc where()
      */
-    public function endWhere()
+    public function endWhere(): static
     {
         if ($this->sqlParts['where']) {
             $params = [];
@@ -2240,11 +2143,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->groupBy(['id1', 'id2']);          // GROUP BY id1, id2
      * $qb->groupBy(['T' => ['id1', 'id2']]); // GROUP BY T.id1, T.id2
      * ```
-     *
-     * @param mixed $groupBy GROUP BY 句
-     * @return $this 自分自身
      */
-    public function groupBy(...$groupBy)
+    public function groupBy(...$groupBy): static
     {
         return $this->resetQueryPart('groupBy')->addGroupBy(...$groupBy);
     }
@@ -2254,7 +2154,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc groupBy()
      */
-    public function addGroupBy(...$groupBy)
+    public function addGroupBy(...$groupBy): static
     {
         foreach ($groupBy as $groups) {
             foreach (arrayize($groups) as $tbl => $arg) {
@@ -2279,7 +2179,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc where()
      */
-    public function having(...$predicates)
+    public function having(...$predicates): static
     {
         return $this->resetQueryPart('having')->_buildCondition('having', $predicates, true, 'AND');
     }
@@ -2291,7 +2191,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc having()
      */
-    public function notHaving(...$predicates)
+    public function notHaving(...$predicates): static
     {
         return $this->resetQueryPart('having')->_buildCondition('having', $predicates, false, 'AND');
     }
@@ -2303,7 +2203,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc having()
      */
-    public function andHaving(...$predicates)
+    public function andHaving(...$predicates): static
     {
         return $this->_buildCondition('having', $predicates, true, 'AND');
     }
@@ -2315,7 +2215,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc having()
      */
-    public function andNotHaving(...$predicates)
+    public function andNotHaving(...$predicates): static
     {
         return $this->_buildCondition('having', $predicates, false, 'AND');
     }
@@ -2327,7 +2227,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc having()
      */
-    public function orHaving(...$predicates)
+    public function orHaving(...$predicates): static
     {
         return $this->_buildCondition('having', $predicates, true, 'OR');
     }
@@ -2339,7 +2239,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc having()
      */
-    public function orNotHaving(...$predicates)
+    public function orNotHaving(...$predicates): static
     {
         return $this->_buildCondition('having', $predicates, false, 'OR');
     }
@@ -2351,7 +2251,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc where()
      */
-    public function endHaving()
+    public function endHaving(): static
     {
         if ($this->sqlParts['having']) {
             $params = [];
@@ -2410,13 +2310,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *     ],
      * ]);
      * ```
-     *
-     * @param mixed $sort キー
-     * @param mixed $order ASC/DESC
-     * @param ?string $nullsOrder null/min/max/first/last
-     * @return $this 自分自身
      */
-    public function orderBy($sort, $order = null, $nullsOrder = null)
+    public function orderBy($sort, $order = null, ?string $nullsOrder = null): static
     {
         return $this->resetQueryPart('orderBy')->addOrderBy(...func_get_args());
     }
@@ -2426,7 +2321,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc orderBy()
      */
-    public function addOrderBy($sort, $order = null, $nullsOrder = null)
+    public function addOrderBy($sort, $order = null, ?string $nullsOrder = null): static
     {
         // bool は特別扱いで主キーとする
         if (is_bool($sort)) {
@@ -2501,12 +2396,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->limit([20, 10]);   // LIMIT 10 OFFSET 20
      * $qb->limit([20 => 10]); // LIMIT 10 OFFSET 20
      * ```
-     *
-     * @param int|array|null $count 最大件数、あるいは[オフセット => 最大件数]な配列
-     * @param ?int $offset オフセット。オプショナル
-     * @return $this 自分自身
      */
-    public function limit($count, $offset = null)
+    public function limit(int|array|null $count, ?int $offset = null): static
     {
         if (is_array($count)) {
             $c = count($count);
@@ -2544,12 +2435,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * # あらかじめ limit 設定しておけば第2引数は省略できる
      * $qb->limit(10)->page(5); // LIMIT 10 OFFSET 50
      * ```
-     *
-     * @param int $page ページ数
-     * @param ?int $limit 1ページの単位。省略時は現在の limit が使用される
-     * @return $this 自分自身
      */
-    public function page($page, $limit = null)
+    public function page(int $page, ?int $limit = null): static
     {
         if ($limit === null) {
             $limit = $this->sqlParts['limit'];
@@ -2583,11 +2470,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * echo $qb->column('test')->comment([]);
      * // SELECT * FROM test
      * ```
-     *
-     * @param string|array $comment コメント文字列。文字列なら追加、配列ならダイレクトに代入される
-     * @return $this 自分自身
      */
-    public function comment($comment)
+    public function comment(string|array $comment): static
     {
         if (is_array($comment)) {
             $this->sqlParts['comment'] = $comment;
@@ -2624,11 +2508,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * // ) __dbml_union_table
      * // WHERE status = 'active'
      * ```
-     *
-     * @param string|SelectBuilder $query クエリ
-     * @return $this 自分自身
      */
-    public function union($query)
+    public function union($query): static
     {
         // 隠し引数 $isall
         $isall = func_num_args() === 2 ? func_get_arg(1) : false;
@@ -2644,11 +2525,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * UNION ALL する
      *
      * ALL で UNION される以外は {@link union()} と全く同じ。
-     *
-     * @param string|SelectBuilder $query
-     * @return $this 自分自身
      */
-    public function unionAll($query)
+    public function unionAll($query): static
     {
         return $this->union($query, true);
     }
@@ -2657,10 +2535,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * '!' 付き条件で全てがフィルタされたかを返す
      *
      * @ignore
-     *
-     * @return bool 全条件が空なら true
      */
-    public function isEmptyCondition()
+    public function isEmptyCondition(): bool
     {
         // $this->emptyCondition は単純な bool ではないので !! する
         return !!$this->emptyCondition;
@@ -2674,12 +2550,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->column('t_article')->where(['status' => 'active'])->existize();
      * // SELECT EXISTS(SELECT * FROM t_article WHERE status = 'active')
      * ```
-     *
-     * @param bool $affirmation NOT EXISTS フラグ
-     * @param bool $for_update EXISTS チェックはしばしばロックを伴うのでそのフラグ
-     * @return $this 自分自身
      */
-    public function existize($affirmation = true, $for_update = false)
+    public function existize(bool $affirmation = true, bool $for_update = false): static
     {
         $that = clone $this;
         $that->resetQueryPart('select');
@@ -2717,11 +2589,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->column('t_article')->where(['status' => 'active'])->countize();
      * // SELECT COUNT(*) AS __dbml_auto_cnt FROM t_article WHERE status = 'active'
      * ```
-     *
-     * @param string $column COUNT 対象カラム
-     * @return $this 自分自身
      */
-    public function countize($column = '*')
+    public function countize(string $column = '*'): static
     {
         $that = clone $this;
         $that->detectAutoOrder(false);
@@ -2769,10 +2638,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * 引数が与えられている場合は {@link Paginator::paginate()} も同時に行う。
      *
      * @inheritdoc Paginator::paginate()
-     *
-     * @return Paginator Paginator オブジェクト
      */
-    public function paginate($currentpage = null, $countperpage = null)
+    public function paginate(?int $currentpage = null, ?int $countperpage = null): Paginator
     {
         $p = new Paginator($this);
         if (func_num_args()) {
@@ -2787,10 +2654,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * 引数が与えられている場合は {@link Sequencer::sequence()} も同時に行う。
      *
      * @inheritdoc Sequencer::sequence()
-     *
-     * @return Sequencer
      */
-    public function sequence($condition, $count, $orderbyasc = true)
+    public function sequence(?array $condition = null, ?int $count = null, ?bool $orderbyasc = true): Sequencer
     {
         $p = new Sequencer($this);
         if (func_num_args()) {
@@ -2823,12 +2688,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * // SELECT * FROM t_table WHERE (status = "active") AND (id > 200) ORDER BY id ASC LIMIT 100
      * // ・・・のようなクエリが順次投げられる（Generator で返されるので分割されていることは意識しなくて良い）
      * ```
-     *
-     * @param int $chunk 分割数
-     * @param ?string $column 基準カラム。省略時は AUTO_INCREMENT な主キー。 '-' プレフィックスを付けると降順になる
-     * @return \Generator 分割して返す Generator
      */
-    public function chunk($chunk, $column = null)
+    public function chunk(int $chunk, ?string $column = null): \Generator
     {
         $from = first_value($this->getFromPart())['table'] ?? throw new \UnexpectedValueException('from table is not set.');
         $column = $column ?: strval($this->database->getSchema()->getTableAutoIncrement($from)?->getName() ?: throw new \UnexpectedValueException('not autoincrement column.'));
@@ -2878,12 +2739,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *     -1 => ['id' => 99998],
      * ];
      * ```
-     *
-     * @param array $predicates 「特定レコード」の条件。複数指定で行値式になる
-     * @param int $limit 前後の取得数。前後を表すので取得数はこの値の2倍になる
-     * @return array 前後のレコード配列
      */
-    public function neighbor($predicates, $limit = 1)
+    public function neighbor(array $predicates, int $limit = 1): array
     {
         $pcount = count($predicates);
         if (!$pcount) {
@@ -2921,10 +2778,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * 行レベルの変換クロージャを返す
      *
      * @ignore 内部用
-     *
-     * @return \Closure
      */
-    public function getRowConverter()
+    public function getRowConverter(): \Closure
     {
         $caster = $this->getCaster();
         return function ($parent_row) use ($caster) {
@@ -2958,11 +2813,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * - after: ほぼ「return 直前」であり、サブビルダやクロージャの解決後
      *
      * 引数は大本の行配列で、 $this は SelectBuilder で bind される。
-     *
-     * @param \Closure|null $callback コールバック
-     * @return $this
      */
-    public function before(\Closure $callback = null)
+    public function before(?\Closure $callback = null): static
     {
         $this->applyments['before'] = $callback;
         return $this;
@@ -2975,7 +2827,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * @inheritdoc before()
      */
-    public function after(\Closure $callback = null)
+    public function after(?\Closure $callback = null): static
     {
         $this->applyments['after'] = $callback;
         return $this;
@@ -2985,12 +2837,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * 行フェッチ後に SelectBuilder 特有の処理を行う
      *
      * ほぼ内部処理で明示的に呼ぶことはない。
-     *
-     * @param array $parents 親結果行
-     * @param bool $continuity 連続でコールされる可能性があるか
-     * @return array 特有の処理が行われた $parents
      */
-    public function postselect($parents, $continuity = false)
+    public function postselect(array $parents, bool $continuity = false): array
     {
         assert(!$continuity || ($continuity && $this->applyments['before'] === null), 'yield not support before apply');
         assert(!$continuity || ($continuity && $this->applyments['after'] === null), 'yield not support after apply');
@@ -3092,13 +2940,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->column('t_article')->wrap('A', 'B', 'hoge')->wrap('C', 'D', 'hoge');
      * // C (SELECT t_article.* FROM t_article) D
      * ```
-     *
-     * @param string $keyword1 ラップする文字列1
-     * @param string $keyword2 ラップする文字列2
-     * @param ?string $name ラップした登録名
-     * @return $this 自分自身
      */
-    public function wrap($keyword1, $keyword2 = '', $name = null)
+    public function wrap(string $keyword1, string $keyword2 = '', ?string $name = null): static
     {
         array_set($this->wrappers, [$keyword1, $keyword2], $name);
         return $this->_dirty();
@@ -3108,10 +2951,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * EXISTS でラップして返す
      *
      * {@link wrap()} の特化メソッド。
-     *
-     * @return $this 自分自身
      */
-    public function exists()
+    public function exists(): static
     {
         $this->sqlParts['select'] = ['*'];
         return $this->wrap('EXISTS', '', 'EXISTS');
@@ -3121,10 +2962,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * NOT EXISTS でラップして返す
      *
      * {@link wrap()} の特化メソッド。
-     *
-     * @return $this 自分自身
      */
-    public function notExists()
+    public function notExists(): static
     {
         $this->sqlParts['select'] = ['*'];
         return $this->wrap('NOT EXISTS', '', 'NOT EXISTS');
@@ -3134,12 +2973,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * 集約関数化する
      *
      * {@link Database::aggregate()} のためのヘルパーメソッドで、明示的には呼ばれないし呼ばない。
-     *
-     * @param string|array $aggregations 集約関数
-     * @param int $select_limit カラム数制限
-     * @return $this 自分自身
      */
-    public function aggregate($aggregations, $select_limit = PHP_INT_MAX)
+    public function aggregate(string|array $aggregations, int $select_limit = PHP_INT_MAX): static
     {
         // 集約クエリで主キー順に意味は無い
         $this->detectAutoOrder(false);
@@ -3213,12 +3048,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * // SELECT * FROM tablename FORCE INDEX (PRIMARY)
      * $qb->column('tablename')->hint('FORCE INDEX (PRIMARY)');
      * ```
-     *
-     * @param string $hint ヒント構文
-     * @param ?string $talias ヒント句を結びつけるテーブル or エイリアス
-     * @return $this 自分自身
      */
-    public function hint($hint, $talias = null)
+    public function hint(?string $hint, ?string $talias = null): static
     {
         if ("$hint" === "") {
             return $this;
@@ -3243,11 +3074,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->column('t_article')->lockInShare();
      * // SELECT t_article.* FROM t_article LOCK IN SHARE MODE
      * ```
-     *
-     * @param ?string $lockoption ロックオプション
-     * @return $this 自分自身
      */
-    public function lockInShare($lockoption = null)
+    public function lockInShare(string $lockoption = ''): static
     {
         $this->lockMode = LockMode::PESSIMISTIC_READ;
         $this->lockOption = $lockoption;
@@ -3270,11 +3098,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->column('t_article')->lockForUpdate('SKIP LOCKED');
      * // SELECT t_article.* FROM t_article FOR UPDATE SKIP LOCKED
      * ```
-     *
-     * @param ?string $lockoption ロックオプション
-     * @return $this 自分自身
      */
-    public function lockForUpdate($lockoption = null)
+    public function lockForUpdate(string $lockoption = ''): static
     {
         $this->lockMode = LockMode::PESSIMISTIC_WRITE;
         $this->lockOption = $lockoption;
@@ -3297,23 +3122,18 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->unlock();
      * // SELECT t_article.* FROM t_article
      * ```
-     *
-     * @return $this 自分自身
      */
-    public function unlock()
+    public function unlock(): static
     {
         $this->lockMode = LockMode::NONE;
-        $this->lockOption = null;
+        $this->lockOption = '';
         return $this->_dirty();
     }
 
     /**
      * 自動 OrderBy の有効無効を設定する
-     *
-     * @param ?bool $use 切り替えフラグ
-     * @return $this 自分自身
      */
-    public function detectAutoOrder($use)
+    public function detectAutoOrder(?bool $use): static
     {
         // ビルド中に呼ばれることがあるが、最終的に Database の fetch でも呼ばれるため上書きされてしまうので1度きりの設定とする
         if ($use !== null && $this->enableAutoOrder !== null) {
@@ -3351,10 +3171,9 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->getSubbuilder('children')->where(['delete_time' => 0])->orderBy(['update_time' => 'DESC'])->limit(5);
      * ```
      *
-     * @param ?string $name キー。省略すると単一ではなく全サブクエリビルダを配列で返す
-     * @return $this|$this[] サブクエリビルダ
+     * @return static|static[] サブクエリビルダ
      */
-    public function getSubbuilder($name = null)
+    public function getSubbuilder(?string $name = null)
     {
         if ($name === null) {
             return $this->subbuilders;
@@ -3392,10 +3211,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *     ],
      * ];
      * ```
-     *
-     * @return array FROM 句配列
      */
-    public function getFromPart()
+    public function getFromPart(): array
     {
         $result = [];
         foreach ($this->sqlParts['from'] as $from) {
@@ -3426,11 +3243,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     /**
      * SQL の各句を返す
-     *
-     * @param ?string $queryPartName 句名
-     * @return mixed 句
      */
-    public function getQueryPart($queryPartName)
+    public function getQueryPart(?string $queryPartName): mixed
     {
         if ($queryPartName === null) {
             return $this->sqlParts;
@@ -3460,11 +3274,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * $qb->resetQueryPart('orderBy');
      * // SELECT t_article.* FROM t_article
      * ```
-     *
-     * @param string|array|null $queryPartName リセットする句
-     * @return $this 自分自身
      */
-    public function resetQueryPart($queryPartName = null)
+    public function resetQueryPart(string|array|null $queryPartName = null): static
     {
         if ($queryPartName === null || is_array($queryPartName)) {
             foreach ($queryPartName ?? array_keys($this->sqlParts) as $name) {
@@ -3497,7 +3308,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         return $this->_dirty();
     }
 
-    public function reset()
+    public function reset(): static
     {
         parent::reset();
 
@@ -3511,7 +3322,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         $this->joinOrders = [];
         $this->wrappers = [];
         $this->lockMode = LockMode::NONE;
-        $this->lockOption = null;
+        $this->lockOption = '';
         $this->applyments = [
             'before' => null,
             'after'  => null,
@@ -3540,9 +3351,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * ```
      *
      * @param null|int|false $ttl キャッシュ期限（null はキャッシュドライバーのデフォルトに従う。false は解除）
-     * @return $this 自分自身
      */
-    public function cache($ttl = null)
+    public function cache($ttl = null): static
     {
         if ($ttl === false) {
             $this->cache = [];
@@ -3559,10 +3369,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     /**
      * 内部向け
-     *
-     * @return int|null
      */
-    public function getCacheTtl()
+    public function getCacheTtl(): ?int
     {
         // 未設定
         if (!$this->cache) {
@@ -3587,12 +3395,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * @used-by pairs()
      * @used-by tuple()
      * @used-by value()
-     *
-     * @param string $method フェッチタイプ
-     * @param iterable $params bind パラメータ
-     * @return $this|array|false|mixed|Entityable[]
      */
-    public function fetch($method, iterable $params = [])
+    public function fetch(string $method, iterable $params = [])
     {
         $this->lazyMethod = $method;
         if ($this->lazyMode) {
@@ -3602,7 +3406,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         return $this->getDatabase()->fetch($method, $this, $params);
     }
 
-    public function fetchOrThrow($method, iterable $params = [])
+    public function fetchOrThrow(string $method, iterable $params = [])
     {
         $result = $this->fetch($method, $params);
         // Value, Tuple は [] を返し得ないし、複数行系も false を返し得ない
@@ -3618,13 +3422,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * @link Database::yield()
      *
      * 引数は subselect 時に使用されるものなので通常時は不要。
-     *
-     * @param ?int $chunk subselect のチャンク数
-     * @param ?string $method フェッチタイプ
-     * @param iterable $params bind パラメータ
-     * @return Yielder
      */
-    public function yield($chunk = null, $method = null, iterable $params = [])
+    public function yield(?int $chunk = null, ?string $method = null, iterable $params = []): Yielder
     {
         $method ??= 'array';
         $this->lazyMethod = $method;
@@ -3635,30 +3434,26 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     /**
      * 内部向け
-     *
-     * @return string|null
      */
-    public function getLazyMode()
+    public function getLazyMode(): ?string
     {
         return $this->lazyMode;
     }
 
     /**
      * 内部向け
-     *
-     * @return int|null
      */
-    public function getLazyChunk()
+    public function getLazyChunk(): ?int
     {
         return $this->lazyChunk;
     }
 
-    public function getQuery()
+    public function getQuery(): string
     {
         return "($this)" . concat(' ', trim($this->sqlParts['operator'] ?? ''));
     }
 
-    public function getParams($queryPartName = null)
+    public function getParams(?string $queryPartName = null): array
     {
         // _getSql で内部構造が変わることがあるので呼んでおく必要がある
         $this->__toString();

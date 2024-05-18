@@ -9,11 +9,9 @@ use ryunosuke\dbml\Database;
  */
 class JsonGenerator extends AbstractGenerator
 {
-    /** @var int JSON_PRETTY_PRINT か否か */
-    private $pretty;
+    private int $pretty;
 
-    /** @var string インデント文字 */
-    private $indent;
+    private string $indent;
 
     public function __construct(array $config = [])
     {
@@ -31,7 +29,7 @@ class JsonGenerator extends AbstractGenerator
         parent::__construct($config);
     }
 
-    protected function initProvider($provider)
+    protected function initProvider(iterable $provider)
     {
         if ($provider instanceof Yielder) {
             if ($this->config['assoc']) {

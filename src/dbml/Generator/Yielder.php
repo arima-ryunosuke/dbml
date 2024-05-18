@@ -16,28 +16,19 @@ class Yielder implements \IteratorAggregate
 {
     use DebugInfoTrait;
 
-    /** @var Result|\Closure ステートメント */
-    private $statement;
+    private Result|\Closure $statement;
 
-    /** @var CompatibleConnection */
     #[DebugInfo(false)]
-    private $cconnection;
+    private CompatibleConnection $cconnection;
 
-    /** @var Connection */
     #[DebugInfo(false)]
-    private $connection;
+    private Connection $connection;
 
-    /** @var string イテレートメソッド（Database::METHOD_XXX） */
-    private $method;
+    private ?string   $method;
+    private ?\Closure $callback;
+    private ?int      $chunk;
 
-    /** @var bool FETCH_UNIQUE の動作を模倣するか */
-    private $emulationedUnique = true;
-
-    /** @var callable 行コールバック */
-    private $callback;
-
-    /** @var ?int チャンク数 */
-    private $chunk;
+    private bool $emulationedUnique = true;
 
     /**
      * コンストラクタ
@@ -48,13 +39,13 @@ class Yielder implements \IteratorAggregate
      * @param ?callable $callback $chunk 行ごとに呼ばれるコールバック処理
      * @param ?int $chunk コールバック処理のチャンク数。指定するとその数だけバッファリングされるので留意
      */
-    public function __construct($statement, $cconnection, $method = null, $callback = null, $chunk = null)
+    public function __construct($statement, $cconnection, ?string $method = null, ?callable $callback = null, ?int $chunk = null)
     {
         $this->statement = $statement;
         $this->cconnection = $cconnection;
         $this->connection = $cconnection->getConnection();
         $this->method = $method;
-        $this->callback = $callback;
+        $this->callback = $callback === null ? null : \Closure::fromCallable($callback);
         $this->chunk = $chunk;
     }
 
@@ -71,21 +62,18 @@ class Yielder implements \IteratorAggregate
     private function _cleanup()
     {
         $this->setBufferMode(true);
-        if ($this->statement instanceof Result) {
+        if (isset($this->statement) && $this->statement instanceof Result) {
             $this->statement->free();
         }
-        $this->statement = null;
+        unset($this->statement);
     }
 
     /**
      * フェッチメソッドを設定する
      *
      * {@link Database::METHOD_ARRAY Database の METHOD_XXX 定数}を参照。
-     *
-     * @param string $method Database の METHOD_XXX を指定する
-     * @return $this 自分自身
      */
-    public function setFetchMethod($method)
+    public function setFetchMethod(string $method): static
     {
         $this->method = $method;
         return $this;
@@ -105,11 +93,8 @@ class Yielder implements \IteratorAggregate
      * ```
      *
      * 「同時にクエリを実行できない」は Database::sub 系クエリが使えないことを意味するので、本当に必要な時以外は呼ばなくていい。
-     *
-     * @param bool $mode バッファモード/非バッファモード
-     * @return $this 自分自身
      */
-    public function setBufferMode($mode)
+    public function setBufferMode(bool $mode): static
     {
         $this->cconnection->setBufferMode($mode);
 
@@ -134,23 +119,17 @@ class Yielder implements \IteratorAggregate
      *
      * とはいえデフォルトで true なので明示的に呼ぶ必要はほとんど無い。
      * 上記のコードを false にすると挙動が分かりやすい。
-     *
-     * @param bool $mode FETCH_UNIQUE の動作を模倣するなら true
-     * @return $this 自分自身
      */
-    public function setEmulationUnique($mode)
+    public function setEmulationUnique(bool $mode): static
     {
         $this->emulationedUnique = $mode;
         return $this;
     }
 
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         if ($this->statement instanceof \Closure) {
             $this->statement = ($this->statement)($this->connection);
-            if (!$this->statement instanceof Result) {
-                throw new \RuntimeException('stetement provider returns invalid type.');
-            }
         }
 
         $metadata = $this->cconnection->getMetadata($this->statement);

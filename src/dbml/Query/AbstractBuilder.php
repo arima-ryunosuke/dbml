@@ -268,10 +268,8 @@ abstract class AbstractBuilder implements Queryable, \Stringable
 
     /**
      * すべてを無に帰す
-     *
-     * @return $this 自分自身
      */
-    public function reset()
+    public function reset(): static
     {
         unset($this->sql);
         $this->params = []; // 参照変数で直接渡されることが多いので unset だと都合が悪い
@@ -280,17 +278,17 @@ abstract class AbstractBuilder implements Queryable, \Stringable
         return $this;
     }
 
-    public function getQuery()
+    public function getQuery(): string
     {
         return $this->sql;
     }
 
-    public function getParams()
+    public function getParams(): array
     {
         return $this->params;
     }
 
-    public function merge(?array &$params)
+    public function merge(?array &$params): string
     {
         $params = $params ?? [];
         foreach ($this->getParams() as $param) {

@@ -293,8 +293,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         $expected = $platform instanceof SQLServerPlatform ? 'w\\%o\\_r\\[d' : 'w\\%o\\_r[d';
         $this->assertEquals($expected, $cplatform->escapeLike('w%o_r[d'));
 
-        $expected = $platform instanceof SQLServerPlatform ? '\\[a\\%%m%%x%y' : '[a\\%%m%%x%y';
-        $this->assertEquals($expected, $cplatform->escapeLike(['[a%', new Expression('m%'), ['x', 'y']]));
+        $this->assertEquals('m%m', $cplatform->escapeLike(new Expression('m%m')));
     }
 
     /**
@@ -451,12 +450,12 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_appendLockSuffix($cplatform, $platform)
     {
         $expected = $platform instanceof SQLServerPlatform ? 'select * from t_table' : 'select * from t_table ' . $platform->getReadLockSQL();
-        $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_READ, null));
-        $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', null, null));
+        $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_READ, ''));
+        $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
 
         $expected = $platform instanceof SQLServerPlatform ? 'select * from t_table' : 'select * from t_table ' . $platform->getWriteLockSQL() . ' hoge';
         $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_WRITE, 'hoge'));
-        $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', null, null));
+        $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
     }
 
     /**
@@ -694,12 +693,16 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getConcatExpression($cplatform, $platform)
     {
-        $this->assertException('greater than', L($cplatform)->getConcatExpression([]));
+        $this->assertException('greater than', L($cplatform)->getConcatExpression());
 
-        $this->assertEquals('id', $cplatform->getConcatExpression('id'));
+        $this->assertExpression($cplatform->getConcatExpression('id'), 'id', []);
 
         $expected = $platform instanceof SQLServerPlatform ? $platform->getConcatExpression('CAST(id1 as varchar)', 'CAST(id2 as varchar)') : $platform->getConcatExpression('id1', 'id2');
         $this->assertEquals($expected, $cplatform->getConcatExpression('id1', 'id2'));
+
+        if ($platform instanceof SqlitePlatform) {
+            $this->assertExpression($cplatform->getConcatExpression(new Expression('?', ['hoge']), 'id2'), '? || id2', ['hoge']);
+        }
     }
 
     /**
@@ -739,7 +742,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertExpression($cplatform->getBinaryExpression('hoge'), 'CAST(? as VARBINARY(MAX))', ['hoge']);
         }
         else {
-            $this->assertEquals('hoge', $cplatform->getBinaryExpression('hoge'));
+            $this->assertExpression($cplatform->getBinaryExpression('hoge'), 'hoge', []);
         }
     }
 

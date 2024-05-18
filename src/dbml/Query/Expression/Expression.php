@@ -12,11 +12,9 @@ use function ryunosuke\dbml\arrayize;
  */
 class Expression implements Queryable
 {
-    /** @var string 文字列表現 */
-    protected $expr;
+    protected ?string $expr;
 
-    /** @var array bind パラメータ(optional) */
-    protected $params;
+    protected array $params;
 
     /**
      * 値を Expression 化して返す
@@ -41,11 +39,8 @@ class Expression implements Queryable
      * $expr = Expression::forge(true); // Expression: "1"
      * $expr = Expression::forge(false); // Expression: "0"
      * ```
-     *
-     * @param string $expr 値
-     * @return $this|mixed Expression インスタンス
      */
-    public static function forge($expr)
+    public static function forge(mixed $expr): mixed
     {
         // 文字列で
         if (is_string($expr)) {
@@ -88,14 +83,10 @@ class Expression implements Queryable
      * - `Expression::ADD(1, 2);`
      *
      * はそれぞれ等価になる。
-     *
-     * @param string $expr 文字列表現
-     * @param array $params bind パラメータ
-     * @return $this Expression インスタンス
      */
-    public static function __callStatic($expr, $params)
+    public static function __callStatic(string $expr, array $params): static
     {
-        if (is_string($expr) && strpos($expr, '(') !== false) {
+        if (strpos($expr, '(') !== false) {
             return new Expression($expr, $params);
         }
 
@@ -112,11 +103,8 @@ class Expression implements Queryable
 
     /**
      * コンストラクタ
-     *
-     * @param string $expr 文字列表現
-     * @param mixed $params bind パラメータ
      */
-    public function __construct($expr, $params = [])
+    public function __construct(?string $expr, mixed $params = [])
     {
         if ($params instanceof \ArrayObject) {
             $params = iterator_to_array($params);
@@ -127,10 +115,8 @@ class Expression implements Queryable
 
     /**
      * 文字列表現を返す
-     *
-     * @return string 文字列表現
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->expr;
     }
@@ -143,7 +129,7 @@ class Expression implements Queryable
     /**
      * @inheritdoc
      */
-    public function getParams()
+    public function getParams(): array
     {
         $this->__toString(); // 実質的なビルド
         return $this->params;
@@ -152,7 +138,7 @@ class Expression implements Queryable
     /**
      * @inheritdoc
      */
-    public function getQuery()
+    public function getQuery(): string
     {
         return $this->__toString();
     }
@@ -160,7 +146,7 @@ class Expression implements Queryable
     /**
      * @inheritdoc
      */
-    public function merge(?array &$params)
+    public function merge(?array &$params): string
     {
         $params = $params ?? [];
         foreach ($this->getParams() as $param) {

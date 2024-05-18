@@ -28,8 +28,7 @@ class SelectOption extends AbstractClause
     public const SQL_CALC_FOUND_ROWS = 'SQL_CALC_FOUND_ROWS';
     public const STRAIGHT_JOIN       = 'STRAIGHT_JOIN';
 
-    /** @var string */
-    private $expr;
+    private string $expr;
 
     /**
      * インスタンスを返す
@@ -38,12 +37,8 @@ class SelectOption extends AbstractClause
      * - `SelectOption::DISTINCT();`
      *
      * これらはそれぞれ等価になる
-     *
-     * @param string $expr 構文
-     * @param array $arguments ダミー
-     * @return $this SelectOption オブジェクト
      */
-    public static function __callStatic($expr, $arguments)
+    public static function __callStatic(string $expr, array $arguments): static
     {
         return new SelectOption($expr);
     }
@@ -52,21 +47,17 @@ class SelectOption extends AbstractClause
      * コンストラクタ
      *
      * valid な文字列かどうかのチェックは行わないので、 SelectOption::DISTINCT のような定数を与えてもよいし、固定文字列を与えても良い。
-     *
-     * @param string $expr 文字列表現
      */
-    public function __construct($expr)
+    public function __construct(string $expr)
     {
         $this->expr = $expr;
     }
 
     /**
      * 文字列表現を返す
-     *
-     * @return string 文字列表現
      */
-    public function __toString()
+    public function __toString(): string
     {
-        return (string) $this->expr;
+        return $this->expr;
     }
 }

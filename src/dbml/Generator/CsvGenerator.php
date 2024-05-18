@@ -9,8 +9,7 @@ use ryunosuke\dbml\Database;
  */
 class CsvGenerator extends AbstractGenerator
 {
-    /** @var string 出力エンコーディング */
-    private $mb_internal_encoding;
+    private string $mb_internal_encoding;
 
     public function __construct(array $config = [])
     {
@@ -42,7 +41,7 @@ class CsvGenerator extends AbstractGenerator
         return fputcsv($resource, $fields, $this->config['delimiter'], $this->config['enclosure'], $this->config['escape']);
     }
 
-    protected function initProvider($provider)
+    protected function initProvider(iterable $provider)
     {
         if ($provider instanceof Yielder) {
             $provider->setFetchMethod(Database::METHOD_ARRAY);

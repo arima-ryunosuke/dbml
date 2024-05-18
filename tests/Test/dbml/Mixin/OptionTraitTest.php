@@ -8,7 +8,7 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
     use OptionTrait;
 
-    public static function getDefaultOptions()
+    public static function getDefaultOptions(): array
     {
         return [
             'op1'       => 'val1',
@@ -333,12 +333,8 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
         ])->option('array'));
 
-        /** @noinspection PhpParamsInspection */
-        {
-            $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('hoge', []));
-            $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('hoge', null));
-            $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('op1', []));
-        }
+        $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('hoge', []));
+        $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('op1', []));
     }
 
     function test_option()
@@ -351,5 +347,5 @@ class OptionTest
 {
     use OptionTrait;
 
-    public static function getDefaultOptions() { return ['test' => 0]; }
+    public static function getDefaultOptions(): array { return ['test' => 0]; }
 }

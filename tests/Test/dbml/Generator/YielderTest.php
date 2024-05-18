@@ -20,21 +20,6 @@ class YielderTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_statement($database)
-    {
-        $g = new Yielder(function () {
-            return;
-        }, $database->getCompatibleConnection());
-
-        $this->assertException(new \RuntimeException('invalid'), function () use ($g) {
-            iterator_to_array($g);
-        });
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
     function test_all($database)
     {
         $g = new Yielder($database->executeSelect('select * from multiprimary'), $database->getCompatibleConnection(), 'array');

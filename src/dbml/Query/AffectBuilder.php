@@ -119,7 +119,7 @@ class AffectBuilder extends AbstractBuilder
     private $autoIncrementSeq = false;
     private $affectedRows;
 
-    public static function getDefaultOptions()
+    public static function getDefaultOptions(): array
     {
         return [
             // 拡張 INSERT SET 構文を使うか否か（mysql 以外は無視される）
@@ -335,7 +335,7 @@ class AffectBuilder extends AbstractBuilder
             if ($uColumn === '*') {
                 $uDatum ??= function ($updateColumn, $insertData) use ($useReference) {
                     $reference = $this->database->getCompatiblePlatform()->getReferenceSyntax($updateColumn);
-                    return !$useReference || $reference === false ? $insertData[$updateColumn] : $this->database->raw($reference);
+                    return !$useReference || $reference === null ? $insertData[$updateColumn] : $this->database->raw($reference);
                 };
                 foreach (array_diff_key($insertData, $updateData) as $iColumn => $iData) {
                     $newUpdateData[$iColumn] = ($uDatum instanceof \Closure) ? $uDatum($iColumn, $insertData) : $uDatum;

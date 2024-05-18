@@ -22,13 +22,11 @@ class CompatibleConnection
 {
     private static \WeakMap $storage;
 
-    /** @var Connection */
-    private $connection;
+    private Connection $connection;
 
-    /** @var DriverConnection */
-    private $driverConnection;
+    private DriverConnection $driverConnection;
 
-    /** @var \PDO|\mysqli|\PgSql\Connection */
+    /** @var resource|\PDO|\SQLite3|\mysqli|\PgSql\Connection */
     private $nativeConnection;
 
     public function __construct(Connection $connection)
@@ -47,12 +45,12 @@ class CompatibleConnection
         self::$storage[$this->connection] = [];
     }
 
-    public function getConnection()
+    public function getConnection(): Connection
     {
         return $this->connection;
     }
 
-    public function getName()
+    public function getName(): string
     {
         if (isset(self::$storage[$this->connection][__FUNCTION__])) {
             return self::$storage[$this->connection][__FUNCTION__];
@@ -77,7 +75,7 @@ class CompatibleConnection
         throw DBALException::notSupported(__METHOD__);
     }
 
-    public function isSupportedNamedPlaceholder()
+    public function isSupportedNamedPlaceholder(): bool
     {
         if (isset(self::$storage[$this->connection][__FUNCTION__])) {
             return self::$storage[$this->connection][__FUNCTION__];
@@ -211,7 +209,7 @@ class CompatibleConnection
         return $supported_cache[$driverName][$attribute_name];
     }
 
-    public function setBufferMode($mode)
+    public function setBufferMode(bool $mode)
     {
         if ($this->driverConnection instanceof Driver\PDO\Connection) {
             $this->tryPDOAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $mode);
@@ -221,7 +219,7 @@ class CompatibleConnection
         }
     }
 
-    public function customResult(Result $result, $checkSameColumn)
+    public function customResult(Result $result, ?string $checkSameColumn): Result
     {
         $driverResult = (fn() => $this->result)->bindTo($result, Result::class)($result);
 
@@ -251,7 +249,7 @@ class CompatibleConnection
         return [];
     }
 
-    public function alternateMatchedRows()
+    public function alternateMatchedRows(): ?int
     {
         if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
             if ($this->nativeConnection->info !== null && preg_match('#Rows matched:\s*(\d+)\s*Changed: \s*(\d+)\s*Warnings: \s*(\d+)#ui', $this->nativeConnection->info, $matches)) {

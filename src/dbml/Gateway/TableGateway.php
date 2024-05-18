@@ -444,10 +444,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         replaceAndPrimaryWithoutTable as public replaceAndPrimary;
     }
 
-    protected function getDatabase() { return $this->database; }
+    protected function getDatabase(): Database { return $this->database; }
 
     /** @var array scope のデフォルト値 */
-    private static $defargs = [
+    private static array $defargs = [
         'column'  => [],
         'where'   => [],
         'orderBy' => [],
@@ -457,50 +457,32 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         'set'     => [],
     ];
 
-    /** @var string デフォルト iterate メソッド */
-    protected $defaultIteration = '';
+    protected string $defaultIteration  = '';
+    protected string $defaultJoinMethod = '';
 
-    /** @var string デフォルト JOIN メソッド */
-    protected $defaultJoinMethod = '';
+    private Database $database;
 
-    /** @var Database Database オブジェクト */
-    private $database;
+    private TableGateway $original;
 
-    /** @var TableGateway */
-    private $original;
+    private string  $tableName;
+    private ?string $alias;
 
-    /** @var string テーブル名 */
-    private $tableName;
+    private \ArrayObject $scopes;
+    private array        $activeScopes = ['' => []];
 
-    /** @var string エイリアス名 */
-    private $alias;
+    private ?string $foreign = null;
+    private ?string $hint    = null;
 
-    /** @var \ArrayObject クエリスコープ配列（インスタンス間共用） */
-    private $scopes;
-
-    /** @var array 有効スコープ配列 */
-    private $activeScopes = ['' => []];
-
-    /** @var string 使用する外部キー */
-    private $foreign;
-
-    /** @var string インデックスヒント */
-    private $hint;
-
-    /** @var TableGateway */
     #[DebugInfo(false)]
-    private $end;
+    private TableGateway $end;
 
-    /** @var TableGateway[] join する Gateway 配列 */
-    private $joins = [];
+    /** @var TableGateway[] */
+    private array $joins      = [];
+    private array $joinParams = [];
 
-    /** @var array join するパラメータ */
-    private $joinParams = [];
+    private array $pkukval = [];
 
-    /** @var array 行を一意に特定できるなにか */
-    private $pkukval = [];
-
-    public static function getDefaultOptions()
+    public static function getDefaultOptions(): array
     {
         return [
             // 直接回した場合のフェッチモード
@@ -518,12 +500,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * コンストラクタ
-     *
-     * @param Database $database データベース
-     * @param string $table_name テーブル名
-     * @param ?string $entity_name エンティティ名
      */
-    public function __construct(Database $database, $table_name, $entity_name = null)
+    public function __construct(Database $database, string $table_name, ?string $entity_name = null)
     {
         $this->database = $database;
         $this->tableName = $table_name;
@@ -621,38 +599,28 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * 返り値として「JOIN したテーブルの Gateway」を返す。
      * JOIN 先に対してなにかしたい場合は {@link end()} が必要。冒頭の「メソッドコール or マジックゲット or マジックコール」も参照。
-     *
-     * @param string $name テーブル名
-     * @return $this JOIN した ゲートウェイ
      */
-    public function __get($name)
+    public function __get(string $name): ?self
     {
         $tname = $this->database->convertTableName($name);
         if (isset($this->database->$tname)) {
             $that = $this->join($this->getUnsafeOption('defaultJoinMethod') ?: 'auto', $this->database->$name);
             return end($that->joins);
         }
+        return null;
     }
 
     /**
      * サポートされない
      *
      * 将来のために予約されており、呼ぶと無条件で例外を投げる。
-     *
-     * @param string $name
-     * @param mixed $value
-     * @return void
      */
-    public function __set($name, $value) { throw new \DomainException(__METHOD__ . ' is not supported.'); }
+    public function __set(string $name, mixed $value): void { throw new \DomainException(__METHOD__ . ' is not supported.'); }
 
     /**
      * @ignore
-     *
-     * @param string $name メソッド名
-     * @param array $arguments 引数配列
-     * @return $this|mixed
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments): mixed
     {
         // OptionTrait へ移譲
         $result = $this->OptionTrait__callGetSet($name, $arguments, $called);
@@ -709,22 +677,20 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * // SELECT T.id, T.title FROM t_table T WHERE T.create_at = '2014-03-31' LIMIT 1
      * echo $gw->as('T')->column(['id', 'title'])->where(['create_at' => '2014-03-31'])->limit(1);
      * ```
-     *
-     * @return string クエリ文字列
      */
     public function __toString(): string
     {
         return $this->select([])->queryInto();
     }
 
-    private function _primary($pkval)
+    private function _primary($pkval): array
     {
         $pcols = $this->database->getSchema()->getTablePrimaryKey($this->tableName)->getColumns();
         $pvals = array_values((array) $pkval);
         return array_combine(array_slice($pcols, 0, count($pvals)), $pvals) ?: throw new \InvalidArgumentException("array_combine: argument's length is not match primary columns.");
     }
 
-    private function _accessor($name, $value)
+    private function _accessor(string $name, $value)
     {
         // 引数なしの場合は getter として振る舞う
         if ($value === null) {
@@ -751,11 +717,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * $exists1 = isset($gw['article_title']);    // true
      * $exists2 = isset($gw['undefined_column']); // false
      * ```
-     *
-     * @param string $offset カラム名
-     * @return bool 存在するなら true
      */
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
             return $this->exists('*', $this->_primary($offset));
@@ -807,11 +770,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * # invoke と組み合わせると下記のようなことが可能になる
      * $db->t_article->t_comment['@scope1@scope2 AS C']($column, $where);
      * ```
-     *
-     * @param string $offset カラム名あるいはテーブル記法
-     * @return $this|array|Entityable|mixed レコード・カラム値・自分自身
      */
-    public function offsetGet($offset): mixed
+    public function offsetGet(mixed $offset): mixed
     {
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
             return $this->pk($offset);
@@ -873,12 +833,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * $gw->pk(1)['article_title'] = 'タイトル';
      * $gw[1]['article_title'] = 'タイトル';
      * ```
-     *
-     * @param string $offset カラム名
-     * @param mixed $value カラム値
-     * @return int|array 作用行
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         if ($offset === null) {
             $this->insert($value);
@@ -902,11 +858,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * unset($gw[1]);      // 単一主キー値1のレコードを削除する
      * unset($gw[[1, 2]]); // 複合主キー値[1, 2]のレコードを削除する
      * ```
-     *
-     * @param mixed $offset
-     * @return int|array 作用行
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
             $this->delete($this->_primary($offset));
@@ -921,11 +874,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 「コピーインスタンス」とは「オリジナルではないインスタンス」のこと。
      * オリジナルでなければコピーなので複数回呼んでも初回以外は同じインスタンスを返す。
      * それを避けるには $force に true を渡す必要がある。
-     *
-     * @param bool $force true にすると強制的にコピーして返す
-     * @return $this コピーインスタンス
      */
-    public function clone($force = false)
+    public function clone(bool $force = false): static
     {
         $this->resetResult();
 
@@ -940,9 +890,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 自身の Table オブジェクトを返す
      *
      * @inheritdoc Database::describe()
-     * @return \Doctrine\DBAL\Schema\Table Table オブジェクト
      */
-    public function describe()
+    public function describe(): \Doctrine\DBAL\Schema\Table
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->database->describe($this->tableName);
@@ -950,22 +899,16 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * 行を正規化する
-     *
-     * @template T
-     * @param T $row
-     * @return T
      */
-    public function normalize($row)
+    public function normalize(array $row): array
     {
         return $row;
     }
 
     /**
      * 無効カラムを返す
-     *
-     * @return ?array
      */
-    public function invalidColumn()
+    public function invalidColumn(): ?array
     {
         return null;
     }
@@ -977,11 +920,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * // SELECT * FROM tablename AS hoge_alias
      * echo $gw->as('hoge_alias');
      * ```
-     *
-     * @param string $alias テーブルエイリアス名
-     * @return $this 自分自身
      */
-    public function as($alias)
+    public function as(?string $alias): static
     {
         if ("$alias" === "") {
             return $this;
@@ -994,7 +934,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * @ignore
      */
-    public function joinize()
+    public function joinize(): array
     {
         $sparams = $this->getScopeParams([]);
         $addition = array_get($this->joinParams, 'addition', []);
@@ -1034,13 +974,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * # この $select は t_child のビルダを指す（1回を指定してるから）
      * $select = $db->t_parent->t_child->t_grand->end(1)->select();
      * ```
-     *
-     * @param int $back 戻る回数
-     * @return $this 自分自身
      */
-    public function end($back = 0)
+    public function end(int $back = 0): self
     {
-        if ($this->end === null) {
+        if (!isset($this->end)) {
             return $this;
         }
 
@@ -1049,10 +986,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * 実テーブル名を返す
-     *
-     * @return string 実テーブル名
      */
-    public function tableName()
+    public function tableName(): string
     {
         return $this->tableName;
     }
@@ -1062,11 +997,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * 引数を与えると setter, 与えないと getter として動作する。
      * setter の場合は自分自身を返す。
-     *
-     * @param string|null $alias エイリアス名
-     * @return $this|string エイリアス名 or 自分自身
      */
-    public function alias($alias = null)
+    public function alias(?string $alias = null): string|static|null
     {
         return $this->_accessor('alias', $alias);
     }
@@ -1080,7 +1012,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string|null $foreign 外部キー名
      * @return $this|string 外部キー名 or 自分自身
      */
-    public function foreign($foreign = null)
+    public function foreign(?string $foreign = null): string|static|null
     {
         return $this->_accessor('foreign', $foreign);
     }
@@ -1090,21 +1022,16 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * 引数を与えると setter, 与えないと getter として動作する。
      * setter の場合は自分自身を返す。
-     *
-     * @param string|null $hint ヒント句
-     * @return $this|string  ヒント句 or 自分自身
      */
-    public function hint($hint = null)
+    public function hint(?string $hint = null): string|static|null
     {
         return $this->_accessor('hint', $hint);
     }
 
     /**
      * @ignore
-     *
-     * @return string
      */
-    public function descriptor()
+    public function descriptor(): string
     {
         return $this->tableName . ($this->foreign === null ? '' : ":$this->foreign") . concat(' ', $this->alias);
     }
@@ -1118,10 +1045,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * // T
      * echo $gw->as('T')->modifier();
      * ```
-     *
-     * @return string テーブル修飾子
      */
-    public function modifier()
+    public function modifier(): string
     {
         return $this->alias ?: $this->tableName;
     }
@@ -1177,9 +1102,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param TableGateway $gateway 結合するテーブルゲートウェイ
      * @param string|array $on 結合条件。 {@link where()} と同じ形式が使える
      * @param ?string $fkeyname 外部キー名称。省略時は唯一の外部キーを使用（無かったり2個以上ある場合は例外）
-     * @return $this 自分自身
      */
-    public function join($type, TableGateway $gateway, $on = [], $fkeyname = null)
+    public function join(string $type, TableGateway $gateway, $on = [], ?string $fkeyname = null): self
     {
         // 対象
         $gateway = $gateway->clone();
@@ -1201,10 +1125,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * dryrun モードに移行する
      *
      * Gateway 版の {@link Database::dryrun()} 。
-     *
-     * @return $this 自分自身
      */
-    public function dryrun()
+    public function dryrun(): static
     {
         $that = $this->context();
         $that->database = $that->database->dryrun();
@@ -1215,10 +1137,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * prepare モードに移行する
      *
      * Gateway 版の {@link Database::prepare()} 。
-     *
-     * @return $this 自分自身
      */
-    public function prepare()
+    public function prepare(): static
     {
         $that = $this->context();
         $that->database = $that->database->prepare();
@@ -1229,10 +1149,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 取得系クエリをプリペアする
      *
      * Gateway 版の {@link Database::prepareSelect()} 。
-     *
-     * @return Statement
      */
-    public function prepareSelect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function prepareSelect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): Statement
     {
         return $this->select(...func_get_args())->prepare()->getPreparedStatement();
     }
@@ -1258,9 +1176,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string|array $limit LIMIT 句
      * @param string|array $groupBy GROUP BY 句
      * @param string|array $having HAVING 句
-     * @return $this 自分自身
      */
-    public function addScope($name = '', $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], $sets = [])
+    public function addScope(string $name = '', $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], $sets = []): static
     {
         if ($tableDescriptor instanceof \Closure) {
             $scope = $tableDescriptor;
@@ -1309,9 +1226,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string $name スコープ名
      * @param string|array $sourceScopes 既存スコープ名
      * @param array|\Closure ...$newscopes 追加で設定するスコープ（scoping と同じ）
-     * @return $this 自分自身
      */
-    public function mixScope($name, $sourceScopes, ...$newscopes)
+    public function mixScope(string $name, $sourceScopes, ...$newscopes): static
     {
         if (is_string($sourceScopes)) {
             $sourceScopes = split_noempty(' ', $sourceScopes);
@@ -1391,9 +1307,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @param string $name スコープ名
      * @param array $binding bind する引数配列
-     * @return $this 自分自身
      */
-    public function bindScope($name, array $binding)
+    public function bindScope(string $name, array $binding): static
     {
         if (!isset($this->scopes[$name])) {
             throw new \InvalidArgumentException("'$name' scope is undefined.");
@@ -1435,7 +1350,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc addScope()
      */
-    public function scoping($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function scoping($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): static
     {
         $that = $this->clone();
         $hash = spl_object_id($that) . '_' . count($that->scopes);
@@ -1454,7 +1369,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::column()
      */
-    public function column($tableDescriptor)
+    public function column($tableDescriptor): static
     {
         return $this->scoping(...array_values(array_replace(self::$defargs, ['column' => $tableDescriptor])));
     }
@@ -1469,7 +1384,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::where()
      */
-    public function where($where)
+    public function where($where): static
     {
         return $this->scoping(...array_values(array_replace(self::$defargs, ['where' => $where])));
     }
@@ -1484,7 +1399,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::orderBy()
      */
-    public function orderBy($orderBy)
+    public function orderBy($orderBy): static
     {
         return $this->scoping(...array_values(array_replace(self::$defargs, ['orderBy' => $orderBy])));
     }
@@ -1499,7 +1414,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::limit()
      */
-    public function limit($limit)
+    public function limit($limit): static
     {
         return $this->scoping(...array_values(array_replace(self::$defargs, ['limit' => $limit])));
     }
@@ -1514,7 +1429,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::groupBy()
      */
-    public function groupBy($groupBy)
+    public function groupBy($groupBy): static
     {
         return $this->scoping(...array_values(array_replace(self::$defargs, ['groupBy' => $groupBy])));
     }
@@ -1529,18 +1444,15 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::having()
      */
-    public function having($having)
+    public function having($having): static
     {
         return $this->scoping(...array_values(array_replace(self::$defargs, ['having' => $having])));
     }
 
     /**
      * SET 句を追加する
-     *
-     * @param array $sets [col => val]
-     * @return $this 自分自身
      */
-    public function set($sets)
+    public function set(array $sets): static
     {
         return $this->scoping(...array_values(array_replace(self::$defargs, ['set' => $sets])));
     }
@@ -1571,9 +1483,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @param string|array $name スコープ名
      * @param mixed $variadic_parameters スコープパラメータ
-     * @return $this 自分自身
      */
-    public function scope($name = '', $variadic_parameters = [])
+    public function scope($name = '', $variadic_parameters = []): static
     {
         if (is_string($name)) {
             $name = split_noempty(' ', $name);
@@ -1603,11 +1514,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * # 特に意味はないが、スコープを当てて外すコード
      * $gw->scope('scope1 scope2')->unscope('scope1 scope2');
      * ```
-     *
-     * @param string $name スコープ名
-     * @return $this 自分自身
      */
-    public function unscope($name = '')
+    public function unscope($name = ''): static
     {
         if (is_string($name)) {
             // デフォルトスコープも考慮して split_noempty ではなく explode
@@ -1626,10 +1534,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * デフォルトスコープを含め、縛っているスコープをすべて解除する
-     *
-     * @return $this 自分自身
      */
-    public function noscope()
+    public function noscope(): static
     {
         $that = $this->clone();
         $that->activeScopes = [];
@@ -1665,10 +1571,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * 定義されているすべてのスコープを返す
-     *
-     * @return array スコープ配列
      */
-    public function getScopes()
+    public function getScopes(): array
     {
         return $this->scopes->getArrayCopy();
     }
@@ -1712,12 +1616,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *     'having'  => [],
      * ];
      * ```
-     *
-     * @param string|array $name スコープ名
-     * @param mixed $variadic_parameters スコープパラメータ
-     * @return array スコープパラメータ
      */
-    public function getScopeParts($name = '', $variadic_parameters = [])
+    public function getScopeParts(string $name = '', $variadic_parameters = []): array
     {
         if (!isset($this->scopes[$name])) {
             throw new \InvalidArgumentException("scope '$name' is undefined.");
@@ -1757,10 +1657,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * 指定した場合は追加でスコープを指定したように振舞う。
      *
      * @inheritdoc scoping()
-     *
-     * @return array スコープの各句配列
      */
-    public function getScopeParams($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function getScopeParams($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): array
     {
         // スコープの解決
         $that = ($tableDescriptor || $where || $orderBy || $limit || $groupBy || $having) ? $this->scoping(...func_get_args()) : $this;
@@ -1817,7 +1715,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc getScopeParams()
      */
-    public function getScopeParamsForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function getScopeParamsForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): array
     {
         $activeScopes = $this->activeScopes;
         foreach ($this->getUnsafeOption('ignoreAffectScope') as $scope) {
@@ -1882,9 +1780,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * ```
      *
      * @param mixed $variadic 主キー値
-     * @return $this 自分自身
      */
-    public function pk(...$variadic)
+    public function pk(...$variadic): static
     {
         $where = array_map([$this, '_primary'], $variadic);
         $that = $this->where([$where]);
@@ -1923,9 +1820,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * ```
      *
      * @param mixed $variadic 一意キー値
-     * @return $this 自分自身
      */
-    public function uk(...$variadic)
+    public function uk(...$variadic): static
     {
         $uvals = array_each($variadic, function (&$carry, $pvals) {
             $carry[] = array_values((array) $pvals);
@@ -2028,7 +1924,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::select()
      */
-    public function select($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function select($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
         $return = $this->database->select(...array_values($sp));
@@ -2076,9 +1972,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @param mixed $variadic_primary 主キー値あるいは配列
      * @param mixed $tableDescriptor 取得カラム
-     * @return SelectBuilder 主キーが指定されたクエリビルダ
      */
-    public function selectFind($variadic_primary, $tableDescriptor = [])
+    public function selectFind($variadic_primary, $tableDescriptor = []): SelectBuilder
     {
         $arguments = func_get_args();
         if (is_array($arguments[0])) {
@@ -2105,7 +2000,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::selectAggregate()
      */
-    public function selectAggregate($aggregation, $column, $where = [], $groupBy = [], $having = [])
+    public function selectAggregate($aggregation, $column, $where = [], $groupBy = [], $having = []): SelectBuilder
     {
         return $this->select($column, $where, [], [], $groupBy, $having)->aggregate($aggregation);
     }
@@ -2129,7 +2024,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::subselect()
      */
-    public function subselect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function subselect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
         $return = $this->database->subselect(...array_values($sp));
@@ -2145,7 +2040,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::subquery()
      */
-    public function subquery($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function subquery($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
         $return = $this->database->subquery(...array_values($sp));
@@ -2164,7 +2059,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::subaggregate()
      */
-    public function subaggregate($aggregate, $column, $where = [])
+    public function subaggregate($aggregate, $column, $where = []): SelectBuilder
     {
         $sp = $this->getScopeParams($column, $where);
         $return = $this->database->subaggregate($aggregate, ...array_values($sp));
@@ -2195,7 +2090,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::neighbor()
      */
-    public function neighbor($predicates = [], $limit = 1)
+    public function neighbor(array $predicates = [], int $limit = 1): array
     {
         if ($this->pkukval && !$predicates) {
             $predicates = $this->pkukval;
@@ -2225,7 +2120,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @param string|array $where WHERE 句
      * @param string|array $groupBy GROUP BY 句
      * @param string|array $having HAVING 句
-     * @return int レコード件数
      */
     public function count($column = [], $where = [], $groupBy = [], $having = []): int
     {
@@ -2245,7 +2139,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::paginate()
      */
-    public function paginate($currentpage = null, $countperpage = null)
+    public function paginate(?int $currentpage = null, ?int $countperpage = null): Paginator
     {
         return $this->select()->paginate(...func_get_args());
     }
@@ -2257,7 +2151,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::sequence()
      */
-    public function sequence($condition, $count, $orderbyasc = true)
+    public function sequence(?array $condition = null, ?int $count = null, ?bool $orderbyasc = true): Sequencer
     {
         return $this->select()->sequence(...func_get_args());
     }
@@ -2269,7 +2163,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::chunk()
      */
-    public function chunk($count, $column = null)
+    public function chunk(int $count, ?string $column = null): \Generator
     {
         return $this->select()->chunk(...func_get_args());
     }
@@ -2293,7 +2187,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::gather()
      */
-    public function gather($wheres = [], $other_wheres = [], $parentive = false)
+    public function gather($wheres = [], $other_wheres = [], $parentive = false): array
     {
         $sp = $this->getScopeParams([], $wheres);
         return $this->database->gather($this->tableName, $sp['where'], $other_wheres, $parentive);
@@ -2306,7 +2200,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::differ()
      */
-    public function differ($array, $wheres = [])
+    public function differ(array $array, $wheres = []): array
     {
         $sp = $this->getScopeParams([], $wheres);
         return $this->database->differ($array, $this->tableName, $sp['where']);
@@ -2428,7 +2322,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::update()
      */
-    public function update($data, array $where = [])
+    public function update($data, $where = [])
     {
         $this->resetResult();
         return $this->database->update($this, ...func_get_args());
@@ -2443,7 +2337,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::delete()
      */
-    public function delete(array $where = [])
+    public function delete($where = [])
     {
         $this->resetResult();
         return $this->database->delete($this, ...func_get_args());
@@ -2458,7 +2352,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::invalid()
      */
-    public function invalid(array $where = [], ?array $invalid_columns = null)
+    public function invalid($where = [], ?array $invalid_columns = null)
     {
         $this->resetResult();
         return $this->database->invalid($this, ...func_get_args());
@@ -2473,7 +2367,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::revise()
      */
-    public function revise($data, array $where = [])
+    public function revise($data, $where = [])
     {
         $this->resetResult();
         return $this->database->revise($this, ...func_get_args());
@@ -2488,7 +2382,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::upgrade()
      */
-    public function upgrade($data, array $where = [])
+    public function upgrade($data, $where = [])
     {
         $this->resetResult();
         return $this->database->upgrade($this, ...func_get_args());
@@ -2503,7 +2397,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::remove()
      */
-    public function remove(array $where = [])
+    public function remove($where = [])
     {
         $this->resetResult();
         return $this->database->remove($this, ...func_get_args());
@@ -2518,7 +2412,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::destroy()
      */
-    public function destroy(array $where = [])
+    public function destroy($where = [])
     {
         $this->resetResult();
         return $this->database->destroy($this, ...func_get_args());
@@ -2609,7 +2503,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::getLastInsertId()
      */
-    public function getLastInsertId($columnname = null)
+    public function getLastInsertId(?string $columnname = null): null|int|string
     {
         return $this->database->getLastInsertId($this->tableName, $columnname);
     }
@@ -2621,7 +2515,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::resetAutoIncrement()
      */
-    public function resetAutoIncrement($seq = 1)
+    public function resetAutoIncrement(?int $seq = 1)
     {
         return $this->database->resetAutoIncrement($this->tableName, $seq);
     }

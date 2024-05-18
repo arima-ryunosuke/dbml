@@ -143,36 +143,26 @@ class Operator extends Expression
     ];
 
     /** @var \Closure[] 外部注入演算子 */
-    private static $registereds = [];
+    private static array $registereds = [];
 
-    /** @var ?CompatiblePlatform */
-    private $platform;
+    private ?CompatiblePlatform $platform;
 
-    /** @var string 演算子 */
-    private $operator;
+    private string $operator;
 
-    /** @var string 演算値1 */
-    private $operand1;
+    private ?string $operand1;
+    private ?array  $operand2;
 
-    /** @var array 演算値2 */
-    private $operand2;
+    private bool $isarray;
 
-    /** @var bool 演算値2が配列か */
-    private $isarray;
-
-    /** @var bool 否定フラグ */
-    private $not = false;
+    private bool $not = false;
 
     /**
      * 演算子を定義する
      *
      * 設定値として「カラム, 値を受け取り、[式 => パラメータ] を返すクロージャ」を与えなければならない。
      * （クラス冒頭のサンプルを参照）。
-     *
-     * @param string $operator 演算子文字列
-     * @param callable||null $callback 演算処理
      */
-    public static function define($operator, $callback)
+    public static function define(string $operator, ?callable $callback)
     {
         self::$registereds[$operator] = $callback;
     }
@@ -193,12 +183,8 @@ class Operator extends Expression
      * - 他多数（クラスの method を参照）
      *
      * これを利用すると {@link Where::build()} で演算子を指定せずシンプルな条件指定が出来るようになる（クラス冒頭を参照）。
-     *
-     * @param string $operator 演算子
-     * @param array $operands 演算値
-     * @return $this Operator インスタンス
      */
-    public static function __callStatic($operator, $operands)
+    public static function __callStatic(string $operator, array $operands): static
     {
         static $magics = null;
         $magics = $magics ?? array_kvmap(self::METHODS, function ($k, $v) { return [$v['magic'] => $k]; });
@@ -222,13 +208,8 @@ class Operator extends Expression
 
     /**
      * コンストラクタ
-     *
-     * @param ?CompatiblePlatform $platform プラットフォーム
-     * @param string $operator 演算子
-     * @param string $operand1 演算値1
-     * @param string|array $operand2 演算値2
      */
-    public function __construct($platform, $operator, $operand1, $operand2)
+    public function __construct(?CompatiblePlatform $platform, string $operator, ?string $operand1, $operand2)
     {
         parent::__construct(null, []);
 
@@ -251,10 +232,8 @@ class Operator extends Expression
 
     /**
      * 文字列表現を返す
-     *
-     * @return string 文字列表現
      */
-    public function __toString()
+    public function __toString(): string
     {
         if ($this->expr === null) {
             $this->expr = $this->_getString();
@@ -278,10 +257,8 @@ class Operator extends Expression
      * @uses _likein()
      * @uses _range()
      * @uses _phrase()
-     *
-     * @return string
      */
-    private function _getString()
+    private function _getString(): string
     {
         // 外部注入優先で処理
         if (isset(self::$registereds[$this->operator])) {
@@ -482,10 +459,8 @@ class Operator extends Expression
 
     /**
      * 否定する
-     *
-     * @return $this 自分自身
      */
-    public function not()
+    public function not(): static
     {
         // string に null を入れて再生成を促す必要がある
         $this->expr = null;
@@ -496,12 +471,8 @@ class Operator extends Expression
 
     /**
      * callStatic で作成したインスタンスを後初期化する
-     *
-     * @param string $operand1 演算値1
-     * @param ?CompatiblePlatform $platform プラットフォーム
-     * @return $this 自分自身
      */
-    public function lazy($operand1, $platform = null)
+    public function lazy(?string $operand1, ?CompatiblePlatform $platform = null): static
     {
         $this->platform = $platform ?? $this->platform;
         $this->operand1 = $operand1;

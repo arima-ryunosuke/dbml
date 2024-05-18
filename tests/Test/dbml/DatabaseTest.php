@@ -32,7 +32,6 @@ use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\dbml\Types\AbstractType;
 use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
-use ryunosuke\Test\Entity\Comment;
 use ryunosuke\Test\Entity\ManagedComment;
 use ryunosuke\Test\Platforms\SqlitePlatform;
 use function ryunosuke\dbml\array_order;
@@ -1195,11 +1194,6 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals(Article::class, $database->getEntityClass('t_article'));
         // 存在しないならEntityのはず
         $this->assertEquals(Entity::class, $database->getEntityClass('test'));
-
-        // 複数を投げると先に見つかった方を返す
-        $this->assertEquals(Article::class, $database->getEntityClass(['t_article', 't_comment']));
-        $this->assertEquals(Comment::class, $database->getEntityClass(['t_comment', 't_article']));
-        $this->assertEquals(Entity::class, $database->getEntityClass(['t_not1', 't_not2']));
 
         // 直クラス名でも引ける(自動エイリアス機能で t_article は Article と読み替えられるのでどちらでも引けるようにしてある)
         $this->assertEquals(Article::class, $database->getEntityClass('Article'));
@@ -4698,7 +4692,7 @@ INSERT INTO test (name) VALUES
             $cplatform = $database->getCompatiblePlatform();
             $cache = $this->forcedRead($database, 'cache');
             $cache['compatiblePlatform'] = new class($cplatform->getWrappedPlatform()) extends CompatiblePlatform {
-                public function supportsIdentityAutoUpdate() { return false; }
+                public function supportsIdentityAutoUpdate(): bool { return false; }
             };
             $this->forcedWrite($database, 'cache', $cache);
             return function () use ($database, $cache, $cplatform) {
@@ -4718,7 +4712,7 @@ INSERT INTO test (name) VALUES
             $cplatform = $database->getCompatiblePlatform();
             $cache = $this->forcedRead($database, 'cache');
             $cache['compatiblePlatform'] = new class($cplatform->getWrappedPlatform()) extends CompatiblePlatform {
-                public function supportsBulkMerge() { return false; }
+                public function supportsBulkMerge(): bool { return false; }
             };
             $this->forcedWrite($database, 'cache', $cache);
             return function () use ($database, $cache, $cplatform) {
@@ -5814,7 +5808,7 @@ INSERT INTO test (id, name) VALUES
             $cplatform = $database->getCompatiblePlatform();
             $cache = $this->forcedRead($database, 'cache');
             $cache['compatiblePlatform'] = new class($cplatform->getWrappedPlatform()) extends CompatiblePlatform {
-                public function supportsIdentityAutoUpdate() { return false; }
+                public function supportsIdentityAutoUpdate(): bool { return false; }
             };
             $this->forcedWrite($database, 'cache', $cache);
             return function () use ($database, $cache, $cplatform) {
@@ -5831,7 +5825,7 @@ INSERT INTO test (id, name) VALUES
             $cplatform = $database->getCompatiblePlatform();
             $cache = $this->forcedRead($database, 'cache');
             $cache['compatiblePlatform'] = new class($cplatform->getWrappedPlatform()) extends CompatiblePlatform {
-                public function supportsMerge() { return false; }
+                public function supportsMerge(): bool { return false; }
             };
             $this->forcedWrite($database, 'cache', $cache);
             return function () use ($database, $cache, $cplatform) {

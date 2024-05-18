@@ -359,7 +359,7 @@ class Database
         replaceAndPrimaryWithTable as public replaceAndPrimary;
     }
 
-    protected function getDatabase() { return $this; }
+    protected function getDatabase(): Database { return $this; }
 
     /// 内部的に自動付加されるカラム名
     public const AUTO_KEY         = '__dbml_auto_column';
@@ -397,29 +397,24 @@ class Database
 
     /** @var Connection[] */
     #[DebugInfo(false)]
-    private $connections;
+    private array $connections;
 
-    /** @var Connection */
     #[DebugInfo(false)]
-    private $txConnection;
+    private Connection $txConnection;
 
-    /** @var \ArrayObject */
-    private $vtables;
+    private \ArrayObject $vtables;
 
-    /** @var \ArrayObject 「未初期化なら生成して返す」系のメソッドのキャッシュ */
     #[DebugInfo(false)]
-    private $cache;
+    private \ArrayObject $cache;
 
-    /** @var array */
     private array $foreignKeySwitchingLevels = [];
 
-    /** @var int */
-    private $affectedRows;
+    private ?int $affectedRows;
 
     /** @var int[] dryrun 中の挿入 ID. dryrun でしか使わないので（値が戻って欲しいので ArrayObject にはしていない） */
-    private $lastInsertIds = [];
+    private array $lastInsertIds = [];
 
-    public static function getDefaultOptions()
+    public static function getDefaultOptions(): array
     {
         $default_options = [
             // キャッシュオブジェクト
@@ -574,9 +569,8 @@ class Database
      * つまり実質的には「本ライブラリの設定が全て可能」となる。あまり「この設定はどこのクラスに係るのか？」は気にしなくて良い。
      *
      * @param array|Connection|Connection[] $dbconfig 設定配列
-     * @param array $options オプション配列
      */
-    public function __construct($dbconfig, $options = [])
+    public function __construct($dbconfig, array $options = [])
     {
         // 代替クラスのロード（本来こんなところに書くべきではないが他に良い場所もないのでほぼ必ず通るここに書く）
         class_aliases([
@@ -678,22 +672,16 @@ class Database
 
     /**
      * ゲートウェイオブジェクトがあるかを返す
-     *
-     * @param string $name テーブル名
-     * @return bool ゲートウェイオブジェクトがあるなら true
      */
-    public function __isset($name)
+    public function __isset(string $name): bool
     {
         return $this->$name !== null;
     }
 
     /**
      * ゲートウェイオブジェクトを伏せる
-     *
-     * @param string $name テーブル名
-     * @return void
      */
-    public function __unset($name)
+    public function __unset(string $name): void
     {
         unset($this->cache['gateway'][$name]);
     }
@@ -707,11 +695,8 @@ class Database
      * # t_article の全レコードを取得する
      * $db->t_article->array();
      * ```
-     *
-     * @param string $name ゲートウェイ名（テーブル名 or エンティティ名）
-     * @return TableGateway ゲートウェイオブジェクト
      */
-    public function __get($name)
+    public function __get(string $name): ?TableGateway
     {
         $tablename = $this->convertTableName($name);
         if (!$this->getSchema()->hasTable($tablename)) {
@@ -731,20 +716,13 @@ class Database
      * 将来のために予約されており、呼ぶと無条件で例外を投げる。
      *
      * phpstorm が `$db->tablename[1]['title'] = 'hoge';` のような式で警告を出すのでそれを抑止する目的もある。
-     *
-     * @param string $name
-     * @param mixed $value
      */
-    public function __set($name, $value) { throw new \DomainException(__METHOD__ . ' is not supported.'); }
+    public function __set(string $name, mixed $value): void { throw new \DomainException(__METHOD__ . ' is not supported.'); }
 
     /**
      * @ignore
-     *
-     * @param string $name メソッド名
-     * @param array $arguments 引数配列
-     * @return mixed
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments): mixed
     {
         // OptionTrait へ移譲
         $result = $this->OptionTrait__callGetSet($name, $arguments, $called);
@@ -767,7 +745,7 @@ class Database
         throw new \BadMethodCallException("'$name' is undefined.");
     }
 
-    private function _tableMap()
+    private function _tableMap(): array
     {
         $maps = cache_fetch($this->getUnsafeOption('cacheProvider'), 'Database-tableMap', function () {
             $maps = [
@@ -849,7 +827,7 @@ class Database
         return $stmt;
     }
 
-    private function _getConverter($data_source)
+    private function _getConverter($data_source): \Closure
     {
         $platform = $this->getPlatform();
         $cast_type = $this->getUnsafeOption('autoCastType');
@@ -955,7 +933,7 @@ class Database
         return $chunk;
     }
 
-    private function _postaffect(AffectBuilder $builder, $opt)
+    private function _postaffect(AffectBuilder $builder, array $opt)
     {
         $affected = $builder->getAffectedRows();
         if ($this->getUnsafeOption('dryrun')) {
@@ -1018,7 +996,7 @@ class Database
         return array_sum($affecteds);
     }
 
-    private function _setIdentityInsert($tableName, $data)
+    private function _setIdentityInsert(string $tableName, array $data): \Closure
     {
         $cplatform = $this->getCompatiblePlatform();
         if ($this->getUnsafeOption('autoIdentityInsert') && !$cplatform->supportsIdentityUpdate()) {
@@ -1077,11 +1055,8 @@ class Database
      * ```
      *
      * オブジェクト名が競合している場合は何が返ってくるか未定義。
-     *
-     * @param ?string $objectname オブジェクト名
-     * @return AbstractAsset スキーマオブジェクト
      */
-    public function describe($objectname = null)
+    public function describe(?string $objectname = null): AbstractAsset
     {
         $schema = $this->getSchema();
 
@@ -1119,12 +1094,8 @@ class Database
      *
      * 存在するテーブル名や tableMapper などを利用して mixin 用のトレイトを作成する。
      * このメソッドが吐き出したトレイトを `@ mixin Hogera` などとすると補完が効くようになる。
-     *
-     * @param ?string $namespace トレイト群の名前空間。未指定だとグローバル
-     * @param ?string $filename ファイルとして吐き出す先
-     * @return string アノテーションコメント
      */
-    public function echoAnnotation($namespace = null, $filename = null)
+    public function echoAnnotation(?string $namespace = null, ?string $filename = null): string
     {
         $special_types = [
             Types::SIMPLE_ARRAY => 'array|string',
@@ -1219,12 +1190,8 @@ class Database
      * コード補完用の phpstorm.meta を取得する
      *
      * 存在するテーブル名や tableMapper などを利用して phpstorm.meta を作成する。
-     *
-     * @param ?string $namespace エンティティの名前空間。未指定だと Entityable に集約される
-     * @param ?string $filename ファイルとして吐き出す先
-     * @return string phpstorm.meta の内容
      */
-    public function echoPhpStormMeta($namespace = null, $filename = null)
+    public function echoPhpStormMeta(?string $namespace = null, ?string $filename = null): string
     {
         $special_types = [
             Types::SIMPLE_ARRAY => 'array|string',
@@ -1313,9 +1280,8 @@ class Database
      * 単一のインスタンスを渡した場合は両方に設定される。
      *
      * @param LoggerInterface|LoggerInterface[]|null $logger ロガー
-     * @return $this 自分自身
      */
-    public function setLogger($logger)
+    public function setLogger($logger): static
     {
         if (is_array($logger)) {
             $loggers = [
@@ -1368,14 +1334,11 @@ class Database
      *     ],
      * ]);
      * ```
-     *
-     * @param array $array キャストタイプ配列
-     * @return $this 自分自身
      */
-    public function setAutoCastType($array)
+    public function setAutoCastType(array $castTypes): static
     {
         $types = [];
-        foreach ($array as $type => $opt) {
+        foreach ($castTypes as $type => $opt) {
             if ($opt instanceof Type) {
                 if (!Type::getTypeRegistry()->has($type)) {
                     Type::getTypeRegistry()->register($type, $opt);
@@ -1433,11 +1396,8 @@ class Database
      * // 全く別個のコネクションに切り替える
      * $db->setConnection($connection);
      * ```
-     *
-     * @param Connection|bool $connection コネクション or bool（true ならマスター、 false ならスレーブ）
-     * @return $this 自分自身
      */
-    public function setConnection($connection)
+    public function setConnection(Connection|bool $connection): static
     {
         // bool は特別扱いで true: master, false: slave として扱う
         if (is_bool($connection)) {
@@ -1457,20 +1417,16 @@ class Database
      *
      * トランザクション接続とは基本的に「マスター接続」を指す。
      * シングルコネクション環境なら気にしなくて良い。
-     *
-     * @return Connection コネクション
      */
-    public function getConnection()
+    public function getConnection(): Connection
     {
         return $this->txConnection;
     }
 
     /**
      * マスター接続（Connection）を返す
-     *
-     * @return Connection コネクション
      */
-    public function getMasterConnection()
+    public function getMasterConnection(): Connection
     {
         // Master はマスターを返す
         return $this->connections['master'];
@@ -1478,10 +1434,8 @@ class Database
 
     /**
      * スレーブ接続（Connection）を返す
-     *
-     * @return Connection コネクション
      */
-    public function getSlaveConnection()
+    public function getSlaveConnection(): Connection
     {
         // Slaveは「マスターから読みたい」ことがなくはないので設定ベース
         if ($this->getMasterMode()) {
@@ -1498,7 +1452,7 @@ class Database
      *
      * @return Connection[] コネクション配列
      */
-    public function getConnections()
+    public function getConnections(): array
     {
         $cons = [];
         foreach ($this->connections as $con) {
@@ -1509,11 +1463,8 @@ class Database
 
     /**
      * {@link CompatibleConnection 互換用コネクション}を取得する
-     *
-     * @param ?Connection $connection コネクション（省略時はトランザクションコネクション）
-     * @return CompatibleConnection 本ライブラリの互換用コネクション
      */
-    public function getCompatibleConnection($connection = null)
+    public function getCompatibleConnection(?Connection $connection = null): CompatibleConnection
     {
         $connection ??= $this->getConnection();
         return $this->cache['compatibleConnection'][spl_object_hash($connection)] ??= new CompatibleConnection($connection);
@@ -1521,20 +1472,16 @@ class Database
 
     /**
      * {@link AbstractPlatform dbal のプラットフォーム}を取得する
-     *
-     * @return AbstractPlatform dbal プラットフォーム
      */
-    public function getPlatform()
+    public function getPlatform(): AbstractPlatform
     {
         return $this->getSlaveConnection()->getDatabasePlatform();
     }
 
     /**
      * {@link CompatiblePlatform 互換用プラットフォーム}を取得する
-     *
-     * @return CompatiblePlatform 本ライブラリの互換用プラットフォーム
      */
-    public function getCompatiblePlatform()
+    public function getCompatiblePlatform(): CompatiblePlatform
     {
         if (!isset($this->cache['compatiblePlatform'])) {
             $classname = $this->getUnsafeOption('compatiblePlatform');
@@ -1546,10 +1493,8 @@ class Database
 
     /**
      * {@link Schema スキーマオブジェクト}を取得する
-     *
-     * @return Schema スキーマオブジェクト
      */
-    public function getSchema()
+    public function getSchema(): Schema
     {
         if (!isset($this->cache['schema'])) {
             $listeners = [
@@ -1565,30 +1510,18 @@ class Database
 
     /**
      * テーブル名からエンティティクラス名を取得する
-     *
-     * @param string|array $tablename テーブル名
-     * @return string|false エンティティクラス名
      */
-    public function getEntityClass($tablename)
+    public function getEntityClass(string $tablename): string
     {
         $map = $this->_tableMap()['entityClass'];
-        foreach ((array) $tablename as $tn) {
-            foreach ((array) $this->convertEntityName($tn) as $t) {
-                if (isset($map[$t])) {
-                    return $map[$t];
-                }
-            }
-        }
-        return Entity::class;
+        $entityname = $this->convertEntityName($tablename);
+        return $map[$entityname] ?? Entity::class;
     }
 
     /**
      * テーブル名からゲートウェイクラス名を取得する
-     *
-     * @param string $tablename テーブル名
-     * @return string ゲートウェイクラス名
      */
-    public function getGatewayClass($tablename)
+    public function getGatewayClass(string $tablename): string
     {
         $map = $this->_tableMap()['gatewayClass'];
         $tablename = $this->convertTableName($tablename);
@@ -1597,11 +1530,8 @@ class Database
 
     /**
      * エンティティ名からテーブル名へ変換する
-     *
-     * @param string $entityname エンティティ名
-     * @return string テーブル名
      */
-    public function convertTableName($entityname)
+    public function convertTableName(string $entityname): string
     {
         $map = $this->_tableMap()['EtoT'];
         return $map[$entityname] ?? $entityname;
@@ -1609,13 +1539,8 @@ class Database
 
     /**
      * テーブル名からエンティティ名へ変換する
-     *
-     * 複数のマッピングがあるときは最初の名前を返す。
-     *
-     * @param string $tablename テーブル名
-     * @return string エンティティ名
      */
-    public function convertEntityName($tablename)
+    public function convertEntityName(string $tablename): string
     {
         $map = $this->_tableMap()['TtoE'];
         return first_value($map[$tablename] ?? []) ?: $tablename;
@@ -1643,11 +1568,8 @@ class Database
      * ```
      *
      * @inheritdoc select()
-     *
-     * @param string|array $vtableName 仮想テーブル名
-     * @return $this 自分自身
      */
-    public function declareVirtualTable($vtableName, $tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function declareVirtualTable(string $vtableName, $tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): static
     {
         assert(!$this->getSchema()->hasTable($vtableName));
         $this->vtables[$vtableName] = array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]);
@@ -1670,11 +1592,8 @@ class Database
      * $db->selectArray('c_table2');
      * // WITH RECURSIVE c_table2(n) AS(SELECT 1 UNION SELECT n + 1 FROM c_table2 WHERE n < 5)SELECT c_table2.* FROM c_table2
      * ```
-     *
-     * @param array $expressions CTE 配列
-     * @return $this 自分自身
      */
-    public function declareCommonTable($expressions)
+    public function declareCommonTable(array $expressions): static
     {
         foreach ($expressions as $name => $expression) {
             if ($expression instanceof \Closure) {
@@ -1711,11 +1630,8 @@ class Database
      * 仮想テーブルを取得する
      *
      * 原則内部向け。
-     *
-     * @param string $vtableName
-     * @return array|null 設定されていたらそれを、なかったら null
      */
-    public function getVirtualTable($vtableName)
+    public function getVirtualTable(string $vtableName): ?array
     {
         return $this->vtables[$vtableName] ?? null;
     }
@@ -1834,11 +1750,8 @@ class Database
      * php 側の型が活用される箇所はそう多くないが、例えば下記のような処理では上書きすると有用なことがある。
      *
      * - {@link Database::setAutoCastType()} による型による自動キャスト
-     *
-     * @param array $definition 仮想カラム定義
-     * @return $this 自分自身
      */
-    public function overrideColumns($definition)
+    public function overrideColumns(array $definition): static
     {
         $schema = $this->getSchema();
         foreach ($definition as $tname => $columns) {
@@ -1940,11 +1853,8 @@ class Database
      *     // 別ローカルテーブル名に対して上記の構造の繰り返しができる
      * ]);
      * ```
-     *
-     * @param array $relations 外部キー定義
-     * @return array 追加した外部キー名
      */
-    public function addRelation($relations)
+    public function addRelation(array $relations): array
     {
         $result = [];
         foreach ($relations as $localTable => $foreignTables) {
@@ -1962,14 +1872,8 @@ class Database
      *
      * 簡易性や ForeignKeyConstraint を隠蔽するために用意されている。
      * ForeignKeyConstraint 指定で追加する場合は {@link Schema::addForeignKey()} を呼ぶ。
-     *
-     * @param string $localTable 外部キー定義テーブル名
-     * @param string $foreignTable 参照先テーブル名
-     * @param string|array $fkdata 外部キー情報
-     * @param string|null $fkname 外部キー名。省略時は自動命名
-     * @return ForeignKeyConstraint 追加した外部キーオブジェクト
      */
-    public function addForeignKey($localTable, $foreignTable, $fkdata, $fkname = null)
+    public function addForeignKey(string $localTable, string $foreignTable, string|array $fkdata, ?string $fkname = null): ForeignKeyConstraint
     {
         $fkdata = arrayize($fkdata);
         $options = array_unset($fkdata, 'options', []) + ['virtual' => true];
@@ -1991,13 +1895,8 @@ class Database
      *
      * 簡易性や ForeignKeyConstraint を隠蔽するために用意されている。
      * ForeignKeyConstraint 指定で無効にする場合は {@link Schema::ignoreForeignKey()}  を呼ぶ。
-     *
-     * @param string $localTable 外部キー定義テーブル名
-     * @param string $foreignTable 参照先テーブル名
-     * @param string|array $columnsMap 外部キーカラム
-     * @return ForeignKeyConstraint 無効にした外部キーオブジェクト
      */
-    public function ignoreForeignKey($localTable, $foreignTable, $columnsMap)
+    public function ignoreForeignKey(string $localTable, string $foreignTable, string|array $columnsMap): ForeignKeyConstraint
     {
         $columnsMap = array_rekey(arrayize($columnsMap), function ($k, $v) { return is_int($k) ? $v : $k; });
 
@@ -2015,12 +1914,8 @@ class Database
      * 深い階層で enable -> enable -> disable ->disable した場合、最初の disable で解除されてしまうので、ネストレベルが管理される。
      * ネストレベルが 0 の時（本当に切り替わったとき）のみクエリは実行される。
      * さらにネストレベルは $fkey 指定時はそれぞれで管理される。
-     *
-     * @param bool $enable 有効無効
-     * @param null|ForeignKeyConstraint|string $fkey 切り替える外部キー制約
-     * @return int ネストレベル
      */
-    public function switchForeignKey($enable, $fkey = null): int
+    public function switchForeignKey(bool $enable, ForeignKeyConstraint|string $fkey): int
     {
         $fkeyname = $fkey instanceof ForeignKeyConstraint ? $fkey->getName() : $fkey;
         $table_name = first_key($this->getSchema()->getForeignTable($fkey));
@@ -2046,12 +1941,8 @@ class Database
 
     /**
      * begin
-     *
-     * {@link Connection::beginTransaction()} の移譲。
-     *
-     * @return int ネストレベル
      */
-    public function begin()
+    public function begin(): int
     {
         $this->txConnection->beginTransaction();
         return $this->txConnection->getTransactionNestingLevel();
@@ -2059,12 +1950,8 @@ class Database
 
     /**
      * commit
-     *
-     * {@link Connection::commit()} の移譲。
-     *
-     * @return int ネストレベル
      */
-    public function commit()
+    public function commit(): int
     {
         $this->txConnection->commit();
         return $this->txConnection->getTransactionNestingLevel();
@@ -2072,12 +1959,8 @@ class Database
 
     /**
      * rollback
-     *
-     * {@link Connection::rollBack()} の移譲。
-     *
-     * @return int ネストレベル
      */
-    public function rollback()
+    public function rollback(): int
     {
         $this->txConnection->rollBack();
         return $this->txConnection->getTransactionNestingLevel();
@@ -2096,14 +1979,8 @@ class Database
      *     return $db->insertOrThrow('t_table', ['data array']);
      * });
      * ```
-     *
-     * @param callable $main メイン処理
-     * @param ?callable $catch 例外発生時の処理
-     * @param array $options トランザクションオプション
-     * @param bool $throwable 例外を投げるか返すか
-     * @return mixed メイン処理の返り値
      */
-    public function transact($main, $catch = null, $options = [], $throwable = true)
+    public function transact(callable $main, ?callable $catch = null, array $options = [], bool $throwable = true): mixed
     {
         return $this->transaction($main, $catch, $options)->perform($throwable);
     }
@@ -2112,13 +1989,8 @@ class Database
      * トランザクションオブジェクトを返す
      *
      * $options は {@link Transaction} を参照。
-     *
-     * @param ?callable $main メイン処理
-     * @param ?callable $catch 例外発生時の処理
-     * @param array $options トランザクションオプション
-     * @return Transaction トランザクションオブジェクト
      */
-    public function transaction($main = null, $catch = null, $options = [])
+    public function transaction(?callable $main = null, ?callable $catch = null, array $options = []): Transaction
     {
         $tx = new Transaction($this, $options);
         if ($main) {
@@ -2148,12 +2020,8 @@ class Database
      *     $db->update('t_table', ['data array'], $pk);
      * });
      * ```
-     *
-     * @param callable $main メイン処理
-     * @param array|int|null $options トランザクションオプション
-     * @return array トランザクションログ
      */
-    public function preview($main, $options = null)
+    public function preview(callable $main, array $options = null): array
     {
         $tx = $this->transaction($main, $options);
         $tx->preview($logs);
@@ -2164,12 +2032,8 @@ class Database
      * new {@link Expression} するだけのメソッド
      *
      * 可能なら直接 new Expression せずにこのメソッド経由で生成したほうが良い（MUST ではない）。
-     *
-     * @param mixed $expr クエリ文
-     * @param mixed $params bind パラメータ
-     * @return Expression クエリ表現オブジェクト
      */
-    public function raw($expr, $params = [])
+    public function raw(string $expr, mixed $params = []): Expression
     {
         return new Expression($expr, $params);
     }
@@ -2205,11 +2069,8 @@ class Database
      * ]);
      * // SELECT (((colA = ?) AND (colB = ?)) OR ((colC = ?) AND (colD = ?) AND ((colE1 = ?) OR (colE2 = ?)))) AS contain_misc FROM t_article: [1, 2, 3, 4, 5, 6]
      * ```
-     *
-     * @param mixed $predicates 条件配列
-     * @return Expression クエリ表現オブジェクト
      */
-    public function operator(...$predicates)
+    public function operator(...$predicates): Expression
     {
         $params = [];
         $ands = [];
@@ -2221,12 +2082,8 @@ class Database
 
     /**
      * 文字列とパラメータから TableDescriptor を生成する
-     *
-     * @param string $tableDescriptor テーブル記法
-     * @param iterable $params パラメータ
-     * @return TableDescriptor
      */
-    public function descriptor($tableDescriptor, iterable $params = [])
+    public function descriptor(string $tableDescriptor, array $params = []): TableDescriptor
     {
         $tableDescriptor = new TableDescriptor($this, $tableDescriptor, []);
         return $tableDescriptor->bind($this, $params);
@@ -2244,10 +2101,8 @@ class Database
      * // prepare: SELECT * FROM t_table WHERE id IN (?, ?, ?) AND status = ?
      * // execute: SELECT * FROM t_table WHERE id IN (1, 2, 3) AND status = 1
      * ```
-     *
-     * @return callable|\ArrayObject
      */
-    public function binder()
+    public function binder(): callable|\ArrayObject
     {
         return new class extends \ArrayObject {
             public function __invoke($param)
@@ -2277,12 +2132,8 @@ class Database
      * bool を quote すると文字ではなく int になる。
      *
      * それ以外は {@link Connection::quote()} と同じ。
-     *
-     * @param mixed $value クオートする値
-     * @param string|null $type クオート型
-     * @return string|null クオートされた値
      */
-    public function quote($value, $type = null)
+    public function quote(mixed $value, ?int $type = null): mixed
     {
         // SQLSrv でテストを通すためのアドホック実装だが、全RDBMS でやってしまっても問題はないはず（テストが通るようなら消してしまって構わない）
         if (is_int($value)) {
@@ -2295,11 +2146,8 @@ class Database
      * 識別子をクオートする
      *
      * {@link Connection::quoteIdentifier()} を参照。
-     *
-     * @param string $identifier 識別子
-     * @return string クオートされた識別子
      */
-    public function quoteIdentifier($identifier)
+    public function quoteIdentifier(string $identifier): string
     {
         return $this->getSlaveConnection()->quoteIdentifier($identifier);
     }
@@ -2320,12 +2168,8 @@ class Database
      * $db->queryInto($db->select('tablename', ['id' => 1]));
      * // (SELECT tablename.* FROM tablename WHERE id = '1')
      * ```
-     *
-     * @param string $sql SQL
-     * @param iterable $params bind 配列
-     * @return string 値が埋め込まれた実行可能なクエリ
      */
-    public function queryInto($sql, iterable $params = [])
+    public function queryInto(string|Queryable $sql, iterable $params = []): string
     {
         $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
 
@@ -2341,10 +2185,8 @@ class Database
      * SELECT ビルダを生成して返す
      *
      * 極力 new SelectBuilder せずにこのメソッドを介すこと。
-     *
-     * @return SelectBuilder SELECT ビルダオブジェクト
      */
-    public function createSelectBuilder()
+    public function createSelectBuilder(): SelectBuilder
     {
         return new SelectBuilder($this);
     }
@@ -2353,10 +2195,8 @@ class Database
      * AFFECT ビルダを生成して返す
      *
      * 極力 new AffectBuilder せずにこのメソッドを介すこと。
-     *
-     * @return AffectBuilder AFFECT ビルダオブジェクト
      */
-    public function createAffectBuilder()
+    public function createAffectBuilder(): AffectBuilder
     {
         return new AffectBuilder($this);
     }
@@ -2371,11 +2211,9 @@ class Database
      * - インデックスがバッファプールに乗る
      *
      * 概して mysql (InnoDB) 用だが、他の RDBMS でも呼んで無駄にはならないはず。
-     *
-     * @param array|string $table_names テーブル名配列（glob 的記法が使える。省略時は全テーブル）
-     * @return array 暖気クエリの結果（現在は [table => [index => COUNT]] だが、COUNt 部分は変更されることがある）
+     * 返り値として暖気クエリの結果（現在は [table => [index => COUNT]] を返すが、COUNt 部分は変更されることがある）
      */
-    public function warmup($table_names = [])
+    public function warmup(array|string $table_names = []): array
     {
         $DELIMITER = '@-@-@';
         $cplatform = $this->getCompatiblePlatform();
@@ -2409,13 +2247,8 @@ class Database
      * foreach で回せる何かとサブメソッド名で結果を構築する
      *
      * @ignore 難解過ぎる上内部でしか使われない
-     *
-     * @param Result|array $row_provider foreach で回せる何か
-     * @param string|array $fetch_mode Database::METHOD__XXX
-     * @param ?\Closure $converter 行ごとの変換クロージャ
-     * @return array|bool|mixed クエリ結果
      */
-    public function perform($row_provider, $fetch_mode, $converter = null)
+    public function perform(Result|array $row_provider, string $fetch_mode, ?\Closure $converter = null): mixed
     {
         $checkSameKey = $this->getUnsafeOption('checkSameKey');
 
@@ -2544,12 +2377,8 @@ class Database
      * @used-by fetchPairsOrThrow()
      * @used-by fetchTupleOrThrow()
      * @used-by fetchValueOrThrow()
-     *
-     * @param string|SelectBuilder|Statement $sql クエリ
-     * @param iterable $params bind パラメータ
-     * @return false|array|Entityable[] クエリ結果
      */
-    public function fetch($method, $sql, iterable $params = [])
+    public function fetch(string $method, $sql, iterable $params = [])
     {
         $converter = $this->_getConverter($sql);
         $stmt = $this->_sqlToStmt($sql, $params, $this->getSlaveConnection());
@@ -2569,7 +2398,7 @@ class Database
         return $result;
     }
 
-    public function fetchOrThrow($method, $sql, iterable $params = [])
+    public function fetchOrThrow(string $method, $sql, iterable $params = [])
     {
         $result = $this->{"fetch$method"}($sql, $params);
         // Value, Tuple は [] を返し得ないし、複数行系も false を返し得ない
@@ -2647,9 +2476,8 @@ class Database
      * @param array|int $limit 取得件数（{@link SelectBuilder::limit()}）
      * @param array|string $groupBy グルーピング（{@link SelectBuilder::groupBy()}）
      * @param array|string $having HAVING 条件（{@link SelectBuilder::having()}）
-     * @return SelectBuilder クエリビルダオブジェクト
      */
-    public function select($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function select($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         $builder = $this->createSelectBuilder();
         return $builder->build(array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]), true);
@@ -2698,7 +2526,7 @@ class Database
      *
      * @inheritdoc select()
      */
-    public function entity($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function entity($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->cast(null);
     }
@@ -2729,9 +2557,8 @@ class Database
      * @param array|string $where 条件
      * @param array|string $groupBy カラム名かその配列
      * @param array|string $having 条件
-     * @return SelectBuilder 集約クエリビルダ
      */
-    public function selectAggregate($aggregation, $column, $where = [], $groupBy = [], $having = [])
+    public function selectAggregate($aggregation, $column, $where = [], $groupBy = [], $having = []): SelectBuilder
     {
         return $this->select($column, $where, [], [], $groupBy, $having)->aggregate($aggregation);
     }
@@ -2758,12 +2585,8 @@ class Database
      * @used-by yieldAssoc()
      * @used-by yieldLists()
      * @used-by yieldPairs()
-     *
-     * @param string|SelectBuilder $sql SQL
-     * @param iterable $params SQL パラメータ
-     * @return Yielder foreach で回せるオブジェクト
      */
-    public function yield($sql, iterable $params = [])
+    public function yield($sql, iterable $params = []): Yielder
     {
         $chunk = null;
         $converter = $this->_getConverter($sql);
@@ -2801,15 +2624,8 @@ class Database
      * @used-by exportArray()
      * @used-by exportCsv()
      * @used-by exportJson()
-     *
-     * @param string|AbstractGenerator $generator 出力タイプ
-     * @param string|SelectBuilder $sql SQL
-     * @param iterable $params SQL パラメータ
-     * @param array $config 出力パラメータ
-     * @param string|resource|null $file 出力先。 null を与えると標準出力に書き出される
-     * @return int 書き込みバイト数
      */
-    public function export($generator, $sql, iterable $params = [], $config = [], $file = null)
+    public function export(string|AbstractGenerator $generator, $sql, iterable $params = [], array $config = [], $file = null): int
     {
         if (is_string($generator)) {
             $generator = strtolower($generator);
@@ -2885,10 +2701,8 @@ class Database
      * @used-by subselectValue()
      *
      * @inheritdoc select()
-     *
-     * @return SelectBuilder サブクエリビルダオブジェクト
      */
-    public function subselect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function subselect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         $builder = $this->createSelectBuilder();
         return $builder->setLazyMode()->build(array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]));
@@ -2937,9 +2751,8 @@ class Database
      * @param array|int $limit 取得件数（{@link SelectBuilder::limit()}）
      * @param array|string $groupBy グルーピング（{@link SelectBuilder::groupBy()}）
      * @param array|string $having HAVING 条件（{@link SelectBuilder::having()}）
-     * @return SelectBuilder クエリビルダオブジェクト
      */
-    public function subquery($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function subquery($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         // build 前にあらかじめ setSubmethod して分岐する必要がある
         $builder = $this->createSelectBuilder();
@@ -3014,9 +2827,8 @@ class Database
      * @param array|string $aggregate 集約関数名
      * @param array|string $column サブテーブル名
      * @param array $where WHERE 条件
-     * @return SelectBuilder クエリビルダオブジェクト
      */
-    public function subaggregate($aggregate, $column, $where = [])
+    public function subaggregate($aggregate, $column, $where = []): SelectBuilder
     {
         return $this->select($column, $where)->aggregate($aggregate, 1)->setSubmethod($aggregate);
     }
@@ -3101,7 +2913,7 @@ class Database
      * @param array|string $where 条件
      * @param array|string $groupBy カラム名かその配列
      * @param array|string $having 条件
-     * @return int|array 集約結果
+     * @return string|int|array 集約結果
      */
     public function aggregate($aggregation, $column, $where = [], $groupBy = [], $having = [])
     {
@@ -3161,9 +2973,8 @@ class Database
      * @param array|int $limit 単数値か[offset=>count]な連想配列
      * @param array|string $groupBy カラム名かその配列
      * @param array|string $having 条件
-     * @return SelectBuilder クエリビルダオブジェクト
      */
-    public function union($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function union($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         return $this->select(['' => $column], $where, $orderBy, $limit, $groupBy, $having)->union($unions);
     }
@@ -3180,9 +2991,8 @@ class Database
      * @param array|int $limit 単数値か[offset=>count]な連想配列
      * @param array|string $groupBy カラム名かその配列
      * @param array|string $having 条件
-     * @return SelectBuilder クエリビルダオブジェクト
      */
-    public function unionAll($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function unionAll($unions, $column = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         return $this->select(['' => $column], $where, $orderBy, $limit, $groupBy, $having)->unionAll($unions);
     }
@@ -3196,7 +3006,7 @@ class Database
      *
      * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
      */
-    public function neighbor($tableDescriptor, $predicates, $limit = 1)
+    public function neighbor($tableDescriptor, array $predicates, int $limit = 1): array
     {
         return $this->select($tableDescriptor)->neighbor($predicates, $limit);
     }
@@ -3263,7 +3073,7 @@ class Database
      * @param bool $parentive 親方向にたどるか子方向に辿るか
      * @return array かき集めたレコード情報（[テーブル名 => [主キー配列1, 主キー配列2, ...]]）
      */
-    public function gather($tablename, $wheres = [], $other_wheres = [], $parentive = false)
+    public function gather(string $tablename, $wheres = [], $other_wheres = [], bool $parentive = false): array
     {
         $schema = $this->getSchema();
         $cplatform = $this->getCompatiblePlatform();
@@ -3348,13 +3158,8 @@ class Database
      *     'fuga' => ['path' => 'img/fuga.jpg'],
      * ];
      * ```
-     *
-     * @param array $array 対象配列
-     * @param string $tablename 取得テーブル
-     * @param array $wheres 対象テーブルの条件
-     * @return array 突き合わせ結果
      */
-    public function differ($array, $tablename, $wheres = [])
+    public function differ(array $array, string $tablename, $wheres = []): array
     {
         $keyname = Database::AUTO_PRIMARY_KEY;
         $tmpname = '__dbml_auto_join';
@@ -3429,10 +3234,8 @@ class Database
      * $db->t_table->dryrun()->update($data, $where);
      * // Gateway で使いたい場合はこのように Gateway クラスに dryrun が生えているのでそれを使用する
      * ```
-     *
-     * @return $this 自分自身（のようなもの）
      */
-    public function dryrun()
+    public function dryrun(): static
     {
         return $this->context(['dryrun' => true]);
     }
@@ -3449,10 +3252,8 @@ class Database
      *
      * などと実質的にはほとんど同じ（後者に至っては全く同じ=移譲・糖衣構文）。
      * つまりは {@link dryrun()} と同じなのでそちらも参照。
-     *
-     * @return $this 自分自身（のようなもの）
      */
-    public function prepare()
+    public function prepare(): static
     {
         return $this->context(['preparing' => true]);
     }
@@ -3461,9 +3262,8 @@ class Database
      * 取得系クエリをプリペアする
      *
      * @inheritdoc Database::select()
-     * @return Statement
      */
-    public function prepareSelect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function prepareSelect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): Statement
     {
         return $this->select(...func_get_args())->prepare()->getPreparedStatement();
     }
@@ -3473,7 +3273,7 @@ class Database
      *
      * @inheritdoc Connection::executeQuery()
      */
-    public function executeSelect($query, iterable $params = [], ?int $ttl = 0)
+    public function executeSelect(string $query, iterable $params = [], ?int $ttl = 0)
     {
         $params = Adhoc::bindableParameters($params);
 
@@ -3509,7 +3309,7 @@ class Database
      *
      * @inheritdoc Connection::executeStatement()
      */
-    public function executeAffect($query, iterable $params = [], ?int $retry = null)
+    public function executeAffect(string $query, iterable $params = [], ?int $retry = null)
     {
         $bare_params = $params;
         $params = Adhoc::bindableParameters($params);
@@ -3572,9 +3372,8 @@ class Database
      * 非常に実験的な機能で現実装は mysqli/pgsql のみの対応。仕様は互換性を考慮せず変更されることがある。
      *
      * @inheritdoc Connection::executeQuery()
-     * @return callable 結果を返すクロージャ
      */
-    public function executeSelectAsync($query, iterable $params = [])
+    public function executeSelectAsync(string $query, iterable $params = []): \Closure
     {
         $ticker = $this->executeAsync([$query => $params], $this->getSlaveConnection());
         return fn() => $ticker(0); // @codeCoverageIgnore
@@ -3589,9 +3388,8 @@ class Database
      * 非常に実験的な機能で現実装は mysqli/pgsql のみの対応。仕様は互換性を考慮せず変更されることがある。
      *
      * @inheritdoc Connection::executeStatement()
-     * @return callable 結果を返すクロージャ
      */
-    public function executeAffectAsync($query, iterable $params = [])
+    public function executeAffectAsync(string $query, iterable $params = []): \Closure
     {
         $ticker = $this->executeAsync([$query => $params], $this->getMasterConnection());
         return fn() => $ticker(0); // @codeCoverageIgnore
@@ -3612,12 +3410,8 @@ class Database
      * 引数にインデックスを与えるとそのクエリが完了するまで待ってそれを返す。
      *
      * 非常に実験的な機能で現実装は mysqli/pgsql のみの対応。
-     *
-     * @param array $queries 実行するクエリ配列
-     * @param ?Connection $connection 実行コネクション
-     * @return object|callable
      */
-    public function executeAsync($queries, $connection = null)
+    public function executeAsync(array $queries, ?Connection $connection = null): object|callable
     {
         if ($this->getUnsafeOption('dryrun')) {
             throw new \UnexpectedValueException("executeAsync is not supported dryrun");
@@ -3663,7 +3457,7 @@ class Database
      * @param array|Entityable $default レコードのデフォルト値
      * @return array|Entityable 空レコード
      */
-    public function getEmptyRecord($tablename, $default = [])
+    public function getEmptyRecord(string $tablename, $default = [])
     {
         $table = $this->convertTableName($tablename);
         $columns = $this->getSchema()->getTableColumns($table);
@@ -3723,14 +3517,8 @@ class Database
      *
      * $opt で chunk や ignore オプションが指定できる。
      * 特に chunk/bulk は返り値の SQL が大幅に変化する。
-     *
-     * @param string $tableName テーブル名
-     * @param string $dml 処理名
-     * @param array|string $recordsOrFilename レコード配列かそれが書かれたファイル名
-     * @param array $opt オプション引数
-     * @return array|int sql 文。dryrun でないなら affected rows
      */
-    public function migrate($tableName, $dml, $recordsOrFilename, $opt = [])
+    public function migrate(string $tableName, string $dml, array|string $recordsOrFilename, array $opt = []): int|array
     {
         $opt += [
             'dryrun' => true,
@@ -3889,11 +3677,8 @@ class Database
      * // INSERT INTO t_child (child_id, child_name, parent_id) VALUES (1, "子供名1", 1) ON DUPLICATE KEY UPDATE child_id = VALUES(child_id), child_name = VALUES(child_name), parent_id = VALUES(parent_id)
      * // 必要に応じて DELETE も行われる
      * ```
-     *
-     * @param array $datatree 取り込む配列
-     * @return int affected rows
      */
-    public function import($datatree)
+    public function import(array $datatree): int
     {
         $affected = 0;
         foreach ($datatree as $tableName => $rows) {
@@ -4005,7 +3790,7 @@ class Database
      * @param array $options CSV オプション
      * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function loadCsv($tableName, $filename, $options = [])
+    public function loadCsv(string|array $tableName, string $filename, array $options = [])
     {
         $options += [
             'native'     => false,
@@ -4166,7 +3951,7 @@ class Database
      * @used-by insertArrayOrThrow()
      *
      * @param string|TableDescriptor $tableName テーブル名
-     * @param array|callable|\Generator $data カラムデータ配列あるいは Generator
+     * @param array|\Generator $data カラムデータ配列あるいは Generator
      * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function insertArray($tableName, $data)
@@ -4257,7 +4042,7 @@ class Database
      * @used-by updateArrayIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
-     * @param array|callable|\Generator $data カラムデータあるいは Generator あるいは Generator を返す callable
+     * @param array|\Generator $data カラムデータ配列あるいは Generator
      * @param array|mixed $where 束縛条件
      * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
@@ -4344,7 +4129,7 @@ class Database
      * @used-by modifyArrayIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
-     * @param array|callable|\Generator $insertData カラムデータあるいは Generator
+     * @param array|\Generator $insertData カラムデータ配列あるいは Generator
      * @param array $updateData カラムデータ
      * @param string $uniquekey 重複チェックに使うユニークキー名
      * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
@@ -4465,7 +4250,7 @@ class Database
      * @used-by changeArrayIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
-     * @param array $dataarray データ配列
+     * @param array $dataarray カラムデータ配列あるいは Generator
      * @param array|mixed $where 束縛条件。 false を与えると DELETE 文自体を発行しない（速度向上と安全担保）
      * @param string $uniquekey 重複チェックに使うユニークキー名
      * @param ?array $returning 返り値の制御変数。配列を与えるとそのカラムの SELECT 結果を返す（null は主キーを表す）
@@ -4534,7 +4319,7 @@ class Database
         // returning モード（更新や削除のためその世界を事前取得する）
         $oldrecords = [];
         if ($returning) {
-            $pkcol = $cplatform->getConcatExpression(array_values(array_implode($plist, $this->quote($pksep))));
+            $pkcol = $cplatform->getConcatExpression(...array_values(array_implode($plist, $this->quote($pksep))));
             if ($where !== false) {
                 $oldrecords = $this->selectAssoc([$builder->getTable() => [self::AUTO_PRIMARY_KEY => $pkcol], '' => $returning], $builder->getWhere());
             }
@@ -4655,7 +4440,7 @@ class Database
      * @used-by affectArrayIgnore()
      *
      * @param string $tableName テーブル名
-     * @param array $dataarray データ配列
+     * @param array $dataarray カラムデータ配列あるいは Generator
      * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
      */
     public function affectArray($tableName, $dataarray)
@@ -5694,27 +5479,25 @@ class Database
     /**
      * 最後に挿入した ID を返す
      *
-     * @param ?string $tableName テーブル名。PostgreSql の場合のみ有効
-     * @param ?string $columnName カラム名。PostgreSql の場合のみ有効
-     * @return null|string 最後に挿入した ID. dryrun 中は max+1 から始まる連番を返す
+     * dryrun 中は max+1 から始まる連番を返す。
      */
-    public function getLastInsertId($tableName = null, $columnName = null)
+    public function getLastInsertId(?string $tableName = null, ?string $columnName = null): null|int|string
     {
         if ($this->getUnsafeOption('dryrun')) {
             $key = "$tableName.$columnName";
             $this->lastInsertIds[$key] = ($this->lastInsertIds[$key] ?? $this->max([$tableName => $columnName])) + 1;
             return $this->lastInsertIds[$key];
         }
-        return $this->getMasterConnection()->lastInsertId($this->getCompatiblePlatform()->getIdentitySequenceName($tableName, $columnName));
+        $id = $this->getMasterConnection()->lastInsertId($this->getCompatiblePlatform()->getIdentitySequenceName($tableName, $columnName));
+        return $id === false ? null : $id;
     }
 
     /**
      * 自動採番列をリセットする
      *
-     * @param string $tableName テーブル名
-     * @param ?int $seq 採番列の値（NULL を与えると最大値+1になる）
+     * $seq に null を与えるとMAX+1になる。
      */
-    public function resetAutoIncrement($tableName, $seq = 1)
+    public function resetAutoIncrement(string $tableName, ?int $seq = 1)
     {
         $autocolumn = $this->getSchema()->getTableAutoIncrement($tableName);
         if ($autocolumn === null) {
@@ -5735,10 +5518,8 @@ class Database
      * 最後に更新した行数を返す
      *
      * 実行していない or 直前のクエリが失敗していた場合は null を返す。
-     *
-     * @return int|null 更新した行数
      */
-    public function getAffectedRows()
+    public function getAffectedRows(): ?int
     {
         return $this->affectedRows;
     }
@@ -5747,11 +5528,8 @@ class Database
      * キャッシュの破棄と再生成
      *
      * デプロイの直後等にこのメソッドを呼べば全キャッシュが生成される。
-     *
-     * @param bool $force
-     * @return $this
      */
-    public function recache($force = true)
+    public function recache(bool $force = true): static
     {
         // Database 以外でも getCacheProvider を使っている箇所があるので触るときは精査
         // 内部キャッシュなどは未考慮で良い。あくまでリクエストをまたぐキャッシュの暖機
@@ -5802,10 +5580,8 @@ class Database
      * @internal
      * @ignore
      * @codeCoverageIgnore
-     *
-     * @return $this
      */
-    public function refresh()
+    public function refresh(): static
     {
         $this->getUnsafeOption('cacheProvider')->clear();
         $this->cache = new \ArrayObject();

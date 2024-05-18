@@ -213,7 +213,7 @@ class OrderBy extends AbstractClause
      * - pros: 良い意味で速度のブレが少ない（状態や引数に依存して遅くなったりしない）
      * - cons: 悪い意味で速度のブレが少ない（状態や引数に依存して速くなったりしない）
      */
-    public static function random($seed = null): static
+    public static function random(?int $seed = null): static
     {
         return new class($seed) extends OrderBy {
             public function __construct(private $seed)
@@ -233,10 +233,8 @@ class OrderBy extends AbstractClause
      * 状態や統計に基づいてランダム化する
      *
      * ただし現状は randomOrder, randomPKMinMax, randomPK のみ（他は癖が強すぎる）。
-     *
-     * @return static
      */
-    public static function randomSuitably()
+    public static function randomSuitably(): static
     {
         return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
@@ -267,10 +265,8 @@ class OrderBy extends AbstractClause
      *
      * - pros: そこそこ速い
      * - cons: 指定件数以下になりやすい・等確率でない・1クエリで完結しない・速度が安定しない（速いときは速いが遅いときは遅い）
-     *
-     * @return static
      */
-    public static function randomWhere()
+    public static function randomWhere(): static
     {
         return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
@@ -288,10 +284,8 @@ class OrderBy extends AbstractClause
      *
      * - pros: それなりに速い
      * - cons: 要CTE・クエリが大幅に書き換えられる・1クエリで完結しない・速度が安定しない（速いときは速いが遅いときは遅い）
-     *
-     * @return static
      */
-    public static function randomOffset()
+    public static function randomOffset(): static
     {
         return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
@@ -311,10 +305,8 @@ class OrderBy extends AbstractClause
      *
      * - pros: それなりに速い
      * - cons: 要CTE・JOINに弱い
-     *
-     * @return static
      */
-    public static function randomPK()
+    public static function randomPK(): static
     {
         return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
@@ -354,10 +346,8 @@ class OrderBy extends AbstractClause
      *
      * - pros: かなり速い
      * - cons: 主キーが数値前提・JOINに弱い・歯抜けが発生する・1クエリで完結しない
-     *
-     * @return static
      */
-    public static function randomPKMinMax()
+    public static function randomPKMinMax(): static
     {
         return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
@@ -382,10 +372,8 @@ class OrderBy extends AbstractClause
      *
      * - pros: かなり速い・歯抜けが発生しない
      * - cons: 要CTE・主キーが数値前提・JOINに弱い・偏りが激しい・クエリが大幅に書き換えられる・1クエリで完結しない
-     *
-     * @return static
      */
-    public static function randomPKMinMax2()
+    public static function randomPKMinMax2(): static
     {
         return new class(true) extends OrderBy {
             public function __invoke(SelectBuilder $builder)

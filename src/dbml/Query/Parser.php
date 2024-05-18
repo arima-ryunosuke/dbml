@@ -19,11 +19,11 @@ class Parser
     public const ERROR_MODE_WARNING   = 10;
     public const ERROR_MODE_EXCEPTION = 20;
 
-    private $parser;
+    private DBALParser $parser;
 
-    private $errorMode;
+    private int $errorMode;
 
-    public static function raiseMismatchParameter($key, $errorMode)
+    public static function raiseMismatchParameter($key, int $errorMode)
     {
         if ($errorMode === self::ERROR_MODE_SILENT) {
             return;
@@ -45,7 +45,7 @@ class Parser
         }
     }
 
-    public function __construct($original, $errorMode = self::ERROR_MODE_EXCEPTION)
+    public function __construct($original, int $errorMode = self::ERROR_MODE_EXCEPTION)
     {
         assert(in_array($errorMode, [self::ERROR_MODE_SILENT, self::ERROR_MODE_WARNING, self::ERROR_MODE_EXCEPTION], true));
         $this->parser = $original instanceof DBALParser ? $original : new DBALParser($original);
@@ -56,11 +56,8 @@ class Parser
      * クエリをプレースホルダー単位で分割する
      *
      * 汎用的に使う（わざわざ visitor を使わずにサクッとパースしたいことがある）。
-     *
-     * @param string $sql 書き換えるクエリ
-     * @return array プレースホルダーの箇所で分割されている配列
      */
-    public function convertPartialSQL($sql)
+    public function convertPartialSQL(string $sql): array
     {
         $visitor = new class(
             $this->errorMode,
@@ -106,12 +103,8 @@ class Parser
      *
      * 位置プレースホルダが足りなかったり多かったりしたら例外を投げる。
      * 元からある名前付きプレースホルダーには言及しない。もしあってもそのまま追加される。
-     *
-     * @param string $sql 書き換えるクエリ
-     * @param iterable $params パラメータ兼変換後のレシーバ
-     * @return string 書き換えられたクエリ
      */
-    public function convertNamedSQL($sql, iterable &$params)
+    public function convertNamedSQL(string $sql, iterable &$params): string
     {
         $visitor = new class(
             array_merge($params instanceof \Traversable ? iterator_to_array($params) : $params),
@@ -183,14 +176,9 @@ class Parser
      * 元からある位置プレースホルダーには言及しない。もしあってもそのまま追加される。
      *
      * 1つのプレースホルダーが複数に対応することもあるので呼び元で適宜 $paramMap を使って読み替えなければならない。
-     *
-     * @param string $sql 書き換えるクエリ
-     * @param iterable $params パラメータ兼変換後のレシーバ
-     * @param array $paramMap 変換表レシーバ
-     * @param ?callable $callback 位置記号のコールバック。普通は ? で十分であり、指定するのは実質的に PostgreSql 専用
-     * @return string 書き換えられたクエリ
+     * $callback で位置記号のコールバックを指定できるが、普通は ? で十分であり、指定するのは実質的に PostgreSql 専用。
      */
-    public function convertPositionalSQL($sql, iterable &$params, &$paramMap = [], $callback = null)
+    public function convertPositionalSQL(string $sql, iterable &$params, ?array &$paramMap = [], ?callable $callback = null): string
     {
         $visitor = new class(
             array_merge($params instanceof \Traversable ? iterator_to_array($params) : $params),
@@ -264,7 +252,7 @@ class Parser
     /**
      * @see convertPositionalSQL()
      */
-    public function convertDollarSQL($sql, iterable &$params, &$paramMap = [])
+    public function convertDollarSQL(string $sql, iterable &$params, ?array &$paramMap = [])
     {
         return $this->convertPositionalSQL($sql, $params, $paramMap, static fn($n) => '$' . ($n + 1));
     }
@@ -275,13 +263,8 @@ class Parser
      * プレースホルダの数や種類が完全に一致していないと例外を投げる。
      *
      * 値の埋め込みは本質的に危険なので避けるべきだが、一部の内部処理や代替がない場合に埋め込む必要性が稀にある。
-     *
-     * @param string $sql 書き換えるクエリ
-     * @param iterable $params パラメータ
-     * @param callable $quoter クォートコールバック
-     * @return string 書き換えられたクエリ
      */
-    public function convertQuotedSQL($sql, iterable $params, $quoter)
+    public function convertQuotedSQL(string $sql, iterable $params, callable $quoter): string
     {
         $visitor = new class(
             array_merge($params instanceof \Traversable ? iterator_to_array($params) : $params),

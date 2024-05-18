@@ -181,7 +181,7 @@ use function ryunosuke\dbml\str_between;
  * @property string|SelectBuilder|TableGateway|mixed $descriptor
  * @property string $joinsign
  * @property string $table
- * @property string $alias
+ * @property ?string $alias
  * @property string $jointype
  * @property TableDescriptor[] $jointable
  * @property array $scope
@@ -203,52 +203,40 @@ class TableDescriptor
     /** @var string[] テーブル記法を表すメタ文字 */
     public const META_CHARACTORS = ['(', ')', '@', '[', ']', '{', '}', '+', '-', '#', '.'];
 
-    /** @var string オリジナル文字列 */
-    private $descriptor;
+    private mixed $descriptor;
 
-    /** @var string JOIN記号 */
-    private $joinsign;
+    private ?string $joinsign;
 
-    /** @var string テーブル名 */
-    private $table;
+    private null|string|Queryable $table;
 
-    /** @var string エイリアス名 */
-    private $alias;
+    private ?string $alias;
 
-    /** @var TableDescriptor[] JOIN 表 */
-    private $jointable = [];
+    /** @var TableDescriptor[] */
+    private array $jointable = [];
 
-    /** @var array スコープ */
-    private $scope = [];
+    private array $scope = [];
 
-    /** @var array 結合条件 */
-    private $condition = [];
+    private array $condition = [];
 
-    /** @var string 外部キー名 */
-    private $fkeyname;
+    private ?string $fkeyname;
 
-    /** @var array GROUP */
-    private $group = [];
+    private array $group = [];
 
-    /** @var array 集約条件 */
-    private $having = [];
+    private array $having = [];
 
-    /** @var array 並び順 */
-    private $order = [];
+    private array $order = [];
 
-    /** @var int 取得件数 */
-    private $offset, $limit;
+    private ?int $offset;
+    private ?int $limit;
 
-    /** @var array 取得カラム名 */
-    private $column = [];
+    private array $column = [];
 
-    /** @var string 結合キー */
-    private $key;
+    private string $key;
 
     /** @var string パースの過程で残ってしまったゴミ（これがあるということは何らかの理由でパースに失敗している可能性が高い） */
-    private $remaining;
+    private string $remaining;
 
-    private static function _split($descriptor, $defcol)
+    private static function _split(string $descriptor, $defcol)
     {
         // @todo 影響が小さい内にリファクタする（何をしてるかさっぱりわからない）
 
@@ -349,12 +337,9 @@ class TableDescriptor
     /**
      * 文字列や配列からインスタンスの配列を生成する
      *
-     * @param Database $database データベースオブジェクト
-     * @param string|array $descriptor テーブル記法
-     * @param array $columnIfString テーブルのみ指定時のデフォルトカラム
-     * @return $this[] 自身の配列
+     * @return static[] 自身の配列
      */
-    public static function forge(Database $database, $descriptor, $columnIfString = ['*'])
+    public static function forge(Database $database, string|array $descriptor, string|array $columnIfString = ['*'])
     {
         // 文字列はバラす（table1, table2 => [table1 => [], table2 => []]）
         if (is_string($descriptor)) {
@@ -392,12 +377,8 @@ class TableDescriptor
 
     /**
      * コンストラクタ
-     *
-     * @param Database $database データベースオブジェクト
-     * @param string $descriptor テーブル記法
-     * @param string|array $cols テーブルのみ指定時のデフォルトカラム
      */
-    public function __construct(Database $database, $descriptor, $cols)
+    public function __construct(Database $database, string $descriptor, $cols)
     {
         /// e.g. +tablename@scope(1, 2):fkeyname[condition]#1-3 AS T.col1, col2 AS C2
 
@@ -470,7 +451,7 @@ class TableDescriptor
         $this->joinsign = $joinsign;
         $this->alias = $alias;
 
-        $this->table = $database->convertTableName($table);
+        $this->table = $database->convertTableName($table ?? '');
         if ($this->alias === null && $this->table !== $table) {
             $this->alias = $table;
         }
@@ -621,10 +602,10 @@ class TableDescriptor
         }
     }
 
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         if (property_exists($this, $name)) {
-            return $this->$name;
+            return $this->$name ?? null;
         }
 
         if (strcasecmp($name, 'accessor') === 0) {
@@ -637,7 +618,7 @@ class TableDescriptor
             return array_search($this->joinsign, Database::JOIN_MAPPER, true) ?: throw new \UnexpectedValueException('undefined joinsign.');
         }
         if (strcasecmp($name, 'fkeysuffix') === 0) {
-            return concat(':', $this->fkeyname);
+            return concat(':', $this->fkeyname ?? null);
         }
 
         throw new \InvalidArgumentException("'$name' is undefined.");
@@ -664,12 +645,8 @@ class TableDescriptor
      *
      * 今のところ用途の多い condition のみ。
      * いずれ拡張するにしても全うなクエリ順にする見込み。
-     *
-     * @param Database $database データベースオブジェクト
-     * @param iterable $params bind params
-     * @return $this 自身
      */
-    public function bind($database, $params)
+    public function bind(Database $database, array $params): static
     {
         $parser = new Parser($database->getPlatform()->createSQLParser());
 

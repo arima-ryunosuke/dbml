@@ -37,25 +37,18 @@ class Sequencer implements \IteratorAggregate, \Countable
 {
     use IteratorTrait;
 
-    /** @var SelectBuilder クエリビルダ */
-    private $builder;
+    private SelectBuilder $builder;
 
-    /** @var array 検索カラム */
-    private $condition;
+    private array $condition;
 
-    /** @var int 取得件数 */
-    private $count;
+    private int $count;
 
-    /** @var bool 昇順/降順 */
-    private $order;
+    private bool $order;
 
-    /** @var bool 次の要素 */
-    private $more;
+    private bool $more;
 
     /**
      * コンストラクタ
-     *
-     * @param SelectBuilder $builder ページングに使用するクエリビルダ
      */
     public function __construct(SelectBuilder $builder)
     {
@@ -90,13 +83,9 @@ class Sequencer implements \IteratorAggregate, \Countable
      * - 2つ以上のタプルの大小関係定義が困難
      *
      * が理由（大抵の場合 AUTO INCREMENT だろうから負数だったりタプルだったりは考慮しないことにする）。
-     *
-     * @param array $condition シーク条件として使用する [カラム => 値]（大抵は主キー、あるいはインデックスカラム）
-     * @param int $count 読み取り行数
-     * @param bool $orderbyasc 昇順/降順
-     * @return $this 自分自身
+     * もっとも大抵は主キー、あるいはインデックスカラムでほぼ固定だろう。
      */
-    public function sequence($condition, $count, $orderbyasc = true)
+    public function sequence(array $condition, int $count, bool $orderbyasc = true): static
     {
         // 再生成のために null っとく
         $this->more = false;
@@ -107,7 +96,6 @@ class Sequencer implements \IteratorAggregate, \Countable
             throw new \InvalidArgumentException('$condition\'s length must be 1.');
         }
 
-        $count = intval($count);
         if ($count <= 0) {
             throw new \InvalidArgumentException('$count must be positive number.');
         }
@@ -121,20 +109,16 @@ class Sequencer implements \IteratorAggregate, \Countable
 
     /**
      * 現在アイテムを取得する
-     *
-     * @return array 現在ページ内のアイテム配列
      */
-    public function getItems()
+    public function getItems(): array
     {
         return $this->getResult();
     }
 
     /**
      * 次アイテムが存在するかを返す
-     *
-     * @return bool 次アイテムが存在するか
      */
-    public function hasMore()
+    public function hasMore(): bool
     {
         // クエリを投げないと分からないため、呼んでおく必要がある
         $this->getItems();

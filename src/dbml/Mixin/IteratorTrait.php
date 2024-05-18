@@ -12,15 +12,12 @@ use function ryunosuke\dbml\first_keyvalue;
  */
 trait IteratorTrait
 {
-    /** @var \Closure 行プロバイダ */
-    private $__provider = null;
+    private \Closure $__provider;
 
-    /** @var array ↑の引数 */
-    private $__args = [];
+    private array $__args = [];
 
-    /** @var array 結果セット配列 */
     #[DebugInfo(false)]
-    private $__result = null;
+    private ?array $__result = null;
 
     /**
      * 結果セットプロバイダを登録する
@@ -43,9 +40,8 @@ trait IteratorTrait
      * @ignoreinherit
      *
      * @param array|string|\Closure $caller プロバイダ
-     * @return $this 自分自身
      */
-    public function setProvider($caller)
+    public function setProvider($caller): static
     {
         if (is_array($caller) && count($caller) === 1) {
             [$caller, $args] = first_keyvalue($caller);
@@ -72,12 +68,10 @@ trait IteratorTrait
      * 結果セットプロバイダを解除する
      *
      * @ignoreinherit
-     *
-     * @return $this 自分自身
      */
-    public function resetProvider()
+    public function resetProvider(): static
     {
-        $this->__provider = null;
+        unset($this->__provider);
         $this->__args = [];
         return $this;
     }
@@ -86,10 +80,8 @@ trait IteratorTrait
      * 結果セットをクリアして無効化する
      *
      * @ignoreinherit
-     *
-     * @return $this 自分自身
      */
-    public function resetResult()
+    public function resetResult(): static
     {
         $this->__result = null;
         return $this;
@@ -101,19 +93,14 @@ trait IteratorTrait
      * 結果はキャッシュされるため、複数回呼んでも問題ない。
      *
      * @ignoreinherit
-     *
-     * @return array 結果セット
      */
-    public function getResult()
+    public function getResult(): array
     {
-        if ($this->__provider === null) {
+        if (!isset($this->__provider)) {
             throw new \UnexpectedValueException('provider is not set.');
         }
 
-        if ($this->__result === null) {
-            $this->__result = $this->__provider->call($this, ...$this->__args);
-        }
-        return $this->__result;
+        return $this->__result ??= $this->__provider->call($this, ...$this->__args);
     }
 
     /**
@@ -121,8 +108,6 @@ trait IteratorTrait
      *
      * @ignoreinherit
      * @see http://php.net/manual/en/iteratoraggregate.getiterator.php
-     *
-     * @return \ArrayIterator 結果セットのイテレータ
      */
     public function getIterator(): \Traversable
     {
@@ -134,8 +119,6 @@ trait IteratorTrait
      *
      * @ignoreinherit
      * @see http://php.net/manual/en/countable.count.php
-     *
-     * @return int 結果セットの件数
      */
     public function count(): int
     {

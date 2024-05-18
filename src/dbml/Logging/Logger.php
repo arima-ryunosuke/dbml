@@ -85,29 +85,21 @@ class Logger extends AbstractLogger
     use DebugInfoTrait;
     use OptionTrait;
 
-    /** @var string ログレベル */
-    private $level;
+    private bool $transacting;
 
-    /** @var bool トランザクション中 */
-    private $transacting;
-
-    /** @var resource|\Closure ログハンドル */
+    /** @var resource|\Closure */
     private $handle;
 
-    /** @var int array 用の現在のバッファサイズ */
-    private $bufferSize;
+    private int $bufferSize;
+    private int $bufferLimit;
 
-    /** @var int array 用の最大のバッファサイズ */
-    private $bufferLimit;
-
-    /** @var resource 一時リソースログバッファ */
+    /** @var resource */
     private $resourceBuffer;
 
-    /** @var array 一時配列ログバッファ */
     #[DebugInfo(false)]
-    private $arrayBuffer;
+    private ?array $arrayBuffer = null;
 
-    public static function getDefaultOptions()
+    public static function getDefaultOptions(): array
     {
         return [
             // ログレベル
@@ -151,11 +143,8 @@ class Logger extends AbstractLogger
 
     /**
      * シンプルに値の埋め込みだけを行うコールバックを返す
-     *
-     * @param int|null $trimsize bind パラメータの切り詰めサイズ
-     * @return \Closure 文字列化コールバック
      */
-    public static function simple($trimsize = null)
+    public static function simple(?int $trimsize = null): \Closure
     {
         return function ($sql, $params, $types, $metadata) use ($trimsize) {
             foreach ($params as $k => $param) {
@@ -202,11 +191,8 @@ class Logger extends AbstractLogger
 
     /**
      * 値を埋め込んだ上で sql フォーマットするコールバックを返す
-     *
-     * @param int|null $trimsize bind パラメータの切り詰めサイズ
-     * @return \Closure 文字列化コールバック
      */
-    public static function pretty($trimsize = null)
+    public static function pretty(?int $trimsize = null): \Closure
     {
         $simple = self::simple($trimsize);
         return function ($sql, $params, $types, $metadata) use ($simple) {
@@ -216,11 +202,8 @@ class Logger extends AbstractLogger
 
     /**
      * 連続する空白をまとめて1行化するコールバックを返す
-     *
-     * @param int|null $trimsize bind パラメータの切り詰めサイズ
-     * @return \Closure 文字列化コールバック
      */
-    public static function oneline($trimsize = null)
+    public static function oneline(?int $trimsize = null): \Closure
     {
         $simple = self::simple($trimsize);
         return function ($sql, $params, $types, $metadata) use ($simple) {
@@ -246,11 +229,8 @@ class Logger extends AbstractLogger
 
     /**
      * 1行 json (jsonl) のコールバックを返す
-     *
-     * @param bool $bind bind パラメータの埋め込みフラグ
-     * @return \Closure 文字列化コールバック
      */
-    public static function json($bind = true)
+    public static function json(bool $bind = true): \Closure
     {
         return function ($sql, $params, $types, $metadata) use ($bind) {
             if ($bind) {

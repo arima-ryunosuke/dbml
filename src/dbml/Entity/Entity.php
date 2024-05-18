@@ -10,49 +10,49 @@ use function ryunosuke\dbml\arrayval;
  */
 class Entity implements Entityable, \IteratorAggregate, JsonSerializable
 {
-    private $fields = [];
+    private array $fields = [];
 
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments): mixed
     {
         return ($this->offsetGet($name))(...$arguments);
     }
 
-    public function __isset($name)
+    public function __isset(string $name): bool
     {
         return $this->offsetExists($name);
     }
 
-    public function __unset($name)
+    public function __unset(string $name): void
     {
-        return $this->offsetUnset($name);
+        $this->offsetUnset($name);
     }
 
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         return $this->offsetGet($name);
     }
 
-    public function __set($name, $value)
+    public function __set(string $name, mixed $value): void
     {
-        return $this->offsetSet($name, $value);
+        $this->offsetSet($name, $value);
     }
 
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return array_key_exists($offset, $this->fields);
     }
 
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->fields[$offset]);
     }
 
-    public function offsetGet($offset): mixed
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->fields[$offset];
     }
 
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->fields[$offset] = $value;
     }
@@ -67,7 +67,7 @@ class Entity implements Entityable, \IteratorAggregate, JsonSerializable
         return $this->fields;
     }
 
-    public function assign(array $fields): Entityable
+    public function assign(array $fields): static
     {
         $this->fields = $fields;
         return $this;

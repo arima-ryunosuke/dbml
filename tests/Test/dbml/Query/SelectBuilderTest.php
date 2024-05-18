@@ -3857,9 +3857,6 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
         $this->assertQuery('', $builder->reset()->column('foreign_p P')->getSubmethod());
         $this->assertQuery('max', $builder->reset()->column('foreign_p P')->setSubmethod('max')->getSubmethod());
         $this->assertQuery('', $builder->setSubmethod(null)->getSubmethod());
-
-        $builder->reset();
-        $this->assertException('submethod is invalid', L($builder)->setSubmethod(123));
     }
 
     /**
@@ -4040,7 +4037,7 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
         $this->assertStringContainsString(' ' . $lock, (string) $builder);
         $builder->array();
 
-        if ($builder->getDatabase()->getCompatiblePlatform()->appendLockSuffix('dummy', 'forupdate', '') !== 'dummy') {
+        if ($builder->getDatabase()->getCompatiblePlatform()->appendLockSuffix('dummy', LockMode::PESSIMISTIC_WRITE, 'forupdate') !== 'dummy') {
             $builder->select('*')->from('test1')->lockForUpdate('SKIP LOCKED');
             $this->assertStringContainsString(' ' . $lock . ' SKIP LOCKED', (string) $builder);
         }

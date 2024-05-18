@@ -44,41 +44,35 @@ class Schema
     public const COLUMN_UPDATABLE = 1 << 2;
     public const COLUMN_REAL      = 1 << 3;
 
-    /** @var AbstractSchemaManager */
-    private $schemaManger;
+    private AbstractSchemaManager $schemaManger;
 
     /** @var callable[] */
-    private $listeners;
+    private array $listeners;
 
-    /** @var CacheInterface */
-    private $cache;
+    private CacheInterface $cache;
 
     /** @var string[] */
-    private $tableNames = [];
+    private array $tableNames = [];
 
     /** @var Table[] */
-    private $tables = [];
+    private array $tables = [];
 
     /** @var Column[][] */
-    private $tableColumns = [];
+    private array $tableColumns = [];
 
     /** @var ForeignKeyConstraint[][] */
-    private $foreignKeys = [], $lazyForeignKeys = [];
+    private array $foreignKeys = [];
+    /** @var callable[] */
+    private array $lazyForeignKeys = [];
 
-    /** @var array */
-    private $foreignColumns = [];
+    private array $foreignColumns = [];
 
-    /** @var string */
-    private $foreignCacheId = '%s-%s-%s';
+    private string $foreignCacheId = '%s-%s-%s';
 
     /**
      * コンストラクタ
-     *
-     * @param AbstractSchemaManager $schemaManger スキーママネージャ
-     * @param callable[] $listeners イベントリスナ
-     * @param CacheInterface $cache キャッシュプロバイダ
      */
-    public function __construct(AbstractSchemaManager $schemaManger, $listeners, $cache)
+    public function __construct(AbstractSchemaManager $schemaManger, array $listeners, CacheInterface $cache)
     {
         $this->schemaManger = $schemaManger;
         $this->listeners = $listeners;
@@ -115,10 +109,8 @@ class Schema
 
     /**
      * テーブルオブジェクトをメタデータに追加する
-     *
-     * @param Table $table 追加するテーブルオブジェクト
      */
-    public function addTable($table)
+    public function addTable(Table $table)
     {
         /// 一過性のものを想定しているのでこのメソッドで決してキャッシュ保存を行ってはならない
 
@@ -139,13 +131,8 @@ class Schema
      *
      * 存在しないカラムも指定できる。
      * その場合、普通に追加されるので仮想カラムとして扱うことができる。
-     *
-     * @param string $table_name テーブル名
-     * @param string $column_name カラム名
-     * @param array|null $definitation カラム定義。 null を渡すと削除になる
-     * @return Column|null 定義されたカラム
      */
-    public function setTableColumn($table_name, $column_name, ?array $definitation)
+    public function setTableColumn(string $table_name, string $column_name, ?array $definitation): ?Column
     {
         /// 一過性のものを想定しているのでこのメソッドで決してキャッシュ保存を行ってはならない
 
@@ -190,11 +177,8 @@ class Schema
      * 仮に dbal の方で setOption メソッドが実装されたら不要となる。
      *
      * 原則的に好きに使ってよいが dbal 組み込みと joinable キーは「外部キー結合に使われるか？」の内部判定で使用されるので留意。
-     *
-     * @param string|ForeignKeyConstraint $fkey 外部キー
-     * @param array $metadata メタデータ
      */
-    public function setForeignKeyMetadata($fkey, array $metadata)
+    public function setForeignKeyMetadata(string|ForeignKeyConstraint $fkey, array $metadata)
     {
         $fkey = $fkey instanceof ForeignKeyConstraint ? $fkey : $this->getForeignKeys()[$fkey] ?? null;
         if (!isset($fkey)) {
@@ -205,11 +189,8 @@ class Schema
 
     /**
      * テーブルが存在するなら true を返す
-     *
-     * @param string $table_name 調べるテーブル名
-     * @return bool テーブルが存在するなら true
      */
-    public function hasTable($table_name)
+    public function hasTable(string $table_name): bool
     {
         //$tables = array_flip($this->getTableNames());
         //return isset($tables[$table_name]);
@@ -218,10 +199,8 @@ class Schema
 
     /**
      * テーブル名一覧を取得する
-     *
-     * @return string[] テーブル名配列
      */
-    public function getTableNames()
+    public function getTableNames(): array
     {
         if (!$this->tableNames) {
             $this->tableNames = cache_fetch($this->cache, 'Schema-table_names', function () {
@@ -244,11 +223,8 @@ class Schema
 
     /**
      * テーブルオブジェクトを取得する
-     *
-     * @param string $table_name 取得したいテーブル名
-     * @return Table テーブルオブジェクト
      */
-    public function getTable($table_name)
+    public function getTable(string $table_name): Table
     {
         if (!isset($this->tables[$table_name])) {
             if (!$this->hasTable($table_name)) {
@@ -282,10 +258,9 @@ class Schema
     /**
      * パターン一致したテーブルオブジェクトを取得する
      *
-     * @param string|array $table_pattern 取得したいテーブルパターン
      * @return Table[] テーブルオブジェクト配列
      */
-    public function getTables($table_pattern = [])
+    public function getTables(string|array $table_pattern = []): array
     {
         $table_names = $this->getTableNames();
         $table_pattern = (array) ($table_pattern ?: $table_names);
@@ -313,11 +288,9 @@ class Schema
     /**
      * テーブルのカラムオブジェクトを取得する
      *
-     * @param string $table_name 取得したいテーブル名
-     * @param null|int|callable $filter 取得条件
      * @return Column[] テーブルのカラムオブジェクト配列
      */
-    public function getTableColumns($table_name, $filter = null)
+    public function getTableColumns(string $table_name, null|int|callable $filter = null): array
     {
         if (!isset($this->tableColumns[$table_name])) {
             $this->tableColumns[$table_name] = $this->getTable($table_name)->getColumns();
@@ -351,14 +324,8 @@ class Schema
 
     /**
      * テーブルカラムの表現を返す
-     *
-     * @param string $table_name 取得したいテーブル名
-     * @param string $column_name 取得したいカラム名
-     * @param string $type select or affect
-     * @param array $args 遅延カラムだった場合のコールバック引数
-     * @return mixed カラム表現
      */
-    public function getTableColumnExpression($table_name, $column_name, $type, ...$args)
+    public function getTableColumnExpression(string $table_name, string $column_name, string $type, ...$args)
     {
         $column = $this->getTableColumns($table_name)[$column_name] ?? null;
         if ($column === null) {
@@ -379,11 +346,8 @@ class Schema
 
     /**
      * テーブルの主キーインデックスオブジェクトを取得する
-     *
-     * @param string $table_name 取得したいテーブル名
-     * @return Index 主キーインデックスオブジェクト
      */
-    public function getTablePrimaryKey($table_name)
+    public function getTablePrimaryKey(string $table_name): ?Index
     {
         return $this->getTable($table_name)->getPrimaryKey();
     }
@@ -391,10 +355,9 @@ class Schema
     /**
      * テーブルの主キーカラムオブジェクトを取得する
      *
-     * @param string $table_name 取得したいテーブル名
      * @return Column[] 主キーカラムオブジェクト配列
      */
-    public function getTablePrimaryColumns($table_name)
+    public function getTablePrimaryColumns(string $table_name): array
     {
         $pkey = $this->getTablePrimaryKey($table_name);
         if ($pkey === null) {
@@ -406,11 +369,9 @@ class Schema
     /**
      * テーブルの（主キーを除く）ユニークキーカラムオブジェクトを取得する
      *
-     * @param string $table_name 取得したいテーブル名
-     * @param string $ukname 取得したいユニークキー名（PRIMARY は特別扱いで主キーを返し、空文字は最初のキーを返す。将来的に nullable になるかもしれない）
      * @return Column[] ユニークキーカラムオブジェクト配列
      */
-    public function getTableUniqueColumns($table_name, $ukname = '')
+    public function getTableUniqueColumns(string $table_name, string $ukname = ''): array
     {
         $table = $this->getTable($table_name);
 
@@ -438,11 +399,8 @@ class Schema
 
     /**
      * テーブルのオートインクリメントカラムを取得する
-     *
-     * @param string $table_name 取得したいテーブル名
-     * @return Column オートインクリメントカラムがあるならそのオブジェクト、無いなら null
      */
-    public function getTableAutoIncrement($table_name)
+    public function getTableAutoIncrement(string $table_name): ?Column
     {
         $pcols = $this->getTablePrimaryColumns($table_name);
         foreach ($pcols as $pcol) {
@@ -457,10 +415,9 @@ class Schema
     /**
      * テーブルの外部キーオブジェクトを取得する
      *
-     * @param string $table_name 取得したいテーブル名
      * @return ForeignKeyConstraint[] テーブルの外部キーオブジェクト配列
      */
-    public function getTableForeignKeys($table_name)
+    public function getTableForeignKeys(string $table_name): array
     {
         if (!isset($this->foreignKeys[$table_name])) {
             // doctrine が制約名を小文字化してるみたいなのでオリジナルでマップする
@@ -486,11 +443,9 @@ class Schema
      *
      * を取得する。
      *
-     * @param string|null $to_table 向かうテーブル名（被参照外部キー）
-     * @param string|null $from_table 元テーブル名（参照外部キー）
      * @return ForeignKeyConstraint[] 外部キーオブジェクト配列
      */
-    public function getForeignKeys($to_table = null, $from_table = null)
+    public function getForeignKeys(?string $to_table = null, ?string $from_table = null): array
     {
         if ($from_table === null) {
             $from_table = $this->getTableNames();
@@ -511,10 +466,9 @@ class Schema
     /**
      * 外部キーから関連テーブルを取得する
      *
-     * @param string|ForeignKeyConstraint $fkey 外部キー
      * @return array [fromTable => $toTable] の配列
      */
-    public function getForeignTable($fkey)
+    public function getForeignTable(string|ForeignKeyConstraint $fkey): array
     {
         $fkeyname = $fkey instanceof ForeignKeyConstraint ? $fkey->getName() : $fkey;
         foreach ($this->getTableNames() as $from) {
@@ -529,13 +483,10 @@ class Schema
     /**
      * テーブル間を結ぶ外部キーカラムを取得する
      *
-     * @param string $table_name1 テーブル名1
-     * @param string $table_name2 テーブル名2
-     * @param ?string $fkeyname 制約名。未指定時は唯一の外部キー（複数ある場合は例外）。確定した外部キーオブジェクトが格納される
-     * @param ?bool $direction キー（$table_name1 -> $table_name2 なら true）の方向が格納される
-     * @return array [table1_column => table2_column]
+     * $fkeyname 未指定時は唯一の外部キー（複数ある場合は例外）。確定した外部キーオブジェクトが格納される。
+     * $direction キー（$table_name1 -> $table_name2 なら true）の方向が格納される
      */
-    public function getForeignColumns($table_name1, $table_name2, &$fkeyname = null, &$direction = null)
+    public function getForeignColumns(string $table_name1, string $table_name2, ?string &$fkeyname = null, ?bool &$direction = null): array
     {
         $direction = null;
         if (!$this->hasTable($table_name1) || !$this->hasTable($table_name2)) {
@@ -611,14 +562,8 @@ class Schema
      * テーブルに外部キーを追加する
      *
      * このメソッドで追加された外部キーはできるだけ遅延して追加され、必要になるまでは実行されない。
-     *
-     * @param string $localTable 外部キー定義テーブル名
-     * @param string $foreignTable 参照先テーブル名
-     * @param string|array $fkdata 外部キー情報
-     * @param string|null $fkname 外部キー名。省略時は自動命名
-     * @return string 追加する外部キー名
      */
-    public function addForeignKeyLazy($localTable, $foreignTable, $fkdata, $fkname = null)
+    public function addForeignKeyLazy(string $localTable, string $foreignTable, string|array $fkdata, ?string $fkname = null): string
     {
         $fkname = $fkname ?? ($localTable . '_' . $foreignTable . '_' . count($this->lazyForeignKeys[$localTable] ?? []));
         $this->lazyForeignKeys[$localTable][$fkname] = function () use ($localTable, $foreignTable, $fkdata, $fkname) {
@@ -636,12 +581,8 @@ class Schema
      *
      * このメソッドで追加された外部キーはデータベースに反映されるわけでもないし、キャッシュにも乗らない。
      * あくまで「アプリ的にちょっとリレーションが欲しい」といったときに使用する想定。
-     *
-     * @param ForeignKeyConstraint $fkey 追加する外部キーオブジェクト
-     * @param string $lTable 追加するテーブル名
-     * @return ForeignKeyConstraint 追加した外部キーオブジェクト
      */
-    public function addForeignKey($fkey, $lTable = null)
+    public function addForeignKey(ForeignKeyConstraint $fkey, ?string $lTable = null): ForeignKeyConstraint
     {
         /** @noinspection PhpDeprecationInspection */
         $lTable ??= $fkey->getLocalTable()?->getName();
@@ -683,12 +624,8 @@ class Schema
      *
      * このメソッドで削除された外部キーはデータベースに反映されるわけでもないし、キャッシュにも乗らない。
      * あくまで「アプリ的にちょっとリレーションを外したい」といったときに使用する想定。
-     *
-     * @param ForeignKeyConstraint|string $fkey 削除する外部キーオブジェクトあるいは外部キー文字列
-     * @param string $lTable 削除するテーブル名
-     * @return ForeignKeyConstraint 削除した外部キーオブジェクト
      */
-    public function ignoreForeignKey($fkey, $lTable = null)
+    public function ignoreForeignKey(ForeignKeyConstraint|string $fkey, ?string $lTable = null): ForeignKeyConstraint
     {
         // 文字列指定ならオブジェクト化
         if (is_string($fkey)) {
@@ -741,7 +678,7 @@ class Schema
      *
      * @return array [table => [columnA => [table => [column => FK]]]]
      */
-    public function getRelation()
+    public function getRelation(): array
     {
         return array_each($this->getForeignKeys(), function (&$carry, ForeignKeyConstraint $fkey) {
             [$ltable, $ftable] = first_keyvalue($this->getForeignTable($fkey));
@@ -756,12 +693,11 @@ class Schema
     /**
      * 中間テーブルを介さずに結合できるカラムを返す
      *
-     * @param string $to_table 向かうテーブル名（被参照外部キー）
-     * @param string $from_table 元テーブル名（参照外部キー）
-     * @param ?ForeignKeyConstraint $fkey 確定した外部キーが格納される
+     * $fkey 確定した外部キーが格納される。
+     *
      * @return array [lcolmun => fcolumn]
      */
-    public function getIndirectlyColumns($to_table, $from_table, &$fkey = null)
+    public function getIndirectlyColumns(string $to_table, string $from_table, ?ForeignKeyConstraint &$fkey = null)
     {
         $result = [];
         foreach ($this->getTableForeignKeys($from_table) as $fkey2) {
@@ -784,13 +720,8 @@ class Schema
      * 外部キーを辿って「テーブルA.カラムX」から「テーブルB.カラムY」を導出
      *
      * 返り値のキーには辿ったパス（テーブル）が / 区切りで格納される。
-     *
-     * @param string $to_table 向かうテーブル名（被参照外部キー）
-     * @param string $from_table 元テーブル名（参照外部キー）
-     * @param string $from_column 元カラム名
-     * @return array 辿ったパス
      */
-    public function followColumnName($to_table, $from_table, $from_column)
+    public function followColumnName(string $to_table, string $from_table, string $from_column): array
     {
         $relations = $this->getRelation();
 

@@ -170,13 +170,11 @@ class Transaction
     public const REPEATABLE_READ  = TransactionIsolationLevel::REPEATABLE_READ;
     public const SERIALIZABLE     = TransactionIsolationLevel::SERIALIZABLE;
 
-    /** @var Database */
-    private $database;
+    private Database $database;
 
-    /** @var int リトライ回数 */
-    private $retryCount;
+    private int $retryCount;
 
-    public static function getDefaultOptions()
+    public static function getDefaultOptions(): array
     {
         return [
             // マスターで実行するか否か
@@ -224,11 +222,8 @@ class Transaction
 
     /**
      * コンストラクタ
-     *
-     * @param Database $database データベース
-     * @param array $options オプション
      */
-    public function __construct(Database $database, $options = [])
+    public function __construct(Database $database, array $options = [])
     {
         $this->database = $database;
 
@@ -242,27 +237,27 @@ class Transaction
         $this->setDefault($options + $default);
     }
 
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         return $this->getOption($name);
     }
 
-    public function __set($name, $value)
+    public function __set(string $name, mixed $value): void
     {
-        return $this->setOption($name, $value);
+        $this->setOption($name, $value);
     }
 
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments): mixed
     {
         return $this->OptionTrait__call($name, $arguments);
     }
 
-    public function __invoke($throwable)
+    public function __invoke(bool $throwable)
     {
         return $this->perform($throwable);
     }
 
-    private function _callback($name, $callback, $key)
+    private function _callback(string $name, $callback, $key): static
     {
         // 配列じゃないなら追加
         if (!is_array($callback)) {
@@ -291,7 +286,7 @@ class Transaction
         return $args[$last] ?? null;
     }
 
-    private function _ready($previewMode)
+    private function _ready(bool $previewMode): \Closure
     {
         // 変数初期化
         $current_connection = $this->database->getConnection();
@@ -356,7 +351,7 @@ class Transaction
         };
     }
 
-    private function _execute(Connection $connection, $previewMode)
+    private function _execute(Connection $connection, bool $previewMode)
     {
         // begin
         $connection->beginTransaction();
@@ -405,132 +400,89 @@ class Transaction
      *
      * @used-by setBegin()
      * @used-by getBegin()
-     *
-     * @param \Closure $callback begin イベント
-     * @param null $key イベント名。数値や文字列なら既存を上書き（無いなら追加）、未指定時は常に追加
-     * @return $this 自分自身
      */
-    public function begin($callback, $key = null) { return $this->_callback(__FUNCTION__, $callback, $key); }
+    public function begin($callback, $key = null): static { return $this->_callback(__FUNCTION__, $callback, $key); }
 
     /**
      * commit イベントを設定する
      *
      * @used-by setCommit()
      * @used-by getCommit()
-     *
-     * @param \Closure $callback commit イベント
-     * @param null $key イベント名。数値や文字列なら既存を上書き（無いなら追加）、未指定時は常に追加
-     * @return $this 自分自身
      */
-    public function commit($callback, $key = null) { return $this->_callback(__FUNCTION__, $callback, $key); }
+    public function commit($callback, $key = null): static { return $this->_callback(__FUNCTION__, $callback, $key); }
 
     /**
      * rollback イベントを設定する
      *
      * @used-by setRollback()
      * @used-by getRollback()
-     *
-     * @param \Closure $callback rollback イベント
-     * @param null $key イベント名。数値や文字列なら既存を上書き（無いなら追加）、未指定時は常に追加
-     * @return $this 自分自身
      */
-    public function rollback($callback, $key = null) { return $this->_callback(__FUNCTION__, $callback, $key); }
+    public function rollback($callback, $key = null): static { return $this->_callback(__FUNCTION__, $callback, $key); }
 
     /**
      * main イベントを設定する
      *
      * @used-by setMain()
      * @used-by getMain()
-     *
-     * @param \Closure|\Closure[] $callback main イベント
-     * @param null $key イベント名。数値や文字列なら既存を上書き（無いなら追加）、未指定時は常に追加
-     * @return $this 自分自身
      */
-    public function main($callback, $key = null) { return $this->_callback(__FUNCTION__, $callback, $key); }
+    public function main($callback, $key = null): static { return $this->_callback(__FUNCTION__, $callback, $key); }
 
     /**
      * done イベントを設定する
      *
      * @used-by setDone()
      * @used-by getDone()
-     *
-     * @param \Closure $callback done イベント
-     * @param null $key イベント名。数値や文字列なら既存を上書き（無いなら追加）、未指定時は常に追加
-     * @return $this 自分自身
      */
-    public function done($callback, $key = null) { return $this->_callback(__FUNCTION__, $callback, $key); }
+    public function done($callback, $key = null): static { return $this->_callback(__FUNCTION__, $callback, $key); }
 
     /**
      * fail イベントを設定する
      *
      * @used-by setFail()
      * @used-by getFail()
-     *
-     * @param \Closure $callback fail イベント
-     * @param null $key イベント名。数値や文字列なら既存を上書き（無いなら追加）、未指定時は常に追加
-     * @return $this 自分自身
      */
-    public function fail($callback, $key = null) { return $this->_callback(__FUNCTION__, $callback, $key); }
+    public function fail($callback, $key = null): static { return $this->_callback(__FUNCTION__, $callback, $key); }
 
     /**
      * retry イベントを設定する
      *
      * @used-by setRetry()
      * @used-by getRetry()
-     *
-     * @param \Closure $callback retry イベント
-     * @param null $key イベント名。数値や文字列なら既存を上書き（無いなら追加）、未指定時は常に追加
-     * @return $this 自分自身
      */
-    public function retry($callback, $key = null) { return $this->_callback(__FUNCTION__, $callback, $key); }
+    public function retry($callback, $key = null): static { return $this->_callback(__FUNCTION__, $callback, $key); }
 
     /**
      * catch イベントを設定する
      *
      * @used-by setCatch()
      * @used-by getCatch()
-     *
-     * @param \Closure $callback catch イベント
-     * @param null $key イベント名。数値や文字列なら既存を上書き（無いなら追加）、未指定時は常に追加
-     * @return $this 自分自身
      */
-    public function catch($callback, $key = null) { return $this->_callback(__FUNCTION__, $callback, $key); }
+    public function catch($callback, $key = null): static { return $this->_callback(__FUNCTION__, $callback, $key); }
 
     /**
      * finish イベントを設定する
      *
      * @used-by setFinish()
      * @used-by getFinish()
-     *
-     * @param \Closure $callback finish イベント
-     * @param null $key イベント名。数値や文字列なら既存を上書き（無いなら追加）、未指定時は常に追加
-     * @return $this 自分自身
      */
-    public function finish($callback, $key = null) { return $this->_callback(__FUNCTION__, $callback, $key); }
+    public function finish($callback, $key = null): static { return $this->_callback(__FUNCTION__, $callback, $key); }
 
     /**
      * トランザクションをマスター接続で実行するようにする
-     *
-     * @return $this 自分自身
      */
-    public function master() { return $this->setOption('masterMode', true); }
+    public function master(): static { return $this->setOption('masterMode', true); }
 
     /**
      * トランザクションをスレーブ接続で実行するようにする
-     *
-     * @return $this 自分自身
      */
-    public function slave() { return $this->setOption('masterMode', false); }
+    public function slave(): static { return $this->setOption('masterMode', false); }
 
     /**
      * トランザクションとして実行する
      *
      * $throwable は catch で代替可能なので近い将来削除される。
-     *
-     * @param bool $throwable true を指定すると例外発生時に例外が飛ぶ。 false にすると返り値で返す
-     * @return mixed トランザクションコールバックの返り値
      */
-    public function perform($throwable = true)
+    public function perform(bool $throwable = true)
     {
         $finally = $this->_ready(false);
 
@@ -554,11 +506,8 @@ class Transaction
      * トランザクションとして実行後、強制的に rollback する
      *
      * 一連の実行クエリが得られるが、あくまでDBレイヤーのトランザクションなので、 php的にファイルを変更したり、何かを送信したりしてもそれは戻らない。
-     *
-     * @param array $queries 一連の実行クエリが格納される
-     * @return mixed トランザクションコールバックの返り値
      */
-    public function preview(&$queries = [])
+    public function preview(?array &$queries = [])
     {
         $logs = [];
         $cx = $this->context([

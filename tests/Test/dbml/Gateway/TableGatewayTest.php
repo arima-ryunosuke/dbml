@@ -1675,31 +1675,31 @@ AND ((flag=1))", "$gw");
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function update($data, array $where = [])
+            public function update($data, $where = [])
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function delete(array $where = [])
+            public function delete($where = [])
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function invalid(array $where = [], ?array $invalid_columns = null)
+            public function invalid($where = [], ?array $invalid_columns = null)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function remove(array $where = [])
+            public function remove($where = [])
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function destroy(array $where = [])
+            public function destroy($where = [])
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());

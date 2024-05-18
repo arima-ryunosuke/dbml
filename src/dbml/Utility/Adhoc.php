@@ -28,9 +28,6 @@ class Adhoc
      *   - その際、定数はキー・値ともに解決され、$params の driverOptions に追加される（上書きではない）
      * - url の指定より params 直指定の方が優先される
      *   - つまり、 url が共通設定のように作用する（url 文字列で指定できない配列や要エスケープ文字列を直に指定するイメージ）
-     *
-     * @param array $params パラメータ
-     * @return array 書き換えたパラメータ
      */
     public static function parseParams(array $params): array
     {
@@ -72,13 +69,8 @@ class Adhoc
 
     /**
      * キャッシュに有ったらそれを、無かったら登録して返す
-     *
-     * @param CacheInterface $cacher
-     * @param string $key キー（任意の文字列が使える）
-     * @param \Closure $provider
-     * @return mixed キャッシュ or $provider の返り値
      */
-    public static function cacheByHash(CacheInterface $cacher, string $key, \Closure $provider, ?int $ttl = null)
+    public static function cacheByHash(CacheInterface $cacher, string $key, \Closure $provider, ?int $ttl = null): mixed
     {
         $cacheid = "Adhoc-" . hash('fnv164', $key . (new \ReflectionFunction($provider)));
 
@@ -96,11 +88,8 @@ class Adhoc
 
     /**
      * 値が「空」なら true を返す
-     *
-     * @param mixed $value
-     * @return bool
      */
-    public static function is_empty($value)
+    public static function is_empty($value): bool
     {
         if ($value === null) {
             return true;
@@ -120,11 +109,8 @@ class Adhoc
 
     /**
      * 指定配列を個数に応じて再帰的に小括弧()で包む
-     *
-     * @param array $array
-     * @return array
      */
-    public static function wrapParentheses($array)
+    public static function wrapParentheses(array $array): array
     {
         $count = count($array);
         $result = [];
@@ -146,11 +132,8 @@ class Adhoc
 
     /**
      * 配列が Queryable を含むなら true を返す
-     *
-     * @param mixed $array 対象配列
-     * @return bool Queryable を含むなら true
      */
-    public static function containQueryable($array)
+    public static function containQueryable($array): bool
     {
         if (!is_array($array)) {
             return false;
@@ -166,13 +149,8 @@ class Adhoc
 
     /**
      * テーブル修飾子を付与する
-     *
-     * @param string $tablename テーブル名
-     * @param array $tablecolumns テーブルカラム
-     * @param array $array 修飾する配列
-     * @return array 修飾された配列
      */
-    public static function modifier($tablename, $tablecolumns, $array)
+    public static function modifier(string $tablename, array $tablecolumns, array $array): array
     {
         if (!strlen($tablename)) {
             return $array;

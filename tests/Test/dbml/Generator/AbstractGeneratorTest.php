@@ -30,7 +30,7 @@ generateTail
 
 class ConcreteGenerator extends AbstractGenerator
 {
-    protected function initProvider($provider)
+    protected function initProvider(iterable $provider)
     {
     }
 

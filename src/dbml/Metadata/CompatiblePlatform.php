@@ -33,19 +33,14 @@ use function ryunosuke\dbml\starts_with;
  */
 class CompatiblePlatform /*extends AbstractPlatform*/
 {
-    /** @var AbstractPlatform 元 platform */
-    private $platform;
+    private AbstractPlatform $platform;
 
-    /** @var ?string */
-    private $version;
+    private ?string $version;
 
     /**
      * コンストラクタ
-     *
-     * @param AbstractPlatform $platform 元 platform
-     * @param ?string $version バージョン文字列
      */
-    public function __construct(AbstractPlatform $platform, $version = null)
+    public function __construct(AbstractPlatform $platform, ?string $version = null)
     {
         $this->platform = $platform;
         $this->version = $version;
@@ -53,30 +48,24 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * 元 platform を取得する
-     *
-     * @return AbstractPlatform 元 platform
      */
-    public function getWrappedPlatform()
+    public function getWrappedPlatform(): AbstractPlatform
     {
         return $this->platform;
     }
 
     /**
      * バージョン文字列を取得する
-     *
-     * @return ?string バージョン文字列
      */
-    public function getVersion()
+    public function getVersion(): ?string
     {
         return $this->version;
     }
 
     /**
      * platform 名を取得する
-     *
-     * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         if ($this->platform instanceof SqlitePlatform) {
             return 'sqlite';
@@ -96,10 +85,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * AUTO_INCREMENT な列に null を与えると自動採番が働くかどうか
-     *
-     * @return bool AUTO_INCREMENT な列に null を与えると自動採番が働くなら true
      */
-    public function supportsIdentityNullable()
+    public function supportsIdentityNullable(): bool
     {
         if ($this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
             return false;
@@ -121,10 +108,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * AUTO_INCREMENT な列を明示指定して UPDATE できるか否かを返す
-     *
-     * @return bool AUTO_INCREMENT な列を明示指定して UPDATE できるなら true
      */
-    public function supportsIdentityUpdate()
+    public function supportsIdentityUpdate(): bool
     {
         if ($this->platform instanceof SQLServerPlatform) {
             return false;
@@ -134,10 +119,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * AUTO_INCREMENT な列を明示指定したあと、自動でシーケンスが更新されるか否かを返す
-     *
-     * @return bool AUTO_INCREMENT な列を明示指定したあと、自動でシーケンスが更新されるなら true
      */
-    public function supportsIdentityAutoUpdate()
+    public function supportsIdentityAutoUpdate(): bool
     {
         if ($this->platform instanceof PostgreSQLPlatform || $this->platform instanceof OraclePlatform) {
             return false;
@@ -147,10 +130,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * INSERT SET 拡張構文が使えるか否かを返す
-     *
-     * @return bool INSERT SET 拡張構文が使えるなら true
      */
-    public function supportsInsertSet()
+    public function supportsInsertSet(): bool
     {
         if ($this->platform instanceof MySQLPlatform || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
             return true;
@@ -161,10 +142,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * REPLACE が使えるか否かを返す
-     *
-     * @return bool REPLACE が使えるなら true
      */
-    public function supportsReplace()
+    public function supportsReplace(): bool
     {
         if ($this->platform instanceof SqlitePlatform) {
             return true;
@@ -177,10 +156,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * MERGE が使えるか否かを返す
-     *
-     * @return bool MERGE が使えるなら true
      */
-    public function supportsMerge()
+    public function supportsMerge(): bool
     {
         if ($this->platform instanceof SqlitePlatform) {
             return true;
@@ -196,10 +173,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * BULK MERGE が使えるか否かを返す
-     *
-     * @return bool BULK MERGE が使えるなら true
      */
-    public function supportsBulkMerge()
+    public function supportsBulkMerge(): bool
     {
         if ($this->platform instanceof SqlitePlatform) {
             return true;
@@ -215,10 +190,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * IGNORE が使えるか否かを返す
-     *
-     * @return bool IGNORE が使えるなら true
      */
-    public function supportsIgnore()
+    public function supportsIgnore(): bool
     {
         if ($this->platform instanceof SqlitePlatform) {
             return true;
@@ -231,10 +204,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * UPDATE + ORDER BY,LIMIT をサポートするか否かを返す
-     *
-     * @return bool UPDATE + ORDER BY,LIMIT をサポートするなら true
      */
-    public function supportsUpdateLimit()
+    public function supportsUpdateLimit(): bool
     {
         if ($this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform) {
             return true;
@@ -244,10 +215,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * DELETE + ORDER BY,LIMIT をサポートするか否かを返す
-     *
-     * @return bool DELETE + ORDER BY,LIMIT をサポートするなら true
      */
-    public function supportsDeleteLimit()
+    public function supportsDeleteLimit(): bool
     {
         if ($this->platform instanceof MySQLPlatform || $this->platform instanceof SQLServerPlatform) {
             return true;
@@ -257,10 +226,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * UNION が括弧をサポートするか否かを返す
-     *
-     * @return bool UNION が括弧をサポートするなら true
      */
-    public function supportsUnionParentheses()
+    public function supportsUnionParentheses(): bool
     {
         if ($this->platform instanceof SqlitePlatform) {
             return false;
@@ -270,10 +237,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * TRUNCATE 文で自動採番列がリセットされるか否かを返す
-     *
-     * @return bool TRUNCATE で自動採番列がリセットされるなら true
      */
-    public function supportsResetAutoIncrementOnTruncate()
+    public function supportsResetAutoIncrementOnTruncate(): bool
     {
         // Sqlite のみリセットされない
         if ($this->platform instanceof SqlitePlatform) {
@@ -285,10 +250,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * 行値式が有効か否かを返す
-     *
-     * @return bool 行値式が有効なら true
      */
-    public function supportsRowConstructor()
+    public function supportsRowConstructor(): bool
     {
         if ($this->platform instanceof SQLServerPlatform) {
             return false;
@@ -304,10 +267,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * char と binary に互換性があるかを返す
-     *
-     * @return bool char と binary に互換性があるなら true
      */
-    public function supportsCompatibleCharAndBinary()
+    public function supportsCompatibleCharAndBinary(): bool
     {
         if ($this->platform instanceof SQLServerPlatform) {
             return false;
@@ -320,10 +281,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * id asc,id desc のような冗長な ORDER BY を許すか
-     *
-     * @return bool
      */
-    public function supportsRedundantOrderBy()
+    public function supportsRedundantOrderBy(): bool
     {
         if ($this->platform instanceof SQLServerPlatform) {
             return false;
@@ -333,13 +292,10 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * 必要に応じて識別子をエスケープする
-     *
-     * @param string $word エスケープする文字列
-     * @return string エスケープされた文字列
      */
-    public function quoteIdentifierIfNeeded($word)
+    public function quoteIdentifierIfNeeded(string $word): string
     {
-        if (!is_string($word) || strlen($word) === 0) {
+        if (strlen($word) === 0) {
             return $word;
         }
 
@@ -357,18 +313,11 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * LIKE エスケープする
-     *
-     * @param string|Expression|array $word エスケープする文字列
-     * @param string $escaper LIKE のエスケープ文字
-     * @return string LIKE エスケープされた文字列
      */
-    public function escapeLike($word, $escaper = '\\')
+    public function escapeLike(string|Queryable $word, string $escaper = '\\'): string
     {
-        if (is_array($word)) {
-            return implode('%', array_map([$this, 'escapeLike'], $word));
-        }
-
-        if ($word instanceof Expression) {
+        if ($word instanceof Queryable) {
+            assert(!$word->getParams());
             return "$word";
         }
 
@@ -377,12 +326,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * 文字列を指定長で切る
-     *
-     * @param ?string $string 切る文字列
-     * @param Column $column カラム
-     * @return string 切られた文字列
      */
-    public function truncateString($string, $column)
+    public function truncateString(string $string, Column $column): string
     {
         // @todo mysql 以外は詳しくないため未実装
         if (!$this->platform instanceof MySQLPlatform) {
@@ -409,10 +354,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * （対応しているなら） dual 表を返す
-     *
-     * @return string dual 表
      */
-    public function getDualTable()
+    public function getDualTable(): string
     {
         if ($this->platform instanceof MySQLPlatform) {
             return 'dual';
@@ -422,11 +365,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * MERGE 構文を返す
-     *
-     * @param array $columns 一意制約カラム
-     * @return string|bool MERGE 構文に対応してるなら文字列、対応していないなら false
      */
-    public function getMergeSyntax($columns)
+    public function getMergeSyntax(array $columns): ?string
     {
         if ($this->platform instanceof SqlitePlatform) {
             $constraint = implode(',', $columns);
@@ -439,16 +379,13 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             $constraint = implode(',', $columns);
             return "ON CONFLICT($constraint) DO UPDATE SET";
         }
-        return false;
+        return null;
     }
 
     /**
      * 参照構文（mysql における VALUES）を返す
-     *
-     * @param string $column 参照カラム名
-     * @return string|bool 参照構文、対応していないなら false
      */
-    public function getReferenceSyntax($column)
+    public function getReferenceSyntax(string $column): ?string
     {
         if ($this->platform instanceof SqlitePlatform) {
             return "excluded.$column";
@@ -459,17 +396,13 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof PostgreSQLPlatform) {
             return "EXCLUDED.$column";
         }
-        return false;
+        return null;
     }
 
     /**
      * 自動採番を使うか切り替えるための SQL を返す
-     *
-     * @param string $tableName テーブル名
-     * @param bool $onoffflag スイッチフラグ
-     * @return string 自動採番を使うか切り替えるための SQL. SQLServer 以外は例外
      */
-    public function getIdentityInsertSQL($tableName, $onoffflag)
+    public function getIdentityInsertSQL(string $tableName, bool $onoffflag): string
     {
         // SQLServer のみ。自動カラムに能動的に値を指定できるか否かを設定
         if ($this->platform instanceof SQLServerPlatform) {
@@ -481,12 +414,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * TRUNCATE 文を返す
-     *
-     * @param string $tableName テーブル名
-     * @param bool|false $cascade PostgreSql の場合に RESTART IDENTITY を付与するか
-     * @return string TRUNCATE 文
      */
-    public function getTruncateTableSQL($tableName, $cascade = false)
+    public function getTruncateTableSQL(string $tableName, bool $cascade = false): string
     {
         // PostgreSql は他に合わせるため RESTART IDENTITY を付加する
         if ($this->platform instanceof PostgreSQLPlatform) {
@@ -498,12 +427,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * ID シーケンス名を返す
-     *
-     * @param string $tableName テーブル名
-     * @param string $columnName カラム名
-     * @return string|null シーケンス名。自動シーケンスに対応していない場合は null
      */
-    public function getIdentitySequenceName($tableName, $columnName)
+    public function getIdentitySequenceName(?string $tableName, ?string $columnName): ?string
     {
         if ($this->platform instanceof PostgreSQLPlatform) {
             return $tableName . '_' . $columnName . '_seq';
@@ -516,12 +441,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * インデックスヒント構文を返す
-     *
-     * @param string|array $index_name インデックス名
-     * @param string $mode HINT/FORCE などのモード名
-     * @return string インデックスヒント構文
      */
-    public function getIndexHintSQL($index_name, $mode = 'FORCE')
+    public function getIndexHintSQL(string|array $index_name, string $mode = 'FORCE'): string
     {
         $index_name = implode(', ', arrayize($index_name));
 
@@ -541,7 +462,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      * @internal
      * @codeCoverageIgnore
      */
-    public function getListTableColumnsSQL($table, $database = null): string
+    public function getListTableColumnsSQL(string $table, ?string $database = null): string
     {
         // doctrine 4.4 から VIEW のカラムが得られなくなったので暫定対応（SQLServer 以外は辛うじて getListTableColumnsSQL が使える）
         if ($this->platform instanceof SQLServerPlatform) {
@@ -567,20 +488,15 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * クエリにロック構文を付加して返す
-     *
-     * @param string $query クエリ
-     * @param ?int $lockmode ロック構文
-     * @param string $lockoption ロックオプション
-     * @return string クエリにロック構文を付加した文字列
      */
-    public function appendLockSuffix($query, $lockmode, $lockoption)
+    public function appendLockSuffix(string $query, int $lockmode, string $lockoption): string
     {
         // SQLServer はクエリ自体ではなく from 句に紐づくので不要
         if ($this->platform instanceof SQLServerPlatform) {
             return $query;
         }
 
-        if ($lockmode === null) {
+        if ($lockmode === LockMode::NONE) {
             return $query;
         }
 
@@ -598,12 +514,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * 条件配列を結合した Expression を返す
-     *
-     * @param array $wheres WHERE 配列
-     * @param string $prefix 修飾子
-     * @return Expression WHERE 条件をバインドパラメータに持つ Expression インスタンス
      */
-    public function getPrimaryCondition($wheres, $prefix = '')
+    public function getPrimaryCondition(array $wheres, string $prefix = ''): Expression
     {
         if (!$wheres) {
             return new Expression('');
@@ -675,12 +587,12 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     /**
      * CASE ～ END 構文
      *
-     * @param string|Queryable $expr 対象カラム。null 指定時は CASE WHEN 構文になる
+     * @param null|string|Queryable $expr 対象カラム。null 指定時は CASE WHEN 構文になる
      * @param array $whens [条件 => 値]の配列
      * @param mixed $else else 句。未指定時は else 句なし
      * @return Expression CASE ～ END 構文の Expression インスタンス
      */
-    public function getCaseWhenSyntax($expr, array $whens, $else = null)
+    public function getCaseWhenSyntax($expr, array $whens, $else = null): Expression
     {
         $params = [];
         $entry = function ($expr, $raw = false) use (&$params) {
@@ -715,7 +627,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      * @param string|array|null order 句。これが活きるのは mysql のみ
      * @return string GROUP_CONCAT 構文
      */
-    public function getGroupConcatSyntax($expr, $separator = null, $order = null)
+    public function getGroupConcatSyntax(string|array $expr, ?string $separator = null, $order = null): string
     {
         $separator = (string) $separator;
         $qseparator = $this->platform->quoteStringLiteral($separator);
@@ -762,11 +674,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      * $column はカラム名を想定しており、エスケープされないので注意すること。
      *
      * @todo 呼び元で ? の数を算出してるので Syntax ではなく Expression 返しの方が良い
-     *
-     * @param string $column 左辺値
-     * @return string null 許容演算子
      */
-    public function getSpaceshipSyntax($column)
+    public function getSpaceshipSyntax(string $column): string
     {
         if ($this->platform instanceof SqlitePlatform) {
             return "$column IS ?";
@@ -785,10 +694,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * 再帰 WITH 句を返す
-     *
-     * @return string 再帰 WITH
      */
-    public function getWithRecursiveSyntax()
+    public function getWithRecursiveSyntax(): string
     {
         // 他 DBMS は無条件で RECURSIVE をつけても大丈夫だが Sqlserver はだめっぽい
         if ($this->platform instanceof SQLServerPlatform) {
@@ -799,11 +706,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * count 表現を返す
-     *
-     * @param string $column カラム名
-     * @return Expression COUNT Expression
      */
-    public function getCountExpression($column)
+    public function getCountExpression(string $column): Expression
     {
         // avg 以外は移譲
         return new Expression("COUNT($column)");
@@ -811,11 +715,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * min 表現を返す
-     *
-     * @param string $column カラム名
-     * @return Expression MIN Expression
      */
-    public function getMinExpression($column)
+    public function getMinExpression(string $column): Expression
     {
         // avg 以外は移譲
         return new Expression("MIN({$column})");
@@ -823,11 +724,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * max 表現を返す
-     *
-     * @param string $column カラム名
-     * @return Expression MAX Expression
      */
-    public function getMaxExpression($column)
+    public function getMaxExpression(string $column): Expression
     {
         // avg 以外は移譲
         return new Expression("MAX({$column})");
@@ -835,11 +733,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * sum 表現を返す
-     *
-     * @param string $column カラム名
-     * @return Expression SUM Expression
      */
-    public function getSumExpression($column)
+    public function getSumExpression(string $column): Expression
     {
         // avg 以外は移譲
         return new Expression("SUM({$column})");
@@ -847,11 +742,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * avg 表現を返す
-     *
-     * @param string $column カラム名
-     * @return Expression AVG Expression
      */
-    public function getAvgExpression($column)
+    public function getAvgExpression(string $column): Expression
     {
         // SQLServer は元の型が生きるのでキャストを加える
         if ($this->platform instanceof SQLServerPlatform) {
@@ -862,38 +754,37 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * 文字列結合句を返す
-     *
-     * @param string|array $args CONCAT の引数となる配列
-     * @return Expression CONCAT Expression
      */
-    public function getConcatExpression($args)
+    public function getConcatExpression(string|Queryable ...$args): Expression
     {
-        $args = is_array($args) ? $args : func_get_args();
         $count = count($args);
 
         if ($count === 0) {
             throw new \InvalidArgumentException('$args must be greater than 0.');
         }
         if ($count === 1) {
-            return reset($args);
+            return is_string($args[0]) ? new Expression($args[0]) : $args[0];
         }
 
-        // SQLServer は数値を文字列として結合できないのでキャストを加える
-        if ($this->platform instanceof SQLServerPlatform) {
-            $args = array_map(function ($arg) {
-                return "CAST($arg as varchar)";
-            }, $args);
-        }
+        $params = [];
+        $args = array_map(function ($arg) use (&$params) {
+            if ($arg instanceof Queryable) {
+                $arg = $arg->merge($params);
+            }
+            // SQLServer は数値を文字列として結合できないのでキャストを加える
+            if ($this->platform instanceof SQLServerPlatform) {
+                $arg = "CAST($arg as varchar)";
+            }
+            return $arg;
+        }, $args);
 
-        return new Expression($this->platform->getConcatExpression(...$args));
+        return new Expression($this->platform->getConcatExpression(...$args), $params);
     }
 
     /**
      * 正規表現を返す
-     *
-     * @return string REGEXP Expression
      */
-    public function getRegexpExpression()
+    public function getRegexpExpression(): string
     {
         if ($this->platform instanceof SqlitePlatform) {
             return "REGEXP";
@@ -910,17 +801,14 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * binary 表現を返す
-     *
-     * @param string $data データ
-     * @return Expression|string BINARY Expression
      */
-    public function getBinaryExpression($data)
+    public function getBinaryExpression(string $data): Expression
     {
         // SQLServer はキャストしなければ binary として扱えない
         if ($this->platform instanceof SQLServerPlatform) {
-            return new Expression('CAST(? as VARBINARY(MAX))', [(string) $data]);
+            return new Expression('CAST(? as VARBINARY(MAX))', [$data]);
         }
-        return $data;
+        return new Expression($data);
     }
 
     /**
@@ -928,11 +816,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      *
      * dbal では非推奨だがたまに使うことがある。
      * ローカルタイム限定で形式も Y-m-d H:i:s.v のみ。
-     *
-     * @param int $precision 精度
-     * @return Expression NOW Expression
      */
-    public function getNowExpression(int $precision = 0)
+    public function getNowExpression(int $precision = 0): Expression
     {
         if ($this->platform instanceof SqlitePlatform) {
             assert($precision === 0 || $precision === 3);
@@ -955,11 +840,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * sleep 表現を返す
-     *
-     * @param float second 秒数
-     * @return Expression SLEEP Expression
      */
-    public function getSleepExpression($second)
+    public function getSleepExpression(float $second): Expression
     {
         if ($this->platform instanceof MySQLPlatform) {
             return new Expression("SLEEP(?)", $second);
@@ -973,11 +855,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * random 表現（[0~1.0)）を返す
-     *
-     * @param ?int $seed 乱数シード
-     * @return Expression RANDOM Expression
      */
-    public function getRandomExpression($seed)
+    public function getRandomExpression(?int $seed): Expression
     {
         // Sqlite にシード設定方法は存在しない
         if ($this->platform instanceof SqlitePlatform) {
@@ -1001,16 +880,9 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * AUTO_INCREMENT のセット構文を返す
-     *
-     * @param string $tableName テーブル名
-     * @param string $columnName カラム名
-     * @param int $seq セットしたい AUTO_INCREMENT 番号
-     * @return array AUTO_INCREMENT をセットする一連のクエリ文字列配列
      */
-    public function getResetSequenceExpression($tableName, $columnName, $seq)
+    public function getResetSequenceExpression(string $tableName, string $columnName, int $seq): array
     {
-        $seq = intval($seq);
-
         if ($this->platform instanceof SqlitePlatform) {
             $seq--;
             return [
@@ -1035,13 +907,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * 外部キー有効無効切替構文を返す
-     *
-     * @param bool $enabled 有効無効
-     * @param ?string $table_name テーブル名
-     * @param ?string $fkname 外部キー名
-     * @return array 外部キーを切り替える一連のクエリ文字列配列
      */
-    public function getSwitchForeignKeyExpression($enabled, $table_name = null, $fkname = null)
+    public function getSwitchForeignKeyExpression(bool $enabled, ?string $table_name = null, ?string $fkname = null): array
     {
         if ($this->platform instanceof SqlitePlatform) {
             return ['PRAGMA foreign_keys = ' . ($enabled ? 'true' : 'false')];
@@ -1064,10 +931,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * IGNORE 構文を返す
-     *
-     * @return string IGNORE 構文
      */
-    public function getIgnoreSyntax()
+    public function getIgnoreSyntax(): string
     {
         if ($this->platform instanceof SqlitePlatform) {
             return 'OR IGNORE';
@@ -1081,12 +946,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * 与えられた文をコメント化する
-     *
-     * @param string $comment コメント文字列
-     * @param bool $cstyle Cスタイルフラグ。 true を与えると / * * / 形式になる
-     * @return string
      */
-    public function commentize($comment, $cstyle = false)
+    public function commentize(string $comment, bool $cstyle = false): string
     {
         // Cスタイルは全 DBMS でサポートしてるっぽい
         if ($cstyle) {
@@ -1103,14 +964,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     /**
      * 挿入データと更新データで更新用カラム列を生成する
-     *
-     * mysql の VALUES 構文のために存在している
-     *
-     * @param array $insertData 挿入データ
-     * @param array $updateData 更新データ
-     * @return array VALUES で使用できる更新データ
      */
-    public function convertMergeData($insertData, $updateData)
+    public function convertMergeData(array $insertData, array $updateData): array
     {
         // 指定されているならそのまま返せば良い
         if ($updateData) {
@@ -1120,17 +975,14 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         // 指定されていない場合は $insertData を返す。ただし、データが長大な場合、2重に bind されることになり無駄なので参照構文を使う
         return array_each($insertData, function (&$carry, $v, $k) {
             $reference = $this->getReferenceSyntax($k);
-            $carry[$k] = $reference === false ? $v : new Expression($reference);
+            $carry[$k] = $reference === null ? $v : new Expression($reference);
         }, []);
     }
 
     /**
      * EXISTS 構文を SELECT で使用できるようにする
-     *
-     * @param string|Queryable $exists EXISTS 構文
-     * @return Expression SELECT で使用できるようにした EXISTS 構文
      */
-    public function convertSelectExistsQuery($exists)
+    public function convertSelectExistsQuery(string|Queryable $exists): Expression
     {
         $params = [];
         if ($exists instanceof Queryable) {

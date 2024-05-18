@@ -104,8 +104,8 @@ namespace ryunosuke\Test\Gateway {
 
     class Article extends TableGateway
     {
-        protected $defaultIteration  = 'assoc';
-        protected $defaultJoinMethod = 'left';
+        protected string $defaultIteration  = 'assoc';
+        protected string $defaultJoinMethod = 'left';
 
         public function __construct(Database $database, $table_name, $entity_name)
         {
@@ -164,7 +164,7 @@ namespace ryunosuke\Test\Gateway {
             return $db->subcount('t_comment');
         }
 
-        public function normalize($row)
+        public function normalize(array $row): array
         {
             if (isset($row['checks'])) {
                 $row['checks'] = strtoupper($row['checks']);
@@ -172,7 +172,7 @@ namespace ryunosuke\Test\Gateway {
             return $row;
         }
 
-        public function invalidColumn()
+        public function invalidColumn(): ?array
         {
             return [
                 'delete_at' => fn() => date('Y-m-d H:i:s'),

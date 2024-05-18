@@ -33,34 +33,31 @@ class Statement implements Queryable
 {
     use DebugInfoTrait;
 
-    /** @var Parser */
-    private $parser;
+    private Parser $parser;
 
-    /** @var string */
-    private $query;
+    private string $query;
 
-    /** @var array */
-    private $params = [];
+    private array $params;
 
-    /** @var bool */
-    private $namedSupported;
+    private bool $namedSupported;
 
-    /** @var array */
-    private $paramMap = [];
+    private array $paramMap = [];
 
-    /** @var Connection */
-    private $master, $slave;
+    #[DebugInfo(false)]
+    private Connection $master;
+    #[DebugInfo(false)]
+    private Connection $slave;
 
     /** @var \Doctrine\DBAL\Statement[] */
     #[DebugInfo(false)]
-    private $statements = [];
+    private array $statements = [];
 
-    public function __construct($query, iterable $params, Database $database)
+    public function __construct(string $query, iterable $params, Database $database)
     {
         // コンストラクタ時点で疑問符プレースホルダーをすべて名前付きプレースホルダーに変換しておく
         $this->parser = new Parser($database->getPlatform()->createSQLParser());
         $this->query = $this->parser->convertNamedSQL($query, $params);
-        $this->params = $params;
+        $this->params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
 
         $this->namedSupported = $database->getCompatibleConnection()->isSupportedNamedPlaceholder();
 
@@ -69,7 +66,7 @@ class Statement implements Queryable
         $this->slave = $database->getSlaveConnection();
     }
 
-    private function _execute($method, iterable $params, Connection $connection)
+    private function _execute(string $method, iterable $params, Connection $connection)
     {
         // 引数パラメータを基本として初期パラメータで上書く
         $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
@@ -104,24 +101,16 @@ class Statement implements Queryable
 
     /**
      * 取得系クエリとして実行する
-     *
-     * @param array $params 追加パラメータ
-     * @param ?Connection $connection コネクション
-     * @return Result result オブジェクト
      */
-    public function executeSelect(iterable $params = [], Connection $connection = null)
+    public function executeSelect(iterable $params = [], Connection $connection = null): Result
     {
         return $this->_execute('executeQuery', $params, $connection ?: $this->slave);
     }
 
     /**
      * 更新系クエリとして実行する
-     *
-     * @param array $params 追加パラメータ
-     * @param ?Connection $connection コネクション
-     * @return int affected row
      */
-    public function executeAffect(iterable $params = [], Connection $connection = null)
+    public function executeAffect(iterable $params = [], Connection $connection = null): int
     {
         return $this->_execute('executeStatement', $params, $connection ?: $this->master);
     }
@@ -129,7 +118,7 @@ class Statement implements Queryable
     /**
      * @inheritdoc
      */
-    public function getQuery()
+    public function getQuery(): string
     {
         return $this->query;
     }
@@ -137,7 +126,7 @@ class Statement implements Queryable
     /**
      * @inheritdoc
      */
-    public function getParams()
+    public function getParams(): array
     {
         return $this->params;
     }
@@ -145,7 +134,7 @@ class Statement implements Queryable
     /**
      * @inheritdoc
      */
-    public function merge(?array &$params)
+    public function merge(?array &$params): string
     {
         $params = $params ?? [];
         foreach ($this->getParams() as $k => $param) {

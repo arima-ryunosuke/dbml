@@ -20,7 +20,7 @@ class ArrayGenerator extends AbstractGenerator
         parent::__construct($config);
     }
 
-    protected function initProvider($provider)
+    protected function initProvider(iterable $provider)
     {
         if ($provider instanceof Yielder) {
             if ($this->config['assoc']) {
