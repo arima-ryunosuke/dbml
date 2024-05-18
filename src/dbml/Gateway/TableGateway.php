@@ -7,7 +7,6 @@ use ryunosuke\dbml\Attribute\VirtualColumn;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
-use ryunosuke\dbml\Mixin\AffectConditionallyTrait;
 use ryunosuke\dbml\Mixin\AffectIgnoreTrait;
 use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
 use ryunosuke\dbml\Mixin\AggregateTrait;
@@ -417,12 +416,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         modifyIgnoreWithoutTable as public modifyIgnore;
         modifyIgnoreWithoutTable as public modifyIgnore;
     }
-    use AffectConditionallyTrait {
-        insertConditionallyWithoutTable as public insertConditionally;
-        createConditionallyWithoutTable as public createConditionally;
-        upsertConditionallyWithoutTable as public upsertConditionally;
-        modifyConditionallyWithoutTable as public modifyConditionally;
-    }
     use AffectOrThrowTrait {
         insertOrThrowWithoutTable as public insertOrThrow;
         updateOrThrowWithoutTable as public updateOrThrow;
@@ -452,8 +445,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     protected function getDatabase() { return $this->database; }
-
-    protected function getConditionPosition() { return 0; }
 
     /** @var array scope のデフォルト値 */
     private static $defargs = [
@@ -2481,7 +2472,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @used-by insertOrThrow()
      * @used-by insertAndPrimary()
      * @used-by insertIgnore()
-     * @used-by insertConditionally()
      *
      * @inheritdoc Database::insert()
      */
@@ -2626,7 +2616,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @used-by upsertOrThrow()
      * @used-by upsertAndPrimary()
-     * @used-by upsertConditionally()
      *
      * @inheritdoc Database::upsert()
      */
@@ -2642,7 +2631,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @used-by modifyOrThrow()
      * @used-by modifyAndPrimary()
      * @used-by modifyIgnore()
-     * @used-by modifyConditionally()
      *
      * @inheritdoc Database::modify()
      */

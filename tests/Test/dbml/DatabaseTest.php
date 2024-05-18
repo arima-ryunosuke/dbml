@@ -340,12 +340,12 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // affectConditionally
         $database->truncate('noauto');
-        $this->assertEquals(['id' => 'a'], $database->insertConditionally('noauto', ['id' => ''], ['id' => 'a', 'name' => 'hoge']));
-        $this->assertEquals(['id' => 'b'], $database->upsertConditionally('noauto', ['id' => ''], ['id' => 'b', 'name' => 'fuga']));
-        $this->assertEquals(['id' => 'c'], $database->modifyConditionally('noauto', ['id' => ''], ['id' => 'c', 'name' => 'piyo']));
-        $this->assertEquals([], $database->insertConditionally('noauto', ['id' => 'a'], ['id' => 'a', 'name' => 'hoge']));
-        $this->assertEquals([], $database->upsertConditionally('noauto', ['id' => 'b'], ['id' => 'b', 'name' => 'fuga']));
-        $this->assertEquals([], $database->modifyConditionally('noauto', ['id' => 'c'], ['id' => 'c', 'name' => 'piyo']));
+        $this->assertEquals(['id' => 'a'], $database->insertAndPrimary('noauto[id:""]', ['id' => 'a', 'name' => 'hoge']));
+        $this->assertEquals(['id' => 'b'], $database->upsertAndPrimary('noauto[id:""]', ['id' => 'b', 'name' => 'fuga']));
+        $this->assertEquals(['id' => 'c'], $database->modifyAndPrimary('noauto[id:""]', ['id' => 'c', 'name' => 'piyo']));
+        $this->assertEquals(['id' => 'a'], $database->insertAndPrimary('noauto[id:a]', ['id' => 'a', 'name' => 'hoge']));
+        $this->assertEquals(['id' => 'b'], $database->upsertAndPrimary('noauto[id:b]', ['id' => 'b', 'name' => 'fuga']));
+        $this->assertEquals(['id' => 'c'], $database->modifyAndPrimary('noauto[id:c]', ['id' => 'c', 'name' => 'piyo']));
 
         // affectIgnore
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
@@ -408,9 +408,6 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
             // for coverage
             $this->assertEquals(['id' => 1], $database->saveIgnore('foreign_p', ['id' => 1]));
-            $this->assertEquals([], $database->delete('foreign_c1', ['id' => -1], ['primary' => 2]));
-            $this->assertEquals([], $database->remove('foreign_c1', ['id' => -1], ['primary' => 2]));
-            $this->assertEquals([], $database->destroy('foreign_c1', ['id' => -1], ['primary' => 2]));
 
             if ($database->getPlatform() instanceof MySQLPlatform) {
                 $this->assertEquals(['id' => 1], $database->deleteIgnore('foreign_p', ['id' => 1]));
@@ -5218,38 +5215,6 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_createConditionally($database)
-    {
-        $result = $database->createConditionally('test', ['id' => 1], [
-            'id'   => 1,
-            'name' => 'a',
-        ]);
-        $this->assertEquals([], $result);
-
-        $result = $database->createConditionally('test', ['id' => 100], [
-            'id'   => 100,
-            'name' => 'zzz',
-        ]);
-        $this->assertEquals(['id' => 100], $result);
-
-        $result = $database->createConditionally('test[id:101]', [], [
-            'id'   => 101,
-            'name' => 'zzz',
-        ]);
-        $this->assertEquals(['id' => 101], $result);
-
-        $sql = $database->dryrun()->createConditionally('test', ['id' => 1], [
-            'id'   => 1,
-            'name' => 'a',
-        ]);
-        $this->assertStringContainsString('INSERT INTO test (id, name) SELECT', $sql);
-        $this->assertStringContainsString('WHERE (NOT EXISTS (SELECT * FROM test WHERE id =', $sql);
-    }
-
-    /**
-     * @dataProvider provideDatabase
-     * @param Database $database
-     */
     function test_insert($database)
     {
         // simple
@@ -5279,27 +5244,21 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_insertConditionally($database)
+    function test_insertAndPrimary($database)
     {
-        $result = $database->insertConditionally('test', ['id' => 1], [
+        $result = $database->insertAndPrimary('test[id:1]', [
             'id'   => 1,
             'name' => 'a',
         ]);
-        $this->assertEquals([], $result);
+        $this->assertEquals(['id' => 1], $result);
 
-        $result = $database->insertConditionally('test', ['id' => 100], [
+        $result = $database->insertAndPrimary('test[id:100]', [
             'id'   => 100,
             'name' => 'zzz',
         ]);
         $this->assertEquals(['id' => 100], $result);
 
-        $result = $database->insertConditionally('test[id:101]', [], [
-            'id'   => 101,
-            'name' => 'zzz',
-        ]);
-        $this->assertEquals(['id' => 101], $result);
-
-        $sql = $database->dryrun()->insertConditionally('test', ['id' => 1], [
+        $sql = $database->dryrun()->insert('test[id:1]', [
             'id'   => 1,
             'name' => 'a',
         ]);
@@ -6096,27 +6055,21 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_upsertConditionally($database)
+    function test_upsertAndPrimary($database)
     {
-        $result = $database->upsertConditionally('test', ['id' => 1], [
+        $result = $database->upsertAndPrimary('test[id:1]', [
             'id'   => 1,
             'name' => 'a',
         ]);
-        $this->assertEquals([], $result);
+        $this->assertEquals(['id' => 1], $result);
 
-        $result = $database->upsertConditionally('test', ['id' => 100], [
+        $result = $database->upsertAndPrimary('test[id:100]', [
             'id'   => 100,
             'name' => 'zzz',
         ]);
         $this->assertEquals(['id' => 100], $result);
 
-        $result = $database->upsertConditionally('test[id:101]', [], [
-            'id'   => 101,
-            'name' => 'zzz',
-        ]);
-        $this->assertEquals(['id' => 101], $result);
-
-        $result = $database->upsertConditionally('test', ['id' => -1], [
+        $result = $database->upsertAndPrimary('test[id:-1]', [
             'id'   => 10,
             'name' => 'zzz',
         ]);
@@ -6190,34 +6143,28 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_modifyConditionally($database)
+    function test_modifyAndPrimary($database)
     {
-        $result = $database->modifyConditionally('test', ['id' => 1], [
+        $result = $database->modifyAndPrimary('test[id:1]', [
             'id'   => 1,
             'name' => 'a',
         ]);
-        $this->assertEquals([], $result);
+        $this->assertEquals(['id' => 1], $result);
 
-        $result = $database->modifyConditionally('test', ['id' => 100], [
+        $result = $database->modifyAndPrimary('test[id:100]', [
             'id'   => 100,
             'name' => 'zzz',
         ]);
         $this->assertEquals(['id' => 100], $result);
 
-        $result = $database->modifyConditionally('test[id:101]', [], [
-            'id'   => 101,
-            'name' => 'zzz',
-        ]);
-        $this->assertEquals(['id' => 101], $result);
-
-        $result = $database->modifyConditionally('test', ['id' => -1], [
+        $result = $database->modifyAndPrimary('test[id:-1]', [
             'id'   => 10,
             'name' => 'zzz',
         ]);
         $this->assertEquals(['id' => 10], $result);
 
         if ($database->getCompatiblePlatform()->supportsMerge()) {
-            $sql = $database->dryrun()->modifyConditionally('test', ['id' => -1], [
+            $sql = $database->dryrun()->modifyAndPrimary('test[id:-1]', [
                 'id'   => 10,
                 'name' => 'zzz',
             ]);

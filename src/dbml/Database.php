@@ -38,7 +38,6 @@ use ryunosuke\dbml\Metadata\CompatibleConnection;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Metadata\Schema;
 use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
-use ryunosuke\dbml\Mixin\AffectConditionallyTrait;
 use ryunosuke\dbml\Mixin\AffectIgnoreTrait;
 use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
 use ryunosuke\dbml\Mixin\AggregateTrait;
@@ -165,12 +164,6 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  *
  * [insert, updert, modify, delete, invalid, revise, upgrade, remove, destroy] メソッドのみに付与できる。
  * RDBMS に動作は異なるが、 `INSERT IGNORE` のようなクエリが発行される。
- *
- * **Conditionally**
- *
- * [insert, upsert, modify] メソッドのみに付与できる。
- * 条件付き insert となり、「insert された場合にその主キー」を「されなかった場合に空配列」を返す。
- * 最も多いユースケースとしては「行がないなら insert」だろう。
  *
  * ### エスケープ
  *
@@ -389,12 +382,6 @@ class Database
         modifyIgnoreWithTable as public modifyIgnore;
         modifyIgnoreWithTable as public modifyIgnore;
     }
-    use AffectConditionallyTrait {
-        insertConditionallyWithTable as public insertConditionally;
-        createConditionallyWithTable as public createConditionally;
-        upsertConditionallyWithTable as public upsertConditionally;
-        modifyConditionallyWithTable as public modifyConditionally;
-    }
     use AffectOrThrowTrait {
         insertOrThrowWithTable as public insertOrThrow;
         updateOrThrowWithTable as public updateOrThrow;
@@ -424,8 +411,6 @@ class Database
     }
 
     protected function getDatabase() { return $this; }
-
-    protected function getConditionPosition() { return 1; }
 
     /// 内部的に自動付加されるカラム名
     public const AUTO_KEY         = '__dbml_auto_column';
@@ -5651,7 +5636,6 @@ class Database
      * となると対称性がなく、コードリーディング時に余計な思考を挟むことが多い（「なぜ insert だけ OrThrow なんだろう？」）のでエイリアスを用意した。
      *
      * @used-by createIgnore()
-     * @used-by createConditionally()
      *
      * @param string|array $tableName テーブル名
      * @param mixed $data INSERT データ配列
@@ -5692,7 +5676,6 @@ class Database
      * @used-by insertOrThrow()
      * @used-by insertAndPrimary()
      * @used-by insertIgnore()
-     * @used-by insertConditionally()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data INSERT データ配列
@@ -6358,7 +6341,6 @@ class Database
      *
      * @used-by upsertOrThrow()
      * @used-by upsertAndPrimary()
-     * @used-by upsertConditionally()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $insertData INSERT データ配列
@@ -6463,7 +6445,6 @@ class Database
      * @used-by modifyOrThrow()
      * @used-by modifyAndPrimary()
      * @used-by modifyIgnore()
-     * @used-by modifyConditionally()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $insertData INSERT データ配列

@@ -1653,24 +1653,6 @@ AND ((flag=1))", "$gw");
      * @param TableGateway $gateway
      * @param Database $database
      */
-    function test_affect_conditionally($gateway, $database)
-    {
-        $this->assertEquals(['id' => '11'], $gateway->createConditionally(['id' => -1], ['name' => 'xxxx']));
-        $this->assertEquals(['id' => '12'], $gateway->insertConditionally(['id' => -1], ['name' => 'hoge']));
-        $this->assertEquals(['id' => '13'], $gateway->upsertConditionally(['id' => -1], ['name' => 'fuga']));
-        $this->assertEquals(['id' => '14'], $gateway->modifyConditionally(['id' => -1], ['name' => 'piyo']));
-
-        $this->assertEquals([], $gateway->createConditionally(['id' => 11], ['name' => 'xxxx']));
-        $this->assertEquals([], $gateway->insertConditionally(['id' => 12], ['name' => 'hoge']));
-        $this->assertEquals([], $gateway->upsertConditionally(['id' => 13], ['name' => 'fuga']));
-        $this->assertEquals([], $gateway->modifyConditionally(['id' => 14], ['name' => 'piyo']));
-    }
-
-    /**
-     * @dataProvider provideGateway
-     * @param TableGateway $gateway
-     * @param Database $database
-     */
     function test_affect_override($gateway, $database)
     {
         if (!$database->getCompatiblePlatform()->supportsIgnore()) {
@@ -1815,17 +1797,6 @@ AND ((flag=1))", "$gw");
         };
         $database->setLogger($logger);
         $database->setDefaultOrder(null);
-
-        // for SQLServer
-        if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            // select の bulk insert になる
-            $gateway->scoping([
-                'id' => 'id * 100',
-                'name',
-                'data',
-            ], ['id' => 1])->insert(['name' => 'A']);
-            $this->assertEquals(['INSERT INTO test SELECT test.id * 100 AS id, test.name, test.data FROM test WHERE test.id = ?' => [1]], $lastsql());
-        }
 
         // scope の where が効いた update になる
         $gateway->where(['id' => 1])->update(['name' => 'XXX']);
