@@ -176,15 +176,7 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * @method bool                   getAutoIdentityInsert()
  * @method $this                  setAutoIdentityInsert($bool)
  * @method int|string             getDefaultChunk()
- * @method $this                  setDefaultChunk($int) {
- *     バルク系メソッドのデフォルトチャンクサイズを指定する
- *
- *     原則は int で、文字列指定で特殊な設定が行える。
- *     現在のところ `params:12345` で「bind parameter 数が 12345 を超えたとき」のみ。
- *     これは mysql の bind parameter 上限が 65535 であることに起因している。
- *
- *     @param int|string $int デフォルトチャンクサイズ
- * }
+ * @method $this                  setDefaultChunk($int)
  * @method int                    getDefaultRetry()
  * @method $this                  setDefaultRetry($int)
  * @method array                  getAutoCastType()
@@ -194,43 +186,7 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * @method string                 getCheckSameKey()
  * @method $this                  setCheckSameKey($string)
  * @method string                 getCheckSameColumn()
- * @method $this                  setCheckSameColumn($string) {
- *     同名カラムをどのように扱うか設定する
- *
- *     | 指定          | 説明
- *     |:--            |:--
- *     | null          | 同名カラムに対して何もしない。PDO のデフォルトの挙動（後ろ優先）となる
- *     | "noallow"     | 同名カラムを検出したら即座に例外を投げるようになる
- *     | "strict"      | 同名カラムを検出したら値を確認し、全て同一値ならその値をカラム値とする。一つでも異なる値がある場合は例外を投げる
- *     | "loose"       | ↑と同じだが、比較は緩く行われる（文字列比較）。更に null は除外してチェックする
- *
- *     普通に PDO を使う分には SELECT 句の後ろにあるほど優先されて返ってくる（仕様で規約されているかは知らん）。
- *     それはそれで便利なんだが、例えばよくありそうな `name` カラムがある2つのテーブルを JOIN すると意図しない結果になることが多々ある。
- *
- *     ```php
- *     $db->fetchArray('select t_article.*, t_user.* from t_article join t_user using (user_id)');
- *     ```
- *
- *     このクエリは `t_user.name` と `t_article.name` というカラムが存在すると破綻する。大抵の場合は `t_user.name` が返ってくるが明確に意図した結果ではない。
- *     このオプションを指定するとそういった状況を抑止することができる。
- *
- *     ただし、このオプションはフェッチ結果の全行全列を確認する必要があるため**猛烈に遅い**。
- *     基本的には開発時に指定し、本運用環境では null を指定しておくと良い。
- *
- *     ただ開発時でも、 "noallow" の使用はおすすめできない。
- *     例えば↑のクエリは user_id で using しているように、name 以外に user_id カラムも重複している。したがって "noallow" を指定すると例外が飛ぶことになる。
- *     往々にして主キーと外部キーは同名になることが多いので、 "noallow" を指定しても実質的には使い物にならない。
- *
- *     これを避けるのが "strict" で、これを指定すると同名カラムの値が同値であればセーフとみなす。つまり動作に影響を与えずある程度良い感じにチェックしてくれるようになる。
- *     さらに "loose" を指定すると NULL を除外して重複チェックする。これは LEFT JOIN 時に効果を発揮する（LEFT 時は他方が NULL になることがよくあるため）。
- *     "loose" は文字列による緩い比較になってしまうが、型が異なる状況はそこまで多くないはず。
- *
- *     なお、フェッチ値のチェックであり、クエリレベルでは何もしないことに注意。
- *     例えば↑のクエリで "strict" のとき「**たまたま** `t_user.name` と `t_article.name` が同じ値だった」ケースは検出できない。また、「そもそもフェッチ行が0だった」場合も検出できない。
- *     このオプションはあくまで開発をサポートする機能という位置づけである。
- *
- *     @param string $string [null | "noallow" | "strict" | "loose"]
- * }
+ * @method $this                  setCheckSameColumn($string)
  * @method array                  getExportClass()
  * @method $this                  setExportClass($array)
  *
@@ -417,23 +373,27 @@ class Database
     public static function getDefaultOptions(): array
     {
         $default_options = [
-            // キャッシュオブジェクト
+            /** @var ?CacheInterface キャッシュオブジェクト */
             'cacheProvider'      => null,
-            // 初期化後の SQL コマンド（mysql@PDO でいう MYSQL_ATTR_INIT_COMMAND）
+            /** @var ?string|array 初期化後の SQL コマンド（mysql@PDO でいう MYSQL_ATTR_INIT_COMMAND） */
             'initCommand'        => null,
-            // スキーマを必要としたときのコールバック
+            /** @var \Closure スキーマを必要としたときのコールバック */
             'onRequireSchema'    => function (Database $db) { },
-            // テーブルを必要としたときのコールバック（スキーマアクセス時に一度だけ呼ばれる）
+            /** @var \Closure テーブルを必要としたときのコールバック（スキーマアクセス時に一度だけ呼ばれる） */
             'onIntrospectTable'  => function (Table $table) { },
-            // テーブル名 => Entity クラス名のコンバータ
+            /** @var \Closure テーブル名 => Entity クラス名のコンバータ */
             'tableMapper'        => function ($table) { return pascal_case($table); },
-            // SET IDENTITY_INSERT を自動発行するか（SQLServer 以外は無視される）
+            /** @var bool SET IDENTITY_INSERT を自動発行するか（SQLServer 以外は無視される） */
             'autoIdentityInsert' => true,
-            // バルク系メソッドのデフォルトチャンクサイズ（文字列指定で特殊なコールバックが設定できる）
+            /** @var ?int|string バルク系メソッドのデフォルトチャンクサイズ
+             * null だとチャンクしない。文字列指定で特殊なコールバックが設定できる。
+             * 文字列指定は現在のところ `params:12345` で「bind parameter 数が 12345 を超えたとき」のみ。
+             * これは mysql の bind parameter 上限が 65535 であることに起因している。
+             */
             'defaultChunk'       => null,
-            // insert 時などのデフォルトリトライ回数
+            /** @var int insert 時などのデフォルトリトライ回数 */
             'defaultRetry'       => 0,
-            // DB型で自動キャストする型設定。select,affect 要素を持つ（多少無駄になるがサンプルも兼ねて冗長に記述してある）
+            /** @var array DB型で自動キャストする型設定。select,affect 要素を持つ（多少無駄になるがサンプルも兼ねて冗長に記述してある） */
             'autoCastType'       => [
                 // 正式な与え方。select は取得（SELECT）時、affect は設定（INSERT/UPDATE）時を表す
                 // 個人的には DATETIME で設定したい。出すときは DateTime で返ってくれると便利だけど、入れるときは文字列で入れたい
@@ -459,25 +419,58 @@ class Database
                 // このように Type を渡すと（一度だけ） addType されると同時に select:convertToPHPValue, affect:convertToDatabaseValue が自動で設定される
                 'type'                  => new \Doctrine\DBAL\Types\DateTimeType(),
             ],
-            // assoc,pairs で同名キーがあった時どう振る舞うか[null:何もしない（後方優先。実質上書き）, 'noallow':例外, 'skip':スキップ（前方優先）]
+            /** @var string assoc,pairs で同名キーがあった時どう振る舞うか
+             * - null: 何もしない（後方優先。実質上書き）
+             * - 'noallow': 例外
+             * - 'skip': スキップ（前方優先）
+             */
             'checkSameKey'       => null,
-            // 同名カラムがあった時どう振る舞うか[null, 'noallow', 'strict', 'loose']
+            /** @var string 同名カラムがあった時どう振る舞うか
+             * - null: 同名カラムに対して何もしない。デフォルトの挙動（後ろ優先）となる
+             * - "noallow": 同名カラムを検出したら即座に例外を投げるようになる
+             * - "strict": 同名カラムを検出したら値を確認し、全て同一値ならその値をカラム値とする。一つでも異なる値がある場合は例外を投げる
+             * - "loose": ↑と同じだが、比較は緩く行われる（文字列比較）。更に null は除外してチェックする
+             *
+             * 例えばよくありそうな `name` カラムがある2つのテーブルを JOIN すると意図しない結果になることが多々ある。
+             *
+             * ```php
+             * $db->fetchArray('select t_article.*, t_user.* from t_article join t_user using (user_id)');
+             * ```
+             *
+             * このクエリは `t_user.name` と `t_article.name` というカラムが存在すると破綻する。大抵の場合は `t_user.name` が返ってくるが明確に意図した結果ではない。
+             * このオプションを指定するとそういった状況を抑止することができる。
+             *
+             * ただし、このオプションはフェッチ結果の全行全列を確認する必要があるため**猛烈に遅い**。
+             * 基本的には開発時に指定し、本運用環境では null を指定しておくと良い。
+             *
+             * ただ開発時でも、 "noallow" の使用はおすすめできない。
+             * 例えば↑のクエリは user_id で using しているように、name 以外に user_id カラムも重複している。したがって "noallow" を指定すると例外が飛ぶことになる。
+             * 往々にして主キーと外部キーは同名になることが多いので、 "noallow" を指定しても実質的には使い物にならない。
+             *
+             * これを避けるのが "strict" で、これを指定すると同名カラムの値が同値であればセーフとみなす。つまり動作に影響を与えずある程度良い感じにチェックしてくれるようになる。
+             * さらに "loose" を指定すると NULL を除外して重複チェックする。これは LEFT JOIN 時に効果を発揮する（LEFT 時は他方が NULL になることがよくあるため）。
+             * "loose" は文字列による緩い比較になってしまうが、型が異なる状況はそこまで多くないはず。
+             *
+             * なお、フェッチ値のチェックであり、クエリレベルでは何もしないことに注意。
+             * 例えば↑のクエリで "strict" のとき「**たまたま** `t_user.name` と `t_article.name` が同じ値だった」ケースは検出できない。また、「そもそもフェッチ行が0だった」場合も検出できない。
+             * このオプションはあくまで開発をサポートする機能という位置づけである。
+             */
             'checkSameColumn'    => null,
-            // 更新クエリを実行せずクエリ文字列を返すようにするか
+            /** @var bool 更新クエリを実行せずクエリ文字列を返すようにするか（内部向け） */
             'dryrun'             => false,
-            // 更新クエリを実行せずプリペアされたステートメントを返すようにするか
+            /** @var bool 更新クエリを実行せずプリペアされたステートメントを返すようにするか（内部向け） */
             'preparing'          => false,
-            // 参照系クエリをマスターで実行するか(「スレーブに書き込みたい」はまずあり得ないが「マスターから読み込みたい」はままある)
+            /** @var bool 参照系クエリをマスターで実行するか(「スレーブに書き込みたい」はまずあり得ないが「マスターから読み込みたい」はままある) */
             'masterMode'         => false,
-            // CompatiblePlatform のクラス名 or インスタンス
+            /** @var string|CompatiblePlatform CompatiblePlatform のクラス名 or インスタンス */
             'compatiblePlatform' => CompatiblePlatform::class,
-            // exportXXX 呼び出し時にどのクラスを使用するか
+            /** @var array exportXXX 呼び出し時にどのクラスを使用するか */
             'exportClass'        => [
                 'array' => ArrayGenerator::class,
                 'csv'   => CsvGenerator::class,
                 'json'  => JsonGenerator::class,
             ],
-            // ロギングオブジェクト（LoggerInterface）
+            /** @var ?LoggerInterface ロギングオブジェクト（LoggerInterface） */
             'logger'             => null,
         ];
 

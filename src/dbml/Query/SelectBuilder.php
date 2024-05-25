@@ -72,121 +72,19 @@ use function ryunosuke\dbml\str_exists;
  * prepare を呼ぶと現時点のパラメータで固定することができ、その上で `:name` のような名前付きパラメータに値を渡すことができる。
  *
  * @method string                 getDefaultLazyMode()
- * @method $this                  setDefaultLazyMode($string) {[] や Gateway 指定時のデフォルト sub lazy mode}
+ * @method $this                  setDefaultLazyMode($string)
  * @method array                  getDefaultScope()
- * @method $this                  setDefaultScope($array) {TableGateway の暗黙的スコープ名}
+ * @method $this                  setDefaultScope($array)
  * @method mixed                  getDefaultOrder()
- * @method $this                  setDefaultOrder($mixed) {
- *     OrderBy のデフォルトを指定する
- *
- *     デフォルトとは、OrderBy が無かったり、有ったとしても必ず最後に追加される並び順を表す。
- *
- *     true を指定すると主キーの昇順、 false を指定すると主キーの降順が付与される。
- *     あるいは任意の文字列や表現を渡すとそれが追加される。
- *
- *     @param mixed $mixed 並び順
- * }
+ * @method $this                  setDefaultOrder($mixed)
  * @method string                 getPrimarySeparator()
- * @method $this                  setPrimarySeparator($string) {
- *     主キー区切り文字を設定する
- *
- *     自動で子供テーブルをひっぱるような処理において、その配列のキーは主キーになる。
- *     ただし、単純な親子テーブルを引っ張るような場合は自動でよしなに一意性を検出してキーとする。
- *
- *     1. 共に自動採番主キーである親テーブルと子テーブル
- *     2. 親テーブルへの外部キーが複合主キーの一部である子テーブル
- *
- *     1 の場合は共に自動採番なので子テーブルのキーは主キーになる。区切り文字は使われない。
- *     2 の場合は複合主キーであり、単一カラムで表すことはできないが、「自動で子供テーブルを引っ張る」ような処理は外部キーを元に引っ張るので**その子供の世界では複合主キーの片方だけで一意に**なる。
- *     つまり結果として区切り文字は使われない。
- *
- *     それでも冗長にキーを持っていたりするとどうしても自動では一意性が検出できない場合がある。
- *     そのような場合に結合する文字列を指定する。
- *
- *     @param string $string 主キー区切り文字
- * }
+ * @method $this                  setPrimarySeparator($string)
  * @method string                 getAggregationDelimiter()
- * @method $this                  setAggregationDelimiter($string) {
- *     集約関数の区切り文字を設定する
- *
- *     min, max などの集約関数を実行するときに付与される文字列を指定する。
- *     集約関数は大抵の場合は単一クエリで実行するので大部分で指定不要だが、時折指定が必要になることがある。
- *
- *     ```php
- *     # こういった個別メソッドの場合は指定する意味はない（区切りも何もスカラー値で取れるんだから）
- *     $db->min('table');
- *     // results: 1
- *
- *     # このように aggregate メソッドを使用したときに活きる
- *     $db->aggregate(['min', 'max'], 'table.id', [], 'table.group_id');
- *     // results:
- *     [
- *         1 => [
- *             'table.id@min' => 1,
- *             'table.id@max' => 2,
- *         ],
- *     ]
- *     ```
- *
- *     @param string $string  集約関数の区切り文字
- * }
+ * @method $this                  setAggregationDelimiter($string)
  * @method string                 getArrayFetch()
- * @method $this                  setArrayFetch($string) {
- *     サブテーブルで配列を指定したときの取得方法を指定する
- *
- *     ```php
- *     # このようなサブテーブルの配列指定で・・・
- *     $db->selectArray([
- *         't_article' => [
- *             't_comment' => ['*'],
- *         ],
- *     ]);
- *
- *     # DATABASE::METHOD_ARRAY を指定した場合
- *     [
- *         // サブテーブル取得は連番配列になる（0ベース配列）
- *         't_comment' => [
- *             [コメントレコード],
- *             [コメントレコード],
- *             [コメントレコード],
- *         ],
- *     ]
- *
- *     # DATABASE::METHOD_ASSOC を指定した場合
- *     [
- *         // サブテーブル取得は連想配列になる（サブテーブルの主キー）
- *         't_comment' => [
- *             '1' => [コメントレコード],
- *             '2' => [コメントレコード],
- *             '3' => [コメントレコード],
- *         ],
- *     ]
- *
- *     # null を指定した場合
- *     [
- *         // サブテーブル取得はメソッドの selectXXXXX に引きずられる（この場合 selectArray なので METHOD_ARRAY と同等）
- *         't_comment' => [
- *             [コメントレコード],
- *             [コメントレコード],
- *             [コメントレコード],
- *         ],
- *     ]
- *     ```
- *
- *     @param string $string Database::METHOD_XXX
- * }
+ * @method $this                  setArrayFetch($string)
  * @method string                 getNullsOrder()
- * @method $this                  setNullsOrder($string = null) {
- *     ORDER BY で NULL をどう扱うかを指定する
- *
- *     - null: 何もしない
- *     - "min": 最小値として扱う
- *     - "max": 最小値として扱う
- *     - "first": 常に最初に来る
- *     - "last": 常に最後に来る
- *
- *     @param string $string  null, "min", "max", ""first, "last" のいずれか
- * }
+ * @method $this                  setNullsOrder($string = null)
  * @method int                    getPropagateLockMode()
  * @method $this                  setPropagateLockMode($int)
  * @method bool                   getInjectChildColumn()
@@ -303,23 +201,100 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     public static function getDefaultOptions(): array
     {
         return [
-            // [] や Gateway 指定時のデフォルト sub lazy mode
+            /** @var string 配列や Gateway 指定時のデフォルト sub lazy mode */
             'defaultLazyMode'      => self::LAZY_MODE_EAGER,
-            // TableGateway の暗黙的スコープ名
+            /** @var array TableGateway の暗黙的スコープ名 */
             'defaultScope'         => [],
-            // orderBy が無かったとき、あったとしても必ず最後に付与されるデフォルトの並び順
+            /** @var string|bool orderBy が無かったとき、あったとしても必ず最後に付与されるデフォルトの並び順
+             * true を指定すると主キーの昇順、 false を指定すると主キーの降順が付与される。
+             * あるいは任意の文字列や表現を渡すとそれが追加される。
+             */
             'defaultOrder'         => true,
-            // 複合主キーを単一主キーとみなすための結合文字列
+            /** @var string 複合主キーを単一主キーとみなすための結合文字列
+             * 1. 共に自動採番主キーである親テーブルと子テーブル
+             * 2. 親テーブルへの外部キーが複合主キーの一部である子テーブル
+             *
+             * 1 の場合は共に自動採番なので子テーブルのキーは主キーになる。区切り文字は使われない。
+             * 2 の場合は複合主キーであり、単一カラムで表すことはできないが、「自動で子供テーブルを引っ張る」ような処理は外部キーを元に引っ張るので**その子供の世界では複合主キーの片方だけで一意に**なる。
+             * つまり結果として区切り文字は使われない。
+             *
+             * それでも冗長にキーを持っていたりするとどうしても自動では一意性が検出できない場合がある。
+             * そのような場合に結合する文字列を指定する。
+             */
             'primarySeparator'     => "\x1F",
-            // aggregate 時（columnname@sum）の区切り文字
+            /** @var string aggregate 時（columnname@sum）の区切り文字
+             * 集約関数は大抵の場合は単一クエリで実行するので大部分で指定不要だが、時折指定が必要になることがある。
+             *
+             * ```php
+             * # こういった個別メソッドの場合は指定する意味はない（区切りも何もスカラー値で取れるんだから）
+             * $db->min('table');
+             * // results: 1
+             *
+             * # このように aggregate メソッドを使用したときに活きる
+             * $db->aggregate(['min', 'max'], 'table.id', [], 'table.group_id');
+             * // results:
+             * [
+             *     1 => [
+             *         'table.id@min' => 1,
+             *         'table.id@max' => 2,
+             *     ],
+             * ]
+             * ```
+             */
             'aggregationDelimiter' => '@',
-            // 配列を指定した場合のフェッチモード（通常は array か assoc）
+            /** @var string 配列を指定した場合のフェッチモード（通常は array か assoc）
+             *
+             * ```php
+             * # このようなサブテーブルの配列指定で・・・
+             * $db->selectArray([
+             *     't_article' => [
+             *         't_comment' => ['*'],
+             *     ],
+             * ]);
+             *
+             * # DATABASE::METHOD_ARRAY を指定した場合
+             * [
+             *     // サブテーブル取得は連番配列になる（0ベース配列）
+             *     't_comment' => [
+             *         [コメントレコード],
+             *         [コメントレコード],
+             *         [コメントレコード],
+             *     ],
+             * ]
+             *
+             * # DATABASE::METHOD_ASSOC を指定した場合
+             * [
+             *     // サブテーブル取得は連想配列になる（サブテーブルの主キー）
+             *     't_comment' => [
+             *         '1' => [コメントレコード],
+             *         '2' => [コメントレコード],
+             *         '3' => [コメントレコード],
+             *     ],
+             * ]
+             *
+             * # null を指定した場合
+             * [
+             *     // サブテーブル取得はメソッドの selectXXXXX に引きずられる（この場合 selectArray なので METHOD_ARRAY と同等）
+             *     't_comment' => [
+             *         [コメントレコード],
+             *         [コメントレコード],
+             *         [コメントレコード],
+             *     ],
+             * ]
+             * ```
+             */
             'arrayFetch'           => Database::METHOD_ASSOC,
-            // ORDER BY で NULL をどう扱うか
+            /** @var ?string ORDER BY で NULL をどう扱うか
+             * - null: 何もしない
+             * - "min": 最小値として扱う
+             * - "max": 最小値として扱う
+             * - "first": 常に最初に来る
+             * - "last": 常に最後に来る
+             */
             'nullsOrder'           => null,
-            // 遅延実行時に親のロックモードを受け継ぐか否か
+            /** @var bool 遅延実行時に親のロックモードを受け継ぐか否か */
             'propagateLockMode'    => true,
-            // サブクエリをコメント化して親のクエリに埋め込むか否か
+            /** @var bool サブクエリをコメント化して親のクエリに埋め込むか否か */
             'injectChildColumn'    => false,
         ];
     }

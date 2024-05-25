@@ -33,71 +33,19 @@ use function ryunosuke\dbml\str_exists;
  * @method bool                   getUpdateEmpty()
  * @method $this                  setUpdateEmpty($bool)
  * @method array                  getDefaultInvalidColumn()
- * @method $this                  setDefaultInvalidColumn($array) {
- *     論理削除時のカラムを指定する
- *
- *     この設定で ['delete_at' => now()] などとすると invalid コール時に delete_at が now で更新されるようになる。
- *
- *     @param array $array 論理削除時のカラム
- * }
+ * @method $this                  setDefaultInvalidColumn($array)
  * @method bool                   getFilterNoExistsColumn()
- * @method $this                  setFilterNoExistsColumn($bool) {
- *     存在しないカラムをフィルタするか指定する
- *
- *     この設定を true にすると INSERT/UPDATE 時に「対象テーブルに存在しないカラム」が自動で伏せられるようになる。
- *     余計なキーが有るだけでエラーになるのは多くの場合めんどくさいだけなので true にするのは有用。
- *
- *     ただし、スペルミスなどでキーの指定を誤ると何も言わずに伏せてしまうので気づきにくい不具合になるので注意。
- *
- *     @param bool $bool 存在しないカラムをフィルタするなら true
- * }
+ * @method $this                  setFilterNoExistsColumn($bool)
  * @method bool                   getFilterNullAtNotNullColumn()
- * @method $this                  setFilterNullAtNotNullColumn($bool) {
- *     not null なカラムの null をフィルタするか指定する
- *
- *     この設定を true にすると INSERT/UPDATE 時に「not null なのに null が来たカラム」が自動で伏せられるようになる。
- *     呼び出し側の都合などで null を予約的に扱い、キーとして存在してしまうことはよくある。
- *     どうせエラーになるので、結局呼び出し直前に if 分岐で unset したりするのでいっそのこと自動で伏せてしまったほうが便利なことは多い。
- *
- *     @param bool $bool not null なカラムの null をフィルタするなら true
- * }
+ * @method $this                  setFilterNullAtNotNullColumn($bool)
  * @method bool                   getConvertEmptyToNull()
- * @method $this                  setConvertEmptyToNull($bool) {
- *     NULLABLE に空文字が来たときの挙動を指定する
- *
- *     この設定を true にすると、例えば `hoge_no: INTEGER NOT NULL` なカラムに空文字を与えて INSERT/UPDATE した場合に自動で NULL に変換されるようになる。
- *     Web システムにおいては空文字でパラメータが来ることが多いのでこれを true にしておくといちいち変換せずに済む。
- *
- *     よくあるのは「年齢」というカラムがあり、入力画面で必須ではない場合。
- *     未入力で空文字が飛んでくるので、設定にもよるがそのまま mysql に突っ込んでしまうと 0 になるかエラーになる。
- *     これはそういったケースで楽をするための設定。
- *
- *     @param bool $bool 空文字を NULL に変換するなら true
- * }
+ * @method $this                  setConvertEmptyToNull($bool)
  * @method bool                   getConvertBoolToInt()
- * @method $this                  setConvertBoolToInt($bool) {
- *     数値系カラムに真偽値が来たときの挙動を指定する
- *
- *     この設定を true にすると、数値系カラムに真偽値が来た場合に自動で int に変換されるようになる。
- *
- *     @param bool $bool 真偽値を int に変換するなら true
- * }
+ * @method $this                  setConvertBoolToInt($bool)
  * @method bool                   getConvertNumericToDatetime()
- * @method $this                  setConvertNumericToDatetime($bool) {
- *     日時系カラムに int/float が来たときの挙動を指定する
- *
- *     この設定を true にすると、日時系カラムに int/float が来た場合にタイムスタンプとみなすようになる。
- *
- *     @param bool $bool int/float をタイムスタンプとみなすなら true
- * }
+ * @method $this                  setConvertNumericToDatetime($bool)
  * @method bool                   getTruncateString()
- * @method $this                  setTruncateString($bool) {
- *     文字列系カラムに length を超える文字列が来たときの挙動を指定する
- *
- *     この設定を true にすると、文字列系カラムに length を超える文字列が来た場合に切り落とされるようになる。
- *
- *     @param bool $bool length で切り落とすなら true
- * }
+ * @method $this                  setTruncateString($bool)
  */
 // @formatter:on
 class AffectBuilder extends AbstractBuilder
@@ -122,27 +70,51 @@ class AffectBuilder extends AbstractBuilder
     public static function getDefaultOptions(): array
     {
         return [
-            // 拡張 INSERT SET 構文を使うか否か（mysql 以外は無視される）
+            /** @var bool 拡張 INSERT SET 構文を使うか否か（mysql 以外は無視される） */
             'insertSet'                 => false,
-            // update で空データの時に意味のない更新をするか？（false だと構文エラーになる）
+            /** @var bool update で空データの時に意味のない更新をするか？（false だと構文エラーになる） */
             'updateEmpty'               => true,
-            // invalid 時のデフォルトカラム
+            /** @var array invalid 時のデフォルトカラム
+             * この設定で ['delete_at' => now()] などとすると invalid コール時に delete_at が now で更新されるようになる。
+             */
             'defaultInvalidColumn'      => [
                 //'delete_flg'  => 1,
                 //'delete_user' => fn() => Auth()::id(),
                 //'delete_time' => fn() => date('Y-m-d H:i:s'),
             ],
-            // insert 時などにテーブルに存在しないカラムを自動でフィルタするか否か
+            /** @var bool insert 時などにテーブルに存在しないカラムを自動でフィルタするか否か
+             * この設定を true にすると INSERT/UPDATE 時に「対象テーブルに存在しないカラム」が自動で伏せられるようになる。
+             * 余計なキーが有るだけでエラーになるのは多くの場合めんどくさいだけなので true にするのは有用。
+             *
+             * ただし、スペルミスなどでキーの指定を誤ると何も言わずに伏せてしまうので気づきにくい不具合になるので注意。
+             */
             'filterNoExistsColumn'      => true,
-            // insert 時などに not null な列に null が来た場合に自動でフィルタするか否か
+            /** @var bool insert 時などに not null な列に null が来た場合に自動でフィルタするか否か
+             * この設定を true にすると INSERT/UPDATE 時に「not null なのに null が来たカラム」が自動で伏せられるようになる。
+             * 呼び出し側の都合などで null を予約的に扱い、キーとして存在してしまうことはよくある。
+             * どうせエラーになるので、結局呼び出し直前に if 分岐で unset したりするのでいっそのこと自動で伏せてしまったほうが便利なことは多い。
+             */
             'filterNullAtNotNullColumn' => true,
-            // insert 時などに NULLABLE NUMERIC カラムは 空文字を null として扱うか否か
+            /** @var bool insert 時などに NULLABLE NUMERIC カラムは 空文字を null として扱うか否か
+             * この設定を true にすると、例えば `hoge_no: INTEGER NOT NULL` なカラムに空文字を与えて INSERT/UPDATE した場合に自動で NULL に変換されるようになる。
+             * Web システムにおいては空文字でパラメータが来ることが多いのでこれを true にしておくといちいち変換せずに済む。
+             *
+             * よくあるのは「年齢」というカラムがあり、入力画面で必須ではない場合。
+             * 未入力で空文字が飛んでくるので、設定にもよるがそのまま mysql に突っ込んでしまうと 0 になるかエラーになる。
+             * これはそういったケースで楽をするための設定。
+             */
             'convertEmptyToNull'        => true,
-            // insert 時などに数値系カラムは真偽値を int として扱うか否か
+            /** @var bool insert 時などに数値系カラムは真偽値を int として扱うか否か
+             * この設定を true にすると、数値系カラムに真偽値が来た場合に自動で int に変換されるようになる。
+             */
             'convertBoolToInt'          => true,
-            // insert 時などに日時カラムは int/float をタイムスタンプとして扱うか否か
+            /** @var bool insert 時などに日時カラムは int/float をタイムスタンプとして扱うか否か
+             * この設定を true にすると、日時系カラムに int/float が来た場合にタイムスタンプとみなすようになる。
+             */
             'convertNumericToDatetime'  => true,
-            // insert 時などに文字列カラムは length で切るか否か
+            /** @var bool insert 時などに文字列カラムは length で切るか否か
+             * この設定を true にすると、文字列系カラムに length を超える文字列が来た場合に切り落とされるようになる。
+             */
             'truncateString'            => false,
         ];
     }

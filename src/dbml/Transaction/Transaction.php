@@ -177,29 +177,29 @@ class Transaction
     public static function getDefaultOptions(): array
     {
         return [
-            // マスターで実行するか否か
+            /** @var bool マスターで実行するか否か */
             'masterMode'     => true,
-            // トランザクション分離レベル(REPEATABLE_READ, ...)
+            /** @var ?int トランザクション分離レベル(REPEATABLE_READ, ...) */
             'isolationLevel' => null,
-            // 実行クエリロガー
+            /** @var LoggerInterface 実行クエリロガー */
             'logger'         => null,
-            // トランザクションイベント
+            /** @var \Closure[] トランザクションイベント */
             'begin'          => [/* function (Connection $connection) { }*/],
             'commit'         => [/* function (Connection $connection) { }*/],
             'rollback'       => [/* function (Connection $connection) { }*/],
-            // メイン処理
+            /** @var \Closure[] メイン処理 */
             'main'           => [/* function (Database $database, $return = null) { }*/],
-            // 成功イベント
+            /** @var \Closure[] 成功イベント */
             'done'           => [/* function ($return) { }*/],
-            // 失敗イベント
+            /** @var \Closure[] 失敗イベント */
             'fail'           => [/* function ($exception) { }*/],
-            // リトライイベント
+            /** @var \Closure[] リトライイベント */
             'retry'          => [/* function ($retryCount) { }*/],
-            // 失敗イベント
+            /** @var \Closure[] 失敗イベント */
             'catch'          => [/* function () { }*/],
-            // 完了イベント
+            /** @var \Closure[] 完了イベント */
             'finish'         => [/* function () { }*/],
-            // リトライ可能判定処理
+            /** @var \Closure リトライ可能判定処理 */
             'retryable'      => function (int $retryCount, \Exception $ex, Connection $connection): ?float {
                 // 無限リトライ防止
                 if ($retryCount > 5) {
@@ -215,7 +215,7 @@ class Transaction
                 }
                 return null;
             },
-            // セーブポイントを活かすか
+            /** @var ?bool セーブポイントを活かすか */
             'savepointable'  => null,
         ];
     }

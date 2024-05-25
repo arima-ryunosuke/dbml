@@ -303,24 +303,16 @@ use function ryunosuke\dbml\split_noempty;
  * 場合によっては非常に非効率なクエリになるので注意。
  * また、その性質上、外部キー結合をすることはできない。
  *
- * @method string                 getDefaultIteration() {デフォルトイテレーションモードを返す}
- * @method $this                  setDefaultIteration($iterationMode) {
- *     デフォルトイテレーションモードを設定する
- *
- *     デフォルトのデフォルトは "array" なので、何も考えずに foreach で回すと array 相当の動作になる。
- *
- *     @param string $iterationMode {@link Database::METHOD_ARRAY} などの定数
- * }
- * @method string                 getDefaultJoinMethod() {デフォルト JOIN モードを返す}
- * @method $this                  setDefaultJoinMethod($string) {
- *     デフォルト JOIN モードを設定する
- *
- *     デフォルトのデフォルトは "AUTO" なので、何も考えずに JOIN すると最も良い感じに JOIN される。
- *
- *     @param string $string {@link Database::JOIN_MAPPER} のいずれかのキー
- * }
- * @method array                  getIgnoreAffectScope() {更新時に無視するスコープ名を返す}
- * @method $this                  setIgnoreAffectScope(array $ignoreAffectScope) {更新時に無視するスコープ名を設定する}
+ * @method string                 getDefaultIteration()
+ * @method $this                  setDefaultIteration($iterationMode)
+ * @method string                 getDefaultJoinMethod()
+ * @method $this                  setDefaultJoinMethod($string)
+ * @method array                  getIgnoreAffectScope()
+ * @method $this                  setIgnoreAffectScope(array $ignoreAffectScope)
+ * @method \Closure               getScopeRenamer()
+ * @method $this                  setScopeRenamer(\Closure $scopeRenamer)
+ * @method \Closure               getColumnRenamer()
+ * @method $this                  setColumnRenamer(\Closure $columnRenamer)
  *
  * これは phpstorm の as keyword が修正されたら不要になる
  * @method array|Entityable[] array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
@@ -485,15 +477,15 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public static function getDefaultOptions(): array
     {
         return [
-            // 直接回した場合のフェッチモード
+            /** @var string 直接回した場合のフェッチモード */
             'defaultIteration'  => 'array',
-            // マジック JOIN 時のデフォルトモード
+            /** @var string マジック JOIN 時のデフォルトモード */
             'defaultJoinMethod' => 'auto',
-            // affect 系で無視するスコープ
+            /** @var array affect 系で無視するスコープ */
             'ignoreAffectScope' => [],
-            // メソッドベーススコープの命名規則
+            /** @var \Closure メソッドベーススコープの命名規則 */
             'scopeRenamer'      => function ($name) { return lcfirst($name); },
-            // メソッドベース仮想カラムの命名規則
+            /** @var \Closure メソッドベース仮想カラムの命名規則 */
             'columnRenamer'     => function ($name) { return snake_case($name); },
         ];
     }

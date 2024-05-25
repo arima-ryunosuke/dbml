@@ -102,20 +102,26 @@ class Logger extends AbstractLogger
     public static function getDefaultOptions(): array
     {
         return [
-            // ログレベル
+            /** @var string ログレベル */
             'level'       => LogLevel::INFO,
-            // トランザクションだけをログるか（level >= INFO 以上である必要がある）
+            /** @var bool トランザクションだけをログるか（level >= INFO 以上である必要がある） */
             'transaction' => false,
-            // 出力場所（string/resource/Closure/null）。null はログらない
+            /** @var null|string|resource|\Closure 出力場所（string/resource/Closure/null）。null はログらない */
             'destination' => null,
-            // $sql, $params, $types の文字列化コールバック
+            /** @var \Closure ($sql, $params, $types) の文字列化コールバック */
             'callback'    => self::simple(),
-            // バッファリングモード（true だと 配列に溜め込む。数値だとバッファサイズになる。destination が Closure の場合は無効）
+            /** @var bool|int|array バッファリングモード
+             * - false: バッファ無効で逐次書き込む
+             * - true: 配列にバッファして終了時に書き込む
+             * - int: 指定サイズでバッファする
+             * - array: 指定サイズでバッファし、超えたらフラッシュする
+             */
             'buffer'      => [1024 * 1024 * 8],
-            // flock するか否か
+            /** @var bool flock するか否か */
             'lockmode'    => true,
-            // メタデータをコメント化して出力する際の処理（下記はあくまで組み込み。任意のキーを生やせばそれがログられる）
-            // static なクロージャを与えると初回呼び出しの結果が固定化され、次回以降同じ結果を返すようになる（コネクション ID などに使える）
+            /** @var \Closure[] メタデータをコメント化して出力する際の処理（下記はあくまで組み込み。任意のキーを生やせばそれがログられる）
+             * static なクロージャを与えると初回呼び出しの結果が固定化され、次回以降同じ結果を返すようになる（コネクション ID などに使える）
+             */
             'metadata'    => [
                 'id'      => static function ($metadata) {
                     return uniqid();
