@@ -473,7 +473,38 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['id' => 'id'], $schema->getForeignColumns('foreign_p', 'foreign_c1', $fkey, $direction));
         $this->assertSame(false, $direction);
 
+        // 普通に呼ぶと曖昧だが・・・
+        $schema->refresh();
         $this->assertException('ambiguous foreign keys', L($schema)->getForeignColumns('foreign_d2', 'foreign_d1'));
+
+        // 一方をデフォルトじゃなくすと関連が取れる
+        $schema->refresh();
+        $schema->setForeignKeyMetadata('fk_dd12', ['joinable' => false]);
+        $schema->setForeignKeyMetadata('fk_dd21', ['joinable' => true]);
+        $fkey = null;
+        $this->assertEquals(['id' => 'id'], $schema->getForeignColumns('foreign_d2', 'foreign_d1', $fkey, $direction));
+        $this->assertEquals('fk_dd21', $fkey->getName());
+        $this->assertSame(true, $direction);
+
+        // 他方だと逆
+        $schema->refresh();
+        $schema->setForeignKeyMetadata('fk_dd12', ['joinable' => true]);
+        $schema->setForeignKeyMetadata('fk_dd21', ['joinable' => false]);
+        $fkey = null;
+        $this->assertEquals(['d2_id' => 'id'], $schema->getForeignColumns('foreign_d2', 'foreign_d1', $fkey, $direction));
+        $this->assertEquals('fk_dd12', $fkey->getName());
+        $this->assertSame(false, $direction);
+
+        // 両方だと取れない
+        $schema->refresh();
+        $schema->setForeignKeyMetadata('fk_dd12', ['joinable' => false]);
+        $schema->setForeignKeyMetadata('fk_dd21', ['joinable' => false]);
+        $this->assertException('joinable foreign key', L($schema)->getForeignColumns('foreign_d2', 'foreign_d1'));
+
+        // 設定できないなら例外
+        $this->assertException('undefined foreign key', L($schema)->setForeignKeyMetadata('hogefuga', []));
+
+        $schema->refresh();
     }
 
     /**

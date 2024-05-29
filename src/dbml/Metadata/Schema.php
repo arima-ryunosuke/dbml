@@ -186,6 +186,26 @@ class Schema
     }
 
     /**
+     * 外部キーのメタデータを設定する
+     *
+     * メタデータと言いつつも単に配列を紐づけるだけに過ぎない。
+     * 仮に dbal の方で setOption メソッドが実装されたら不要となる。
+     *
+     * 原則的に好きに使ってよいが dbal 組み込みと joinable キーは「外部キー結合に使われるか？」の内部判定で使用されるので留意。
+     *
+     * @param string|ForeignKeyConstraint $fkey 外部キー
+     * @param array $metadata メタデータ
+     */
+    public function setForeignKeyMetadata($fkey, array $metadata)
+    {
+        $fkey = $fkey instanceof ForeignKeyConstraint ? $fkey : $this->getForeignKeys()[$fkey] ?? null;
+        if (!isset($fkey)) {
+            throw new \InvalidArgumentException("undefined foreign key '$fkey'.");
+        }
+        (fn() => $this->_options = array_replace($this->_options, $metadata))->bindTo($fkey, ForeignKeyConstraint::class)();
+    }
+
+    /**
      * テーブルが存在するなら true を返す
      *
      * @param string $table_name 調べるテーブル名
@@ -549,12 +569,17 @@ class Schema
                     return ['direction' => null, 'columns' => [], 'fkey' => null];
                 }
 
-                // キー指定がないなら唯一のものを、あるならそれを取得
+                // キー指定がないなら自動検出、あるならそれを取得
                 if ($fkeyname === null) {
-                    if ($fcount >= 2) {
+                    // 2個以上は joinable 指定されているものを使う
+                    $joinablefkeys = array_filter($fkeys, fn(ForeignKeyConstraint $fkey) => $fkey->getOptions()['joinable'] ?? true);
+                    if (count($joinablefkeys) === 0) {
+                        throw new \UnexpectedValueException("joinable foreign key is not exists between $table_name1<->$table_name2 .");
+                    }
+                    if (count($joinablefkeys) >= 2) {
                         throw new \UnexpectedValueException('ambiguous foreign keys ' . implode(', ', array_keys($fkeys)) . '.');
                     }
-                    $fkey = reset($fkeys);
+                    $fkey = reset($joinablefkeys);
                 }
                 else {
                     if (!isset($fkeys[$fkeyname])) {

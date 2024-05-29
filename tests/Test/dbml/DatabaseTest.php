@@ -1265,6 +1265,14 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         // リレーションが発生するはず
         $this->assertEquals('SELECT P.*, C.* FROM foreign_p P INNER JOIN foreign_c1 C ON C.id = P.id', (string) $database->select('foreign_p P + foreign_c1 C'));
 
+        // さらに追加しても default:false にすれば・・・
+        $fkey = $database->addForeignKey('foreign_c1', 'foreign_p', 'name', 'c1_p');
+        $database->getSchema()->setForeignKeyMetadata($fkey, ['joinable' => false]);
+        // リレーションに影響は出ない
+        $this->assertEquals('SELECT P.*, C.* FROM foreign_p P INNER JOIN foreign_c1 C ON C.id = P.id', (string) $database->select('foreign_p P + foreign_c1 C'));
+        // 明示的に指定すれば使える
+        $this->assertEquals('SELECT P.*, C.* FROM foreign_p P INNER JOIN foreign_c1 C ON C.name = P.name', (string) $database->select('foreign_p P + foreign_c1:c1_p C'));
+
         // 後処理
         $database->getSchema()->refresh();
     }

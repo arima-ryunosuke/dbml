@@ -6497,7 +6497,7 @@ class Database
         $fkeys = $schema->getForeignKeys($tableName, null);
         foreach ($fkeys as $fkey) {
             // 仮想でない通常の外部キーであれば RDBMS 側で削除・更新してくれるが、仮想外部キーは能動的に実行する必要がある
-            if (@$fkey->getOption('virtual') === true) {
+            if (@$fkey->getOption('virtual') === true && ($fkey->getOptions()['emulatable'] ?? true) === true) {
                 $onDelete = strtoupper($fkey->onDelete());
                 if ($onDelete === 'CASCADE') {
                     $ltable = first_key($schema->getForeignTable($fkey));
