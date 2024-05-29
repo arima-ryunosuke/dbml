@@ -24,6 +24,10 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.18
+
+- [feature] 外部キーにメタデータを設定できる機能
+
 ## 2.1.17
 
 - [feature] slave のランダム化と serverVersion や driverOptions などに対応した url を実装
