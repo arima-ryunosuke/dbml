@@ -64,7 +64,7 @@ class ArrayResultTest extends \ryunosuke\Test\AbstractUnitTestCase
         ]);
 
         $result->setSameCheckMethod('strict');
-        $this->assertException('cause strict', L($result)->fetchAssociative());
+        that($result)->fetchAssociative()->wasThrown('cause strict');
         $this->assertEquals(['A' => 'a'], $result->fetchAssociative());
         $this->assertEquals([['A' => 'b']], $result->fetchAllAssociative());
     }

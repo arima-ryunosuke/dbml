@@ -94,18 +94,18 @@ class ResultTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
         ]);
 
-        $this->assertException('is invalid', L($result)->checkSameColumn(['a', 'b', 'c'], false));
+        that($result)->checkSameColumn(['a', 'b', 'c'], false)->wasThrown('is invalid');
 
         $result->setSameCheckMethod('noallow');
-        $this->assertException('cause noallow', L($result)->checkSameColumn(['a', 'a', 'a'], false));
+        that($result)->checkSameColumn(['a', 'a', 'a'], false)->wasThrown('cause noallow');
 
         $result->setSameCheckMethod('strict');
         $this->assertEquals(['a' => 1], $result->checkSameColumn([1, 1, 1], false));
-        $this->assertException('cause strict', L($result)->checkSameColumn(['1', 1, null], false));
+        that($result)->checkSameColumn(['1', 1, null], false)->wasThrown('cause strict');
 
         $result->setSameCheckMethod('loose');
         $this->assertEquals(['a' => null], $result->checkSameColumn(['1', 1, null], false));
-        $this->assertException('cause loose', L($result)->checkSameColumn(['1', 2, null], false));
+        that($result)->checkSameColumn(['1', 2, null], false)->wasThrown('cause loose');
     }
 }
 

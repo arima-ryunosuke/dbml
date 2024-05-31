@@ -66,12 +66,12 @@ class SelectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertSame($builder, $builder->setLazyMode('eager')->valueOrThrow());
 
         $empty = $builder->reset()->from('test1')->where('id = -1');
-        $this->assertException(new NonSelectedException("record is not found"), L($empty)->arrayOrThrow());
-        $this->assertException(new NonSelectedException("record is not found"), L($empty)->assocOrThrow());
-        $this->assertException(new NonSelectedException("record is not found"), L($empty)->listsOrThrow());
-        $this->assertException(new NonSelectedException("record is not found"), L($empty)->pairsOrThrow());
-        $this->assertException(new NonSelectedException("record is not found"), L($empty)->tupleOrThrow());
-        $this->assertException(new NonSelectedException("record is not found"), L($empty)->valueOrThrow());
+        that($empty)->arrayOrThrow()->wasThrown(new NonSelectedException("record is not found"));
+        that($empty)->assocOrThrow()->wasThrown(new NonSelectedException("record is not found"));
+        that($empty)->listsOrThrow()->wasThrown(new NonSelectedException("record is not found"));
+        that($empty)->pairsOrThrow()->wasThrown(new NonSelectedException("record is not found"));
+        that($empty)->tupleOrThrow()->wasThrown(new NonSelectedException("record is not found"));
+        that($empty)->valueOrThrow()->wasThrown(new NonSelectedException("record is not found"));
     }
 
     /**
@@ -229,8 +229,8 @@ class SelectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $builder->reset()->select('*')->from('t_table1')->innerJoinOn('t_join1', 'hoge')->innerJoinOn('t_join2', 'fuga');
         $this->assertEquals('SELECT * FROM t_table1 INNER JOIN t_join1 ON hoge INNER JOIN t_join2 ON fuga', "$builder");
 
-        $this->assertException(new \BadMethodCallException("is undefined"), [$builder, 'fetchHoge']);
-        $this->assertException(new \BadMethodCallException("is undefined"), [$builder, 'joinHoge']);
+        that($builder)->fetchHoge()->wasThrown(new \BadMethodCallException("is undefined"));
+        that($builder)->joinHoge()->wasThrown(new \BadMethodCallException("is undefined"));
     }
 
     /**
@@ -309,9 +309,9 @@ class SelectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $row = call_user_func($subuilder->getCaster(), ['c' => 'v']);
         $this->assertInstanceOf(\ryunosuke\Test\Entity\Comment::class, $row);
 
-        $this->assertException(new \InvalidArgumentException('is not exists'), L($builder)->cast('NotFound'));
+        that($builder)->cast('NotFound')->wasThrown(new \InvalidArgumentException('is not exists'));
 
-        $this->assertException(new \InvalidArgumentException('must be implements'), L($builder)->cast('\stdClass'));
+        that($builder)->cast('\stdClass')->wasThrown(new \InvalidArgumentException('must be implements'));
     }
 
     /**
@@ -497,10 +497,7 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
             ])
         );
 
-        $this->assertException(
-            new \UnexpectedValueException('some columns are not found'),
-            [$builder, 'column'], 'test1.!hogera'
-        );
+        that($builder)->column('test1.!hogera')->wasThrown(new \UnexpectedValueException('some columns are not found'));
     }
 
     /**
@@ -530,7 +527,7 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
         $expected = "SELECT test.col1, test.col2 FROM test";
         $this->assertQuery($expected, $builder->column(['test' => ['col1, col2']]));
 
-        $this->assertException('other schema', L($builder)->column('other.table.c1'));
+        that($builder)->column('other.table.c1')->wasThrown('other schema');
     }
 
     /**
@@ -590,11 +587,11 @@ FROM test1 t1 INNER JOIN test2 t2 ON t1.id = t2.id", $builder);
             'name1' => 'A',
         ], $builder->limit(1)->tuple());
 
-        $this->assertException('only ?string is allowed', L($builder->reset())->column([
+        that($builder)->reset()->column([
             'test1' => [
                 'id' => function ($id = 123) { },
             ],
-        ]));
+        ])->wasThrown('only ?string is allowed');
     }
 
     /**
@@ -1102,7 +1099,7 @@ GREATEST(1,2,3) FROM test1', $builder);
             $this->assertEquals([1, 2, 3, 4], $builder->getParams());
         }
 
-        $this->assertException('not match primary columns', L($builder->reset())->column('foreign_c1 (1, 2)'));
+        that($builder)->reset()->column('foreign_c1 (1, 2)')->wasThrown('not match primary columns');
     }
 
     /**
@@ -1193,12 +1190,12 @@ GREATEST(1,2,3) FROM test1', $builder);
             ],
         ]);
         $this->assertQuery("SELECT sc1.name AS name1, sc2.name AS name2 FROM foreign_s INNER JOIN foreign_sc sc1 ON sc1.s_id1 = foreign_s.id INNER JOIN foreign_sc sc2 ON sc2.s_id2 = foreign_s.id", $builder);
-        $this->assertException("must be table as alias", L($builder->reset())->column([
+        that($builder)->reset()->column([
             'foreign_s' => [
                 'name1' => '+foreign_sc:fk_sc1.name',
                 'name2' => '+foreign_sc:fk_sc2.name',
             ],
-        ]));
+        ])->wasThrown("must be table as alias");
 
         $builder->reset()->column([
             'foreign_s' => [
@@ -1207,12 +1204,12 @@ GREATEST(1,2,3) FROM test1', $builder);
             ],
         ]);
         $this->assertQuery("SELECT sc1.name AS name1, sc2.name AS name2 FROM foreign_s INNER JOIN foreign_sc sc1 ON 1 INNER JOIN foreign_sc sc2 ON 2", $builder);
-        $this->assertException("must be table as alias", L($builder->reset())->column([
+        that($builder)->reset()->column([
             'foreign_s' => [
                 'name1' => '+foreign_sc:[1].name',
                 'name2' => '+foreign_sc:[2].name',
             ],
-        ]));
+        ])->wasThrown("must be table as alias");
     }
 
     /**
@@ -1728,10 +1725,10 @@ AND
         }
 
         // エラー
-        $this->assertException("base table not found", L($builder->reset())->where(['' => [[1]]]));
-        $this->assertException("not match primary columns", L($builder->reset()->column('test'))->where(['' => [[1, 2]]]));
-        $this->assertException("not match primary columns", L($builder->reset()->column('multiprimary'))->where(['' => [[1]]]));
-        $this->assertException("not match primary columns", L($builder->reset()->column('multiprimary'))->where(['' => [[1, 2, 3]]]));
+        that($builder)->reset()->where(['' => [[1]]])->wasThrown("base table not found");
+        that($builder)->reset()->column('test')->where(['' => [[1, 2]]])->wasThrown("not match primary columns");
+        that($builder)->reset()->column('multiprimary')->where(['' => [[1]]])->wasThrown("not match primary columns");
+        that($builder)->reset()->column('multiprimary')->where(['' => [[1, 2, 3]]])->wasThrown("not match primary columns");
 
         // トップレベル以外無視。ただし、OR などの数値キーは OK
         $this->assertEquals("SELECT test.* FROM test WHERE (FALSE) AND (test.id = '3')", $builder->reset()->column('test')->where([
@@ -2420,8 +2417,8 @@ AND (FALSE)", $builder->queryInto());
         $this->assertEquals([null, null, null, null, null, 4, 2, 0, -2, -4], $builder->orderBy('cint', false, 'first')->lists());
 
         $builder->setNullsOrder('hoge');
-        $this->assertException('hoge is not supported', L($builder->orderBy('hoge'))->getQuery());
-        $this->assertException('is not support parametable query', L($builder->orderBy(new Expression('? + ?', [1, 2])))->getQuery());
+        that($builder)->orderBy('hoge')->getQuery()->wasThrown("hoge is not supported");
+        that($builder)->orderBy(new Expression('? + ?', [1, 2]))->getQuery()->wasThrown("is not support parametable query");
     }
 
     /**
@@ -2487,7 +2484,7 @@ SELECT test.* FROM test", $builder);
         $this->assertSame(0, $builder->getQueryPart('offset'));
         $this->assertSame(0, $builder->getQueryPart('limit'));
 
-        $this->assertException(new \InvalidArgumentException('1 or 2'), L($builder)->limit([3, 7, 9]));
+        that($builder)->limit([3, 7, 9])->wasThrown(new \InvalidArgumentException('1 or 2'));
     }
 
     /**
@@ -2904,7 +2901,7 @@ SQL
         ], $builder->neighbor(['comment_id' => 2]));
 
         // 例外
-        $this->assertException('$predicates is empty', L($builder)->neighbor([]));
+        that($builder)->neighbor([])->wasThrown('$predicates is empty');
     }
 
     /**
@@ -2932,7 +2929,7 @@ SQL
         $this->assertEquals(array_keys($row['c1']), array_reverse(array_keys($row['c2'])));
 
         // 存在しないのは例外が飛ぶはず
-        $this->assertException(new \InvalidArgumentException('not defined'), L($builder)->getSubbuilder('hoge'));
+        that($builder)->getSubbuilder('hoge')->wasThrown(new \InvalidArgumentException('not defined'));
     }
 
     /**
@@ -2950,7 +2947,7 @@ SQL
         $this->assertQuery('SELECT * FROM test GROUP BY id ORDER BY id ASC', $builder->resetQueryPart(['select']));
         $this->assertQuery('SELECT * FROM test', $builder->resetQueryPart(['orderBy', 'groupBy']));
 
-        $this->assertException('is undefined', L($builder)->resetQueryPart('hogera'));
+        that($builder)->resetQueryPart('hogera')->wasThrown(new \InvalidArgumentException('is undefined'));
     }
 
     /**
@@ -3032,19 +3029,19 @@ SQL
         $this->assertEquals(false, $builder->tuple());
 
         // from が無い subselect 指定は無効なはず
-        $this->assertException(new \UnexpectedValueException('has not foreign key'), L($builder)->column([
+        that($builder)->column([
             [
                 'hoge' => $builder->getDatabase()->subselectArray('t_dummy'),
             ],
-        ]));
+        ])->wasThrown(new \UnexpectedValueException('has not foreign key'));
 
         // prepared statement は使用できないはず
-        $this->assertException(new \UnexpectedValueException('not support prepared statement'), L($builder)->column([
+        that($builder)->column([
             'test1' => ['id', 'name1'],
             ''      => [
                 'children{id}' => $builder->getDatabase()->subselectArray('test2')->prepare(),
             ],
-        ]));
+        ])->wasThrown(new \UnexpectedValueException('not support prepared statement'));
     }
 
     /**
@@ -3073,13 +3070,13 @@ SQL
             Select::forge('foreign_d2', 'NULL'),
         ], $builder->getQueryPart('select'));
 
-        $this->assertException('ambiguous foreign keys', function () use ($builder) {
+        that(function () use ($builder) {
             $builder->reset()->column([
                 'foreign_d1' => [
                     'foreign_d2' => $builder->getDatabase()->subselectArray('foreign_d2'),
                 ],
             ]);
-        });
+        })()->wasThrown('ambiguous foreign keys');
     }
 
     /**
@@ -3127,10 +3124,9 @@ SQL
                 'C2'   => ['cid' => 1, 'seq' => 1, 'name' => 'c2name11', 'pid' => 1, 'ppname2' => 'hoge'],
             ],
         ], $rows);
-
-        $this->assertException('reference undefined parent column', L($builder)->postselect([
+        that($builder)->postselect([
             ['xxxpid' => 1, Database::AUTO_PRIMARY_KEY . 'c1' => 1, Database::AUTO_PRIMARY_KEY . 'c2' => 1],
-        ]));
+        ])->wasThrown('reference undefined parent column');
     }
 
     /**
@@ -3308,7 +3304,7 @@ SQL
             $this->assertEquals($expected, arrayval($actual));
         }
 
-        $this->assertException('$mode is must be', L($builder)->setLazyMode('hoge'));
+        that($builder)->setLazyMode('hoge')->wasThrown('$mode is must be');
     }
 
     /**
@@ -3327,12 +3323,12 @@ SQL
         $actual = $builder->limit(1)->tuple();
         $this->assertEquals(10, $actual['func'](10));
         $this->assertInstanceOf(\ArrayObject::class, $actual['this']());
-        $this->assertException('Using $this when not in object context', $actual['static']);
+        that($actual)['static']()->wasThrown('Using $this when not in object context');
 
         $actual = $builder->limit(1)->cast()->tuple();
         $this->assertEquals(10, $actual->func(10));
         $this->assertInstanceOf(Entity::class, $actual->this());
-        $this->assertException('Using $this when not in object context', $actual->static);
+        that($actual)->static()->wasThrown('Using $this when not in object context');
 
         $builder->column([
             'test' => [
@@ -3725,19 +3721,19 @@ SQL
 
         // ccc と fff に外部キー関係はないので例外が投がるはず
         $builder->reset()->column('ccc C');
-        $this->assertException(new \UnexpectedValueException("'aaa' is not exists"), L($builder)->innerJoinForeign('fff F', 'aaa'));
+        that($builder)->innerJoinForeign('fff F', 'aaa')->wasThrown(new \UnexpectedValueException("'aaa' is not exists"));
 
         // 同じテーブルへの複数の外部キーは曖昧なので例外が投がるはず
         $builder->reset()->column('ppp P');
-        $this->assertException(new \UnexpectedValueException('ambiguous foreign key'), L($builder)->innerJoinForeign('mmm'));
+        that($builder)->innerJoinForeign('mmm')->wasThrown(new \UnexpectedValueException('ambiguous foreign key'));
 
         // 名前未指定の相互参照の外部キーは曖昧なので例外が投がるはず
         $builder->reset()->column('gg1');
-        $this->assertException(new \UnexpectedValueException('ambiguous foreign key'), L($builder)->innerJoinForeign('gg2'));
+        that($builder)->innerJoinForeign('gg2')->wasThrown(new \UnexpectedValueException('ambiguous foreign key'));
 
         // 存在しない外部キー名は例外が投がるはず
         $builder->reset()->column('gg1');
-        $this->assertException(new \UnexpectedValueException('foreign key \'notfkey\' is not exists'), L($builder)->innerJoinForeign('gg2', 'notfkey'));
+        that($builder)->innerJoinForeign('gg2', 'notfkey')->wasThrown(new \UnexpectedValueException('foreign key \'notfkey\' is not exists'));
     }
 
     function test_joinIndirect()
@@ -3878,14 +3874,10 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
 
         // 省略した場合は例外は飛ばないが、明示的に指定してかつ存在しない場合は例外が飛ぶ
         $this->assertFalse($builder->reset()->column('test1 T1')->setSubwhere('test2', 'T1'));
-        $this->assertException(new \UnexpectedValueException('has not foreign key'), function () use ($builder) {
-            $builder->reset()->column('test1 T1')->setSubwhere('test2', 'T1', 'hoge');
-        });
+        that($builder)->reset()->column('test1 T1')->setSubwhere('test2', 'T1', 'hoge')->wasThrown(new \UnexpectedValueException('has not foreign key'));
 
         // 相互外部キーは引数に依らず例外が飛ぶ
-        $this->assertException(new \UnexpectedValueException('ambiguous foreign key'), function () use ($builder) {
-            $builder->reset()->column('foreign_d1 D1')->setSubwhere('foreign_d2', 'D2');
-        });
+        that($builder)->reset()->column('foreign_d1 D1')->setSubwhere('foreign_d2', 'D2')->wasThrown(new \UnexpectedValueException('ambiguous foreign key'));
 
         // 外部キーを明示すればOK
         $builder->reset()->column('foreign_d1 D1')->setSubwhere('foreign_d2', 'D2', 'fk_dd12');
@@ -3907,9 +3899,7 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
 
         // 省略した場合は例外は飛ばないが、明示的に指定してかつ存在しない場合は例外が飛ぶ
         $this->assertFalse($builder->reset()->column('test1 T1')->setSubwhere('test2', 'T1'));
-        $this->assertException(new \UnexpectedValueException('has not foreign key'), function () use ($builder) {
-            $builder->reset()->column('test1 T1')->setSubwhere('test2', 'T1', 'hoge');
-        });
+        that($builder)->reset()->column('test1 T1')->setSubwhere('test2', 'T1', 'hoge')->wasThrown(new \UnexpectedValueException('has not foreign key'));
     }
 
     /**
@@ -3996,8 +3986,8 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
         $this->assertEquals('SUM(YEAR(login_at) = ?) AS x', $selects[2]);
         $this->assertEquals([2016, 2017, 2018], $builder->getParams());
 
-        $this->assertException(new \InvalidArgumentException('is empty'), L($builder->column('test'))->aggregate([]));
-        $this->assertException(new \InvalidArgumentException('length is over 1'), L($builder->column('test.id,name'))->aggregate('count', 1));
+        that($builder)->column('test')->aggregate([])->wasThrown(new \InvalidArgumentException('is empty'));
+        that($builder)->column('test.id,name')->aggregate('count', 1)->wasThrown(new \InvalidArgumentException('length is over 1'));
     }
 
     /**

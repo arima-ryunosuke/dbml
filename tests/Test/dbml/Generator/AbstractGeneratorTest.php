@@ -9,7 +9,7 @@ class AbstractGeneratorTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_path()
     {
         $g = new ConcreteGenerator();
-        $this->assertException(new \RuntimeException('failed to open'), L($g)->generate('never/notfound/dir/:::.txt', []));
+        that($g)->generate('never/notfound/dir/:::.txt', [])->wasThrown(new \RuntimeException('failed to open'));
     }
 
     function test_stdout()

@@ -20,14 +20,10 @@ class StatementTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['__dbml_auto_bind0' => 'hoge'], $stmt->getParams());
 
         // 引数のほうが少ない
-        $this->assertException('does not have', function () use ($database) {
-            new Statement('this is no=?, this is named=:named', ['named' => 'hoge'], $database);
-        });
+        that(Statement::class)->new('this is no=?, this is named=:named', ['named' => 'hoge'], $database)->wasThrown('does not have');
 
         // 引数のほうが多い
-        $this->assertException('length is long', function () use ($database) {
-            new Statement('this is no=?, this is named=:named', ['hoge', 'fuga'], $database);
-        });
+        that(Statement::class)->new('this is no=?, this is named=:named', ['hoge', 'fuga'], $database)->wasThrown('length is long');
     }
 
     function test___debugInfo()

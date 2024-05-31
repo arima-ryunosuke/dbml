@@ -2,6 +2,7 @@
 
 namespace ryunosuke\Test\dbml\Gateway;
 
+use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Types\StringType;
 use ryunosuke\dbml\Entity\Entity;
@@ -16,7 +17,6 @@ use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Platforms\SqlitePlatform;
 use function ryunosuke\dbml\csv_import;
 use function ryunosuke\dbml\json_import;
-use function ryunosuke\dbml\try_catch;
 
 class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -48,7 +48,7 @@ class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertNull($gateway->hogera);
 
-        $this->assertException('is not supported', fn() => $gateway->test = 123);
+        that(fn() => $gateway->test = 123)()->wasThrown('is not supported');
     }
 
     /**
@@ -60,8 +60,7 @@ class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('hoge', $gateway->clone()->setDefaultJoinMethod('hoge')->getDefaultJoinMethod());
         $this->assertEquals('auto', $gateway->getDefaultJoinMethod());
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        $this->assertException('undefined', L($gateway)->hogera());
+        that($gateway)->hogera()->wasThrown('undefined');
     }
 
     function test___debugInfo()
@@ -250,9 +249,9 @@ AND ((flag=1))", "$gw");
         unset($gateway[1]);
         $this->assertFalse($gateway[1]->tuple());
 
-        $this->assertException('not supported', function () use ($gateway) {
+        that(function () use ($gateway) {
             unset($gateway['undefined']);
-        });
+        })()->wasThrown('not supported');
     }
 
     /**
@@ -345,7 +344,7 @@ AND ((flag=1))", "$gw");
         $this->assertEquals([-1, 'a'], $select->getParams());
 
         // 本体には一切影響がないはず
-        $this->assertEquals(['' => []], self::forcedRead($gateway, 'activeScopes'));
+        that($gateway)->activeScopes->is(['' => []]);
 
         // スコープはインスタンス間で共用されるはず
         $gw = $gateway->as('GW');
@@ -353,8 +352,8 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(['NOW()'], $gateway->getScopeParts('common')['column']);
 
         // 存在しないスコープは例外が飛ぶはず
-        $this->assertException('undefined', L($gateway)->scope('hogera'));
-        $this->assertException('undefined', L($gateway)->unscope('hogera'));
+        that($gateway)->scope('hogera')->wasThrown('undefined');
+        that($gateway)->unscope('hogera')->wasThrown('undefined');
     }
 
     /**
@@ -520,9 +519,9 @@ AND ((flag=1))", "$gw");
         ], $gateway->getScopeParts('mixmix'));
 
         // これはエラーになる（c の引数がどこにも現れていない）
-        $this->assertException(new \ArgumentCountError(), L($gateway->scope('x'))->select());
+        that($gateway)->scope('x')->select()->wasThrown(new \ArgumentCountError());
         // 登録されていないスコープはエラー
-        $this->assertException('scope is undefined', L($gateway)->mixScope('new', 'undefined'));
+        that($gateway)->mixScope('new', 'undefined')->wasThrown('scope is undefined');
     }
 
     /**
@@ -547,8 +546,8 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(['X', 'Y', 'Z'], $gateway->getScopeParts('abc')['column']);
 
         $gateway->addScope('xyz', 'now()');
-        $this->assertException('scope must be closure', L($gateway)->bindScope('xyz', []));
-        $this->assertException('scope is undefined', L($gateway)->bindScope('new', []));
+        that($gateway)->bindScope('xyz', [])->wasThrown('scope must be closure');
+        that($gateway)->bindScope('new', [])->wasThrown('scope is undefined');
     }
 
     /**
@@ -684,7 +683,7 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(['empty' => 99], $gateway->getScopeParts('empty')['where']);
         $this->assertEquals(['empty' => 99], $gateway->scope('empty')->getScopeParts('empty')['where']);
 
-        $this->assertException('undefined', L($gateway)->getScopeParts('notfound'));
+        that($gateway)->getScopeParts('notfound')->wasThrown('undefined');
     }
 
     /**
@@ -1124,7 +1123,7 @@ AND ((flag=1))", "$gw");
             'name' => 'b',
         ], $gateway->findOrThrow([2], 'name'));
 
-        $this->assertException(new NonSelectedException(), L($gateway)->findOrThrow(999));
+        that($gateway)->findOrThrow(999)->wasThrown(new NonSelectedException());
     }
 
     /**
@@ -1143,8 +1142,8 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(false, $database->multiprimary()->pk([99, 99])->value('name'));
         $this->assertEquals(['a', 'b', 'c', 'd', 'e', 'f'], $database->multiprimary()->pk([1], [2, 6])->lists('name'));
 
-        @$this->assertException('array_combine', L($gateway)->pk([1, 2]));
-        @$this->assertException('array_combine', L($database->multiprimary())->pk([1, 2, 3]));
+        that($gateway)->pk([1, 2])->wasThrown('array_combine');
+        that($gateway)->multiprimary()->pk([1, 2, 3])->wasThrown('array_combine');
     }
 
     /**
@@ -1174,10 +1173,10 @@ AND ((flag=1))", "$gw");
         $this->assertEquals("SELECT * FROM multiunique M WHERE ((M.uc1 = 's1') AND (M.uc2 = 't1')) OR ((M.uc1 = 's2') AND (M.uc2 = 't2'))", (string) $multiunique->as('M')->uk(['s1', 't1'], ['s2', 't2']));
 
         // 数が一致しないなら例外
-        $this->assertException('not match unique index', L($multiunique)->uk(1, 2, [3, 4]));
+        that($multiunique)->uk(1, 2, [3, 4])->wasThrown('not match unique index');
 
         // 型が一致しないなら例外
-        $this->assertException('not match unique index', L($multiunique)->uk(1.2));
+        that($multiunique)->uk(1.2)->wasThrown('not match unique index');
     }
 
     /**
@@ -1256,12 +1255,12 @@ AND ((flag=1))", "$gw");
             ],
         ], $gateway->array('*', ['id' => [2, 4]]));
 
-        $this->assertException(new NonSelectedException(), L($gateway)->arrayOrThrow('*', ['id' => [999]]));
-        $this->assertException(new NonSelectedException(), L($gateway)->assocOrThrow('*', ['id' => [999]]));
-        $this->assertException(new NonSelectedException(), L($gateway)->listsOrThrow('*', ['id' => [999]]));
-        $this->assertException(new NonSelectedException(), L($gateway)->pairsOrThrow('*', ['id' => [999]]));
-        $this->assertException(new NonSelectedException(), L($gateway)->tupleOrThrow('*', ['id' => [999]]));
-        $this->assertException(new NonSelectedException(), L($gateway)->valueOrThrow('*', ['id' => [999]]));
+        that($gateway)->arrayOrThrow('*', ['id' => [999]])->wasThrown(new NonSelectedException());
+        that($gateway)->assocOrThrow('*', ['id' => [999]])->wasThrown(new NonSelectedException());
+        that($gateway)->listsOrThrow('*', ['id' => [999]])->wasThrown(new NonSelectedException());
+        that($gateway)->pairsOrThrow('*', ['id' => [999]])->wasThrown(new NonSelectedException());
+        that($gateway)->tupleOrThrow('*', ['id' => [999]])->wasThrown(new NonSelectedException());
+        that($gateway)->valueOrThrow('*', ['id' => [999]])->wasThrown(new NonSelectedException());
     }
 
     /**
@@ -1298,7 +1297,7 @@ AND ((flag=1))", "$gw");
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for read */', $log['sql']);
             $this->assertEquals([1], $log['params']);
 
-            $this->assertException('record', L($gateway)->findForAffect(0));
+            that($gateway)->findForAffect(0)->wasThrown('record');
             $log = $logs[3];
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for write */', $log['sql']);
             $this->assertEquals([0], $log['params']);
@@ -1643,9 +1642,11 @@ AND ((flag=1))", "$gw");
             $this->assertEquals(['id' => 1], $database->foreign_p->upgradeIgnore(['name' => 'upgrade'], ['id' => 1]));
             $this->assertEquals(['id' => 1], $database->foreign_p->invalidIgnore(['id' => 1], ['name' => 'deleted']));
             // delete の syntax error はしょうがない
-            try_catch(L($database->foreign_c1)->deleteIgnore(['id' => -1]));
-            try_catch(L($database->foreign_c1)->removeIgnore(['id' => -1]));
-            try_catch(L($database->foreign_c1)->destroyIgnore(['id' => -1]));
+            if (!$database->getCompatiblePlatform()->getWrappedPlatform() instanceof MySQLPlatform) {
+                that($database)->foreign_c1->deleteIgnore(['id' => -1])->wasThrown('');
+                that($database)->foreign_c1->removeIgnore(['id' => -1])->wasThrown('');
+                that($database)->foreign_c1->destroyIgnore(['id' => -1])->wasThrown('');
+            }
         }
     }
 

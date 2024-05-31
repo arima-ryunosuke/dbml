@@ -27,7 +27,7 @@ class IteratorTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(2, $it->callcount);
 
         $it->resetProvider();
-        $this->assertException('provider is not set', L($it)->getResult());
+        that($it)->getResult()->wasThrown('provider is not set');
     }
 
     function test_provider()
@@ -46,7 +46,7 @@ class IteratorTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
         });
         $this->assertEquals([7, 8, 9], $it->getResult());
 
-        $this->assertException('is invalid', L($it)->setProvider(123));
+        that($it)->setProvider(123)->wasThrown('is invalid');
     }
 }
 

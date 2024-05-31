@@ -80,7 +80,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertStringContainsString('Table', get_class($schema->getTable('metatest')));
 
-        $this->assertException(SchemaException::tableAlreadyExists('metatest'), L($schema)->addTable($this->getDummyTable('metatest')));
+        that($schema)->addTable($this->getDummyTable('metatest'))->wasThrown(SchemaException::tableAlreadyExists('metatest'));
     }
 
     /**
@@ -127,7 +127,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertStringContainsString('Table', get_class($schema->getTable('metasample')));
 
-        $this->assertException(SchemaException::tableDoesNotExist('hogera'), L($schema)->getTable('hogera'));
+        that($schema)->getTable('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
     }
 
     /**
@@ -180,7 +180,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertIsArray($schema->getTableColumns('metatest'));
         $this->assertIsArray($schema->getTableColumns('viewsample'));
 
-        $this->assertException(SchemaException::tableDoesNotExist('hogera'), L($schema)->getTableColumns('hogera'));
+        that($schema)->getTableColumns('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
     }
 
     /**
@@ -193,7 +193,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertStringContainsString('Index', get_class($schema->getTablePrimaryKey('metatest')));
 
-        $this->assertException(SchemaException::tableDoesNotExist('hogera'), L($schema)->getTablePrimaryKey('hogera'));
+        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
     }
 
     /**
@@ -207,7 +207,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(array_intersect_key($schema->getTableColumns('metatest'), ['id' => '']), $schema->getTablePrimaryColumns('metatest'));
         $this->assertEquals([], $schema->getTablePrimaryColumns('viewsample'));
 
-        $this->assertException(SchemaException::tableDoesNotExist('hogera'), L($schema)->getTablePrimaryKey('hogera'));
+        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
     }
 
     /**
@@ -235,9 +235,9 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(array_intersect_key($schema->getTableColumns('uniquetable'), ['uid1' => '', 'uid2' => '']), $schema->getTableUniqueColumns('uniquetable'));
         $this->assertEquals(array_intersect_key($schema->getTableColumns('uniquetable'), ['uidx' => '']), $schema->getTableUniqueColumns('uniquetable', 'UNIQUEKEY2'));
 
-        $this->assertException('is not found', L($schema)->getTableUniqueColumns('metasample'));
-        $this->assertException('does not exist', L($schema)->getTableUniqueColumns('uniquetable', 'undefined'));
-        $this->assertException(SchemaException::tableDoesNotExist('hogera'), L($schema)->getTablePrimaryKey('hogera'));
+        that($schema)->getTableUniqueColumns('metasample')->wasThrown('is not found');
+        that($schema)->getTableUniqueColumns('uniquetable', 'undefined')->wasThrown('does not exist');
+        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
     }
 
     /**
@@ -272,7 +272,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertIsArray($schema->getTableForeignKeys('metatest'));
 
-        $this->assertException(SchemaException::tableDoesNotExist('hogera'), L($schema)->getTableForeignKeys('hogera'));
+        that($schema)->getTableForeignKeys('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
     }
 
     /**
@@ -401,7 +401,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertEquals(['FK_1', 'FK_2'], array_keys($schema->getForeignKeys('metatest')));
 
-        $this->assertException(SchemaException::tableDoesNotExist('hogera'), L($schema)->getTablePrimaryKey('hogera'));
+        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
     }
 
     /**
@@ -450,7 +450,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['id' => 'foreign1'], $schema->getForeignColumns('metatest', 'foreign1', $fkey));
         $this->assertEquals('FK_1', $fkey->getName());
         $fkey = 'FK_2';
-        $this->assertException('is not exists', L($schema)->getForeignColumns('metatest', 'foreign1', $fkey));
+        that($schema)->getForeignColumns('metatest', 'foreign1', $fkey)->wasThrown('is not exists');
     }
 
     /**
@@ -475,7 +475,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // 普通に呼ぶと曖昧だが・・・
         $schema->refresh();
-        $this->assertException('ambiguous foreign keys', L($schema)->getForeignColumns('foreign_d2', 'foreign_d1'));
+        that($schema)->getForeignColumns('foreign_d2', 'foreign_d1')->wasThrown('ambiguous foreign keys');
 
         // 一方をデフォルトじゃなくすと関連が取れる
         $schema->refresh();
@@ -499,10 +499,10 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $schema->refresh();
         $schema->setForeignKeyMetadata('fk_dd12', ['joinable' => false]);
         $schema->setForeignKeyMetadata('fk_dd21', ['joinable' => false]);
-        $this->assertException('joinable foreign key', L($schema)->getForeignColumns('foreign_d2', 'foreign_d1'));
+        that($schema)->getForeignColumns('foreign_d2', 'foreign_d1')->wasThrown('joinable foreign key');
 
         // 設定できないなら例外
-        $this->assertException('undefined foreign key', L($schema)->setForeignKeyMetadata('hogefuga', []));
+        that($schema)->setForeignKeyMetadata('hogefuga', [])->wasThrown('undefined foreign key');
 
         $schema->refresh();
     }
@@ -540,10 +540,10 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertEquals('fk_hogera', $schema->addForeignKey($newFK('fk_hogera', 'id', 'foreign2', 'id'), 'foreign1')->getName());
 
-        $this->assertException('localTable is not set', L($schema)->addForeignKey($newFK(null, 'id', 'foreign2', 'id'), null));
-        $this->assertException('already defined same', L($schema)->addForeignKey($newFK('fk_hogera', 'id', 'foreign2', 'id'), 'foreign1'));
-        $this->assertException('column for foreign1', L($schema)->addForeignKey($newFK(null, 'foreign2', 'foreign2', 'foreign2'), 'foreign1'));
-        $this->assertException('column for foreign1', L($schema)->addForeignKey($newFK(null, 'foreign2', 'foreign1', 'foreign2'), 'foreign2'));
+        that($schema)->addForeignKey($newFK(null, 'id', 'foreign2', 'id'), null)->wasThrown('localTable is not set');
+        that($schema)->addForeignKey($newFK('fk_hogera', 'id', 'foreign2', 'id'), 'foreign1')->wasThrown('already defined same');
+        that($schema)->addForeignKey($newFK(null, 'foreign2', 'foreign2', 'foreign2'), 'foreign1')->wasThrown('column for foreign1');
+        that($schema)->addForeignKey($newFK(null, 'foreign2', 'foreign1', 'foreign2'), 'foreign2')->wasThrown('column for foreign1');
     }
 
     /**
@@ -564,9 +564,9 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $schema->ignoreForeignKey('fk_hogera');
         $this->assertEmpty($schema->getTableForeignKeys('foreign'));
 
-        $this->assertException('undefined foreign key', L($schema)->ignoreForeignKey('undefined'));
-        $this->assertException('localTable is not set', L($schema)->ignoreForeignKey($newFK(null, 'id', 'foreign2', 'id'), null));
-        $this->assertException('matched foreign key', L($schema)->ignoreForeignKey($newFK(null, 'notfound', 'metatest', 'notfound'), 'foreign'));
+        that($schema)->ignoreForeignKey('undefined')->wasThrown('undefined foreign key');
+        that($schema)->ignoreForeignKey($newFK(null, 'id', 'foreign2', 'id'), null)->wasThrown('localTable is not set');
+        that($schema)->ignoreForeignKey($newFK(null, 'notfound', 'metatest', 'notfound'), 'foreign')->wasThrown('matched foreign key');
     }
 
     /**

@@ -1,43 +1,5 @@
 <?php
 
-namespace {
-
-    /**
-     * @template T
-     * @param T $object
-     * @return T
-     */
-    function L($object)
-    {
-        return new class($object) {
-            private $object;
-
-            public function __construct($object)
-            {
-                $this->object = $object;
-            }
-
-            public function __get($name)
-            {
-                return function () use ($name) {
-                    return $this->object->$name;
-                };
-            }
-
-            public function __call($name, $args)
-            {
-                return function () use ($name, $args) {
-                    $params = [];
-                    for ($i = 0, $l = count($args); $i < $l; $i++) {
-                        $params[$i] = &$args[$i];
-                    }
-                    return call_user_func_array([$this->object, $name], $params);
-                };
-            }
-        };
-    }
-}
-
 namespace ryunosuke\Test {
 
     use ryunosuke\polyfill\enum\IntBackedEnum;

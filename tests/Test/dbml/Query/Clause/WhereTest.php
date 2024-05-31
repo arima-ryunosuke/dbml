@@ -442,15 +442,9 @@ class WhereTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertExpression(Where::and(['id IN(?)' => $database->select('test.id')])($database), 'id IN((SELECT test.id FROM test))', []);
         $this->assertExpression(Where::and(['id' => $database->select('test.id')])($database), 'id IN (SELECT test.id FROM test)', []);
 
-        $this->assertException(
-            new \InvalidArgumentException('notfound search string'),
-            fn() => Where::build($database, ['hoge = ?' => [[1, 2], 3]]),
-        );
+        that(Where::class)::build($database, ['hoge = ?' => [[1, 2], 3]])->wasThrown(new \InvalidArgumentException('notfound search string'));
 
-        $this->assertException(
-            new \UnexpectedValueException('both specified'),
-            fn() => Where::build($database, ['col:OP' => Operator::is(null)]),
-        );
+        that(Where::class)::build($database, ['col:OP' => Operator::is(null)])->wasThrown(new \UnexpectedValueException('both specified'));
     }
 
     public static function assertExpression(Queryable $expr, $expectedQuery, array $expectedparams)

@@ -318,7 +318,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals($expected, $cplatform->truncateString('あいうえお', $cblob));
 
         if ($platform instanceof MySQLPlatform) {
-            $this->assertException('integer is not supported', L($cplatform)->truncateString('dummy', new Column('dummy', Type::getType('integer'))));
+            that($cplatform)->truncateString('dummy', new Column('dummy', Type::getType('integer')))->wasThrown('integer is not supported');
         }
     }
 
@@ -398,7 +398,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         }
         else {
             $expected = new DBALException('is not supported by platform');
-            $this->assertException($expected, L($cplatform)->getIdentityInsertSQL('t_table', true));
+            that($cplatform)->getIdentityInsertSQL('t_table', true)->wasThrown($expected);
         }
     }
 
@@ -612,7 +612,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         }
         if ($platform instanceof SQLServerPlatform) {
             $expected = new DBALException('is not supported by platform');
-            $this->assertException($expected, L($cplatform)->getGroupConcatSyntax('id'));
+            that($cplatform)->getGroupConcatSyntax('id')->wasThrown($expected);
         }
     }
 
@@ -693,7 +693,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getConcatExpression($cplatform, $platform)
     {
-        $this->assertException('greater than', L($cplatform)->getConcatExpression());
+        that($cplatform)->getConcatExpression()->wasThrown('greater than');
 
         $this->assertExpression($cplatform->getConcatExpression('id'), 'id', []);
 
@@ -724,7 +724,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         }
 
         if ($expected === null) {
-            $this->assertException('is not supported', L($cplatform)->getRegexpExpression());
+            that($cplatform)->getRegexpExpression()->wasThrown('is not supported');
         }
         else {
             $this->assertEquals($expected, $cplatform->getRegexpExpression());
@@ -788,7 +788,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertExpression($cplatform->getSleepExpression(10), 'pg_sleep(?)', [10]);
         }
         else {
-            $this->assertException('is not support', L($cplatform)->getSleepExpression(99));
+            that($cplatform)->getSleepExpression(99)->wasThrown('is not supported');
         }
     }
 
@@ -816,7 +816,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertExpression($cplatform->getRandomExpression(1234), 'RAND(CHECKSUM(NEWID()))', []);
         }
         else {
-            $this->assertException('is not support', L($cplatform)->getRandomExpression(null));
+            that($cplatform)->getRandomExpression(null)->wasThrown('is not supported');
         }
     }
 
@@ -844,7 +844,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         ];
 
         if (!isset($expected[$cplatform->getName()])) {
-            $this->assertException('is not support', L($cplatform)->getResetSequenceExpression('t_table', 'c_sol', 99));
+            that($cplatform)->getResetSequenceExpression('t_table', 'c_sol', 99)->wasThrown('is not supported');
         }
         else {
             $this->assertEquals($expected[$cplatform->getName()], $cplatform->getResetSequenceExpression('t_table', 'c_sol', 99));
@@ -896,7 +896,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertEquals('IGNORE', $cplatform->getIgnoreSyntax());
         }
         else {
-            $this->assertException('is not supported', L($cplatform)->getIgnoreSyntax());
+            that($cplatform)->getIgnoreSyntax()->wasThrown('is not supported');
         }
     }
 

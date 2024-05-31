@@ -36,46 +36,44 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test_split()
     {
-        $split = self::forcedCallize(TableDescriptor::class, '_split');
-
-        $this->assertEquals([
+        that(TableDescriptor::class)::_split('t_table', ['*'])->is([
             't_table' => ['*'],
-        ], $split('t_table', ['*']));
+        ]);
 
-        $this->assertEquals([
+        that(TableDescriptor::class)::_split('t_parent.id, name', ['*'])->is([
             't_parent' => ['id', 'name'],
-        ], $split('t_parent.id, name', ['*']));
+        ]);
 
-        $this->assertEquals([
+        that(TableDescriptor::class)::_split('t_parent P.id, P.name', ['*'])->is([
             't_parent P' => ['id', 'name'],
-        ], $split('t_parent P.id, P.name', ['*']));
+        ]);
 
-        $this->assertEquals([
+        that(TableDescriptor::class)::_split('t_parent, t_child.id', ['*'])->is([
             't_parent' => ['*'],
             't_child'  => ['id'],
-        ], $split('t_parent, t_child.id', ['*']));
+        ]);
 
-        $this->assertEquals([
+        that(TableDescriptor::class)::_split('t_parent:fkey.* + t_child.id', [])->is([
             't_parent:fkey' => ['*'],
             '+t_child'      => ['id'],
-        ], $split('t_parent:fkey.* + t_child.id', []));
+        ]);
 
-        $this->assertEquals([
+        that(TableDescriptor::class)::_split('t_parent(P.flg=1) P.* + t_child.id', [])->is([
             't_parent(P.flg=1) P' => ['*'],
             '+t_child'            => ['id'],
-        ], $split('t_parent(P.flg=1) P.* + t_child.id', []));
+        ]);
 
-        $this->assertEquals([
+        that(TableDescriptor::class)::_split('+t_article.**', [])->is([
             '+t_article' => ['**'],
-        ], $split('+t_article.**', []));
+        ]);
 
-        $this->assertEquals([
+        that(TableDescriptor::class)::_split('t_parent/t_child.id', [])->is([
             't_parent' => [
                 't_child' => ['id'],
             ],
-        ], $split('t_parent/t_child.id', []));
+        ]);
 
-        $this->assertException('not supports specify other schema', $split, 'schema.table.column', ['*']);
+        that(TableDescriptor::class)::_split('schema.table.column', ['*'])->wasThrown('not supports specify other schema');
     }
 
     /**
@@ -471,7 +469,7 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertSame(null, $td->fkeyname);
         $this->assertSame([], $td->condition);
 
-        $this->assertException('is undefined', L($td)->hogera);
+        that($td)->hogera->wasThrown('is undefined');
     }
 
     /**
@@ -522,7 +520,7 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
         ]);
 
         $td = new TableDescriptor($database, 'test[id:?] T', []);
-        $this->assertException('short', L($td)->bind($database, []));
-        $this->assertException('long', L($td)->bind($database, [1, 2]));
+        that($td)->bind($database, [])->wasThrown('short');
+        that($td)->bind($database, [1, 2])->wasThrown('long');
     }
 }

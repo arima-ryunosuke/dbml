@@ -48,7 +48,7 @@ class PaginatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertSame(0, $paginator->getPageCount());
         $this->assertSame([], $paginator->getPageRange(5));
 
-        $this->assertException(new \InvalidArgumentException('must be positive number'), L($paginator)->paginate(2, 0));
+        that($paginator)->paginate(2, 0)->wasThrown(new \InvalidArgumentException('must be positive number'));
     }
 
     /**
@@ -139,7 +139,7 @@ class PaginatorTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // 12 ページはセーフだが 13 ページは例外
         $this->assertEquals(12, $paginator->paginate(12, 9)->getPageCount());
-        $this->assertException('too long', L($paginator->paginate(13, 9))->getPageCount());
+        that($paginator)->paginate(13, 9)->getPageCount()->wasThrown('too long');
     }
 
     /**

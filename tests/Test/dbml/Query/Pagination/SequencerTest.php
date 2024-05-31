@@ -45,9 +45,9 @@ class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
         $sequencer->sequence(['id' => 1], 5);
         $this->assertCount(5, $sequencer->getItems());
 
-        $this->assertException(new \InvalidArgumentException('length must be 1'), L($sequencer)->sequence([], 2));
+        that($sequencer)->sequence([], 2)->wasThrown(new \InvalidArgumentException('length must be 1'));
 
-        $this->assertException(new \InvalidArgumentException('must be positive number'), L($sequencer)->sequence(['id' => 0], 0));
+        that($sequencer)->sequence(['id' => 0], 0)->wasThrown(new \InvalidArgumentException('must be positive number'));
     }
 
     /**

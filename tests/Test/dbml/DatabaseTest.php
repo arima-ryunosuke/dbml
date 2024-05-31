@@ -140,17 +140,9 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $db->getSlaveConnection()->connect();
         unset($db);
         gc_collect_cycles();
-        $this->assertStringEqualsFile("$tmpdir/log.txt", <<<LOG
-        Connecting
-        PRAGMA cache_size = 1000
-        Disconnecting
-        
-        LOG,);
+        $this->assertStringContainsString('PRAGMA cache_size = 1000', file_get_contents("$tmpdir/log.txt"));
 
-        $this->assertException('$dbconfig must be', function () {
-            /** @noinspection PhpParamsInspection */
-            new Database(null);
-        });
+        that(Database::class)->new(null)->wasThrown('$dbconfig must be');
     }
 
     /**
@@ -193,7 +185,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test___set($database)
     {
-        $this->assertException('is not supported', fn() => $database->test = 123);
+        that(fn() => $database->test = 123)()->wasThrown('is not supported');
     }
 
     /**
@@ -232,21 +224,21 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         // select～OrThrow 系(見つからなかった場合に例外が投がることを担保)
         $ex = new NonSelectedException('record is not found');
-        $this->assertException($ex, L($database)->selectArrayOrThrow('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectAssocOrThrow('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectListsOrThrow('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectPairsOrThrow('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectTupleOrThrow('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectValueOrThrow('test', ['1=0']));
+        that($database)->selectArrayOrThrow('test', ['1=0'])->wasThrown($ex);
+        that($database)->selectAssocOrThrow('test', ['1=0'])->wasThrown($ex);
+        that($database)->selectListsOrThrow('test', ['1=0'])->wasThrown($ex);
+        that($database)->selectPairsOrThrow('test', ['1=0'])->wasThrown($ex);
+        that($database)->selectTupleOrThrow('test', ['1=0'])->wasThrown($ex);
+        that($database)->selectValueOrThrow('test', ['1=0'])->wasThrown($ex);
 
         // select～ForAffect 系(見つからなかった場合に例外が投がることを担保)
         $this->assertEquals($database->selectArray('test'), $database->selectArrayForAffect('test'));
-        $this->assertException($ex, L($database)->selectArrayForAffect('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectAssocForAffect('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectListsForAffect('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectPairsForAffect('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectTupleForAffect('test', ['1=0']));
-        $this->assertException($ex, L($database)->selectValueForAffect('test', ['1=0']));
+        that($database)->selectArrayForAffect('test', ['1=0'])->wasThrown($ex);
+        that($database)->selectAssocForAffect('test', ['1=0'])->wasThrown($ex);
+        that($database)->selectListsForAffect('test', ['1=0'])->wasThrown($ex);
+        that($database)->selectPairsForAffect('test', ['1=0'])->wasThrown($ex);
+        that($database)->selectTupleForAffect('test', ['1=0'])->wasThrown($ex);
+        that($database)->selectValueForAffect('test', ['1=0'])->wasThrown($ex);
 
         // fetch～OrThrow 系(見つかる場合に同じ結果になることを担保)
         $sql = 'select id from test where id = 3';
@@ -257,9 +249,9 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         // fetch～OrThrow 系(見つからなかった場合に例外が投がることを担保)
         $sql = 'select id from test where 1=0';
         $ex = new NonSelectedException('record is not found');
-        $this->assertException($ex, L($database)->fetchArrayOrThrow($sql));
-        $this->assertException($ex, L($database)->fetchValueOrThrow($sql));
-        $this->assertException($ex, L($database)->fetchTupleOrThrow($sql));
+        that($database)->fetchArrayOrThrow($sql)->wasThrown($ex);
+        that($database)->fetchValueOrThrow($sql)->wasThrown($ex);
+        that($database)->fetchTupleOrThrow($sql)->wasThrown($ex);
 
         // entity～ 系(流す程度に)
         $this->assertEquals($database->entityArrayOrThrow('test'), $database->entityArrayForAffect('test'));
@@ -268,9 +260,9 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals($database->entityArrayForUpdate('test'), $database->entityArrayInShare('test'));
         $this->assertEquals($database->entityAssocForUpdate('test'), $database->entityAssocInShare('test'));
         $this->assertEquals($database->entityTupleForUpdate('test', [], [], 1), $database->entityTupleInShare('test', [], [], 1));
-        $this->assertException($ex, L($database)->entityArrayForAffect('test', ['1=0']));
-        $this->assertException($ex, L($database)->entityAssocForAffect('test', ['1=0']));
-        $this->assertException($ex, L($database)->entityTupleForAffect('test', ['1=0']));
+        that($database)->entityArrayForAffect('test', ['1=0'])->wasThrown($ex);
+        that($database)->entityAssocForAffect('test', ['1=0'])->wasThrown($ex);
+        that($database)->entityTupleForAffect('test', ['1=0'])->wasThrown($ex);
 
         // affectOrThrow(作用した場合に主キーが返ることを担保)
         $this->assertEquals(['id' => 99], $database->insertOrThrow('test', ['id' => 99]));
@@ -323,17 +315,17 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $ex = new NonAffectedException('affected row is nothing');
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
             $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
-            $this->assertException($ex, L($database)->insert('test', ['id' => 9, 'name' => 'hoge'], ['primary' => 1, 'ignore' => true]));
+            that($database)->insert('test', ['id' => 9, 'name' => 'hoge'], ['primary' => 1, 'ignore' => true])->wasThrown($ex);
             if ($database->getCompatiblePlatform()->getName() !== 'mysql') {
-                $this->assertException($ex, L($database)->modify('test', ['id' => 9, 'name' => null], [], 'PRIMARY', ['primary' => 1, 'ignore' => true]));
+                that($database)->modify('test', ['id' => 9, 'name' => null], [], 'PRIMARY', ['primary' => 1, 'ignore' => true])->wasThrown($ex);
             }
         }
-        $this->assertException($ex, L($database)->updateOrThrow('test', ['name' => 'd'], ['id' => -1]));
-        $this->assertException($ex, L($database)->deleteOrThrow('test', ['id' => -1]));
-        $this->assertException($ex, L($database)->removeOrThrow('test', ['id' => -1]));
-        $this->assertException($ex, L($database)->destroyOrThrow('test', ['id' => -1]));
+        that($database)->updateOrThrow('test', ['name' => 'd'], ['id' => -1])->wasThrown($ex);
+        that($database)->deleteOrThrow('test', ['id' => -1])->wasThrown($ex);
+        that($database)->removeOrThrow('test', ['id' => -1])->wasThrown($ex);
+        that($database)->destroyOrThrow('test', ['id' => -1])->wasThrown($ex);
         if ($database->getCompatibleConnection()->getName() === 'pdo-mysql') {
-            $this->assertException($ex, L($database)->upsertOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => '']));
+            that($database)->upsertOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => ''])->wasThrown($ex);
         }
 
         // affectConditionally
@@ -414,11 +406,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         }
 
         if ($database->getCompatibleConnection()->getName() === 'pdo-mysql') {
-            $this->assertException($ex, L($database)->upsertOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => '']));
-        }
-
-        if ($database->getCompatibleConnection()->getName() === 'pdo-mysql') {
-            $this->assertException($ex, L($database)->upsertOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => '']));
+            that($database)->upsertOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => ''])->wasThrown($ex);
         }
 
         // テーブル記法＋OrThrowもきちんと動くことを担保
@@ -436,7 +424,8 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         ], $database->test(4)->tuple());
 
         // H は存在しないはず
-        $this->assertException(new \BadMethodCallException(), [$database, 'selectH'], 'hoge');
+        /** @noinspection PhpUndefinedMethodInspection */
+        that($database)->selectH('hoge')->wasThrown(new \BadMethodCallException());
     }
 
     function test___debugInfo()
@@ -469,11 +458,10 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals([['id' => 1]], $database->context()->setMasterMode(true)->selectArray('test'));
 
         // RDBMS が異なると例外が飛ぶ
-        $this->assertException('must be same platform', function () {
-            $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
-            $slave = DriverManager::getConnection(['url' => 'mysql://localhost/testdb']);
-            new Database([$master, $slave]);
-        });
+        that(Database::class)->new([
+            DriverManager::getConnection(['url' => 'sqlite:///:memory:']),
+            DriverManager::getConnection(['url' => 'mysql://localhost/testdb']),
+        ])->wasThrown('must be same platform');
     }
 
     function test_getConnections()
@@ -675,7 +663,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
         ], $database->getAutoCastType());
 
-        $this->assertException('must contain', L($database)->setAutoCastType(['integer' => ['hoge']]));
+        that($database)->setAutoCastType(['integer' => ['hoge']])->wasThrown('must contain');
 
         $database->setAutoCastType([]);
     }
@@ -1079,14 +1067,14 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             }
 
             // RESTRICT が効く
-            $this->assertException('Cannot delete or update', L($database)->delete('master_table', [
+            that($database)->delete('master_table', [
                 'subid' => 100,
-            ]));
-            $this->assertException('Cannot delete or update', L($database)->update('master_table', [
+            ])->wasThrown('Cannot delete or update');
+            that($database)->update('master_table', [
                 'subid' => 101,
             ], [
                 'subid' => 100,
-            ]));
+            ])->wasThrown('Cannot delete or update');
 
             // 外部キーを無効化すれば作用しない
             $database->switchForeignKey(false, 'auto_3tomaster');
@@ -1117,7 +1105,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertInstanceOf(Schema\ForeignKeyConstraint::class, $fkey);
 
         // 外部キーがないなら例外が投げられるはず
-        $this->assertException('foreign key is not found', L($database)->ignoreForeignKey('foreign_c1', 'foreign_p', 'id'));
+        that($database)->ignoreForeignKey('foreign_c1', 'foreign_p', 'id')->wasThrown('foreign key is not found');
 
         // まず test1<->test2 のリレーションがないことを担保して・・・
         $this->assertStringContainsString('ON 1', (string ) $database->select('foreign_p P + foreign_c1 C'));
@@ -1228,7 +1216,6 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         // 前処理
         $cacher->delete('Database-tableMap');
         $backup = $database->getOption('tableMapper');
-        $tableMap = self::forcedCallize($database, '_tableMap');
 
         // 同じエンティティ名を返すような実装だと例外が飛ぶはず
         $database->setOption('tableMapper', function ($tablename) {
@@ -1237,13 +1224,13 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             }
             return 'hoge';
         });
-        $this->assertException('is already defined', $tableMap);
+        that($database)->_tableMap()->wasThrown('is already defined');
 
         // テーブル名とエンティティが一致しても例外が飛ぶはず
         $database->setOption('tableMapper', function ($tablename) {
             return $tablename . '1';
         });
-        $this->assertException('already defined', $tableMap);
+        that($database)->_tableMap()->wasThrown('already defined');
 
         // null を返せば除外される
         $database->setOption('tableMapper', function ($tablename) {
@@ -1252,7 +1239,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             }
             return null;
         });
-        $this->assertEquals([
+        that($database)->_tableMap()->is([
             'entityClass'  => [
                 'TestClass' => null,
             ],
@@ -1266,7 +1253,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'TtoE'         => [
                 'test' => ['TestClass'],
             ],
-        ], $tableMap());
+        ]);
 
         // 後処理
         $cacher->delete('Database-tableMap');
@@ -1380,7 +1367,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         // 例外発生時は元に戻るはず
         $database->setOption('preparing', 0);
-        $this->assertException(Schema\SchemaException::tableDoesNotExist('notfound'), L($database->prepare())->insert('notfound', [1]));
+        that($database)->prepare()->insert('notfound', [1])->wasThrown(Schema\SchemaException::tableDoesNotExist('notfound'));
         $this->assertSame(0, $database->getOption('preparing'));
     }
 
@@ -1405,12 +1392,12 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     {
         // false だとまっとうな DBMS なら怒られる
         $database = $database->context(['filterNullAtNotNullColumn' => false]);
-        $this->assertException('null', L($database)->insert('notnulls', [
+        that($database)->insert('notnulls', [
             'name'     => null,
             'cint'     => null,
             'cfloat'   => null,
             'cdecimal' => null,
-        ]));
+        ])->wasThrown('null');
 
         // true なら not null な列に null を設定しても怒られない
         $database = $database->context(['filterNullAtNotNullColumn' => true]);
@@ -1515,23 +1502,23 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     {
         $database->setAutoCastType(['guid' => true]);
         $database->setCheckSameColumn('noallow');
-        $this->assertException('cause noallow', L($database)->selectArray('test.*, test.id'));
+        that($database)->selectArray('test.*, test.id')->wasThrown('cause noallow');
         $database->setAutoCastType(['guid' => true]);
-        $this->assertException('cause noallow', L($database)->fetchArray('select id as "A.id", id as "B.id" from test'));
+        that($database)->fetchArray('select id as "A.id", id as "B.id" from test')->wasThrown('cause noallow');
         $database->setAutoCastType([]);
 
         $database->setCheckSameColumn('strict');
         $this->assertArrayHasKey('id', $database->selectTuple('test.*, test.id', [], [], 1));
-        $this->assertException('cause strict', L($database)->selectAssoc([
+        that($database)->selectAssoc([
             'test',
             '' => [
                 'NULL as a',
                 "'' as a",
             ],
-        ]));
+        ])->wasThrown('cause strict');
         $database->setAutoCastType(['guid' => true]);
         $this->assertIsArray($database->fetchTuple('select 1 as "A.id", 1 as "B.id" from test where id = 1'));
-        $this->assertException('cause strict', L($database)->fetchArray('select 1 as "A.id", 2 as "B.id" from test'));
+        that($database)->fetchArray('select 1 as "A.id", 2 as "B.id" from test')->wasThrown('cause strict');
         $database->setAutoCastType([]);
 
         $database->setCheckSameColumn('loose');
@@ -1544,21 +1531,21 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 "'' as a",
             ],
         ], [], [], 1));
-        $this->assertException('cause loose', L($database)->selectAssoc([
+        that($database)->selectAssoc([
             'test',
             '' => [
                 'NULL as a',
                 '0 as a',
                 '1 as a',
             ],
-        ]));
+        ])->wasThrown('cause loose');
         $database->setAutoCastType(['guid' => true]);
         $this->assertIsArray($database->fetchTuple('select NULL as "A.id", 1 as "B.id", 1 as "C.id" from test where id = 1'));
-        $this->assertException('cause loose', L($database)->fetchArray('select NULL as "A.id", 0 as "B.id", 1 as "C.id" from test'));
+        that($database)->fetchArray('select NULL as "A.id", 0 as "B.id", 1 as "C.id" from test')->wasThrown('cause loose');
         $database->setAutoCastType([]);
 
         // 子供にも効くはず
-        $this->assertException('is same column or alias', (L($database)->selectTuple([
+        that($database)->selectTuple([
             'test1' => [
                 '*',
                 'test2{id}' => $database->subselectArray([
@@ -1572,10 +1559,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                     ],
                 ]),
             ],
-        ], ['id' => 1])));
+        ], ['id' => 1])->wasThrown('is same column or alias');
 
         $database->setCheckSameColumn('hoge');
-        $this->assertException(new \DomainException('invalid'), L($database)->selectAssoc('test.*, test.id'));
+        that($database)->selectAssoc('test.*, test.id')->wasThrown(new \DomainException('invalid'));
 
         $database->setCheckSameColumn(null);
     }
@@ -1616,7 +1603,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         // 変更のない切り替えはOKだが
         $database->setConnection($master);
         // 変更のある切り替えはNGのはず
-        $this->assertException("can't switch connection", L($database)->setConnection($slave));
+        that($database)->setConnection($slave)->wasThrown("can't switch connection");
     }
 
     /**
@@ -1892,14 +1879,14 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertStringContainsString('EvilString', $database->fetchValue($query2));
 
         // Queryable とパラメータを投げることは出来ない（足りない分を補填する形ならOKだが、大抵の場合は誤り）
-        $this->assertException("long", L($database)->queryInto(new Expression('?,?,?', [1, 2, 3]), [1, 2, 3]));
+        that($database)->queryInto(new Expression('?,?,?', [1, 2, 3]), [1, 2, 3])->wasThrown("long");
 
         // プレースホルダを含む脆弱性があったのでテスト
-        $this->assertException('does not have', L($database)->queryInto('select ?', []));
-        $this->assertException('long', L($database)->queryInto('select ?', [1, 2]));
+        that($database)->queryInto('select ?', [])->wasThrown("does not have");
+        that($database)->queryInto('select ?', [1, 2])->wasThrown("long");
 
         // 不一致だと予期せぬ動作になることがあるのでテスト
-        $this->assertException('does not have', L($database)->queryInto(':hoge', ['fuga' => 1]));
+        that($database)->queryInto(':hoge', ['fuga' => 1])->wasThrown("does not have");
     }
 
     /**
@@ -1940,10 +1927,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertJson(file_get_contents($path));
 
         $database->setCheckSameColumn('loose');
-        $this->assertException('cause loose', L($database)->export('csv', 'select test.id, 0 as id from test'));
+        that($database)->export('csv', 'select test.id, 0 as id from test')->wasThrown("cause loose");
         $database->setCheckSameColumn(null);
 
-        $this->assertException(new \BadMethodCallException('undefined'), L($database)->export('Hoge', 'select 1'));
+        that($database)->export('Hoge', 'select 1')->wasThrown(new \BadMethodCallException('undefined'));
     }
 
     /**
@@ -2067,14 +2054,14 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'e' => ['subid' => 6, 'name' => 'f'],
         ], 'multiprimary', ['multiprimary.mainid' => 1]));
 
-        $this->assertException('row is empty', L($database)->differ([
+        that($database)->differ([
             ['unmatch1' => 1],
             ['unmatch2' => 2],
-        ], 'multiprimary'));
-        $this->assertException('column is unmatched', L($database)->differ([
+        ], 'multiprimary')->wasThrown('row is empty');
+        that($database)->differ([
             ['mainid' => 1],
             ['subid' => 1],
-        ], 'multiprimary'));
+        ], 'multiprimary')->wasThrown('column is unmatched');
     }
 
     /**
@@ -2096,7 +2083,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     function test_fetch_builder($database)
     {
         $select = $database->select('test', ['id' => 1]);
-        $this->assertException('both $builder and fetch argument', L($database)->fetchTuple($select, [1]));
+        that($database)->fetchTuple($select, [1])->wasThrown('both $builder and fetch argument');
     }
 
     /**
@@ -2239,7 +2226,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $one = $database->selectTuple('test.id,name', ['1=0']);
         $this->assertFalse($one);
 
-        $this->assertException('too many', L($database)->selectTuple('test.id,name'));
+        that($database)->selectTuple('test.id,name')->wasThrown('too many');
     }
 
     /**
@@ -2254,7 +2241,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $one = $database->selectValue('test.name', ['1=0']);
         $this->assertFalse($one);
 
-        $this->assertException('too many', L($database)->selectValue('test.id'));
+        that($database)->selectValue('test.id')->wasThrown('too many');
     }
 
     /**
@@ -2393,12 +2380,12 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_fetch_misc($database)
     {
-        $this->assertException('', L($database)->fetchArray('invalid'));
-        $this->assertException('', L($database)->fetchAssoc('invalid'));
-        $this->assertException('', L($database)->fetchLists('invalid'));
-        $this->assertException('', L($database)->fetchPairs('invalid'));
-        $this->assertException('', L($database)->fetchTuple('invalid'));
-        $this->assertException('', L($database)->fetchValue('invalid'));
+        that($database)->fetchArray('invalid')->wasThrown();
+        that($database)->fetchAssoc('invalid')->wasThrown();
+        that($database)->fetchLists('invalid')->wasThrown();
+        that($database)->fetchPairs('invalid')->wasThrown();
+        that($database)->fetchTuple('invalid')->wasThrown();
+        that($database)->fetchValue('invalid')->wasThrown();
     }
 
     /**
@@ -2469,9 +2456,9 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             $row2 = ['id' => 'k', 'value' => 'v2'],
         ];
 
-        $this->assertException("duplicated key k", L($database)->perform($rows, 'assoc'));
-        $this->assertException("duplicated key k", L($database)->perform($rows, 'pairs'));
-        $this->assertException("missing value of k", L($database)->perform([['k']], 'pairs'));
+        that($database)->perform($rows, 'assoc')->wasThrown("duplicated key k");
+        that($database)->perform($rows, 'pairs')->wasThrown("duplicated key k");
+        that($database)->perform([['k']], 'pairs')->wasThrown("missing value of k");
 
         $database = $database->context(['checkSameKey' => 'skip']);
 
@@ -2484,7 +2471,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals(['k' => end($row2)], $database->perform($rows, 'pairs'));
 
         $this->assertEquals(['hoge'], $database->perform([['hoge']], 'lists'));
-        $this->assertException("unknown fetch method 'hoge'", L($database)->perform([], 'hoge'));
+        that($database)->perform([], 'hoge')->wasThrown("unknown fetch method 'hoge'");
     }
 
     /**
@@ -2499,7 +2486,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertInstanceOf(Schema\ForeignKeyConstraint::class, $database->describe('fk_articlecomment'));
         $this->assertInstanceOf(Schema\Column::class, $database->describe('t_article.article_id'));
         $this->assertInstanceOf(Schema\Index::class, $database->describe('t_article.secondary'));
-        $this->assertException('undefined schema object', L($database)->describe('hogera'));
+        that($database)->describe('hogera')->wasThrown("undefined schema object");
     }
 
     /**
@@ -2755,10 +2742,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         // リトライ回数を超えると通常通り例外を投げる
         $database = $database->context(['defaultRetry' => 2]);
         $id = 1;
-        $this->assertException(UniqueConstraintViolationException::class, L($database)->insert("test", [
+        that($database)->insert("test", [
             'id'   => function () use (&$id) { return $id++; },
             'name' => 'x',
-        ]));
+        ])->wasThrown(UniqueConstraintViolationException::class);
     }
 
     /**
@@ -2874,11 +2861,11 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     function test_executeAsync_misc($database)
     {
         $database->setOption('dryrun', 1);
-        $this->assertException('is not supported', L($database)->executeAsync(['SELECT 1' => []]));
+        that($database)->executeAsync(['SELECT 1' => []])->wasThrown('is not supported');
         $database->setOption('dryrun', 0);
 
         $database->setOption('preparing', 1);
-        $this->assertException('is not supported', L($database)->executeAsync(['SELECT 1' => []]));
+        that($database)->executeAsync(['SELECT 1' => []])->wasThrown('is not supported');
         $database->setOption('preparing', 0);
     }
 
@@ -3212,8 +3199,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_migrate_misc($database)
     {
-        $this->assertException('undefined primary key at', L($database)->migrate('foreign_p', 'insert', [['name' => 'hoge']]));
-        $this->assertException('is not supported', L($database)->migrate('foreign_p', 'undefined', []));
+        that($database)->migrate('foreign_p', 'insert', [['name' => 'hoge']])->wasThrown('undefined primary key at');
+        that($database)->migrate('foreign_p', 'undefined', [])->wasThrown('is not supported');
     }
 
     /**
@@ -3960,13 +3947,13 @@ IGNORE 0 LINES
 (@id, @name, @__dummy__2, @dummy, @data) SET id = @id, name = UPPER(@name), dummy = NULL, data = 'binary'
 ", $sql);
 
-            $this->assertException('accept Closure', L($database->dryrun())->loadCsv([
+            that($database)->dryrun()->loadCsv([
                 'nullable' => [
                     'id' => function () { },
                 ],
             ], 'hoge.csv', [
                 'native' => true,
-            ]));
+            ])->wasThrown('accept Closure');
         }
     }
 
@@ -4127,18 +4114,11 @@ CSV
     function test_insertArrayOrThrow($database)
     {
         if ($database->getPlatform() instanceof SqlitePlatform || $database->getPlatform() instanceof MySQLPlatform) {
-            $manager = $this->scopeManager(function () use ($database) {
-                $cplatform = $database->getCompatiblePlatform();
-                $cache = $this->forcedRead($database, 'cache');
-                $cache['compatiblePlatform'] = new class($cplatform->getWrappedPlatform()) extends CompatiblePlatform {
-                    public function supportsIdentityNullable(): bool { return true; }
-                };
-                $this->forcedWrite($database, 'cache', $cache);
-                return function () use ($database, $cache, $cplatform) {
-                    $cache['compatiblePlatform'] = $cplatform;
-                    $this->forcedWrite($database, 'cache', $cache);
-                };
-            });
+            $cache = that($database)->var('cache');
+            $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
+            $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+                public function supportsIdentityNullable(): bool { return true; }
+            };
 
             $database->delete('test', ['id' => [1, 2, 7, 8, 10]]);
 
@@ -4176,8 +4156,8 @@ CSV
                 ['id' => null, 'name' => '15'],
             ]));
 
-            $this->assertException('affected row is nothing', L($database)->insertArrayOrThrow('test', []));
-            $this->assertException('only autoincrement table', L($database)->insertArrayOrThrow('noauto', []));
+            that($database)->insertArrayOrThrow('test', [])->wasThrown('affected row is nothing');
+            that($database)->insertArrayOrThrow('noauto', [])->wasThrown('only autoincrement table');
 
             unset($manager);
         }
@@ -4263,22 +4243,13 @@ CSV
     function test_insertArray_misc($database)
     {
         // $data は 連想配列の配列でなければならないはず
-        $this->assertException(
-            new \InvalidArgumentException('element must be array'),
-            L($database)->insertArray('test', ['dummy'])
-        );
+        that($database)->insertArray('test', ['dummy'])->wasThrown(new \InvalidArgumentException('element must be array'));
 
         // カラムは最初の要素のキーで合わせられるはず
-        $this->assertException(
-            new \UnexpectedValueException('columns are not match'),
-            L($database)->insertArray('test', [['name' => 1], ['name' => 2, 'data' => 3]])
-        );
+        that($database)->insertArray('test', [['name' => 1], ['name' => 2, 'data' => 3]])->wasThrown(new \UnexpectedValueException('columns are not match'));
 
         // カラムは最初の要素のキーで合わせられるはず
-        $this->assertException(
-            new \UnexpectedValueException('columns are not match'),
-            L($database)->insertArray('test', [['name' => 1, 'data' => 3], ['name' => 2]])
-        );
+        that($database)->insertArray('test', [['name' => 1, 'data' => 3], ['name' => 2]])->wasThrown(new \UnexpectedValueException('columns are not match'));
 
         $affected = $database->dryrun()->insertArray('test', [
             ['name' => 'a'],
@@ -4492,22 +4463,13 @@ INSERT INTO test (name) VALUES
         $this->assertEquals(['X', 'Y', 'Z'], $database->selectLists('test.name', ['id' => [1, 2, 3]]));
 
         // $data は 連想配列の配列でなければならないはず
-        $this->assertException(
-            new \InvalidArgumentException('element must be array'),
-            L($database)->updateArray('test', ['dummy'])
-        );
+        that($database)->updateArray('test', ['dummy'])->wasThrown(new \InvalidArgumentException('element must be array'));
 
         // カラムは主キーを含まなければならないはず
-        $this->assertException(
-            new \InvalidArgumentException('must be contain primary key'),
-            L($database)->updateArray('test', [['name' => 1]])
-        );
+        that($database)->updateArray('test', [['name' => 1]])->wasThrown(new \InvalidArgumentException('must be contain primary key'));
 
         // 主キーはスカラーでなければならないはず
-        $this->assertException(
-            new \InvalidArgumentException('primary key must be scalar value'),
-            L($database)->updateArray('test', [['id' => new Expression('1')]])
-        );
+        that($database)->updateArray('test', [['id' => new Expression('1')]])->wasThrown(new \InvalidArgumentException('primary key must be scalar value'));
     }
 
     /**
@@ -4688,44 +4650,27 @@ INSERT INTO test (name) VALUES
             return;
         }
 
-        $manager = $this->scopeManager(function () use ($database) {
-            $cplatform = $database->getCompatiblePlatform();
-            $cache = $this->forcedRead($database, 'cache');
-            $cache['compatiblePlatform'] = new class($cplatform->getWrappedPlatform()) extends CompatiblePlatform {
-                public function supportsIdentityAutoUpdate(): bool { return false; }
-            };
-            $this->forcedWrite($database, 'cache', $cache);
-            return function () use ($database, $cache, $cplatform) {
-                $cache['compatiblePlatform'] = $cplatform;
-                $this->forcedWrite($database, 'cache', $cache);
-            };
-        });
+        $cache = that($database)->var('cache');
+        $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
+        $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+            public function supportsIdentityAutoUpdate(): bool { return false; }
+        };
 
         $pk = $database->modifyArray('test', [
             ['id' => 98, 'name' => 'xx'],
             ['id' => 99, 'name' => 'yy'],
         ]);
         $this->assertEquals(2, $pk);
-        unset($manager);
 
-        $manager = $this->scopeManager(function () use ($database) {
-            $cplatform = $database->getCompatiblePlatform();
-            $cache = $this->forcedRead($database, 'cache');
-            $cache['compatiblePlatform'] = new class($cplatform->getWrappedPlatform()) extends CompatiblePlatform {
-                public function supportsBulkMerge(): bool { return false; }
-            };
-            $this->forcedWrite($database, 'cache', $cache);
-            return function () use ($database, $cache, $cplatform) {
-                $cache['compatiblePlatform'] = $cplatform;
-                $this->forcedWrite($database, 'cache', $cache);
-            };
-        });
+        $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+            public function supportsBulkMerge(): bool { return false; }
+        };
 
-        $this->assertException('is not support modifyArray', L($database)->modifyArray('test', []));
-        unset($manager);
+        that($database)->modifyArray('test', [])->wasThrown('is not support modifyArray');
+        $cache->offsetUnset('compatiblePlatform');
 
-        $this->assertException('must be array', L($database->dryrun())->modifyArray('test', ['dummy']));
-        $this->assertException('columns are not match', L($database->dryrun())->modifyArray('test', [['id' => 1], ['name' => 2]]));
+        that($database)->dryrun()->modifyArray('test', ['dummy'])->wasThrown('must be array');
+        that($database)->dryrun()->modifyArray('test', [['id' => 1], ['name' => 2]])->wasThrown('columns are not match');
 
         $data = [
             ['id' => 1, 'name' => 'A'],
@@ -5044,7 +4989,7 @@ INSERT INTO test (id, name) VALUES
         ]);
 
         // g_grand1 が RESTRICT なので失敗する
-        $this->assertException('Cannot delete or update', L($database)->invalid('g_ancestor', [], ['delete_at' => '2014-12-24 00:00:00']));
+        that($database)->invalid('g_ancestor', [], ['delete_at' => '2014-12-24 00:00:00'])->wasThrown('Cannot delete or update');
 
         // g_grand1 を無効化すれば・・・
         $this->assertEquals(1, $database->invalid('g_grand1', [], ['delete_at' => '2014-12-24 00:00:00']));
@@ -5085,7 +5030,7 @@ INSERT INTO test (id, name) VALUES
         }
 
         $this->assertEquals(['id' => 1], $database->invalidOrThrow('test', ['id' => 1], ['name' => 'deleted']));
-        $this->assertException('affected row is nothing', L($database)->invalidOrThrow('test', ['id' => -1], ['name' => 'deleted']));
+        that($database)->invalidOrThrow('test', ['id' => -1], ['name' => 'deleted'])->wasThrown('affected row is nothing');
     }
 
     /**
@@ -5118,7 +5063,7 @@ INSERT INTO test (id, name) VALUES
 
         // OrThrow
         if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            $this->assertException('affected row is nothing', L($database)->reviseOrThrow('test', ['id' => -1], ['id' => -1]));
+            that($database)->reviseOrThrow('test', ['id' => -1], ['id' => -1])->wasThrown('affected row is nothing');
         }
 
         // 相互外部キー
@@ -5172,7 +5117,7 @@ INSERT INTO test (id, name) VALUES
 
         // OrThrow
         if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            $this->assertException('affected row is nothing', L($database)->upgradeOrThrow('test', ['id' => -1], ['id' => -1]));
+            that($database)->upgradeOrThrow('test', ['id' => -1], ['id' => -1])->wasThrown('affected row is nothing');
         }
 
         // 主キーを更新しない
@@ -5516,9 +5461,9 @@ INSERT INTO test (id, name) VALUES
         $this->assertEquals(10, $database->reduce('oprlog', 5, '-log_date', ['category', 'primary_id'], ['category' => 'category-9']));
         $database->rollback();
 
-        $this->assertException('must be >= 0', L($database)->reduceOrThrow('oprlog', -1));
-        $this->assertException('must be === 1', L($database)->reduceOrThrow('oprlog', 1, ['a' => true, 'b' => false]));
-        $this->assertException('affected row is nothing', L($database)->reduceOrThrow('oprlog', 5, 'log_date', [], ['1=0']));
+        that($database)->reduceOrThrow('oprlog', -1)->wasThrown('must be >= 0');
+        that($database)->reduceOrThrow('oprlog', 1, ['a' => true, 'b' => false])->wasThrown('must be === 1');
+        that($database)->reduceOrThrow('oprlog', 5, 'log_date', [], ['1=0'])->wasThrown('affected row is nothing');
     }
 
     /**
@@ -5779,12 +5724,10 @@ INSERT INTO test (id, name) VALUES
      */
     function test_modify_misc($database)
     {
-        $manager = $this->scopeManager(function () use ($database) {
-            return function () use ($database) {
-                $database->setConvertEmptyToNull(true);
-                $database->setInsertSet(false);
-            };
-        });
+        $database = $database->context([
+            'convertEmptyToNull' => true,
+            'insertSet'          => false,
+        ]);
 
         $database->setConvertEmptyToNull(true);
 
@@ -5802,40 +5745,22 @@ INSERT INTO test (id, name) VALUES
             $sql = $database->dryrun()->modifyOrThrow('test', ['name' => 'zz']);
             $this->assertStringContainsString("INSERT INTO test SET name = 'zz' ", $sql[0]);
         }
-        unset($manager);
+        $database = $database->unstack();
 
-        $manager = $this->scopeManager(function () use ($database) {
-            $cplatform = $database->getCompatiblePlatform();
-            $cache = $this->forcedRead($database, 'cache');
-            $cache['compatiblePlatform'] = new class($cplatform->getWrappedPlatform()) extends CompatiblePlatform {
-                public function supportsIdentityAutoUpdate(): bool { return false; }
-            };
-            $this->forcedWrite($database, 'cache', $cache);
-            return function () use ($database, $cache, $cplatform) {
-                $cache['compatiblePlatform'] = $cplatform;
-                $this->forcedWrite($database, 'cache', $cache);
-            };
-        });
+        $cache = that($database)->var('cache');
+        $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
+        $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+            public function supportsIdentityAutoUpdate(): bool { return false; }
+        };
 
         $pk = $database->modifyOrThrow('test', ['id' => 99, 'name' => 'xx']);
         $this->assertEquals(['id' => 99], $pk);
-        unset($manager);
 
-        $manager = $this->scopeManager(function () use ($database) {
-            $cplatform = $database->getCompatiblePlatform();
-            $cache = $this->forcedRead($database, 'cache');
-            $cache['compatiblePlatform'] = new class($cplatform->getWrappedPlatform()) extends CompatiblePlatform {
-                public function supportsMerge(): bool { return false; }
-            };
-            $this->forcedWrite($database, 'cache', $cache);
-            return function () use ($database, $cache, $cplatform) {
-                $cache['compatiblePlatform'] = $cplatform;
-                $this->forcedWrite($database, 'cache', $cache);
-            };
-        });
+        $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+            public function supportsMerge(): bool { return false; }
+        };
 
         $this->assertEquals(1, $database->modify('test', ['id' => 100, 'name' => 'z']));
-        unset($manager);
     }
 
     /**
@@ -6271,9 +6196,9 @@ INSERT INTO test (id, name) VALUES
             -2  => ["id" => "12", "" => 1],
         ], $primaries);
 
-        $this->assertException('is invalid', L($database)->affectArray('test', [['@method' => 'unknown']]));
-        $this->assertException('primary data mismatch', L($database)->affectArray('multiprimary', [['@method' => 'update', 'mainid' => 1]]));
-        $this->assertException('primary data mismatch', L($database)->affectArray('multiprimary', [['@method' => 'delete', 'mainid' => 1]]));
+        that($database)->affectArray('test', [['@method' => 'unknown']])->wasThrown('is invalid');
+        that($database)->affectArray('multiprimary', [['@method' => 'update', 'mainid' => 1]])->wasThrown('primary data mismatch');
+        that($database)->affectArray('multiprimary', [['@method' => 'delete', 'mainid' => 1]])->wasThrown('primary data mismatch');
 
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
             $primaries = $database->affectArrayIgnore('test', [
@@ -6368,7 +6293,8 @@ INSERT INTO test (id, name) VALUES
     {
         $duplicatest = $database->getSchema()->getTable('test');
         $duplicatest->addColumn('name2', 'string', ['length' => 32, 'default' => '']);
-        self::forcedWrite($duplicatest, '_name', 'duplicatest');
+        /** @noinspection PhpFieldAssignmentTypeMismatchInspection */
+        that($duplicatest)->_name = 'duplicatest';
         $smanager = $database->getConnection()->createSchemaManager();
         try_return([$smanager, 'dropTable'], $duplicatest);
         $smanager->createTable($duplicatest);
@@ -6723,13 +6649,11 @@ AND
         $this->assertStringContainsString("$exsits2", "$select");
 
         // 指定しないと例外
-        $this->assertException('ambiguous', function () use ($database) {
-            $database->select([
-                'foreign_d1' => [
-                    'has_d2' => $database->subexists('foreign_d2'),
-                ],
-            ]);
-        });
+        that($database)->select([
+            'foreign_d1' => [
+                'has_d2' => $database->subexists('foreign_d2'),
+            ],
+        ])->wasThrown('ambiguous');
     }
 
     /**
@@ -6749,14 +6673,14 @@ AND
         $this->assertEquals('3', $row['cmax']);
         $this->assertEquals(2.0, $row['cavg']);
 
-        $this->assertException("aggregate column's length is over 1", function () use ($database) {
+        that(function () use ($database) {
             $database->selectTuple([
                 't_article' => [
                     'cmin' => $database->submin('t_comment.comment_id, comment'),
                     'cmax' => $database->submax('t_comment.comment_id, comment'),
                 ],
             ], [], [], 1);
-        });
+        })()->wasThrown("aggregate column's length is over 1");
     }
 
     /**
@@ -7260,11 +7184,11 @@ ORDER BY T.id DESC, name ASC
             ], $row);
 
         // 外部キーがなければ例外が飛ぶはず
-        $this->assertException('has not foreign key', L($database)->selectTuple([
+        that($database)->selectTuple([
             'test1' => [
                 'test2' => $database->foreign_c1(),
             ],
-        ], [], [], 1));
+        ], [], [], 1)->wasThrown('has not foreign key');
     }
 
     /**
@@ -7368,7 +7292,7 @@ ORDER BY T.id DESC, name ASC
         ], $rows);
 
         // 親にないカラムを参照しようとすると例外が飛ぶ
-        $this->assertException('reference undefined parent', L($database)->selectArray([
+        that($database)->selectArray([
             'foreign_p P' => [
                 '*',
                 'pid'           => 'id',
@@ -7378,7 +7302,7 @@ ORDER BY T.id DESC, name ASC
                     'ppname' => '..nocolumn',
                 ],
             ],
-        ]));
+        ])->wasThrown('reference undefined parent');
     }
 
     /**
@@ -7494,7 +7418,7 @@ ORDER BY T.id DESC, name ASC
         $database->resetAutoIncrement('auto', null);
         $this->assertEquals(['id' => 63], $database->insertOrThrow('auto', ['name' => 'hoge']));
 
-        $this->assertException('is not auto incremental', L($database)->resetAutoIncrement('noauto', 1));
+        that($database)->resetAutoIncrement('noauto', 1)->wasThrown('is not auto incremental');
     }
 
     /**

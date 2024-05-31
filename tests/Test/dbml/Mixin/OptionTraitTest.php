@@ -76,12 +76,12 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test_getDefaultOptions()
     {
-        $this->assertException(new \DomainException(), function () {
+        that(function () {
             $stub = new class {
                 use OptionTrait;
             };
             $stub::getDefaultOptions();
-        });
+        })()->wasThrown(new \DomainException());
     }
 
     function test_getOriginal()
@@ -219,7 +219,7 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertSame($this, $this->unstackAll()->unstackAll()->unstackAll());
 
         // 例外が飛ぶはず
-        $this->assertException(new \UnexpectedValueException('empty'), L($this)->unstack());
+        that($this)->unstack()->wasThrown(new \UnexpectedValueException('empty'));
     }
 
     function test_setDefault()
@@ -302,8 +302,8 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('hoge', $this->getUnsafeOption('nocheck'));
 
         // 存在しないものはそれぞれ例外が投げられるはず
-        $this->assertException(new \InvalidArgumentException(), L($this)->getOption('hoge'));
-        $this->assertException(new \InvalidArgumentException(), L($this)->setOption('hoge', 'fuga'));
+        that($this)->getOption('hoge')->wasThrown(new \InvalidArgumentException());
+        that($this)->setOption('hoge', 'fuga')->wasThrown(new \InvalidArgumentException());
     }
 
     function test_storeOption()
@@ -333,8 +333,8 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
         ])->option('array'));
 
-        $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('hoge', []));
-        $this->assertException(new \InvalidArgumentException(), L($this)->mergeOption('op1', []));
+        that($this)->mergeOption('hoge', [])->wasThrown(new \InvalidArgumentException());
+        that($this)->mergeOption('op1', [])->wasThrown(new \InvalidArgumentException());
     }
 
     function test_option()

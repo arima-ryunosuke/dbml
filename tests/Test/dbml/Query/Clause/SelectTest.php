@@ -13,10 +13,7 @@ class SelectTest extends \ryunosuke\Test\AbstractUnitTestCase
         $actual = Select::hoge('columnName');
         $this->assertEquals('columnName AS hoge', $actual);
 
-        $this->assertException(new \InvalidArgumentException('length must be 1'), function () {
-            /** @noinspection PhpUndefinedMethodInspection */
-            Select::hoge('columnName1', 'columnName2');
-        });
+        that(Select::class)::hoge('columnName1', 'columnName2')->wasThrown(new \InvalidArgumentException('length must be 1'));
     }
 
     function test_split()

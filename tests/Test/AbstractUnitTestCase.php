@@ -15,8 +15,6 @@ use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Tools\DsnParser;
 use Doctrine\DBAL\Types\Type;
-use PHPUnit\Framework\Error\Error;
-use PHPUnit\Framework\Exception;
 use PHPUnit\Framework\SkippedTestError;
 use PHPUnit\Framework\TestCase;
 use ryunosuke\dbml\Logging\LoggerChain;
@@ -911,48 +909,6 @@ abstract class AbstractUnitTestCase extends TestCase
         }
     }
 
-    public static function assertException($e, $callback)
-    {
-        $callback = self::forcedCallize($callback);
-
-        try {
-            $callback(...array_slice(func_get_args(), 2));
-        }
-        catch (Error $ex) {
-            throw $ex;
-        }
-        catch (Exception $ex) {
-            throw $ex;
-        }
-        catch (\Throwable $ex) {
-            $check_code = true;
-            if (is_string($e)) {
-                $check_code = false;
-                if (class_exists($e)) {
-                    $e = (new \ReflectionClass($e))->newInstanceWithoutConstructor();
-                }
-                else {
-                    if ($ex instanceof \Exception) {
-                        $e = new \Exception($e);
-                    }
-                    if ($ex instanceof \Error) {
-                        $e = new \Error($e);
-                    }
-                }
-            }
-
-            self::assertInstanceOf(get_class($e), $ex);
-            if ($check_code) {
-                self::assertEquals($e->getCode(), $ex->getCode());
-            }
-            if (strlen($e->getMessage()) > 0) {
-                self::assertStringContainsString($e->getMessage(), $ex->getMessage());
-            }
-            return;
-        }
-        self::fail(get_class($e) . ' is not thrown.');
-    }
-
     public static function assertStringIgnoreBreak($expected, $actual, $message = '')
     {
         $expected = preg_replace('/[\r\n]/', ' ', trim($expected, "\r\n"));
@@ -966,99 +922,5 @@ abstract class AbstractUnitTestCase extends TestCase
             self::assertArrayHasKey($k, $actual);
             self::assertStringStartsWith($v, $actual[$k]);
         }
-    }
-
-    public static function forcedCallize($callable, $method = null)
-    {
-        if (func_num_args() == 2) {
-            $callable = func_get_args();
-        }
-
-        if (is_string($callable) && strpos($callable, '::') !== false) {
-            $parts = explode('::', $callable);
-            $method = new \ReflectionMethod($parts[0], $parts[1]);
-            if (!$method->isPublic() && $method->isStatic()) {
-                $method->setAccessible(true);
-                return function () use ($method) {
-                    return $method->invokeArgs(null, func_get_args());
-                };
-            }
-        }
-
-        if (is_array($callable) && count($callable) === 2) {
-            try {
-                $method = new \ReflectionMethod($callable[0], $callable[1]);
-                if (!$method->isPublic()) {
-                    $method->setAccessible(true);
-                    return function () use ($callable, $method) {
-                        return $method->invokeArgs($method->isStatic() ? null : $callable[0], func_get_args());
-                    };
-                }
-            }
-            catch (\ReflectionException) {
-                // __call を考慮するとどうしようもない
-            }
-        }
-
-        return $callable;
-    }
-
-    public static function forcedRead($object, $property)
-    {
-        $class = get_class($object);
-        while (true) {
-            try {
-                $refprop = new \ReflectionProperty($class, $property);
-                break;
-            }
-            catch (\ReflectionException $ex) {
-                $class = get_parent_class($class);
-                if ($class == false) {
-                    throw $ex;
-                }
-            }
-        }
-        $refprop->setAccessible(true);
-        return $refprop->getValue($object);
-    }
-
-    public static function forcedWrite($object, $property, $value)
-    {
-        $class = get_class($object);
-        while (true) {
-            try {
-                $refprop = new \ReflectionProperty($class, $property);
-                break;
-            }
-            catch (\ReflectionException $ex) {
-                $class = get_parent_class($class);
-                if ($class == false) {
-                    throw $ex;
-                }
-            }
-        }
-        $refprop->setAccessible(true);
-        $current = $refprop->getValue($object);
-        $refprop->setValue($object, $value);
-        return $current;
-    }
-
-    public static function scopeManager(callable $initializer)
-    {
-        return new class($initializer) {
-            private $finalizer;
-
-            public function __construct($initializer)
-            {
-                $this->finalizer = $initializer();
-            }
-
-            public function __destruct()
-            {
-                ($this->finalizer)();
-                unset($this->finalizer);
-                gc_collect_cycles();
-            }
-        };
     }
 }

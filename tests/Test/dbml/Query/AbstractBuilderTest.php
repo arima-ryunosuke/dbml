@@ -31,7 +31,7 @@ class AbstractBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_precondition($builder)
     {
-        $precondition = self::forcedCallize($builder, '_precondition');
+        $precondition = self::tryableCallable([$builder, '_precondition']);
 
         $actual = Where::build($builder->getDatabase(), $precondition(['P' => 'foreign_p'], [$builder->getDatabase()->subexists('foreign_c1')]));
         $this->assertEquals(['(EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = P.id))'], $actual);

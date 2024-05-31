@@ -56,10 +56,10 @@ class ParserTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('select 3, 1, 2, 4, 9', $parser->convertQuotedSQL($sql, $params + ['named9' => 9], fn($v) => $v));
 
         $params = [1];
-        $this->assertException('does not have', L($parser)->convertNamedSQL('select ?, :named, :named, ?', $params));
+        that($parser)->convertNamedSQL('select ?, :named, :named, ?', $params)->wasThrown('does not have');
 
         $params = [1, 2, 3];
-        $this->assertException('length is long', L($parser)->convertNamedSQL('select ?, :named, :named, ?', $params));
+        that($parser)->convertNamedSQL('select ?, :named, :named, ?', $params)->wasThrown('length is long');
     }
 
     function test_convertPositionalSQL()
@@ -102,10 +102,10 @@ class ParserTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('select 3, 1, 2, 4, 9', $parser->convertQuotedSQL($sql, $params + [4 => 9], fn($v) => $v));
 
         $params = ['named9' => 9];
-        $this->assertException('does not have', L($parser)->convertPositionalSQL('select ?, :named, :named, ?', $params));
+        that($parser)->convertPositionalSQL('select ?, :named, :named, ?', $params)->wasThrown('does not have');
 
         $params = ['named' => 1, 'named9' => 9];
-        $this->assertException('length is long', L($parser)->convertPositionalSQL('select ?, :named, :named, ?', $params));
+        that($parser)->convertPositionalSQL('select ?, :named, :named, ?', $params)->wasThrown('length is long');
     }
 
     function test_convertDollarSQL()
@@ -157,18 +157,18 @@ class ParserTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals("select NULL, 0, 0, 'x', 1", $sql);
 
         $params = [1, 2, 3];
-        $this->assertException('does not have', L($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v));
+        that($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v)->wasThrown('does not have');
 
         $params = [1];
-        $this->assertException('does not have', L($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v));
+        that($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v)->wasThrown('does not have');
 
         $params = ['named' => 1];
-        $this->assertException('does not have', L($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v));
+        that($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v)->wasThrown('does not have');
 
         $params = ['named' => 1, 2];
-        $this->assertException('does not have', L($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v));
+        that($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v)->wasThrown('does not have');
 
         $params = ['named' => 1, 2, 3, 4];
-        $this->assertException('length is long', L($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v));
+        that($parser)->convertQuotedSQL('select ?, :named, ?', $params, fn($v) => $v)->wasThrown('length is long');
     }
 }

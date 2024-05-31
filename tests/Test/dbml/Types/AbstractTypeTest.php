@@ -20,6 +20,6 @@ class AbstractTypeTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertSame(123, $type->convertToPHPValue(123, $platform));
 
-        $this->assertException('is not supported DDL', L($type)->getSQLDeclaration([], $platform));
+        that($type)->getSQLDeclaration([], $platform)->wasThrown('is not supported DDL');
     }
 }

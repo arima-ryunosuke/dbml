@@ -46,10 +46,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('columnName = ?', $actual);
         $this->assertEquals(['hoge'], $actual->getParams());
 
-        $this->assertException(new \InvalidArgumentException('length must be greater than 2'), function () {
-            /** @noinspection PhpUndefinedMethodInspection */
-            Operator::hoge('columnName');
-        });
+        that(Operator::class)::hoge('columnName')->wasThrown(new \InvalidArgumentException('length must be greater than 2'));
     }
 
     function test___constructor()
@@ -119,9 +116,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $operator = new Operator(self::$platform, Operator::RAW, 'hoge = ? AND (fuga IN (?) OR piyo IN (?))', [1, [2, 3], [4, 5, 6]]);
         $this->assertOperator('hoge = ? AND (fuga IN (?,?) OR piyo IN (?,?,?))', [1, 2, 3, 4, 5, 6], $operator);
 
-        $this->assertException('notfound search string', function () {
-            (new Operator(self::$platform, Operator::RAW, 'hoge = ?', [[1, 2, 3], 4]))->getQuery();
-        });
+        that(Operator::class)->new(self::$platform, Operator::RAW, 'hoge = ?', [[1, 2, 3], 4])->getQuery()->wasThrown('notfound search string');
     }
 
     function test_op_spaceship()
@@ -129,7 +124,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $operator = new Operator(self::$platform, '<=>', 'a', [99]);
         $this->assertOperator('a IS ?', [99], $operator);
         $this->assertOperator('NOT (a IS ?)', [99], $operator->not());
-        $this->assertException('contains 1 elements', L(new Operator(self::$platform, '<=>', 'a', []))->getQuery());
+        that(Operator::class)->new(self::$platform, '<=>', 'a', [])->getQuery()->wasThrown('contains 1 elements');
     }
 
     function test_op_is_null()
@@ -148,7 +143,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $operator = new Operator(self::$platform, 'BETWEEN', 'a', [-INF, +INF]);
         $this->assertOperator('a BETWEEN ? AND ?', [-PHP_FLOAT_MAX, +PHP_FLOAT_MAX], $operator);
 
-        $this->assertException('contains 2 elements', L(new Operator(self::$platform, 'BETWEEN', 'a', 1))->getQuery());
+        that(Operator::class)->new(self::$platform, 'BETWEEN', 'a', 1)->getQuery()->wasThrown('contains 2 elements');
     }
 
     function test_op_like()
@@ -285,7 +280,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertOperator("(a, b) $ope2 (?,?)", [3, 4], $operator);
             $this->assertOperator("NOT ((a, b) $ope2 (?,?))", [3, 4], $operator->not());
 
-            $this->assertException('array length 2', L(new Operator(self::$platform, $ope, 'a', [1]))->getQuery());
+            that(Operator::class)->new(self::$platform, $ope, 'a', [1])->getQuery()->wasThrown('array length 2');
         }
     }
 
