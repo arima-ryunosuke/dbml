@@ -4505,6 +4505,70 @@ INSERT INTO test (name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_deleteArray($database)
+    {
+        // 空のテスト
+        $this->assertEquals(0, $database->deleteArray('test', []));
+
+        $where = [
+            ['id' => 1, 'name' => 'a'],
+            ['id' => 2, 'name' => new Expression('UPPER(\'b\')')],
+            ['id' => 3, 'name' => new Expression('UPPER(?)', 'c')],
+            ['id' => 4, 'name' => $database->select('test1.UPPER(name1)', ['id' => 4])],
+            ['id' => 5, 'name' => 'nothing'],
+            ['id' => 6, 'name' => 'f'],
+        ];
+
+        $affected = $database->deleteArray('test', $where);
+
+        // 6件与えているが、削除されるのは2件（id:1,name:a id:6,name:f）のはず（他は UPPER をかましてるので一致しない）
+        $this->assertEquals(2, $affected);
+
+        // 実際に取得して削除されている/いないを確認
+        $this->assertEquals([2, 3, 4, 5], $database->selectLists('test.id', [
+            'id' => [1, 2, 3, 4, 5, 6],
+        ]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_deleteArray_chunk($database)
+    {
+        // ログを見たいので全体を preview で囲む
+        $logs = $database->preview(function (Database $database) {
+            $where = [
+                ['id' => 1, 'name' => 'a'],
+                ['id' => 2, 'name' => new Expression('UPPER(\'b\')')],
+                ['id' => 3, 'name' => new Expression('UPPER(?)', 'c')],
+                ['id' => 4, 'name' => $database->select('test1.UPPER(name1)', ['id' => 4])],
+                ['id' => 5, 'name' => 'nothing'],
+                ['id' => 6, 'name' => 'f'],
+            ];
+
+            $database = $database->context(['defaultChunk' => 2]);
+            $affected = $database->deleteArray('test', $where);
+
+            // 6件与えているが、削除されるのは2件（id:1,name:a id:6,name:f）のはず（他は UPPER をかましてるので一致しない）
+            $this->assertEquals(2, $affected);
+
+            // 実際に取得して削除されている/いないを確認
+            $this->assertEquals([2, 3, 4, 5], $database->selectLists('test.id', [
+                'id' => [1, 2, 3, 4, 5, 6],
+            ]));
+        });
+        $this->assertEquals([
+            "DELETE FROM test WHERE ((id = 1) AND (name = 'a')) OR ((id = 2) AND (name = UPPER('b')))",
+            "DELETE FROM test WHERE ((id = 3) AND (name = UPPER('c'))) OR ((id = 4) AND (name IN (SELECT UPPER(name1) FROM test1 WHERE id = 4)))",
+            "DELETE FROM test WHERE ((id = 5) AND (name = 'nothing')) OR ((id = 6) AND (name = 'f'))",
+        ], array_values(preg_grep('#^DELETE#', $logs)));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_modifyArray($database)
     {
         if (!$database->getCompatiblePlatform()->supportsBulkMerge()) {
@@ -6434,6 +6498,9 @@ INSERT INTO test (id, name) VALUES
             // sqlite は外部キーを無視できない（というか DELETE OR IGNORE が対応していない？）のでシンタックスだけ
             $ignore = $database->getCompatiblePlatform()->getIgnoreSyntax();
             $database = $database->dryrun();
+            $this->assertEquals([
+                "DELETE $ignore FROM foreign_p WHERE (id = '1') OR (id = '2')",
+            ], $database->deleteArrayIgnore('foreign_p', [['id' => 1], ['id' => 2]]));
             $this->assertEquals([
                 "DELETE $ignore FROM foreign_p WHERE id = '1'",
             ], $database->deleteIgnore('foreign_p', ['id' => 1]));

@@ -84,6 +84,28 @@ trait AffectIgnoreTrait
     }
 
     /**
+     * IGNORE 付き {@uses Database::deleteArray()}
+     *
+     * @inheritdoc Database::deleteArray()
+     */
+    private function deleteArrayIgnoreWithTable($tableName, $where = [])
+    {
+        assert(parameter_default([$this, 'deleteArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('deleteArray', func_get_args());
+    }
+
+    /**
+     * IGNORE 付き {@uses TableGateway::deleteArray()}
+     *
+     * @inheritdoc TableGateway::deleteArray()
+     */
+    private function deleteArrayIgnoreWithoutTable($where = [])
+    {
+        assert(parameter_default([$this, 'deleteArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectIgnore('deleteArray', func_get_args());
+    }
+
+    /**
      * IGNORE 付き {@uses Database::modifyArray()}
      *
      * @inheritdoc Database::modifyArray()

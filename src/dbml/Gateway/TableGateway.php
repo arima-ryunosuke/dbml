@@ -390,6 +390,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         insertSelectIgnoreWithoutTable as public insertSelectIgnore;
         insertArrayIgnoreWithoutTable as public insertArrayIgnore;
         updateArrayIgnoreWithoutTable as public updateArrayIgnore;
+        deleteArrayIgnoreWithoutTable as public deleteArrayIgnore;
         modifyArrayIgnoreWithoutTable as public modifyArrayIgnore;
         changeArrayIgnoreWithoutTable as public changeArrayIgnore;
         affectArrayIgnoreWithoutTable as public affectArrayIgnore;
@@ -2236,6 +2237,19 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     {
         $this->resetResult();
         return $this->database->updateArray($this, ...func_get_args());
+    }
+
+    /**
+     * 駆動表を省略できる <@uses Database::deleteArray()>
+     *
+     * @used-by deleteArrayIgnore()
+     *
+     * @inheritdoc Database::deleteArray()
+     */
+    public function deleteArray($where = [])
+    {
+        $this->resetResult();
+        return $this->database->deleteArray($this, ...func_get_args());
     }
 
     /**

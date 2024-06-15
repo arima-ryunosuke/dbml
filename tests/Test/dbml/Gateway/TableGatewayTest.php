@@ -1456,6 +1456,10 @@ AND ((flag=1))", "$gw");
         $this->assertEquals($count * 2, $count = $gateway->count());
         $this->assertEquals(24, $count);
 
+        /// deleteArray
+        $gateway->deleteArray([['id' => 1], ['id' => 2], ['id' => 3]]);
+        $this->assertEquals($count - 3, $gateway->count());
+
         // truncate すると全て吹き飛ぶはず
         $gateway->truncate();
         $this->assertEquals(0, $gateway->count());
@@ -1643,6 +1647,7 @@ AND ((flag=1))", "$gw");
             $this->assertEquals(['id' => 1], $database->foreign_p->invalidIgnore(['id' => 1], ['name' => 'deleted']));
             // delete の syntax error はしょうがない
             if (!$database->getCompatiblePlatform()->getWrappedPlatform() instanceof MySQLPlatform) {
+                that($database)->foreign_c1->deleteArrayIgnore(['id' => -1])->wasThrown('');
                 that($database)->foreign_c1->deleteIgnore(['id' => -1])->wasThrown('');
                 that($database)->foreign_c1->removeIgnore(['id' => -1])->wasThrown('');
                 that($database)->foreign_c1->destroyIgnore(['id' => -1])->wasThrown('');

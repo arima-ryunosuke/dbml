@@ -271,6 +271,7 @@ class Database
         insertSelectIgnoreWithTable as public insertSelectIgnore;
         insertArrayIgnoreWithTable as public insertArrayIgnore;
         updateArrayIgnoreWithTable as public updateArrayIgnore;
+        deleteArrayIgnoreWithTable as public deleteArrayIgnore;
         modifyArrayIgnoreWithTable as public modifyArrayIgnore;
         changeArrayIgnoreWithTable as public changeArrayIgnore;
         affectArrayIgnoreWithTable as public affectArrayIgnore;
@@ -4076,6 +4077,71 @@ class Database
                 'column' => [], // 可変なので指定しない
             ]);
             $builder->updateArray(opt: $opt);
+
+            $affecteds[] = $builder->execute();
+        }
+
+        return $this->_postaffects($builder, $affecteds);
+    }
+
+    /**
+     * BULK DELETE 構文
+     *
+     * 指定配列でバルクデリートする。
+     * バルクデリートとは普通のデリートであり、条件が分割され得る以外の違いはない。
+     *
+     * ```php
+     * # それぞれの条件に合致する行が DELETE される
+     * $db->deleteArray('tablename', [
+     *     ['id' => 1],
+     *     ['status' => 2],
+     *     ['title:LIKE' => 'hoge'],
+     * ]);
+     * // DELETE FROM tablename
+     * // WHERE
+     * //    (id = '1') OR (status = 2) OR (title LIKE = 'hoge')
+     *
+     * # 上記の使い方だと delete と大差がないが、大量の主キー指定などで分割が活きてくる
+     * $db->deleteArray('tablename', [
+     *     ['id' => 1],
+     *     ['id' => 2],
+     *     ['id' => 3],
+     *     // ・・・
+     *     ['id' => 997],
+     *     ['id' => 998],
+     *     ['id' => 999],
+     * ]);
+     * // DELETE FROM tablename
+     * // WHERE
+     * //    (id = '1') OR (id = '2') OR (id = '3')
+     * // ・・・
+     * // DELETE FROM tablename
+     * // WHERE
+     * //    (id = '997') OR (id = '998') OR (id = '999')
+     * ```
+     *
+     * @used-by deleteArrayIgnore()
+     *
+     * @param string|TableDescriptor $tableName テーブル名
+     * @param array|\Generator $where 削除条件
+     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
+     */
+    public function deleteArray($tableName, $where = [])
+    {
+        // 隠し引数 $opt
+        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
+
+        $builder = $this->createAffectBuilder();
+        $builder->build([
+            'table' => $tableName,
+        ]);
+
+        $affecteds = [];
+        foreach (iterator_chunk($where, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
+            $builder->build([
+                'where' => [iterator_to_array($rows)],
+            ]);
+            $builder->delete(opt: $opt);
 
             $affecteds[] = $builder->execute();
         }
