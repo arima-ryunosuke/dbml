@@ -109,21 +109,30 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                                 new Column('data', Type::getType('string'), ['length' => 255, 'default' => '']),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('test1',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('name1', Type::getType('string'), ['length' => 32]),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true), new Index('SECONDARY1', ['id'])]
+                            [new Index('PRIMARY', ['id'], true, true), new Index('SECONDARY1', ['id'])],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('test2',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('name2', Type::getType('string'), ['length' => 32]),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true), new Index('SECONDARY2', ['id'])]
+                            [new Index('PRIMARY', ['id'], true, true), new Index('SECONDARY2', ['id'])],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('auto',
                             [
@@ -133,20 +142,27 @@ abstract class AbstractUnitTestCase extends TestCase
                             [new Index('PRIMARY', ['id'], true, true)],
                             [],
                             [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('noauto',
                             [
                                 new Column('id', Type::getType('string'), ['length' => 32]),
                                 new Column('name', Type::getType('string'), ['length' => 32]),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('paging',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('name', Type::getType('string'), ['length' => 32]),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('aggregate',
                             [
@@ -155,7 +171,10 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('group_id1', Type::getType('integer')),
                                 new Column('group_id2', Type::getType('integer')),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('oprlog',
                             [
@@ -164,12 +183,19 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('primary_id', Type::getType('integer')),
                                 new Column('log_date', Type::getType('date')),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('noprimary',
                             [
                                 new Column('id', Type::getType('integer')),
-                            ]
+                            ],
+                            [],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('nullable',
                             [
@@ -179,7 +205,10 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('cfloat', Type::getType('float'), ['notnull' => false]),
                                 new Column('cdecimal', Type::getType('decimal'), ['notnull' => false, 'scale' => 2, 'precision' => 3]),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('notnulls',
                             [
@@ -189,7 +218,10 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('cfloat', Type::getType('float'), ['notnull' => true, 'default' => 2.3]),
                                 new Column('cdecimal', Type::getType('decimal'), ['notnull' => true, 'scale' => 2, 'precision' => 3, 'default' => 4.56]),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('multiprimary',
                             [
@@ -197,7 +229,10 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('subid', Type::getType('integer')),
                                 new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                             ],
-                            [new Index('PRIMARY', ['mainid', 'subid'], true, true)]
+                            [new Index('PRIMARY', ['mainid', 'subid'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('multiunique',
                             [
@@ -213,7 +248,10 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Index('uk1', ['uc_s'], true),
                                 new Index('uk2', ['uc_i'], true),
                                 new Index('uk3', ['uc1', 'uc2'], true),
-                            ]
+                            ],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('misctype',
                             [
@@ -231,7 +269,10 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('carray', Type::getType('simple_array'), ['notnull' => false]),
                                 new Column('cjson', Type::getType('json'), ['notnull' => false]),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true), new Index('IDX_MISCTYPE1', ['pid'], true)]
+                            [new Index('PRIMARY', ['id'], true, true), new Index('IDX_MISCTYPE1', ['pid'], true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('misctype_child',
                             [
@@ -247,14 +288,20 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('cbinary', Type::getType('binary'), ['notnull' => false]),
                                 new Column('cblob', Type::getType('blob'), ['notnull' => false]),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('foreign_p',
                             [
                                 new Column('id', Type::getType('integer')),
                                 new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('foreign_c1',
                             [
@@ -269,7 +316,8 @@ abstract class AbstractUnitTestCase extends TestCase
                                     'deferrable' => true,
                                     'deferred'   => true,
                                 ]),
-                            ]
+                            ],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('foreign_c2',
                             [
@@ -284,7 +332,8 @@ abstract class AbstractUnitTestCase extends TestCase
                                     'deferrable' => true,
                                     'deferred'   => true,
                                 ]),
-                            ]
+                            ],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('foreign_d1',
                             [
@@ -292,14 +341,20 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('d2_id', Type::getType('integer')),
                                 new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('foreign_d2',
                             [
                                 new Column('id', Type::getType('integer')),
                                 new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         function (Connection $connection) {
                             $fk1 = new ForeignKeyConstraint(['d2_id'], 'foreign_d2', ['id'], 'fk_dd12');
@@ -312,7 +367,10 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('id', Type::getType('integer')),
                                 new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('foreign_sc',
                             [
@@ -326,7 +384,8 @@ abstract class AbstractUnitTestCase extends TestCase
                             [
                                 new ForeignKeyConstraint(['s_id1'], 'foreign_s', ['id'], 'fk_sc1'),
                                 new ForeignKeyConstraint(['s_id2'], 'foreign_s', ['id'], 'fk_sc2'),
-                            ]
+                            ],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('g_ancestor',
                             [
@@ -334,7 +393,10 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('ancestor_name', Type::getType('string'), ['length' => 32]),
                                 new Column('delete_at', Type::getType('datetime'), ['notnull' => false, 'default' => null]),
                             ],
-                            [new Index('PRIMARY', ['ancestor_id'], true, true)]
+                            [new Index('PRIMARY', ['ancestor_id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('g_parent',
                             [
@@ -352,7 +414,8 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new ForeignKeyConstraint(['ancestor_id'], 'g_ancestor', ['ancestor_id'], 'fkey_generation1', [
                                     'onDelete' => 'CASCADE',
                                 ]),
-                            ]
+                            ],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('g_child',
                             [
@@ -367,7 +430,8 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new ForeignKeyConstraint(['parent_id'], 'g_parent', ['parent_id'], 'fkey_generation2', [
                                     'onDelete' => 'CASCADE',
                                 ]),
-                            ]
+                            ],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('g_grand1',
                             [
@@ -384,7 +448,8 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new ForeignKeyConstraint(['parent_id'], 'g_parent', ['parent_id'], 'fkey_generation3_2', [
                                     'onDelete' => 'CASCADE',
                                 ]),
-                            ]
+                            ],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         function (Connection $connection) {
                             // 謎のエラーが出るのでさしあたり除外
@@ -405,7 +470,8 @@ abstract class AbstractUnitTestCase extends TestCase
                                     new ForeignKeyConstraint(['parent_id', 'ancestor_id'], 'g_parent', ['parent_id', 'ancestor_id'], 'fkey_generation3', [
                                         'onDelete' => 'CASCADE',
                                     ]),
-                                ]
+                                ],
+                                ['collation' => 'utf8mb3_bin'],
                             ));
                         },
                         new Table('horizontal1',
@@ -413,7 +479,10 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('name', Type::getType('string')),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('horizontal2',
                             [
@@ -422,7 +491,8 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
                             [],
-                            [new ForeignKeyConstraint(['id'], 'horizontal1', ['id'], 'fkey_horizontal')]
+                            [new ForeignKeyConstraint(['id'], 'horizontal1', ['id'], 'fkey_horizontal')],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('master_table',
                             [
@@ -430,6 +500,9 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('subid', Type::getType('integer')),
                             ],
                             [new Index('PRIMARY', ['category', 'subid'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('tran_table1',
                             [
@@ -437,6 +510,9 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('master_id', Type::getType('integer'), ['notnull' => false]),
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('tran_table2',
                             [
@@ -444,13 +520,19 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('master_id', Type::getType('integer'), ['notnull' => false]),
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('heavy',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('data', Type::getType('text')),
                             ],
-                            [new Index('PRIMARY', ['id'], true, true)]
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('t_article',
                             [
@@ -462,7 +544,10 @@ abstract class AbstractUnitTestCase extends TestCase
                             [
                                 new Index('PRIMARY', ['article_id'], true, true),
                                 new Index('secondary', ['title']),
-                            ]
+                            ],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('t_comment',
                             [
@@ -477,7 +562,8 @@ abstract class AbstractUnitTestCase extends TestCase
                                     'onUpdate' => 'CASCADE',
                                     'onDelete' => 'CASCADE',
                                 ]),
-                            ]
+                            ],
+                            ['collation' => 'utf8mb3_bin'],
                         ),
                         new View('v_blog', '
                             SELECT
@@ -576,20 +662,29 @@ abstract class AbstractUnitTestCase extends TestCase
                     [
                         new Column('id', Type::getType('integer'), ['autoincrement' => true]),
                     ],
-                    [new Index('PRIMARY', ['id'], true, true)]
+                    [new Index('PRIMARY', ['id'], true, true)],
+                    [],
+                    [],
+                    ['collation' => 'utf8mb3_bin'],
                 ),
                 new Table('test',
                     [
                         new Column('id', Type::getType('integer'), ['autoincrement' => true]),
                     ],
-                    [new Index('PRIMARY', ['id'], true, true)]
+                    [new Index('PRIMARY', ['id'], true, true)],
+                    [],
+                    [],
+                    ['collation' => 'utf8mb3_bin'],
                 ),
                 new Table('foreign_p',
                     [
                         new Column('id', Type::getType('integer')),
                         new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
                     ],
-                    [new Index('PRIMARY', ['id'], true, true)]
+                    [new Index('PRIMARY', ['id'], true, true)],
+                    [],
+                    [],
+                    ['collation' => 'utf8mb3_bin'],
                 ),
                 new Table('foreign_c1',
                     [
@@ -599,7 +694,8 @@ abstract class AbstractUnitTestCase extends TestCase
                     ],
                     [new Index('PRIMARY', ['id', 'seq'], true, true)],
                     [],
-                    [new ForeignKeyConstraint(['id'], 'foreign_p', ['id'], 'fk_parentchild1')]
+                    [new ForeignKeyConstraint(['id'], 'foreign_p', ['id'], 'fk_parentchild1')],
+                    ['collation' => 'utf8mb3_bin'],
                 ),
                 new Table('foreign_c2',
                     [
@@ -609,7 +705,8 @@ abstract class AbstractUnitTestCase extends TestCase
                     ],
                     [new Index('PRIMARY', ['cid', 'seq'], true, true)],
                     [],
-                    [new ForeignKeyConstraint(['cid'], 'foreign_p', ['id'], 'fk_parentchild2')]
+                    [new ForeignKeyConstraint(['cid'], 'foreign_p', ['id'], 'fk_parentchild2')],
+                    ['collation' => 'utf8mb3_bin'],
                 ),
             ]);
             self::$database = new Database($connection, array_replace([
