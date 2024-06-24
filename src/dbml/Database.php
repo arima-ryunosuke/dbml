@@ -275,6 +275,8 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * @method $this                  setInjectCallStack(string|array|callable $string)
  * @method bool                   getMasterMode()
  * @method $this                  setMasterMode($bool)
+ * @method bool                   getDynamicPlaceholder()
+ * @method $this                  setDynamicPlaceholder($bool)
  * @method string                 getCheckSameKey()
  * @method $this                  setCheckSameKey($string)
  * @method string                 getCheckSameColumn()
@@ -567,6 +569,8 @@ class Database
                 // このように Type を渡すと（一度だけ） addType されると同時に select:convertToPHPValue, affect:convertToDatabaseValue が自動で設定される
                 'type'                  => new \Doctrine\DBAL\Types\DateTimeType(),
             ],
+            // PDO のエミュレーションモードのように php サイドで値の埋め込みを行うか
+            'dynamicPlaceholder'        => false,
             // assoc,pairs で同名キーがあった時どう振る舞うか[null:何もしない（後方優先。実質上書き）, 'noallow':例外, 'skip':スキップ（前方優先）]
             'checkSameKey'              => null,
             // 同名カラムがあった時どう振る舞うか[null, 'noallow', 'strict', 'loose']
@@ -4270,7 +4274,7 @@ class Database
     {
         $builder = $this->selectAggregate($aggregation, $column, $where, $groupBy, $having);
 
-        $stmt = $this->executeSelect($builder, $builder->getParams());
+        $stmt = $this->executeSelect((string) $builder, $builder->getParams());
 
         $cast = function ($var) {
             if ((!is_int($var) && !is_float($var)) && preg_match('#^-?([1-9]\d*|0)(\.\d+)?$#u', (string) $var, $match)) {
@@ -4642,6 +4646,11 @@ class Database
             return new Result(new ArrayResult($cache[$queryid]['data'], $cache[$queryid]['meta']), $this->getSlaveConnection());
         }
 
+        if ($this->getDynamicPlaceholder()) {
+            $query = $this->queryInto($query, $params);
+            $params = [];
+        }
+
         if ($filter_path = $this->getInjectCallStack()) {
             $query = implode('', $this->_getCallStack($filter_path)) . $query;
         }
@@ -4683,6 +4692,11 @@ class Database
 
         if ($this->getUnsafeOption('preparing')) {
             return $this->prepare($query, $params);
+        }
+
+        if ($this->getDynamicPlaceholder()) {
+            $query = $this->queryInto($query, $params);
+            $bare_params = $params = [];
         }
 
         if ($filter_path = $this->getInjectCallStack()) {
@@ -4805,7 +4819,12 @@ class Database
                         $params = [$params];
                     }
                     foreach ($params as $param) {
-                        yield $query => $param;
+                        if ($this->getDynamicPlaceholder()) {
+                            yield $this->queryInto($query, $param) => [];
+                        }
+                        else {
+                            yield $query => $param;
+                        }
                     }
                 }
             })($queries);
