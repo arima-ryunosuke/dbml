@@ -24,6 +24,10 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.20
+
+- [feature] 強制的に値埋め込みを行う dynamicPlaceholder オプションを追加
+
 ## 2.1.19
 
 - [fixbug] mysql の phrase が照合順序に依存していた不具合を修正
