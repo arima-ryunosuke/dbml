@@ -139,7 +139,7 @@ class OrderByTest extends \ryunosuke\Test\AbstractUnitTestCase
         LIMIT 3
         SQL, $builder->reset()->column('test')->where(['id > ?' => 5])->limit(3)->orderBy(OrderBy::randomWhere()));
 
-        srand(6);
+        srand(24);
         $this->assertEqualsSQL(<<<SQL
         WITH RECURSIVE __dbml_cte_table AS (
           SELECT test.*

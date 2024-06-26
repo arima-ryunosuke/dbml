@@ -2295,6 +2295,127 @@ if (!function_exists('ryunosuke\\dbml\\array_insert')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\array_join') || (new \ReflectionFunction('ryunosuke\\dbml\\array_join'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\array_join')) {
+    /**
+     * 配列の SQL 的な JOIN を行う
+     *
+     * $from に対して $on を満たす $join の行を結合する。
+     * $from,$join は共にいわゆる「配列の配列」でなければならない。
+     *
+     * $on は各レコードが渡ってくるので、true を返せば結合、false を返せば結合されない。
+     * $on には配列も渡すことができ、配列を渡した場合は USING 的な動作になる。
+     * - キーが駆動表のカラム名、値が結合表のカラム名を表す
+     * - キーの値同士を json で判定する（厳密に言えば値を json キーにした一時配列で逆引きされる）
+     * - 複数指定時は AND になる
+     * 上記の前提・制約が許容できるなら配列指定の方が高速に動作する。
+     *
+     * join 後のキーは各キーを "+" で連結したものになるが、このキーは暫定的なもの。
+     *
+     * Example:
+     * ```php
+     * // t_article と t_comment の JOIN（のイメージ）
+     * $articles = [
+     *     2 => ['article_id' => 2, 'article_name' => 'hoge'],
+     *     4 => ['article_id' => 4, 'article_name' => 'fuga'],
+     *     5 => ['article_id' => 5, 'article_name' => 'piyo'],
+     * ];
+     * $comments = [
+     *     4 => ['comment_id' => 4, 'article_id' => 2, 'comment' => 'foo'],
+     *     6 => ['comment_id' => 6, 'article_id' => 4, 'comment' => 'bar'],
+     *     7 => ['comment_id' => 7, 'article_id' => 4, 'comment' => 'baz'],
+     *     9 => ['comment_id' => 9, 'article_id' => 9, 'comment' => 'dmy'],
+     * ];
+     * // INNER っぽい動き
+     * that(array_join($articles, $comments, fn($article, $comment) => $article['article_id'] === $comment['article_id'], false))->isSame([
+     *     '2+4' => ['article_id' => 2, 'article_name' => 'hoge', 'comment_id' => 4, 'comment' => 'foo'],
+     *     '4+6' => ['article_id' => 4, 'article_name' => 'fuga', 'comment_id' => 6, 'comment' => 'bar'],
+     *     '4+7' => ['article_id' => 4, 'article_name' => 'fuga', 'comment_id' => 7, 'comment' => 'baz'],
+     * ]);
+     * // LEFT っぽい動き
+     * that(array_join($articles, $comments, fn($article, $comment) => $article['article_id'] === $comment['article_id'], true))->isSame([
+     *     '2+4'    => ['article_id' => 2, 'article_name' => 'hoge', 'comment_id' => 4, 'comment' => 'foo'],
+     *     '4+6'    => ['article_id' => 4, 'article_name' => 'fuga', 'comment_id' => 6, 'comment' => 'bar'],
+     *     '4+7'    => ['article_id' => 4, 'article_name' => 'fuga', 'comment_id' => 7, 'comment' => 'baz'],
+     *     '5+null' => ['article_id' => 5, 'article_name' => 'piyo', 'comment_id' => null, 'comment' => null],
+     * ]);
+     * // ↑のような単純比較クロージャなら配列でも指定できる（そしてこの方がはるかに速い）
+     * that(array_join($articles, $comments, ['article_id' => 'article_id'], false))->isSame([
+     *     '2+4' => ['article_id' => 2, 'article_name' => 'hoge', 'comment_id' => 4, 'comment' => 'foo'],
+     *     '4+6' => ['article_id' => 4, 'article_name' => 'fuga', 'comment_id' => 6, 'comment' => 'bar'],
+     *     '4+7' => ['article_id' => 4, 'article_name' => 'fuga', 'comment_id' => 7, 'comment' => 'baz'],
+     * ]);
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\array
+     *
+     * @param array|iterable&\ArrayAccess<\ArrayAccess> $from 駆動表
+     * @param array|iterable&\ArrayAccess<\ArrayAccess> $join 結合表
+     * @param array|callable $on 結合条件。原則として callable で、ある程度の前提制約が置けるときのみ配列を指定する
+     * @param bool $outer true だと OUTER, false だと INNER 的挙動になる
+     * @return array JOIN された配列
+     */
+    function array_join($from, $join, $on, bool $outer = false): array
+    {
+        $arraymode = $on && is_array($on) && !is_callable($on);
+
+        if ($arraymode) {
+            // なぜ json でキーにするのか？ 個別インデックスや文字結合ではダメなのか？
+            // ダメ。null と空文字が区別できない
+
+            $left_cols = array_flip(array_keys($on));
+            $right_cols = array_flip(array_values($on));
+
+            // カラム値をキー、元キーを値としたいわゆるインデックスを作成しておく
+            $index = [];
+            foreach ($join as $j => $right) {
+                $rcols = array_pickup($right, $right_cols);
+                // 一つでも存在しないならマッチさせない
+                if (count($rcols) === count($right_cols)) {
+                    $index[json_encode($rcols)][] = $j;
+                }
+            }
+        }
+        else {
+            // 空配列（無条件結合）はこっちに流れてくる
+            $on = $on ?: fn() => true;
+        }
+
+        // $outer で未結合の時のデフォルト行をあらかじめ作っておく
+        if ($outer) {
+            $cols = [];
+            foreach ($join as $right) {
+                $cols += $right;
+            }
+            $nullrow = array_map(fn() => null, $cols);
+        }
+
+        $result = [];
+        foreach ($from as $i => $left) {
+            $matched_rows = [];
+
+            if ($arraymode) {
+                foreach ($index[json_encode(array_pickup($left, $left_cols))] ?? [] as $j) {
+                    $matched_rows["$i+$j"] = $left + $join[$j];
+                }
+            }
+            else {
+                foreach ($join as $j => $right) {
+                    if ($on($left, $right)) {
+                        $matched_rows["$i+$j"] = $left + $right;
+                    }
+                }
+            }
+
+            if ($outer && !$matched_rows) {
+                $matched_rows["$i+null"] = $left + $nullrow;
+            }
+            $result += $matched_rows;
+        }
+        return $result;
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\array_keys_exist') || (new \ReflectionFunction('ryunosuke\\dbml\\array_keys_exist'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\array_keys_exist')) {
     /**
@@ -7816,7 +7937,7 @@ if (!function_exists('ryunosuke\\dbml\\sql_format')) {
                         // "columnname ," になってしまう
                         // mysql において関数呼び出し括弧の前に空白は許されない
                         // ただし、関数呼び出しではなく記号の場合はスペースを入れたい（ colname = (SELECT ～) など）
-                        if (!in_array($next[1], ['.', ',', '(', ';']) || ($next[1] === '(' && !preg_match('#^[a-z0-9_"\'`]+$#i', $rawtoken))) {
+                        if (!in_array($prev[1], [';']) && !in_array($next[1], ['.', ',', '(', ';']) || ($next[1] === '(' && !preg_match('#^[a-z0-9_"\'`]+$#i', $rawtoken))) {
                             $result[] = $MARK_SP;
                         }
                         break;
@@ -8021,6 +8142,11 @@ if (!function_exists('ryunosuke\\dbml\\sql_format')) {
                             $parts = preg_replace("#$MARK_BR#u", $MARK_BR . $MARK_NT, $parts, substr_count($parts, $MARK_BR) - 1);
                             $result[] = $MARK_BR . $virttoken . $MARK_BR . $MARK_NT . $parts;
                         }
+                        break;
+                    case "COMMIT":
+                    case "ROLLBACK":
+                        // begin は begin～end の一部の可能性があるが commit,rollback は俺の知る限りそのような構文はない
+                        $result[] = $virttoken;
                         break;
                     case "END":
                         if ($context === 'CASE') {
@@ -10184,7 +10310,7 @@ if (!function_exists('ryunosuke\\dbml\\paml_export')) {
                 $v = 'true';
             }
             elseif (is_string($v)) {
-                $v = '"' . addcslashes($v, "\"\0\\") . '"';
+                $v = str_quote($v);
             }
 
             if ($k === $n++) {
@@ -11958,13 +12084,12 @@ if (!function_exists('ryunosuke\\dbml\\stacktrace')) {
                     $parents[] = $value;
                     return get_class($value) . $export(object_properties($value), $nest, $parents);
                 }
-                // 文字列は改行削除
+                // 文字列はダブルクォート
                 elseif (is_string($value)) {
-                    $value = str_replace(["\r\n", "\r", "\n"], '\n', $value);
                     if (($strlen = strlen($value)) > $limit) {
                         $value = substr($value, 0, $limit) . sprintf('...(more %d length)', $strlen - $limit);
                     }
-                    return '"' . addcslashes($value, "\"\0\\") . '"';
+                    return str_quote($value);
                 }
                 // それ以外は stringify
                 else {
@@ -21195,14 +21320,16 @@ if (!function_exists('ryunosuke\\dbml\\unique_string')) {
             shuffle($charlist);
             $result = implode('', array_slice($charlist, 0, $initial));
         }
-        elseif (is_stringable($initial)) {
+        elseif (is_null($initial)) {
+            $result .= $charlist[mt_rand(0, $charlength - 1)];
+        }
+        else {
             $result = $initial;
         }
 
-        $p = 0;
-        do {
+        while ((($p = strpos($source, $result, $p ?? 0)) !== false)) {
             $result .= $charlist[mt_rand(0, $charlength - 1)];
-        } while (($p = strpos($source, $result, $p)) !== false);
+        }
 
         return $result;
     }
@@ -21409,15 +21536,6 @@ if (!function_exists('ryunosuke\\dbml\\function_parameter')) {
                     else {
                         $default = $parameter->getDefaultValue();
                         $defval = var_export2($default, true);
-                        if (is_string($default)) {
-                            $defval = strtr($defval, [
-                                "\r" => "\\r",
-                                "\n" => "\\n",
-                                "\t" => "\\t",
-                                "\f" => "\\f",
-                                "\v" => "\\v",
-                            ]);
-                        }
                     }
                 }
                 // isOptional だが isDefaultValueAvailable でないし isVariadic でもない（稀にある（stream_filter_append で確認））
@@ -23219,7 +23337,7 @@ if (!function_exists('ryunosuke\\dbml\\camel_case')) {
      * @param string $delimiter デリミタ
      * @return string 変換した文字列
      */
-    function camel_case($string, $delimiter = '_')
+    function camel_case(?string $string, ?string $delimiter = '_')
     {
         return lcfirst(pascal_case($string, $delimiter));
     }
@@ -23241,7 +23359,7 @@ if (!function_exists('ryunosuke\\dbml\\chain_case')) {
      * @param string $delimiter デリミタ
      * @return string 変換した文字列
      */
-    function chain_case($string, $delimiter = '-')
+    function chain_case(?string $string, ?string $delimiter = '-')
     {
         return snake_case($string, $delimiter);
     }
@@ -23391,10 +23509,8 @@ if (!function_exists('ryunosuke\\dbml\\ends_with')) {
      * @param bool $case_insensitivity 大文字小文字を無視するか
      * @return bool 対象文字列で終わるなら true
      */
-    function ends_with($string, $with, $case_insensitivity = false)
+    function ends_with(?string $string, $with, $case_insensitivity = false)
     {
-        assert(is_stringable($string));
-
         foreach ((array) $with as $w) {
             assert(strlen($w));
 
@@ -23418,7 +23534,7 @@ if (!function_exists('ryunosuke\\dbml\\include_string')) {
      * @param array $array extract される連想変数
      * @return string レンダリングされた文字列
      */
-    function include_string($template, $array = [])
+    function include_string(?string $template, $array = [])
     {
         // opcache が効かない気がする
         $path = memory_stream(__FUNCTION__);
@@ -23447,7 +23563,7 @@ if (!function_exists('ryunosuke\\dbml\\kvsprintf')) {
      * @param array $array フォーマット引数
      * @return string フォーマットされた文字列
      */
-    function kvsprintf($format, array $array)
+    function kvsprintf(?string $format, array $array)
     {
         $keys = array_flip(array_keys($array));
         $vals = array_values($array);
@@ -23494,7 +23610,7 @@ if (!function_exists('ryunosuke\\dbml\\mb_compatible_encoding')) {
      * @param string $to 変換先エンコーディング
      * @return ?bool from が to に対して互換性があるなら true（8bit binary の時のみ例外的に null を返す）
      */
-    function mb_compatible_encoding($from, $to)
+    function mb_compatible_encoding(?string $from, ?string $to)
     {
         static $encmap = [];
         if (!$encmap) {
@@ -23598,10 +23714,8 @@ if (!function_exists('ryunosuke\\dbml\\mb_ellipsis')) {
      * @param int|null $pos 省略記号の差し込み位置
      * @return string 丸められた文字列
      */
-    function mb_ellipsis($string, $width, $trimmarker = '...', $pos = null)
+    function mb_ellipsis(?string $string, $width, $trimmarker = '...', $pos = null)
     {
-        $string = (string) $string;
-
         $strwidth = mb_monospace($string);
         if ($strwidth <= $width) {
             return $string;
@@ -23731,7 +23845,7 @@ if (!function_exists('ryunosuke\\dbml\\mb_ereg_split')) {
      * @param int $flags フラグ
      * @return ?array 分割された文字列
      */
-    function mb_ereg_split($pattern, $subject, $limit = -1, $flags = 0)
+    function mb_ereg_split(?string $pattern, ?string $subject, $limit = -1, $flags = 0)
     {
         // 是正（奇妙だが preg_split は 0, -1 以外は特別扱いしないようだ（個数が負数になることはないので実質的に 1 指定と同じ））
         if (-1 <= $limit && $limit <= 0) {
@@ -23854,7 +23968,7 @@ if (!function_exists('ryunosuke\\dbml\\mb_monospace')) {
      * @param array $codepoints コードポイント配列
      * @return int 等幅の文字幅
      */
-    function mb_monospace($string, $codepoints = [])
+    function mb_monospace(?string $string, $codepoints = [])
     {
         $widthmap = [];
         foreach ($codepoints as $codepoint => $width) {
@@ -23928,7 +24042,7 @@ if (!function_exists('ryunosuke\\dbml\\mb_str_pad')) {
      * @param int $pad_type 埋める位置
      * @return string 指定文字で埋められた文字列
      */
-    function mb_str_pad($string, $width, $pad_string = " ", $pad_type = STR_PAD_RIGHT)
+    function mb_str_pad(?string $string, $width, $pad_string = " ", $pad_type = STR_PAD_RIGHT)
     {
         assert(in_array($pad_type, [STR_PAD_LEFT, STR_PAD_RIGHT, STR_PAD_BOTH]));
 
@@ -23978,10 +24092,8 @@ if (!function_exists('ryunosuke\\dbml\\mb_substr_replace')) {
      * @param ?int $length 置換長
      * @return string 置換した文字列
      */
-    function mb_substr_replace($string, $replacement, $start, $length = null)
+    function mb_substr_replace(?string $string, ?string $replacement, $start, $length = null)
     {
-        $string = (string) $string;
-
         $strlen = mb_strlen($string);
         if ($start < 0) {
             $start += $strlen;
@@ -24012,7 +24124,7 @@ if (!function_exists('ryunosuke\\dbml\\mb_trim')) {
      * @param string $string 対象文字列
      * @return string trim した文字列
      */
-    function mb_trim($string)
+    function mb_trim(?string $string)
     {
         return preg_replace('/\A[\p{C}\p{Z}]++|[\p{C}\p{Z}]++\z/u', '', $string);
     }
@@ -24048,9 +24160,9 @@ if (!function_exists('ryunosuke\\dbml\\mb_wordwrap')) {
      * @param ?string $break 分割文字
      * @return string|array 指定幅で改行が差し込まれた文字列
      */
-    function mb_wordwrap($string, $width, $break = "\n")
+    function mb_wordwrap(?string $string, $width, $break = "\n")
     {
-        $lines = mb_split('\\R', (string) $string);
+        $lines = mb_split('\\R', $string);
 
         $result = [];
         foreach ($lines as $line) {
@@ -24107,7 +24219,7 @@ if (!function_exists('ryunosuke\\dbml\\multiexplode')) {
      * @param int $limit 分割数
      * @return array 分割された配列
      */
-    function multiexplode($delimiter, $string, $limit = \PHP_INT_MAX)
+    function multiexplode($delimiter, ?string $string, $limit = \PHP_INT_MAX)
     {
         $limit = (int) $limit;
         if ($limit < 0) {
@@ -24149,7 +24261,7 @@ if (!function_exists('ryunosuke\\dbml\\namespace_split')) {
      * @param string $string 対象文字列
      * @return array [namespace, localname]
      */
-    function namespace_split($string)
+    function namespace_split(?string $string)
     {
         $pos = strrpos($string, '\\');
         if ($pos === false) {
@@ -24181,7 +24293,7 @@ if (!function_exists('ryunosuke\\dbml\\ngram')) {
      * @param string $encoding マルチバイトエンコーディング
      * @return array N-gram 配列
      */
-    function ngram($string, $N, $encoding = 'UTF-8')
+    function ngram(?string $string, $N, $encoding = 'UTF-8')
     {
         if (func_num_args() < 3) {
             $encoding = mb_internal_encoding();
@@ -24214,7 +24326,7 @@ if (!function_exists('ryunosuke\\dbml\\pascal_case')) {
      * @param string $delimiter デリミタ（複数可）
      * @return string 変換した文字列
      */
-    function pascal_case($string, $delimiter = '_')
+    function pascal_case(?string $string, ?string $delimiter = '_')
     {
         $replacemap = array_combine(str_split($delimiter), array_pad([], strlen($delimiter), ' '));
         return strtr(ucwords(strtr($string, $replacemap)), [' ' => '']);
@@ -24256,7 +24368,7 @@ if (!function_exists('ryunosuke\\dbml\\quoteexplode')) {
      * @param array $options オプション
      * @return array 分割された配列
      */
-    function quoteexplode($delimiter, $string, $limit = null, $enclosures = "'\"", $escape = '\\', $options = [])
+    function quoteexplode($delimiter, ?string $string, $limit = null, $enclosures = "'\"", $escape = '\\', $options = [])
     {
         $options += [
             'delim-capture' => false, // デリミタも結果に含まれるようになる
@@ -24308,7 +24420,7 @@ if (!function_exists('ryunosuke\\dbml\\render_file')) {
      * @param array $array レンダリング変数
      * @return string レンダリングされた文字列
      */
-    function render_file($template_file, $array)
+    function render_file(?string $template_file, $array)
     {
         return render_string(file_get_contents($template_file), $array);
     }
@@ -24350,10 +24462,15 @@ if (!function_exists('ryunosuke\\dbml\\render_string')) {
      * @param array $array レンダリング変数
      * @return string レンダリングされた文字列
      */
-    function render_string($template, $array)
+    function render_string(?string $template, $array)
     {
         // eval 可能な形式に変換
-        $evalcode = 'return "' . addcslashes($template, "\"\\\0") . '";';
+        $evalcode = 'return ' . str_quote($template, [
+                'special-character' => [
+                    '\\' => '\\\\', // バックスラッシュ
+                    '"'  => '\\"',  // 二重引用符
+                ],
+            ]) . ';';
 
         // 利便性を高めるために変数配列を少しいじる
         $vars = [];
@@ -24415,7 +24532,7 @@ if (!function_exists('ryunosuke\\dbml\\render_template')) {
      * @param callable $tag ブロックと変数値が渡ってくるクロージャ（タグ付きテンプレートリテラルのようなもの）
      * @return string レンダリングされた文字列
      */
-    function render_template($template, $vars, $tag = null)
+    function render_template(?string $template, $vars, $tag = null)
     {
         assert(is_arrayable($vars) || is_array($vars));
 
@@ -24496,7 +24613,7 @@ if (!function_exists('ryunosuke\\dbml\\snake_case')) {
      * @param bool $keep_abbr すべて大文字の単語を1単語として扱うか
      * @return string 変換した文字列
      */
-    function snake_case($string, $delimiter = '_', $keep_abbr = false)
+    function snake_case(?string $string, ?string $delimiter = '_', $keep_abbr = false)
     {
         $pattern = $keep_abbr ? '/[A-Z]([A-Z](?![a-z]))*/' : '/[A-Z]/';
         return ltrim(strtolower(preg_replace($pattern, $delimiter . '\0', $string)), $delimiter);
@@ -24528,7 +24645,7 @@ if (!function_exists('ryunosuke\\dbml\\split_noempty')) {
      * @param string|bool $trimchars 指定した文字を trim する。true を指定すると trim する
      * @return array 指定文字で分割して空文字を除いた配列
      */
-    function split_noempty($delimiter, $string, $trimchars = true)
+    function split_noempty(?string $delimiter, ?string $string, $trimchars = true)
     {
         // trim しないなら preg_split(PREG_SPLIT_NO_EMPTY) で十分
         if (strlen($trimchars) === 0) {
@@ -24568,10 +24685,8 @@ if (!function_exists('ryunosuke\\dbml\\starts_with')) {
      * @param bool $case_insensitivity 大文字小文字を無視するか
      * @return bool 指定文字列で始まるなら true を返す
      */
-    function starts_with($string, $with, $case_insensitivity = false)
+    function starts_with(?string $string, $with, $case_insensitivity = false)
     {
-        assert(is_stringable($string));
-
         foreach ((array) $with as $w) {
             assert(strlen($w));
 
@@ -24611,9 +24726,8 @@ if (!function_exists('ryunosuke\\dbml\\str_anyof')) {
      * @param bool $case_insensitivity 大文字小文字を無視するか
      * @return bool 候補の中にあるならそのキー。無いなら null
      */
-    function str_anyof($needle, $haystack, $case_insensitivity = false)
+    function str_anyof(?string $needle, $haystack, $case_insensitivity = false)
     {
-        $needle = (string) $needle;
         foreach ($haystack as $k => $v) {
             if (!$case_insensitivity && strcmp($needle, $v) === 0) {
                 return $k;
@@ -24682,7 +24796,7 @@ if (!function_exists('ryunosuke\\dbml\\str_array')) {
      * @param bool $hashmode 連想配列モードか
      * @return array 配列
      */
-    function str_array($string, $delimiter, $hashmode)
+    function str_array($string, ?string $delimiter, $hashmode)
     {
         $array = $string;
         if (is_stringable($string)) {
@@ -24747,7 +24861,7 @@ if (!function_exists('ryunosuke\\dbml\\str_between')) {
      * @param string $escape エスケープ文字。この文字が前にある $from, $to 文字は走査外になる
      * @return ?string $from, $to で囲まれた文字。見つからなかった場合は null
      */
-    function str_between($string, $from, $to, &$position = 0, $enclosure = '\'"', $escape = '\\')
+    function str_between(?string $string, ?string $from, ?string $to, &$position = 0, $enclosure = '\'"', $escape = '\\')
     {
         $strlen = strlen($string);
         $fromlen = strlen($from);
@@ -24805,7 +24919,7 @@ if (!function_exists('ryunosuke\\dbml\\str_bytes')) {
      * @param int $base 基数
      * @return array 文字のバイト配列
      */
-    function str_bytes($string, $base = 10)
+    function str_bytes(?string $string, $base = 10)
     {
         // return array_values(unpack('C*', $string));
 
@@ -24843,7 +24957,7 @@ if (!function_exists('ryunosuke\\dbml\\str_chop')) {
      * @param bool $case_insensitivity 大文字小文字を無視するか
      * @return string 削ぎ落とした文字列
      */
-    function str_chop($string, $prefix = '', $suffix = '', $case_insensitivity = false)
+    function str_chop(?string $string, ?string $prefix = '', ?string $suffix = '', $case_insensitivity = false)
     {
         $pattern = [];
         if (strlen($prefix)) {
@@ -24882,7 +24996,7 @@ if (!function_exists('ryunosuke\\dbml\\str_chunk')) {
      * @param int ...$chunks 分割の各文字数（可変引数）
      * @return string[] 分割された文字列配列
      */
-    function str_chunk($string, ...$chunks)
+    function str_chunk(?string $string, ...$chunks)
     {
         $offset = 0;
         $length = strlen($string);
@@ -24894,7 +25008,7 @@ if (!function_exists('ryunosuke\\dbml\\str_chunk')) {
             $result[] = substr($string, $offset, $chunk);
             $offset += $chunk;
         }
-        $result[] = (string) substr($string, $offset);
+        $result[] = substr($string, $offset);
         return $result;
     }
 }
@@ -24924,7 +25038,7 @@ if (!function_exists('ryunosuke\\dbml\\str_common_prefix')) {
      * @param string[] $strings
      * @return ?string 共通部分（共通がない場合は空文字）
      */
-    function str_common_prefix(...$strings)
+    function str_common_prefix(?string ...$strings)
     {
         if (count($strings) < 2) {
             return null;
@@ -24940,6 +25054,85 @@ if (!function_exists('ryunosuke\\dbml\\str_common_prefix')) {
             $result .= $c;
         }
         return $result;
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\str_control_apply') || (new \ReflectionFunction('ryunosuke\\dbml\\str_control_apply'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\str_control_apply')) {
+    /**
+     * 制御文字を実際に適用させる
+     *
+     * とはいえ文字列として適用できる制御文字はそう多くはなく、実質的に \b くらいだろう。
+     *
+     * - \b: 前の1文字を消して自身も消える
+     * - \d: 次の\d以外の1文字を消して自身も消える
+     *   - 前方探索なので利便性のため「\d以外の」という条件がついている
+     * - \r: 直前の \n から直後の \n までを消す
+     *   - \r に「消す」という意味はないが、実用上はその方が便利なことが多い
+     *
+     * なお、 \b と書いてあるが php のエスケープシーケンスに \b は存在しないため \x08 と記述する必要がある（\d も同様）。
+     * それはそれで不便なので \b, \d は特別扱いとしてある（$characters のデフォルト値に潜ませてあるが、それを外せば特別扱いは無くなる）。
+     *
+     * Example:
+     * ```php
+     * // 最初の X は [BS] で消える・次の X は [DEL] で消える、XXX は [CR] で消える。結果 text\nzzz になる
+     * that(str_control_apply("X\b\dXtext\nXXX\rzzz"))->isSame("text\nzzz");
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\strings
+     *
+     * @param string $string 対象文字列
+     * @param string $characters 対象とする制御文字
+     * @return string 制御文字が適用された文字列
+     */
+    function str_control_apply(string $string, string $characters = "\b\x08\d\x7f\r"): string
+    {
+        $remap = [];
+        if (strpos_escaped($characters, "\b") !== null) {
+            $remap["\b"] = "\x08";
+        }
+        if (strpos_escaped($characters, "\d") !== null) {
+            $remap["\d"] = "\x7f";
+        }
+        $string = strtr_escaped($string, $remap);
+        $characters = strtr_escaped($characters, $remap);
+
+        $offset = 0;
+        while (true) {
+            $pos = strcspn($string, $characters, $offset) + $offset;
+            $control = $string[$pos] ?? null;
+            if ($control === null) {
+                break;
+            }
+            if ($control === "\x08") {
+                if ($pos === 0) {
+                    $string = substr_replace($string, '', $pos, 1);
+                    $offset = $pos;
+                }
+                else {
+                    $string = substr_replace($string, '', $pos - 1, 2);
+                    $offset = $pos - 1;
+                }
+            }
+            if ($control === "\x7f") {
+                $next = strspn($string, "\x7f", $pos) + $pos;
+                $string = substr_replace($string, '', $next, 1);
+                $string = substr_replace($string, '', $pos, 1);
+                $offset = $pos;
+            }
+            if ($control === "\x0d") {
+                $prev = strposr($string, "\x0a", $pos);
+                if ($prev === false) {
+                    $string = substr_replace($string, '', 0, $pos + 1);
+                    $offset = 0;
+                }
+                else {
+                    $string = substr_replace($string, '', $prev + 1, $pos - $prev);
+                    $offset = $prev + 1;
+                }
+            }
+        }
+        return $string;
     }
 }
 
@@ -25055,7 +25248,7 @@ if (!function_exists('ryunosuke\\dbml\\str_diff')) {
             public function __invoke($xstring, $ystring)
             {
                 $arrayize = function ($string) {
-                    $binary_check = function ($string) {
+                    $binary_check = function (?string $string) {
                         if ($this->options['allow-binary'] === true || !preg_match('#\0#', $string)) {
                             return $string;
                         }
@@ -25550,10 +25743,8 @@ if (!function_exists('ryunosuke\\dbml\\str_ellipsis')) {
      * @param int|null $pos 省略記号の差し込み位置
      * @return string 丸められた文字列
      */
-    function str_ellipsis($string, $width, $trimmarker = '...', $pos = null)
+    function str_ellipsis(?string $string, $width, $trimmarker = '...', $pos = null)
     {
-        $string = (string) $string;
-
         $strlen = mb_strlen($string);
         if ($strlen <= $width) {
             return $string;
@@ -25623,11 +25814,9 @@ if (!function_exists('ryunosuke\\dbml\\str_embed')) {
      * @param ?array $replaced 置換されたペアがタプルで格納される
      * @return string 置換された文字列
      */
-    function str_embed($string, $replacemap, $enclosure = "'\"", $escape = '\\', &$replaced = null)
+    function str_embed(?string $string, $replacemap, $enclosure = "'\"", $escape = '\\', &$replaced = null)
     {
         assert(is_iterable($replacemap));
-
-        $string = (string) $string;
 
         // 長いキーから処理するためソートしておく
         $replacemap = arrayval($replacemap, false);
@@ -25738,14 +25927,12 @@ if (!function_exists('ryunosuke\\dbml\\str_exists')) {
      * @param bool $and_flag すべて含む場合に true を返すか
      * @return bool $needle を含むなら true
      */
-    function str_exists($haystack, $needle, $case_insensitivity = false, $and_flag = false)
+    function str_exists(?string $haystack, $needle, $case_insensitivity = false, $and_flag = false)
     {
         if (!is_array($needle)) {
             $needle = [$needle];
         }
 
-        // あくまで文字列としての判定に徹する（strpos の第2引数は闇が深い気がする）
-        $haystack = (string) $haystack;
         $needle = array_map('strval', $needle);
 
         foreach ($needle as $str) {
@@ -25808,7 +25995,7 @@ if (!function_exists('ryunosuke\\dbml\\str_guess')) {
      * @param ?float $percent マッチ度（％）を受ける変数
      * @return string|array 候補の中で最も近い文字列
      */
-    function str_guess($string, $candidates, &$percent = null)
+    function str_guess(?string $string, $candidates, &$percent = null)
     {
         $candidates = array_filter(arrayval($candidates, false), 'strlen');
         if (!$candidates) {
@@ -25877,7 +26064,7 @@ if (!function_exists('ryunosuke\\dbml\\str_lchop')) {
      * @param bool $case_insensitivity 大文字小文字を無視するか
      * @return string 削ぎ落とした文字列
      */
-    function str_lchop($string, $prefix, $case_insensitivity = false)
+    function str_lchop(?string $string, ?string $prefix, $case_insensitivity = false)
     {
         return str_chop($string, $prefix, '', $case_insensitivity);
     }
@@ -25918,7 +26105,7 @@ if (!function_exists('ryunosuke\\dbml\\str_patch')) {
      * @param array $options オプション配列
      * @return string パッチ適用結果
      */
-    function str_patch($string, $patch, $options = [])
+    function str_patch(?string $string, ?string $patch, $options = [])
     {
         $options += [
             'encoding' => null,
@@ -26142,6 +26329,154 @@ if (!function_exists('ryunosuke\\dbml\\str_putcsv')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\str_quote') || (new \ReflectionFunction('ryunosuke\\dbml\\str_quote'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\str_quote')) {
+    /**
+     * 文字列をダブルクォート文字列に変換する
+     *
+     * 文字ではうまく表現できないが、例えば「本当の改行」が \n になり、「本当のタブ文字」が \t になる。
+     * コントロール文字は "\code" 形式のようになる。
+     * 「得られた文字列は eval すると元に戻る」とでも言えばいいか。
+     *
+     * 制御文字をそのまま出力するとまずい状況が稀によくある（特に行指向媒体への改行文字）。
+     * この関数を通せば php の文字列の体裁を保ったまま1行化できる。
+     * 端的に言えば var_export の文字列特化版。
+     *
+     * 挙動は $options である程度制御可能。
+     * 各 $options は原則的に文字のマップか true を渡す（true の場合はデフォルトが使用される）。
+     * 一部、それ以外の値・型に対応しているものもある。
+     *
+     * - escape-character: 制御文字のうち、明確なエスケープシーケンスが存在する場合はそれを使用する
+     *   - control-character にオーバーラップするがこちらが優先される
+     * - control-character: 00 ～ 1F+7F の制御文字を \code 形式にする
+     *   - 文字列で "oct", "hex", "HEX" も指定できる。その場合それぞれ \oct, \xhex, \xHEX 形式になる
+     * - special-character: ダブルクオート内の文字列が文字列であるための変換を行う
+     *   - 原則的にデフォルトに任せて指定すべきではない
+     *
+     * Example:
+     * ```php
+     * // （非常に分かりにくいが）下記のように変換される
+     * that(str_quote("\$a\nb\rc\x00"))->isSame("\"\\\$a\\nb\\rc\\0\"");
+     * // 文字としての意味は一緒であり要するに表現形式の違いなので、php の世界で eval すれば元の文字列に戻る
+     * that(eval('return ' . str_quote("\$a\nb\rc\x00") . ';'))->isSame("\$a\nb\rc\x00");
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\strings
+     *
+     * @param string $string 対象文字列
+     * @param array $options オプション配列
+     * @return string クォート文字列
+     */
+    function str_quote(string $string, array $options = []): string
+    {
+        $options += [
+            'escape-character'  => true,
+            'control-character' => true,
+            'special-character' => true,
+            'heredoc'           => '',
+            'nowdoc'            => '',
+            'indent'            => 0,
+        ];
+
+        assert(!($options['heredoc'] && $options['nowdoc']));
+
+        // nowdoc にエスケープは存在しないのでそのまま埋め込む（その結果壊れてもこの関数の責務ではない）
+        if (strlen($options['nowdoc'])) {
+            $indent = str_repeat(" ", $options['indent']);
+            $string = preg_replace('#(\R)#u', '$1' . $indent, $string);
+            return "<<<'{$options['nowdoc']}'\n{$indent}{$string}\n{$indent}{$options['nowdoc']}";
+        }
+
+        // @see https://www.php.net/manual/ja/language.types.string.php#language.types.string.syntax.double
+        $special_chars = [
+            '\\' => '\\\\', // バックスラッシュ
+            '"'  => '\\"',  // 二重引用符
+            '$'  => '\\$',  // ドル記号
+        ];
+        $escape_chars = [
+            "\11" => '\\t', // 水平タブ (HT またはアスキーの 0x09 (9))
+            "\12" => '\\n', // ラインフィード (LF またはアスキーの 0x0A (10))
+            "\13" => '\\v', // 垂直タブ (VT またはアスキーの 0x0B (11))
+            "\14" => '\\f', // フォームフィード (FF またはアスキーの 0x0C (12))
+            "\15" => '\\r', // キャリッジリターン (CR またはアスキーの 0x0D (13))
+            "\33" => '\\e', // エスケープ (ESC あるいはアスキーの 0x1B (27))
+        ];
+        $control_chars = [
+            "\0"   => "\\0",
+            "\1"   => "\\1",
+            "\2"   => "\\2",
+            "\3"   => "\\3",
+            "\4"   => "\\4",
+            "\5"   => "\\5",
+            "\6"   => "\\6",
+            "\7"   => "\\7",
+            "\10"  => "\\10",
+            "\11"  => "\\11",
+            "\12"  => "\\12",
+            "\13"  => "\\13",
+            "\14"  => "\\14",
+            "\15"  => "\\15",
+            "\16"  => "\\16",
+            "\17"  => "\\17",
+            "\20"  => "\\20",
+            "\21"  => "\\21",
+            "\22"  => "\\22",
+            "\23"  => "\\23",
+            "\24"  => "\\24",
+            "\25"  => "\\25",
+            "\26"  => "\\26",
+            "\27"  => "\\27",
+            "\30"  => "\\30",
+            "\31"  => "\\31",
+            "\32"  => "\\32",
+            "\33"  => "\\33",
+            "\34"  => "\\34",
+            "\35"  => "\\35",
+            "\36"  => "\\36",
+            "\37"  => "\\37",
+            "\177" => "\\177",
+        ];
+
+        // heredoc 用の特殊処理（タイプ可能な文字はエスケープしなくてもよいだろう）
+        if (strlen($options['heredoc'])) {
+            $control_chars = array_diff_key($control_chars, $escape_chars);
+            $escape_chars = [];
+            unset($special_chars['"']);
+        }
+
+        $charmap = [];
+        if ($options['special-character']) {
+            $charmap += is_array($options['special-character']) ? $options['special-character'] : $special_chars;
+        }
+        if ($options['escape-character']) {
+            $charmap += is_array($options['escape-character']) ? $options['escape-character'] : $escape_chars;
+        }
+        if ($options['control-character']) {
+            if ($options['control-character'] === 'oct') {
+                // デフォで oct にしてあるので変換不要
+                assert(end($control_chars) === "\\177");
+            }
+            if ($options['control-character'] === 'hex') {
+                $control_chars = array_map(fn($v) => sprintf('\\x%02x', octdec(trim($v, '\\'))), $control_chars);
+            }
+            if ($options['control-character'] === 'HEX') {
+                $control_chars = array_map(fn($v) => sprintf('\\x%02X', octdec(trim($v, '\\'))), $control_chars);
+            }
+            $charmap += is_array($options['control-character']) ? $options['control-character'] : $control_chars;
+        }
+
+        $string = strtr($string, $charmap);
+
+        if (strlen($options['heredoc'])) {
+            $indent = str_repeat(" ", $options['indent']);
+            $string = preg_replace('#(\R)#u', '$1' . $indent, $string);
+            return "<<<{$options['heredoc']}\n{$indent}{$string}\n{$indent}{$options['heredoc']}";
+        }
+
+        return '"' . $string . '"';
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\str_rchop') || (new \ReflectionFunction('ryunosuke\\dbml\\str_rchop'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\str_rchop')) {
     /**
@@ -26161,7 +26496,7 @@ if (!function_exists('ryunosuke\\dbml\\str_rchop')) {
      * @param bool $case_insensitivity 大文字小文字を無視するか
      * @return string 削ぎ落とした文字列
      */
-    function str_rchop($string, $suffix, $case_insensitivity = false)
+    function str_rchop(?string $string, ?string $suffix, $case_insensitivity = false)
     {
         return str_chop($string, '', $suffix, $case_insensitivity);
     }
@@ -26211,7 +26546,7 @@ if (!function_exists('ryunosuke\\dbml\\str_submap')) {
      * @param bool $case_insensitivity 大文字小文字を無視するか
      * @return string 置換された文字列
      */
-    function str_submap($subject, $replaces, $case_insensitivity = false)
+    function str_submap(?string $subject, $replaces, $case_insensitivity = false)
     {
         assert(is_iterable($replaces));
 
@@ -26311,7 +26646,7 @@ if (!function_exists('ryunosuke\\dbml\\str_subreplace')) {
      * @param bool $case_insensitivity 大文字小文字を無視するか
      * @return string 置換された文字列
      */
-    function str_subreplace($subject, $search, $replaces, $case_insensitivity = false)
+    function str_subreplace(?string $subject, ?string $search, $replaces, $case_insensitivity = false)
     {
         $replaces = is_iterable($replaces) ? $replaces : [$replaces];
 
@@ -26370,7 +26705,7 @@ if (!function_exists('ryunosuke\\dbml\\strcat')) {
      * @param mixed ...$variadic 結合する文字列（可変引数）
      * @return string 結合した文字列
      */
-    function strcat(...$variadic)
+    function strcat(?string ...$variadic)
     {
         return implode('', $variadic);
     }
@@ -26404,7 +26739,7 @@ if (!function_exists('ryunosuke\\dbml\\strpos_array')) {
      * @param int $offset 開始位置
      * @return array $needles それぞれの位置配列
      */
-    function strpos_array($haystack, $needles, $offset = 0)
+    function strpos_array(?string $haystack, $needles, $offset = 0)
     {
         if ($offset < 0) {
             $offset += strlen($haystack);
@@ -26418,6 +26753,95 @@ if (!function_exists('ryunosuke\\dbml\\strpos_array')) {
             }
         }
         return $result;
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\strpos_closest') || (new \ReflectionFunction('ryunosuke\\dbml\\strpos_closest'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\strpos_closest')) {
+    /**
+     * 指定位置から左右どちらかの探索を行う
+     *
+     * 一つ前/後の指定文字の位置を返す
+     * 端的に言えば strpo/strposr の自動使い分け＋範囲外でもエラーにならない版。
+     *
+     * $nth は負数で左探索、正数で右探索だが、スキップ数も兼ねる。
+     *
+     * Example:
+     * ```php
+     * //        +0123456789A1234567
+     * //        -7654321A9876543210
+     * $string = 'hello hello hello';
+     *
+     * // 0文字目から右探索すれば0文字目が引っかかる
+     * that(strpos_closest($string, 'hello', 0, +1))->isSame(0);
+     * // ↑のスキップ（2つ目）版
+     * that(strpos_closest($string, 'hello', 0, +2))->isSame(6);
+     * // 5文字目から右探索すれば6文字目が引っかかる
+     * that(strpos_closest($string, 'hello', 5, +1))->isSame(6);
+     * // ↑のスキップ（2つ目）版
+     * that(strpos_closest($string, 'hello', 5, +2))->isSame(12);
+     * // 8文字目から右探索すれば12文字目が引っかかる（2個目の hello の途中なので3個目の hello から引っかかる）
+     * that(strpos_closest($string, 'hello', 8, +1))->isSame(12);
+     * // ↑のスキップ（2つ目）版
+     * that(strpos_closest($string, 'hello', 8, +2))->isSame(null);
+     *
+     * // 0文字目から左探索しても見つからない
+     * that(strpos_closest($string, 'hello', 0, -1))->isSame(null);
+     * // 5文字目から左探索すれば0文字目が引っかかる
+     * that(strpos_closest($string, 'hello', 5, -1))->isSame(0);
+     * // 8文字目から左探索すれば0文字目が引っかかる（2個目の hello の途中なので1個目の hello から引っかかる）
+     * that(strpos_closest($string, 'hello', 8, -1))->isSame(0);
+     * // 11文字目から左探索すれば6文字目が引っかかる
+     * that(strpos_closest($string, 'hello', 11, -1))->isSame(6);
+     * // ↑のスキップ（2つ目）版
+     * that(strpos_closest($string, 'hello', 11, -2))->isSame(0);
+     *
+     * // 範囲外でもエラーにならない
+     * that(strpos_closest($string, 'hello', -999, +1))->isSame(0);  // 「数直線のはるか左方から探索を始めて 0 文字目で見つかった」のようなイメージ
+     * that(strpos_closest($string, 'hello', +999, -1))->isSame(12); // 「数直線のはるか右方から探索を始めて 12 文字目で見つかった」のようなイメージ
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\strings
+     *
+     * @param string $haystack 対象文字列
+     * @param string $needle 位置を取得したい文字列
+     * @param ?int $offset 開始位置。 null を渡すと $nth の方向に応じて自動で定まる
+     * @param int $nth 左右指定兼スキップ数（正数で右探索、負数で左探索）
+     * @return ?int 見つかった位置
+     */
+    function strpos_closest(string $haystack, string $needle, ?int $offset = null, int $nth = 1): ?int
+    {
+        assert($nth !== 0);
+
+        $reverse = $nth < 0;
+        $nth = abs($nth);
+
+        $offset ??= $reverse ? strlen($haystack) : 0;
+
+        for ($i = 0; $i < $nth; $i++) {
+            if ($i > 0) {
+                $offset++;
+            }
+
+            if ($offset < -strlen($haystack)) {
+                $offset = -strlen($haystack);
+            }
+            if ($offset > strlen($haystack)) {
+                $offset = strlen($haystack);
+            }
+
+            if ($reverse) {
+                $offset = strposr($haystack, $needle, $offset);
+            }
+            else {
+                $offset = strpos($haystack, $needle, $offset);
+            }
+
+            if ($offset === false) {
+                return null;
+            }
+        }
+        return $offset;
     }
 }
 
@@ -26466,7 +26890,7 @@ if (!function_exists('ryunosuke\\dbml\\strpos_escaped')) {
      * @param ?string $found 見つかった文字が格納される
      * @return ?int 見つかった位置
      */
-    function strpos_escaped($haystack, $needle, $offset = 0, $escape = '\\', &$found = null)
+    function strpos_escaped(?string $haystack, $needle, $offset = 0, $escape = '\\', &$found = null)
     {
         $q_escape = preg_quote($escape, '#');
         if (is_stringable($needle)) {
@@ -26521,7 +26945,7 @@ if (!function_exists('ryunosuke\\dbml\\strpos_quoted')) {
      * @param ?string $found $needle の内、見つかった文字列が格納される
      * @return ?int $needle の位置
      */
-    function strpos_quoted($haystack, $needle, $offset = 0, $enclosure = "'\"", $escape = '\\', &$found = null)
+    function strpos_quoted(?string $haystack, $needle, $offset = 0, $enclosure = "'\"", $escape = '\\', &$found = null)
     {
         if (is_string($enclosure)) {
             if (strlen($enclosure)) {
@@ -26574,6 +26998,77 @@ if (!function_exists('ryunosuke\\dbml\\strpos_quoted')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\strposr') || (new \ReflectionFunction('ryunosuke\\dbml\\strposr'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\strposr')) {
+    /**
+     * デフォで左探索な strrpos
+     *
+     * 個人的に strrpos の offset の挙動が分かりにくい。
+     * - offset>=0: 先頭から offset スキップ＋**右探索**
+     * - offset< 0: 末尾から -offset スキップ＋**左探索**
+     *
+     * r と銘打っているんだから offset に依らずにデフォで左探索して欲しい。
+     * 特に offset 未指定だと 0 なので「先頭から末尾まで読んで最後に見つかった場所を返す」という非常に非効率的なことになっている（実際の実装は違うようだけど）。
+     * さらに「単純に50文字目から左探索したい」だけなのに offset が気持ち悪いことになる（50 - strlen($string)）。
+     * 要するに https://www.php.net/manual/ja/function.strrpos.php#76447 これ。
+     *
+     * offset で検索文字列の途中に飛び込んだ場合は見つからないとみなす（strrpos は見つかったとみなす）。
+     * この挙動は説明しにくいので Example を参照。
+     *
+     * Example:
+     * ```php
+     * //        +0123456789A1234567
+     * //        -7654321A9876543210
+     * $string = 'hello hello hello';
+     *
+     * // offset を省略すると末尾から左探索になる
+     * that(strposr($string, 'hello'))->isSame(12);
+     * // 標準の文字列関数のように負数で後ろからの探索になる
+     * that(strposr($string, 'hello', -1))->isSame(6);
+     * // 0文字目から左探索しても見つからない
+     * that(strposr($string, 'hello', 0))->isSame(false);
+     * // 5文字目から左探索すれば0文字目が引っかかる
+     * that(strposr($string, 'hello', 5))->isSame(0);
+     * // 13文字目から左探索すれば6文字目が引っかかる（13文字目は3個目の hello の途中なので2個目の hello から引っかかる）
+     * that(strposr($string, 'hello', 13))->isSame(6);
+     * // この動作は strrpos だと異なる（途中文字列も拾ってしまう）
+     * that(strrpos($string, 'hello', -4))->isSame(12);
+     * // そもそも strrpos は負数指定しないと右探索なので使いにくくてしょうがない
+     * that(strrpos($string, 'hello', 5))->isSame(12);
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\strings
+     *
+     * @param string $haystack 対象文字列
+     * @param string $needle 位置を取得したい文字列
+     * @param ?int $offset 開始位置。 null を渡すと末尾からの探索になる
+     * @return int|false 見つかった位置
+     */
+    function strposr(string $haystack, string $needle, ?int $offset = null): int|false
+    {
+        $offset ??= strlen($haystack);
+
+        if ($offset < 0) {
+            $offset += strlen($haystack);
+        }
+
+        if (strlen($haystack) < $offset) {
+            throw new \ValueError('strposr(): Argument #3 ($offset) must be contained in argument #1 ($haystack)');
+        }
+
+        $result = strrpos($haystack, $needle, $offset - strlen($haystack));
+        // 仮に見つかってもオフセットを跨いでる場合は -1 して再検索
+        if ($result !== false && $result + strlen($needle) > $offset) {
+            // が、先頭文字の場合は -1 する意味もない（そもそもエラーになる）ので false で返してしまってよい
+            if ($result === 0) {
+                return false;
+            }
+            return strrpos($haystack, $needle, $result - 1 - strlen($haystack));
+        }
+        return $result;
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\strrstr') || (new \ReflectionFunction('ryunosuke\\dbml\\strrstr'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\strrstr')) {
     /**
@@ -26605,7 +27100,7 @@ if (!function_exists('ryunosuke\\dbml\\strrstr')) {
      * @param bool $after_needle $needle より後ろを返すか
      * @return ?string
      */
-    function strrstr($haystack, $needle, $after_needle = true)
+    function strrstr(?string $haystack, ?string $needle, $after_needle = true)
     {
         // return strrev(strstr(strrev($haystack), strrev($needle), $after_needle));
 
@@ -26655,7 +27150,7 @@ if (!function_exists('ryunosuke\\dbml\\strtr_escaped')) {
      * @param string $escape エスケープ文字
      * @return string 置換された文字列
      */
-    function strtr_escaped($string, $replace_pairs, $escape = '\\')
+    function strtr_escaped(?string $string, $replace_pairs, $escape = '\\')
     {
         uksort($replace_pairs, fn($a, $b) => strlen($b) - strlen($a));
         $froms = array_keys($replace_pairs);
@@ -30203,11 +30698,11 @@ if (!function_exists('ryunosuke\\dbml\\var_export2')) {
         $INDENT = 4;
 
         // 再帰用クロージャ
-        $export = function ($value, $nest = 0, $parents = []) use (&$export, $INDENT) {
+        $export = function ($value, $context, $nest = 0, $parents = []) use (&$export, $INDENT) {
             // 再帰を検出したら *RECURSION* とする（処理に関しては is_recursive のコメント参照）
             foreach ($parents as $parent) {
                 if ($parent === $value) {
-                    return $export('*RECURSION*');
+                    return $export('*RECURSION*', 'recursion');
                 }
             }
             // 配列は連想判定したり再帰したり色々
@@ -30219,19 +30714,19 @@ if (!function_exists('ryunosuke\\dbml\\var_export2')) {
 
                 // スカラー値のみで構成されているならシンプルな再帰
                 if (!$hashed && array_all($value, fn(...$args) => is_primitive(...$args))) {
-                    return '[' . implode(', ', array_map($export, $value)) . ']';
+                    return '[' . implode(', ', array_map(fn($v) => $export($v, 'array-value'), $value)) . ']';
                 }
 
                 // 連想配列はキーを含めて桁あわせ
                 if ($hashed) {
-                    $keys = array_map($export, array_combine($keys = array_keys($value), $keys));
+                    $keys = array_map(fn($v) => $export($v, 'array-key'), array_combine($keys = array_keys($value), $keys));
                     $maxlen = max(array_map('strlen', $keys));
                 }
                 $kvl = '';
                 $parents[] = $value;
                 foreach ($value as $k => $v) {
                     $keystr = $hashed ? $keys[$k] . str_repeat(' ', $maxlen - strlen($keys[$k])) . ' => ' : '';
-                    $kvl .= $spacer1 . $keystr . $export($v, $nest + 1, $parents) . ",\n";
+                    $kvl .= $spacer1 . $keystr . $export($v, 'array-value', $nest + 1, $parents) . ",\n";
                 }
                 return "[\n{$kvl}{$spacer2}]";
             }
@@ -30240,13 +30735,27 @@ if (!function_exists('ryunosuke\\dbml\\var_export2')) {
                 $parents[] = $value;
                 $classname = get_class($value);
                 if ($classname === \stdClass::class) {
-                    return '(object) ' . $export((array) $value, $nest, $parents);
+                    return '(object) ' . $export((array) $value, 'object', $nest, $parents);
                 }
-                return $classname . '::__set_state(' . $export(object_properties($value), $nest, $parents) . ')';
+                return $classname . '::__set_state(' . $export(object_properties($value), 'object', $nest, $parents) . ')';
             }
-            // 文字列はダブルクオート
+            // 文字列はダブルクオート（場合によってはヒアドキュメント）
             elseif (is_string($value)) {
-                return '"' . addcslashes($value, "\$\"\0\\") . '"';
+                // 列揃えのため配列のキーは常にダブルクォート
+                if ($context === 'array-key') {
+                    return str_quote($value);
+                }
+                // 改行を含むならヒアドキュメント
+                if (str_exists($value, ["\r", "\n"])) {
+                    // ただし、改行文字だけの場合は除く（何らかの引数で改行文字だけを渡すシチュエーションはそれなりにあるのでヒアドキュメントだと冗長）
+                    if (trim($value, "\r\n") !== '') {
+                        return str_quote($value, [
+                            'heredoc' => unique_string($value, 'TEXT', '_'),
+                            'indent'  => $nest * $INDENT,
+                        ]);
+                    }
+                }
+                return str_quote($value);
             }
             // null は小文字で居て欲しい
             elseif (is_null($value)) {
@@ -30259,7 +30768,7 @@ if (!function_exists('ryunosuke\\dbml\\var_export2')) {
         };
 
         // 結果を返したり出力したり
-        $result = $export($value);
+        $result = $export($value, null);
         if ($return) {
             return $result;
         }
