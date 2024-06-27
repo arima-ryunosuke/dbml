@@ -301,7 +301,7 @@ class Logger extends AbstractLogger
         if ($this->handle instanceof \Closure && parameter_length($this->handle) <= 1) {
             $handle = $this->handle;
             $this->handle = function () use ($handle) {
-                $handle($this->getUnsafeOption('callback')(...func_get_args()));
+                $handle($this->_stringify(...func_get_args()));
             };
         }
     }
@@ -327,13 +327,26 @@ class Logger extends AbstractLogger
         }
         if (is_array($this->arrayBuffer)) {
             foreach ($this->arrayBuffer as $log) {
-                fwrite($this->handle, $this->getUnsafeOption('callback')(...$log) . "\n");
+                fwrite($this->handle, $this->_stringify(...$log) . "\n");
             }
         }
 
         if ($locking) {
             flock($this->handle, LOCK_UN);
         }
+    }
+
+    private function _stringify($sql, $params, $types, $metadata, $indent): string
+    {
+        $callback = $this->getUnsafeOption('callback') ?? fn($v) => $v;
+        $result = $callback($sql, $params, $types, $metadata);
+
+        // バッファモードじゃないと入り乱れるのでインデントの意味がない（むしろ誤読を助長するので害悪）
+        if ($indent && !($this->handle instanceof \Closure && $this->resourceBuffer === null && $this->arrayBuffer === null)) {
+            $result = preg_replace('#^#usm', '  ', $result);
+        }
+
+        return $result;
     }
 
     /**
@@ -347,12 +360,18 @@ class Logger extends AbstractLogger
             return;
         }
 
+        $currentTransacting = $this->transacting;
+
         if (strcasecmp($message, 'BEGIN') === 0) {
             $this->transacting = true;
         }
 
         if (!$this->transacting && $this->getUnsafeOption('transaction')) {
             return;
+        }
+
+        if (strcasecmp($message, 'COMMIT') === 0 || strcasecmp($message, 'ROLLBACK') === 0) {
+            $this->transacting = $currentTransacting = false;
         }
 
         $sql = $context['sql'] ?? $message;
@@ -377,31 +396,27 @@ class Logger extends AbstractLogger
 
         // arrayBuffer を優先するため下記の順番を変えてはならない
         if (is_array($this->arrayBuffer)) {
-            $this->arrayBuffer[] = [$sql, $params, $types, $metadata];
+            $this->arrayBuffer[] = [$sql, $params, $types, $metadata, $currentTransacting];
         }
         elseif (is_resource($this->resourceBuffer)) {
-            fwrite($this->resourceBuffer, $this->getUnsafeOption('callback')($sql, $params, $types, $metadata) . "\n");
+            fwrite($this->resourceBuffer, $this->_stringify($sql, $params, $types, $metadata, $currentTransacting) . "\n");
         }
         elseif (is_resource($this->handle)) {
-            fwrite($this->handle, $this->getUnsafeOption('callback')($sql, $params, $types, $metadata) . "\n");
+            fwrite($this->handle, $this->_stringify($sql, $params, $types, $metadata, $currentTransacting) . "\n");
         }
         else {
-            ($this->handle)($sql, $params, $types, $metadata);
+            ($this->handle)($sql, $params, $types, $metadata, $currentTransacting);
         }
 
         if ($this->bufferLimit) {
             $this->bufferSize += strlen($sql) + array_sum(array_map('strlen', $params));
             if ($this->bufferSize > $this->bufferLimit) {
                 foreach ($this->arrayBuffer as $log) {
-                    fwrite($this->resourceBuffer, $this->getUnsafeOption('callback')(...$log) . "\n");
+                    fwrite($this->resourceBuffer, $this->_stringify(...$log) . "\n");
                 }
                 $this->arrayBuffer = [];
                 $this->bufferSize = 0;
             }
-        }
-
-        if (strcasecmp($message, 'COMMIT') === 0 || strcasecmp($message, 'ROLLBACK') === 0) {
-            $this->transacting = false;
         }
     }
 }

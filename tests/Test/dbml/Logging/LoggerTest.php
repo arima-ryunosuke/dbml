@@ -292,9 +292,8 @@ select 4, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 
     function test_transaction()
     {
-        $logs = [];
         $logger = new Logger([
-            'destination' => function ($log) use (&$logs) { $logs[] = $log; },
+            'destination' => $log = tmpfile(),
             'transaction' => true,
             'metadata'    => [],
         ]);
@@ -308,15 +307,18 @@ select 4, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
         $logger->info('logging2');
         $logger->info('rollback');
         $logger->info('ignore');
+        unset($logger);
 
-        $this->assertEquals([
-            "begin",
-            "logging1",
-            "commit",
-            "begin",
-            "logging2",
-            "rollback",
-        ], $logs);
+        rewind($log);
+        $this->assertEquals(<<<LOG
+        begin
+          logging1
+        commit
+        begin
+          logging2
+        rollback
+        
+        LOG, stream_get_contents($log));
     }
 
     function test_metadata_default()
