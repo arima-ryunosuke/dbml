@@ -386,7 +386,6 @@ class Operator extends Expression
 
     private function _phrase()
     {
-        $regexp = $this->platform->getRegexpExpression();
         $split = function ($delimiter, $string) {
             return array_filter(array_map('trim', quoteexplode($delimiter, $string, null)), 'strlen');
         };
@@ -406,13 +405,13 @@ class Operator extends Expression
             }
             foreach ($phrases as $j => $phrase) {
                 foreach ($split(",", $phrase) as $k => $word) {
-                    $pattern = $this->operand1 . " $regexp ?";
-                    $s = $word[0] ?? '';
-                    $e = $word[-1] ?? '';
-                    if ($s === '-') {
-                        $pattern = "NOT ($pattern)";
+                    $not = false;
+                    if (($word[0] ?? '') === '-') {
+                        $not = true;
                         $word = substr($word, 1);
                     }
+                    $s = $word[0] ?? '';
+                    $e = $word[-1] ?? '';
                     if ($s === '"' && $e === '"') {
                         $word = glob2regex(trim(stripslashes($word), '"'));
                     }
@@ -423,8 +422,13 @@ class Operator extends Expression
                     else {
                         $word = glob2regex($word, GLOB_BRACE);
                     }
-                    $patterns[$i][$j][$k] = $pattern;
-                    $params[] = $word;
+                    $regex = $this->platform->getRegexpExpression($this->operand1, $word);
+                    if ($not) {
+                        $patterns[$i][$j][$k] = "NOT ({$regex->merge($params)})";
+                    }
+                    else {
+                        $patterns[$i][$j][$k] = $regex->merge($params);
+                    }
                 }
                 $patterns[$i][$j] = implode(' OR ', Adhoc::wrapParentheses($patterns[$i][$j]));
             }

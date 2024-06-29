@@ -712,22 +712,17 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getRegexpExpression($cplatform, $platform)
     {
-        $expected = null;
         if ($platform instanceof SqlitePlatform) {
-            $expected = "REGEXP";
+            $this->assertExpression($cplatform->getRegexpExpression('column', '.*'), "column REGEXP ?", ['.*']);
         }
-        if ($platform instanceof MySQLPlatform) {
-            $expected = "RLIKE";
+        elseif ($platform instanceof MySQLPlatform) {
+            $this->assertExpression($cplatform->getRegexpExpression('column', '.*'), "REGEXP_LIKE(column, ?, 'i')", ['.*']);
         }
-        if ($platform instanceof PostgreSQLPlatform) {
-            $expected = "~*";
-        }
-
-        if ($expected === null) {
-            that($cplatform)->getRegexpExpression()->wasThrown('is not supported');
+        elseif ($platform instanceof PostgreSQLPlatform) {
+            $this->assertExpression($cplatform->getRegexpExpression('column', '.*'), "column ~* ?", ['.*']);
         }
         else {
-            $this->assertEquals($expected, $cplatform->getRegexpExpression());
+            that($cplatform)->getRegexpExpression('column', '.*')->wasThrown('is not supported');
         }
     }
 

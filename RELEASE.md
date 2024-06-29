@@ -53,6 +53,10 @@
   - Sequencer の負数降順を廃止
   - Sequencer の has メソッド改名
 
+## 2.1.19
+
+- [fixbug] mysql の phrase が照合順序に依存していた不具合を修正
+
 ## 2.1.18
 
 - [feature] 外部キーにメタデータを設定できる機能

@@ -784,16 +784,16 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     /**
      * 正規表現を返す
      */
-    public function getRegexpExpression(): string
+    public function getRegexpExpression(string $column, string $pattern): Expression
     {
         if ($this->platform instanceof SqlitePlatform) {
-            return "REGEXP";
+            return new Expression("$column REGEXP ?", [$pattern]);
         }
         if ($this->platform instanceof MySQLPlatform) {
-            return "RLIKE";
+            return new Expression("REGEXP_LIKE($column, ?, 'i')", [$pattern]);
         }
         if ($this->platform instanceof PostgreSQLPlatform) {
-            return "~*";
+            return new Expression("$column ~* ?", [$pattern]);
         }
 
         throw DBALException::notSupported(__METHOD__);
