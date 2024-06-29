@@ -194,11 +194,11 @@ abstract class AbstractBuilder implements Queryable, \Stringable
      * // results: "?", $params: ['col']
      *
      * # Queryable も渡せる
-     * $qb->bindInto(new Expression('col', [1]), $params);
+     * $qb->bindInto(Expression::new('col', [1]), $params);
      * // results: ['col1'], $params: [1]
      *
      * # 配列で渡す（混在可能。メイン用途）
-     * $qb->bindInto(['col1' => new Expression('UPPER(?)', [1]), 'col2' => 2], $params);
+     * $qb->bindInto(['col1' => Expression::new('UPPER(?)', [1]), 'col2' => 2], $params);
      * // results: ['col1' => 'UPPER(?)', 'col2' => '?'], $params: [1, 2]
      * ```
      */

@@ -2,16 +2,19 @@
 
 namespace ryunosuke\dbml\Query\Expression;
 
+use ryunosuke\dbml\Mixin\FactoryTrait;
 use ryunosuke\dbml\Query\Queryable;
 use function ryunosuke\dbml\arrayize;
 
 /**
  * 生クエリを表すクラス
  *
- * `new Expression('NOW()')` を select に与えると "NOW()" に展開される（エスケープやサブクエリ化などの余計なことを一切行わない）。
+ * `Expression::new('NOW()')` を select に与えると "NOW()" に展開される（エスケープやサブクエリ化などの余計なことを一切行わない）。
  */
 class Expression implements Queryable
 {
+    use FactoryTrait;
+
     protected ?string $expr;
 
     protected array $params;
@@ -46,20 +49,20 @@ class Expression implements Queryable
         if (is_string($expr)) {
             // 'NULL' は特別扱いで式とみなす
             if (strcasecmp($expr, 'null') === 0) {
-                return new Expression('NULL');
+                return Expression::new('NULL');
             }
             // 括弧が含まれていたら式とみなす
             if (strpos($expr, '(') !== false) {
-                return new Expression($expr);
+                return Expression::new($expr);
             }
         }
         // 数値は自動修飾を無効にするために式とみなす
         if (is_numeric($expr)) {
-            return new Expression($expr);
+            return Expression::new($expr);
         }
         // ↑の真偽値版（あらゆる RDBMS で実質的には数値みたいなものなので）
         if (is_bool($expr)) {
-            return new Expression((int) $expr);
+            return Expression::new((int) $expr);
         }
         return $expr;
     }
@@ -73,12 +76,12 @@ class Expression implements Queryable
      *
      * つまり
      *
-     * - `new Expression('NOW()');`
+     * - `Expression::new('NOW()');`
      * - `Expression::NOW();`
      *
      * や
      *
-     * - `new Expression('ADD(?, ?)', array(1, 2));`
+     * - `Expression::new('ADD(?, ?)', array(1, 2));`
      * - `Expression::{'ADD(?, ?)'}(1, 2);`
      * - `Expression::ADD(1, 2);`
      *
@@ -87,18 +90,18 @@ class Expression implements Queryable
     public static function __callStatic(string $expr, array $params): static
     {
         if (strpos($expr, '(') !== false) {
-            return new Expression($expr, $params);
+            return Expression::new($expr, $params);
         }
 
         $inners = [];
         $newparams = [];
         foreach ($params as $param) {
             if (!$param instanceof Queryable) {
-                $param = new Expression('?', $param);
+                $param = Expression::new('?', $param);
             }
             $inners[] = $param->merge($newparams);
         }
-        return new Expression($expr . "(" . implode(', ', $inners) . ")", $newparams);
+        return Expression::new($expr . "(" . implode(', ', $inners) . ")", $newparams);
     }
 
     /**

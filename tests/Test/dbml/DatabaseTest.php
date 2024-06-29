@@ -479,27 +479,6 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertCount(1, $database->getConnections());
     }
 
-    function test_compatiblePlatform()
-    {
-        // デフォルト
-        $database = self::getDummyDatabase();
-        $this->assertInstanceOf(CompatiblePlatform::class, $database->getCompatiblePlatform());
-
-        $cplatform = new class ( new \ryunosuke\Test\Platforms\SqlitePlatform() ) extends CompatiblePlatform { };
-
-        // クラス名
-        $database = new Database(DriverManager::getConnection(['url' => 'sqlite:///:memory:']), [
-            'compatiblePlatform' => get_class($cplatform),
-        ]);
-        $this->assertInstanceOf(get_class($cplatform), $database->getCompatiblePlatform());
-
-        // インスタンス
-        $database = new Database(DriverManager::getConnection(['url' => 'sqlite:///:memory:']), [
-            'compatiblePlatform' => $cplatform,
-        ]);
-        $this->assertSame($cplatform, $database->getCompatiblePlatform());
-    }
-
     function test_getSchema()
     {
         $connection = DriverManager::getConnection([

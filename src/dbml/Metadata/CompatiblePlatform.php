@@ -12,6 +12,7 @@ use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Types\Types;
+use ryunosuke\dbml\Mixin\FactoryTrait;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Queryable;
 use function ryunosuke\dbml\array_each;
@@ -33,9 +34,11 @@ use function ryunosuke\dbml\starts_with;
  */
 class CompatiblePlatform /*extends AbstractPlatform*/
 {
-    private AbstractPlatform $platform;
+    use FactoryTrait;
 
-    private ?string $version;
+    protected AbstractPlatform $platform;
+
+    protected ?string $version;
 
     /**
      * コンストラクタ
@@ -518,7 +521,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getPrimaryCondition(array $wheres, string $prefix = ''): Expression
     {
         if (!$wheres) {
-            return new Expression('');
+            return Expression::new('');
         }
 
         $prefix = concat($prefix, '.');
@@ -581,7 +584,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
                 $condition = implode(' OR ', $andconds);
             }
         }
-        return new Expression($condition, $params);
+        return Expression::new($condition, $params);
     }
 
     /**
@@ -616,7 +619,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         $query .= $else === null ? '' : "ELSE {$entry($else)} ";
         $query .= 'END)';
 
-        return new Expression($query, $params);
+        return Expression::new($query, $params);
     }
 
     /**
@@ -710,7 +713,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getCountExpression(string $column): Expression
     {
         // avg 以外は移譲
-        return new Expression("COUNT($column)");
+        return Expression::new("COUNT($column)");
     }
 
     /**
@@ -719,7 +722,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getMinExpression(string $column): Expression
     {
         // avg 以外は移譲
-        return new Expression("MIN({$column})");
+        return Expression::new("MIN({$column})");
     }
 
     /**
@@ -728,7 +731,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getMaxExpression(string $column): Expression
     {
         // avg 以外は移譲
-        return new Expression("MAX({$column})");
+        return Expression::new("MAX({$column})");
     }
 
     /**
@@ -737,7 +740,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getSumExpression(string $column): Expression
     {
         // avg 以外は移譲
-        return new Expression("SUM({$column})");
+        return Expression::new("SUM({$column})");
     }
 
     /**
@@ -749,7 +752,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof SQLServerPlatform) {
             $column = "CAST($column AS float)";
         }
-        return new Expression("AVG({$column})");
+        return Expression::new("AVG({$column})");
     }
 
     /**
@@ -763,7 +766,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             throw new \InvalidArgumentException('$args must be greater than 0.');
         }
         if ($count === 1) {
-            return is_string($args[0]) ? new Expression($args[0]) : $args[0];
+            return is_string($args[0]) ? Expression::new($args[0]) : $args[0];
         }
 
         $params = [];
@@ -778,7 +781,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return $arg;
         }, $args);
 
-        return new Expression($this->platform->getConcatExpression(...$args), $params);
+        return Expression::new($this->platform->getConcatExpression(...$args), $params);
     }
 
     /**
@@ -787,13 +790,13 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getRegexpExpression(string $column, string $pattern): Expression
     {
         if ($this->platform instanceof SqlitePlatform) {
-            return new Expression("$column REGEXP ?", [$pattern]);
+            return Expression::new("$column REGEXP ?", [$pattern]);
         }
         if ($this->platform instanceof MySQLPlatform) {
-            return new Expression("REGEXP_LIKE($column, ?, 'i')", [$pattern]);
+            return Expression::new("REGEXP_LIKE($column, ?, 'i')", [$pattern]);
         }
         if ($this->platform instanceof PostgreSQLPlatform) {
-            return new Expression("$column ~* ?", [$pattern]);
+            return Expression::new("$column ~* ?", [$pattern]);
         }
 
         throw DBALException::notSupported(__METHOD__);
@@ -806,9 +809,9 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     {
         // SQLServer はキャストしなければ binary として扱えない
         if ($this->platform instanceof SQLServerPlatform) {
-            return new Expression('CAST(? as VARBINARY(MAX))', [$data]);
+            return Expression::new('CAST(? as VARBINARY(MAX))', [$data]);
         }
-        return new Expression($data);
+        return Expression::new($data);
     }
 
     /**
@@ -822,20 +825,20 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         if ($this->platform instanceof SqlitePlatform) {
             assert($precision === 0 || $precision === 3);
             $f = $precision === 0 ? '%S' : '%f';
-            return new Expression("strftime('%Y-%m-%d %H:%M:$f', datetime('now', 'localtime'))");
+            return Expression::new("strftime('%Y-%m-%d %H:%M:$f', datetime('now', 'localtime'))");
         }
         if ($this->platform instanceof MySQLPlatform) {
-            return new Expression("NOW($precision)"); // パラメータで渡せない？
+            return Expression::new("NOW($precision)"); // パラメータで渡せない？
         }
         if ($this->platform instanceof PostgreSQLPlatform) {
-            return new Expression("LOCALTIMESTAMP($precision)"); // パラメータで渡せない？
+            return Expression::new("LOCALTIMESTAMP($precision)"); // パラメータで渡せない？
         }
         if ($this->platform instanceof SQLServerPlatform) {
             $f = $precision ? '.' . str_repeat('f', $precision) : "";
-            return new Expression("CAST(FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm:ss$f') as DATETIME)"); // キャストしないと日付型にならない
+            return Expression::new("CAST(FORMAT(GETDATE(), 'yyyy-MM-dd HH:mm:ss$f') as DATETIME)"); // キャストしないと日付型にならない
         }
 
-        return new Expression("NOW()");
+        return Expression::new("NOW()");
     }
 
     /**
@@ -844,10 +847,10 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function getSleepExpression(float $second): Expression
     {
         if ($this->platform instanceof MySQLPlatform) {
-            return new Expression("SLEEP(?)", $second);
+            return Expression::new("SLEEP(?)", $second);
         }
         if ($this->platform instanceof PostgreSQLPlatform) {
-            return new Expression("pg_sleep(?)", $second);
+            return Expression::new("pg_sleep(?)", $second);
         }
 
         throw DBALException::notSupported(__METHOD__);
@@ -860,19 +863,19 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     {
         // Sqlite にシード設定方法は存在しない
         if ($this->platform instanceof SqlitePlatform) {
-            return new Expression("(0.5 - RANDOM() / CAST(-9223372036854775808 AS REAL) / 2)");
+            return Expression::new("(0.5 - RANDOM() / CAST(-9223372036854775808 AS REAL) / 2)");
         }
         // MySQL のみ単体クエリで setseed+random が実現できる
         if ($this->platform instanceof MySQLPlatform) {
-            return $seed === null ? new Expression("RAND()") : new Expression("RAND(?)", $seed);
+            return $seed === null ? Expression::new("RAND()") : Expression::new("RAND(?)", $seed);
         }
         // PostgreSQL は setseed があるが、SELECT 句で呼んでも毎回 setseed され random が同じ値になってしまう
         if ($this->platform instanceof PostgreSQLPlatform) {
-            return new Expression("random()");
+            return Expression::new("random()");
         }
         // SQLServer の RAND はシードを与えなければ同じ値を返してしまう
         if ($this->platform instanceof SQLServerPlatform) {
-            return new Expression("RAND(CHECKSUM(NEWID()))");
+            return Expression::new("RAND(CHECKSUM(NEWID()))");
         }
 
         throw DBALException::notSupported(__METHOD__);
@@ -975,7 +978,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         // 指定されていない場合は $insertData を返す。ただし、データが長大な場合、2重に bind されることになり無駄なので参照構文を使う
         return array_each($insertData, function (&$carry, $v, $k) {
             $reference = $this->getReferenceSyntax($k);
-            $carry[$k] = $reference === null ? $v : new Expression($reference);
+            $carry[$k] = $reference === null ? $v : Expression::new($reference);
         }, []);
     }
 
@@ -994,6 +997,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             $exists = "CASE WHEN ($exists) THEN 1 ELSE 0 END";
         }
 
-        return new Expression($exists, $params);
+        return Expression::new($exists, $params);
     }
 }

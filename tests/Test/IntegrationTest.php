@@ -11,7 +11,9 @@ use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
+use ryunosuke\dbml\Query\AffectBuilder;
 use ryunosuke\dbml\Query\Clause\Where;
+use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\Comment;
 use function ryunosuke\dbml\try_return;
@@ -21,6 +23,36 @@ use function ryunosuke\dbml\try_return;
  */
 class IntegrationTest extends AbstractUnitTestCase
 {
+    /**
+     * Cスタイルコメントがエラーを出さないか
+     *
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_insteadof($database)
+    {
+        $sb = new class($database) extends SelectBuilder {
+            public function hoge()
+            {
+                return 'hoge';
+            }
+        };
+
+        $sb::insteadof();
+        $select = $database->select('test');
+        $this->assertInstanceOf(get_class($sb), $select);
+        $this->assertEquals('hoge', $select->hoge());
+
+        SelectBuilder::insteadof(get_class($sb));
+        $select = $database->select('test');
+        $this->assertInstanceOf(get_class($sb), $select);
+        $this->assertEquals('hoge', $select->hoge());
+
+        SelectBuilder::insteadof();
+        $select = $database->select('test');
+        $this->assertInstanceOf(SelectBuilder::class, $select);
+    }
+
     /**
      * Cスタイルコメントがエラーを出さないか
      *
@@ -338,9 +370,9 @@ class IntegrationTest extends AbstractUnitTestCase
         $this->assertNull($database->getDefaultChunk());
 
         $db = $database->context(['defaultChunk' => 10]);
-        $selecter = $db->createSelectBuilder();
+        $selecter = SelectBuilder::new($db);
         $selecter->column('test')->where(['id > ?' => 5])->orderBy('-id')->groupBy('name')->limit(10);
-        $affecter = $db->createAffectBuilder();
+        $affecter = AffectBuilder::new($db);
         $affecter->reduce('test', 10, '-id', 'name', ['id > ?' => 5]);
         unset($selecter);
         unset($affecter);

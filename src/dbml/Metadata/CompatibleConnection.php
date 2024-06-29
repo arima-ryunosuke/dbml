@@ -8,6 +8,7 @@ use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\Driver\Middleware\AbstractConnectionMiddleware;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Result;
+use ryunosuke\dbml\Mixin\FactoryTrait;
 use ryunosuke\dbml\Query\Parser;
 
 /**
@@ -20,14 +21,16 @@ use ryunosuke\dbml\Query\Parser;
  */
 class CompatibleConnection
 {
-    private static \WeakMap $storage;
+    use FactoryTrait;
 
-    private Connection $connection;
+    protected static \WeakMap $storage;
 
-    private DriverConnection $driverConnection;
+    protected Connection $connection;
+
+    protected DriverConnection $driverConnection;
 
     /** @var resource|\PDO|\SQLite3|\mysqli|\PgSql\Connection */
-    private $nativeConnection;
+    protected $nativeConnection;
 
     public function __construct(Connection $connection)
     {

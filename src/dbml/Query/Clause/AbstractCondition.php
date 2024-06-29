@@ -306,7 +306,7 @@ abstract class AbstractCondition extends AbstractClause
                 else {
                     $ope = Operator::RAW;
                 }
-                $operator = new Operator($database->getCompatiblePlatform(), $ope, $cond, $value);
+                $operator = Operator::new($database->getCompatiblePlatform(), $ope, $cond, $value);
                 if ($operator->getQuery()) {
                     $criteria[] = $operator->merge($params);
                     if ($emptyfilter) {
@@ -338,6 +338,6 @@ abstract class AbstractCondition extends AbstractClause
     {
         $orand = $this->andor === 'AND' ? 'OR' : 'AND';
         $exprs = static::build($database, $this->predicate, $params, $orand, $filtered);
-        return new Expression(implode(" {$this->andor} ", Adhoc::wrapParentheses($exprs)), $params);
+        return Expression::new(implode(" {$this->andor} ", Adhoc::wrapParentheses($exprs)), $params);
     }
 }

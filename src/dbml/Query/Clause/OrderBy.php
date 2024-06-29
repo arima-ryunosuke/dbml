@@ -90,7 +90,7 @@ class OrderBy extends AbstractClause
      * $db->select('test')->orderBySecure('test.id');
      *
      * // Expression インスタンスは無条件で OK
-     * $db->select('test.id AS hoge')->orderBySecure(new Expression('NOW()'));
+     * $db->select('test.id AS hoge')->orderBySecure(Expression::new('NOW()'));
      *
      * // test に hoge カラムは存在しないが id のエイリアスなので OK
      * $db->select('test.id AS hoge')->orderBySecure('hoge');
@@ -273,7 +273,7 @@ class OrderBy extends AbstractClause
             {
                 $random = $builder->getDatabase()->getCompatiblePlatform()->getRandomExpression(null);
                 $count = (int) $builder->countize()->value() ?: -1;
-                $where = new Expression("$random <= (? / ?)", [$builder->getQueryPart('limit') ?? PHP_INT_MAX, $count]);
+                $where = Expression::new("$random <= (? / ?)", [$builder->getQueryPart('limit') ?? PHP_INT_MAX, $count]);
                 return $builder->andWhere($where)->orderBy(OrderBy::random());
             }
         };
@@ -292,7 +292,7 @@ class OrderBy extends AbstractClause
             {
                 $count = (int) $builder->countize()->value();
                 $offsets = $count ? random_range(0, $count - 1, $builder->getQueryPart('limit') ?? PHP_INT_MAX) : [];
-                $base = $builder->getDatabase()->createSelectBuilder()->from(self::CTE_TABLE);
+                $base = SelectBuilder::new($builder->getDatabase())->from(self::CTE_TABLE);
                 $queries = array_maps($offsets, fn($offset) => (clone $base)->limit(1, $offset)) ?: $base;
                 $that = (clone $builder)->resetQueryPart(['orderBy', 'offset', 'limit']);
                 return $builder->getDatabase()->union($queries)->with(self::CTE_TABLE, $that)->orderBy(OrderBy::random());
@@ -326,7 +326,7 @@ class OrderBy extends AbstractClause
                 }
                 $pkkeys = implode(',', $pkcolumns);
                 $pkkeys = count($pkcols) > 1 ? "($pkkeys)" : $pkkeys;
-                $pkwhere = $builder->getDatabase()->createSelectBuilder()->from(self::CTE_TABLE)->select(...$pkcolumns)->orderBy(OrderBy::random());
+                $pkwhere = SelectBuilder::new($builder->getDatabase())->from(self::CTE_TABLE)->select(...$pkcolumns)->orderBy(OrderBy::random());
                 if ($limit) {
                     $pkwhere->limit($limit)->wrap('SELECT * FROM', self::CTE_TABLE_ALIAS); // for mysql (This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery)
                 }
@@ -388,7 +388,7 @@ class OrderBy extends AbstractClause
                 $that = (clone $builder)->resetQueryPart(['orderBy', 'offset', 'limit']);
                 [$min, $max] = array_values((clone $that)->cast('array')->resetQueryPart('select')->select("$alias.$pkkey")->aggregate(['MIN', 'MAX'])->tuple());
                 $pkvals = random_range($min ?? 0, $max ?? 0, $limit ?? PHP_INT_MAX);
-                $base = $builder->getDatabase()->createSelectBuilder()->from(self::CTE_TABLE)->limit(1);
+                $base = SelectBuilder::new($builder->getDatabase())->from(self::CTE_TABLE)->limit(1);
                 $queries = array_maps($pkvals, fn($pkval) => (clone $base)->where(["$pkkey >= ?" => $pkval]));
                 return $builder->getDatabase()->union($queries)->with(self::CTE_TABLE, $that)->orderBy(OrderBy::random());
             }

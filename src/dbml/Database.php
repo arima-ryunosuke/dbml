@@ -467,8 +467,8 @@ class Database
             'preparing'          => false,
             /** @var bool 参照系クエリをマスターで実行するか(「スレーブに書き込みたい」はまずあり得ないが「マスターから読み込みたい」はままある) */
             'masterMode'         => false,
-            /** @var string|CompatiblePlatform CompatiblePlatform のクラス名 or インスタンス */
-            'compatiblePlatform' => CompatiblePlatform::class,
+            /** @deprecated @var string|CompatiblePlatform CompatiblePlatform のクラス名 or インスタンス */
+            'compatiblePlatform' => CompatiblePlatform::class, // for compatible. delete in future scope
             /** @var array exportXXX 呼び出し時にどのクラスを使用するか */
             'exportClass'        => [
                 'array' => ArrayGenerator::class,
@@ -1465,7 +1465,7 @@ class Database
     public function getCompatibleConnection(?Connection $connection = null): CompatibleConnection
     {
         $connection ??= $this->getConnection();
-        return $this->cache['compatibleConnection'][spl_object_hash($connection)] ??= new CompatibleConnection($connection);
+        return $this->cache['compatibleConnection'][spl_object_hash($connection)] ??= CompatibleConnection::new($connection);
     }
 
     /**
@@ -1483,8 +1483,8 @@ class Database
     {
         if (!isset($this->cache['compatiblePlatform'])) {
             $classname = $this->getUnsafeOption('compatiblePlatform');
-            assert(is_a($classname, CompatiblePlatform::class, true));
-            $this->cache['compatiblePlatform'] = is_object($classname) ? $classname : new $classname($this->getPlatform(), (fn() => $this->getServerVersion())->bindTo($this->getSlaveConnection(), Connection::class)());
+            assert(is_a($classname, CompatiblePlatform::class, true)); // for compatible. simply CompatiblePlatform::new
+            $this->cache['compatiblePlatform'] = is_object($classname) ? $classname : $classname::new($this->getPlatform(), (fn() => $this->getServerVersion())->bindTo($this->getSlaveConnection(), Connection::class)());
         }
         return $this->cache['compatiblePlatform'];
     }
@@ -1598,7 +1598,7 @@ class Database
                 $expression = $expression($this);
             }
             if (is_array($expression)) {
-                $expression = $this->createSelectBuilder()->build($expression);
+                $expression = SelectBuilder::new($this)->build($expression);
             }
 
             $cols = '';
@@ -2028,12 +2028,10 @@ class Database
 
     /**
      * new {@link Expression} するだけのメソッド
-     *
-     * 可能なら直接 new Expression せずにこのメソッド経由で生成したほうが良い（MUST ではない）。
      */
     public function raw(string $expr, mixed $params = []): Expression
     {
-        return new Expression($expr, $params);
+        return Expression::new($expr, $params);
     }
 
     /**
@@ -2075,7 +2073,7 @@ class Database
         foreach ($predicates as $cond) {
             array_set($ands, Where::and(arrayize($cond))($this)->merge($params), null, function ($v) { return !Adhoc::is_empty($v); });
         }
-        return new Expression('(' . implode(' OR ', Adhoc::wrapParentheses($ands)) . ')', $params);
+        return Expression::new('(' . implode(' OR ', Adhoc::wrapParentheses($ands)) . ')', $params);
     }
 
     /**
@@ -2159,7 +2157,7 @@ class Database
      * // SELECT 'xxx'
      *
      * # Expression を与えると保持しているパラメータが使用される
-     * $db->queryInto(new Expression('UPPER(?)', ['yyy']));
+     * $db->queryInto(Expression::new('UPPER(?)', ['yyy']));
      * // UPPER('yyy')
      *
      * # Expression というか Queryable 全般がそうなる
@@ -2182,21 +2180,23 @@ class Database
     /**
      * SELECT ビルダを生成して返す
      *
-     * 極力 new SelectBuilder せずにこのメソッドを介すこと。
+     * @deprecated instead SelectBuilder::new
+     * @codeCoverageIgnore
      */
     public function createSelectBuilder(): SelectBuilder
     {
-        return new SelectBuilder($this);
+        return SelectBuilder::new($this);
     }
 
     /**
      * AFFECT ビルダを生成して返す
      *
-     * 極力 new AffectBuilder せずにこのメソッドを介すこと。
+     * @deprecated instead AffectBuilder::new
+     * @codeCoverageIgnore
      */
     public function createAffectBuilder(): AffectBuilder
     {
-        return new AffectBuilder($this);
+        return AffectBuilder::new($this);
     }
 
     /**
@@ -2234,7 +2234,7 @@ class Database
         }
 
         $result = [];
-        foreach ($this->createSelectBuilder()->addSelect($columns)->tuple() as $key => $count) {
+        foreach (SelectBuilder::new($this)->addSelect($columns)->tuple() as $key => $count) {
             [$tname, $iname] = explode($DELIMITER, $key, 2);
             $result[$tname][$iname] = $count;
         }
@@ -2477,7 +2477,7 @@ class Database
      */
     public function select($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
-        $builder = $this->createSelectBuilder();
+        $builder = SelectBuilder::new($this);
         return $builder->build(array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]), true);
     }
 
@@ -2702,7 +2702,7 @@ class Database
      */
     public function subselect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
-        $builder = $this->createSelectBuilder();
+        $builder = SelectBuilder::new($this);
         return $builder->setLazyMode()->build(array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]));
     }
 
@@ -2753,7 +2753,7 @@ class Database
     public function subquery($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         // build 前にあらかじめ setSubmethod して分岐する必要がある
-        $builder = $this->createSelectBuilder();
+        $builder = SelectBuilder::new($this);
         $builder->setSubmethod('query');
         return $builder->build(array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]), true);
     }
@@ -3187,9 +3187,9 @@ class Database
             return [];
         }
 
-        $select = $this->createSelectBuilder();
+        $select = SelectBuilder::new($this);
         $select->select("$tmpname.$keyname");
-        $select->from(new Expression('(' . implode(' UNION ', $selects) . ')', $params), $tmpname);
+        $select->from(Expression::new('(' . implode(' UNION ', $selects) . ')', $params), $tmpname);
         $select->leftJoinOn($tablename, array_merge(arrayize($wheres), array_sprintf($joincols, "$tablename.%1\$s = $tmpname.%1\$s")));
         $select->where(array_sprintf($pkcols, "$tablename.%2\$s IS NULL"));
         $select->detectAutoOrder(false);
@@ -3787,7 +3787,7 @@ class Database
      *     't_hoge' => [
      *         'id',
      *         // 値に ? で列値を参照できる式を渡すことができる（この場合キーがカラム名指定になる）
-     *         'name' => new Expression('UPPER(?)'),
+     *         'name' => Expression::new('UPPER(?)'),
      *         // 「php レイヤ」という点以外は↑と同じ（CSV 値が引数で渡ってくる）
      *         'name' => function ($v) { return strtoupper($v); },
      *     ],
@@ -3878,7 +3878,7 @@ class Database
             $file->setFlags(\SplFileObject::READ_CSV | \SplFileObject::READ_AHEAD | \SplFileObject::SKIP_EMPTY | \SplFileObject::DROP_NEW_LINE);
             $file->setCsvControl($options['delimiter'], $options['enclosure'], $options['escape']);
 
-            $builder = $this->createAffectBuilder();
+            $builder = AffectBuilder::new($this);
             $builder->build(['table' => $tableName]);
             $affecteds = [];
             foreach (iterator_chunk($file, $this->_getChunk() ?? PHP_INT_MAX, true) as $rows) {
@@ -3927,7 +3927,7 @@ class Database
             $sql = (string) $sql;
         }
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build([
             'table'  => $tableName,
             'column' => $columns,
@@ -3972,7 +3972,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build([
             'table' => $tableName,
         ]);
@@ -4064,7 +4064,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build([
             'table' => $tableName,
             'where' => $where,
@@ -4131,7 +4131,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build([
             'table' => $tableName,
         ]);
@@ -4222,7 +4222,7 @@ class Database
             throw new \DomainException($cplatform->getName() . ' is not support modifyArray.');
         }
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build([
             'table'      => $tableName,
             'constraint' => $uniquekey,
@@ -4340,7 +4340,7 @@ class Database
         $opt = func_num_args() === 6 ? func_get_arg(5) : [];
         unset($opt['primary']); // 自身で処理するので不要
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build([
             'table'  => $tableName,
             'where'  => $where,
@@ -4527,7 +4527,7 @@ class Database
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
         $opt['method_key'] = '@method';
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build([
             'table' => $tableName,
         ]);
@@ -4800,7 +4800,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->insert($tableName, $data, opt: $opt);
 
         $unseter = $this->_setIdentityInsert($builder->getTable(), $builder->getSet());
@@ -4842,7 +4842,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->update($tableName, $data, $where, opt: $opt);
 
         $affecteds = [];
@@ -4910,7 +4910,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->delete($tableName, $where, opt: $opt);
 
         $affecteds = [];
@@ -4988,7 +4988,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'where' => $where]);
 
         $invalid_columns ??= $this->{$builder->getTable()}->invalidColumn();
@@ -5055,7 +5055,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'set' => $data, 'where' => $where]);
         $builder->build([
             'where' => $builder->restrictWheres('update'),
@@ -5100,7 +5100,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'set' => $data, 'where' => $where]);
 
         try {
@@ -5164,7 +5164,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'where' => $where]);
         $builder->build([
             'where' => $builder->restrictWheres('delete'),
@@ -5208,7 +5208,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'where' => $where]);
 
         $affecteds = [];
@@ -5268,7 +5268,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 6 ? func_get_arg(5) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->reduce($tableName, $limit, $orderBy, $groupBy, $where, $opt);
 
         $builder->execute();
@@ -5314,7 +5314,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 4 ? func_get_arg(3) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'constraint' => 'PRIMARY']);
 
         try {
@@ -5412,7 +5412,7 @@ class Database
             return $this->upsert($tableName, $insertData, $updateData ?: [], $opt);
         }
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->modify($tableName, $insertData, $updateData, $uniquekey, $opt);
 
         $builder->execute();
@@ -5446,7 +5446,7 @@ class Database
         // 隠し引数 $opt
         $opt = func_num_args() === 3 ? func_get_arg(2) : [];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->replace($tableName, $data, $opt);
 
         $builder->execute();
@@ -5476,7 +5476,7 @@ class Database
      */
     public function duplicate($tableName, array $overrideData = [], $where = [], $sourceTable = null)
     {
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->duplicate($tableName, $overrideData, $where, $sourceTable);
 
         $unseter = $this->_setIdentityInsert($builder->getTable(), $builder->getSet());
@@ -5504,7 +5504,7 @@ class Database
     {
         $opt = ['cascade' => $cascade];
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->truncate($tableName, $opt);
 
         $builder->execute();
@@ -5527,7 +5527,7 @@ class Database
     {
         $schema = $this->getSchema();
 
-        $builder = $this->createAffectBuilder();
+        $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName]);
 
         $relations = $schema->getForeignKeys($builder->getTable(), null);

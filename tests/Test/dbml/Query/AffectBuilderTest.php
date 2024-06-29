@@ -81,7 +81,7 @@ class AffectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertSame($row->arrayize(), $builder->build(['table' => 't_article'])->normalize($row));
 
         // null なオートインクリメントは伏せられる
-        $builder = self::getDummyDatabase()->createAffectBuilder();
+        $builder = AffectBuilder::new(self::getDummyDatabase());
         $builder->build(['table' => 'test']);
         $this->assertEquals([], $builder->normalize(['id' => null]));
     }

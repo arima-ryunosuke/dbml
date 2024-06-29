@@ -399,7 +399,7 @@
  *
  * {@link Database::overrideColumns()} で「あたかもテーブルにあるかのように振る舞うカラム」を定義できる。
  *
- * ありがちな例だが「姓」「名」を持つテーブルに対して `overrideColumns(['usertable' => ['fullname' => new Expression('CONCAT(sei, mei)')]]);` すると、あたかもフルネームカラムがあるように振る舞わせることができる。
+ * ありがちな例だが「姓」「名」を持つテーブルに対して `overrideColumns(['usertable' => ['fullname' => Expression::new('CONCAT(sei, mei)')]]);` すると、あたかもフルネームカラムがあるように振る舞わせることができる。
  * 使用例などはメソッドを参照。
  *
  * 原則として仮想カラムを引っ張るためには明示的な指定が必要で、 `*` や `!ignore` で引っ張ったとしても取得列に含まれることはない。
@@ -408,6 +408,27 @@
  *
  * 明示使用の場合でも今のところ select, where, having でのみ使用可能。
  * orderBy は select に含めて指定すれば実現できるし、having も mysql であれば（設定次第で）直接式を指定することができるので、実質的には select, where でのみの使用となることが多いはず。
+ *
+ * ### 拡張クラス
+ *
+ * 一部のクラスは {@link FactoryTrait} を use しており、これらのクラスは継承した拡張クラスで insteadof を呼ぶことでそのクラスが代わりに使われるようになる。
+ *
+ * ```php
+ * class MySelectBuilder extends SelectBuilder
+ * {
+ *     public function hoge()
+ *     {
+ *         // something
+ *     }
+ * }
+ * MySelectBuilder::insteadof();                     // これをすると SelectBuilder の代わりに MySelectBuilder が使用されるようになる
+ * SelectBuilder::insteadof(MySelectBuilder::class); // これでもよい（一応こっちが本来の使い方）
+ *
+ * $db->select('t_table')->hoge(); // 呼べる
+ * ```
+ *
+ * 乱用は禁物だし、ドラスティックな変更はできないがちょっとした拡張ポイントのように使うことができる。
+ * ただし、これで拡張した場合互換性担保の対称にならないため注意。
  */
 namespace ryunosuke\dbml {
 
@@ -416,9 +437,11 @@ namespace ryunosuke\dbml {
     use ryunosuke\dbml\Metadata\Schema;
     use ryunosuke\dbml\Query\SelectBuilder;
     use ryunosuke\dbml\Query\TableDescriptor;
+    use ryunosuke\dbml\Mixin\FactoryTrait;
 
     assert(class_exists(TableGateway::class));
     assert(class_exists(Schema::class));
     assert(class_exists(TableDescriptor::class));
     assert(class_exists(SelectBuilder::class));
+    assert(class_exists(FactoryTrait::class));
 }

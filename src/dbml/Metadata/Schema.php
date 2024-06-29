@@ -239,7 +239,7 @@ class Schema
                 else {
                     $columns = \Closure::bind(function ($table) {
                         $database = $this->_conn->getDatabase();
-                        $cplatform = new CompatiblePlatform($this->_platform);
+                        $cplatform = CompatiblePlatform::new($this->_platform);
                         /** @noinspection PhpDeprecationInspection */
                         $sql = $cplatform->getListTableColumnsSQL($table, $database);
                         $tableColumns = $this->_conn->fetchAllAssociative($sql);

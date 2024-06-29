@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Metadata\Schema;
+use ryunosuke\dbml\Mixin\FactoryTrait;
 use ryunosuke\dbml\Query\Clause\Where;
 use ryunosuke\dbml\Query\Expression\Expression;
 use function ryunosuke\dbml\array_assort;
@@ -50,22 +51,24 @@ use function ryunosuke\dbml\str_exists;
 // @formatter:on
 class AffectBuilder extends AbstractBuilder
 {
-    private ?string $table      = null;        // テーブル名
-    private ?string $alias      = null;        // テーブルエイリアス
-    private ?string $constraint = null;        // ユニーク制約名
-    private array   $set        = [];          // 更新するデータ（column => value）
-    private array   $merge      = [];          // 更新するデータ（UPSERT 系）
-    private array   $column     = [];          // 更新するカラム（BULK 系）
-    private array   $values     = [];          // 更新するデータ（BULK 系）
-    private ?string $select     = null;        // SELECT 文（BULK 系）
-    private array   $where      = [];          // WHERE 条件
-    private array   $groupBy    = [];          // GROUP BY 列（ほとんど使われない）
-    private array   $having     = [];          // HAVING 条件（現状使ってない）
-    private array   $orderBy    = [];          // ORDER BY 列（ほとんど使われない）
-    private ?int    $limit      = null;        // LIMIT 件数（ほとんど使われない）
+    use FactoryTrait;
 
-    private $autoIncrementSeq = false;
-    private $affectedRows;
+    protected ?string $table      = null;        // テーブル名
+    protected ?string $alias      = null;        // テーブルエイリアス
+    protected ?string $constraint = null;        // ユニーク制約名
+    protected array   $set        = [];          // 更新するデータ（column => value）
+    protected array   $merge      = [];          // 更新するデータ（UPSERT 系）
+    protected array   $column     = [];          // 更新するカラム（BULK 系）
+    protected array   $values     = [];          // 更新するデータ（BULK 系）
+    protected ?string $select     = null;        // SELECT 文（BULK 系）
+    protected array   $where      = [];          // WHERE 条件
+    protected array   $groupBy    = [];          // GROUP BY 列（ほとんど使われない）
+    protected array   $having     = [];          // HAVING 条件（現状使ってない）
+    protected array   $orderBy    = [];          // ORDER BY 列（ほとんど使われない）
+    protected ?int    $limit      = null;        // LIMIT 件数（ほとんど使われない）
+
+    protected $autoIncrementSeq = false;
+    protected $affectedRows;
 
     public static function getDefaultOptions(): array
     {
@@ -524,7 +527,7 @@ class AffectBuilder extends AbstractBuilder
                 }
                 // Expression はマーカーとしての役割なので作り直す
                 elseif ($expr instanceof Expression) {
-                    $row[$cname] = new Expression($expr, $fields[$r]);
+                    $row[$cname] = Expression::new($expr, $fields[$r]);
                 }
                 elseif ($expr instanceof \Closure) {
                     $row[$cname] = $expr($fields[$r]);
@@ -847,13 +850,13 @@ class AffectBuilder extends AbstractBuilder
         }
 
         $overrideSet = $this->bindInto($this->set, $this->params);
-        $overrideSet = array_map(function ($v) { return new Expression($v); }, $overrideSet);
+        $overrideSet = array_map(function ($v) { return Expression::new($v); }, $overrideSet);
 
         $this->set += ($this->table === $sourceTable ? [] : $this->database->getSchema()->getTablePrimaryColumns($sourceTable));
 
         foreach ($metasource as $name => $dummy) {
             if (array_key_exists($name, $metatarget) && !array_key_exists($name, $overrideSet)) {
-                $overrideSet[$name] = new Expression($name);
+                $overrideSet[$name] = Expression::new($name);
             }
         }
 

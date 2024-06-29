@@ -3,6 +3,7 @@
 namespace ryunosuke\dbml\Query\Expression;
 
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
+use ryunosuke\dbml\Mixin\FactoryTrait;
 use ryunosuke\dbml\Query\Clause\Where;
 use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\array_depth;
@@ -84,6 +85,8 @@ use function ryunosuke\dbml\str_subreplace;
 // @formatter:on
 class Operator extends Expression
 {
+    use FactoryTrait;
+
     /// 内部演算子
     public const RAW    = '__RAW__';
     public const COLVAL = '__COLVAL__';
@@ -145,16 +148,16 @@ class Operator extends Expression
     /** @var \Closure[] 外部注入演算子 */
     private static array $registereds = [];
 
-    private ?CompatiblePlatform $platform;
+    protected ?CompatiblePlatform $platform;
 
-    private string $operator;
+    protected string $operator;
 
-    private ?string $operand1;
-    private ?array  $operand2;
+    protected ?string $operand1;
+    protected ?array  $operand2;
 
-    private bool $isarray;
+    protected bool $isarray;
 
-    private bool $not = false;
+    protected bool $not = false;
 
     /**
      * 演算子を定義する
@@ -170,7 +173,7 @@ class Operator extends Expression
     /**
      * インスタンスを返す
      *
-     * - `new Operator($platform, 'BETWEEN', 'hoge', '1');`
+     * - `Operator::new($platform, 'BETWEEN', 'hoge', '1');`
      * - `Operator::BETWEEN('hoge', '1', $platform);`
      * - `Operator::BETWEEN('hoge', '1');`
      *
@@ -189,10 +192,10 @@ class Operator extends Expression
         static $magics = null;
         $magics = $magics ?? array_kvmap(self::METHODS, function ($k, $v) { return [$v['magic'] => $k]; });
         if (isset(self::$registereds[$operator])) {
-            return new Operator(null, $operator, null, $operands);
+            return Operator::new(null, $operator, null, $operands);
         }
         if (($funcname = $magics[$operator] ?? null) !== null) {
-            return new Operator(null, $funcname, null, $operands);
+            return Operator::new(null, $funcname, null, $operands);
         }
 
         if (count($operands) < 2) {
@@ -203,7 +206,7 @@ class Operator extends Expression
         $operand2 = $operands[1];
         $platform = $operands[2] ?? null;
 
-        return new Operator($platform, $operator, $operand1, $operand2);
+        return Operator::new($platform, $operator, $operand1, $operand2);
     }
 
     /**

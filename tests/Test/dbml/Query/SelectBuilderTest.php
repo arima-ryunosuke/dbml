@@ -3211,7 +3211,7 @@ SQL
         $writelock = trim($platform->getWriteLockSQL());
         $writelock = $writelock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_WRITE));
 
-        $parent = $database->createSelectBuilder();
+        $parent = SelectBuilder::new($database);
         $stringify = function (SelectBuilder $parent) use ($database) {
             return implode("\n", $database->preview(function () use ($parent) { $parent->tuple(); }));
         };

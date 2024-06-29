@@ -11,6 +11,7 @@ use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Exception\NonSelectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Generator\Yielder;
+use ryunosuke\dbml\Mixin\FactoryTrait;
 use ryunosuke\dbml\Mixin\FetchMethodTrait;
 use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\IteratorTrait;
@@ -96,6 +97,7 @@ use function ryunosuke\dbml\str_exists;
 // @formatter:on
 class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Countable
 {
+    use FactoryTrait;
     use IteratorTrait;
     use JoinTrait;
 
@@ -143,7 +145,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     private const COUNT_ALIAS = '__dbml_auto_cnt';
 
-    private array $sqlParts = [
+    protected array $sqlParts = [
         'comment'  => [],
         'with'     => [],
         'option'   => [],
@@ -161,42 +163,42 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         'operator' => null,
     ];
 
-    private array $cache = [];
+    protected array $cache = [];
 
-    private array $callbacks = [];
+    protected array $callbacks = [];
 
-    private array $applyments = [
+    protected array $applyments = [
         'before' => null,
         'after'  => null,
     ];
 
-    private array $joinOrders = [];
+    protected array $joinOrders = [];
 
-    private array $onConditions = [];
+    protected array $onConditions = [];
 
-    private array $wrappers = [];
+    protected array $wrappers = [];
 
-    private int    $lockMode   = LockMode::NONE;
-    private string $lockOption = '';
+    protected int    $lockMode   = LockMode::NONE;
+    protected string $lockOption = '';
 
     /** @var SelectBuilder[] */
-    private array            $subbuilders = [];
-    private null|bool|string $submethod   = null;
-    private ?string          $subwhere    = null;
+    protected array            $subbuilders = [];
+    protected null|bool|string $submethod   = null;
+    protected ?string          $subwhere    = null;
 
-    private ?string $lazyMode      = null;
-    private ?string $lazyMethod    = null;
-    private ?string $lazyParent    = null;
-    private array   $lazyColumns   = [];
-    private array   $lazyCondition = [];
-    private ?int    $lazyChunk     = null;
+    protected ?string $lazyMode      = null;
+    protected ?string $lazyMethod    = null;
+    protected ?string $lazyParent    = null;
+    protected array   $lazyColumns   = [];
+    protected array   $lazyCondition = [];
+    protected ?int    $lazyChunk     = null;
 
     /** @var string|callable fetch 時のタイプ */
-    private $caster;
+    protected $caster;
 
-    private ?bool $emptyCondition = null;
+    protected ?bool $emptyCondition = null;
 
-    private ?bool $enableAutoOrder = null;
+    protected ?bool $enableAutoOrder = null;
 
     public static function getDefaultOptions(): array
     {
@@ -760,7 +762,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                         $column = $this->database->getCompatiblePlatform()->convertSelectExistsQuery($column);
                     }
                 }
-                $result[] = Select::forge($key, new Expression($column->getQuery(), $column->getParams()), $prefix);
+                $result[] = Select::forge($key, Expression::new($column->getQuery(), $column->getParams()), $prefix);
             }
             // SelectOption は単純に addSelectOption するだけ
             elseif ($column instanceof SelectOption) {
@@ -844,7 +846,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             }
             $next = count($this->sqlParts[$type]);
             $key = $next === 0 ? 0 : $andor . $next;
-            $this->sqlParts[$type][$key] = new Expression($ors, $params);
+            $this->sqlParts[$type][$key] = Expression::new($ors, $params);
         }
 
         return $this->_dirty();
@@ -1258,10 +1260,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
         $platform = $this->database->getCompatiblePlatform();
         if (strpos($operator, '?') === false) {
-            $this->sqlParts['operator'] = new Operator($platform, $operator, ' ', $operands);
+            $this->sqlParts['operator'] = Operator::new($platform, $operator, ' ', $operands);
         }
         else {
-            $this->sqlParts['operator'] = new Operator($platform, Operator::RAW, $operator, $operands);
+            $this->sqlParts['operator'] = Operator::new($platform, Operator::RAW, $operator, $operands);
         }
         return $this->_dirty();
     }
@@ -1421,7 +1423,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * |  5 | `"!"`                                            | 仮想カラムを含めたテーブルの全列を取得（これは「空文字カラム以外を全て」を意味するので結局全てのカラムが得られる、ということになる）
      * |  8 | `"..hoge"`                                       | subselect 時において親のカラムを表す
      * | 10 | `"+prefix.column_name"`                          | JOIN 記号＋ドットを含む文字列は prefix テーブルと JOIN してそのカラムを取得
-     * | 11 | `new Expression("NOW()")`                        | {@link Expression} を与えると一切加工せずそのまま文字列を表す
+     * | 11 | `Expression::new("NOW()")`                       | {@link Expression} を与えると一切加工せずそのまま文字列を表す
      * | 12 | `"NOW()"`                                        | 上と同じ。 `()` を含む文字列は自動で {@link Expression} 化される
      * | 21 | `['alias|typename' => 'column']`                 | 配列のキーをパイプでつなぐとその型に変換されて取得できる
      * | 22 | `['alias' => function($row){}]`                  | デフォルト値がないクロージャは行全体が渡ってくるコールバックになる
@@ -1491,8 +1493,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * # No.11, 12： Expression
      * $qb->column([
      *     't_article' => [
-     *         'upper_title' => new Expression('UPPER(article_title)'), // タイトルを大文字で取得
-     *         'upper_title' => 'UPPER(article_title)',                 // 全く同じ。カッコを含めば自動で Expression 化される
+     *         'upper_title' => Expression::new('UPPER(article_title)'), // タイトルを大文字で取得
+     *         'upper_title' => 'UPPER(article_title)',                  // 全く同じ。カッコを含めば自動で Expression 化される
      *     ],
      * ]);
      *
@@ -1853,13 +1855,13 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             return $this->andWhere($condition);
         }
 
-        $qb = new SelectBuilder($this->database);
+        $qb = SelectBuilder::new($this->database);
         $qb->sqlParts = $this->sqlParts;
         $qb->where($condition);
         if ($table instanceof SelectBuilder) {
             $qb->andWhere($table->onConditions);
         }
-        $conditionExpr = new Expression($this->_getConditionClause($qb->sqlParts['where'] ?: [1]), $qb->getParams('where'));
+        $conditionExpr = Expression::new($this->_getConditionClause($qb->sqlParts['where'] ?: [1]), $qb->getParams('where'));
 
         // 既設定エイリアスならスルー
         if (isset($froms[$joinAlias]) && $froms[$joinAlias] === $table) {
@@ -2101,7 +2103,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             foreach ($this->sqlParts['where'] as $where) {
                 $where->merge($params);
             }
-            $this->sqlParts['where'] = [new Expression($this->_getConditionClause($this->sqlParts['where']), $params)];
+            $this->sqlParts['where'] = [Expression::new($this->_getConditionClause($this->sqlParts['where']), $params)];
         }
         return $this->_dirty();
     }
@@ -2233,7 +2235,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             foreach ($this->sqlParts['having'] as $where) {
                 $where->merge($params);
             }
-            $this->sqlParts['having'] = [new Expression($this->_getConditionClause($this->sqlParts['having']), $params)];
+            $this->sqlParts['having'] = [Expression::new($this->_getConditionClause($this->sqlParts['having']), $params)];
         }
         return $this->_dirty();
     }
@@ -2550,7 +2552,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             $that->lockForUpdate();
         }
 
-        $exister = $that->database->createSelectBuilder();
+        $exister = SelectBuilder::new($that->database);
         $exister->select($that->database->getCompatiblePlatform()->convertSelectExistsQuery($that));
         $exister->detectAutoOrder(false);
         return $exister;
@@ -2595,7 +2597,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             if (!$that->sqlParts['select']) {
                 $that->addSelect('1');
             }
-            $counter = $that->database->createSelectBuilder();
+            $counter = SelectBuilder::new($that->database);
             $counter->select(new Select(self::COUNT_ALIAS, "COUNT($column)"));
             $counter->from(['__dbml_auto_table' => $that]);
         }
