@@ -2664,6 +2664,25 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $this->assertSame($expected, $database->executeSelect($query, $params)->fetchAssociative());
         $this->assertSame($expected, (new Statement($query, $params, $database))->executeSelect()->fetchAssociative());
+
+        // エミュレーションモード
+        $logs = $database->preview(function () use ($database) {
+            $database->setDynamicPlaceholder(false);
+            $pk = $database->updateAndPrimary('test', ['name' => 1], ['id' => 1]);
+            $database->select('test', $pk)->detectAutoOrder(false)->array();
+
+            $database->setDynamicPlaceholder(true);
+            $pk = $database->updateAndPrimary('test', ['name' => 2], ['id' => 2]);
+            $database->select('test', $pk)->detectAutoOrder(false)->array();
+        });
+        $database->setDynamicPlaceholder(false);
+        // 本来はログレベルでは判別できないが数値だけは処理が異なるので判別可能
+        $this->assertEquals([
+            "UPDATE test SET name = 1 WHERE id = 1",
+            "SELECT test.* FROM test WHERE id = 1",
+            "UPDATE test SET name = '2' WHERE id = '2'",
+            "SELECT test.* FROM test WHERE id = '2'",
+        ], array_slice($logs, 1, -1));
     }
 
     /**
@@ -2867,6 +2886,16 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $database->setOption('preparing', 1);
         that($database)->executeAsync(['SELECT 1' => []])->wasThrown('is not supported');
         $database->setOption('preparing', 0);
+
+        $this->trapThrowable('is not supported');
+
+        try {
+            $database->setOption('dynamicPlaceholder', 1);
+            $this->assertEquals([[['x' => 1]]], $database->executeAsync(['SELECT ? as x' => [1]])());
+        }
+        finally {
+            $database->setOption('dynamicPlaceholder', 0);
+        }
     }
 
     /**
