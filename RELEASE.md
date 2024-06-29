@@ -21,6 +21,12 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.0.1
+
+- [feature] FactoryTrait を導入して外部から多少拡張できるようになった
+- [feature] トランザクションログをインデントする機能
+- [feature] deleteArray を実装
+
 ## 3.0.0
 
 - [change] php>=8.0
