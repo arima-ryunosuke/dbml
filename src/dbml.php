@@ -443,5 +443,5 @@ namespace ryunosuke\dbml {
     assert(class_exists(Schema::class));
     assert(class_exists(TableDescriptor::class));
     assert(class_exists(SelectBuilder::class));
-    assert(class_exists(FactoryTrait::class));
+    assert(trait_exists(FactoryTrait::class));
 }
