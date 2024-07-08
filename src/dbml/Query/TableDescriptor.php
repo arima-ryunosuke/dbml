@@ -201,7 +201,7 @@ use function ryunosuke\dbml\str_between;
 class TableDescriptor
 {
     /** @var string[] テーブル記法を表すメタ文字 */
-    public const META_CHARACTORS = ['(', ')', '@', '[', ']', '{', '}', '+', '-', '#', '.'];
+    public const META_CHARACTORS = ['(', ')', '@', '[', ']', '{', '}', '+', '-', '#', '.', ' '];
 
     private mixed $descriptor;
 

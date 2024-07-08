@@ -95,8 +95,8 @@ class AffectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $builder->build([
             'table'   => 'test as T',
             'where'   => ['date > ?' => "2014-12-24"],
-            'groupBy' => 'group',
-            'orderBy' => 'date',
+            'groupBy' => ['group'],
+            'orderBy' => ['date'],
             'limit'   => 10,
         ]);
 
