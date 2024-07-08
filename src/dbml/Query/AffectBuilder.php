@@ -442,6 +442,11 @@ class AffectBuilder extends AbstractBuilder
         return $row;
     }
 
+    public function tableAs(): string
+    {
+        return $this->table . concat(' AS ', $this->alias);
+    }
+
     public function restrictWheres(string $event): array
     {
         assert(in_array(strtolower($event), ['update', 'delete']));
@@ -542,7 +547,7 @@ class AffectBuilder extends AbstractBuilder
         }
 
         $colnames = array_filter(array_keys(array_rekey($columns, function ($k, $v) { return is_int($k) ? $v : $k; })), 'strlen');
-        $this->sql = sprintf("INSERT INTO $this->table (%s) VALUES %s", implode(', ', $colnames), implode(', ', $values));
+        $this->sql = sprintf("INSERT INTO {$this->tableAs()} (%s) VALUES %s", implode(', ', $colnames), implode(', ', $values));
 
         return $this;
     }
@@ -557,7 +562,7 @@ class AffectBuilder extends AbstractBuilder
         $this->params = [];
 
         $ignore = array_get($opt, 'ignore') ? $this->database->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $this->sql = "INSERT {$ignore}INTO $this->table " . concat('(', implode(', ', $this->column), ') ') . $this->select;
+        $this->sql = "INSERT {$ignore}INTO {$this->tableAs()} " . concat('(', implode(', ', $this->column), ') ') . $this->select;
 
         return $this;
     }
@@ -578,7 +583,7 @@ class AffectBuilder extends AbstractBuilder
         }
 
         $ignore = array_get($opt, 'ignore') ? $this->database->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $this->sql = sprintf("INSERT {$ignore}INTO $this->table (%s) VALUES %s", implode(', ', $this->column), implode(', ', $values));
+        $this->sql = sprintf("INSERT {$ignore}INTO {$this->tableAs()} (%s) VALUES %s", implode(', ', $this->column), implode(', ', $values));
 
         return $this;
     }
@@ -651,7 +656,7 @@ class AffectBuilder extends AbstractBuilder
         $criteria = Where::and(array_merge($this->where, [$pkcond]))($this->database)->merge($this->params);
 
         $ignore = array_get($opt, 'ignore') ? $this->database->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $this->sql = "UPDATE {$ignore}$this->table SET $sets WHERE $criteria";
+        $this->sql = "UPDATE {$ignore}{$this->tableAs()} SET $sets WHERE $criteria";
 
         return $this;
     }
@@ -687,7 +692,7 @@ class AffectBuilder extends AbstractBuilder
         }
 
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
-        $this->sql = sprintf("INSERT {$ignore}INTO $this->table (%s) VALUES %s $merge %s", implode(', ', $this->column), implode(', ', $values), $updates);
+        $this->sql = sprintf("INSERT {$ignore}INTO {$this->tableAs()} (%s) VALUES %s $merge %s", implode(', ', $this->column), implode(', ', $values), $updates);
 
         return $this;
     }
@@ -704,7 +709,7 @@ class AffectBuilder extends AbstractBuilder
 
         $cplatform = $this->database->getCompatiblePlatform();
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
-        $this->sql = "INSERT {$ignore}INTO $this->table ";
+        $this->sql = "INSERT {$ignore}INTO {$this->tableAs()} ";
         if ($this->where) {
             $condition = $this->database->selectNotExists($this->table, $this->where);
             $condition = $condition->merge($this->params);
@@ -742,7 +747,7 @@ class AffectBuilder extends AbstractBuilder
         $criteria = Where::and($this->where)($this->database)->merge($this->params);
 
         $ignore = array_get($opt, 'ignore') ? $this->database->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $this->sql = "UPDATE {$ignore}$this->table SET $sets" . ($criteria ? " WHERE $criteria" : '');
+        $this->sql = "UPDATE {$ignore}{$this->tableAs()} SET $sets" . ($criteria ? " WHERE $criteria" : '');
 
         return $this;
     }
@@ -777,7 +782,7 @@ class AffectBuilder extends AbstractBuilder
         $criteria = Where::and(array_intersect_key($this->set, $primary))($this->database)->merge($this->params);
 
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
-        $this->sql = "REPLACE {$ignore}INTO $this->table (" . implode(', ', array_keys($selects)) . ") ";
+        $this->sql = "REPLACE {$ignore}INTO {$this->tableAs()} (" . implode(', ', array_keys($selects)) . ") ";
         $this->sql .= "SELECT " . implode(', ', $selects) . " FROM (SELECT NULL) __T ";
         $this->sql .= "LEFT JOIN $this->table ON " . ($criteria ? $criteria : '1=0');
 
@@ -810,7 +815,7 @@ class AffectBuilder extends AbstractBuilder
 
         $cplatform = $this->database->getCompatiblePlatform();
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
-        $this->sql = "INSERT {$ignore}INTO $this->table ";
+        $this->sql = "INSERT {$ignore}INTO {$this->tableAs()} ";
         if ($condition !== null) {
             $fromDual = concat(' FROM ', $cplatform->getDualTable());
             $this->sql .= sprintf("(%s) SELECT %s$fromDual WHERE $condition", implode(', ', array_keys($sets1)), implode(', ', $sets1));
@@ -863,7 +868,7 @@ class AffectBuilder extends AbstractBuilder
         $select = $this->database->select([$sourceTable => $overrideSet], $this->where);
         $select->merge($this->params);
         $ignore = array_get($opt, 'ignore') ? $this->database->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $this->sql = "INSERT {$ignore}INTO $this->table (" . implode(', ', array_keys($overrideSet)) . ") $select";
+        $this->sql = "INSERT {$ignore}INTO {$this->tableAs()} (" . implode(', ', array_keys($overrideSet)) . ") $select";
 
         return $this;
     }
@@ -879,7 +884,7 @@ class AffectBuilder extends AbstractBuilder
         $criteria = Where::and($this->where)($this->database)->merge($this->params);
 
         $ignore = array_get($opt, 'ignore') ? $this->database->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
-        $this->sql = "DELETE {$ignore}FROM $this->table" . ($criteria ? " WHERE $criteria" : '');
+        $this->sql = "DELETE {$ignore}FROM {$this->tableAs()}" . ($criteria ? " WHERE $criteria" : '');
 
         return $this;
     }
