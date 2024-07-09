@@ -38,6 +38,7 @@ use ryunosuke\dbml\Metadata\CompatibleConnection;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Metadata\Schema;
 use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
+use ryunosuke\dbml\Mixin\AffectAndBeforeTrait;
 use ryunosuke\dbml\Mixin\AffectIgnoreTrait;
 use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
 use ryunosuke\dbml\Mixin\AggregateTrait;
@@ -160,6 +161,12 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * 通常の更新系メソッドに付与できる。
  * 返り値として主キー配列を返すようになる。
  * OrThrow と異なり作用行は見ないで常に主キーを返すため、「とりあえずザクザクと行を追加したい」のようなテストケースの作成などで有用。
+ *
+ * **AndBefore**
+ *
+ * INSERT 系以外の更新系メソッドに付与できる。
+ * 返り値として条件一致した更新前のレコード群を返すようになる。
+ * 履歴ログを取るようなケースで有用（もちろん実行前に能動的に SELECT しておくのでも構わない）。
  *
  * **Ignore**
  *
@@ -316,6 +323,22 @@ class Database
         upsertAndPrimaryWithTable as public upsertAndPrimary;
         modifyAndPrimaryWithTable as public modifyAndPrimary;
         replaceAndPrimaryWithTable as public replaceAndPrimary;
+    }
+    use AffectAndBeforeTrait {
+        updateArrayAndBeforeWithTable as public updateArrayAndBefore;
+        deleteArrayAndBeforeWithTable as public deleteArrayAndBefore;
+        modifyArrayAndBeforeWithTable as public modifyArrayAndBefore;
+        updateAndBeforeWithTable as public updateAndBefore;
+        deleteAndBeforeWithTable as public deleteAndBefore;
+        invalidAndBeforeWithTable as public invalidAndBefore;
+        reviseAndBeforeWithTable as public reviseAndBefore;
+        upgradeAndBeforeWithTable as public upgradeAndBefore;
+        removeAndBeforeWithTable as public removeAndBefore;
+        destroyAndBeforeWithTable as public destroyAndBefore;
+        reduceAndBeforeWithTable as public reduceAndBefore;
+        upsertAndBeforeWithTable as public upsertAndBefore;
+        modifyAndBeforeWithTable as public modifyAndBefore;
+        replaceAndBeforeWithTable as public replaceAndBefore;
     }
 
     protected function getDatabase(): Database { return $this; }
@@ -931,7 +954,21 @@ class Database
         return $chunk;
     }
 
-    private function _postaffect(AffectBuilder $builder, array $opt)
+    private function _preaffect(AffectBuilder $builder, array $opt): ?array
+    {
+        if (!($opt['return'] ?? false) || $this->getUnsafeOption('dryrun')) {
+            return null;
+        }
+
+        $tablename = $builder->getTable() . concat(" AS ", $builder->getAlias());
+        $select = $this->select($tablename, $builder->getCondition());
+        if ($builder->getAlias() !== null && $builder->getTable() === $this->convertTableName($builder->getAlias())) {
+            $select->cast();
+        }
+        return $select->array();
+    }
+
+    private function _postaffect(AffectBuilder $builder, ?array $returns, array $opt)
     {
         $affected = $builder->getAffectedRows();
         if ($this->getUnsafeOption('dryrun')) {
@@ -977,10 +1014,14 @@ class Database
             }
             return $primary;
         }
+        if (array_get($opt, 'return')) {
+            assert(is_array($returns));
+            return $returns;
+        }
         return $affected;
     }
 
-    private function _postaffects(AffectBuilder $builder, array $affecteds)
+    private function _postaffects(AffectBuilder $builder, array $affecteds, array $returns, array $opt)
     {
         if ($this->getUnsafeOption('dryrun')) {
             return $affecteds;
@@ -990,6 +1031,9 @@ class Database
         }
         if (($seq = $builder->getAutoIncrementSeq()) !== false) {
             $this->resetAutoIncrement($builder->getTable(), $seq);
+        }
+        if (array_get($opt, 'return')) {
+            return array_merge(...$returns);
         }
         return array_sum($affecteds);
     }
@@ -3888,7 +3932,7 @@ class Database
                 $affecteds[] = $builder->execute();
             }
 
-            return $this->_postaffects($builder, $affecteds);
+            return $this->_postaffects($builder, $affecteds, [], $options);
         }
     }
 
@@ -3939,7 +3983,7 @@ class Database
         $affected = $this->executeAffect($builder->getQuery(), $params);
         $affecteds = [$affected];
 
-        return $this->_postaffects($builder, $affecteds);
+        return $this->_postaffects($builder, $affecteds, [], $opt);
     }
 
     /**
@@ -4007,7 +4051,7 @@ class Database
             }
         }
 
-        $affected = $this->_postaffects($builder, $affecteds);
+        $affected = $this->_postaffects($builder, $affecteds, [], $opt);
         if (!$orPkThrow || !is_int($affected)) {
             return $affected;
         }
@@ -4054,11 +4098,12 @@ class Database
      * したがって $where を指定するのは「`status_cd = 50` のもののみ」などといった「前提となるような条件」を書く。
      *
      * @used-by updateArrayIgnore()
+     * @used-by updateArrayAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|\Generator $data カラムデータ配列あるいは Generator
      * @param array|mixed $where 束縛条件
-     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array[]|Entity[]|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function updateArray($tableName, $data, $where = [])
     {
@@ -4071,6 +4116,7 @@ class Database
             'where' => $where,
         ]);
 
+        $returns = [];
         $affecteds = [];
         foreach (iterator_chunk($data, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
             $builder->build([
@@ -4079,10 +4125,11 @@ class Database
             ]);
             $builder->updateArray(opt: $opt);
 
+            $returns[] = $this->_preaffect($builder, $opt);
             $affecteds[] = $builder->execute();
         }
 
-        return $this->_postaffects($builder, $affecteds);
+        return $this->_postaffects($builder, $affecteds, $returns, $opt);
     }
 
     /**
@@ -4122,10 +4169,11 @@ class Database
      * ```
      *
      * @used-by deleteArrayIgnore()
+     * @used-by deleteArrayAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|\Generator $where 削除条件
-     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array[]|Entity[]|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function deleteArray($tableName, $where = [])
     {
@@ -4137,6 +4185,7 @@ class Database
             'table' => $tableName,
         ]);
 
+        $returns = [];
         $affecteds = [];
         foreach (iterator_chunk($where, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
             $builder->build([
@@ -4144,10 +4193,11 @@ class Database
             ]);
             $builder->delete(opt: $opt);
 
+            $returns[] = $this->_preaffect($builder, $opt);
             $affecteds[] = $builder->execute();
         }
 
-        return $this->_postaffects($builder, $affecteds);
+        return $this->_postaffects($builder, $affecteds, $returns, $opt);
     }
 
     /**
@@ -4206,12 +4256,13 @@ class Database
      * ```
      *
      * @used-by modifyArrayIgnore()
+     * @used-by modifyArrayAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|\Generator $insertData カラムデータ配列あるいは Generator
      * @param array $updateData カラムデータ
      * @param string $uniquekey 重複チェックに使うユニークキー名
-     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array[]|Entity[]|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function modifyArray($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
@@ -4229,6 +4280,7 @@ class Database
             'constraint' => $uniquekey,
         ]);
 
+        $returns = [];
         $affecteds = [];
         foreach (iterator_chunk($insertData, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
             $builder->build([
@@ -4237,10 +4289,11 @@ class Database
             ]);
             $builder->modifyArray(opt: $opt);
 
+            $returns[] = $this->_preaffect($builder, $opt);
             $affecteds[] = $builder->execute();
         }
 
-        return $this->_postaffects($builder, $affecteds);
+        return $this->_postaffects($builder, $affecteds, $returns, $opt);
     }
 
     /**
@@ -4807,7 +4860,7 @@ class Database
         $unseter = $this->_setIdentityInsert($builder->getTable(), $builder->getSet());
         try {
             $builder->execute();
-            return $this->_postaffect($builder, $opt);
+            return $this->_postaffect($builder, [], $opt);
         }
         finally {
             $unseter();
@@ -4831,12 +4884,13 @@ class Database
      *
      * @used-by updateOrThrow()
      * @used-by updateAndPrimary()
+     * @used-by updateAndBefore()
      * @used-by updateIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
      * @param array|mixed $where WHERE 条件
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function update($tableName, $data, $where = [])
     {
@@ -4876,11 +4930,12 @@ class Database
             }
         }
 
+        $returns = $this->_preaffect($builder, $opt);
         $affected = $builder->execute();
         if ($this->getUnsafeOption('dryrun')) {
             return array_merge($affecteds, arrayize($affected));
         }
-        return $this->_postaffect($builder, $opt);
+        return $this->_postaffect($builder, $returns, $opt);
     }
 
     /**
@@ -4900,11 +4955,12 @@ class Database
      *
      * @used-by deleteOrThrow()
      * @used-by deleteAndPrimary()
+     * @used-by deleteAndBefore()
      * @used-by deleteIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function delete($tableName, $where = [])
     {
@@ -4942,11 +4998,12 @@ class Database
             }
         }
 
+        $returns = $this->_preaffect($builder, $opt);
         $affected = $builder->execute();
         if ($this->getUnsafeOption('dryrun')) {
             return array_merge($affecteds, arrayize($affected));
         }
-        return $this->_postaffect($builder, $opt);
+        return $this->_postaffect($builder, $returns, $opt);
     }
 
     /**
@@ -4977,12 +5034,13 @@ class Database
      *
      * @used-by invalidOrThrow()
      * @used-by invalidAndPrimary()
+     * @used-by invalidAndBefore()
      * @used-by invalidIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
      * @param ?array $invalid_columns 無効カラム値
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function invalid($tableName, $where, $invalid_columns = null)
     {
@@ -5018,7 +5076,7 @@ class Database
                     }
                 }
                 else {
-                    $affecteds = array_merge($affecteds, arrayize($this->invalid($ltable, $subwhere, $lcolumns, array_remove($opt, ['primary']))));
+                    $affecteds = array_merge($affecteds, arrayize($this->invalid($ltable, $subwhere, $lcolumns, array_remove($opt, ['primary', 'return']))));
                 }
             }
         }
@@ -5044,12 +5102,13 @@ class Database
      *
      * @used-by reviseOrThrow()
      * @used-by reviseAndPrimary()
+     * @used-by reviseAndBefore()
      * @used-by reviseIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
      * @param array|mixed $where WHERE 条件
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function revise($tableName, $data, $where = [])
     {
@@ -5089,12 +5148,13 @@ class Database
      *
      * @used-by upgradeOrThrow()
      * @used-by upgradeAndPrimary()
+     * @used-by upgradeAndBefore()
      * @used-by upgradeIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
      * @param array|mixed $where WHERE 条件
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function upgrade($tableName, $data, $where = [])
     {
@@ -5122,7 +5182,7 @@ class Database
 
                     $ltable = first_key($schema->getForeignTable($fkey));
                     $subwhere = $builder->cascadeWheres($fkey);
-                    $affecteds = array_merge($affecteds, arrayize($this->upgrade($ltable, $subdata, $subwhere, array_remove($opt, ['primary']))));
+                    $affecteds = array_merge($affecteds, arrayize($this->upgrade($ltable, $subdata, $subwhere, array_remove($opt, ['primary', 'return']))));
                 }
             }
 
@@ -5154,11 +5214,12 @@ class Database
      *
      * @used-by removeOrThrow()
      * @used-by removeAndPrimary()
+     * @used-by removeAndBefore()
      * @used-by removeIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function remove($tableName, $where = [])
     {
@@ -5198,11 +5259,12 @@ class Database
      *
      * @used-by destroyOrThrow()
      * @used-by destroyAndPrimary()
+     * @used-by destroyAndBefore()
      * @used-by destroyIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function destroy($tableName, $where = [])
     {
@@ -5219,7 +5281,7 @@ class Database
             if ($fkey->onDelete() === null) {
                 $ltable = first_key($schema->getForeignTable($fkey));
                 $subwhere = $builder->cascadeWheres($fkey);
-                $affecteds = array_merge($affecteds, arrayize($this->destroy($ltable, $subwhere, array_remove($opt, ['primary']))));
+                $affecteds = array_merge($affecteds, arrayize($this->destroy($ltable, $subwhere, array_remove($opt, ['primary', 'return']))));
             }
         }
 
@@ -5256,13 +5318,14 @@ class Database
      * ```
      *
      * @used-by reduceOrThrow()
+     * @used-by reduceAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param ?int $limit 残す件数
      * @param string|array $orderBy 並び順
      * @param string|array $groupBy グルーピング条件
      * @param array|mixed $where WHERE 条件
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function reduce($tableName, $limit = null, $orderBy = [], $groupBy = [], $where = [])
     {
@@ -5272,8 +5335,9 @@ class Database
         $builder = AffectBuilder::new($this);
         $builder->reduce($tableName, $limit, $orderBy, $groupBy, $where, $opt);
 
+        $returns = $this->_preaffect($builder, $opt);
         $builder->execute();
-        return $this->_postaffect($builder, $opt);
+        return $this->_postaffect($builder, $returns, $opt);
     }
 
     /**
@@ -5304,11 +5368,12 @@ class Database
      *
      * @used-by upsertOrThrow()
      * @used-by upsertAndPrimary()
+     * @used-by upsertAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $insertData INSERT データ配列
      * @param mixed $updateData UPDATE データ配列
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function upsert($tableName, $insertData, $updateData = [])
     {
@@ -5324,7 +5389,10 @@ class Database
             $unseter = $this->_setIdentityInsert($builder->getTable(), $builder->getSet());
             try {
                 $builder->execute();
-                return $this->_postaffect($builder, $opt);
+                if (($opt['return'] ?? false && !$this->getUnsafeOption('dryrun'))) {
+                    return [];
+                }
+                return $this->_postaffect($builder, [], $opt);
             }
             finally {
                 $unseter();
@@ -5340,8 +5408,9 @@ class Database
             ]);
             $builder->update(opt: $opt);
 
+            $returns = $this->_preaffect($builder, $opt);
             $builder->execute();
-            return $this->_postaffect($builder, $opt);
+            return $this->_postaffect($builder, $returns, $opt);
         }
     }
 
@@ -5396,13 +5465,14 @@ class Database
      *
      * @used-by modifyOrThrow()
      * @used-by modifyAndPrimary()
+     * @used-by modifyAndBefore()
      * @used-by modifyIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $insertData INSERT データ配列
      * @param mixed $updateData UPDATE データ配列
      * @param string $uniquekey 重複チェックに使うユニークキー名
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function modify($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
     {
@@ -5416,8 +5486,9 @@ class Database
         $builder = AffectBuilder::new($this);
         $builder->modify($tableName, $insertData, $updateData, $uniquekey, $opt);
 
+        $returns = $this->_preaffect($builder, $opt);
         $builder->execute();
-        return $this->_postaffect($builder, $opt);
+        return $this->_postaffect($builder, $returns, $opt);
     }
 
     /**
@@ -5437,10 +5508,11 @@ class Database
      *
      * @used-by replaceOrThrow()
      * @used-by replaceAndPrimary()
+     * @used-by replaceAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data REPLACE データ配列
-     * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function replace($tableName, $data)
     {
@@ -5450,8 +5522,9 @@ class Database
         $builder = AffectBuilder::new($this);
         $builder->replace($tableName, $data, $opt);
 
+        $returns = $this->_preaffect($builder, $opt);
         $builder->execute();
-        return $this->_postaffect($builder, $opt);
+        return $this->_postaffect($builder, $returns, $opt);
     }
 
     /**
@@ -5509,7 +5582,7 @@ class Database
         $builder->truncate($tableName, $opt);
 
         $builder->execute();
-        return $this->_postaffect($builder, $opt);
+        return $this->_postaffect($builder, [], $opt);
     }
 
     /**
@@ -5552,7 +5625,7 @@ class Database
             }
         }
 
-        return $this->_postaffects($builder, $affecteds);
+        return $this->_postaffects($builder, $affecteds, [], []);
     }
 
     /**

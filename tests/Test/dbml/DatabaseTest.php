@@ -6460,6 +6460,253 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_affectArrayAndBefore($database)
+    {
+        // 特に意味はないが chunk と結果は相関しないのでできるだけバラバラの方がいい
+        $database = $database->context(['defaultChunk' => rand(1, 5)]);
+
+        // 全体条件が効くので 2,3 のみ更新され 2,3 だけを返す
+        $actual = $database->updateArrayAndBefore('test', [
+            ['id' => 1, 'name' => 'updateArrayAndBefore'],
+            ['id' => 2, 'name' => 'updateArrayAndBefore'],
+            ['id' => 3, 'name' => 'updateArrayAndBefore'],
+        ], [
+            'id > ?' => 1,
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => "2",
+                "name" => "b",
+                "data" => "",
+            ],
+            [
+                "id"   => "3",
+                "name" => "c",
+                "data" => "",
+            ],
+        ], $actual);
+
+        // ↑で2,3 のみ更新されたので 1 は対象にならず 2,3,4 だけを返す
+        $actual = $database->deleteArrayAndBefore('test', [
+            ['name' => 'updateArrayAndBefore'],
+            ['id' => 4],
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => "2",
+                "name" => "updateArrayAndBefore",
+                "data" => "",
+            ],
+            [
+                "id"   => "3",
+                "name" => "updateArrayAndBefore",
+                "data" => "",
+            ],
+            [
+                "id"   => "4",
+                "name" => "d",
+                "data" => "",
+            ],
+        ], $actual);
+
+        if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
+            // ↑で2,3 が削除されたので作成され作成は返さないので 1 だけを返す
+            $actual = $database->modifyArrayAndBefore('test', [
+                ['id' => 1, 'name' => 'modifyArrayAndBefore'],
+                ['id' => 2, 'name' => 'modifyArrayAndBefore'],
+                ['id' => 3, 'name' => 'modifyArrayAndBefore'],
+            ]);
+            $this->assertEquals([
+                [
+                    "id"   => "1",
+                    "name" => "a",
+                    "data" => "",
+                ],
+            ], $actual);
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_affectAndBefore($database)
+    {
+        // 変更系（変更前を返す）
+
+        $actual = $database->updateAndBefore('test', [
+            'name' => 'updateAndBefore',
+        ], [
+            'id' => 1,
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => "1",
+                "name" => "a",
+                "data" => "",
+            ],
+        ], $actual);
+
+        $actual = $database->invalidAndBefore('test', [
+            'id' => 1,
+        ], [
+            'name' => 'invalidAndBefore',
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => 1,
+                "name" => "updateAndBefore",
+                "data" => "",
+            ],
+        ], $actual);
+
+        $actual = $database->upsertAndBefore('test', [
+            'id'   => 1,
+            'name' => 'upsertAndBefore',
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => 1,
+                "name" => "invalidAndBefore",
+                "data" => "",
+            ],
+        ], $actual);
+
+        $actual = $database->modifyAndBefore('test', [
+            'id'   => 1,
+            'name' => 'modifyAndBefore',
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => 1,
+                "name" => "upsertAndBefore",
+                "data" => "",
+            ],
+        ], $actual);
+
+        if ($database->getCompatiblePlatform()->supportsReplace()) {
+            $actual = $database->replaceAndBefore('test', [
+                'id'   => 1,
+                'name' => 'replaceAndBefore',
+            ]);
+            $this->assertEquals([
+                [
+                    "id"   => 1,
+                    "name" => "modifyAndBefore",
+                    "data" => "",
+                ],
+            ], $actual);
+        }
+
+        // 削除系（削除前を返す）
+
+        $actual = $database->deleteAndBefore('test', [
+            'id > ?' => 7,
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => "8",
+                "name" => "h",
+                "data" => "",
+            ],
+            [
+                "id"   => "9",
+                "name" => "i",
+                "data" => "",
+            ],
+            [
+                "id"   => "10",
+                "name" => "j",
+                "data" => "",
+            ],
+        ], $actual);
+
+        $actual = $database->reduceAndBefore('test', 3, ['id' => true]);
+        $this->assertEquals([
+            [
+                "id"   => "4",
+                "name" => "d",
+                "data" => "",
+            ],
+            [
+                "id"   => "5",
+                "name" => "e",
+                "data" => "",
+            ],
+            [
+                "id"   => "6",
+                "name" => "f",
+                "data" => "",
+            ],
+            [
+                "id"   => "7",
+                "name" => "g",
+                "data" => "",
+            ],
+        ], $actual);
+
+        // 追加系（全て空）
+
+        $actual = $database->upsertAndBefore('test', [
+            'id'   => 101,
+            'name' => 'upsertAndBefore',
+        ]);
+        $this->assertEquals([], $actual);
+
+        $actual = $database->modifyAndBefore('test', [
+            'id'   => 102,
+            'name' => 'modifyAndBefore',
+        ]);
+        $this->assertEquals([], $actual);
+
+        if ($database->getCompatiblePlatform()->supportsReplace()) {
+            $actual = $database->replaceAndBefore('test', [
+                'id'   => 103,
+                'name' => 'replaceAndBefore',
+            ]);
+            $this->assertEquals([], $actual);
+        }
+
+        // 亜種（カバレッジ目的）
+        $actual = $database->reviseAndBefore('test', [
+            'name' => 'reviseAndBefore',
+        ], [
+            'id' => 1,
+        ]);
+        $this->assertCount(1, $actual);
+
+        $actual = $database->upgradeAndBefore('test', [
+            'name' => 'reviseAndBefore',
+        ], [
+            'id' => 1,
+        ]);
+        $this->assertCount(1, $actual);
+
+        $actual = $database->removeAndBefore('test', [
+            'id' => 1,
+        ]);
+        $this->assertCount(1, $actual);
+
+        $actual = $database->destroyAndBefore('test', [
+            'id' => 2,
+        ]);
+        $this->assertCount(1, $actual);
+
+        // エンティティ
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            $actual = $database->updateAndBefore('t_comment ManagedComment', [
+                'comment' => 'updateAndBefore',
+            ], [
+                'comment_id' => 1,
+            ]);
+            $this->assertInstanceOf(ManagedComment::class, $actual[0]);
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_affect_ignore($database)
     {
         if ($database->getCompatiblePlatform()->supportsIgnore()) {

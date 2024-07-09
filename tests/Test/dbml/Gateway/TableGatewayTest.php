@@ -4,6 +4,7 @@ namespace ryunosuke\Test\dbml\Gateway;
 
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Types\StringType;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Exception\NonSelectedException;
@@ -14,6 +15,7 @@ use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
+use ryunosuke\Test\Entity\ManagedComment;
 use ryunosuke\Test\Platforms\SqlitePlatform;
 use function ryunosuke\dbml\csv_import;
 use function ryunosuke\dbml\json_import;
@@ -1578,6 +1580,252 @@ AND ((flag=1))", "$gw");
         $this->assertEquals($pri, $gateway->destroyAndPrimary($pri));
 
         $this->assertEquals(11, $count);
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_affectArrayAndBefore($gateway, $database)
+    {
+        // 全体条件が効くので 2,3 のみ更新され 2,3 だけを返す
+        $actual = $gateway->updateArrayAndBefore([
+            ['id' => 1, 'name' => 'updateArrayAndBefore'],
+            ['id' => 2, 'name' => 'updateArrayAndBefore'],
+            ['id' => 3, 'name' => 'updateArrayAndBefore'],
+        ], [
+            'id > ?' => 1,
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => "2",
+                "name" => "b",
+                "data" => "",
+            ],
+            [
+                "id"   => "3",
+                "name" => "c",
+                "data" => "",
+            ],
+        ], $actual);
+
+        // ↑で2,3 のみ更新されたので 1 は対象にならず 2,3,4 だけを返す
+        $actual = $gateway->deleteArrayAndBefore([
+            ['name' => 'updateArrayAndBefore'],
+            ['id' => 4],
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => "2",
+                "name" => "updateArrayAndBefore",
+                "data" => "",
+            ],
+            [
+                "id"   => "3",
+                "name" => "updateArrayAndBefore",
+                "data" => "",
+            ],
+            [
+                "id"   => "4",
+                "name" => "d",
+                "data" => "",
+            ],
+        ], $actual);
+
+        if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
+            // ↑で2,3 が削除されたので作成され作成は返さないので 1 だけを返す
+            $actual = $gateway->modifyArrayAndBefore([
+                ['id' => 1, 'name' => 'modifyArrayAndBefore'],
+                ['id' => 2, 'name' => 'modifyArrayAndBefore'],
+                ['id' => 3, 'name' => 'modifyArrayAndBefore'],
+            ]);
+            $this->assertEquals([
+                [
+                    "id"   => "1",
+                    "name" => "a",
+                    "data" => "",
+                ],
+            ], $actual);
+        }
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_affectAndBefore($gateway, $database)
+    {
+        // 変更系（変更前を返す）
+
+        $actual = $gateway->updateAndBefore([
+            'name' => 'updateAndBefore',
+        ], [
+            'id' => 1,
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => "1",
+                "name" => "a",
+                "data" => "",
+            ],
+        ], $actual);
+
+        $actual = $gateway->invalidAndBefore([
+            'id' => 1,
+        ], [
+            'name' => 'invalidAndBefore',
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => 1,
+                "name" => "updateAndBefore",
+                "data" => "",
+            ],
+        ], $actual);
+
+        $actual = $gateway->upsertAndBefore([
+            'id'   => 1,
+            'name' => 'upsertAndBefore',
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => 1,
+                "name" => "invalidAndBefore",
+                "data" => "",
+            ],
+        ], $actual);
+
+        $actual = $gateway->modifyAndBefore([
+            'id'   => 1,
+            'name' => 'modifyAndBefore',
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => 1,
+                "name" => "upsertAndBefore",
+                "data" => "",
+            ],
+        ], $actual);
+
+        if ($database->getCompatiblePlatform()->supportsReplace()) {
+            $actual = $gateway->replaceAndBefore([
+                'id'   => 1,
+                'name' => 'replaceAndBefore',
+            ]);
+            $this->assertEquals([
+                [
+                    "id"   => 1,
+                    "name" => "modifyAndBefore",
+                    "data" => "",
+                ],
+            ], $actual);
+        }
+
+        // 削除系（削除前を返す）
+
+        $actual = $gateway->deleteAndBefore([
+            'id > ?' => 7,
+        ]);
+        $this->assertEquals([
+            [
+                "id"   => "8",
+                "name" => "h",
+                "data" => "",
+            ],
+            [
+                "id"   => "9",
+                "name" => "i",
+                "data" => "",
+            ],
+            [
+                "id"   => "10",
+                "name" => "j",
+                "data" => "",
+            ],
+        ], $actual);
+
+        $actual = $gateway->reduceAndBefore(3, ['id' => true]);
+        $this->assertEquals([
+            [
+                "id"   => "4",
+                "name" => "d",
+                "data" => "",
+            ],
+            [
+                "id"   => "5",
+                "name" => "e",
+                "data" => "",
+            ],
+            [
+                "id"   => "6",
+                "name" => "f",
+                "data" => "",
+            ],
+            [
+                "id"   => "7",
+                "name" => "g",
+                "data" => "",
+            ],
+        ], $actual);
+
+        // 追加系（全て空）
+
+        $actual = $gateway->upsertAndBefore([
+            'id'   => 101,
+            'name' => 'upsertAndBefore',
+        ]);
+        $this->assertEquals([], $actual);
+
+        $actual = $gateway->modifyAndBefore([
+            'id'   => 102,
+            'name' => 'modifyAndBefore',
+        ]);
+        $this->assertEquals([], $actual);
+
+        if ($database->getCompatiblePlatform()->supportsReplace()) {
+            $actual = $gateway->replaceAndBefore([
+                'id'   => 103,
+                'name' => 'replaceAndBefore',
+            ]);
+            $this->assertEquals([], $actual);
+        }
+
+        // 亜種（カバレッジ目的）
+        $actual = $gateway->reviseAndBefore([
+            'name' => 'reviseAndBefore',
+        ], [
+            'id' => 1,
+        ]);
+        $this->assertCount(1, $actual);
+
+        $actual = $gateway->upgradeAndBefore([
+            'name' => 'reviseAndBefore',
+        ], [
+            'id' => 1,
+        ]);
+        $this->assertCount(1, $actual);
+
+        $actual = $gateway->removeAndBefore([
+            'id' => 1,
+        ]);
+        $this->assertCount(1, $actual);
+
+        $actual = $gateway->destroyAndBefore([
+            'id' => 2,
+        ]);
+        $this->assertCount(1, $actual);
+
+        // エンティティ
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            $actual = $database->ManagedComment->updateAndBefore([
+                'comment' => 'updateAndBefore',
+            ], [
+                'comment_id' => 1,
+            ]);
+            $this->assertInstanceOf(ManagedComment::class, $actual[0]);
+        }
     }
 
     /**

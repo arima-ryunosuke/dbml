@@ -62,6 +62,7 @@ class AffectBuilder extends AbstractBuilder
     protected array   $values     = [];          // 更新するデータ（BULK 系）
     protected ?string $select     = null;        // SELECT 文（BULK 系）
     protected array   $where      = [];          // WHERE 条件
+    protected ?Where  $condition  = null;        // 実際に使用した WHERE（に相当する条件）
     protected array   $groupBy    = [];          // GROUP BY 列（ほとんど使われない）
     protected array   $having     = [];          // HAVING 条件（現状使ってない）
     protected array   $orderBy    = [];          // ORDER BY 列（ほとんど使われない）
@@ -653,7 +654,8 @@ class AffectBuilder extends AbstractBuilder
         $sets = array_sprintf($set, '%2$s = %1$s', ', ');
 
         $pkcond = $this->database->getCompatiblePlatform()->getPrimaryCondition(array_uncolumns($pkcols), $this->table);
-        $criteria = Where::and(array_merge($this->where, [$pkcond]))($this->database)->merge($this->params);
+        $this->condition = Where::and(array_merge($this->where, [$pkcond]));
+        $criteria = ($this->condition)($this->database)->merge($this->params);
 
         $ignore = array_get($opt, 'ignore') ? $this->database->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
         $this->sql = "UPDATE {$ignore}{$this->tableAs()} SET $sets WHERE $criteria";
@@ -677,12 +679,19 @@ class AffectBuilder extends AbstractBuilder
         $merge = $cplatform->getMergeSyntax(array_keys($ukcols));
         $refer = $cplatform->getReferenceSyntax('%1$s');
 
+        $ukvals = [];
         $values = [];
         foreach ($this->values as $row) {
+            $ukval = array_filter(array_intersect_key($row, $ukcols), fn($v) => $v !== null);
+            if (count($ukval) === count($ukcols)) {
+                $ukvals[] = $ukval;
+            }
             $set = $this->bindInto($row, $this->params);
 
             $values[] = '(' . implode(', ', $set) . ')';
         }
+        $pkcond = $this->database->getCompatiblePlatform()->getPrimaryCondition($ukvals, $this->table);
+        $this->condition = Where::and([$pkcond]);
 
         if ($this->merge) {
             $updates = array_sprintf($this->bindInto($this->merge, $this->params), '%2$s = %1$s', ', ');
@@ -743,7 +752,8 @@ class AffectBuilder extends AbstractBuilder
         $set = $this->bindInto($this->set, $this->params);
         $sets = array_sprintf($set, '%2$s = %1$s', ', ');
 
-        $criteria = Where::and($this->where)($this->database)->merge($this->params);
+        $this->condition = Where::and($this->where);
+        $criteria = ($this->condition)($this->database)->merge($this->params);
 
         $ignore = array_get($opt, 'ignore') ? $this->database->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
         $this->sql = "UPDATE {$ignore}{$this->tableAs()} SET $sets" . ($criteria ? " WHERE $criteria" : '');
@@ -778,7 +788,8 @@ class AffectBuilder extends AbstractBuilder
             }
         }
 
-        $criteria = Where::and(array_intersect_key($this->set, $primary))($this->database)->merge($this->params);
+        $this->condition = Where::and(array_intersect_key($this->set, $primary));
+        $criteria = ($this->condition)($this->database)->merge($this->params);
 
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
         $this->sql = "REPLACE {$ignore}INTO {$this->tableAs()} (" . implode(', ', array_keys($selects)) . ") ";
@@ -803,6 +814,11 @@ class AffectBuilder extends AbstractBuilder
         $pkcols = $schema->getTableUniqueColumns($this->table, $this->constraint ?? 'PRIMARY');
 
         $merge = $this->database->getCompatiblePlatform()->convertMergeData($this->set, $this->merge);
+
+        $ukval = array_filter(array_intersect_key($this->set, $pkcols), fn($v) => $v !== null);
+        if (count($ukval) === count($pkcols)) {
+            $this->condition = Where::and([$ukval]);
+        }
 
         $sets1 = $this->bindInto($this->set, $this->params);
         $condition = null;
@@ -879,7 +895,8 @@ class AffectBuilder extends AbstractBuilder
         ], true);
         $this->params = [];
 
-        $criteria = Where::and($this->where)($this->database)->merge($this->params);
+        $this->condition = Where::and($this->where);
+        $criteria = ($this->condition)($this->database)->merge($this->params);
 
         $ignore = array_get($opt, 'ignore') ? $this->database->getCompatiblePlatform()->getIgnoreSyntax() . ' ' : '';
         $this->sql = "DELETE {$ignore}FROM {$this->tableAs()}" . ($criteria ? " WHERE $criteria" : '');
@@ -1019,6 +1036,11 @@ class AffectBuilder extends AbstractBuilder
         return $this->where;
     }
 
+    public function getCondition(): ?Where
+    {
+        return $this->condition;
+    }
+
     public function getGroupBy(): array
     {
         return $this->groupBy;
@@ -1068,6 +1090,7 @@ class AffectBuilder extends AbstractBuilder
         $this->values = [];
         $this->select = null;
         $this->where = [];
+        $this->condition = null;
         $this->groupBy = [];
         $this->having = [];
         $this->orderBy = [];
