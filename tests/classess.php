@@ -38,15 +38,15 @@ namespace ryunosuke\Test {
 
         public function clean($callback)
         {
-            if ($this->is_dirty) {
+            if ($this->getOriginal()->is_dirty) {
                 $callback($this);
-                $this->is_dirty = false;
+                $this->getOriginal()->is_dirty = false;
             }
         }
 
         public function executeAffect($query, iterable $params = [], ?int $retry = null)
         {
-            $this->is_dirty = true;
+            $this->getOriginal()->is_dirty = true;
             return parent::executeAffect($query, $params, $retry);
         }
     }
@@ -144,9 +144,9 @@ namespace ryunosuke\Test\Gateway {
 
     class Comment extends TableGateway
     {
-        public function __construct(Database $database, $table_name)
+        public function __construct(Database $database, $table_name, $entity_name)
         {
-            parent::__construct($database, $table_name);
+            parent::__construct($database, $table_name, $entity_name);
 
             $this->addScope('scope1', 'NOW()');
             $this->addScope('scope2', function ($id) {
