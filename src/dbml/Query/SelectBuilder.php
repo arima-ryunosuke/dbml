@@ -2932,7 +2932,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     public function notExists(): static
     {
         $this->sqlParts['select'] = ['*'];
-        return $this->wrap('NOT EXISTS', '', 'NOT EXISTS');
+        return $this->wrap('NOT EXISTS', '', 'EXISTS');
     }
 
     /**

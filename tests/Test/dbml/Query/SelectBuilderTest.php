@@ -3834,6 +3834,8 @@ INNER JOIN t_leaf ON (t_leaf.leaf_root_id = t_root.root_id) AND (t_leaf.leaf_roo
      */
     function test_exists($builder, $database)
     {
+        $this->assertQuery('NOT EXISTS (SELECT * FROM test)', $builder->column('test')->exists()->notExists());
+
         if (self::supportSyntax($database, 'SELECT EXISTS(SELECT * FROM test)')) {
             $this->assertEquals(1, $builder->getDatabase()->fetchValue("SELECT " . $builder->reset()->column('test1')->exists()));
             $this->assertEquals(0, $builder->getDatabase()->fetchValue("SELECT " . $builder->reset()->column('noauto')->exists()));
