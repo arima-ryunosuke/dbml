@@ -1653,16 +1653,16 @@
         },
         {
             "name": "ryunosuke/functions",
-            "version": "v1.6.18",
+            "version": "v1.6.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/arima-ryunosuke/php-functions.git",
-                "reference": "6fddd8d52982591e49cf31bd2afaf2b35684d84f"
+                "reference": "fbe95791074710a07520b3610c63369e0ad31e7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arima-ryunosuke/php-functions/zipball/6fddd8d52982591e49cf31bd2afaf2b35684d84f",
-                "reference": "6fddd8d52982591e49cf31bd2afaf2b35684d84f",
+                "url": "https://api.github.com/repos/arima-ryunosuke/php-functions/zipball/fbe95791074710a07520b3610c63369e0ad31e7d",
+                "reference": "fbe95791074710a07520b3610c63369e0ad31e7d",
                 "shasum": ""
             },
             "require": {
@@ -1699,9 +1699,9 @@
             "description": "Utility functions for PHP",
             "support": {
                 "issues": "https://github.com/arima-ryunosuke/php-functions/issues",
-                "source": "https://github.com/arima-ryunosuke/php-functions/tree/v1.6.18"
+                "source": "https://github.com/arima-ryunosuke/php-functions/tree/v1.6.20"
             },
-            "time": "2024-03-13T08:42:29+00:00"
+            "time": "2024-07-14T06:45:20+00:00"
         },
         {
             "name": "ryunosuke/phpunit-extension",
