@@ -6183,6 +6183,113 @@ if (!function_exists('ryunosuke\\dbml\\class_loader')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\class_map') || (new \ReflectionFunction('ryunosuke\\dbml\\class_map'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\class_map')) {
+    /**
+     * 指定クラスローダで読み込まれるであろう class => file を返す
+     *
+     * 実質的には composer で読み込まれるクラスマップを返す。
+     * つまり `dump-autoload -o` したときの getClassMap 相当を返す。
+     *
+     * ファイル名からクラス名を逆引きする都合上、猛烈に遅いので注意。
+     *
+     * @package ryunosuke\Functions\Package\classobj
+     */
+    function class_map(
+        /** @var ?\Composer\Autoload\ClassLoader オートローダオブジェクト */
+        ?object $loader = null,
+        /** パスが相対パスだった場合の基底ディレクトリ */
+        ?string $basePath = null,
+        /** キャッシュを使用するか */
+        bool $cache = true,
+    ): /** [class => file] の配列 */ array
+    {
+        $loader ??= class_loader();
+        $basePath ??= dirname((new \ReflectionClass($loader))->getFileName(), 3);
+        $cachekey = json_encode([spl_object_id($loader), $basePath]);
+        if (!$cache) {
+            cache($cachekey, null, __FUNCTION__);
+        }
+        return cache($cachekey, function () use ($loader, $basePath) {
+            $result = [];
+
+            // psr0+4
+            foreach ([
+                0 => $loader->getPrefixes() + ["" => $loader->getFallbackDirs()],
+                4 => $loader->getPrefixesPsr4() + ["" => $loader->getFallbackDirsPsr4()],
+            ] as $level => $psr) {
+                foreach ($psr as $prefix => $dirs) {
+                    foreach ($dirs as $dir) {
+                        $dir = path_normalize(path_is_absolute($dir) ? $dir : "$basePath/$dir");
+                        foreach (file_list($dir, ['name' => '#^[a-z_\x80-\xff][a-z0-9_\x80-\xff]*\.php$#ui']) ?? [] as $file) {
+                            if ($level === 0) {
+                                $class = strtr(substr($file, strlen($dir) + 1, -4), [DIRECTORY_SEPARATOR => '\\']);
+                                if (!isset($result[$class]) && str_starts_with($class, $prefix)) {
+                                    $result[$class] = $file;
+                                }
+                            }
+                            elseif ($level === 4) {
+                                $class = strtr($prefix . substr($file, strlen($dir) + 1, -4), [DIRECTORY_SEPARATOR => '\\']);
+                                if (!isset($result[$class])) {
+                                    $result[$class] = $file;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // クラスファイル名が見つかったからといってクラス定義ファイルとは限らないので中身を見なければならない
+            $result = array_filter($result, function ($file, $class) {
+                try {
+                    [$N, $C] = namespace_split($class);
+                    $tokens = \PhpToken::tokenize(file_get_contents($file), TOKEN_PARSE);
+                    $namespace = '';
+                    $namespacing = false;
+                    foreach ($tokens as $n => $token) {
+                        switch (true) {
+                            case $token->is(T_NAMESPACE):
+                                $namespacing = true;
+                                $namespace = '';
+                                break;
+                            case $token->is([';', '{']):
+                                $namespacing = false;
+                                break;
+                            // namespace の文脈で T_NAME_FULLY_QUALIFIED は流れてこないが \\ がないと T_STRING で流れてくる
+                            case $token->is([T_NAME_QUALIFIED, T_STRING]):
+                                if ($namespacing) {
+                                    $namespace .= $token->text;
+                                }
+                                break;
+                            case $token->is([T_CLASS, T_INTERFACE, T_TRAIT, /*T_ENUM:*/]):
+                                // ある程度で区切らないと無名クラス（new class() { }）や class 定数（Hoge::class）で最後まで読んでしまい、極端に遅くなる
+                                // class/interface/trait/enum キーワードとクラス名が16トークンも離れてることはまずないだろう
+                                for ($i = $n + 1, $l = min($n + 16, count($tokens)); $i < $l; $i++) {
+                                    if ($tokens[$i]->is(T_STRING) && $namespace === $N && $tokens[$i]->is($C)) {
+                                        return true;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                }
+                catch (\ParseError) {
+                    // TOKEN_PARSE で tokenize するとパースエラーが発生するが、パースエラーになるファイルでクラス定義がされるわけないのでスルーでよい
+                }
+                return false;
+            }, ARRAY_FILTER_USE_BOTH);
+
+            // classmap は composer が生成するかユーザーが明示的に設定するので↑のような漁る処理は必要ない
+            // ただしパスの正規化は行わなければならない
+            foreach ($loader->getClassMap() as $class => $file) {
+                $result[$class] ??= path_normalize(path_is_absolute($file) ? $file : "$basePath/$file");
+            }
+
+            return $result;
+        }, __FUNCTION__);
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\class_namespace') || (new \ReflectionFunction('ryunosuke\\dbml\\class_namespace'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\class_namespace')) {
     /**
@@ -6421,9 +6528,9 @@ if (!function_exists('ryunosuke\\dbml\\class_uses_all')) {
      * trait T2{use T1;}
      * trait T3{use T2;}
      * that(class_uses_all(new class{use T3;}))->isSame([
-     *     'Example\\T3', // クラスが直接 use している
-     *     'Example\\T2', // T3 が use している
-     *     'Example\\T1', // T2 が use している
+     *     'Example\\T3' => 'Example\\T3', // クラスが直接 use している
+     *     'Example\\T2' => 'Example\\T2', // T3 が use している
+     *     'Example\\T1' => 'Example\\T1', // T2 が use している
      * ]);
      * ```
      *
@@ -6435,6 +6542,14 @@ if (!function_exists('ryunosuke\\dbml\\class_uses_all')) {
      */
     function class_uses_all($class, $autoload = true)
     {
+        static $cache = [];
+
+        $cachekey = ltrim(is_object($class) ? get_class($class) : $class, '\\');
+
+        if (isset($cache[$cachekey])) {
+            return $cache[$cachekey];
+        }
+
         // まずはクラス階層から取得
         $traits = [];
         do {
@@ -6457,7 +6572,9 @@ if (!function_exists('ryunosuke\\dbml\\class_uses_all')) {
             }
             $count = count($traits);
         }
-        return array_keys($traits);
+
+        $names = array_keys($traits);
+        return $cache[$cachekey] = array_combine($names, $names);
     }
 }
 
@@ -10725,32 +10842,43 @@ if (!function_exists('ryunosuke\\dbml\\date_interval')) {
      *
      * @package ryunosuke\Functions\Package\datetime
      *
-     * @param string $interval ISO8601継続時間文字列
+     * @param string $interval ISO8601継続時間文字列か相対表記
      * @return \DateInterval DateInterval オブジェクト
      */
     function date_interval($interval)
     {
-        if (!preg_match('#^(?P<S>[\-+])?P((?P<Y>-?\d+)Y)?((?P<M>-?\d+)M)?((?P<D>-?\d+)D)?(T((?P<h>-?\d+)H)?((?P<m>-?\d+)M)?((?P<s>-?\d+(\.\d+)?)S)?)?$#', $interval, $matches, PREG_UNMATCHED_AS_NULL)) {
-            throw new \InvalidArgumentException("$interval is invalid DateInterval string");
+        if (preg_match('#^(?P<S>[\-+])?P((?P<Y>-?\d+)Y)?((?P<M>-?\d+)M)?((?P<D>-?\d+)D)?(T((?P<h>-?\d+)H)?((?P<m>-?\d+)M)?((?P<s>-?\d+(\.\d+)?)S)?)?$#', $interval, $matches, PREG_UNMATCHED_AS_NULL)) {
+            $interval = new \DateInterval('P0Y');
+            $interval->y = (int) $matches['Y'];
+            $interval->m = (int) $matches['M'];
+            $interval->d = (int) $matches['D'];
+            $interval->h = (int) $matches['h'];
+            $interval->i = (int) $matches['m'];
+            $interval->s = (int) $matches['s'];
+            $interval->f = (float) $matches['s'] - $interval->s;
+
+            if ($matches['S'] === '-') {
+                $interval->y = -$interval->y;
+                $interval->m = -$interval->m;
+                $interval->d = -$interval->d;
+                $interval->h = -$interval->h;
+                $interval->i = -$interval->i;
+                $interval->s = -$interval->s;
+                $interval->f = -$interval->f;
+            }
         }
-
-        $interval = new \DateInterval('P0Y');
-        $interval->y = (int) $matches['Y'];
-        $interval->m = (int) $matches['M'];
-        $interval->d = (int) $matches['D'];
-        $interval->h = (int) $matches['h'];
-        $interval->i = (int) $matches['m'];
-        $interval->s = (int) $matches['s'];
-        $interval->f = (float) $matches['s'] - $interval->s;
-
-        if ($matches['S'] === '-') {
-            $interval->y = -$interval->y;
-            $interval->m = -$interval->m;
-            $interval->d = -$interval->d;
-            $interval->h = -$interval->h;
-            $interval->i = -$interval->i;
-            $interval->s = -$interval->s;
-            $interval->f = -$interval->f;
+        else {
+            $parsed = date_parse($interval);
+            if ($parsed['errors'] || !$parsed['relative']) {
+                throw new \InvalidArgumentException("$interval is invalid DateInterval string");
+            }
+            $interval = new \DateInterval('P0Y');
+            $interval->y = $parsed['relative']['year'];
+            $interval->m = $parsed['relative']['month'];
+            $interval->d = $parsed['relative']['day'];
+            $interval->h = $parsed['relative']['hour'];
+            $interval->i = $parsed['relative']['minute'];
+            $interval->s = $parsed['relative']['second'];
         }
 
         $now = new \DateTimeImmutable();
@@ -11922,6 +12050,96 @@ if (!function_exists('ryunosuke\\dbml\\error')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\set_all_error_handler') || (new \ReflectionFunction('ryunosuke\\dbml\\set_all_error_handler'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\set_all_error_handler')) {
+    /**
+     * あらゆるエラーをハンドルする
+     *
+     * 実質的には set_error_handler+set_exception_handler+register_shutdown_function してるだけ。
+     * ハンドラの引数は Throwable 固定（エラーの場合は ErrorException に変換されてコールされる）。
+     * ハンドラが true/null を返すと設定前（ない場合は標準）のハンドラがコールされる。
+     * 実用上は「ログるかログらないか」くらいの差でしかない。
+     *
+     * @package ryunosuke\Functions\Package\errorfunc
+     * @codeCoverageIgnore カバレッジ不可
+     */
+    function set_all_error_handler(
+        /** 実行されるクロージャ */ \Closure $handler,
+        /** エラー抑制演算子をハンドリングするか */ bool $atmark_error = false,
+        /** fatal 用に予約するサイズ */ int $reserved_byte = 0,
+    ): /** キャンセルする callable */ callable
+    {
+        return new class($handler, $atmark_error, $reserved_byte) {
+            private static array  $instances         = [];
+            private static string $reservedMemory    = '';
+            private static bool   $regsteredShutdown = false;
+
+            private $handler;
+            private $error_handler;
+            private $exception_handler;
+
+            public function __construct(\Closure $handler, bool $atmark_error, int $reserved_byte)
+            {
+                self::$instances[spl_object_id($this)] = $this;
+                if (strlen(self::$reservedMemory) < $reserved_byte) {
+                    self::$reservedMemory = str_repeat('x', $reserved_byte);
+                }
+
+                $this->handler = $handler;
+
+                $this->error_handler = set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($atmark_error) {
+                    if (!$atmark_error && !(error_reporting() & $errno)) {
+                        return false;
+                    }
+
+                    $default = ($this->handler)(new \ErrorException($errstr, 0, $errno, $errfile, $errline)) ?? true;
+                    if ($default) {
+                        return ($this->error_handler)($errno, $errstr, $errfile, $errline);
+                    }
+                }) ?? fn() => false;
+
+                $this->exception_handler = set_exception_handler(function (\Throwable $t) {
+                    $default = ($this->handler)($t) ?? true;
+                    if ($default) {
+                        return ($this->exception_handler)($t);
+                    }
+                }) ?? fn($t) => throw $t;
+
+                if (!self::$regsteredShutdown) {
+                    self::$regsteredShutdown = true;
+                    register_shutdown_function(function () {
+                        self::$reservedMemory = '';
+                        // php は循環参照を片付けずに memory size エラーを飛ばすのでやっておく意味はある
+                        gc_collect_cycles();
+                        foreach (self::$instances as $instance) {
+                            // 通常の実行時エラーは set_error_handler でハンドリングされているが
+                            // - 実行時ではないコンパイル時エラー
+                            // - エラーハンドラが呼ばれない実行時エラー（実行メモリ/時間など）
+                            // が存在するので個別にハンドリングしないと呼ばれる機会が失われる
+                            if (($error = error_get_last()) !== null) {
+                                if (false
+                                    || in_array($error['type'], [E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)
+                                    || strpos($error['message'], 'Allowed memory size') === 0
+                                    || strpos($error['message'], 'Maximum execution time') === 0
+                                ) {
+                                    ($instance->handler)(new \ErrorException($error['message'], 1, $error['type'], $error['file'], $error['line']));
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            public function __invoke()
+            {
+                restore_error_handler();
+                restore_exception_handler();
+                unset(self::$instances[spl_object_id($this)]);
+            }
+        };
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\set_error_exception_handler') || (new \ReflectionFunction('ryunosuke\\dbml\\set_error_exception_handler'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\set_error_exception_handler')) {
     /**
@@ -12522,7 +12740,22 @@ if (!function_exists('ryunosuke\\dbml\\process_closure')) {
         file_put_contents($mainscript = sys_get_temp_dir() . '/process-' . sha1($maincode) . '.php', $maincode);
 
         $return = tempnam($workdir, 'return');
-        $process = process_async(php_binary(), [$mainscript, $return], var_export3(arrayize($args), ["outmode" => "eval"]), $stdout, $stderr, $workdir, $env, $options);
+
+        $options ??= [];
+        $ini = arrayize($options['ini'] ?? []);
+        unset($options['ini']);
+
+        $ini_args = [];
+        foreach ($ini as $key => $value) {
+            if (is_int($key)) {
+                $ini_args[] = "-d$value";
+            }
+            else {
+                $ini_args[] = "-d$key=$value";
+            }
+        }
+
+        $process = process_async(php_binary(), [...$ini_args, $mainscript, $return], var_export3(arrayize($args), ["outmode" => "eval"]), $stdout, $stderr, $workdir, $env, $options);
         $process->setDestructAction('terminate');
         $process->setCompleteAction(function () use ($throw, $return) {
             /** @var $this \ProcessAsync */
@@ -13685,6 +13918,142 @@ if (!function_exists('ryunosuke\\dbml\\file_rewrite_contents')) {
             }
             throw $ex;
         }
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\file_rotate') || (new \ReflectionFunction('ryunosuke\\dbml\\file_rotate'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\file_rotate')) {
+    /**
+     * ファイルをローテーションする
+     *
+     * オプションは logrotate に意図的に似せてある。
+     * 返り値としてローテーションファイル配列を返す。
+     * 基本的に決め打ちな使い方で細かいオプションは実装していない。
+     *
+     * Example:
+     * ```php
+     * // 適当にファイルを用意
+     * rm_rf(sys_get_temp_dir() . '/rotate');
+     * $logfile = sys_get_temp_dir() . '/rotate/log.txt';
+     * file_set_contents($logfile, '');
+     * // 5回ローテートしてみる
+     * foreach (range(1, 5) as $i) {
+     *     file_rotate($logfile, ifempty: true, rotate: 4, compress: 2, dateformat: "-$i"); // dateformat は普通は日付書式文字列（↓の確認がしんどくなるのでここでは連番）
+     * }
+     * // rotate:4 効果で全部で4世代であり、compress:2 効果でうち2世代は圧縮されている
+     * $dirname = dirname($logfile);
+     * that(glob("$dirname/log-*"))->is([
+     *     "$dirname/log-2.txt.gz",
+     *     "$dirname/log-3.txt.gz",
+     *     "$dirname/log-4.txt",
+     *     "$dirname/log-5.txt",
+     * ]);
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\filesystem
+     */
+    function file_rotate(
+        /** 対象ファイル名 */ string $filename,
+        /** 空ファイルでもローテーションするか */ bool $ifempty = false,
+        /** 同じファイル（inode）を使い続けるか */ bool $copytruncate = false,
+        /** 既存ローテーションファイルに追記するか */ bool $append = false,
+        /** ローテーションファイルのディレクトリ */ ?string $olddir = null,
+        /** ローテーションファイルのサフィックス */ ?string $dateformat = null,
+        /** 保持世代数（null で無世代） */ ?int $rotate = null,
+        /** 圧縮世代数（例えば 3 を指定すると3世代目から圧縮される） */ ?int $compress = null,
+    ): /** ローテーションファイル配列 */ ?array
+    {
+        /// 共通処理
+
+        assert(!($copytruncate && $append), 'both $copytruncate and $append are true');
+        assert($rotate === null || $rotate >= 0, '$rotate is negative number');
+        assert($compress === null || $compress >= 0, '$compress is negative number');
+
+        $filename = realpath($filename);
+        $pathinfo = pathinfo($filename);
+
+        if ($filename === false) {
+            return null;
+        }
+        if (!$ifempty && !filesize($filename)) {
+            return null;
+        }
+
+        /// 世代ディレクトリ検出
+
+        $olddir ??= $pathinfo['dirname'];
+        if (!path_is_absolute($olddir)) {
+            $olddir = "{$pathinfo['dirname']}/$olddir";
+        }
+        if (!is_dir($olddir)) {
+            @mkdir($olddir, 0777, true);
+            if (is_dir($olddir) === false) {
+                throw new \RuntimeException("failed to mkdir($olddir)");
+            }
+        }
+
+        /// ローテーション
+
+        $oldfile = "$olddir/{$pathinfo['filename']}" . date($dateformat ?? '-Y-m-d', time()) . ".{$pathinfo['extension']}";
+        if ($copytruncate) {
+            if (@copy($filename, $oldfile) === false) {
+                throw new \RuntimeException("failed to copy($filename, $oldfile)");
+            }
+
+            file_put_contents($filename, "");
+        }
+        elseif ($append) {
+            if (@file_put_contents($oldfile, file_get_contents($filename), FILE_APPEND) === false) {
+                throw new \RuntimeException("failed to file_put_contents($oldfile, file_get_contents($filename), FILE_APPEND)");
+            }
+
+            file_put_contents($filename, "");
+        }
+        else {
+            if (@rename($filename, $oldfile) === false) {
+                throw new \RuntimeException("failed to rename($filename, $oldfile)");
+            }
+
+            file_put_contents($filename, "");
+            if (($perms = fileperms($oldfile)) !== false) {
+                chmod($filename, $perms);
+            }
+            if (($owner = fileowner($oldfile)) !== false) {
+                chown($filename, $owner);
+            }
+            if (($group = filegroup($oldfile)) !== false) {
+                chgrp($filename, $group);
+            }
+        }
+
+        /// 世代管理
+
+        $oldfiles = glob("$olddir/{$pathinfo['filename']}*");
+        $oldfiles = array_maps($oldfiles, 'realpath');
+        $oldfiles = array_diff($oldfiles, [$filename]);
+        rsort($oldfiles);
+
+        // 古い世代を削除
+        if ($rotate !== null) {
+            foreach (array_slice($oldfiles, $rotate, null, true) as $n => $file) {
+                if (unlink($file) !== false) {
+                    unset($oldfiles[$n]);
+                }
+            }
+        }
+
+        // 古い世代を圧縮
+        if ($compress !== null) {
+            foreach (array_slice($oldfiles, $compress, null, true) as $n => $file) {
+                if (pathinfo($file, PATHINFO_EXTENSION) !== 'gz') {
+                    if (file_put_contents("compress.zlib://$file.gz", file_get_contents($file)) !== false && unlink($file) !== false) {
+                        $oldfiles[$n] = "$file.gz";
+                    }
+                }
+            }
+        }
+
+        return $oldfiles;
     }
 }
 
@@ -21357,9 +21726,10 @@ if (!function_exists('ryunosuke\\dbml\\callable_code')) {
      * @package ryunosuke\Functions\Package\reflection
      *
      * @param callable|\ReflectionFunctionAbstract $callable コードを取得する callable
+     * @param bool $return_token true にすると生のトークン配列で返す
      * @return array ['定義部分', '{処理コード}']
      */
-    function callable_code($callable)
+    function callable_code($callable, bool $return_token = false)
     {
         $ref = $callable instanceof \ReflectionFunctionAbstract ? $callable : reflect_callable($callable);
         $contents = file($ref->getFileName());
@@ -21390,7 +21760,79 @@ if (!function_exists('ryunosuke\\dbml\\callable_code')) {
             ]);
         }
 
+        if ($return_token) {
+            return [$meta, $body];
+        }
+
         return [trim(implode('', array_column($meta, 'text'))), trim(implode('', array_column($body, 'text')))];
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\function_doccomments') || (new \ReflectionFunction('ryunosuke\\dbml\\function_doccomments'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\function_doccomments')) {
+    /**
+     * $callable の本体・引数・返り値の DocComment を返す
+     *
+     * 下記のような配列を返す（仕様上 Example が書けない）。
+     *
+     * ```
+     * [
+     *     "" => "本体の DocComment",
+     *     0  => "引数1の DocComment",
+     *     1  => "引数2の DocComment",
+     *     // ...他の引数
+     *     -1 => "返り値の DocComment",
+     * ];
+     * ```
+     *
+     * それぞれ存在しない場合はキー自体が抜け落ちる（null で入ったりはしない）。
+     * 非常に雑に実装しているので、配列や new(8.1以降)の引数に反応することがある。
+     *
+     * 本体の DocComment は ReflectionFunctionAbstract::getDocComment と同等である。
+     * 引数の DocComment は必ず型宣言の直前（ない場合は引数名の直前）に記述しなければならない。
+     * 返り値の DocComment は必ず型宣言の直前（ない場合は{の直前）に記述しなければならない。
+     *
+     * @package ryunosuke\Functions\Package\reflection
+     */
+    function function_doccomments(
+        /** 対象 callable */
+        \ReflectionFunctionAbstract|callable $callable,
+    ): /** 本体・引数・返り値の DocComment 配列 */ array
+    {
+        $ref = $callable instanceof \ReflectionFunctionAbstract ? $callable : reflect_callable($callable);
+        $parameters = array_each($ref->getParameters(), function (&$carry, $v) {
+            $carry[$v->getName()] = $v;
+        }, []);
+
+        $result = [];
+        if ($ref->getDocComment() !== false) {
+            $result[''] = $ref->getDocComment();
+        }
+
+        $doccomment = null;
+        $tokens = callable_code($ref, true)[0];
+        foreach ($tokens as $token) {
+            if ($token->is(T_DOC_COMMENT)) {
+                $doccomment = $token;
+            }
+
+            if ($token->is(T_VARIABLE)) {
+                $varname = substr($token->text, 1);
+                if ($doccomment && isset($parameters[$varname])) {
+                    $result[$parameters[$varname]->getPosition()] = $doccomment->text;
+                }
+                $doccomment = null;
+            }
+            if ($token->is([T_NEW])) {
+                $doccomment = null; // @codeCoverageIgnore for php8.1
+            }
+        }
+
+        if ($doccomment) {
+            $result[-1] = $doccomment->text;
+        }
+
+        return $result;
     }
 }
 
@@ -28653,7 +29095,7 @@ if (!function_exists('ryunosuke\\dbml\\cache')) {
                 // 名前空間自体がないなら作る or 読む
                 if (!isset($this->cache[$namespace])) {
                     $nsarray = [];
-                    $cachpath = $this->cachedir . '/' . rawurldecode($namespace) . self::CACHE_EXT;
+                    $cachpath = $this->cachedir . '/' . rawurlencode($namespace) . self::CACHE_EXT;
                     if (file_exists($cachpath)) {
                         $nsarray = require $cachpath;
                     }
@@ -30643,7 +31085,6 @@ if (!function_exists('ryunosuke\\dbml\\var_export2')) {
      * 下記の点が異なる。
      *
      * - 配列は 5.4 以降のショートシンタックス（[]）で出力
-     * - インデントは 4 固定
      * - ただの配列は1行（[1, 2, 3]）でケツカンマなし、連想配列は桁合わせインデントでケツカンマあり
      * - 文字列はダブルクオート
      * - null は null（小文字）
@@ -30689,32 +31130,45 @@ if (!function_exists('ryunosuke\\dbml\\var_export2')) {
      * @package ryunosuke\Functions\Package\var
      *
      * @param mixed $value 出力する値
-     * @param bool $return 返すなら true 出すなら false
+     * @param bool|array $options オプション配列（var_export に寄せるため bool も受け付ける）
      * @return string|null $return=true の場合は出力せず結果を返す
      */
-    function var_export2($value, $return = false)
+    function var_export2($value, $options = [])
     {
-        // インデントの空白数
-        $INDENT = 4;
+        if (!is_array($options)) {
+            $options = [
+                'return' => !!$options,
+            ];
+        }
+
+        $options += [
+            'minify' => false, // 短縮形で返す（実質的には情報を減らして1行で返す）
+            'indent' => 4,     // インデントの空白数
+            'return' => false, // 値を戻すか出力するか
+        ];
 
         // 再帰用クロージャ
-        $export = function ($value, $context, $nest = 0, $parents = []) use (&$export, $INDENT) {
+        $export = function ($value, $context, $nest = 0, $parents = []) use (&$export, $options) {
             // 再帰を検出したら *RECURSION* とする（処理に関しては is_recursive のコメント参照）
             foreach ($parents as $parent) {
                 if ($parent === $value) {
                     return $export('*RECURSION*', 'recursion');
                 }
             }
+
+            $space = $options['minify'] ? "" : " ";
+            $break = $options['minify'] ? "" : "\n";
+
             // 配列は連想判定したり再帰したり色々
             if (is_array($value)) {
-                $spacer1 = str_repeat(' ', ($nest + 1) * $INDENT);
-                $spacer2 = str_repeat(' ', $nest * $INDENT);
+                $spacer1 = str_repeat($space, ($nest + 1) * $options['indent']);
+                $spacer2 = str_repeat($space, $nest * $options['indent']);
 
                 $hashed = is_hasharray($value);
 
                 // スカラー値のみで構成されているならシンプルな再帰
                 if (!$hashed && array_all($value, fn(...$args) => is_primitive(...$args))) {
-                    return '[' . implode(', ', array_map(fn($v) => $export($v, 'array-value'), $value)) . ']';
+                    return '[' . implode(",$space", array_map(fn($v) => $export($v, 'array-value'), $value)) . ']';
                 }
 
                 // 連想配列はキーを含めて桁あわせ
@@ -30723,19 +31177,20 @@ if (!function_exists('ryunosuke\\dbml\\var_export2')) {
                     $maxlen = max(array_map('strlen', $keys));
                 }
                 $kvl = '';
+                $lastkey = array_key_last($value);
                 $parents[] = $value;
                 foreach ($value as $k => $v) {
-                    $keystr = $hashed ? $keys[$k] . str_repeat(' ', $maxlen - strlen($keys[$k])) . ' => ' : '';
-                    $kvl .= $spacer1 . $keystr . $export($v, 'array-value', $nest + 1, $parents) . ",\n";
+                    $keystr = $hashed ? $keys[$k] . str_repeat($space, $maxlen - strlen($keys[$k])) . "$space=>$space" : '';
+                    $kvl .= $spacer1 . $keystr . $export($v, 'array-value', $nest + 1, $parents) . ($k === $lastkey && $options['minify'] ? "" : ",") . "$break";
                 }
-                return "[\n{$kvl}{$spacer2}]";
+                return "[$break{$kvl}{$spacer2}]";
             }
             // オブジェクトは単にプロパティを __set_state する文字列を出力する
             elseif (is_object($value)) {
                 $parents[] = $value;
                 $classname = get_class($value);
                 if ($classname === \stdClass::class) {
-                    return '(object) ' . $export((array) $value, 'object', $nest, $parents);
+                    return "(object)$space" . $export((array) $value, 'object', $nest, $parents);
                 }
                 return $classname . '::__set_state(' . $export(object_properties($value), 'object', $nest, $parents) . ')';
             }
@@ -30746,12 +31201,12 @@ if (!function_exists('ryunosuke\\dbml\\var_export2')) {
                     return str_quote($value);
                 }
                 // 改行を含むならヒアドキュメント
-                if (str_exists($value, ["\r", "\n"])) {
+                if (!$options['minify'] && str_exists($value, ["\r", "\n"])) {
                     // ただし、改行文字だけの場合は除く（何らかの引数で改行文字だけを渡すシチュエーションはそれなりにあるのでヒアドキュメントだと冗長）
                     if (trim($value, "\r\n") !== '') {
                         return str_quote($value, [
                             'heredoc' => unique_string($value, 'TEXT', '_'),
-                            'indent'  => $nest * $INDENT,
+                            'indent'  => $nest * $options['indent'],
                         ]);
                     }
                 }
@@ -30769,7 +31224,7 @@ if (!function_exists('ryunosuke\\dbml\\var_export2')) {
 
         // 結果を返したり出力したり
         $result = $export($value, null);
-        if ($return) {
+        if ($options['return']) {
             return $result;
         }
         echo $result, "\n";

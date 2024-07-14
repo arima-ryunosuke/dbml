@@ -59,6 +59,10 @@
   - Sequencer の負数降順を廃止
   - Sequencer の has メソッド改名
 
+## 2.1.21
+
+- [composer] update
+
 ## 2.1.20
 
 - [feature] 強制的に値埋め込みを行う dynamicPlaceholder オプションを追加
