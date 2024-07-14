@@ -21,6 +21,10 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.0.2
+
+- [composer] update
+
 ## 3.0.1
 
 - [feature] FactoryTrait を導入して外部から多少拡張できるようになった
