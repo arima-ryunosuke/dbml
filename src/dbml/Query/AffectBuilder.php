@@ -713,8 +713,7 @@ class AffectBuilder extends AbstractBuilder
         if ($this->where) {
             $condition = $this->database->selectNotExists($this->table, $this->where);
             $condition = $condition->merge($this->params);
-            $fromDual = concat(' FROM ', $cplatform->getDualTable());
-            $this->sql .= sprintf("(%s) SELECT %s$fromDual WHERE $condition", implode(', ', array_keys($set)), implode(', ', $set));
+            $this->sql .= sprintf("(%s) SELECT %s WHERE $condition", implode(', ', array_keys($set)), implode(', ', $set));
         }
         elseif (count($this->set) && $cplatform->supportsInsertSet() && $this->getUnsafeOption('insertSet')) {
             $this->sql .= "SET " . array_sprintf($set, '%2$s = %1$s', ', ');
@@ -817,8 +816,7 @@ class AffectBuilder extends AbstractBuilder
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
         $this->sql = "INSERT {$ignore}INTO {$this->tableAs()} ";
         if ($condition !== null) {
-            $fromDual = concat(' FROM ', $cplatform->getDualTable());
-            $this->sql .= sprintf("(%s) SELECT %s$fromDual WHERE $condition", implode(', ', array_keys($sets1)), implode(', ', $sets1));
+            $this->sql .= sprintf("(%s) SELECT %s WHERE $condition", implode(', ', array_keys($sets1)), implode(', ', $sets1));
         }
         elseif (count($this->set) && $cplatform->supportsInsertSet() && $this->getUnsafeOption('insertSet')) {
             $this->sql .= "SET " . array_sprintf($sets1, '%2$s = %1$s', ', ');

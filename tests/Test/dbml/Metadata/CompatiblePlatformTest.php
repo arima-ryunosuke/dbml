@@ -327,17 +327,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
-    function test_getDualTable($cplatform, $platform)
-    {
-        $expected = $platform instanceof MySQLPlatform ? 'dual' : '';
-        $this->assertEquals($expected, $cplatform->getDualTable());
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
     function test_getMergeSyntax($cplatform, $platform)
     {
         $expected = false;

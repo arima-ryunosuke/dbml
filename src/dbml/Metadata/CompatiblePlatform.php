@@ -356,17 +356,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
-     * （対応しているなら） dual 表を返す
-     */
-    public function getDualTable(): string
-    {
-        if ($this->platform instanceof MySQLPlatform) {
-            return 'dual';
-        }
-        return '';
-    }
-
-    /**
      * MERGE 構文を返す
      */
     public function getMergeSyntax(array $columns): ?string
