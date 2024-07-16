@@ -2312,10 +2312,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
             // 超特殊な処理（build 時に遅延構築する）
             $this->sqlParts['orderBy'][] = $sort;
-            goto ESCAPE;
         }
-
-        if (is_array($sort)) {
+        elseif (is_array($sort)) {
             foreach ($sort as $col => $ord) {
                 if (is_int($col) && is_array($ord)) {
                     $this->addOrderBy($ord[0], $ord[1] ?? $order);
@@ -2350,8 +2348,6 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 $this->sqlParts['orderBy'][] = [$sort, strtoupper($order) !== 'DESC', $nullsOrder];
             }
         }
-
-        ESCAPE:
 
         $this->_dirty();
 
@@ -2820,77 +2816,70 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         assert(!$continuity || ($continuity && $this->applyments['before'] === null), 'yield not support before apply');
         assert(!$continuity || ($continuity && $this->applyments['after'] === null), 'yield not support after apply');
 
-        BEFORE:
-
         $parents = $this->applyments['before'] ? $this->applyments['before']->call($this, $parents) : $parents;
 
-        // 親フェッチ行がないなら不要
-        if (empty($parents)) {
-            goto AFTER;
-        }
+        if ($parents) {
+            // subselect
+            if ($this->subbuilders) {
+                // 親行がスカラーなのは何かがおかしい
+                assert(!is_primitive(first_value($parents)));
 
-        // subselect
-        if ($this->subbuilders) {
-            // 親行がスカラーなのは何かがおかしい
-            assert(!is_primitive(first_value($parents)));
-
-            // subselects 分ループ（多くても数個）
-            foreach ($this->subbuilders as $column => $subselect) {
-                // 連続コールされる場合は無駄なので clone もしないし prepare を使用する
-                if ($continuity) {
-                    if ($subselect->lazyMode === self::LAZY_MODE_EAGER) {
-                        $subselect->lazyMode = self::LAZY_MODE_FETCH;
-                    }
-                }
-                else {
-                    $subselect = clone $subselect;
-                }
-
-                // 親のロックモードを受け継ぐ
-                if ($this->lockMode !== LockMode::NONE && $subselect->lockMode === LockMode::NONE && $subselect->getPropagateLockMode()) {
-                    $subselect->lockMode = $this->lockMode;
-                    $subselect->lockOption = $this->lockOption;
-                }
-
-                // 親のフェッチメソッドを受け継ぐ
-                if ($subselect->lazyMethod === null) {
-                    $subselect->lazyMethod = $this->lazyMethod;
-                    if (Database::METHODS[$subselect->lazyMethod]['keyable'] === null) {
-                        $subselect->lazyMethod = Database::METHOD_ASSOC;
-                    }
-                }
-
-                $parents = $subselect->_subquery($parents, $column);
-            }
-        }
-
-        // binding
-        foreach ($parents as $n => $parent_row) {
-            $row_class = null;
-            foreach ($this->callbacks as $name => [$callback, $args]) {
-                if (!$args) {
-                    $parents[$n][$name] = $callback($parents[$n]);
-                }
-                if (isset($parents[$n][$name]) && $parents[$n][$name] instanceof \Closure) {
-                    // 親行がスカラーなのは何かがおかしい
-                    assert(!is_primitive(first_value($parents)));
-
-                    if (is_bindable_closure($parents[$n][$name])) {
-                        if ($row_class === null) {
-                            if ($parents[$n] instanceof Entityable) {
-                                $row_class = $parents[$n];
-                            }
-                            else {
-                                $row_class = new \ArrayObject($parents[$n], \ArrayObject::ARRAY_AS_PROPS);
-                            }
+                // subselects 分ループ（多くても数個）
+                foreach ($this->subbuilders as $column => $subselect) {
+                    // 連続コールされる場合は無駄なので clone もしないし prepare を使用する
+                    if ($continuity) {
+                        if ($subselect->lazyMode === self::LAZY_MODE_EAGER) {
+                            $subselect->lazyMode = self::LAZY_MODE_FETCH;
                         }
-                        $parents[$n][$name] = $parents[$n][$name]->bindTo($row_class);
+                    }
+                    else {
+                        $subselect = clone $subselect;
+                    }
+
+                    // 親のロックモードを受け継ぐ
+                    if ($this->lockMode !== LockMode::NONE && $subselect->lockMode === LockMode::NONE && $subselect->getPropagateLockMode()) {
+                        $subselect->lockMode = $this->lockMode;
+                        $subselect->lockOption = $this->lockOption;
+                    }
+
+                    // 親のフェッチメソッドを受け継ぐ
+                    if ($subselect->lazyMethod === null) {
+                        $subselect->lazyMethod = $this->lazyMethod;
+                        if (Database::METHODS[$subselect->lazyMethod]['keyable'] === null) {
+                            $subselect->lazyMethod = Database::METHOD_ASSOC;
+                        }
+                    }
+
+                    $parents = $subselect->_subquery($parents, $column);
+                }
+            }
+
+            // binding
+            foreach ($parents as $n => $parent_row) {
+                $row_class = null;
+                foreach ($this->callbacks as $name => [$callback, $args]) {
+                    if (!$args) {
+                        $parents[$n][$name] = $callback($parents[$n]);
+                    }
+                    if (isset($parents[$n][$name]) && $parents[$n][$name] instanceof \Closure) {
+                        // 親行がスカラーなのは何かがおかしい
+                        assert(!is_primitive(first_value($parents)));
+
+                        if (is_bindable_closure($parents[$n][$name])) {
+                            if ($row_class === null) {
+                                if ($parents[$n] instanceof Entityable) {
+                                    $row_class = $parents[$n];
+                                }
+                                else {
+                                    $row_class = new \ArrayObject($parents[$n], \ArrayObject::ARRAY_AS_PROPS);
+                                }
+                            }
+                            $parents[$n][$name] = $parents[$n][$name]->bindTo($row_class);
+                        }
                     }
                 }
             }
         }
-
-        AFTER:
 
         $parents = $this->applyments['after'] ? $this->applyments['after']->call($this, $parents) : $parents;
 

@@ -3333,37 +3333,38 @@ class Database
         // コンテキストを戻すための try～catch
         try {
             $retry ??= $this->getUnsafeOption('defaultRetry');
-            RETRY:
-            try {
-                $this->affectedRows = null;
-                $this->affectedRows = $this->getMasterConnection()->executeStatement($query, $params, Adhoc::bindableTypes($params));
-            }
-            catch (\Exception $ex) {
-                if ($retry-- > 0) {
-                    $wait = null;
-                    // id や uk がクロージャで、値が毎回変わることもある
-                    if ($ex instanceof UniqueConstraintViolationException) {
-                        $wait = 0.1;
-                    }
-                    // それ以外は doctrine に任せる
-                    if ($ex instanceof RetryableException) {
-                        // …としたいんだけど、今の実装は Deadlock と LockWaitTimeout が対象になっている
-                        // Deadlock は例えば mysql で暗黙のロールバックが走るので勝手にリトライするわけにはいかない
-                        // LockWaitTimeout は単純リトライで大丈夫だろうがリトライ間隔を見積もることができない
-                        // トランザクションを見て分岐でもいいけど結構クリティカルになりがちなので安全側に倒してスルー実装としている
-                        assert($ex); // @codeCoverageIgnore
-                    }
-                    if (isset($wait)) {
-                        usleep($wait * 1000 * 1000);
-                        $params = Adhoc::bindableParameters($bare_params);
-                        goto RETRY;
-                    }
+            do {
+                try {
+                    $this->affectedRows = null;
+                    $this->affectedRows = $this->getMasterConnection()->executeStatement($query, $params, Adhoc::bindableTypes($params));
+                    // 利便性のため $this->affectedRows には代入しない（こうしておくと mysqli においてマッチ行と変更行が得られる）
+                    return $this->getCompatibleConnection($this->getMasterConnection())->alternateMatchedRows() ?? $this->affectedRows;
                 }
+                catch (\Exception $ex) {
+                    if ($retry-- > 0) {
+                        $wait = null;
+                        // id や uk がクロージャで、値が毎回変わることもある
+                        if ($ex instanceof UniqueConstraintViolationException) {
+                            $wait = 0.1;
+                        }
+                        // それ以外は doctrine に任せる
+                        if ($ex instanceof RetryableException) {
+                            // …としたいんだけど、今の実装は Deadlock と LockWaitTimeout が対象になっている
+                            // Deadlock は例えば mysql で暗黙のロールバックが走るので勝手にリトライするわけにはいかない
+                            // LockWaitTimeout は単純リトライで大丈夫だろうがリトライ間隔を見積もることができない
+                            // トランザクションを見て分岐でもいいけど結構クリティカルになりがちなので安全側に倒してスルー実装としている
+                            assert($ex); // @codeCoverageIgnore
+                        }
+                        if (isset($wait)) {
+                            usleep($wait * 1000 * 1000);
+                            $params = Adhoc::bindableParameters($bare_params);
+                            continue;
+                        }
+                    }
 
-                throw $ex;
-            }
-            // 利便性のため $this->affectedRows には代入しない（こうしておくと mysqli においてマッチ行と変更行が得られる）
-            return $this->getCompatibleConnection($this->getMasterConnection())->alternateMatchedRows() ?? $this->affectedRows;
+                    throw $ex;
+                }
+            } while (true);
         }
         catch (\Exception $ex) {
             $this->unstackAll();
