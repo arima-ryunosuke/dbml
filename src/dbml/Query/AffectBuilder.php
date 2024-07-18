@@ -45,6 +45,10 @@ use function ryunosuke\dbml\str_exists;
  * @method $this                  setConvertBoolToInt($bool)
  * @method bool                   getConvertNumericToDatetime()
  * @method $this                  setConvertNumericToDatetime($bool)
+ * @method null|int               getConvertArrayToJson()
+ * @method $this                  setConvertArrayToJson(?int $json_encode_flags)
+ * @method null|int               getConvertObjectToJson()
+ * @method $this                  setConvertObjectToJson(?int $json_encode_flags)
  * @method bool                   getTruncateString()
  * @method $this                  setTruncateString($bool)
  */
@@ -116,6 +120,20 @@ class AffectBuilder extends AbstractBuilder
              * この設定を true にすると、日時系カラムに int/float が来た場合にタイムスタンプとみなすようになる。
              */
             'convertNumericToDatetime'  => true,
+            /** @var ?int insert 時などに配列が来た時に json_encode を施すか
+             * 基本的に json の変換は JSON 型に任せればよいが、mariadb は JSON が LONGTEXT になってしまうため型が得られない。
+             * そのようなときにこの設定を有効にすれば自動で変換が為されるようになる。
+             * 他の RDBMS でも深淵な理由で JSON 型が使用できないときに便利。
+             *
+             * あくまで INSERT/UPDATE 時であり、SELECT には言及（取得時に json_decode）できないので注意。
+             * また他の convert 系設定と違い ?int を渡すのにも注意（json_encode のフラグ引数として使われる）。
+             */
+            'convertArrayToJson'        => null,
+            /** @var ?int insert 時などにオブジェクトが来た時に json_encode を施すか
+             * convertArrayToJson のオブジェクト版で説明としてはすべて同じ。
+             * ただし JsonSerializable だけが対象になる。
+             */
+            'convertObjectToJson'       => null,
             /** @var bool insert 時などに文字列カラムは length で切るか否か
              * この設定を true にすると、文字列系カラムに length を超える文字列が来た場合に切り落とされるようになる。
              */
@@ -369,6 +387,8 @@ class AffectBuilder extends AbstractBuilder
         $convertEmptyToNull = $this->getUnsafeOption('convertEmptyToNull');
         $convertBoolToInt = $this->getUnsafeOption('convertBoolToInt');
         $convertNumericToDatetime = $this->getUnsafeOption('convertNumericToDatetime');
+        $convertArrayToJson = $this->getUnsafeOption('convertArrayToJson');
+        $convertObjectToJson = $this->getUnsafeOption('convertObjectToJson');
         $truncateString = $this->getUnsafeOption('truncateString');
         $autoCastType = $this->database->getOption('autoCastType');
         $compatibleCharAndBinary = $this->database->getCompatiblePlatform()->supportsCompatibleCharAndBinary();
@@ -412,6 +432,14 @@ class AffectBuilder extends AbstractBuilder
                     $format ??= isset($datetimeTypes[$typename]) ? $this->database->getPlatform()->getDateTimeFormatString() : null;
                     $format ??= isset($datetimeTZTypes[$typename]) ? $this->database->getPlatform()->getDateTimeTzFormatString() : null;
                     $row[$cname] = $dt->format($format);
+                }
+
+                if ($convertArrayToJson !== null && is_array($row[$cname])) {
+                    $row[$cname] = json_encode($row[$cname], $convertArrayToJson);
+                }
+
+                if ($convertObjectToJson !== null && $row[$cname] instanceof \JsonSerializable) {
+                    $row[$cname] = json_encode($row[$cname], $convertObjectToJson);
                 }
 
                 if ($truncateString && is_string($row[$cname]) && isset($stringTypes[$typename])) {

@@ -1417,6 +1417,30 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_convertToJson($database)
+    {
+        $database = $database->context(['convertArrayToJson' => 0, 'convertObjectToJson' => 0]);
+
+        $pk = $database->insertAndPrimary('test', [
+            'name' => ['a' => ['b' => ['c' => ['a', 'b', 'c']]]],
+        ]);
+        $this->assertEquals('{"a":{"b":{"c":["a","b","c"]}}}', $database->selectValue('test.name', $pk));
+
+        $pk = $database->insertAndPrimary('test', [
+            'name' => new class() implements \JsonSerializable {
+                public function jsonSerialize()
+                {
+                    return ['a' => ['b' => ['c' => ['a', 'b', 'c']]]];
+                }
+            },
+        ]);
+        $this->assertEquals('{"a":{"b":{"c":["a","b","c"]}}}', $database->selectValue('test.name', $pk));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_convertTo($database)
     {
         $database->insert('misctype', [
