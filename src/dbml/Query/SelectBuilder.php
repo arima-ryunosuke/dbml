@@ -606,6 +606,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             }
 
             if ($ignores) {
+                $this->database->debug("ignore column $table", $ignores);
                 $allcolumns = array_filter($schema->getTableColumns($table), function (Column $column) {
                     return !($column->getPlatformOptions()['virtual'] ?? false) || $column->getPlatformOptions()['implicit'];
                 });

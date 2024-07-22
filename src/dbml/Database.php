@@ -19,6 +19,7 @@ use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use Psr\SimpleCache\CacheInterface;
 use ryunosuke\dbml\Driver\ArrayResult;
 use ryunosuke\dbml\Entity\Entity;
@@ -37,8 +38,8 @@ use ryunosuke\dbml\Logging\Middleware as LoggingMiddleware;
 use ryunosuke\dbml\Metadata\CompatibleConnection;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Metadata\Schema;
-use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
 use ryunosuke\dbml\Mixin\AffectAndBeforeTrait;
+use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
 use ryunosuke\dbml\Mixin\AffectIgnoreTrait;
 use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
 use ryunosuke\dbml\Mixin\AggregateTrait;
@@ -498,8 +499,17 @@ class Database
                 'csv'   => CsvGenerator::class,
                 'json'  => JsonGenerator::class,
             ],
-            /** @var ?LoggerInterface ロギングオブジェクト（LoggerInterface） */
+            /** @var ?LoggerInterface クエリロガー（LoggerInterface） */
             'logger'             => null,
+            /** @var ?LoggerInterface デバッグロガー（LoggerInterface）
+             * 下記のようなクエリに現れない情報をログる。
+             * - 何らかのルールでカラムがフィルタ・変換された
+             * - 何らかのキャッシュが使われた
+             * - 一度しか呼ばれない/生成されない系メソッドがコールされた
+             * 実装機能がカオス染みてきたのでこのようなロガーがないと何がどうなってるか分からないことがある。
+             * 開発・デバッグ用であり運用環境では null を推奨。
+             */
+            'debugLogger'        => null,
         ];
 
         // 他クラスのオプションをマージ
@@ -727,6 +737,7 @@ class Database
         if (!isset($this->cache['gateway'][$name])) {
             $classname = $this->getGatewayClass($name);
             $this->cache['gateway'][$name] = new $classname($this, $tablename, $tablename === $name ? null : $name);
+            $this->debug("create gateway $name($classname)");
         }
         return $this->cache['gateway'][$name];
     }
@@ -812,6 +823,7 @@ class Database
                     $maps['TtoE'][$tablename][] = $entityname;
                 }
             }
+            $this->debug("generate tableMap", $maps);
             return $maps;
         });
 
@@ -1067,6 +1079,33 @@ class Database
                 public function getSQLState() { return '10000'; } // @codeCoverageIgnore
             };
             throw new ForeignKeyConstraintViolationException($driverException, null);
+        }
+    }
+
+    /**
+     * 動作ログを取る
+     *
+     * 生成コストも抑えたい（運用時は不要なので）ため、全ての引数は callable を受け付ける。
+     *
+     * @internal
+     */
+    public function debug(string|callable $message, array|callable $context = [], bool|callable $if = true, $level = null)
+    {
+        /** @var LoggerInterface $logger */
+        $logger = $this->getUnsafeOption('debugLogger');
+        if ($logger) {
+            if (is_callable($if) ? $if() : $if) {
+                foreach (array_slice(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), 1) as $trace) {
+                    if (isset($trace['class'], $trace['type'], $trace['function']) && !str_contains($trace['function'], '{closure}')) {
+                        $prefix = $trace['class'] . $trace['type'] . $trace['function'];
+                        return $logger->log(
+                            $level ?? LogLevel::DEBUG,
+                            "[$prefix] " . (is_callable($message) ? $message() : $message),
+                            is_callable($context) ? $context() : $context,
+                        );
+                    }
+                }
+            }
         }
     }
 
@@ -1450,6 +1489,7 @@ class Database
         if ($this->txConnection !== $connection && $this->txConnection->getTransactionNestingLevel() > 0) {
             throw new \UnexpectedValueException("can't switch connection in duaring transaction.");
         }
+        $this->debug("change connection", fn() => array_pickup($connection->getParams(), ['host', 'port', 'user', 'dbname']), if: $this->txConnection !== $connection);
         $this->txConnection = $connection;
         return $this;
     }
@@ -1540,7 +1580,13 @@ class Database
     {
         if (!isset($this->cache['schema'])) {
             $listeners = [
-                'onIntrospectTable' => $this->getUnsafeOption('onIntrospectTable'),
+                'onIntrospectTable' => function (Table $table) {
+                    $this->debug("introspect table {$table->getName()}");
+                    return ($this->getUnsafeOption('onIntrospectTable') ?? fn() => null)($table);
+                },
+                'onAddForeignKey'   => function (ForeignKeyConstraint $fkey, Table $table) {
+                    $this->debug("add foreign key {$fkey->getName()}({$table->getName()}->{$fkey->getForeignTableName()})");
+                },
             ];
             $cacher = $this->getUnsafeOption('cacheProvider');
             $callback = $this->getUnsafeOption('onRequireSchema');
@@ -1859,6 +1905,7 @@ class Database
                         }
                     }
                 }
+                $this->debug("set column $tname.$cname", $def ?? [], if: !!$def);
                 $schema->setTableColumn($tname, $cname, $def);
             }
         }
@@ -3341,6 +3388,7 @@ class Database
                 return $cache;
             }, $ttl);
             if ($cache) {
+                $this->debug("cache $query", $params);
                 return new Result(new ArrayResult($cache['data'], $cache['meta']), $this->getSlaveConnection());
             }
             return $result;
@@ -3402,6 +3450,7 @@ class Database
                         if (isset($wait)) {
                             usleep($wait * 1000 * 1000);
                             $params = Adhoc::bindableParameters($bare_params);
+                            $this->debug("retry($retry) $query", $params);
                             continue;
                         }
                     }

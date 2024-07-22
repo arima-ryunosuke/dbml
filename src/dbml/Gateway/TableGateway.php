@@ -891,6 +891,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
         // スコープを呼ぶたびにコピーが生成されるのは無駄なので clone する（ただし、1度だけ）
         if ($force || $this->original === $this) {
+            $this->database->debug("{$this->tableName}");
             return clone $this;
         }
         return $this;
@@ -1510,6 +1511,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             if (!isset($this->scopes[$scope])) {
                 throw new \InvalidArgumentException("'$scope' scope is undefined.");
             }
+            $this->database->debug("{$this->tableName}::$scope", $args);
             $that->activeScopes[$scope] = $args;
         }
         return $that;
@@ -1537,6 +1539,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             if (!isset($that->activeScopes[$scope])) {
                 throw new \InvalidArgumentException("scope '$scope' is undefined.");
             }
+            $this->database->debug("{$this->tableName}::$scope");
             unset($that->activeScopes[$scope]);
         }
         return $that;

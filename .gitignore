@@ -3,4 +3,5 @@
 /tests/.stub
 /tests/coverage
 /tests/phpunit.xml
+/tests/debug-log.*
 /tests/.phpunit.result.cache

@@ -21,6 +21,9 @@ use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware;
 use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\PHPUnit\TestCaseTrait;
+use ryunosuke\SimpleLogger\Plugins\LevelUnsetPlugin;
+use ryunosuke\SimpleLogger\Plugins\SuppressPlugin;
+use ryunosuke\SimpleLogger\StreamLogger;
 use function ryunosuke\dbml\cacheobject;
 use function ryunosuke\dbml\class_shorten;
 use function ryunosuke\dbml\try_null;
@@ -641,6 +644,9 @@ abstract class AbstractUnitTestCase extends TestCase
                     }
                     return $tablename;
                 },
+                'debugLogger'              => $v[0]->getDatabasePlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform ? (new StreamLogger(__DIR__ . '/../debug-log.jsonl', [
+                    'mode' => 'wb',
+                ]))->appendPlugin(new SuppressPlugin(3600), new LevelUnsetPlugin()) : null,
             ]);
             $database->declareVirtualTable('v_article_comment', [
                 't_article' => [

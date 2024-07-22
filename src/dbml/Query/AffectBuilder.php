@@ -339,7 +339,9 @@ class AffectBuilder extends AbstractBuilder
                 $newUpdateData[$uColumn] = $uDatum;
             }
         }
-        return array_diff_key($newUpdateData, $this->database->getSchema()->getTableUniqueColumns($this->table, $this->constraint ?? 'PRIMARY'));
+        $newUpdateData = array_diff_key($newUpdateData, $this->database->getSchema()->getTableUniqueColumns($this->table, $this->constraint ?? 'PRIMARY'));
+        $this->database->debug("wild update {$this->getTable()}", $newUpdateData, if: !!$newUpdateData);
+        return $newUpdateData;
     }
 
     public function normalize($row): array
@@ -362,9 +364,12 @@ class AffectBuilder extends AbstractBuilder
 
         foreach ($columns as $cname => $column) {
             if (array_key_exists($cname, $row) && ($vaffect = $this->database->getSchema()->getTableColumnExpression($this->table, $cname, 'affect'))) {
-                $row = $vaffect($row[$cname], $row) + $row;
+                $vrow = $vaffect($row[$cname], $row);
+                $row = $vrow + $row;
+                $this->database->debug("extract virtual column {$this->getTable()}.$cname", $vrow, if: !!$vrow);
             }
             if ($column->getPlatformOptions()['virtual'] ?? null) {
+                $this->database->debug("unset virtual column {$this->getTable()}.$cname", if: array_key_exists($cname, $columns));
                 unset($columns[$cname]);
             }
         }
@@ -380,6 +385,7 @@ class AffectBuilder extends AbstractBuilder
         }
 
         if ($this->getUnsafeOption('filterNoExistsColumn')) {
+            $this->database->debug("filterNoExistsColumn column {$this->getTable()}." . implode(',', array_keys(array_diff_key($row, $columns))) , if: !!array_diff_key($row, $columns));
             $row = array_intersect_key($row, $columns);
         }
 
@@ -411,15 +417,18 @@ class AffectBuilder extends AbstractBuilder
                 $nullable = !$column->getNotnull();
 
                 if ($filterNullAtNotNullColumn && $row[$cname] === null && !$nullable && $cname !== $autocolumn) {
+                    $this->database->debug("filterNullAtNotNullColumn unset({$this->getTable()}.$cname)");
                     unset($row[$cname]);
                     continue;
                 }
 
                 if ($convertEmptyToNull && $row[$cname] === '' && ($cname === $autocolumn || (!isset($stringTypes[$typename]) && $nullable))) {
+                    $this->database->debug("convertEmptyToNull {$this->getTable()}.$cname = null");
                     $row[$cname] = null;
                 }
 
                 if ($convertBoolToInt && is_bool($row[$cname]) && isset($numericTypes[$typename])) {
+                    $this->database->debug("convertBoolToInt (int) {$this->getTable()}.$cname");
                     $row[$cname] = (int) $row[$cname];
                 }
 
@@ -431,19 +440,24 @@ class AffectBuilder extends AbstractBuilder
                     $format ??= isset($dateTypes[$typename]) ? $this->database->getPlatform()->getDateFormatString() : null;
                     $format ??= isset($datetimeTypes[$typename]) ? $this->database->getPlatform()->getDateTimeFormatString() : null;
                     $format ??= isset($datetimeTZTypes[$typename]) ? $this->database->getPlatform()->getDateTimeTzFormatString() : null;
+                    $this->database->debug("convertNumericToDatetime {$this->getTable()}.$cname($format)");
                     $row[$cname] = $dt->format($format);
                 }
 
                 if ($convertArrayToJson !== null && is_array($row[$cname])) {
+                    $this->database->debug("convertArrayToJson json_encode({$this->getTable()}.$cname$cname)");
                     $row[$cname] = json_encode($row[$cname], $convertArrayToJson);
                 }
 
                 if ($convertObjectToJson !== null && $row[$cname] instanceof \JsonSerializable) {
+                    $this->database->debug("convertObjectToJson json_encode({$this->getTable()}.$cname$cname)");
                     $row[$cname] = json_encode($row[$cname], $convertObjectToJson);
                 }
 
                 if ($truncateString && is_string($row[$cname]) && isset($stringTypes[$typename])) {
-                    $row[$cname] = $this->database->getCompatiblePlatform()->truncateString($row[$cname], $column);
+                    $tstring = $this->database->getCompatiblePlatform()->truncateString($row[$cname], $column);
+                    $this->database->debug("convertArrayToJson truncateString({$this->getTable()}.$cname$cname)", if: $row[$cname] !== $tstring);
+                    $row[$cname] = $tstring;
                 }
 
                 if (($converter = $autoCastType[$typename]['affect'] ?? null) && !$row[$cname] instanceof Queryable) {

@@ -75,7 +75,10 @@ class Schema
     public function __construct(AbstractSchemaManager $schemaManger, array $listeners, CacheInterface $cache)
     {
         $this->schemaManger = $schemaManger;
-        $this->listeners = $listeners;
+        $this->listeners = array_replace([
+            'onIntrospectTable' => fn() => null,
+            'onAddForeignKey'   => fn() => null,
+        ], $listeners);
         $this->cache = $cache;
     }
 
@@ -120,7 +123,7 @@ class Schema
             throw SchemaException::tableAlreadyExists($table_name);
         }
 
-        $table = ($this->listeners['onIntrospectTable'] ?? fn() => null)($table) ?? $table;
+        $table = $this->listeners['onIntrospectTable']($table) ?? $table;
 
         $this->tableNames[] = $table_name;
         $this->tables[$table_name] = $table;
@@ -249,7 +252,7 @@ class Schema
                 }
                 $table->setSchemaConfig($this->schemaManger->createSchemaConfig());
 
-                return ($this->listeners['onIntrospectTable'] ?? fn() => null)($table) ?? $table;
+                return $this->listeners['onIntrospectTable']($table) ?? $table;
             });
         }
         return $this->tables[$table_name];
@@ -615,6 +618,8 @@ class Schema
         // キャッシュしてそれを返す
         $this->foreignKeys[$lTable][$fkey->getName()] = $fkey;
         $this->_invalidateForeignCache($fkey);
+
+        $fkey = $this->listeners['onAddForeignKey']($fkey, $this->getTable($lTable)) ?? $fkey;
 
         return $fkey;
     }

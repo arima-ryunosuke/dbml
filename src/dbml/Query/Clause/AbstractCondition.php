@@ -226,6 +226,7 @@ abstract class AbstractCondition extends AbstractClause
                         array_shift($vcopy);
                     }
                     if (Adhoc::is_empty($vcopy)) {
+                        $database->debug("filter empty column $cond");
                         $filterd = ($filterd ?? true) && true;
                         continue;
                     }
