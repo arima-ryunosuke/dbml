@@ -21,6 +21,18 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.0.3
+
+- [feature] デバッグログ機能
+- [feature] 複合型を JSON にするオプションを追加
+- [feature] 元のレコードを返す AndBefore 機能
+- [change] duml 表を削除
+- [fixbug] エイリアスを付けたゲートウェイで更新系クエリを実行すると例外になる不具合
+- [fixbug] exists/notExists を複数回呼ぶとエラーになる不具合
+- [fixbug] テーブルエイリアスがテーブル記法として反応していない不具合
+- [fixbug] assert が暴発している不具合
+- [refactor] 妙な goto があったので除去
+
 ## 3.0.2
 
 - [composer] update
