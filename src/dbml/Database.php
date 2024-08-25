@@ -1188,9 +1188,6 @@ class Database
             Types::DECIMAL      => 'float|string',
             Types::FLOAT        => 'float',
         ];
-        $args1 = '$tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []';
-        $args2 = '$variadic_primary, $tableDescriptor = []';
-        $args3 = '$predicates = [], $limit = 1';
 
         $tablemap = $this->_tableMap();
 
@@ -1205,7 +1202,8 @@ class Database
             if (!isset($unique_names[$tname_key])) {
                 $unique_names[$tname_key] = true;
                 $gateway_provider['prop'][] = "/** @var {$ename}TableGateway */\npublic \$$tname;";
-                $gateway_provider['func'][] = "/** @return {$ename}TableGateway */\npublic function $tname($args1) { }";
+                $args = implode(', ', function_parameter([TableGateway::class, 'scoping']));
+                $gateway_provider['func'][] = "/** @return {$ename}TableGateway */\npublic function $tname($args) { }";
             }
         }
 
@@ -1222,23 +1220,82 @@ class Database
             $props = array_sprintf($column_types, "/** @var %1\$s */\npublic \$%2\$s;");
 
             foreach ($entity_names as $entity_name) {
+                $methods = [];
                 $gclass = $tablemap['gatewayClass'][$entity_name] ?? TableGateway::class;
                 $eclass = $tablemap['entityClass'][$entity_name] ?? Entity::class;
                 $entity = "{$entity_name}Entity";
 
-                $suffixes = ['', 'InShare', 'ForUpdate', 'OrThrow', 'ForAffect'];
-                $rules = array_maps(static::METHODS, fn($rule) => $rule + ['arg' => $args1, 'suffix' => $suffixes]);
-                $rules['find'] = static::METHODS[self::METHOD_TUPLE] + ['arg' => $args2, 'suffix' => $suffixes];
-                $rules['neighbor'] = static::METHODS[self::METHOD_ASSOC] + ['arg' => $args3, 'suffix' => ['']];
-                $types = [
-                    "0-1" => "{$entity}[]|array<array{{$shape}}>", // array, assoc, neighbor
-                    "1-1" => "{$entity}|array{{$shape}}",          // tuple, find
+                $declare_types = [
+                    'shape'  => "array{{$shape}}",
+                    'shapes' => "array<array{{$shape}}>",
+                    'single' => "{$entity}|array{{$shape}}",
+                    'multi'  => "{$entity}[]|array<array{{$shape}}>",
                 ];
-                $methods = array_fill_keys(array_keys($rules), []);
-                foreach ($rules as $mname => $rule) {
-                    if ($type = ($types[sprintf("%d-%d", $rule['keyable'] === null, $rule['entity'])] ?? null)) {
-                        foreach ($rule['suffix'] as $suffix) {
-                            $methods[$mname][] = "/** @return $type */\npublic function $mname$suffix({$rule['arg']}) { }";
+
+                $select_methods = [
+                    'array'    => 'multi',
+                    'assoc'    => 'multi',
+                    'tuple'    => 'single',
+                    'find'     => 'single',
+                    'neighbor' => 'multi',
+                ];
+                $suffixes = ['', 'InShare', 'ForUpdate', 'OrThrow', 'ForAffect'];
+                foreach ($select_methods as $mname => $select_method) {
+                    foreach ($suffixes as $suffix) {
+                        $fullname = $mname . $suffix;
+                        if (method_exists($gclass, $fullname)) {
+                            $refmethod = new \ReflectionMethod($gclass, $fullname);
+
+                            $type = $declare_types[$select_method];
+                            $args = implode(', ', function_parameter($refmethod));
+                            $return = $refmethod->hasReturnType() ? ":{$refmethod->getReturnType()}" : "";
+                            $methods[$fullname] = "/** @return {$type} */\npublic function $fullname({$args})$return { }";
+                        }
+                    }
+                }
+
+                $affect_methods = [
+                    'insertArray' => ['data' => 'multi'],
+                    'updateArray' => ['data' => 'multi', 'where' => 'single'],
+                    'deleteArray' => ['where' => 'shapes'],
+                    'modifyArray' => ['insertData' => 'multi', 'updateData' => 'single'],
+                    'changeArray' => ['dataarray' => 'multi', 'where' => 'shape'],
+                    'affectArray' => ['dataarray' => 'multi'],
+                    'save'        => ['data' => 'single'],
+                    'insert'      => ['data' => 'single'],
+                    'update'      => ['data' => 'single', 'where' => 'shape'],
+                    'delete'      => ['where' => 'shape'],
+                    'invalid'     => ['where' => 'shape'],
+                    'revise'      => ['data' => 'single', 'where' => 'shape'],
+                    'upgrade'     => ['data' => 'single', 'where' => 'shape'],
+                    'remove'      => ['where' => 'shape'],
+                    'destroy'     => ['where' => 'shape'],
+                    'reduce'      => ['where' => 'shape'],
+                    'upsert'      => ['insertData' => 'single', 'updateData' => 'single'],
+                    'modify'      => ['insertData' => 'single', 'updateData' => 'single'],
+                    'replace'     => ['data' => 'single'],
+                ];
+                $suffixes = ['', 'AndPrimary', 'AndBefore', 'OrThrow'];
+                foreach ($affect_methods as $mname => $affect_method) {
+                    foreach ($suffixes as $suffix) {
+                        $fullname = $mname . $suffix;
+                        if (method_exists($gclass, $fullname)) {
+                            $refmethod = new \ReflectionMethod($gclass, $fullname);
+
+                            $types = [];
+                            foreach ($refmethod->getParameters() as $parameter) {
+                                $type = $affect_method[$parameter->getName()] ?? null;
+                                if ($type) {
+                                    $types[$parameter->getName()] = $declare_types[$type];
+                                }
+                            }
+
+                            if ($types) {
+                                $params = array_sprintf($types, ' * @param $%2$s %1$s', "\n");
+                                $args = implode(', ', function_parameter($refmethod));
+                                $return = $refmethod->hasReturnType() ? ":{$refmethod->getReturnType()}" : "";
+                                $methods[$fullname] = "/**\n$params\n */\npublic function $fullname({$args})$return { }";
+                            }
                         }
                     }
                 }

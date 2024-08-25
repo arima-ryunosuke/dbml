@@ -75,6 +75,10 @@
   - Sequencer の負数降順を廃止
   - Sequencer の has メソッド改名
 
+## 2.1.22
+
+- [feature] echoAnnotation で affect 系の補完も出す機能
+
 ## 2.1.21
 
 - [composer] update
