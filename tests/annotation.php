@@ -256,46 +256,46 @@ class aggregateTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -314,6 +314,143 @@ class aggregateTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}>
+     * @param $updateData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray aggregateEntity[]|array<array{id: int, name: string, group_id1: int, group_id2: int}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     * @param $updateData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     * @param $updateData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     * @param $updateData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     * @param $updateData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     * @param $updateData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     * @param $updateData aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data aggregateEntity|array{id: int, name: string, group_id1: int, group_id2: int}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class autoTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -324,46 +461,46 @@ class autoTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity[]|array<array{id: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity[]|array<array{id: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity[]|array<array{id: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity[]|array<array{id: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity[]|array<array{id: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity[]|array<array{id: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity[]|array<array{id: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity[]|array<array{id: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity[]|array<array{id: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity|array{id: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity|array{id: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity|array{id: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity|array{id: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity|array{id: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return autoEntity|array{id: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -382,6 +519,143 @@ class autoTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return autoEntity[]|array<array{id: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data autoEntity[]|array<array{id: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data autoEntity[]|array<array{id: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData autoEntity[]|array<array{id: int, name: string}>
+     * @param $updateData autoEntity|array{id: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray autoEntity[]|array<array{id: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray autoEntity[]|array<array{id: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData autoEntity|array{id: int, name: string}
+     * @param $updateData autoEntity|array{id: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData autoEntity|array{id: int, name: string}
+     * @param $updateData autoEntity|array{id: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData autoEntity|array{id: int, name: string}
+     * @param $updateData autoEntity|array{id: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData autoEntity|array{id: int, name: string}
+     * @param $updateData autoEntity|array{id: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData autoEntity|array{id: int, name: string}
+     * @param $updateData autoEntity|array{id: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData autoEntity|array{id: int, name: string}
+     * @param $updateData autoEntity|array{id: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data autoEntity|array{id: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class foreign_c1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -392,46 +666,46 @@ class foreign_c1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity[]|array<array{id: int, seq: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity[]|array<array{id: int, seq: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity[]|array<array{id: int, seq: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity[]|array<array{id: int, seq: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity[]|array<array{id: int, seq: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity[]|array<array{id: int, seq: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity[]|array<array{id: int, seq: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity[]|array<array{id: int, seq: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity[]|array<array{id: int, seq: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity|array{id: int, seq: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity|array{id: int, seq: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity|array{id: int, seq: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity|array{id: int, seq: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity|array{id: int, seq: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c1Entity|array{id: int, seq: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -450,6 +724,143 @@ class foreign_c1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return foreign_c1Entity[]|array<array{id: int, seq: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data foreign_c1Entity[]|array<array{id: int, seq: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data foreign_c1Entity[]|array<array{id: int, seq: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData foreign_c1Entity[]|array<array{id: int, seq: int, name: string}>
+     * @param $updateData foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray foreign_c1Entity[]|array<array{id: int, seq: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray foreign_c1Entity[]|array<array{id: int, seq: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData foreign_c1Entity|array{id: int, seq: int, name: string}
+     * @param $updateData foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_c1Entity|array{id: int, seq: int, name: string}
+     * @param $updateData foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_c1Entity|array{id: int, seq: int, name: string}
+     * @param $updateData foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_c1Entity|array{id: int, seq: int, name: string}
+     * @param $updateData foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_c1Entity|array{id: int, seq: int, name: string}
+     * @param $updateData foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_c1Entity|array{id: int, seq: int, name: string}
+     * @param $updateData foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_c1Entity|array{id: int, seq: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class foreign_c2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -460,46 +871,46 @@ class foreign_c2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity|array{cid: int, seq: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity|array{cid: int, seq: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity|array{cid: int, seq: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity|array{cid: int, seq: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity|array{cid: int, seq: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_c2Entity|array{cid: int, seq: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -518,6 +929,143 @@ class foreign_c2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}>
+     * @param $updateData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray foreign_c2Entity[]|array<array{cid: int, seq: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     * @param $updateData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     * @param $updateData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     * @param $updateData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     * @param $updateData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     * @param $updateData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     * @param $updateData foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_c2Entity|array{cid: int, seq: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class foreign_d1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -528,46 +1076,46 @@ class foreign_d1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity|array{id: int, d2_id: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity|array{id: int, d2_id: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity|array{id: int, d2_id: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity|array{id: int, d2_id: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity|array{id: int, d2_id: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d1Entity|array{id: int, d2_id: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -586,6 +1134,143 @@ class foreign_d1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}>
+     * @param $updateData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray foreign_d1Entity[]|array<array{id: int, d2_id: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     * @param $updateData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     * @param $updateData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     * @param $updateData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     * @param $updateData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     * @param $updateData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     * @param $updateData foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_d1Entity|array{id: int, d2_id: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class foreign_d2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -596,46 +1281,46 @@ class foreign_d2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity[]|array<array{id: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity[]|array<array{id: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity[]|array<array{id: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity[]|array<array{id: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity[]|array<array{id: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity[]|array<array{id: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity[]|array<array{id: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity[]|array<array{id: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity[]|array<array{id: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity|array{id: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity|array{id: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity|array{id: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity|array{id: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity|array{id: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_d2Entity|array{id: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -654,6 +1339,143 @@ class foreign_d2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return foreign_d2Entity[]|array<array{id: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data foreign_d2Entity[]|array<array{id: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data foreign_d2Entity[]|array<array{id: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData foreign_d2Entity[]|array<array{id: int, name: string}>
+     * @param $updateData foreign_d2Entity|array{id: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray foreign_d2Entity[]|array<array{id: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray foreign_d2Entity[]|array<array{id: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData foreign_d2Entity|array{id: int, name: string}
+     * @param $updateData foreign_d2Entity|array{id: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_d2Entity|array{id: int, name: string}
+     * @param $updateData foreign_d2Entity|array{id: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_d2Entity|array{id: int, name: string}
+     * @param $updateData foreign_d2Entity|array{id: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_d2Entity|array{id: int, name: string}
+     * @param $updateData foreign_d2Entity|array{id: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_d2Entity|array{id: int, name: string}
+     * @param $updateData foreign_d2Entity|array{id: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_d2Entity|array{id: int, name: string}
+     * @param $updateData foreign_d2Entity|array{id: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class foreign_pTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -664,46 +1486,46 @@ class foreign_pTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity[]|array<array{id: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity[]|array<array{id: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity[]|array<array{id: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity[]|array<array{id: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity[]|array<array{id: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity[]|array<array{id: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity[]|array<array{id: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity[]|array<array{id: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity[]|array<array{id: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity|array{id: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity|array{id: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity|array{id: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity|array{id: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity|array{id: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pEntity|array{id: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -722,6 +1544,143 @@ class foreign_pTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return foreign_pEntity[]|array<array{id: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data foreign_pEntity[]|array<array{id: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data foreign_pEntity[]|array<array{id: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData foreign_pEntity[]|array<array{id: int, name: string}>
+     * @param $updateData foreign_pEntity|array{id: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray foreign_pEntity[]|array<array{id: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray foreign_pEntity[]|array<array{id: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData foreign_pEntity|array{id: int, name: string}
+     * @param $updateData foreign_pEntity|array{id: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_pEntity|array{id: int, name: string}
+     * @param $updateData foreign_pEntity|array{id: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_pEntity|array{id: int, name: string}
+     * @param $updateData foreign_pEntity|array{id: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_pEntity|array{id: int, name: string}
+     * @param $updateData foreign_pEntity|array{id: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_pEntity|array{id: int, name: string}
+     * @param $updateData foreign_pEntity|array{id: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_pEntity|array{id: int, name: string}
+     * @param $updateData foreign_pEntity|array{id: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_pEntity|array{id: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class foreign_sTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -732,46 +1691,46 @@ class foreign_sTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity[]|array<array{id: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity[]|array<array{id: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity[]|array<array{id: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity[]|array<array{id: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity[]|array<array{id: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity[]|array<array{id: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity[]|array<array{id: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity[]|array<array{id: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity[]|array<array{id: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity|array{id: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity|array{id: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity|array{id: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity|array{id: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity|array{id: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_sEntity|array{id: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -790,6 +1749,143 @@ class foreign_sTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return foreign_sEntity[]|array<array{id: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data foreign_sEntity[]|array<array{id: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data foreign_sEntity[]|array<array{id: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData foreign_sEntity[]|array<array{id: int, name: string}>
+     * @param $updateData foreign_sEntity|array{id: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray foreign_sEntity[]|array<array{id: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray foreign_sEntity[]|array<array{id: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData foreign_sEntity|array{id: int, name: string}
+     * @param $updateData foreign_sEntity|array{id: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_sEntity|array{id: int, name: string}
+     * @param $updateData foreign_sEntity|array{id: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_sEntity|array{id: int, name: string}
+     * @param $updateData foreign_sEntity|array{id: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_sEntity|array{id: int, name: string}
+     * @param $updateData foreign_sEntity|array{id: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_sEntity|array{id: int, name: string}
+     * @param $updateData foreign_sEntity|array{id: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_sEntity|array{id: int, name: string}
+     * @param $updateData foreign_sEntity|array{id: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_sEntity|array{id: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class foreign_scTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -800,46 +1896,46 @@ class foreign_scTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -858,6 +1954,143 @@ class foreign_scTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}>
+     * @param $updateData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray foreign_scEntity[]|array<array{id: int, s_id1: int, s_id2: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     * @param $updateData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     * @param $updateData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     * @param $updateData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     * @param $updateData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     * @param $updateData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     * @param $updateData foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_scEntity|array{id: int, s_id1: int, s_id2: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class g_ancestorTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -868,46 +2101,46 @@ class g_ancestorTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -926,6 +2159,143 @@ class g_ancestorTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}>
+     * @param $updateData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray g_ancestorEntity[]|array<array{ancestor_id: int, ancestor_name: string, delete_at: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     * @param $updateData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     * @param $updateData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     * @param $updateData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     * @param $updateData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     * @param $updateData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     * @param $updateData g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data g_ancestorEntity|array{ancestor_id: int, ancestor_name: string, delete_at: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class g_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -936,46 +2306,46 @@ class g_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -994,6 +2364,143 @@ class g_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}>
+     * @param $updateData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray g_childEntity[]|array<array{child_id: int, parent_id: int, child_name: string, delete_at: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     * @param $updateData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     * @param $updateData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     * @param $updateData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     * @param $updateData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     * @param $updateData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     * @param $updateData g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data g_childEntity|array{child_id: int, parent_id: int, child_name: string, delete_at: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class g_grand1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1004,46 +2511,46 @@ class g_grand1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1062,6 +2569,143 @@ class g_grand1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}>
+     * @param $updateData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray g_grand1Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     * @param $updateData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     * @param $updateData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     * @param $updateData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     * @param $updateData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     * @param $updateData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     * @param $updateData g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data g_grand1Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand1_name: string, delete_at: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class g_grand2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1072,46 +2716,46 @@ class g_grand2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1130,6 +2774,143 @@ class g_grand2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}>
+     * @param $updateData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray g_grand2Entity[]|array<array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     * @param $updateData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     * @param $updateData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     * @param $updateData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     * @param $updateData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     * @param $updateData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     * @param $updateData g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data g_grand2Entity|array{grand_id: int, parent_id: int, ancestor_id: int, grand2_name: string, delete_at: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class g_parentTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1140,46 +2921,46 @@ class g_parentTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1198,6 +2979,143 @@ class g_parentTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}>
+     * @param $updateData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray g_parentEntity[]|array<array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     * @param $updateData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     * @param $updateData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     * @param $updateData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     * @param $updateData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     * @param $updateData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     * @param $updateData g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data g_parentEntity|array{parent_id: int, ancestor_id: int, parent_name: string, delete_at: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class heavyTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1208,46 +3126,46 @@ class heavyTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity[]|array<array{id: int, data: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity[]|array<array{id: int, data: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity[]|array<array{id: int, data: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity[]|array<array{id: int, data: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity[]|array<array{id: int, data: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity[]|array<array{id: int, data: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity[]|array<array{id: int, data: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity[]|array<array{id: int, data: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity[]|array<array{id: int, data: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity|array{id: int, data: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity|array{id: int, data: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity|array{id: int, data: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity|array{id: int, data: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity|array{id: int, data: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return heavyEntity|array{id: int, data: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1266,6 +3184,143 @@ class heavyTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return heavyEntity[]|array<array{id: int, data: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data heavyEntity[]|array<array{id: int, data: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data heavyEntity[]|array<array{id: int, data: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData heavyEntity[]|array<array{id: int, data: string}>
+     * @param $updateData heavyEntity|array{id: int, data: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray heavyEntity[]|array<array{id: int, data: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray heavyEntity[]|array<array{id: int, data: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData heavyEntity|array{id: int, data: string}
+     * @param $updateData heavyEntity|array{id: int, data: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData heavyEntity|array{id: int, data: string}
+     * @param $updateData heavyEntity|array{id: int, data: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData heavyEntity|array{id: int, data: string}
+     * @param $updateData heavyEntity|array{id: int, data: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData heavyEntity|array{id: int, data: string}
+     * @param $updateData heavyEntity|array{id: int, data: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData heavyEntity|array{id: int, data: string}
+     * @param $updateData heavyEntity|array{id: int, data: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData heavyEntity|array{id: int, data: string}
+     * @param $updateData heavyEntity|array{id: int, data: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data heavyEntity|array{id: int, data: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class horizontal1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1276,46 +3331,46 @@ class horizontal1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity[]|array<array{id: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity[]|array<array{id: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity[]|array<array{id: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity[]|array<array{id: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity[]|array<array{id: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity[]|array<array{id: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity[]|array<array{id: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity[]|array<array{id: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity[]|array<array{id: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity|array{id: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity|array{id: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity|array{id: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity|array{id: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity|array{id: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal1Entity|array{id: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1334,6 +3389,143 @@ class horizontal1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return horizontal1Entity[]|array<array{id: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data horizontal1Entity[]|array<array{id: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data horizontal1Entity[]|array<array{id: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData horizontal1Entity[]|array<array{id: int, name: string}>
+     * @param $updateData horizontal1Entity|array{id: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray horizontal1Entity[]|array<array{id: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray horizontal1Entity[]|array<array{id: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData horizontal1Entity|array{id: int, name: string}
+     * @param $updateData horizontal1Entity|array{id: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData horizontal1Entity|array{id: int, name: string}
+     * @param $updateData horizontal1Entity|array{id: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData horizontal1Entity|array{id: int, name: string}
+     * @param $updateData horizontal1Entity|array{id: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData horizontal1Entity|array{id: int, name: string}
+     * @param $updateData horizontal1Entity|array{id: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData horizontal1Entity|array{id: int, name: string}
+     * @param $updateData horizontal1Entity|array{id: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData horizontal1Entity|array{id: int, name: string}
+     * @param $updateData horizontal1Entity|array{id: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data horizontal1Entity|array{id: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class horizontal2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1344,46 +3536,46 @@ class horizontal2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity[]|array<array{id: int, summary: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity[]|array<array{id: int, summary: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity[]|array<array{id: int, summary: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity[]|array<array{id: int, summary: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity[]|array<array{id: int, summary: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity[]|array<array{id: int, summary: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity[]|array<array{id: int, summary: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity[]|array<array{id: int, summary: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity[]|array<array{id: int, summary: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity|array{id: int, summary: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity|array{id: int, summary: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity|array{id: int, summary: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity|array{id: int, summary: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity|array{id: int, summary: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return horizontal2Entity|array{id: int, summary: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1402,6 +3594,143 @@ class horizontal2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return horizontal2Entity[]|array<array{id: int, summary: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data horizontal2Entity[]|array<array{id: int, summary: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data horizontal2Entity[]|array<array{id: int, summary: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData horizontal2Entity[]|array<array{id: int, summary: string}>
+     * @param $updateData horizontal2Entity|array{id: int, summary: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray horizontal2Entity[]|array<array{id: int, summary: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray horizontal2Entity[]|array<array{id: int, summary: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData horizontal2Entity|array{id: int, summary: string}
+     * @param $updateData horizontal2Entity|array{id: int, summary: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData horizontal2Entity|array{id: int, summary: string}
+     * @param $updateData horizontal2Entity|array{id: int, summary: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData horizontal2Entity|array{id: int, summary: string}
+     * @param $updateData horizontal2Entity|array{id: int, summary: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData horizontal2Entity|array{id: int, summary: string}
+     * @param $updateData horizontal2Entity|array{id: int, summary: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData horizontal2Entity|array{id: int, summary: string}
+     * @param $updateData horizontal2Entity|array{id: int, summary: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData horizontal2Entity|array{id: int, summary: string}
+     * @param $updateData horizontal2Entity|array{id: int, summary: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data horizontal2Entity|array{id: int, summary: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class master_tableTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1412,46 +3741,46 @@ class master_tableTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity[]|array<array{category: string, subid: int}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity[]|array<array{category: string, subid: int}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity[]|array<array{category: string, subid: int}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity[]|array<array{category: string, subid: int}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity[]|array<array{category: string, subid: int}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity[]|array<array{category: string, subid: int}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity[]|array<array{category: string, subid: int}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity[]|array<array{category: string, subid: int}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity[]|array<array{category: string, subid: int}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity|array{category: string, subid: int} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity|array{category: string, subid: int} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity|array{category: string, subid: int} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity|array{category: string, subid: int} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity|array{category: string, subid: int} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return master_tableEntity|array{category: string, subid: int} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1470,6 +3799,143 @@ class master_tableTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return master_tableEntity[]|array<array{category: string, subid: int}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data master_tableEntity[]|array<array{category: string, subid: int}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data master_tableEntity[]|array<array{category: string, subid: int}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData master_tableEntity[]|array<array{category: string, subid: int}>
+     * @param $updateData master_tableEntity|array{category: string, subid: int}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray master_tableEntity[]|array<array{category: string, subid: int}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray master_tableEntity[]|array<array{category: string, subid: int}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData master_tableEntity|array{category: string, subid: int}
+     * @param $updateData master_tableEntity|array{category: string, subid: int}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData master_tableEntity|array{category: string, subid: int}
+     * @param $updateData master_tableEntity|array{category: string, subid: int}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData master_tableEntity|array{category: string, subid: int}
+     * @param $updateData master_tableEntity|array{category: string, subid: int}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData master_tableEntity|array{category: string, subid: int}
+     * @param $updateData master_tableEntity|array{category: string, subid: int}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData master_tableEntity|array{category: string, subid: int}
+     * @param $updateData master_tableEntity|array{category: string, subid: int}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData master_tableEntity|array{category: string, subid: int}
+     * @param $updateData master_tableEntity|array{category: string, subid: int}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data master_tableEntity|array{category: string, subid: int}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class misctypeTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1480,46 +3946,46 @@ class misctypeTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1538,6 +4004,143 @@ class misctypeTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}>
+     * @param $updateData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray misctypeEntity[]|array<array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     * @param $updateData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     * @param $updateData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     * @param $updateData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     * @param $updateData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     * @param $updateData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     * @param $updateData misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data misctypeEntity|array{id: int, pid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: \DateTimeImmutable, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string, carray: array|string, cjson: array|string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class misctype_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1548,46 +4151,46 @@ class misctype_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1606,6 +4209,143 @@ class misctype_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}>
+     * @param $updateData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray misctype_childEntity[]|array<array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     * @param $updateData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     * @param $updateData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     * @param $updateData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     * @param $updateData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     * @param $updateData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     * @param $updateData misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data misctype_childEntity|array{id: int, cid: int, cint: int, cfloat: float, cdecimal: float|string, cdate: string, cdatetime: string, cstring: string, ctext: string, cbinary: string, cblob: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class multiprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1616,46 +4356,46 @@ class multiprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity|array{mainid: int, subid: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity|array{mainid: int, subid: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity|array{mainid: int, subid: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity|array{mainid: int, subid: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity|array{mainid: int, subid: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryEntity|array{mainid: int, subid: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1674,6 +4414,143 @@ class multiprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}>
+     * @param $updateData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray multiprimaryEntity[]|array<array{mainid: int, subid: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     * @param $updateData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     * @param $updateData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     * @param $updateData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     * @param $updateData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     * @param $updateData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     * @param $updateData multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data multiprimaryEntity|array{mainid: int, subid: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class multiuniqueTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1684,46 +4561,46 @@ class multiuniqueTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1742,6 +4619,143 @@ class multiuniqueTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}>
+     * @param $updateData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray multiuniqueEntity[]|array<array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     * @param $updateData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     * @param $updateData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     * @param $updateData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     * @param $updateData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     * @param $updateData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     * @param $updateData multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data multiuniqueEntity|array{id: int, uc_s: string, uc_i: int, uc1: string, uc2: int, groupkey: int}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class noautoTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1752,46 +4766,46 @@ class noautoTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity[]|array<array{id: string, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity[]|array<array{id: string, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity[]|array<array{id: string, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity[]|array<array{id: string, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity[]|array<array{id: string, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity[]|array<array{id: string, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity[]|array<array{id: string, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity[]|array<array{id: string, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity[]|array<array{id: string, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity|array{id: string, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity|array{id: string, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity|array{id: string, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity|array{id: string, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity|array{id: string, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noautoEntity|array{id: string, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1810,6 +4824,143 @@ class noautoTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return noautoEntity[]|array<array{id: string, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data noautoEntity[]|array<array{id: string, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data noautoEntity[]|array<array{id: string, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData noautoEntity[]|array<array{id: string, name: string}>
+     * @param $updateData noautoEntity|array{id: string, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray noautoEntity[]|array<array{id: string, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray noautoEntity[]|array<array{id: string, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData noautoEntity|array{id: string, name: string}
+     * @param $updateData noautoEntity|array{id: string, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData noautoEntity|array{id: string, name: string}
+     * @param $updateData noautoEntity|array{id: string, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData noautoEntity|array{id: string, name: string}
+     * @param $updateData noautoEntity|array{id: string, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData noautoEntity|array{id: string, name: string}
+     * @param $updateData noautoEntity|array{id: string, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData noautoEntity|array{id: string, name: string}
+     * @param $updateData noautoEntity|array{id: string, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData noautoEntity|array{id: string, name: string}
+     * @param $updateData noautoEntity|array{id: string, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data noautoEntity|array{id: string, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class noprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1820,46 +4971,46 @@ class noprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity[]|array<array{id: int}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity[]|array<array{id: int}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity[]|array<array{id: int}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity[]|array<array{id: int}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity[]|array<array{id: int}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity[]|array<array{id: int}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity[]|array<array{id: int}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity[]|array<array{id: int}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity[]|array<array{id: int}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity|array{id: int} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity|array{id: int} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity|array{id: int} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity|array{id: int} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity|array{id: int} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return noprimaryEntity|array{id: int} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1878,6 +5029,143 @@ class noprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return noprimaryEntity[]|array<array{id: int}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data noprimaryEntity[]|array<array{id: int}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data noprimaryEntity[]|array<array{id: int}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData noprimaryEntity[]|array<array{id: int}>
+     * @param $updateData noprimaryEntity|array{id: int}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray noprimaryEntity[]|array<array{id: int}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray noprimaryEntity[]|array<array{id: int}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData noprimaryEntity|array{id: int}
+     * @param $updateData noprimaryEntity|array{id: int}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData noprimaryEntity|array{id: int}
+     * @param $updateData noprimaryEntity|array{id: int}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData noprimaryEntity|array{id: int}
+     * @param $updateData noprimaryEntity|array{id: int}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData noprimaryEntity|array{id: int}
+     * @param $updateData noprimaryEntity|array{id: int}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData noprimaryEntity|array{id: int}
+     * @param $updateData noprimaryEntity|array{id: int}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData noprimaryEntity|array{id: int}
+     * @param $updateData noprimaryEntity|array{id: int}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data noprimaryEntity|array{id: int}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class notnullsTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1888,46 +5176,46 @@ class notnullsTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -1946,6 +5234,143 @@ class notnullsTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}>
+     * @param $updateData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray notnullsEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data notnullsEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class nullableTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -1956,46 +5381,46 @@ class nullableTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2014,6 +5439,143 @@ class nullableTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}>
+     * @param $updateData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray nullableEntity[]|array<array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     * @param $updateData nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data nullableEntity|array{id: int, name: string, cint: int, cfloat: float, cdecimal: float|string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -2024,46 +5586,46 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2082,6 +5644,143 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @param $updateData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray oprlogEntity[]|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @param $updateData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @param $updateData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @param $updateData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @param $updateData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @param $updateData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @param $updateData oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class pagingTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -2092,46 +5791,46 @@ class pagingTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity[]|array<array{id: int, name: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity[]|array<array{id: int, name: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity[]|array<array{id: int, name: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity[]|array<array{id: int, name: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity[]|array<array{id: int, name: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity[]|array<array{id: int, name: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity[]|array<array{id: int, name: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity[]|array<array{id: int, name: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity[]|array<array{id: int, name: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity|array{id: int, name: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity|array{id: int, name: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity|array{id: int, name: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity|array{id: int, name: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity|array{id: int, name: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return pagingEntity|array{id: int, name: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2150,6 +5849,143 @@ class pagingTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return pagingEntity[]|array<array{id: int, name: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data pagingEntity[]|array<array{id: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data pagingEntity[]|array<array{id: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData pagingEntity[]|array<array{id: int, name: string}>
+     * @param $updateData pagingEntity|array{id: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray pagingEntity[]|array<array{id: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray pagingEntity[]|array<array{id: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData pagingEntity|array{id: int, name: string}
+     * @param $updateData pagingEntity|array{id: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData pagingEntity|array{id: int, name: string}
+     * @param $updateData pagingEntity|array{id: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData pagingEntity|array{id: int, name: string}
+     * @param $updateData pagingEntity|array{id: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData pagingEntity|array{id: int, name: string}
+     * @param $updateData pagingEntity|array{id: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData pagingEntity|array{id: int, name: string}
+     * @param $updateData pagingEntity|array{id: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData pagingEntity|array{id: int, name: string}
+     * @param $updateData pagingEntity|array{id: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data pagingEntity|array{id: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class ArticleTableGateway extends \ryunosuke\Test\Gateway\Article
@@ -2160,46 +5996,46 @@ class ArticleTableGateway extends \ryunosuke\Test\Gateway\Article
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2218,6 +6054,143 @@ class ArticleTableGateway extends \ryunosuke\Test\Gateway\Article
 
     /** @return ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}>
+     * @param $updateData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray ArticleEntity[]|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     * @param $updateData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     * @param $updateData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     * @param $updateData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     * @param $updateData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     * @param $updateData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     * @param $updateData ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data ArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: string, vaffect: int, title_checks: int, upper_title: int, statement: string, closure: int, query_builder: int}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class CommentTableGateway extends \ryunosuke\Test\Gateway\Comment
@@ -2228,46 +6201,46 @@ class CommentTableGateway extends \ryunosuke\Test\Gateway\Comment
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity|array{comment_id: int, article_id: int, comment: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity|array{comment_id: int, article_id: int, comment: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity|array{comment_id: int, article_id: int, comment: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity|array{comment_id: int, article_id: int, comment: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity|array{comment_id: int, article_id: int, comment: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return CommentEntity|array{comment_id: int, article_id: int, comment: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2286,6 +6259,143 @@ class CommentTableGateway extends \ryunosuke\Test\Gateway\Comment
 
     /** @return CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}>
+     * @param $updateData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray CommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data CommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class ManagedCommentTableGateway extends \ryunosuke\Test\Gateway\Comment
@@ -2296,46 +6406,46 @@ class ManagedCommentTableGateway extends \ryunosuke\Test\Gateway\Comment
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2354,6 +6464,143 @@ class ManagedCommentTableGateway extends \ryunosuke\Test\Gateway\Comment
 
     /** @return ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}>
+     * @param $updateData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray ManagedCommentEntity[]|array<array{comment_id: int, article_id: int, comment: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     * @param $updateData ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data ManagedCommentEntity|array{comment_id: int, article_id: int, comment: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class testTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -2364,46 +6611,46 @@ class testTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity[]|array<array{id: int, name: string, data: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity[]|array<array{id: int, name: string, data: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity[]|array<array{id: int, name: string, data: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity[]|array<array{id: int, name: string, data: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity[]|array<array{id: int, name: string, data: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity[]|array<array{id: int, name: string, data: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity[]|array<array{id: int, name: string, data: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity[]|array<array{id: int, name: string, data: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity[]|array<array{id: int, name: string, data: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity|array{id: int, name: string, data: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity|array{id: int, name: string, data: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity|array{id: int, name: string, data: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity|array{id: int, name: string, data: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity|array{id: int, name: string, data: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return testEntity|array{id: int, name: string, data: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2422,6 +6669,143 @@ class testTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return testEntity[]|array<array{id: int, name: string, data: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data testEntity[]|array<array{id: int, name: string, data: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data testEntity[]|array<array{id: int, name: string, data: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData testEntity[]|array<array{id: int, name: string, data: string}>
+     * @param $updateData testEntity|array{id: int, name: string, data: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray testEntity[]|array<array{id: int, name: string, data: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray testEntity[]|array<array{id: int, name: string, data: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData testEntity|array{id: int, name: string, data: string}
+     * @param $updateData testEntity|array{id: int, name: string, data: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData testEntity|array{id: int, name: string, data: string}
+     * @param $updateData testEntity|array{id: int, name: string, data: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData testEntity|array{id: int, name: string, data: string}
+     * @param $updateData testEntity|array{id: int, name: string, data: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData testEntity|array{id: int, name: string, data: string}
+     * @param $updateData testEntity|array{id: int, name: string, data: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData testEntity|array{id: int, name: string, data: string}
+     * @param $updateData testEntity|array{id: int, name: string, data: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData testEntity|array{id: int, name: string, data: string}
+     * @param $updateData testEntity|array{id: int, name: string, data: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data testEntity|array{id: int, name: string, data: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class test1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -2432,46 +6816,46 @@ class test1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity[]|array<array{id: int, name1: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity[]|array<array{id: int, name1: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity[]|array<array{id: int, name1: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity[]|array<array{id: int, name1: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity[]|array<array{id: int, name1: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity[]|array<array{id: int, name1: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity[]|array<array{id: int, name1: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity[]|array<array{id: int, name1: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity[]|array<array{id: int, name1: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity|array{id: int, name1: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity|array{id: int, name1: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity|array{id: int, name1: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity|array{id: int, name1: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity|array{id: int, name1: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test1Entity|array{id: int, name1: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2490,6 +6874,143 @@ class test1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return test1Entity[]|array<array{id: int, name1: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data test1Entity[]|array<array{id: int, name1: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data test1Entity[]|array<array{id: int, name1: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData test1Entity[]|array<array{id: int, name1: string}>
+     * @param $updateData test1Entity|array{id: int, name1: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray test1Entity[]|array<array{id: int, name1: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray test1Entity[]|array<array{id: int, name1: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData test1Entity|array{id: int, name1: string}
+     * @param $updateData test1Entity|array{id: int, name1: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData test1Entity|array{id: int, name1: string}
+     * @param $updateData test1Entity|array{id: int, name1: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData test1Entity|array{id: int, name1: string}
+     * @param $updateData test1Entity|array{id: int, name1: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData test1Entity|array{id: int, name1: string}
+     * @param $updateData test1Entity|array{id: int, name1: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData test1Entity|array{id: int, name1: string}
+     * @param $updateData test1Entity|array{id: int, name1: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData test1Entity|array{id: int, name1: string}
+     * @param $updateData test1Entity|array{id: int, name1: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data test1Entity|array{id: int, name1: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class test2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -2500,46 +7021,46 @@ class test2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity[]|array<array{id: int, name2: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity[]|array<array{id: int, name2: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity[]|array<array{id: int, name2: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity[]|array<array{id: int, name2: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity[]|array<array{id: int, name2: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity[]|array<array{id: int, name2: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity[]|array<array{id: int, name2: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity[]|array<array{id: int, name2: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity[]|array<array{id: int, name2: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity|array{id: int, name2: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity|array{id: int, name2: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity|array{id: int, name2: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity|array{id: int, name2: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity|array{id: int, name2: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return test2Entity|array{id: int, name2: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2558,6 +7079,143 @@ class test2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return test2Entity[]|array<array{id: int, name2: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data test2Entity[]|array<array{id: int, name2: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data test2Entity[]|array<array{id: int, name2: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData test2Entity[]|array<array{id: int, name2: string}>
+     * @param $updateData test2Entity|array{id: int, name2: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray test2Entity[]|array<array{id: int, name2: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray test2Entity[]|array<array{id: int, name2: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData test2Entity|array{id: int, name2: string}
+     * @param $updateData test2Entity|array{id: int, name2: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData test2Entity|array{id: int, name2: string}
+     * @param $updateData test2Entity|array{id: int, name2: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData test2Entity|array{id: int, name2: string}
+     * @param $updateData test2Entity|array{id: int, name2: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData test2Entity|array{id: int, name2: string}
+     * @param $updateData test2Entity|array{id: int, name2: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData test2Entity|array{id: int, name2: string}
+     * @param $updateData test2Entity|array{id: int, name2: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData test2Entity|array{id: int, name2: string}
+     * @param $updateData test2Entity|array{id: int, name2: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data test2Entity|array{id: int, name2: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class tran_table1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -2568,46 +7226,46 @@ class tran_table1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity[]|array<array{id: int, master_id: int}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity[]|array<array{id: int, master_id: int}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity[]|array<array{id: int, master_id: int}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity[]|array<array{id: int, master_id: int}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity[]|array<array{id: int, master_id: int}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity[]|array<array{id: int, master_id: int}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity[]|array<array{id: int, master_id: int}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity[]|array<array{id: int, master_id: int}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity[]|array<array{id: int, master_id: int}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity|array{id: int, master_id: int} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity|array{id: int, master_id: int} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity|array{id: int, master_id: int} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity|array{id: int, master_id: int} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity|array{id: int, master_id: int} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table1Entity|array{id: int, master_id: int} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2626,6 +7284,143 @@ class tran_table1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return tran_table1Entity[]|array<array{id: int, master_id: int}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data tran_table1Entity[]|array<array{id: int, master_id: int}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data tran_table1Entity[]|array<array{id: int, master_id: int}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData tran_table1Entity[]|array<array{id: int, master_id: int}>
+     * @param $updateData tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray tran_table1Entity[]|array<array{id: int, master_id: int}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray tran_table1Entity[]|array<array{id: int, master_id: int}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData tran_table1Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData tran_table1Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData tran_table1Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData tran_table1Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData tran_table1Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData tran_table1Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data tran_table1Entity|array{id: int, master_id: int}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class tran_table2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -2636,46 +7431,46 @@ class tran_table2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity[]|array<array{id: int, master_id: int}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity[]|array<array{id: int, master_id: int}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity[]|array<array{id: int, master_id: int}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity[]|array<array{id: int, master_id: int}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity[]|array<array{id: int, master_id: int}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity[]|array<array{id: int, master_id: int}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity[]|array<array{id: int, master_id: int}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity[]|array<array{id: int, master_id: int}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity[]|array<array{id: int, master_id: int}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity|array{id: int, master_id: int} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity|array{id: int, master_id: int} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity|array{id: int, master_id: int} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity|array{id: int, master_id: int} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity|array{id: int, master_id: int} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return tran_table2Entity|array{id: int, master_id: int} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2694,6 +7489,143 @@ class tran_table2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return tran_table2Entity[]|array<array{id: int, master_id: int}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data tran_table2Entity[]|array<array{id: int, master_id: int}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data tran_table2Entity[]|array<array{id: int, master_id: int}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData tran_table2Entity[]|array<array{id: int, master_id: int}>
+     * @param $updateData tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray tran_table2Entity[]|array<array{id: int, master_id: int}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray tran_table2Entity[]|array<array{id: int, master_id: int}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData tran_table2Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData tran_table2Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData tran_table2Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData tran_table2Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData tran_table2Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData tran_table2Entity|array{id: int, master_id: int}
+     * @param $updateData tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data tran_table2Entity|array{id: int, master_id: int}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class v_blogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
@@ -2704,46 +7636,46 @@ class v_blogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}> */
-    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}> */
-    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}> */
-    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}> */
-    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}> */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}> */
-    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}> */
-    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}> */
-    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}> */
-    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string} */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string} */
-    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string} */
-    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string} */
-    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string} */
-    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string} */
     public function find($variadic_primary, $tableDescriptor = []) { }
@@ -2762,6 +7694,143 @@ class v_blogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /** @return v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}> */
     public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}>
+     * @param $updateData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray v_blogEntity[]|array<array{article_id: int, title: string, comment_id: int, comment: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     * @param $updateData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     * @param $updateData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     * @param $updateData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     * @param $updateData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     * @param $updateData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     * @param $updateData v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data v_blogEntity|array{article_id: int, title: string, comment_id: int, comment: string}
+     */
+    public function replaceOrThrow($data) { }
 }
 
 class aggregateEntity extends \ryunosuke\dbml\Entity\Entity
