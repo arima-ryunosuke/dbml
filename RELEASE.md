@@ -24,6 +24,10 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.22
+
+- [feature] echoAnnotation で affect 系の補完も出す機能
+
 ## 2.1.21
 
 - [composer] update
