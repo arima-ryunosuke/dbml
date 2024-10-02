@@ -7020,6 +7020,19 @@ AND
         $this->assertEquals('3', $row['cmax']);
         $this->assertEquals(2.0, $row['cavg']);
 
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            $row = $database->selectTuple([
+                't_article' => [
+                    'cjson' => $database->subjson('t_comment.comment_id, comment'),
+                ],
+            ], [], [], 1);
+            $this->assertEquals([
+                ["comment_id" => 1, "comment"  => "コメント1です"],
+                ["comment_id" => 2, "comment"  => "コメント2です"],
+                ["comment_id" => 3, "comment"  => "コメント3です"],
+            ], json_decode($row['cjson'], true));
+        }
+
         that(function () use ($database) {
             $database->selectTuple([
                 't_article' => [
@@ -7302,6 +7315,27 @@ ORDER BY T.id DESC, name ASC
             4 => 20.0,
             5 => 20.0,
         ], $builder->pairs());
+        
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            $builder = $database->selectJson('aggregate.id,name', [], ['group_id2']);
+            $this->assertStringContainsString("JSON_", "$builder");
+            $this->assertEquals(["id", "name"], $builder->getParams());
+            $pairs = $builder->pairs();
+            $this->assertEquals([
+                ['id' => 1, 'name' => 'a'],
+                ['id' => 2, 'name' => 'b'],
+                ['id' => 3, 'name' => 'c'],
+                ['id' => 4, 'name' => 'd'],
+                ['id' => 5, 'name' => 'e'],
+            ], json_decode($pairs[10], true));
+            $this->assertEquals([
+                ['id' => 6, 'name' => 'f'],
+                ['id' => 7, 'name' => 'g'],
+                ['id' => 8, 'name' => 'h'],
+                ['id' => 9, 'name' => 'i'],
+                ['id' => 10, 'name' => 'j'],
+            ], json_decode($pairs[20], true));
+        }
     }
 
     /**
@@ -7365,6 +7399,41 @@ ORDER BY T.id DESC, name ASC
             4 => 20.0,
             5 => 20.0,
         ], $database->aggregate('median', 'aggregate.group_id2', [], 'aggregate.group_id1'));
+
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            // JSON
+            $actual = $database->aggregate('jsonAgg', 'aggregate.id, name', ['id > 5'], ['group_id1']);
+            $this->assertEquals([
+                ['id' => 6, 'name' => 'f'],
+            ], json_decode($actual[3], true));
+            $this->assertEquals([
+                ['id' => 7, 'name' => 'g'],
+                ['id' => 8, 'name' => 'h'],
+            ], json_decode($actual[4], true));
+            $this->assertEquals([
+                ['id' => 9, 'name' => 'i'],
+                ['id' => 10, 'name' => 'j'],
+            ], json_decode($actual[5], true));
+
+            // JSON（Expression）
+            $actual = $database->aggregate('jsonAgg', [
+                'aggregate' => [
+                    'id2'        => new Expression('id * 2'),
+                    'upper_name' => new Expression('UPPER(name)'),
+                ],
+            ], ['id > 5'], ['group_id1']);
+            $this->assertEquals([
+                ['id2' => 12, 'upper_name' => 'F'],
+            ], json_decode($actual[3], true));
+            $this->assertEquals([
+                ['id2' => 14, 'upper_name' => 'G'],
+                ['id2' => 16, 'upper_name' => 'H'],
+            ], json_decode($actual[4], true));
+            $this->assertEquals([
+                ['id2' => 18, 'upper_name' => 'I'],
+                ['id2' => 20, 'upper_name' => 'J'],
+            ], json_decode($actual[5], true));
+        }
 
         // 自由モード
         $this->assertEquals([

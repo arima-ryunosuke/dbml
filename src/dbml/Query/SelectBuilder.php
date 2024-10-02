@@ -3001,6 +3001,29 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             return $select;
         }
 
+        // json は統一できない程度に固有処理
+        if (is_string($aggregations) && strtolower($aggregations) === 'jsonagg') {
+            $labels = [];
+            $keyvalues = [];
+            foreach ($this->sqlParts['select'] as $alias => $column) {
+                if (is_int($alias)) {
+                    if ($column instanceof Select) {
+                        $alias = $column->getAlias();
+                        $column = $column->getActual();
+                    }
+                    else {
+                        $alias = array_pad(explode('.', $column, 2), -2, '')[1];
+                    }
+                }
+
+                $labels[] = "$alias:$column";
+                $keyvalues[$alias] = $column;
+            }
+            $select = new Select(implode(',', $labels) . $delimiter . $aggregations, $platform->getJsonAggExpression($keyvalues));
+            $this->sqlParts['select'] = array_merge($this->sqlParts['groupBy'], [$select]);
+            return $this->_dirty();
+        }
+
         // カラムとタプルのセットを取得しておく
         $fields = $this->sqlParts['select'] ?: ['*'];
         $tuples = array_each(arrayize($aggregations), function (&$carry, $aggregation) {
@@ -3022,8 +3045,6 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         $fields = array_pad($fields, $tuples_count, end($fields));
         $tuples = array_pad($tuples, $fields_count, end($tuples));
 
-        $platform = $this->database->getCompatiblePlatform();
-        $delimiter = $this->getAggregationDelimiter();
         foreach ($fields as $n => $field) {
             $method = $tuples[$n]['method'];
             $aggregate = $tuples[$n]['aggregate'];

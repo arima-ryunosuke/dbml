@@ -2698,6 +2698,7 @@ class Database
      * @used-by selectSum()
      * @used-by selectAvg()
      * @used-by selectMedian()
+     * @used-by selectJson()
      *
      * @param string|array $aggregation 集約関数名
      * @param array|string $column 取得テーブルとカラム
@@ -2971,6 +2972,7 @@ class Database
      * @used-by subsum()
      * @used-by subavg()
      * @used-by submedian()
+     * @used-by subjson()
      *
      * @param array|string $aggregate 集約関数名
      * @param array|string $column サブテーブル名
@@ -3056,6 +3058,7 @@ class Database
      * @used-by sum()
      * @used-by avg()
      * @used-by median()
+     * @used-by json()
      *
      * @param string|array $aggregation 集約関数名
      * @param array|string $column 取得テーブルとカラム

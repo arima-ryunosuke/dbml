@@ -94,4 +94,14 @@ trait AggregateTrait
     {
         return $this->aggregate('median', $column, $where, $groupBy, $having);
     }
+
+    /**
+     * JSON 集約クエリを実行する（{@uses Database::aggregate()} を参照）
+     *
+     * @inheritdoc Database::aggregate()
+     */
+    public function json($column, $where = [], $groupBy = [], $having = [])
+    {
+        return $this->aggregate('jsonAgg', $column, $where, $groupBy, $having);
+    }
 }

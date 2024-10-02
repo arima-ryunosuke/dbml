@@ -125,4 +125,14 @@ trait SubAggregateTrait
     {
         throw new \LogicException('Not implemented');
     }
+
+    /**
+     * 相関サブクエリの JSON を表すビルダを返す（{@uses Database::subaggregate()} を参照）
+     *
+     * @inheritdoc Database::subaggregate()
+     */
+    public function subjson($column = [], $where = [])
+    {
+        return $this->subaggregate('jsonAgg', $column, $where);
+    }
 }

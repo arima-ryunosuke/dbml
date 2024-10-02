@@ -1368,8 +1368,9 @@ AND ((flag=1))", "$gw");
     /**
      * @dataProvider provideGateway
      * @param TableGateway $gateway
+     * @param Database $database
      */
-    function test_aggregate($gateway)
+    function test_aggregate($gateway, $database)
     {
         $this->assertEquals(10, $gateway->count());
         $this->assertEquals(1, $gateway->min('id'));
@@ -1377,6 +1378,10 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(55, $gateway->sum('id'));
         $this->assertEquals(5.5, $gateway->avg('id'));
         $this->assertEquals(5.5, $gateway->median('id'));
+
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            $this->assertJson($gateway->json('id,name'));
+        }
     }
 
     /**
@@ -2412,6 +2417,17 @@ FROM t_article Article", $Article->column([
         $this->assertEquals('1', $row['cmin']);
         $this->assertEquals('3', $row['cmax']);
         $this->assertEquals('6', $row['csum']);
+
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            $row = $database->t_article()->pk(1)->tuple([
+                'cjson' => $database->t_comment()->subjson('comment_id,comment'),
+            ]);
+            $this->assertEquals([
+                ["comment_id" => 1, "comment" => "コメント1です"],
+                ["comment_id" => 2, "comment" => "コメント2です"],
+                ["comment_id" => 3, "comment" => "コメント3です"],
+            ], json_decode($row['cjson'], true));
+        }
     }
 
     /**

@@ -745,6 +745,71 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * JSON 表現を返す
+     *
+     * 大抵の RDBMS は (key1, value1, key2, value2) のような構文になっており、php レイヤーで使うのに少々不便。
+     * このメソッドを使えば (key1 => value1, key2 => value) 形式でオブジェクト化できる。
+     */
+    public function getJsonObjectExpression(array $keyvalues): Expression
+    {
+        [$json_object, $delimiter] = match (true) {
+            $this->platform instanceof SqlitePlatform     => ['JSON_OBJECT', ','],
+            $this->platform instanceof MySQLPlatform      => ['JSON_OBJECT', ','],
+            $this->platform instanceof PostgreSQLPlatform => ['JSON_BUILD_OBJECT', ','],
+            $this->platform instanceof SQLServerPlatform  => ['JSON_OBJECT', ':'],
+            default                                       => throw DBALException::notSupported(__METHOD__),
+        };
+
+        $params = [];
+        $kvpairs = [];
+        foreach ($keyvalues as $k => $v) {
+            $params[] = $k;
+            if ($v instanceof Queryable) {
+                $v = $v->merge($params);
+            }
+            $placeholder = '?';
+            // なぜか PostgreSQL で BindType が効かないのでキャスト
+            if ($this->platform instanceof PostgreSQLPlatform) {
+                $placeholder = "CAST($placeholder AS TEXT)";
+            }
+            $kvpairs[] = "$placeholder$delimiter $v";
+        }
+        return new Expression("$json_object(" . implode(', ', $kvpairs) . ")", $params);
+    }
+
+    /**
+     * JSON 集約表現を返す
+     *
+     * $key を指定すると配列ではなくオブジェクトになる。
+     */
+    public function getJsonAggExpression(array $keyvalues, $key = null): Expression
+    {
+        [$json_array_agg, $json_object_agg] = match (true) {
+            $this->platform instanceof SqlitePlatform     => ['JSON_GROUP_ARRAY', 'JSON_GROUP_OBJECT'],
+            $this->platform instanceof MySQLPlatform      => ['JSON_ARRAYAGG', 'JSON_OBJECTAGG'],
+            $this->platform instanceof PostgreSQLPlatform => ['JSON_AGG', 'JSON_OBJECT_AGG'],
+            $this->platform instanceof SQLServerPlatform  => ['JSON_ARRAYAGG', 'JSON_OBJECTAGG'],
+            default                                       => throw DBALException::notSupported(__METHOD__),
+        };
+
+        $params = [];
+        if ($key instanceof Queryable) {
+            $key = $key->merge($params);
+        }
+        $kvpairs = $this->getJsonObjectExpression($keyvalues)->merge($params);
+        if ($key === null) {
+            return new Expression("$json_array_agg($kvpairs)", $params);
+        }
+        else {
+            // なぜか PostgreSQL で BindType が効かないのでキャスト
+            if ($this->platform instanceof PostgreSQLPlatform) {
+                $key = "CAST($key AS TEXT)";
+            }
+            return new Expression("$json_object_agg($key, $kvpairs)", $params);
+        }
+    }
+
+    /**
      * 文字列結合句を返す
      */
     public function getConcatExpression(string|Queryable ...$args): Expression

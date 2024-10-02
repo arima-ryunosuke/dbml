@@ -110,4 +110,15 @@ trait SelectAggregateTrait
     {
         return $this->selectAggregate('median', $column, $where, $groupBy, $having);
     }
+
+    /**
+     * JSON 集約クエリを返す（{@uses Database::selectAggregate()} を参照）
+     *
+     * @inheritdoc Database::selectAggregate()
+     */
+    public function selectJson($column, $where = [], $groupBy = [], $having = [])
+    {
+        return $this->selectAggregate('jsonAgg', $column, $where, $groupBy, $having);
+    }
+
 }

@@ -680,6 +680,77 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_getJsonObjectExpression($cplatform, $platform)
+    {
+        $this->trapThrowable('is not supported by platform');
+
+        $jsonObject = $cplatform->getJsonObjectExpression([
+            'id'  => 'id',
+            'idN' => new Expression('id * ?', 3),
+        ]);
+        if ($platform instanceof SqlitePlatform) {
+            $this->assertExpression($jsonObject, 'JSON_OBJECT(?, id, ?, id * ?)', ['id', 'idN', 3]);
+        }
+        if ($platform instanceof MySQLPlatform) {
+            $this->assertExpression($jsonObject, 'JSON_OBJECT(?, id, ?, id * ?)', ['id', 'idN', 3]);
+        }
+        if ($platform instanceof PostgreSQLPlatform) {
+            $this->assertExpression($jsonObject, 'JSON_BUILD_OBJECT(CAST(? AS TEXT), id, CAST(? AS TEXT), id * ?)', ['id', 'idN', 3]);
+        }
+        if ($platform instanceof SQLServerPlatform) {
+            $this->assertExpression($jsonObject, 'JSON_OBJECT(?: id, ?: id * ?)', ['id', 'idN', 3]);
+        }
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
+    function test_getJsonAggExpression($cplatform, $platform)
+    {
+        $this->trapThrowable('is not supported by platform');
+
+        $jsonObject = $cplatform->getJsonAggExpression([
+            'id'  => 'id',
+            'idN' => new Expression('id * ?', 3),
+        ]);
+        if ($platform instanceof SqlitePlatform) {
+            $this->assertExpression($jsonObject, 'JSON_GROUP_ARRAY(JSON_OBJECT(?, id, ?, id * ?))', ['id', 'idN', 3]);
+        }
+        if ($platform instanceof MySQLPlatform) {
+            $this->assertExpression($jsonObject, 'JSON_ARRAYAGG(JSON_OBJECT(?, id, ?, id * ?))', ['id', 'idN', 3]);
+        }
+        if ($platform instanceof PostgreSQLPlatform) {
+            $this->assertExpression($jsonObject, 'JSON_AGG(JSON_BUILD_OBJECT(CAST(? AS TEXT), id, CAST(? AS TEXT), id * ?))', ['id', 'idN', 3]);
+        }
+        if ($platform instanceof SQLServerPlatform) {
+            $this->assertExpression($jsonObject, 'JSON_ARRAYAGG(JSON_OBJECT(?: id, ?: id * ?))', ['id', 'idN', 3]);
+        }
+
+        $jsonObject = $cplatform->getJsonAggExpression([
+            'id'  => 'id',
+            'idN' => new Expression('id * ?', 3),
+        ], new Expression('id * ?', 9));
+        if ($platform instanceof SqlitePlatform) {
+            $this->assertExpression($jsonObject, 'JSON_GROUP_OBJECT(id * ?, JSON_OBJECT(?, id, ?, id * ?))', [9, 'id', 'idN', 3]);
+        }
+        if ($platform instanceof MySQLPlatform) {
+            $this->assertExpression($jsonObject, 'JSON_OBJECTAGG(id * ?, JSON_OBJECT(?, id, ?, id * ?))', [9, 'id', 'idN', 3]);
+        }
+        if ($platform instanceof PostgreSQLPlatform) {
+            $this->assertExpression($jsonObject, 'JSON_OBJECT_AGG(CAST(id * ? AS TEXT), JSON_BUILD_OBJECT(CAST(? AS TEXT), id, CAST(? AS TEXT), id * ?))', [9, 'id', 'idN', 3]);
+        }
+        if ($platform instanceof SQLServerPlatform) {
+            $this->assertExpression($jsonObject, 'JSON_OBJECTAGG(id * ?, JSON_OBJECT(?: id, ?: id * ?))', [9, 'id', 'idN', 3]);
+        }
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_getConcatExpression($cplatform, $platform)
     {
         that($cplatform)->getConcatExpression()->wasThrown('greater than');
