@@ -4258,7 +4258,6 @@ CSV
             ]));
 
             that($database)->insertArrayOrThrow('test', [])->wasThrown('affected row is nothing');
-            that($database)->insertArrayOrThrow('noauto', [])->wasThrown('only autoincrement table');
 
             unset($manager);
         }
@@ -6546,6 +6545,106 @@ INSERT INTO test (id, name) VALUES
 
             // 制約の種類は問わない
             $this->assertIsInt($database->eliminate('foreign_p'));
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_affectArrayAndPrimary($database)
+    {
+        if ($database->getPlatform() instanceof SqlitePlatform || $database->getPlatform() instanceof MySQLPlatform) {
+            $cache = that($database)->var('cache');
+            $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
+            $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+                public function supportsIdentityNullable(): bool { return true; }
+            };
+
+            // 特に意味はないが chunk と結果は相関しないのでできるだけバラバラの方がいい
+            $database = $database->context(['defaultChunk' => rand(9, 9)]);
+
+            $database->delete('test', ['id' => [1, 2, 7, 8, 10]]);
+
+            // 全指定
+            $this->assertEquals([
+                ["id" => 1],
+                ["id" => 2],
+            ], $database->insertArrayAndPrimary('test', [
+                ['id' => 1, 'name' => '1'],
+                ['id' => 2, 'name' => '2'],
+            ]));
+
+            // 混在
+            $this->assertEquals([
+                ["id" => 7],
+                ["id" => 8],
+                ["id" => 12],
+                ["id" => 13],
+                ["id" => 11],
+            ], $database->insertArrayAndPrimary('test', [
+                ['id' => 7, 'name' => '7'],
+                ['id' => 8, 'name' => '8'],
+                ['id' => null, 'name' => '11'],
+                ['id' => 12, 'name' => '12'],
+                ['id' => null, 'name' => '13'],
+            ]));
+
+            // 全未指定（兼準備が大変なのでゲートウェイ側もこっちでテスト）
+            $database->resetAutoIncrement('test', 14);
+            $this->assertEquals([
+                ["id" => 15],
+                ["id" => 14],
+            ], $database->test->insertArrayAndPrimary([
+                ['id' => null, 'name' => '14'],
+                ['id' => null, 'name' => '15'],
+            ]));
+
+            // 空
+            $this->assertEquals([], $database->insertArrayAndPrimary('test', []));
+
+            // エラー
+            that($database)->insertArray('foreign_c1', [
+                ['id' => null, 'name' => ''],
+            ], [
+                'primary' => 3,
+                'ignore'  => true,
+            ])->wasThrown('affected row is mismatch');
+
+            if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
+                $actual = $database->modifyArrayAndPrimary('test', [
+                    ['id' => 1, 'name' => 'modifyArrayAndPrimary'],
+                    ['id' => 2, 'name' => 'modifyArrayAndPrimary'],
+                    ['id' => 3, 'name' => 'modifyArrayAndPrimary'],
+                ]);
+                $this->assertEquals([
+                    ["id" => 1],
+                    ["id" => 2],
+                    ["id" => 3],
+                ], $actual);
+            }
+
+            // NOT オートインクリメント
+            $this->assertEquals([
+                ["id" => 1],
+                ["id" => 2],
+            ], $database->noauto->insertArrayAndPrimary([
+                ['id' => 1, 'name' => 'a'],
+                ['id' => 2, 'name' => 'b'],
+            ]));
+
+            // 複合主キー
+            $this->assertEquals([
+                ['mainid' => 3, 'subid' => 1],
+                ['mainid' => 3, 'subid' => 2],
+                ['mainid' => 4, 'subid' => 1],
+                ['mainid' => 4, 'subid' => 2],
+            ], $database->multiprimary->modifyArrayAndPrimary([
+                ['mainid' => 3, 'subid' => 1, 'name' => 'c1'],
+                ['mainid' => 3, 'subid' => 2, 'name' => 'c2'],
+                ['mainid' => 4, 'subid' => 1, 'name' => 'd1'],
+                ['mainid' => 4, 'subid' => 2, 'name' => 'd2'],
+            ]));
         }
     }
 

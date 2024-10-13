@@ -425,6 +425,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         replaceOrThrowWithoutTable as public replaceOrThrow;
     }
     use AffectAndPrimaryTrait {
+        insertArrayAndPrimaryWithoutTable as public insertArrayAndPrimary;
+        modifyArrayAndPrimaryWithoutTable as public modifyArrayAndPrimary;
         insertAndPrimaryWithoutTable as public insertAndPrimary;
         updateAndPrimaryWithoutTable as public updateAndPrimary;
         deleteAndPrimaryWithoutTable as public deleteAndPrimary;

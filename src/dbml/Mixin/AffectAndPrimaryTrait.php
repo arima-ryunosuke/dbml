@@ -18,6 +18,54 @@ trait AffectAndPrimaryTrait
     }
 
     /**
+     * 主キーを返す {@uses Database::insertArray()}
+     *
+     * @inheritdoc Database::insertArray()
+     * @return array|string
+     */
+    private function insertArrayAndPrimaryWithTable($tableName, $data)
+    {
+        assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectAndPrimary('insertArray', func_get_args());
+    }
+
+    /**
+     * 主キーを返す {@uses TableGateway::insertArray()}
+     *
+     * @inheritdoc TableGateway::insertArray()
+     * @return array|string
+     */
+    private function insertArrayAndPrimaryWithoutTable($data)
+    {
+        assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectAndPrimary('insertArray', func_get_args());
+    }
+
+    /**
+     * 主キーを返す {@uses Database::modifyArray()}
+     *
+     * @inheritdoc Database::modifyArray()
+     * @return array|string
+     */
+    private function modifyArrayAndPrimaryWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    {
+        assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectAndPrimary('modifyArray', func_get_args());
+    }
+
+    /**
+     * 主キーを返す {@uses TableGateway::modifyArray()}
+     *
+     * @inheritdoc TableGateway::modifyArray()
+     * @return array|string
+     */
+    private function modifyArrayAndPrimaryWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    {
+        assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
+        return $this->_invokeAffectAndPrimary('modifyArray', func_get_args());
+    }
+
+    /**
      * 主キーを返す {@uses Database::insert()}
      *
      * @inheritdoc Database::insert()

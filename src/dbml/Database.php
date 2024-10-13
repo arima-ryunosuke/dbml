@@ -313,6 +313,8 @@ class Database
         replaceOrThrowWithTable as public replaceOrThrow;
     }
     use AffectAndPrimaryTrait {
+        insertArrayAndPrimaryWithTable as public insertArrayAndPrimary;
+        modifyArrayAndPrimaryWithTable as public modifyArrayAndPrimary;
         insertAndPrimaryWithTable as public insertAndPrimary;
         updateAndPrimaryWithTable as public updateAndPrimary;
         deleteAndPrimaryWithTable as public deleteAndPrimary;
@@ -966,18 +968,35 @@ class Database
         return $chunk;
     }
 
-    private function _preaffect(AffectBuilder $builder, array $opt): ?array
+    private function _preaffect(AffectBuilder $builder, array $opt): array
     {
-        if (!($opt['return'] ?? false) || $this->getUnsafeOption('dryrun')) {
-            return null;
+        if ($this->getUnsafeOption('dryrun')) {
+            return [];
         }
 
-        $tablename = $builder->getTable() . concat(" AS ", $builder->getAlias());
-        $select = $this->select($tablename, $builder->getCondition());
-        if ($builder->getAlias() !== null && $builder->getTable() === $this->convertTableName($builder->getAlias())) {
-            $select->cast();
+        if ($opt['return'] ?? false) {
+            $tablename = $builder->getTable() . concat(" AS ", $builder->getAlias());
+            $select = $this->select($tablename, $builder->getCondition());
+            if ($builder->getAlias() !== null && $builder->getTable() === $this->convertTableName($builder->getAlias())) {
+                $select->cast();
+            }
+            return $select->array();
         }
-        return $select->array();
+
+        if ($opt['primary'] ?? false) {
+            $pkcols = $this->getSchema()->getTablePrimaryColumns($builder->getTable());
+            $result = [];
+            foreach ($builder->getValues() as $row) {
+                $pkval = [];
+                foreach ($pkcols as $colname => $column) {
+                    $pkval[$colname] = $row[$colname] ?? null;
+                }
+                $result[] = $pkval;
+            }
+            return $result;
+        }
+
+        return [];
     }
 
     private function _postaffect(AffectBuilder $builder, ?array $returns, array $opt)
@@ -1033,7 +1052,7 @@ class Database
         return $affected;
     }
 
-    private function _postaffects(AffectBuilder $builder, array $affecteds, array $returns, array $opt)
+    private function _postaffects(AffectBuilder $builder, array $affecteds, array $return, array $opt)
     {
         if ($this->getUnsafeOption('dryrun')) {
             return $affecteds;
@@ -1044,10 +1063,43 @@ class Database
         if (($seq = $builder->getAutoIncrementSeq()) !== false) {
             $this->resetAutoIncrement($builder->getTable(), $seq);
         }
-        if (array_get($opt, 'return')) {
-            return array_merge(...$returns);
+
+        $affected = array_sum($affecteds);
+
+        // 歴史的な経緯で primary:1 は例外モード
+        if (array_get($opt, 'primary') === 1 && $affected === 0) {
+            throw new NonAffectedException('affected row is nothing.');
         }
-        return array_sum($affecteds);
+        // 同上。 primary:2 は空配列返しモード（for compatible. なぜか BULK 系は空配列ではなく affected 返しになっている）
+        if (array_get($opt, 'primary') === 2) {
+            return $affected;
+        }
+        // 同上。 primary:3 は主キー返しモード
+        if (array_get($opt, 'primary')) {
+            // 主キー指定されていたやつを分離
+            $notnull_pks = array_filter($return, fn($pkval) => !array_find($pkval, 'is_null', false));
+
+            // されていないやつが含まれているなら、後ろからされているやつを除くその件数を取れば追加されたやつになる
+            if ($null_count = (count($return) - count($notnull_pks))) {
+                $lastselect = $this->select([$builder->getTable() => $this->getSchema()->getTablePrimaryKey($builder->getTable())->getColumns()]);
+                $lastselect->orderBy(false);           // 後ろから
+                $lastselect->notWhere([$notnull_pks]); // されているやつを除く
+                $lastselect->limit($null_count);       // その件数
+                $result = $lastselect->array();
+
+                // 件数が合わないのは何かがおかしいので念のため例外（IGNORE なりなんなりで実際に挿入されていないものを返してしまう可能性がある）
+                if ($null_count !== count($result)) {
+                    throw new NonAffectedException('affected row is mismatch.');
+                }
+                return array_merge($notnull_pks, $result);
+            }
+
+            return $notnull_pks;
+        }
+        if (array_get($opt, 'return')) {
+            return $return;
+        }
+        return $affected;
     }
 
     private function _setIdentityInsert(string $tableName, array $data): \Closure
@@ -4119,6 +4171,7 @@ class Database
      *
      * @used-by insertArrayIgnore()
      * @used-by insertArrayOrThrow()
+     * @used-by insertArrayAndPrimary()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|\Generator $data カラムデータ配列あるいは Generator
@@ -4134,17 +4187,7 @@ class Database
             'table' => $tableName,
         ]);
 
-        $schema = $this->getSchema();
-        $autocol = $schema->getTableAutoIncrement($builder->getTable());
-        $autocolname = $autocol?->getName();
-
-        // 主キー返しに対応しているのはオートインクリメントのみ
-        $orPkThrow = array_get($opt, 'primary') === 1;
-        if ($orPkThrow && $autocol === null) {
-            throw new \UnexpectedValueException('insertArrayOrThrow supports only autoincrement table');
-        }
-
-        $pkvals = [];
+        $returns = [];
         $affecteds = [];
         foreach (iterator_chunk($data, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
             $builder->build([
@@ -4152,37 +4195,11 @@ class Database
             ]);
             $builder->insertArray(opt: $opt);
 
+            $returns = array_merge($returns, $this->_preaffect($builder, $opt));
             $affecteds[] = $builder->execute();
-
-            if ($orPkThrow) {
-                foreach ($builder->getValues() as $row) {
-                    if (isset($row[$autocolname])) {
-                        $pkvals[] = $row[$autocolname];
-                    }
-                }
-            }
         }
 
-        $affected = $this->_postaffects($builder, $affecteds, [], $opt);
-        if (!$orPkThrow || !is_int($affected)) {
-            return $affected;
-        }
-
-        // ignore や不測の事態で挿入されてない行があると破綻する（ので OrThrow のみの対応としている）
-        if ($affected === 0) {
-            throw new NonAffectedException('affected row is nothing.');
-        }
-
-        // 指定されているならそれを取ればいい
-        $pkeyselect = $this->select([$builder->getTable() => [$autocolname]], [$autocolname => $pkvals]);
-        // 自動採番なら後ろから（作用行 - 指定行）件を取れば追加されたやつのはず（ピッタリだと limit 0 になってエラーになるので if 分岐）
-        if ($limit = ($affected - count($pkvals))) {
-            $lastselect = $this->select([$builder->getTable() => [$autocolname]], ["$autocolname:!" => $pkvals], [$autocolname => false], $limit);
-            // SQLITE が UNION の括弧をサポートしていないので ORDER と LIMIT が全体に掛かってしまう
-            // どうしようもないので2回に分ける（条件演算子で1行化してるのはカバレッジのため）
-            return $this->getCompatiblePlatform()->supportsUnionParentheses() ? $this->unionAll([$pkeyselect, $lastselect])->array() : array_merge($pkeyselect->array(), $lastselect->array());
-        }
-        return $pkeyselect->array();
+        return $this->_postaffects($builder, $affecteds, $returns, $opt);
     }
 
     /**
@@ -4237,7 +4254,7 @@ class Database
             ]);
             $builder->updateArray(opt: $opt);
 
-            $returns[] = $this->_preaffect($builder, $opt);
+            $returns = array_merge($returns, $this->_preaffect($builder, $opt));
             $affecteds[] = $builder->execute();
         }
 
@@ -4305,7 +4322,7 @@ class Database
             ]);
             $builder->delete(opt: $opt);
 
-            $returns[] = $this->_preaffect($builder, $opt);
+            $returns = array_merge($returns, $this->_preaffect($builder, $opt));
             $affecteds[] = $builder->execute();
         }
 
@@ -4369,6 +4386,7 @@ class Database
      *
      * @used-by modifyArrayIgnore()
      * @used-by modifyArrayAndBefore()
+     * @used-by modifyArrayAndPrimary()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|\Generator $insertData カラムデータ配列あるいは Generator
@@ -4401,7 +4419,7 @@ class Database
             ]);
             $builder->modifyArray(opt: $opt);
 
-            $returns[] = $this->_preaffect($builder, $opt);
+            $returns = array_merge($returns, $this->_preaffect($builder, $opt));
             $affecteds[] = $builder->execute();
         }
 
