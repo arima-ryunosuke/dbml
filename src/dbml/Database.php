@@ -614,7 +614,7 @@ class Database
 
         $configure = function (Configuration $configuration) use ($options) {
             $middlewares = $configuration->getMiddlewares();
-            if (array_find($middlewares, fn($middleware) => $middleware instanceof LoggingMiddleware) === null) {
+            if (array_find_first($middlewares, fn($middleware) => $middleware instanceof LoggingMiddleware) === null) {
                 $middlewares[] = new LoggingMiddleware(new LoggerChain());
                 $configuration->setMiddlewares($middlewares);
             }
@@ -660,7 +660,7 @@ class Database
         elseif (!is_array($dbconfig)) {
             throw new \DomainException('$dbconfig must be Connection or Database config array.');
         }
-        elseif (array_all($dbconfig, function ($v) { return $v instanceof Connection; })) {
+        elseif (array_and($dbconfig, function ($v) { return $v instanceof Connection; })) {
             $connections = array_pad($dbconfig, 2, reset($dbconfig));
         }
         else {

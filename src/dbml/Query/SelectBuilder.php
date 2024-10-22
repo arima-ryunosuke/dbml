@@ -27,9 +27,9 @@ use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\Pagination\Paginator;
 use ryunosuke\dbml\Query\Pagination\Sequencer;
 use ryunosuke\dbml\Utility\Adhoc;
-use function ryunosuke\dbml\array_all;
+use function ryunosuke\dbml\array_and;
 use function ryunosuke\dbml\array_each;
-use function ryunosuke\dbml\array_find;
+use function ryunosuke\dbml\array_find_first;
 use function ryunosuke\dbml\array_flatten;
 use function ryunosuke\dbml\array_implode;
 use function ryunosuke\dbml\array_lookup;
@@ -432,7 +432,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             }
         }
         // 全て自動系カラムだと実質空（後で伏せられるため）なので * を追加する
-        if (array_all($builder->sqlParts['select'], function ($select) {
+        if (array_and($builder->sqlParts['select'], function ($select) {
             return $select instanceof Select && $select->isPlaceholdable();
         }, false)) {
             foreach ($builder->getFromPart() as $from) {
@@ -473,7 +473,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 // EXISTS 述語も除外
                 if (!isset($builder->wrappers['EXISTS']) && !isset($builder->wrappers['NOT EXISTS'])) {
                     // COUNT を含むなら除外
-                    if (null === array_find($builder->sqlParts['select'], function ($s) { return strpos("$s", self::COUNT_ALIAS) !== false; })) {
+                    if (null === array_find_first($builder->sqlParts['select'], function ($s) { return strpos("$s", self::COUNT_ALIAS) !== false; })) {
                         if (($defaultOrder = $builder->getDefaultOrder()) !== null) {
                             $builder->addOrderBy($defaultOrder);
                         }
@@ -637,7 +637,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
             // 上記で確定しなかったら相関のある外部キーを漁る
             if (!isset($fcols)) {
-                $from = $from ?? array_find($subbuiler->getFromPart(), function ($from) use ($table) {
+                $from = $from ?? array_find_first($subbuiler->getFromPart(), function ($from) use ($table) {
                     $fkey = $from['fkeyname'];
                     $fcols = $this->database->getSchema()->getForeignColumns($table, $from['table'], $fkey);
                     if ($fcols) {
@@ -797,7 +797,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                         $result[] = Select::forge($key, 'NULL');
                     }
                 }
-                $this->callbacks[$key] = [$column, array_all($args, 'is_null') ? [] : $args];
+                $this->callbacks[$key] = [$column, array_and($args, 'is_null') ? [] : $args];
             }
             // Expression なら文字列化したものをそのまま select
             elseif ($column instanceof Expression) {
@@ -1815,8 +1815,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 $cols2 = $fcols;
 
                 $nullable = static function (Column $c) { return !$c->getNotnull(); };
-                $join_nullable = array_find(array_intersect_key($schema->getTableColumns($table), $cols1), $nullable);
-                $from_nullable = array_find(array_intersect_key($schema->getTableColumns($fromTable), $cols2), $nullable);
+                $join_nullable = array_find_first(array_intersect_key($schema->getTableColumns($table), $cols1), $nullable);
+                $from_nullable = array_find_first(array_intersect_key($schema->getTableColumns($fromTable), $cols2), $nullable);
                 // 4パターンで inner,left,right,full に対応してもいいけど、旨味が少ない（勝手に right されても使い勝手が悪い）上、full 対応の DBMS は少ない
                 if ($join_nullable || $from_nullable) {
                     $type = 'LEFT';
