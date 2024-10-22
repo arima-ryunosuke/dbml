@@ -275,6 +275,10 @@ if (!defined('ryunosuke\\dbml\\JSON_BARE_AS_STRING')) {
     define('ryunosuke\\dbml\\JSON_BARE_AS_STRING', -106);
 }
 
+if (!defined('ryunosuke\\dbml\\JSON_OBJECT_HANDLER')) {
+    define('ryunosuke\\dbml\\JSON_OBJECT_HANDLER', -107);
+}
+
 if (!defined('ryunosuke\\dbml\\SI_UNITS')) {
     define('ryunosuke\\dbml\\SI_UNITS', [
         -8 => ["y"],
@@ -329,8 +333,8 @@ if (!function_exists('ryunosuke\\dbml\\array_add')) {
     }
 }
 
-assert(!function_exists('ryunosuke\\dbml\\array_all') || (new \ReflectionFunction('ryunosuke\\dbml\\array_all'))->isUserDefined());
-if (!function_exists('ryunosuke\\dbml\\array_all')) {
+assert(!function_exists('ryunosuke\\dbml\\array_and') || (new \ReflectionFunction('ryunosuke\\dbml\\array_and'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\array_and')) {
     /**
      * 全要素が true になるなら true を返す（1つでも false なら false を返す）
      *
@@ -338,9 +342,9 @@ if (!function_exists('ryunosuke\\dbml\\array_all')) {
      *
      * Example:
      * ```php
-     * that(array_all([true, true]))->isTrue();
-     * that(array_all([true, false]))->isFalse();
-     * that(array_all([false, false]))->isFalse();
+     * that(array_and([true, true]))->isTrue();
+     * that(array_and([true, false]))->isFalse();
+     * that(array_and([false, false]))->isFalse();
      * ```
      *
      * @package ryunosuke\Functions\Package\array
@@ -350,7 +354,7 @@ if (!function_exists('ryunosuke\\dbml\\array_all')) {
      * @param bool|mixed $default 空配列の場合のデフォルト値
      * @return bool 全要素が true なら true
      */
-    function array_all($array, $callback = null, $default = true)
+    function array_and($array, $callback = null, $default = true)
     {
         if (is_empty($array)) {
             return $default;
@@ -852,8 +856,8 @@ if (!function_exists('ryunosuke\\dbml\\array_explode')) {
     }
 }
 
-assert(!function_exists('ryunosuke\\dbml\\array_find') || (new \ReflectionFunction('ryunosuke\\dbml\\array_find'))->isUserDefined());
-if (!function_exists('ryunosuke\\dbml\\array_find')) {
+assert(!function_exists('ryunosuke\\dbml\\array_find_first') || (new \ReflectionFunction('ryunosuke\\dbml\\array_find_first'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\array_find_first')) {
     /**
      * array_search のクロージャ版のようなもの
      *
@@ -866,11 +870,11 @@ if (!function_exists('ryunosuke\\dbml\\array_find')) {
      * Example:
      * ```php
      * // 最初に見つかったキーを返す
-     * that(array_find(['a', '8', '9'], 'ctype_digit'))->isSame(1);
-     * that(array_find(['a', 'b', 'b'], fn($v) => $v === 'b'))->isSame(1);
+     * that(array_find_first(['a', '8', '9'], 'ctype_digit'))->isSame(1);
+     * that(array_find_first(['a', 'b', 'b'], fn($v) => $v === 'b'))->isSame(1);
      * // 最初に見つかったコールバック結果を返す（最初の数字の2乗を返す）
      * $ifnumeric2power = fn($v) => ctype_digit($v) ? $v * $v : false;
-     * that(array_find(['a', '8', '9'], $ifnumeric2power, false))->isSame(64);
+     * that(array_find_first(['a', '8', '9'], $ifnumeric2power, false))->isSame(64);
      * ```
      *
      * @package ryunosuke\Functions\Package\array
@@ -880,7 +884,7 @@ if (!function_exists('ryunosuke\\dbml\\array_find')) {
      * @param bool $is_key キーを返すか否か
      * @return mixed コールバックが true を返した最初のキー。存在しなかったら null
      */
-    function array_find($array, $callback, $is_key = true)
+    function array_find_first($array, $callback, $is_key = true)
     {
         $callback = func_user_func_array($callback);
 
@@ -1446,11 +1450,15 @@ if (!function_exists('ryunosuke\\dbml\\array_maps')) {
      *
      * @param iterable $array 対象配列
      * @param callable ...$callbacks 評価クロージャ配列
-     * @return array 評価クロージャを通した新しい配列
+     * @return iterable 評価クロージャを通した新しい配列
      */
     function array_maps($array, ...$callbacks)
     {
-        $result = arrayval($array, false);
+        // Iterator だが ArrayAccess ではないオブジェクト（Generator とか）は unset できないので配列として扱わざるを得ない
+        if (!(function_configure('array.variant') && is_arrayable($array))) {
+            $array = arrayval($array, false);
+        }
+
         foreach ($callbacks as $callback) {
             if (is_string($callback) && $callback[0] === '@') {
                 $margs = [];
@@ -1473,19 +1481,19 @@ if (!function_exists('ryunosuke\\dbml\\array_maps')) {
                 $callback = func_user_func_array($callback);
             }
             $n = 0;
-            foreach ($result as $k => $v) {
+            foreach (arrayval($array, false) as $k => $v) {
                 if (isset($margs)) {
-                    $result[$k] = ([$v, $callback])(...$margs);
+                    $array[$k] = ([$v, $callback])(...$margs);
                 }
                 elseif ($vargs) {
-                    $result[$k] = $callback(...$v);
+                    $array[$k] = $callback(...$v);
                 }
                 else {
-                    $result[$k] = $callback($v, $k, $n++);
+                    $array[$k] = $callback($v, $k, $n++);
                 }
             }
         }
-        return $result;
+        return $array;
     }
 }
 
@@ -2330,6 +2338,39 @@ if (!function_exists('ryunosuke\\dbml\\last_value')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\auto_loader') || (new \ReflectionFunction('ryunosuke\\dbml\\auto_loader'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\auto_loader')) {
+    /**
+     * vendor/autoload.php を返す
+     *
+     * かなり局所的な実装で vendor ディレクトリを変更していたりするとそれだけで例外になる。
+     *
+     * Example:
+     * ```php
+     * that(auto_loader())->contains('autoload.php');
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\classobj
+     *
+     * @param ?string $startdir 高速化用の検索開始ディレクトリを指定するが、どちらかと言えばテスト用
+     * @return string autoload.php のフルパス
+     */
+    function auto_loader($startdir = null)
+    {
+        return cache("path-$startdir", function () use ($startdir) {
+            $cache = dirname_r($startdir ?: __DIR__, function ($dir) {
+                if (file_exists($file = "$dir/autoload.php") || file_exists($file = "$dir/vendor/autoload.php")) {
+                    return $file;
+                }
+            });
+            if (!$cache) {
+                throw new \DomainException('autoloader is not found.');
+            }
+            return $cache;
+        }, __FUNCTION__);
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\class_aliases') || (new \ReflectionFunction('ryunosuke\\dbml\\class_aliases'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\class_aliases')) {
     /**
@@ -2373,6 +2414,29 @@ if (!function_exists('ryunosuke\\dbml\\class_aliases')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\class_loader') || (new \ReflectionFunction('ryunosuke\\dbml\\class_loader'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\class_loader')) {
+    /**
+     * composer のクラスローダを返す
+     *
+     * かなり局所的な実装で vendor ディレクトリを変更していたりするとそれだけで例外になる。
+     *
+     * Example:
+     * ```php
+     * that(class_loader())->isInstanceOf(\Composer\Autoload\ClassLoader::class);
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\classobj
+     *
+     * @param ?string $startdir 高速化用の検索開始ディレクトリを指定するが、どちらかと言えばテスト用
+     * @return \Composer\Autoload\ClassLoader クラスローダ
+     */
+    function class_loader($startdir = null)
+    {
+        return require auto_loader($startdir);
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\class_shorten') || (new \ReflectionFunction('ryunosuke\\dbml\\class_shorten'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\class_shorten')) {
     /**
@@ -2396,6 +2460,61 @@ if (!function_exists('ryunosuke\\dbml\\class_shorten')) {
 
         $parts = explode('\\', $class);
         return array_pop($parts);
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\const_exists') || (new \ReflectionFunction('ryunosuke\\dbml\\const_exists'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\const_exists')) {
+    /**
+     * クラス定数が存在するか調べる
+     *
+     * グローバル定数も調べられる。ので実質的には defined とほぼ同じで違いは下記。
+     *
+     * - defined は単一引数しか与えられないが、この関数は2つの引数も受け入れる
+     * - defined は private const で即死するが、この関数はきちんと調べることができる
+     * - ClassName::class は常に true を返す
+     *
+     * あくまで存在を調べるだけで実際にアクセスできるかは分からないので注意（`property_exists` と同じ）。
+     *
+     * Example:
+     * ```php
+     * // クラス定数が調べられる（1引数、2引数どちらでも良い）
+     * that(const_exists('ArrayObject::STD_PROP_LIST'))->isTrue();
+     * that(const_exists('ArrayObject', 'STD_PROP_LIST'))->isTrue();
+     * that(const_exists('ArrayObject::UNDEFINED'))->isFalse();
+     * that(const_exists('ArrayObject', 'UNDEFINED'))->isFalse();
+     * // グローバル（名前空間）もいける
+     * that(const_exists('PHP_VERSION'))->isTrue();
+     * that(const_exists('UNDEFINED'))->isFalse();
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\classobj
+     *
+     * @param string|object $classname 調べるクラス
+     * @param string $constname 調べるクラス定数
+     * @return bool 定数が存在するなら true
+     */
+    function const_exists($classname, $constname = '')
+    {
+        $colonp = strpos($classname, '::');
+        if ($colonp === false && strlen($constname) === 0) {
+            return defined($classname);
+        }
+        if (strlen($constname) === 0) {
+            $constname = substr($classname, $colonp + 2);
+            $classname = substr($classname, 0, $colonp);
+        }
+
+        try {
+            $refclass = new \ReflectionClass($classname);
+            if (strcasecmp($constname, 'class') === 0) {
+                return true;
+            }
+            return $refclass->hasConstant($constname);
+        }
+        catch (\Throwable) {
+            return false;
+        }
     }
 }
 
@@ -3247,7 +3366,8 @@ if (!function_exists('ryunosuke\\dbml\\sql_format')) {
             }
             // END IF, END LOOP などは一つのトークンとする
             elseif (strtoupper($last->text ?? '') === 'END' && in_array(strtoupper($token->text), ['CASE', 'IF', 'LOOP', 'REPEAT', 'WHILE'], true)) {
-                $tokens[array_key_last($tokens)]->text .= " " . $token->text;
+                $lasttoken = $tokens[array_key_last($tokens)];
+                $lasttoken->text .= " " . $token->text;
             }
             // 上記以外はただのトークンとして格納する
             else {
@@ -3769,12 +3889,15 @@ if (!function_exists('ryunosuke\\dbml\\csv_import')) {
             'delimiter' => ',',
             'enclosure' => '"',
             'escape'    => '\\',
-            'encoding'  => mb_internal_encoding(),
+            'encoding'  => ini_get('default_charset'),
+            'scrub'     => 'IGNORE',
+            'initial'   => [],
             'headers'   => [],
             'headermap' => null,
             'structure' => false,
             'grouping'  => null,
             'callback'  => null, // map + filter 用コールバック（1行が参照で渡ってくるので書き換えられる&&false を返すと結果から除かれる）
+            'limit'     => null, // 正味のデータ行の最大値（超えた場合はそこで処理を終了する。例外が飛んだりはしない）
         ];
 
         // 文字キーを含む場合はヘッダーありの読み換えとなる
@@ -3794,16 +3917,31 @@ if (!function_exists('ryunosuke\\dbml\\csv_import')) {
 
         $restore = set_error_exception_handler();
         try {
-            return (function ($fp, $delimiter, $enclosure, $escape, $encoding, $headers, $headermap, $structure, $grouping, $callback) {
-                $mb_internal_encoding = mb_internal_encoding();
+            $n = -1;
+            return (function ($fp, $delimiter, $enclosure, $escape, $encoding, $scrub, $initial, $headers, $headermap, $structure, $grouping, $callback, $limit) use (&$n) {
+                $default_charset = ini_get('default_charset');
+                if ($default_charset !== $encoding) {
+                    stream_filter_append($fp, "convert.iconv.$encoding/$default_charset" . (strlen($scrub) ? "//$scrub" : ""), STREAM_FILTER_READ);
+                }
+
+                foreach ($initial as $rule => $count) {
+                    for ($i = 0; $i < $count; $i++) {
+                        if ($rule === 'byte') {
+                            fgetc($fp);
+                        }
+                        elseif ($rule === 'line') {
+                            fgets($fp);
+                        }
+                        elseif ($rule === 'csv') {
+                            fgetcsv($fp, 0, $delimiter, $enclosure, $escape);
+                        }
+                    }
+                }
+
                 $result = [];
-                $n = -1;
                 while ($row = fgetcsv($fp, 0, $delimiter, $enclosure, $escape)) {
                     if ($row === [null]) {
                         continue;
-                    }
-                    if ($mb_internal_encoding !== $encoding) {
-                        mb_convert_variables($mb_internal_encoding, $encoding, $row);
                     }
                     if (!$headers) {
                         $headers = $row;
@@ -3854,6 +3992,10 @@ if (!function_exists('ryunosuke\\dbml\\csv_import')) {
                     else {
                         $result[] = $row;
                     }
+
+                    if ($limit !== null && count($result) >= $limit) {
+                        break;
+                    }
                 }
 
                 if ($grouping !== null) {
@@ -3863,7 +4005,14 @@ if (!function_exists('ryunosuke\\dbml\\csv_import')) {
                 }
 
                 return $result;
-            })($fp, $options['delimiter'], $options['enclosure'], $options['escape'], $options['encoding'], $options['headers'], $options['headermap'], $options['structure'], $options['grouping'], $options['callback']);
+            })($fp, $options['delimiter'], $options['enclosure'], $options['escape'], $options['encoding'], $options['scrub'], $options['initial'], $options['headers'], $options['headermap'], $options['structure'], $options['grouping'], $options['callback'], $options['limit']);
+        }
+        catch (\Throwable $t) {
+            // 何行目？ が欲しくなることが非常に多いので例外メッセージを書き換える
+            $message = new \ReflectionProperty($t, 'message');
+            $message->setAccessible(true);
+            $message->setValue($t, "csv#$n: " . $t->getMessage());
+            throw $t;
         }
         finally {
             $restore();
@@ -4009,7 +4158,7 @@ if (!function_exists('ryunosuke\\dbml\\json_import')) {
                                     throw $this->exception("Missing object key", first_value($keyandval[0]));
                                 }
                                 // check objective key (e.g. {[1]: 123})
-                                if (($k = array_find($keyandval[0], fn($v) => $v instanceof $this)) !== null) {
+                                if (($k = array_find_first($keyandval[0], fn($v) => $v instanceof $this)) !== null) {
                                     throw $this->exception("Unexpected object key", $keyandval[0][$k]);
                                 }
                                 // check consecutive objective value (e.g. {k: 123 [1]})
@@ -4543,7 +4692,7 @@ if (!function_exists('ryunosuke\\dbml\\date_convert')) {
         }
 
         if (!$return_object) {
-            $era = array_find(JP_ERA, function ($era) use ($timestamp) {
+            $era = array_find_first(JP_ERA, function ($era) use ($timestamp) {
                 if ($era['since'] <= $timestamp) {
                     $era['year'] = idate('Y', (int) $timestamp) - idate('Y', $era['since']) + 1;
                     $era['gann'] = $era['year'] === 1 ? '元' : $era['year'];
@@ -4650,7 +4799,7 @@ if (!function_exists('ryunosuke\\dbml\\date_timestamp')) {
             $jpnames = array_merge(array_column(JP_ERA, 'name'), array_column(JP_ERA, 'abbr'));
             $datetimedata = preg_replace_callback('/^(' . implode('|', $jpnames) . ')(\d{1,2}|元)/u', function ($matches) {
                 [, $era, $year] = $matches;
-                $eratime = array_find(JP_ERA, function ($v) use ($era) {
+                $eratime = array_find_first(JP_ERA, function ($v) use ($era) {
                     if (in_array($era, [$v['name'], $v['abbr']], true)) {
                         return $v['since'];
                     }
@@ -4875,6 +5024,44 @@ if (!function_exists('ryunosuke\\dbml\\set_error_exception_handler')) {
         }, $error_levels);
 
         return finalize('restore_error_handler');
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\dirname_r') || (new \ReflectionFunction('ryunosuke\\dbml\\dirname_r'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\dirname_r')) {
+    /**
+     * コールバックが true 相当を返すまで親ディレクトリを辿り続ける
+     *
+     * コールバックには親ディレクトリが引数として渡ってくる。
+     *
+     * Example:
+     * ```php
+     * // //tmp/a/b/file.txt を作っておく
+     * $tmp = sys_get_temp_dir();
+     * file_set_contents("$tmp/a/b/file.txt", 'hoge');
+     * // /a/b/c/d/e/f から開始して「どこかの階層の file.txt を探したい」という状況を想定
+     * $callback = fn($path) => realpath("$path/file.txt");
+     * that(dirname_r("$tmp/a/b/c/d/e/f", $callback))->isSame(realpath("$tmp/a/b/file.txt"));
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\filesystem
+     *
+     * @param string $path パス名
+     * @param callable $callback コールバック
+     * @return mixed $callback の返り値。頂上まで辿ったら null
+     */
+    function dirname_r($path, $callback)
+    {
+        $return = $callback($path);
+        if ($return) {
+            return $return;
+        }
+
+        $dirname = dirname($path);
+        if ($dirname === $path) {
+            return null;
+        }
+        return dirname_r($dirname, $callback);
     }
 }
 
@@ -5493,6 +5680,52 @@ if (!function_exists('ryunosuke\\dbml\\mkdir_p')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\path_is_absolute') || (new \ReflectionFunction('ryunosuke\\dbml\\path_is_absolute'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\path_is_absolute')) {
+    /**
+     * パスが絶対パスか判定する
+     *
+     * Example:
+     * ```php
+     * that(path_is_absolute('/absolute/path'))->isTrue();
+     * that(path_is_absolute('relative/path'))->isFalse();
+     * // Windows 環境では下記も true になる
+     * if (DIRECTORY_SEPARATOR === '\\') {
+     *     that(path_is_absolute('\\absolute\\path'))->isTrue();
+     *     that(path_is_absolute('C:\\absolute\\path'))->isTrue();
+     * }
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\filesystem
+     *
+     * @param string $path パス文字列
+     * @return bool 絶対パスなら true
+     */
+    function path_is_absolute($path)
+    {
+        // スキームが付いている場合は path 部分で判定
+        $parts = parse_url($path);
+        if (isset($parts['scheme'], $parts['path'])) {
+            $path = $parts['path'];
+        }
+        elseif (isset($parts['scheme'], $parts['host'])) {
+            $path = $parts['host'];
+        }
+
+        if (substr($path, 0, 1) === '/') {
+            return true;
+        }
+
+        if (DIRECTORY_SEPARATOR === '\\') {
+            if (preg_match('#^([a-z]+:(\\\\|/|$)|\\\\)#i', $path) !== 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\path_normalize') || (new \ReflectionFunction('ryunosuke\\dbml\\path_normalize'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\path_normalize')) {
     /**
@@ -5852,6 +6085,47 @@ if (!function_exists('ryunosuke\\dbml\\iterator_chunk')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\median') || (new \ReflectionFunction('ryunosuke\\dbml\\median'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\median')) {
+    /**
+     * 引数の中央値を返す
+     *
+     * - 要素数が奇数の場合は完全な中央値/偶数の場合は中2つの平均。「平均」という概念が存在しない値なら中2つの後の値
+     * - 配列は個数ではなくフラット展開した要素を対象にする
+     * - 候補がない場合はエラーではなく例外を投げる
+     *
+     * Example:
+     * ```php
+     * // 偶数個なので中2つの平均
+     * that(median(1, 2, 3, 4, 5, 6))->isSame(3.5);
+     * // 奇数個なのでど真ん中
+     * that(median(1, 2, 3, 4, 5))->isSame(3);
+     * // 偶数個だが文字列なので中2つの後
+     * that(median('a', 'b', 'c', 'd'))->isSame('c');
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\math
+     *
+     * @param mixed ...$variadic 対象の変数・配列・リスト
+     * @return mixed 中央値
+     */
+    function median(...$variadic)
+    {
+        $args = array_flatten($variadic) or throw new \LengthException("argument's length is 0.");
+        $count = count($args);
+        $center = (int) ($count / 2);
+        sort($args);
+        // 偶数で共に数値なら平均値
+        if ($count % 2 === 0 && (is_numeric($args[$center - 1]) && is_numeric($args[$center]))) {
+            return ($args[$center - 1] + $args[$center]) / 2;
+        }
+        // 奇数なら単純に中央値
+        else {
+            return $args[$center];
+        }
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\sum') || (new \ReflectionFunction('ryunosuke\\dbml\\sum'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\sum')) {
     /**
@@ -6020,7 +6294,7 @@ if (!function_exists('ryunosuke\\dbml\\namespace_parse')) {
                         ];
                         break;
                     case T_USE:
-                        $tokenCorF = array_find($tokens, fn($token) => ($token->id === T_CONST || $token->id === T_FUNCTION) ? $token->id : 0, false);
+                        $tokenCorF = array_find_first($tokens, fn($token) => ($token->id === T_CONST || $token->id === T_FUNCTION) ? $token->id : 0, false);
 
                         $prefix = '';
                         if (end($tokens)->text === '{') {
@@ -7023,7 +7297,7 @@ if (!function_exists('ryunosuke\\dbml\\function_parameter')) {
             $declare = '';
 
             if ($parameter->hasType()) {
-                $declare .= reflect_types($parameter->getType())->getName() . ' ';
+                $declare .= reflect_type_resolve($parameter->getType()) . ' ';
             }
 
             if ($parameter->isPassedByReference()) {
@@ -7039,30 +7313,27 @@ if (!function_exists('ryunosuke\\dbml\\function_parameter')) {
             if ($parameter->isOptional()) {
                 $defval = null;
 
-                // 組み込み関数のデフォルト値を取得することは出来ない（isDefaultValueAvailable も false を返す）
                 if ($parameter->isDefaultValueAvailable()) {
                     // 修飾なしでデフォルト定数が使われているとその名前空間で解決してしまうので場合分けが必要
                     if ($parameter->isDefaultValueConstant() && strpos($parameter->getDefaultValueConstantName(), '\\') === false) {
-                        $defval = $parameter->getDefaultValueConstantName();
+                        // 存在チェック＋$dummy でグローバル定数を回避しているが、いっそのこと一律 \\ を付与してしまっても良いような気がする
+                        if (const_exists(...(explode('::', $parameter->getDefaultValueConstantName()) + [1 => '$dummy']))) {
+                            $defval = '\\' . $parameter->getDefaultValueConstantName();
+                        }
+                        else {
+                            $defval = $parameter->getDefaultValueConstantName();
+                        }
                     }
                     else {
                         $default = $parameter->getDefaultValue();
                         $defval = var_export2($default, true);
-                        if (is_string($default)) {
-                            $defval = strtr($defval, [
-                                "\r" => "\\r",
-                                "\n" => "\\n",
-                                "\t" => "\\t",
-                                "\f" => "\\f",
-                                "\v" => "\\v",
-                            ]);
-                        }
                     }
                 }
-                // 「オプショナルだけどデフォルト値がないって有り得るのか？」と思ったが、上記の通り組み込み関数だと普通に有り得るようだ
-                // notice が出るので記述せざるを得ないがその値を得る術がない。が、どうせ与えられないので null でいい
-                elseif (version_compare(PHP_VERSION, 8.0) < 0) {
-                    $defval = 'null';
+                // isOptional だが isDefaultValueAvailable でないし isVariadic でもない（稀にある（stream_filter_append で確認））
+                elseif (!$parameter->isVariadic()) {
+                    // Type に応じたデフォルト値が得られればベストだがそこまでする必要もない
+                    // 少なくとも 8.0 時点では = null してしまえば型エラーも起きない（8.4 で非推奨になってるけど）
+                    $defval = "null";
                 }
 
                 if (isset($defval)) {
@@ -7209,8 +7480,12 @@ if (!function_exists('ryunosuke\\dbml\\reflect_callable')) {
      *   - 上記二つは __call/__callStatic のメソッドも呼び出せる
      * - getDeclaration: 宣言部のコードを返す
      * - getCode: 定義部のコードを返す
+     * - isAnonymous: 無名関数なら true を返す（8.2 の isAnonymous 互換）
      * - isStatic: $this バインド可能かを返す（クロージャのみ）
      * - getUsedVariables: use している変数配列を返す（クロージャのみ）
+     * - getClosure: 元となったオブジェクトを $object としたクロージャを返す（メソッドのみ）
+     *   - 上記二つは __call/__callStatic のメソッドも呼び出せる
+     * - getTraitMethod: トレイト側のリフレクションを返す（メソッドのみ）
      *
      * Example:
      * ```php
@@ -7264,6 +7539,11 @@ if (!function_exists('ryunosuke\\dbml\\reflect_callable')) {
                 {
                     return ($this->definition ??= callable_code($this))[1];
                 }
+
+                public function isAnonymous(): bool
+                {
+                    return false;
+                }
             };
         }
         elseif ($callable instanceof \Closure) {
@@ -7298,6 +7578,15 @@ if (!function_exists('ryunosuke\\dbml\\reflect_callable')) {
                     return ($this->definition ??= callable_code($this))[1];
                 }
 
+                public function isAnonymous(): bool
+                {
+                    if (method_exists(\ReflectionFunction::class, 'isAnonymous')) {
+                        return parent::isAnonymous(); // @codeCoverageIgnore
+                    }
+
+                    return strpos($this->name, '{closure}') !== false;
+                }
+
                 public function isStatic(): bool
                 {
                     return !is_bindable_closure($this->callable);
@@ -7305,6 +7594,10 @@ if (!function_exists('ryunosuke\\dbml\\reflect_callable')) {
 
                 public function getUsedVariables(): array
                 {
+                    if (method_exists(\ReflectionFunction::class, 'getClosureUsedVariables')) {
+                        return parent::getClosureUsedVariables(); // @codeCoverageIgnore
+                    }
+
                     $uses = object_properties($this->callable);
                     unset($uses['this']);
                     return $uses;
@@ -7363,6 +7656,59 @@ if (!function_exists('ryunosuke\\dbml\\reflect_callable')) {
                 public function getCode(): string
                 {
                     return ($this->definition ??= callable_code($this))[1];
+                }
+
+                public function isAnonymous(): bool
+                {
+                    return false;
+                }
+
+                public function getClosure(?object $object = null): \Closure
+                {
+                    $name = strtolower($this->name);
+
+                    if ($this->isStatic()) {
+                        if ($name === '__callstatic') {
+                            return \Closure::fromCallable([$this->class, $this->call_name]);
+                        }
+                        return parent::getClosure();
+                    }
+
+                    $object ??= $this->callable[0];
+                    if ($name === '__call') {
+                        return \Closure::fromCallable([$object, $this->call_name]);
+                    }
+                    return parent::getClosure($object);
+                }
+
+                public function getTraitMethod(): ?\ReflectionMethod
+                {
+                    $name = strtolower($this->name);
+                    $class = $this->getDeclaringClass();
+                    $aliases = array_change_key_case($class->getTraitAliases(), CASE_LOWER);
+
+                    if (!isset($aliases[$name])) {
+                        if ($this->getFileName() === $class->getFileName()) {
+                            return null;
+                        }
+                        else {
+                            return $this;
+                        }
+                    }
+
+                    [$tname, $mname] = explode('::', $aliases[$name]);
+                    $result = new self($tname, $mname, $this->callable, $this->call_name);
+
+                    // alias を張ったとしても自身で再宣言はエラーなく可能で、その場合自身が採用されるようだ
+                    if (false
+                        || $this->getFileName() !== $result->getFileName()
+                        || $this->getStartLine() !== $result->getStartLine()
+                        || $this->getEndLine() !== $result->getEndLine()
+                    ) {
+                        return null;
+                    }
+
+                    return $result;
                 }
             };
         }
@@ -7754,7 +8100,12 @@ if (!function_exists('ryunosuke\\dbml\\starts_with')) {
     function starts_with(?string $string, $with, $case_insensitivity = false)
     {
         foreach ((array) $with as $w) {
-            assert(strlen($w));
+            $w = (string) $w;
+
+            // All strings end with the empty string
+            if ($w === '') {
+                return true;
+            }
 
             if (str_equals(substr($string, 0, strlen($w)), $w, $case_insensitivity)) {
                 return true;
@@ -9080,7 +9431,7 @@ if (!function_exists('ryunosuke\\dbml\\cacheobject')) {
                 return file_list($this->directory, [
                     '!type'     => ['dir', 'link'],
                     'extension' => ['php-cache'],
-                ]);
+                ]) ?? [];
             }
 
             private function _getMetadata(string $filename): ?array
@@ -9314,6 +9665,7 @@ if (!function_exists('ryunosuke\\dbml\\function_configure')) {
         $config['placeholder'] ??= '';
         $config['var_stream'] ??= 'VarStreamV010000';
         $config['memory_stream'] ??= 'MemoryStreamV010000';
+        $config['array.variant'] ??= false;
         $config['chain.version'] ??= 2;
         $config['chain.nullsafe'] ??= false;
         $config['process.autoload'] ??= [];
@@ -9830,6 +10182,8 @@ if (!function_exists('ryunosuke\\dbml\\is_typeof')) {
      */
     function is_typeof($var, string $typestring, $context = null)
     {
+        $context ??= '';
+
         $match = function ($type) use ($var, $context) {
             $type = trim($type);
             // ?type は 7.4 を最後に姿を消したが $typestring はただの文字列なので与えられる可能性がなくはない
@@ -9941,21 +10295,22 @@ if (!function_exists('ryunosuke\\dbml\\si_unprefix')) {
      * @param int $unit 桁単位。実用上は 1000, 1024 の2値しか指定することはないはず
      * @return int|float SI 接頭辞を取り払った実際の数値
      */
-    function si_unprefix($var, $unit = 1000)
+    function si_unprefix($var, $unit = 1000, $format = '%d%s')
     {
         assert($unit > 0);
 
         $var = trim($var);
+        $num = numval($var);
 
         foreach (SI_UNITS as $exp => $sis) {
             foreach ($sis as $si) {
-                if (strpos($var, $si) === (strlen($var) - strlen($si))) {
-                    return numval($var) * pow($unit, $exp);
+                if (sprintf($format, $num, $si) === $var) {
+                    return $num * pow($unit, $exp);
                 }
             }
         }
 
-        return numval($var);
+        return $num;
     }
 }
 
@@ -10133,7 +10488,7 @@ if (!function_exists('ryunosuke\\dbml\\var_export2')) {
                 $hashed = is_hasharray($value);
 
                 // スカラー値のみで構成されているならシンプルな再帰
-                if (!$hashed && array_all($value, fn(...$args) => is_primitive(...$args))) {
+                if (!$hashed && array_and($value, fn(...$args) => is_primitive(...$args))) {
                     return '[' . implode(",$space", array_map(fn($v) => $export($v, 'array-value'), $value)) . ']';
                 }
 
@@ -10331,14 +10686,32 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
             $resolveSymbol = function ($token, $prev, $next, $ref) use ($var_export) {
                 $text = $token->text;
                 if ($token->id === T_STRING) {
+                    $namespaces = [$ref->getNamespaceName()];
+                    if ($ref instanceof \ReflectionFunctionAbstract) {
+                        $namespaces[] = $ref->getClosureScopeClass()?->getNamespaceName();
+                    }
                     if ($prev->id === T_NEW || $next->id === T_DOUBLE_COLON || $next->id === T_VARIABLE || $next->text === '{') {
                         $text = namespace_resolve($text, $ref->getFileName(), 'alias') ?? $text;
                     }
                     elseif ($next->text === '(') {
                         $text = namespace_resolve($text, $ref->getFileName(), 'function') ?? $text;
+                        // 関数・定数は use しなくてもグローバルにフォールバックされる（=グローバルと名前空間の区別がつかない）
+                        foreach ($namespaces as $namespace) {
+                            if (!function_exists($text) && function_exists($nstext = "\\$namespace\\$text")) {
+                                $text = $nstext;
+                                break;
+                            }
+                        }
                     }
                     else {
                         $text = namespace_resolve($text, $ref->getFileName(), 'const') ?? $text;
+                        // 関数・定数は use しなくてもグローバルにフォールバックされる（=グローバルと名前空間の区別がつかない）
+                        foreach ($namespaces as $namespace) {
+                            if (!const_exists($text) && const_exists($nstext = "\\$namespace\\$text")) {
+                                $text = $nstext;
+                                break;
+                            }
+                        }
                     }
                 }
 
@@ -10369,7 +10742,7 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
 
             if (is_array($value)) {
                 $hashed = is_hasharray($value);
-                if (!$hashed && array_all($value, fn(...$args) => is_primitive(...$args))) {
+                if (!$hashed && array_and($value, fn(...$args) => is_primitive(...$args))) {
                     [$begin, $middle, $end] = ["", ", ", ""];
                 }
                 else {
@@ -10419,12 +10792,12 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
             if ($value instanceof \Closure) {
                 $ref = new \ReflectionFunction($value);
                 $bind = $ref->getClosureThis();
-                $class = $ref->getClosureScopeClass() ? $ref->getClosureScopeClass()->getName() : null;
+                $class = $ref->getClosureScopeClass();
                 $statics = $ref->getStaticVariables();
 
                 // 内部由来はきちんと fromCallable しないと差異が出てしまう
                 if ($ref->isInternal()) {
-                    $receiver = $bind ?? $class;
+                    $receiver = $bind ?? $class?->getName();
                     $callee = $receiver ? [$receiver, $ref->getName()] : $ref->getName();
                     return "\$this->$vid = \\Closure::fromCallable({$export($callee, $nest)})";
                 }
@@ -10483,8 +10856,14 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
                     'baseline' => -1,
                 ]);
                 if ($bind) {
-                    $scope = $var_export($class === 'Closure' ? 'static' : $class);
-                    $code = "\Closure::bind($code, {$export($bind, $nest + 1)}, $scope)";
+                    $instance = $export($bind, $nest + 1);
+                    if ($class->isAnonymous()) {
+                        $scope = "get_class({$export($bind, $nest + 1)})";
+                    }
+                    else {
+                        $scope = $var_export($class?->getName() === 'Closure' ? 'static' : $class?->getName());
+                    }
+                    $code = "\Closure::bind($code, $instance, $scope)";
                 }
                 elseif (!is_bindable_closure($value)) {
                     $code = "static $code";
@@ -10635,11 +11014,16 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
             if (is_resourcable($value)) {
                 // スタンダードなリソースなら復元できないこともない
                 $meta = stream_get_meta_data($value);
-                if (!in_array(strtolower($meta['stream_type']), ['stdio', 'output'], true)) {
+                $stream_type = strtolower($meta['stream_type']);
+                if (!in_array($stream_type, ['stdio', 'output', 'temp', 'memory'], true)) {
                     throw new \DomainException('resource is supported stream resource only.');
                 }
                 $meta['position'] = @ftell($value);
                 $meta['context'] = stream_context_get_options($value);
+                $meta['buffer'] = null;
+                if (in_array($stream_type, ['temp', 'memory'], true)) {
+                    $meta['buffer'] = stream_get_contents($value, null, 0);
+                }
                 return "\$this->$vid = \$this->open({$export($meta, $nest + 1)})";
             }
 
@@ -10709,6 +11093,9 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
                     $resource = fopen($metadata['uri'], $metadata['mode'], false, stream_context_create($metadata['context']));
                     if ($resource === false) {
                         return null;
+                    }
+                    if ($metadata['seekable'] && is_string($metadata['buffer'])) {
+                        fwrite($resource, $metadata['buffer']);
                     }
                     if ($metadata['seekable'] && is_int($metadata['position'])) {
                         fseek($resource, $metadata['position']);
