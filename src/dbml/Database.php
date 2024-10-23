@@ -3916,7 +3916,7 @@ class Database
      * $opt で chunk や ignore オプションが指定できる。
      * 特に chunk/bulk は返り値の SQL が大幅に変化する。
      */
-    public function migrate(string $tableName, string $dml, array|string $recordsOrFilename, array $opt = []): int|array
+    public function migrate(string $tableName, string $dml, array|string $recordsOrFilename, ...$opt): int|array
     {
         $opt += [
             'dryrun' => true,
@@ -3964,23 +3964,23 @@ class Database
             case 'insert':
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
                 if ($opt['bulk']) {
-                    $results[] = $db->insertArray($tableName, $records, $opt['chunk'], $opt);
+                    $results[] = $db->insertArray($tableName, $records, $opt['chunk'], ...$opt);
                 }
                 else {
                     foreach ($records as $record) {
-                        $results[] = $db->insert($tableName, $record, $opt);
+                        $results[] = $db->insert($tableName, $record, ...$opt);
                     }
                 }
                 break;
             case 'update':
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
                 if ($opt['bulk']) {
-                    $results[] = $db->updateArray($tableName, $records, [], $opt['chunk'], $opt);
+                    $results[] = $db->updateArray($tableName, $records, [], $opt['chunk'], ...$opt);
                 }
                 else {
                     $keys = array_map(fn($record) => array_intersect_key($record, $primary), $records);
                     foreach ($keys as $n => $key) {
-                        $results[] = $db->update($tableName, array_diff_key($records[$n], $key), $key, $opt);
+                        $results[] = $db->update($tableName, array_diff_key($records[$n], $key), $key, ...$opt);
                     }
                 }
                 break;
@@ -3988,28 +3988,28 @@ class Database
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
                 $keys = array_map(fn($record) => array_intersect_key($record, $primary), $records);
                 if ($opt['bulk']) {
-                    $results[] = $db->delete($tableName, [$keys], $opt);
+                    $results[] = $db->delete($tableName, [$keys], ...$opt);
                 }
                 else {
                     foreach ($keys as $key) {
-                        $results[] = $db->delete($tableName, $key, $opt);
+                        $results[] = $db->delete($tableName, $key, ...$opt);
                     }
                 }
                 break;
             case 'modify':
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
                 if ($opt['bulk']) {
-                    $results[] = $db->modifyArray($tableName, $records, [], 'PRIMARY', $opt['chunk'], $opt);
+                    $results[] = $db->modifyArray($tableName, $records, [], 'PRIMARY', $opt['chunk'], ...$opt);
                 }
                 else {
                     foreach ($records as $record) {
-                        $results[] = $db->modify($tableName, $record, [], 'PRIMARY', $opt);
+                        $results[] = $db->modify($tableName, $record, [], 'PRIMARY', ...$opt);
                     }
                 }
                 break;
             case 'change':
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
-                $result = $db->changeArray($tableName, $records, [], 'PRIMARY', [], $opt);
+                $result = $db->changeArray($tableName, $records, [], 'PRIMARY', [], ...$opt);
                 if ($opt['dryrun']) {
                     $results[] = $result[1];
                 }
@@ -4021,11 +4021,11 @@ class Database
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
                 $result = [];
                 if ($opt['bulk']) {
-                    $result[] = $db->save($tableName, $records, $opt);
+                    $result[] = $db->save($tableName, $records, ...$opt);
                 }
                 else {
                     foreach ($records as $record) {
-                        $result[] = $db->save($tableName, $record, $opt);
+                        $result[] = $db->save($tableName, $record, ...$opt);
                     }
                 }
                 if ($opt['dryrun']) {
@@ -4301,11 +4301,8 @@ class Database
      * @param iterable $params bind パラメータ
      * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function insertSelect($tableName, $sql, $columns = [], array $params = [])
+    public function insertSelect($tableName, $sql, $columns = [], array $params = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 5 ? func_get_arg(4) : [];
-
         if ($sql instanceof SelectBuilder) {
             $sql->detectAutoOrder(true);
             $sql->merge($params);
@@ -4353,11 +4350,8 @@ class Database
      * @param array|\Generator $data カラムデータ配列あるいは Generator
      * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function insertArray($tableName, $data)
+    public function insertArray($tableName, $data, ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->build([
             'table' => $tableName,
@@ -4410,11 +4404,8 @@ class Database
      * @param array|mixed $where 束縛条件
      * @return int|array[]|Entity[]|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function updateArray($tableName, $data, $where = [])
+    public function updateArray($tableName, $data, $where = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->build([
             'table' => $tableName,
@@ -4480,11 +4471,8 @@ class Database
      * @param array|\Generator $where 削除条件
      * @return int|array[]|Entity[]|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function deleteArray($tableName, $where = [])
+    public function deleteArray($tableName, $where = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->build([
             'table' => $tableName,
@@ -4570,11 +4558,8 @@ class Database
      * @param string $uniquekey 重複チェックに使うユニークキー名
      * @return int|array[]|Entity[]|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function modifyArray($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    public function modifyArray($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 5 ? func_get_arg(4) : [];
-
         $cplatform = $this->getCompatiblePlatform();
         if (!$cplatform->supportsBulkMerge()) {
             throw new \DomainException($cplatform->getName() . ' is not support modifyArray.');
@@ -4694,12 +4679,8 @@ class Database
      * @param ?array $returning 返り値の制御変数。配列を与えるとそのカラムの SELECT 結果を返す（null は主キーを表す）
      * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
      */
-    public function changeArray($tableName, $dataarray, $where, $uniquekey = 'PRIMARY', $returning = [])
+    public function changeArray($tableName, $dataarray, $where, $uniquekey = 'PRIMARY', $returning = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 6 ? func_get_arg(5) : [];
-        unset($opt['primary']); // 自身で処理するので不要
-
         $builder = AffectBuilder::new($this);
         $builder->build([
             'table'  => $tableName,
@@ -4776,20 +4757,20 @@ class Database
 
         foreach ($col_group as $group) {
             if ($group['bulks'] ?? []) {
-                $sqls[] = $this->modifyArray($builder->getTable(), $group['bulks'], [], $uniquekey, null, $opt);
+                $sqls[] = $this->modifyArray($builder->getTable(), $group['bulks'], [], $uniquekey, ...$opt);
             }
             if ($group['rows'] ?? []) {
                 // 2件以上じゃないとプリペアの旨味が少ない
                 $stmt = null;
                 if ($preparable && count($group['rows']) > 1) {
-                    $stmt = $this->prepare()->modify($builder->getTable(), array_map(fn($c) => ":$c", $group['cols']), [], $uniquekey, $opt);
+                    $stmt = $this->prepare()->modify($builder->getTable(), array_map(fn($c) => ":$c", $group['cols']), [], $uniquekey, ...$opt);
                 }
                 foreach ($group['rows'] as $n => $row) {
                     if ($stmt) {
                         $affected = $sqls[] = $stmt->executeAffect($row);
                     }
                     else {
-                        $affected = $sqls[] = $this->modify($builder->getTable(), $row, [], $uniquekey, $opt);
+                        $affected = $sqls[] = $this->modify($builder->getTable(), $row, [], $uniquekey, ...$opt);
                     }
 
                     if ($autocolumn !== null && !isset($primaries[$n][$autocolumn])) {
@@ -4881,10 +4862,8 @@ class Database
      * @param array $dataarray カラムデータ配列あるいは Generator
      * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
      */
-    public function affectArray($tableName, $dataarray)
+    public function affectArray($tableName, $dataarray, ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
         $opt['method_key'] = '@method';
 
         $builder = AffectBuilder::new($this);
@@ -4943,11 +4922,8 @@ class Database
         $results = [];
         foreach ($affects as $method => $rows) {
             foreach ($rows as $n => $args) {
-                $arguments = parameter_default([$this, $method], $args);
-                $arguments[] = ['primary' => 3] + $opt;
-
                 /** @var int|string $n */
-                $results[$n] = $this->$method(...$arguments);
+                $results[$n] = $this->$method(...$args, ...(['primary' => 3] + $opt));
                 if (!$dryrunning) {
                     $results[$n][''] = $this->getAffectedRows();
                 }
@@ -5044,11 +5020,8 @@ class Database
      * @param array $data 階層を持ったデータ配列
      * @return array|string[] 基本的には階層を持った主キー配列. dryrun 中は文字列配列
      */
-    public function save($tableName, $data)
+    public function save($tableName, $data, ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
-
         $TABLE_SEPARATOR = '/';
         $INDEX_SEPARATOR = '#';
         $SEPARATOR_REGEX = "#[" . preg_quote("{$TABLE_SEPARATOR}{$INDEX_SEPARATOR}", '#') . "]#";
@@ -5106,7 +5079,7 @@ class Database
             }
 
             // changeArray すれば主キーが得られる。主キーが得られれば外部キーに設定できるし返り値用に整形できる
-            $changed = $this->changeArray($tname, $rows, $parents ?: false, 'PRIMARY', [], $opt);
+            $changed = $this->changeArray($tname, $rows, $parents ?: false, 'PRIMARY', [], ...$opt);
             if ($dryrun) {
                 $primaries[$tname] = $changed[0];
                 $sqls = array_merge($sqls, $changed[1]);
@@ -5155,11 +5128,8 @@ class Database
      * @param mixed $data INSERT データ配列
      * @return int|array|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function insert($tableName, $data)
+    public function insert($tableName, $data, ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->insert($tableName, $data, opt: $opt);
 
@@ -5198,11 +5168,8 @@ class Database
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function update($tableName, $data, $where = [])
+    public function update($tableName, $data, $where = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->update($tableName, $data, $where, opt: $opt);
 
@@ -5268,11 +5235,8 @@ class Database
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function delete($tableName, $where = [])
+    public function delete($tableName, $where = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->delete($tableName, $where, opt: $opt);
 
@@ -5348,11 +5312,8 @@ class Database
      * @param ?array $invalid_columns 無効カラム値
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function invalid($tableName, $where, $invalid_columns = null)
+    public function invalid($tableName, $where, $invalid_columns = null, ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'where' => $where]);
 
@@ -5382,12 +5343,12 @@ class Database
                     }
                 }
                 else {
-                    $affecteds = array_merge($affecteds, arrayize($this->invalid($ltable, $subwhere, $lcolumns, array_remove($opt, ['primary', 'return']))));
+                    $affecteds = array_merge($affecteds, arrayize($this->invalid($ltable, $subwhere, $lcolumns, ...array_remove($opt, ['primary', 'return']))));
                 }
             }
         }
 
-        $affected = $this->update($builder->getTable(), $invalid_columns, $builder->getWhere(), $opt);
+        $affected = $this->update($builder->getTable(), $invalid_columns, $builder->getWhere(), ...$opt);
         if ($this->getUnsafeOption('dryrun')) {
             return array_merge($affecteds, arrayize($affected));
         }
@@ -5416,18 +5377,15 @@ class Database
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function revise($tableName, $data, $where = [])
+    public function revise($tableName, $data, $where = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'set' => $data, 'where' => $where]);
         $builder->build([
             'where' => $builder->restrictWheres('update'),
         ], true);
 
-        return $this->update($builder->getTable(), $builder->getSet(), $builder->getWhere(), $opt);
+        return $this->update($builder->getTable(), $builder->getSet(), $builder->getWhere(), ...$opt);
     }
 
     /**
@@ -5462,11 +5420,8 @@ class Database
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function upgrade($tableName, $data, $where = [])
+    public function upgrade($tableName, $data, $where = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'set' => $data, 'where' => $where]);
 
@@ -5488,11 +5443,11 @@ class Database
 
                     $ltable = first_key($schema->getForeignTable($fkey));
                     $subwhere = $builder->cascadeWheres($fkey);
-                    $affecteds = array_merge($affecteds, arrayize($this->upgrade($ltable, $subdata, $subwhere, array_remove($opt, ['primary', 'return']))));
+                    $affecteds = array_merge($affecteds, arrayize($this->upgrade($ltable, $subdata, $subwhere, ...array_remove($opt, ['primary', 'return']))));
                 }
             }
 
-            $affected = $this->update($builder->getTable(), $builder->getSet(), $builder->getWhere(), $opt);
+            $affected = $this->update($builder->getTable(), $builder->getSet(), $builder->getWhere(), ...$opt);
         }
         finally {
             foreach ($recoveries as $recovery) {
@@ -5527,18 +5482,15 @@ class Database
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function remove($tableName, $where = [])
+    public function remove($tableName, $where = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'where' => $where]);
         $builder->build([
             'where' => $builder->restrictWheres('delete'),
         ], true);
 
-        return $this->delete($builder->getTable(), $builder->getWhere(), $opt);
+        return $this->delete($builder->getTable(), $builder->getWhere(), ...$opt);
     }
 
     /**
@@ -5572,11 +5524,8 @@ class Database
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function destroy($tableName, $where = [])
+    public function destroy($tableName, $where = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'where' => $where]);
 
@@ -5587,11 +5536,11 @@ class Database
             if ($fkey->onDelete() === null) {
                 $ltable = first_key($schema->getForeignTable($fkey));
                 $subwhere = $builder->cascadeWheres($fkey);
-                $affecteds = array_merge($affecteds, arrayize($this->destroy($ltable, $subwhere, array_remove($opt, ['primary', 'return']))));
+                $affecteds = array_merge($affecteds, arrayize($this->destroy($ltable, $subwhere, ...array_remove($opt, ['primary', 'return']))));
             }
         }
 
-        $affected = $this->delete($builder->getTable(), $builder->getWhere(), $opt);
+        $affected = $this->delete($builder->getTable(), $builder->getWhere(), ...$opt);
         if ($this->getUnsafeOption('dryrun')) {
             return array_merge($affecteds, arrayize($affected));
         }
@@ -5633,11 +5582,8 @@ class Database
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function reduce($tableName, $limit = null, $orderBy = [], $groupBy = [], $where = [])
+    public function reduce($tableName, $limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 6 ? func_get_arg(5) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->reduce($tableName, $limit, $orderBy, $groupBy, $where, $opt);
 
@@ -5681,11 +5627,8 @@ class Database
      * @param mixed $updateData UPDATE データ配列
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function upsert($tableName, $insertData, $updateData = [])
+    public function upsert($tableName, $insertData, $updateData = [], ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 4 ? func_get_arg(3) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'constraint' => 'PRIMARY']);
 
@@ -5780,13 +5723,10 @@ class Database
      * @param string $uniquekey 重複チェックに使うユニークキー名
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function modify($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    public function modify($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 5 ? func_get_arg(4) : [];
-
         if (!$this->getCompatiblePlatform()->supportsMerge()) {
-            return $this->upsert($tableName, $insertData, $updateData ?: [], $opt);
+            return $this->upsert($tableName, $insertData, $updateData ?: [], ...$opt);
         }
 
         $builder = AffectBuilder::new($this);
@@ -5820,11 +5760,8 @@ class Database
      * @param mixed $data REPLACE データ配列
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
      */
-    public function replace($tableName, $data)
+    public function replace($tableName, $data, ...$opt)
     {
-        // 隠し引数 $opt
-        $opt = func_num_args() === 3 ? func_get_arg(2) : [];
-
         $builder = AffectBuilder::new($this);
         $builder->replace($tableName, $data, $opt);
 

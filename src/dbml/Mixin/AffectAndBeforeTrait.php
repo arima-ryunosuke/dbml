@@ -6,27 +6,18 @@ use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Exception\NonAffectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
 use function ryunosuke\dbml\parameter_default;
-use function ryunosuke\dbml\parameter_length;
 
 trait AffectAndBeforeTrait
 {
-    private function _invokeAffectAndBefore($method, $arguments)
-    {
-        $arity = parameter_length([$this, $method]);
-        $arguments = parameter_default([$this, $method], $arguments);
-        $arguments[$arity] = ($arguments[$arity] ?? []) + ['return' => 1];
-        return $this->$method(...$arguments);
-    }
-
     /**
      * レコードを返す {@uses Database::updateArray()}
      *
      * @inheritdoc Database::updateArray()
      */
-    private function updateArrayAndBeforeWithTable($tableName, $data, $where = [])
+    private function updateArrayAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('updateArray', func_get_args());
+        return $this->updateArray($tableName, $data, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -34,10 +25,10 @@ trait AffectAndBeforeTrait
      *
      * @inheritdoc TableGateway::updateArray()
      */
-    private function updateArrayAndBeforeWithoutTable($data, $where = [])
+    private function updateArrayAndBeforeWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('updateArray', func_get_args());
+        return $this->updateArray($data, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -45,10 +36,10 @@ trait AffectAndBeforeTrait
      *
      * @inheritdoc Database::deleteArray()
      */
-    private function deleteArrayAndBeforeWithTable($tableName, $where = [])
+    private function deleteArrayAndBeforeWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'deleteArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('deleteArray', func_get_args());
+        return $this->deleteArray($tableName, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -56,10 +47,10 @@ trait AffectAndBeforeTrait
      *
      * @inheritdoc TableGateway::deleteArray()
      */
-    private function deleteArrayAndBeforeWithoutTable($where = [])
+    private function deleteArrayAndBeforeWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'deleteArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('deleteArray', func_get_args());
+        return $this->deleteArray($where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -67,10 +58,10 @@ trait AffectAndBeforeTrait
      *
      * @inheritdoc Database::modifyArray()
      */
-    private function modifyArrayAndBeforeWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    private function modifyArrayAndBeforeWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('modifyArray', func_get_args());
+        return $this->modifyArray($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -78,10 +69,10 @@ trait AffectAndBeforeTrait
      *
      * @inheritdoc TableGateway::modifyArray()
      */
-    private function modifyArrayAndBeforeWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    private function modifyArrayAndBeforeWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('modifyArray', func_get_args());
+        return $this->modifyArray($insertData, $updateData, $uniquekey, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -90,10 +81,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::update()
      * @return array|string
      */
-    private function updateAndBeforeWithTable($tableName, $data, $where = [])
+    private function updateAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('update', func_get_args());
+        return $this->update($tableName, $data, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -102,10 +93,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::update()
      * @return array|string
      */
-    private function updateAndBeforeWithoutTable($data, $where = [])
+    private function updateAndBeforeWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('update', func_get_args());
+        return $this->update($data, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -114,10 +105,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::delete()
      * @return array|string
      */
-    private function deleteAndBeforeWithTable($tableName, $where = [])
+    private function deleteAndBeforeWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('delete', func_get_args());
+        return $this->delete($tableName, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -126,10 +117,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::delete()
      * @return array|string
      */
-    private function deleteAndBeforeWithoutTable($where = [])
+    private function deleteAndBeforeWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('delete', func_get_args());
+        return $this->delete($where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -138,10 +129,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::invalid()
      * @return array|string
      */
-    private function invalidAndBeforeWithTable($tableName, $where, $invalid_columns = null)
+    private function invalidAndBeforeWithTable($tableName, $where, $invalid_columns = null, ...$opt)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('invalid', func_get_args());
+        return $this->invalid($tableName, $where, $invalid_columns, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -150,10 +141,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::invalid()
      * @return array|string
      */
-    private function invalidAndBeforeWithoutTable($where = [], $invalid_columns = null)
+    private function invalidAndBeforeWithoutTable($where = [], $invalid_columns = null, ...$opt)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('invalid', func_get_args());
+        return $this->invalid($where, $invalid_columns, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -162,10 +153,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::revise()
      * @return array|string
      */
-    private function reviseAndBeforeWithTable($tableName, $data, $where = [])
+    private function reviseAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('revise', func_get_args());
+        return $this->revise($tableName, $data, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -174,10 +165,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::revise()
      * @return array|string
      */
-    private function reviseAndBeforeWithoutTable($data, $where = [])
+    private function reviseAndBeforeWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('revise', func_get_args());
+        return $this->revise($data, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -186,10 +177,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::upgrade()
      * @return array|string
      */
-    private function upgradeAndBeforeWithTable($tableName, $data, $where = [])
+    private function upgradeAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('upgrade', func_get_args());
+        return $this->upgrade($tableName, $data, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -198,10 +189,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::upgrade()
      * @return array|string
      */
-    private function upgradeAndBeforeWithoutTable($data, $where = [])
+    private function upgradeAndBeforeWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('upgrade', func_get_args());
+        return $this->upgrade($data, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -210,10 +201,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::remove()
      * @return array|string
      */
-    private function removeAndBeforeWithTable($tableName, $where = [])
+    private function removeAndBeforeWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('remove', func_get_args());
+        return $this->remove($tableName, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -222,10 +213,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::remove()
      * @return array|string
      */
-    private function removeAndBeforeWithoutTable($where = [])
+    private function removeAndBeforeWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('remove', func_get_args());
+        return $this->remove($where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -234,10 +225,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::destroy()
      * @return array|string
      */
-    private function destroyAndBeforeWithTable($tableName, $where = [])
+    private function destroyAndBeforeWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('destroy', func_get_args());
+        return $this->destroy($tableName, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -246,10 +237,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::destroy()
      * @return array|string
      */
-    private function destroyAndBeforeWithoutTable($where = [])
+    private function destroyAndBeforeWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('destroy', func_get_args());
+        return $this->destroy($where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -259,10 +250,10 @@ trait AffectAndBeforeTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function reduceAndBeforeWithTable($tableName, $limit = null, $orderBy = [], $groupBy = [], $where = [])
+    private function reduceAndBeforeWithTable($tableName, $limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'reduce']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('reduce', func_get_args());
+        return $this->reduce($tableName, $limit, $orderBy, $groupBy, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -272,10 +263,10 @@ trait AffectAndBeforeTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function reduceAndBeforeWithoutTable($limit = null, $orderBy = [], $groupBy = [], $where = [])
+    private function reduceAndBeforeWithoutTable($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'reduce']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('reduce', func_get_args());
+        return $this->reduce($limit, $orderBy, $groupBy, $where, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -284,10 +275,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::upsert()
      * @return array|string
      */
-    private function upsertAndBeforeWithTable($tableName, $insertData, $updateData = [])
+    private function upsertAndBeforeWithTable($tableName, $insertData, $updateData = [], ...$opt)
     {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('upsert', func_get_args());
+        return $this->upsert($tableName, $insertData, $updateData, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -296,10 +287,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::upsert()
      * @return array|string
      */
-    private function upsertAndBeforeWithoutTable($insertData, $updateData = [])
+    private function upsertAndBeforeWithoutTable($insertData, $updateData = [], ...$opt)
     {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('upsert', func_get_args());
+        return $this->upsert($insertData, $updateData, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -308,10 +299,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::modify()
      * @return array|string
      */
-    private function modifyAndBeforeWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    private function modifyAndBeforeWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('modify', func_get_args());
+        return $this->modify($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -320,10 +311,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::modify()
      * @return array|string
      */
-    private function modifyAndBeforeWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    private function modifyAndBeforeWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('modify', func_get_args());
+        return $this->modify($insertData, $updateData, $uniquekey, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -332,10 +323,10 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::replace()
      * @return array|string
      */
-    private function replaceAndBeforeWithTable($tableName, $data)
+    private function replaceAndBeforeWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('replace', func_get_args());
+        return $this->replace($tableName, $data, ...($opt + ['return' => 1]));
     }
 
     /**
@@ -344,9 +335,9 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::replace()
      * @return array|string
      */
-    private function replaceAndBeforeWithoutTable($data)
+    private function replaceAndBeforeWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndBefore('replace', func_get_args());
+        return $this->replace($data, ...($opt + ['return' => 1]));
     }
 }

@@ -1929,67 +1929,67 @@ AND ((flag=1))", "$gw");
                 $this->called = &$called;
             }
 
-            public function insert($data)
+            public function insert($data, ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function update($data, $where = [])
+            public function update($data, $where = [], ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function delete($where = [])
+            public function delete($where = [], ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function invalid($where = [], ?array $invalid_columns = null)
+            public function invalid($where = [], ?array $invalid_columns = null, ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function remove($where = [])
+            public function remove($where = [], ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function destroy($where = [])
+            public function destroy($where = [], ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [])
+            public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function create($data)
+            public function create($data, ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function upsert($insertData, $updateData = [])
+            public function upsert($insertData, $updateData = [], ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function modify($insertData, $updateData = [], $uniquekey = 'PRIMARY')
+            public function modify($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());
             }
 
-            public function replace($insertData)
+            public function replace($insertData, ...$opt)
             {
                 $this->called[] = __FUNCTION__;
                 return parent::{__FUNCTION__}(...func_get_args());

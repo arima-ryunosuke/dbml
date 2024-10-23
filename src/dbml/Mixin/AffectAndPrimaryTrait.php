@@ -5,28 +5,19 @@ namespace ryunosuke\dbml\Mixin;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Gateway\TableGateway;
 use function ryunosuke\dbml\parameter_default;
-use function ryunosuke\dbml\parameter_length;
 
 trait AffectAndPrimaryTrait
 {
-    private function _invokeAffectAndPrimary($method, $arguments)
-    {
-        $arity = parameter_length([$this, $method]);
-        $arguments = parameter_default([$this, $method], $arguments);
-        $arguments[$arity] = ($arguments[$arity] ?? []) + ['primary' => 3];
-        return $this->$method(...$arguments);
-    }
-
     /**
      * 主キーを返す {@uses Database::insertArray()}
      *
      * @inheritdoc Database::insertArray()
      * @return array|string
      */
-    private function insertArrayAndPrimaryWithTable($tableName, $data)
+    private function insertArrayAndPrimaryWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('insertArray', func_get_args());
+        return $this->insertArray($tableName, $data, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -35,10 +26,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::insertArray()
      * @return array|string
      */
-    private function insertArrayAndPrimaryWithoutTable($data)
+    private function insertArrayAndPrimaryWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('insertArray', func_get_args());
+        return $this->insertArray($data, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -47,10 +38,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::modifyArray()
      * @return array|string
      */
-    private function modifyArrayAndPrimaryWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    private function modifyArrayAndPrimaryWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('modifyArray', func_get_args());
+        return $this->modifyArray($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -59,10 +50,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::modifyArray()
      * @return array|string
      */
-    private function modifyArrayAndPrimaryWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    private function modifyArrayAndPrimaryWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('modifyArray', func_get_args());
+        return $this->modifyArray($insertData, $updateData, $uniquekey, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -71,10 +62,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::insert()
      * @return array|string
      */
-    private function insertAndPrimaryWithTable($tableName, $data)
+    private function insertAndPrimaryWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'insert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('insert', func_get_args());
+        return $this->insert($tableName, $data, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -83,10 +74,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::insert()
      * @return array|string
      */
-    private function insertAndPrimaryWithoutTable($data)
+    private function insertAndPrimaryWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'insert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('insert', func_get_args());
+        return $this->insert($data, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -95,10 +86,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::update()
      * @return array|string
      */
-    private function updateAndPrimaryWithTable($tableName, $data, $where = [])
+    private function updateAndPrimaryWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('update', func_get_args());
+        return $this->update($tableName, $data, $where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -107,10 +98,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::update()
      * @return array|string
      */
-    private function updateAndPrimaryWithoutTable($data, $where = [])
+    private function updateAndPrimaryWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('update', func_get_args());
+        return $this->update($data, $where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -119,10 +110,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::delete()
      * @return array|string
      */
-    private function deleteAndPrimaryWithTable($tableName, $where = [])
+    private function deleteAndPrimaryWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('delete', func_get_args());
+        return $this->delete($tableName, $where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -131,10 +122,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::delete()
      * @return array|string
      */
-    private function deleteAndPrimaryWithoutTable($where = [])
+    private function deleteAndPrimaryWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('delete', func_get_args());
+        return $this->delete($where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -143,10 +134,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::invalid()
      * @return array|string
      */
-    private function invalidAndPrimaryWithTable($tableName, $where, $invalid_columns = null)
+    private function invalidAndPrimaryWithTable($tableName, $where, $invalid_columns = null, ...$opt)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('invalid', func_get_args());
+        return $this->invalid($tableName, $where, $invalid_columns, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -155,10 +146,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::invalid()
      * @return array|string
      */
-    private function invalidAndPrimaryWithoutTable($where = [], $invalid_columns = null)
+    private function invalidAndPrimaryWithoutTable($where = [], $invalid_columns = null, ...$opt)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('invalid', func_get_args());
+        return $this->invalid($where, $invalid_columns, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -167,10 +158,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::revise()
      * @return array|string
      */
-    private function reviseAndPrimaryWithTable($tableName, $data, $where = [])
+    private function reviseAndPrimaryWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('revise', func_get_args());
+        return $this->revise($tableName, $data, $where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -179,10 +170,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::revise()
      * @return array|string
      */
-    private function reviseAndPrimaryWithoutTable($data, $where = [])
+    private function reviseAndPrimaryWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('revise', func_get_args());
+        return $this->revise($data, $where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -191,10 +182,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::upgrade()
      * @return array|string
      */
-    private function upgradeAndPrimaryWithTable($tableName, $data, $where = [])
+    private function upgradeAndPrimaryWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('upgrade', func_get_args());
+        return $this->upgrade($tableName, $data, $where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -203,10 +194,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::upgrade()
      * @return array|string
      */
-    private function upgradeAndPrimaryWithoutTable($data, $where = [])
+    private function upgradeAndPrimaryWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('upgrade', func_get_args());
+        return $this->upgrade($data, $where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -215,10 +206,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::remove()
      * @return array|string
      */
-    private function removeAndPrimaryWithTable($tableName, $where = [])
+    private function removeAndPrimaryWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('remove', func_get_args());
+        return $this->remove($tableName, $where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -227,10 +218,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::remove()
      * @return array|string
      */
-    private function removeAndPrimaryWithoutTable($where = [])
+    private function removeAndPrimaryWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('remove', func_get_args());
+        return $this->remove($where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -239,10 +230,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::destroy()
      * @return array|string
      */
-    private function destroyAndPrimaryWithTable($tableName, $where = [])
+    private function destroyAndPrimaryWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('destroy', func_get_args());
+        return $this->destroy($tableName, $where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -251,10 +242,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::destroy()
      * @return array|string
      */
-    private function destroyAndPrimaryWithoutTable($where = [])
+    private function destroyAndPrimaryWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('destroy', func_get_args());
+        return $this->destroy($where, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -263,10 +254,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::upsert()
      * @return array|string
      */
-    private function upsertAndPrimaryWithTable($tableName, $insertData, $updateData = [])
+    private function upsertAndPrimaryWithTable($tableName, $insertData, $updateData = [], ...$opt)
     {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('upsert', func_get_args());
+        return $this->upsert($tableName, $insertData, $updateData, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -275,10 +266,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::upsert()
      * @return array|string
      */
-    private function upsertAndPrimaryWithoutTable($insertData, $updateData = [])
+    private function upsertAndPrimaryWithoutTable($insertData, $updateData = [], ...$opt)
     {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('upsert', func_get_args());
+        return $this->upsert($insertData, $updateData, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -287,10 +278,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::modify()
      * @return array|string
      */
-    private function modifyAndPrimaryWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    private function modifyAndPrimaryWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('modify', func_get_args());
+        return $this->modify($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -299,10 +290,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::modify()
      * @return array|string
      */
-    private function modifyAndPrimaryWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    private function modifyAndPrimaryWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('modify', func_get_args());
+        return $this->modify($insertData, $updateData, $uniquekey, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -311,10 +302,10 @@ trait AffectAndPrimaryTrait
      * @inheritdoc Database::replace()
      * @return array|string
      */
-    private function replaceAndPrimaryWithTable($tableName, $data)
+    private function replaceAndPrimaryWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('replace', func_get_args());
+        return $this->replace($tableName, $data, ...($opt + ['primary' => 3]));
     }
 
     /**
@@ -323,9 +314,9 @@ trait AffectAndPrimaryTrait
      * @inheritdoc TableGateway::replace()
      * @return array|string
      */
-    private function replaceAndPrimaryWithoutTable($data)
+    private function replaceAndPrimaryWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectAndPrimary('replace', func_get_args());
+        return $this->replace($data, ...($opt + ['primary' => 3]));
     }
 }

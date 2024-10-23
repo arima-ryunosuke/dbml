@@ -2228,10 +2228,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::insertSelect()
      */
-    public function insertSelect($sql, $columns = [], iterable $params = [])
+    public function insertSelect($sql, $columns = [], iterable $params = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->insertSelect($this, ...func_get_args());
+        return $this->database->insertSelect($this, $sql, $columns, $params, ...$opt);
     }
 
     /**
@@ -2242,10 +2242,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::insertArray()
      */
-    public function insertArray($data)
+    public function insertArray($data, ...$opt)
     {
         $this->resetResult();
-        return $this->database->insertArray($this, ...func_get_args());
+        return $this->database->insertArray($this, $data, ...$opt);
     }
 
     /**
@@ -2256,10 +2256,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::updateArray()
      */
-    public function updateArray($data, $where = [])
+    public function updateArray($data, $where = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->updateArray($this, ...func_get_args());
+        return $this->database->updateArray($this, $data, $where, ...$opt);
     }
 
     /**
@@ -2270,10 +2270,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::deleteArray()
      */
-    public function deleteArray($where = [])
+    public function deleteArray($where = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->deleteArray($this, ...func_get_args());
+        return $this->database->deleteArray($this, $where, ...$opt);
     }
 
     /**
@@ -2284,10 +2284,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::modifyArray()
      */
-    public function modifyArray($insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    public function modifyArray($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         $this->resetResult();
-        return $this->database->modifyArray($this, ...func_get_args());
+        return $this->database->modifyArray($this, $insertData, $updateData, $uniquekey, ...$opt);
     }
 
     /**
@@ -2297,10 +2297,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::changeArray()
      */
-    public function changeArray($dataarray, $where, $uniquekey = 'PRIMARY', $returning = [])
+    public function changeArray($dataarray, $where, $uniquekey = 'PRIMARY', $returning = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->changeArray($this->tableName, ...func_get_args());
+        return $this->database->changeArray($this->tableName, $dataarray, $where, $uniquekey, $returning, ...$opt);
     }
 
     /**
@@ -2310,10 +2310,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::affectArray()
      */
-    public function affectArray($dataarray)
+    public function affectArray($dataarray, ...$opt)
     {
         $this->resetResult();
-        return $this->database->affectArray($this->tableName, ...func_get_args());
+        return $this->database->affectArray($this->tableName, $dataarray, ...$opt);
     }
 
     /**
@@ -2323,10 +2323,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::save()
      */
-    public function save($data)
+    public function save($data, ...$opt)
     {
         $this->resetResult();
-        return $this->database->save($this->tableName, ...func_get_args());
+        return $this->database->save($this->tableName, $data, ...$opt);
     }
 
     /**
@@ -2338,10 +2338,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::insert()
      */
-    public function insert($data)
+    public function insert($data, ...$opt)
     {
         $this->resetResult();
-        return $this->database->insert($this, ...func_get_args());
+        return $this->database->insert($this, $data, ...$opt);
     }
 
     /**
@@ -2354,10 +2354,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::update()
      */
-    public function update($data, $where = [])
+    public function update($data, $where = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->update($this, ...func_get_args());
+        return $this->database->update($this, $data, $where, ...$opt);
     }
 
     /**
@@ -2370,10 +2370,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::delete()
      */
-    public function delete($where = [])
+    public function delete($where = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->delete($this, ...func_get_args());
+        return $this->database->delete($this, $where, ...$opt);
     }
 
     /**
@@ -2386,10 +2386,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::invalid()
      */
-    public function invalid($where = [], ?array $invalid_columns = null)
+    public function invalid($where = [], ?array $invalid_columns = null, ...$opt)
     {
         $this->resetResult();
-        return $this->database->invalid($this, ...func_get_args());
+        return $this->database->invalid($this, $where, $invalid_columns, ...$opt);
     }
 
     /**
@@ -2402,10 +2402,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::revise()
      */
-    public function revise($data, $where = [])
+    public function revise($data, $where = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->revise($this, ...func_get_args());
+        return $this->database->revise($this, $data, $where, ...$opt);
     }
 
     /**
@@ -2418,10 +2418,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::upgrade()
      */
-    public function upgrade($data, $where = [])
+    public function upgrade($data, $where = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->upgrade($this, ...func_get_args());
+        return $this->database->upgrade($this, $data, $where, ...$opt);
     }
 
     /**
@@ -2434,10 +2434,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::remove()
      */
-    public function remove($where = [])
+    public function remove($where = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->remove($this, ...func_get_args());
+        return $this->database->remove($this, $where, ...$opt);
     }
 
     /**
@@ -2450,10 +2450,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::destroy()
      */
-    public function destroy($where = [])
+    public function destroy($where = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->destroy($this, ...func_get_args());
+        return $this->database->destroy($this, $where, ...$opt);
     }
 
     /**
@@ -2464,10 +2464,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::reduce()
      */
-    public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [])
+    public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->reduce($this, ...func_get_args());
+        return $this->database->reduce($this, $limit, $orderBy, $groupBy, $where, ...$opt);
     }
 
     /**
@@ -2479,10 +2479,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::upsert()
      */
-    public function upsert($insertData, $updateData = [])
+    public function upsert($insertData, $updateData = [], ...$opt)
     {
         $this->resetResult();
-        return $this->database->upsert($this, ...func_get_args());
+        return $this->database->upsert($this, $insertData, $updateData, ...$opt);
     }
 
     /**
@@ -2495,10 +2495,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::modify()
      */
-    public function modify($insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    public function modify($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         $this->resetResult();
-        return $this->database->modify($this, ...func_get_args());
+        return $this->database->modify($this, $insertData, $updateData, $uniquekey, ...$opt);
     }
 
     /**
@@ -2510,10 +2510,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::replace()
      */
-    public function replace($insertData)
+    public function replace($data, ...$opt)
     {
         $this->resetResult();
-        return $this->database->replace($this, ...func_get_args());
+        return $this->database->replace($this, $data, ...$opt);
     }
 
     /**

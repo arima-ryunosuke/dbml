@@ -6,18 +6,9 @@ use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Exception\NonAffectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
 use function ryunosuke\dbml\parameter_default;
-use function ryunosuke\dbml\parameter_length;
 
 trait AffectOrThrowTrait
 {
-    private function _invokeAffectOrThrow($method, $arguments)
-    {
-        $arity = parameter_length([$this, $method]);
-        $arguments = parameter_default([$this, $method], $arguments);
-        $arguments[$arity] = ($arguments[$arity] ?? []) + ['primary' => 1];
-        return $this->$method(...$arguments);
-    }
-
     /**
      * 作用行が 0 のときに例外を投げる {@uses Database::insertArray()}
      *
@@ -28,10 +19,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    public function insertArrayOrThrowWithTable($tableName, $data)
+    public function insertArrayOrThrowWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('insertArray', func_get_args());
+        return $this->insertArray($tableName, $data, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -41,10 +32,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function insertArrayOrThrowWithoutTable($data)
+    private function insertArrayOrThrowWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('insertArray', func_get_args());
+        return $this->insertArray($data, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -57,9 +48,9 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    public function createWithTable($tableName, $data)
+    public function createWithTable($tableName, $data, ...$opt)
     {
-        return $this->insertOrThrowWithTable(...func_get_args());
+        return $this->insertOrThrowWithTable($tableName, $data, ...$opt);
     }
 
     /**
@@ -68,9 +59,9 @@ trait AffectOrThrowTrait
      * @inheritdoc TableGateway::insert()
      * @see createWithTable()
      */
-    public function createWithoutTable($data)
+    public function createWithoutTable($data, ...$opt)
     {
-        return $this->insertOrThrowWithoutTable(...func_get_args());
+        return $this->insertOrThrowWithoutTable($data, ...$opt);
     }
 
     /**
@@ -80,10 +71,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function insertOrThrowWithTable($tableName, $data)
+    private function insertOrThrowWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'insert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('insert', func_get_args());
+        return $this->insert($tableName, $data, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -93,10 +84,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function insertOrThrowWithoutTable($data)
+    private function insertOrThrowWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'insert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('insert', func_get_args());
+        return $this->insert($data, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -106,10 +97,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function updateOrThrowWithTable($tableName, $data, $where = [])
+    private function updateOrThrowWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('update', func_get_args());
+        return $this->update($tableName, $data, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -119,10 +110,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function updateOrThrowWithoutTable($data, $where = [])
+    private function updateOrThrowWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('update', func_get_args());
+        return $this->update($data, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -132,10 +123,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function deleteOrThrowWithTable($tableName, $where = [])
+    private function deleteOrThrowWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('delete', func_get_args());
+        return $this->delete($tableName, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -145,10 +136,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function deleteOrThrowWithoutTable($where = [])
+    private function deleteOrThrowWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('delete', func_get_args());
+        return $this->delete($where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -158,10 +149,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function invalidOrThrowWithTable($tableName, $where, $invalid_columns = null)
+    private function invalidOrThrowWithTable($tableName, $where, $invalid_columns = null, ...$opt)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('invalid', func_get_args());
+        return $this->invalid($tableName, $where, $invalid_columns, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -171,10 +162,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function invalidOrThrowWithoutTable($where = [], $invalid_columns = null)
+    private function invalidOrThrowWithoutTable($where = [], $invalid_columns = null, ...$opt)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('invalid', func_get_args());
+        return $this->invalid($where, $invalid_columns, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -184,10 +175,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function reviseOrThrowWithTable($tableName, $data, $where = [])
+    private function reviseOrThrowWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('revise', func_get_args());
+        return $this->revise($tableName, $data, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -197,10 +188,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function reviseOrThrowWithoutTable($data, $where = [])
+    private function reviseOrThrowWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('revise', func_get_args());
+        return $this->revise($data, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -210,10 +201,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function upgradeOrThrowWithTable($tableName, $data, $where = [])
+    private function upgradeOrThrowWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('upgrade', func_get_args());
+        return $this->upgrade($tableName, $data, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -223,10 +214,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function upgradeOrThrowWithoutTable($data, $where = [])
+    private function upgradeOrThrowWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('upgrade', func_get_args());
+        return $this->upgrade($data, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -236,10 +227,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function removeOrThrowWithTable($tableName, $where = [])
+    private function removeOrThrowWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('remove', func_get_args());
+        return $this->remove($tableName, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -249,10 +240,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function removeOrThrowWithoutTable($where = [])
+    private function removeOrThrowWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('remove', func_get_args());
+        return $this->remove($where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -262,10 +253,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function destroyOrThrowWithTable($tableName, $where = [])
+    private function destroyOrThrowWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('destroy', func_get_args());
+        return $this->destroy($tableName, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -275,10 +266,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function destroyOrThrowWithoutTable($where = [])
+    private function destroyOrThrowWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('destroy', func_get_args());
+        return $this->destroy($where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -288,10 +279,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function reduceOrThrowWithTable($tableName, $limit = null, $orderBy = [], $groupBy = [], $where = [])
+    private function reduceOrThrowWithTable($tableName, $limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'reduce']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('reduce', func_get_args());
+        return $this->reduce($tableName, $limit, $orderBy, $groupBy, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -301,10 +292,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function reduceOrThrowWithoutTable($limit = null, $orderBy = [], $groupBy = [], $where = [])
+    private function reduceOrThrowWithoutTable($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'reduce']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('reduce', func_get_args());
+        return $this->reduce($limit, $orderBy, $groupBy, $where, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -314,10 +305,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function upsertOrThrowWithTable($tableName, $insertData, $updateData = [])
+    private function upsertOrThrowWithTable($tableName, $insertData, $updateData = [], ...$opt)
     {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('upsert', func_get_args());
+        return $this->upsert($tableName, $insertData, $updateData, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -327,10 +318,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function upsertOrThrowWithoutTable($insertData, $updateData = [])
+    private function upsertOrThrowWithoutTable($insertData, $updateData = [], ...$opt)
     {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('upsert', func_get_args());
+        return $this->upsert($insertData, $updateData, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -340,10 +331,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function modifyOrThrowWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    private function modifyOrThrowWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('modify', func_get_args());
+        return $this->modify($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -353,10 +344,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function modifyOrThrowWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY')
+    private function modifyOrThrowWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('modify', func_get_args());
+        return $this->modify($insertData, $updateData, $uniquekey, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -366,10 +357,10 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function replaceOrThrowWithTable($tableName, $data)
+    private function replaceOrThrowWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('replace', func_get_args());
+        return $this->replace($tableName, $data, ...($opt + ['primary' => 1]));
     }
 
     /**
@@ -379,9 +370,9 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function replaceOrThrowWithoutTable($data)
+    private function replaceOrThrowWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
-        return $this->_invokeAffectOrThrow('replace', func_get_args());
+        return $this->replace($data, ...($opt + ['primary' => 1]));
     }
 }
