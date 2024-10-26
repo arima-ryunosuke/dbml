@@ -4012,7 +4012,6 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         // 空のテスト
         file_put_contents($csvfile, '');
-        $this->assertEquals(0, $database->loadCsv('nullable', $csvfile, ['chunk' => 0]));
         $this->assertEquals(0, $database->loadCsv('nullable', $csvfile, ['chunk' => 1]));
 
         // skip と chunk
@@ -4024,8 +4023,9 @@ id,name,cint,cfloat,cdecimal
 CSV
         );
         $database->delete('nullable');
-        $this->assertEquals(3, $database->context(['defaultChunk' => 2])->loadCsv('nullable', $csvfile_head, [
-            'skip' => 1,
+        $this->assertEquals(3, $database->loadCsv('nullable', $csvfile_head, [
+            'skip'  => 1,
+            'chunk' => 2,
         ]));
         $this->assertEquals([
             ['id' => '1', 'name' => 'name1', 'cint' => '1', 'cfloat' => '1.1', 'cdecimal' => '1.11',],
@@ -4104,7 +4104,7 @@ CSV
         $this->assertEquals([
             "INSERT INTO nullable (id, name, cint, cfloat, cdecimal) VALUES ('1', 'name1', '1', '1.1', '1.11'), ('2', 'name2', '2', '2.2', '2.22')",
             "INSERT INTO nullable (id, name, cint, cfloat, cdecimal) VALUES ('3', 'name3', '3', '3.3', '3.33')",
-        ], $database->context(['dryrun' => true, 'defaultChunk' => 2])->loadCsv('nullable', $csvfile));
+        ], $database->dryrun()->loadCsv('nullable', $csvfile, ['chunk' => 2]));
 
         // カバレッジのために SQL 検証はしておく（実際のテストはすぐ↓）
         if (!$database->getPlatform() instanceof MySQLPlatform) {
@@ -4359,36 +4359,33 @@ CSV
             $namequery = $database->select('test.name', [], ['id' => 'desc']);
 
             // チャンク(1)
-            $database = $database->context(['defaultChunk' => 1]);
             $affected = $database->insertArray('test', [
                 ['name' => 'a'],
                 ['name' => 'b'],
                 ['name' => 'c'],
-            ]);
+            ], chunk: 1);
             // 3件追加したら 3 が返るはず
             $this->assertEquals(3, $affected);
             // ケツから3件取れば突っ込んだデータのはず(ただし逆順)
             $this->assertEquals(['c', 'b', 'a'], $database->fetchLists($namequery->limit($affected)));
 
             // チャンク(2)
-            $database = $database->context(['defaultChunk' => 2]);
             $affected = $database->insertArray('test', [
                 ['name' => 'a'],
                 ['name' => 'b'],
                 ['name' => 'c'],
-            ]);
+            ], chunk: 2);
             // 3件追加したら 3 が返るはず
             $this->assertEquals(3, $affected);
             // ケツから3件取れば突っ込んだデータのはず(ただし逆順)
             $this->assertEquals(['c', 'b', 'a'], $database->fetchLists($namequery->limit($affected)));
 
             // チャンク(3)
-            $database = $database->context(['defaultChunk' => 3]);
             $affected = $database->insertArray('test', [
                 ['name' => 'a'],
                 ['name' => 'b'],
                 ['name' => 'c'],
-            ]);
+            ], chunk: 3);
             // 3件追加したら 3 が返るはず
             $this->assertEquals(3, $affected);
             // ケツから3件取れば突っ込んだデータのはず(ただし逆順)
@@ -4449,13 +4446,12 @@ INSERT INTO test (name) VALUES
 (UPPER('c')),
 ((SELECT UPPER(name1) FROM test1 WHERE id = '4'))", $affected[0]);
 
-        $database = $database->context(['defaultChunk' => 3]);
         $affected = $database->dryrun()->insertArray('test', [
             ['name' => 'a'],
             ['name' => new Expression('UPPER(\'b\')')],
             ['name' => new Expression('UPPER(?)', 'c')],
             ['name' => $database->select('test1.UPPER(name1)', ['id' => 4])],
-        ]);
+        ], chunk: 3);
         $this->assertStringIgnoreBreak("
 INSERT INTO test (name) VALUES
 ('a'),
@@ -4520,8 +4516,7 @@ INSERT INTO test (name) VALUES
                 ['id' => 6, 'name' => 'f'],
             ];
 
-            $database = $database->context(['defaultChunk' => 2]);
-            $affected = $database->updateArray('test', $data, ['id <> ?' => 5]);
+            $affected = $database->updateArray('test', $data, ['id <> ?' => 5], chunk: 2);
 
             // 6件与えているが、変更されるのは4件のはず(pdo-mysql の場合。他DBMSは5件)
             $expected = $database->getCompatibleConnection()->getName() === 'pdo-mysql' ? 4 : 5;
@@ -4703,8 +4698,7 @@ INSERT INTO test (name) VALUES
                 ['id' => 6, 'name' => 'f'],
             ];
 
-            $database = $database->context(['defaultChunk' => 2]);
-            $affected = $database->deleteArray('test', $where);
+            $affected = $database->deleteArray('test', $where, chunk: 2);
 
             // 6件与えているが、削除されるのは2件（id:1,name:a id:6,name:f）のはず（他は UPPER をかましてるので一致しない）
             $this->assertEquals(2, $affected);
@@ -4825,12 +4819,11 @@ INSERT INTO test (name) VALUES
         // ログを見たいので全体を preview で囲む
         $logs = $database->preview(function (Database $database) {
             // チャンク(1)
-            $database = $database->context(['defaultChunk' => 1]);
             $affected = $database->modifyArray('test', [
                 ['id' => 1, 'name' => 'U1'],
                 ['id' => 2, 'name' => 'U2'],
                 ['id' => 93, 'name' => 'A1'],
-            ], []);
+            ], chunk: 1);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 3affected
             if ($database->getCompatiblePlatform()->getName() === 'mysql') {
                 $expected = 5;
@@ -4843,12 +4836,11 @@ INSERT INTO test (name) VALUES
             $this->assertEquals(['U1', 'U2', 'A1'], $database->selectLists('test.name', ['id' => [1, 2, 93]]));
 
             // チャンク(2件updateData)
-            $database = $database->context(['defaultChunk' => 2]);
             $affected = $database->modifyArray('test', [
                 ['id' => 3, 'name' => 'U1'],
                 ['id' => 4, 'name' => 'U2'],
                 ['id' => 95, 'name' => 'A1'],
-            ], ['name' => 'U']);
+            ], ['name' => 'U'], chunk: 2);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 3affected
             if ($database->getCompatiblePlatform()->getName() === 'mysql') {
                 $expected = 5;
@@ -4861,13 +4853,12 @@ INSERT INTO test (name) VALUES
             $this->assertEquals(['U', 'U', 'A1'], $database->selectLists('test.name', ['id' => [3, 4, 95]]));
 
             // チャンク(3)
-            $database = $database->context(['defaultChunk' => 3]);
             $affected = $database->modifyArray('test', [
                 ['id' => 3, 'name' => 'U'],
                 ['id' => 4, 'name' => 'U1'],
                 ['id' => 5, 'name' => 'U2'],
                 ['id' => 96, 'name' => 'A1'],
-            ], []);
+            ], chunk: 3);
             // mysql は 2件変更・1件追加で計5affected, sqlite は単純に 4affected
             if ($database->getCompatiblePlatform()->getName() === 'mysql') {
                 $expected = 5;
@@ -4967,8 +4958,7 @@ INSERT INTO test (id, name) VALUES
 ('991', 'zzz')
 {$merge(['id'])} data = 'hoge', name = 'A'", $affected[0]);
 
-        $database = $database->context(['defaultChunk' => 4]);
-        $affected = $database->dryrun()->modifyArray('test', $data, ['name' => 'hoge']);
+        $affected = $database->dryrun()->modifyArray('test', $data, ['name' => 'hoge'], chunk: 4);
         $this->assertStringIgnoreBreak("
 INSERT INTO test (id, name) VALUES
 ('1', 'A'),
@@ -4977,8 +4967,7 @@ INSERT INTO test (id, name) VALUES
 ('4', (SELECT UPPER(name1) FROM test1 WHERE id = '4'))
 {$merge(['id'])} name = 'hoge'", $affected[0]);
 
-        $database = $database->context(['defaultChunk' => 4]);
-        $affected = $database->dryrun()->modifyArray('test', $data, ['name' => 'hoge']);
+        $affected = $database->dryrun()->modifyArray('test', $data, ['name' => 'hoge'], chunk: 4);
         $this->assertStringIgnoreBreak("
 INSERT INTO test (id, name) VALUES
 ('990', 'nothing'),

@@ -945,14 +945,14 @@ class Database
         };
     }
 
-    private function _getChunk()
+    private function _getChunk(?int $chunk)
     {
         // ステートメントが複数に分かれても全く嬉しくないので prepare 中は無効にする
         if ($this->getUnsafeOption('preparing')) {
             return null;
         }
 
-        $chunk = $this->getUnsafeOption('defaultChunk');
+        $chunk ??= $this->getUnsafeOption('defaultChunk');
         // 特殊設定: params の数でチャンク
         if (is_string($chunk) && preg_match('#^params:\s*(\d+)$#', trim($chunk), $matches)) {
             $count = 0;
@@ -3964,7 +3964,7 @@ class Database
             case 'insert':
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
                 if ($opt['bulk']) {
-                    $results[] = $db->insertArray($tableName, $records, $opt['chunk'], ...$opt);
+                    $results[] = $db->insertArray($tableName, $records, ...$opt);
                 }
                 else {
                     foreach ($records as $record) {
@@ -3975,7 +3975,7 @@ class Database
             case 'update':
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
                 if ($opt['bulk']) {
-                    $results[] = $db->updateArray($tableName, $records, [], $opt['chunk'], ...$opt);
+                    $results[] = $db->updateArray($tableName, $records, [], ...$opt);
                 }
                 else {
                     $keys = array_map(fn($record) => array_intersect_key($record, $primary), $records);
@@ -3999,7 +3999,7 @@ class Database
             case 'modify':
                 $db = $opt['dryrun'] ? $this->dryrun() : $this;
                 if ($opt['bulk']) {
-                    $results[] = $db->modifyArray($tableName, $records, [], 'PRIMARY', $opt['chunk'], ...$opt);
+                    $results[] = $db->modifyArray($tableName, $records, [], 'PRIMARY', ...$opt);
                 }
                 else {
                     foreach ($records as $record) {
@@ -4266,7 +4266,7 @@ class Database
             $builder = AffectBuilder::new($this);
             $builder->build(['table' => $tableName]);
             $affecteds = [];
-            foreach (iterator_chunk($file, $this->_getChunk() ?? PHP_INT_MAX, true) as $rows) {
+            foreach (iterator_chunk($file, $this->_getChunk($options['chunk']) ?? PHP_INT_MAX, true) as $rows) {
                 $builder->loadCsv(null, $column, $rows, $options);
 
                 $affecteds[] = $builder->execute();
@@ -4359,7 +4359,7 @@ class Database
 
         $returns = [];
         $affecteds = [];
-        foreach (iterator_chunk($data, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
+        foreach (iterator_chunk($data, $this->_getChunk($opt['chunk'] ?? null) ?? PHP_INT_MAX) as $rows) {
             $builder->build([
                 'values' => $rows,
             ]);
@@ -4414,7 +4414,7 @@ class Database
 
         $returns = [];
         $affecteds = [];
-        foreach (iterator_chunk($data, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
+        foreach (iterator_chunk($data, $this->_getChunk($opt['chunk'] ?? null) ?? PHP_INT_MAX) as $rows) {
             $builder->build([
                 'values' => $rows,
                 'column' => [], // 可変なので指定しない
@@ -4480,7 +4480,7 @@ class Database
 
         $returns = [];
         $affecteds = [];
-        foreach (iterator_chunk($where, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
+        foreach (iterator_chunk($where, $this->_getChunk($opt['chunk'] ?? null) ?? PHP_INT_MAX) as $rows) {
             $builder->build([
                 'where' => [iterator_to_array($rows)],
             ]);
@@ -4573,7 +4573,7 @@ class Database
 
         $returns = [];
         $affecteds = [];
-        foreach (iterator_chunk($insertData, $this->_getChunk() ?? PHP_INT_MAX) as $rows) {
+        foreach (iterator_chunk($insertData, $this->_getChunk($opt['chunk'] ?? null) ?? PHP_INT_MAX) as $rows) {
             $builder->build([
                 'values' => $rows,
                 'merge'  => $updateData,
