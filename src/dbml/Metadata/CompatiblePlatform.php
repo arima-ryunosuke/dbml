@@ -16,6 +16,7 @@ use ryunosuke\dbml\Mixin\FactoryTrait;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Queryable;
 use function ryunosuke\dbml\array_each;
+use function ryunosuke\dbml\array_sprintf;
 use function ryunosuke\dbml\array_strpad;
 use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\class_shorten;
@@ -365,7 +366,12 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return "ON CONFLICT($constraint) DO UPDATE SET";
         }
         if ($this->platform instanceof MySQLPlatform) {
-            return "ON DUPLICATE KEY UPDATE";
+            if (version_compare($this->version, '8.0.19') >= 0) {
+                return "AS excluded ON DUPLICATE KEY UPDATE";
+            }
+            else {
+                return "ON DUPLICATE KEY UPDATE";
+            }
         }
         if ($this->platform instanceof PostgreSQLPlatform) {
             $constraint = implode(',', $columns);
@@ -383,12 +389,35 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return "excluded.$column";
         }
         if ($this->platform instanceof MySQLPlatform) {
-            return "VALUES($column)";
+            if (version_compare($this->version, '8.0.19') >= 0) {
+                return "excluded.$column";
+            }
+            else {
+                return "VALUES($column)";
+            }
         }
         if ($this->platform instanceof PostgreSQLPlatform) {
             return "EXCLUDED.$column";
         }
         return null;
+    }
+
+    /**
+     * INSERT で使う SELECT を返す
+     */
+    public function getInsertSelectSyntax(array $column, string $condition): string
+    {
+        if ($this->platform instanceof MySQLPlatform) {
+            if (version_compare($this->version, '8.0.19') >= 0) {
+                return sprintf("SELECT * FROM (SELECT %s WHERE $condition)", array_sprintf($column, '%s AS %s', ', '));
+            }
+            else {
+                return sprintf("SELECT %s WHERE $condition", implode(', ', $column));
+            }
+        }
+        else {
+            return sprintf("SELECT %s WHERE $condition", implode(', ', $column));
+        }
     }
 
     /**

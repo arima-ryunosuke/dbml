@@ -877,7 +877,7 @@ class AffectBuilder extends AbstractBuilder
         $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
         $this->sql = "INSERT {$ignore}INTO {$this->tableAs()} ";
         if ($condition !== null) {
-            $this->sql .= sprintf("(%s) SELECT %s WHERE $condition", implode(', ', array_keys($sets1)), implode(', ', $sets1));
+            $this->sql .= "(" . implode(', ', array_keys($sets1)) . ")" . ' ' . $cplatform->getInsertSelectSyntax($sets1, $condition);
         }
         elseif (count($this->set) && $cplatform->supportsInsertSet() && $this->getUnsafeOption('insertSet')) {
             $this->sql .= "SET " . array_sprintf($sets1, '%2$s = %1$s', ', ');

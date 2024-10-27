@@ -25,7 +25,8 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         $platforms = [
             'sqlite_t'    => [new \ryunosuke\Test\Platforms\SqlitePlatform(), "3.31.1"],
             'sqlite'      => [new SqlitePlatform(), "3.31.1"],
-            'mysql'       => [new MySQLPlatform(), "8.0.33"],
+            'mysql8.0.18' => [new MySQLPlatform(), "8.0.18"],
+            'mysql8.0.19' => [new MySQLPlatform(), "8.0.19"],
             'postgresql'  => [new PostgreSQLPlatform(), "15.4.1"],
             'sqlserver'   => [new SQLServerPlatform(), "14.00.3460"],
             'sqlserver16' => [new SQLServerPlatform(), "16.0"],
@@ -334,7 +335,12 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $expected = 'ON CONFLICT(col) DO UPDATE SET';
         }
         if ($platform instanceof MySQLPlatform) {
-            $expected = 'ON DUPLICATE KEY UPDATE';
+            if (version_compare($cplatform->getVersion(), '8.0.19') >= 0) {
+                $expected = 'AS excluded ON DUPLICATE KEY UPDATE';
+            }
+            else {
+                $expected = 'ON DUPLICATE KEY UPDATE';
+            }
         }
         if ($platform instanceof PostgreSQLPlatform) {
             $expected = 'ON CONFLICT(col) DO UPDATE SET';
@@ -346,7 +352,12 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $expected = 'ON CONFLICT(col1,col2) DO UPDATE SET';
         }
         if ($platform instanceof MySQLPlatform) {
-            $expected = 'ON DUPLICATE KEY UPDATE';
+            if (version_compare($cplatform->getVersion(), '8.0.19') >= 0) {
+                $expected = 'AS excluded ON DUPLICATE KEY UPDATE';
+            }
+            else {
+                $expected = 'ON DUPLICATE KEY UPDATE';
+            }
         }
         if ($platform instanceof PostgreSQLPlatform) {
             $expected = 'ON CONFLICT(col1,col2) DO UPDATE SET';
@@ -366,12 +377,34 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $expected = 'excluded.name';
         }
         if ($platform instanceof MySQLPlatform) {
-            $expected = 'VALUES(name)';
+            if (version_compare($cplatform->getVersion(), '8.0.19') >= 0) {
+                $expected = 'excluded.name';
+            }
+            else {
+                $expected = 'VALUES(name)';
+            }
         }
         if ($platform instanceof PostgreSQLPlatform) {
             $expected = 'EXCLUDED.name';
         }
         $this->assertEquals($expected, $cplatform->getReferenceSyntax('name'));
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
+    function test_getInsertSelectSyntax($cplatform, $platform)
+    {
+        $expected = 'SELECT 1, hoge WHERE 1 AND 2';
+        if ($platform instanceof MySQLPlatform) {
+            if (version_compare($cplatform->getVersion(), '8.0.19') >= 0) {
+                $expected = 'SELECT * FROM (SELECT 1 AS id, hoge AS name WHERE 1 AND 2)';
+            }
+        }
+
+        $this->assertEquals($expected, $cplatform->getInsertSelectSyntax(['id' => 1, 'name' => 'hoge'], '1 AND 2'));
     }
 
     /**
@@ -982,7 +1015,12 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $expected = ['id' => new Expression('excluded.id')];
         }
         if ($platform instanceof MySQLPlatform) {
-            $expected = ['id' => new Expression('VALUES(id)')];
+            if (version_compare($cplatform->getVersion(), '8.0.19') >= 0) {
+                $expected = ['id' => new Expression('excluded.id')];
+            }
+            else {
+                $expected = ['id' => new Expression('VALUES(id)')];
+            }
         }
         if ($platform instanceof PostgreSQLPlatform) {
             $expected = ['id' => new Expression('EXCLUDED.id')];

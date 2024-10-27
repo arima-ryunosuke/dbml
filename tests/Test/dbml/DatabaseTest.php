@@ -3225,18 +3225,19 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         ], $result);
 
         if ($database->getCompatiblePlatform()->supportsMerge()) {
+            $merge_prefix = substr($database->getCompatiblePlatform()->getMergeSyntax([]), 0, 2);
             // MODIFY
             $result = $database->migrate('foreign_p', 'modify', $records, $opt + ['bulk' => false]);
             $this->assertCount(3, $result);
             $this->assertArrayStartsWith([
-                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') ON",
-                "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') ON",
-                "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') ON",
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') $merge_prefix",
+                "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') $merge_prefix",
+                "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') $merge_prefix",
             ], $result);
             $result = $database->migrate('foreign_p', 'modify', $records, $opt + ['bulk' => true]);
             $this->assertCount(1, $result);
             $this->assertArrayStartsWith([
-                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') $merge_prefix",
             ], $result);
 
             // CHANGE
@@ -3244,51 +3245,51 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             $this->assertCount(4, $result);
             $this->assertArrayStartsWith([
                 "DELETE FROM foreign_p WHERE NOT (foreign_p.id IN ('11', '12', '13'))",
-                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') ON",
-                "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') ON",
-                "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') ON",
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') $merge_prefix",
+                "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') $merge_prefix",
+                "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') $merge_prefix",
             ], $result);
             $result = $database->migrate('foreign_p', 'change', $records, $opt + ['bulk' => true]);
             $this->assertCount(2, $result);
             $this->assertArrayStartsWith([
                 "DELETE FROM foreign_p WHERE NOT (foreign_p.id IN ('11', '12', '13'))",
-                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') $merge_prefix",
             ], $result);
 
             // SAVE
             $result = $database->migrate('foreign_p', 'save', $records, $opt + ['bulk' => false]);
             $this->assertCount(11, $result);
             $this->assertArrayStartsWith([
-                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') ON",
+                "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge') $merge_prefix",
                 "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('11')) AND (NOT ((foreign_c1.seq = '1' AND foreign_c1.id = '11')))",
-                "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11') ON",
-                "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') ON",
+                "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11') $merge_prefix",
+                "INSERT INTO foreign_p (id, name) VALUES ('12', 'fuga') $merge_prefix",
                 "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('12')) AND (NOT ((foreign_c2.seq = '1' AND foreign_c2.cid = '12')))",
-                "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12') ON",
-                "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') ON",
+                "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12') $merge_prefix",
+                "INSERT INTO foreign_p (id, name) VALUES ('13', 'piyo') $merge_prefix",
                 "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('13')) AND (NOT ((foreign_c1.seq = '2' AND foreign_c1.id = '13')))",
-                "INSERT INTO foreign_c1 (seq, name, id) VALUES ('2', 'cc1', '13') ON",
+                "INSERT INTO foreign_c1 (seq, name, id) VALUES ('2', 'cc1', '13') $merge_prefix",
                 "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('13')) AND (NOT ((foreign_c2.seq = '2' AND foreign_c2.cid = '13')))",
-                "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('2', 'cc2', '13') ON",
+                "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('2', 'cc2', '13') $merge_prefix",
             ], $result);
             $result = $database->migrate('foreign_p', 'save', $records, $opt + ['bulk' => true]);
             $this->assertCount(5, $result);
             if ($database->getCompatiblePlatform()->supportsRowConstructor()) {
                 $this->assertArrayStartsWith([
-                    "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
+                    "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') $merge_prefix",
                     "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('11','13')) AND (NOT ((foreign_c1.seq, foreign_c1.id) IN (('1', '11'), ('2', '13'))))",
-                    "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11'), ('2', 'cc1', '13') ON",
+                    "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11'), ('2', 'cc1', '13') $merge_prefix",
                     "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('12','13')) AND (NOT ((foreign_c2.seq, foreign_c2.cid) IN (('1', '12'), ('2', '13'))))",
-                    "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12'), ('2', 'cc2', '13') ON",
+                    "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12'), ('2', 'cc2', '13') $merge_prefix",
                 ], $result);
             }
             else {
                 $this->assertArrayStartsWith([
-                    "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') ON",
+                    "INSERT INTO foreign_p (id, name) VALUES ('11', 'hoge'), ('12', 'fuga'), ('13', 'piyo') $merge_prefix",
                     "DELETE FROM foreign_c1 WHERE (foreign_c1.id IN ('11','13')) AND (NOT ((foreign_c1.seq = '1' AND foreign_c1.id = '11') OR (foreign_c1.seq = '2' AND foreign_c1.id = '13')))",
-                    "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11'), ('2', 'cc1', '13') ON",
+                    "INSERT INTO foreign_c1 (seq, name, id) VALUES ('1', 'c1', '11'), ('2', 'cc1', '13') $merge_prefix",
                     "DELETE FROM foreign_c2 WHERE (foreign_c2.cid IN ('12','13')) AND (NOT ((foreign_c2.seq = '1' AND foreign_c2.cid = '12') OR (foreign_c2.seq = '2' AND foreign_c2.cid = '13')))",
-                    "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12'), ('2', 'cc2', '13') ON",
+                    "INSERT INTO foreign_c2 (seq, name, cid) VALUES ('1', 'c2', '12'), ('2', 'cc2', '13') $merge_prefix",
                 ], $result);
             }
         }
@@ -4794,14 +4795,15 @@ INSERT INTO test (name) VALUES
             // 実際に取得して変わっている/いないを確認
             $this->assertEquals(['U', 'U1', 'U2', 'A1'], $database->selectLists('test.name', ['id' => [3, 4, 5, 96]]));
         });
+        $merge_prefix = substr($database->getCompatiblePlatform()->getMergeSyntax([]), 0, 2);
         $logs = implode("\n", array_values(preg_grep('#^INSERT#', $logs)));
-        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (1, 'U1') ON", $logs);
-        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (2, 'U2') ON", $logs);
-        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (93, 'A1') ON", $logs);
-        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (3, 'U1'), (4, 'U2') ON", $logs);
-        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (95, 'A1') ON", $logs);
-        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (3, 'U'), (4, 'U1'), (5, 'U2') ON", $logs);
-        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (96, 'A1') ON", $logs);
+        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (1, 'U1') $merge_prefix", $logs);
+        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (2, 'U2') $merge_prefix", $logs);
+        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (93, 'A1') $merge_prefix", $logs);
+        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (3, 'U1'), (4, 'U2') $merge_prefix", $logs);
+        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (95, 'A1') $merge_prefix", $logs);
+        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (3, 'U'), (4, 'U1'), (5, 'U2') $merge_prefix", $logs);
+        $this->assertStringContainsString("INSERT INTO test (id, name) VALUES (96, 'A1') $merge_prefix", $logs);
     }
 
     /**
@@ -6403,6 +6405,7 @@ INSERT INTO test (id, name) VALUES
         ];
 
         if ($database->getCompatiblePlatform()->supportsMerge()) {
+            $merge_prefix = substr($database->getCompatiblePlatform()->getMergeSyntax([]), 0, 2);
             $sqls = $database->dryrun()->affectArray('foreign_p', $post);
             $this->assertArrayStartsWith([
                 "DELETE FROM foreign_c1 WHERE (id) IN (",
@@ -6411,7 +6414,7 @@ INSERT INTO test (id, name) VALUES
                 "DELETE FROM foreign_p WHERE (id = '2') AND (",
                 "UPDATE foreign_p SET name = 'upgrade' WHERE id = '3'",
                 "UPDATE foreign_p SET name = 'revise' WHERE ",
-                "INSERT INTO foreign_p (id, name) VALUES ('5', 'modify') ON ",
+                "INSERT INTO foreign_p (id, name) VALUES ('5', 'modify') $merge_prefix",
             ], $sqls);
         }
 
