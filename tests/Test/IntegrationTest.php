@@ -496,6 +496,8 @@ class IntegrationTest extends AbstractUnitTestCase
             'ctext'     => 'fuga',
             'carray'    => [1, 2, 3],
             'cjson'     => ['a' => 'A'],
+            'eint'      => 1,
+            'estring'   => 'hoge',
         ]);
 
         $syncrows = $database->selectArray('misctype.carray,cjson');

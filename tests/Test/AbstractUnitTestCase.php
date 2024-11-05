@@ -19,6 +19,7 @@ use PHPUnit\Framework\SkippedTestError;
 use PHPUnit\Framework\TestCase;
 use ryunosuke\dbml\Logging\LoggerChain;
 use ryunosuke\dbml\Logging\Middleware;
+use ryunosuke\dbml\Types\EnumType;
 use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\PHPUnit\TestCaseTrait;
 use ryunosuke\SimpleLogger\Plugins\LevelUnsetPlugin;
@@ -79,6 +80,11 @@ abstract class AbstractUnitTestCase extends TestCase
         if ($native instanceof \SQLite3) {
             $native->createFunction('REGEXP', fn($pattern, $value) => (int) mb_eregi($pattern, $value), 2);
         }
+
+        EnumType::register($connection->getDatabasePlatform(), [
+            'enum_int'    => IntEnum::class,
+            'enum_string' => StringEnum::class,
+        ], false);
 
         return $connection;
     }
@@ -284,6 +290,8 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('cblob', Type::getType('blob'), ['length' => 255, 'notnull' => false]),
                                 new Column('carray', Type::getType('simple_array'), ['notnull' => false]),
                                 new Column('cjson', Type::getType('json'), ['notnull' => false]),
+                                new Column('eint', Type::getType('integer')),
+                                new Column('estring', Type::getType('string'), ['length' => 8]),
                             ],
                             [new Index('PRIMARY', ['id'], true, true), new Index('IDX_MISCTYPE1', ['pid'], true)],
                             [],

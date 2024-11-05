@@ -33,7 +33,9 @@ use ryunosuke\dbml\Types\AbstractType;
 use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\ManagedComment;
+use ryunosuke\Test\IntEnum;
 use ryunosuke\Test\Platforms\SqlitePlatform;
+use ryunosuke\Test\StringEnum;
 use function ryunosuke\dbml\array_order;
 use function ryunosuke\dbml\array_remove;
 use function ryunosuke\dbml\kvsort;
@@ -1457,6 +1459,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'cjson'     => "null",
             'cdate'     => 1234567890,
             'cdatetime' => 1234567890.123,
+            'eint'      => 1,
+            'estring'   => 'hoge',
         ]);
         $microsecond = strpos($database->getPlatform()->getDateTimeFormatString(), '.u') === false ? "" : ".122999";
         $expected = [
@@ -1486,6 +1490,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'cblob'     => str_repeat('b', 256),
                 'cdate'     => '2009-02-14',
                 'cdatetime' => "2009-02-14 08:31:30",
+                'eint'      => 1,
+                'estring'   => 'hoge',
             ]);
             $expected = [
                 'cstring' => 'あいうえおアイウ',
@@ -2283,6 +2289,14 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'select' => fn($value) => explode(',', $value),
                 'affect' => false,
             ],
+            'enum_int'     => [
+                'select' => true,
+                'affect' => true,
+            ],
+            'enum_string'  => [
+                'select' => true,
+                'affect' => true,
+            ],
         ]);
 
         $database->getSchema()->setTableColumn('misctype', 'carray', ['type' => Types::SIMPLE_ARRAY]);
@@ -2298,6 +2312,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'ctext'     => 'fuga',
             'carray'    => [1, 2, 3, 4, 5, 6, 7, 8, 9],
             'cjson'     => new Expression('?', [json_encode(['a' => 'A'])]),
+            'eint'      => IntEnum::Int1(),
+            'estring'   => StringEnum::StringHoge(),
         ]);
         $row = $database->selectTuple([
             'misctype MT' => [
@@ -2308,6 +2324,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'cjson',
                 'tarray|simple_array' => 'carray',
                 'tjson|json'          => 'cjson',
+                'eint|enum_int'       => 'eint',
+                'estring|enum_string' => 'estring',
             ],
             ''            => [
                 'now' => $database->getCompatiblePlatform()->getNowExpression(0),
@@ -2317,6 +2335,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals(['ho', 'ge'], $row['cstring']);
         $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['tarray']);
         $this->assertEquals(['a' => 'A'], $row['tjson']);
+        $this->assertSame(IntEnum::Int1(), $row['eint']);
+        $this->assertSame(StringEnum::StringHoge(), $row['estring']);
         if (!$database->getPlatform() instanceof SQLServerPlatform && $database->getCompatibleConnection()->getName() !== 'sqlite3') {
             $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['carray']);
             $this->assertEquals(['a' => 'A'], $row['cjson']);
