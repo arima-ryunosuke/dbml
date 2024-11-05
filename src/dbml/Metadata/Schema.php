@@ -10,7 +10,9 @@ use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Psr\SimpleCache\CacheInterface;
+use ryunosuke\dbml\Database;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_pickup;
 use function ryunosuke\dbml\array_rekey;
@@ -60,6 +62,9 @@ class Schema
     /** @var Column[][] */
     private array $tableColumns = [];
 
+    /** @var callable[][] */
+    private array $lazyTableColumns = [];
+
     /** @var ForeignKeyConstraint[][] */
     private array $foreignKeys = [];
     /** @var callable[] */
@@ -103,6 +108,7 @@ class Schema
         $this->tableNames = [];
         $this->tables = [];
         $this->tableColumns = [];
+        $this->lazyTableColumns = [];
         $this->foreignKeys = [];
         $this->lazyForeignKeys = [];
         $this->foreignColumns = [];
@@ -134,43 +140,61 @@ class Schema
      *
      * 存在しないカラムも指定できる。
      * その場合、普通に追加されるので仮想カラムとして扱うことができる。
+     *
+     * null を渡すとカラムが削除される。
      */
-    public function setTableColumn(string $table_name, string $column_name, ?array $definitation): ?Column
+    public function setTableColumn(string $table_name, string $column_name, $definitation)
     {
-        /// 一過性のものを想定しているのでこのメソッドで決してキャッシュ保存を行ってはならない
+        $this->lazyTableColumns[$table_name][$column_name] = function () use ($table_name, $column_name, $definitation) {
+            $table = $this->getTable($table_name);
 
-        $table = $this->getTable($table_name);
+            if ($definitation === null) {
+                $table->dropColumn($column_name);
+                return null;
+            }
 
-        if ($definitation === null) {
-            $table->dropColumn($column_name);
-            unset($this->tableColumns[$table_name][$column_name]);
-            return null;
-        }
+            if ($definitation !== null && !is_array($definitation)) {
+                $definitation = ['select' => $definitation];
+            }
 
-        if ($table->hasColumn($column_name)) {
-            $column = $table->getColumn($column_name);
-            $definitation['virtual'] ??= $column->getPlatformOptions()['virtual'] ?? false;
-            $definitation['implicit'] ??= $column->getPlatformOptions()['implicit'] ?? ($definitation['virtual'] ? $definitation['implicit'] ?? false : true);
-        }
-        else {
-            $column = $table->addColumn($column_name, 'integer');
-            $definitation['virtual'] = true;
-            $definitation['implicit'] = $definitation['implicit'] ?? false;
-        }
+            if ($table->hasColumn($column_name)) {
+                $column = $table->getColumn($column_name);
+                $definitation['virtual'] ??= $column->getPlatformOptions()['virtual'] ?? false;
+                $definitation['implicit'] ??= $column->getPlatformOptions()['implicit'] ?? ($definitation['virtual'] ? $definitation['implicit'] ?? false : true);
+            }
+            else {
+                $column = $table->addColumn($column_name, Types::INTEGER);
+                $definitation['virtual'] = true;
+                $definitation['implicit'] = $definitation['implicit'] ?? false;
+            }
 
-        $type = array_unset($definitation, 'type');
-        if ($type) {
-            $column->setType($type instanceof Type ? $type : Type::getType($type));
-        }
-        foreach ($definitation as $name => $value) {
-            $column->setPlatformOption($name, $value);
-        }
+            $defaults = [
+                'lazy'   => false,
+                'type'   => null,
+                'select' => null,
+                'affect' => null,
+            ];
+            $definitation += array_intersect_key($column->getPlatformOptions(), $defaults) + $defaults;
 
-        // 再キャッシュ
-        $columns = $this->getTableColumns($table_name);
-        $this->tableColumns[$table_name] = array_merge($columns, [$column_name => $column]);
+            if ($definitation['select'] instanceof \Closure) {
+                $ref = new \ReflectionFunction($definitation['select']);
+                $params = $ref->getParameters();
+                $rtype = isset($params[0]) ? $params[0]->getType() : null;
+                if ($rtype instanceof \ReflectionNamedType && is_a($rtype->getName(), Database::class, true)) {
+                    $definitation['lazy'] = true;
+                }
+            }
 
-        return $column;
+            $type = array_unset($definitation, 'type');
+            if ($type) {
+                $column->setType($type instanceof Type ? $type : Type::getType($type));
+            }
+            foreach ($definitation as $name => $value) {
+                $column->setPlatformOption($name, $value);
+            }
+
+            return $column;
+        };
     }
 
     /**
@@ -297,6 +321,16 @@ class Schema
     {
         if (!isset($this->tableColumns[$table_name])) {
             $this->tableColumns[$table_name] = $this->getTable($table_name)->getColumns();
+        }
+        foreach ($this->lazyTableColumns[$table_name] ?? [] as $name => $lazy) {
+            unset($this->lazyTableColumns[$table_name][$name]);
+            $column = $lazy();
+            if ($column === null) {
+                unset($this->tableColumns[$table_name][$name]);
+            }
+            else {
+                $this->tableColumns[$table_name][$name] = $column;
+            }
         }
         if ($filter === null) {
             return $this->tableColumns[$table_name];

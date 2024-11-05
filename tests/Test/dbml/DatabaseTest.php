@@ -670,21 +670,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'test2'     => [
                 'lower_name' => 'LOWER(%s.name2)',
                 'is_a'       => [
-                    'select' => ['LOWER(?)' => 'A'],
+                    'select' => $database->operator(['LOWER(?)' => 'A']),
                 ],
-            ],
-            'foreign_p' => [
-                'gw'   => $database->foreign_c1,
-                'qb1'  => $database->selectSum('foreign_c1'),
-                'qb2'  => $database->subexists('foreign_c1'),
-                'qb3'  => $database->subquery('foreign_c1'),
-                'expr' => $database->raw('now'),
-                'r0'   => function (): void { },
-                'r1'   => function (): bool { },
-                'r2'   => function (): int { },
-                'r3'   => function (): string { },
-                'r4'   => function (): \ArrayObject { },
-                'r5'   => function (): \DateTime { },
             ],
         ]);
         $this->assertEquals('a', $database->selectValue('test1.lower_name', [], ['id'], 1));
@@ -692,18 +679,39 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals('a', $database->selectValue('test2.is_a', [], ['id'], 1));
         $this->assertEquals('a', $database->selectValue('test2.is_a', [], ['id' => false], 1));
 
-        $columns = $database->getSchema()->getTableColumns('foreign_p');
-        $this->assertEquals('array', $columns['gw']->getType()->getName());
-        $this->assertEquals('integer', $columns['qb1']->getType()->getName());
-        $this->assertEquals('boolean', $columns['qb2']->getType()->getName());
-        $this->assertEquals('array', $columns['qb3']->getType()->getName());
-        $this->assertEquals('string', $columns['expr']->getType()->getName());
-        $this->assertEquals('integer', $columns['r0']->getType()->getName());
-        $this->assertEquals('boolean', $columns['r1']->getType()->getName());
-        $this->assertEquals('integer', $columns['r2']->getType()->getName());
-        $this->assertEquals('string', $columns['r3']->getType()->getName());
-        $this->assertEquals('object', $columns['r4']->getType()->getName());
-        $this->assertEquals('datetime', $columns['r5']->getType()->getName());
+        // lazy:true での循環参照
+        $database->overrideColumns([
+            't_article'     => [
+                'comments' => fn(Database $database) => $database->subselectArray('t_comment.comment_id,article'),
+            ],
+            't_comment'     => [
+                'article' => fn(Database $database) => $database->subselectTuple('t_article.title'),
+            ],
+        ]);
+
+        $this->assertEquals([
+            "article_id" => "1",
+            "comments"   => [
+                [
+                    "comment_id" => "1",
+                    "article"    => [
+                        "title" => "タイトルです",
+                    ],
+                ],
+                [
+                    "comment_id" => "2",
+                    "article"    => [
+                        "title" => "タイトルです",
+                    ],
+                ],
+                [
+                    "comment_id" => "3",
+                    "article"    => [
+                        "title" => "タイトルです",
+                    ],
+                ],
+            ],
+        ], $database->selectTuple('t_article.article_id,comments', ['' => 1]));
 
         $database->getSchema()->refresh();
     }

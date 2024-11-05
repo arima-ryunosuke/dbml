@@ -2132,68 +2132,6 @@ class Database
         $schema = $this->getSchema();
         foreach ($definition as $tname => $columns) {
             foreach ($columns as $cname => $def) {
-                if ($def !== null) {
-                    if (!is_array($def)) {
-                        $def = ['select' => $def];
-                    }
-                    $def += [
-                        'lazy'   => false,
-                        'type'   => null,
-                        'select' => null,
-                        'affect' => null,
-                    ];
-                    if (is_array($def['select'])) {
-                        $def['select'] = $this->operator($def['select']);
-                    }
-                    if (!isset($def['type']) && $def['select'] instanceof TableGateway) {
-                        $def['type'] = 'array';
-                    }
-                    if (!isset($def['type']) && $def['select'] instanceof SelectBuilder) {
-                        $submethod = $def['select']->getSubmethod();
-                        if (is_null($submethod)) {
-                            $def['type'] = 'integer';
-                        }
-                        elseif (is_bool($submethod)) {
-                            $def['type'] = 'boolean';
-                        }
-                        else {
-                            $def['type'] = 'array';
-                        }
-                    }
-                    if (!isset($def['type']) && $def['select'] instanceof Queryable) {
-                        $def['type'] = 'string';
-                    }
-                    if (!isset($def['type']) && $def['select'] instanceof \Closure) {
-                        $ref = new \ReflectionFunction($def['select']);
-                        $rtype = $ref->getReturnType();
-                        if ($rtype instanceof \ReflectionNamedType) {
-                            $typename = strtolower($rtype->getName());
-                            switch ($typename) {
-                                case 'void':
-                                    break;
-                                case 'bool':
-                                    $def['type'] = 'boolean';
-                                    break;
-                                case 'int':
-                                    $def['type'] = 'integer';
-                                    break;
-                                default:
-                                    $def['type'] = Type::hasType($typename) ? $typename : 'object';
-                                    break;
-                            }
-                        }
-                    }
-
-                    if ($def['select'] instanceof \Closure) {
-                        $ref = new \ReflectionFunction($def['select']);
-                        $params = $ref->getParameters();
-                        $rtype = isset($params[0]) ? $params[0]->getType() : null;
-                        if ($rtype instanceof \ReflectionNamedType && is_a($rtype->getName(), Database::class, true)) {
-                            $def['lazy'] = true;
-                        }
-                    }
-                }
-                $this->debug("set column $tname.$cname", $def ?? [], if: !!$def);
                 $schema->setTableColumn($tname, $cname, $def);
             }
         }
