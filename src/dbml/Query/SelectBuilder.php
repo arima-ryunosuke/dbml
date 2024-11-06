@@ -2677,12 +2677,16 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * // ・・・のようなクエリが順次投げられる（Generator で返されるので分割されていることは意識しなくて良い）
      * ```
      */
-    public function chunk(int $chunk, ?string $column = null): \Generator
+    public function chunk(int $chunk, ?string $column = null, $fixrange = false): \Generator
     {
         $from = first_value($this->getFromPart())['table'] ?? throw new \UnexpectedValueException('from table is not set.');
         $column = $column ?: strval($this->database->getSchema()->getTableAutoIncrement($from)?->getName() ?: throw new \UnexpectedValueException('not autoincrement column.'));
         $orderasc = $column[0] !== '-';
         $column = ltrim($column, '-+');
+
+        if ($fixrange) {
+            $breaker = (clone $this)->select($column)->aggregate($orderasc ? 'max' : 'min')->value();
+        }
 
         $sequencer = new Sequencer($this);
         $items = [];
@@ -2690,7 +2694,14 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             $n = end($items)[$column] ?? null;
             $sequencer->sequence([$column => $n], $chunk, $orderasc);
             $items = $sequencer->getItems();
-            yield from $items;
+            foreach ($items as $item) {
+                if ($fixrange) {
+                    if (($orderasc && $item[$column] > $breaker) || (!$orderasc && $item[$column] < $breaker)) {
+                        break 2;
+                    }
+                }
+                yield $item;
+            }
         } while ($items);
     }
 

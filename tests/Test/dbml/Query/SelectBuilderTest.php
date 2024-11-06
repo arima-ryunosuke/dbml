@@ -2867,20 +2867,30 @@ SQL
 
         $logs = $builder->getDatabase()->preview(function ($a) use ($builder) {
             $builder->reset()->column('test');
-            $this->assertEquals($builder->array(), iterator_to_array($builder->chunk(3), false));
-            $this->assertEquals($builder->orderBy(['id' => false])->array(), iterator_to_array($builder->chunk(3, '-id'), false));
+            $this->assertEquals($builder->array(), iterator_to_array($builder->chunk(3)));
+            $this->assertEquals($builder->orderBy(['id' => false])->array(), iterator_to_array($builder->chunk(3, '-id')));
         });
         $this->assertCount(14, $logs);
 
         $logs = $builder->getDatabase()->preview(function ($a) use ($builder) {
             $builder->reset()->column('multiprimary')->orderBy('subid');
-            $this->assertEquals($builder->array(), iterator_to_array($builder->chunk(3, 'subid'), false));
-            $this->assertEquals($builder->orderBy(['subid' => false])->array(), iterator_to_array($builder->chunk(3, '-subid'), false));
+            $this->assertEquals($builder->array(), iterator_to_array($builder->chunk(3, 'subid')));
+            $this->assertEquals($builder->orderBy(['subid' => false])->array(), iterator_to_array($builder->chunk(3, '-subid')));
         });
         $this->assertCount(14, $logs);
 
+        // breaker
+        $count = 0;
+        $builder->reset()->column('test');
+        foreach ($builder->chunk(3, fixrange: true) as $row) {
+            $count++;
+            $builder->getDatabase()->insert('test', ['id' => $row['id'] + 10] + $row);
+        }
+        $this->assertEquals(10, $count);
+        $this->assertEquals(20, $builder->count());
+
         try {
-            iterator_to_array($builder->reset()->column('noauto')->chunk(10), false);
+            iterator_to_array($builder->reset()->column('noauto')->chunk(10));
             $this->fail('exception not thrown.');
         }
         catch (\Exception $ex) {
