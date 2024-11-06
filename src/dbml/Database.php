@@ -508,8 +508,6 @@ class Database
             'preparing'          => false,
             /** @var bool 参照系クエリをマスターで実行するか(「スレーブに書き込みたい」はまずあり得ないが「マスターから読み込みたい」はままある) */
             'masterMode'         => false,
-            /** @deprecated @var string|CompatiblePlatform CompatiblePlatform のクラス名 or インスタンス */
-            'compatiblePlatform' => CompatiblePlatform::class, // for compatible. delete in future scope
             /** @var array exportXXX 呼び出し時にどのクラスを使用するか */
             'exportClass'        => [
                 'array' => ArrayGenerator::class,
@@ -1853,12 +1851,7 @@ class Database
      */
     public function getCompatiblePlatform(): CompatiblePlatform
     {
-        if (!isset($this->cache['compatiblePlatform'])) {
-            $classname = $this->getUnsafeOption('compatiblePlatform');
-            assert(is_a($classname, CompatiblePlatform::class, true)); // for compatible. simply CompatiblePlatform::new
-            $this->cache['compatiblePlatform'] = is_object($classname) ? $classname : $classname::new($this->getPlatform(), (fn() => $this->getServerVersion())->bindTo($this->getSlaveConnection(), Connection::class)());
-        }
-        return $this->cache['compatiblePlatform'];
+        return $this->cache['compatiblePlatform'] ??= CompatiblePlatform::new($this->getPlatform(), (fn() => $this->getServerVersion())->bindTo($this->getSlaveConnection(), Connection::class)());
     }
 
     /**
@@ -2492,28 +2485,6 @@ class Database
 
         $parser = new Parser($this->getPlatform()->createSQLParser());
         return $parser->convertQuotedSQL($sql, $params, fn($v) => $this->quote($v));
-    }
-
-    /**
-     * SELECT ビルダを生成して返す
-     *
-     * @deprecated instead SelectBuilder::new
-     * @codeCoverageIgnore
-     */
-    public function createSelectBuilder(): SelectBuilder
-    {
-        return SelectBuilder::new($this);
-    }
-
-    /**
-     * AFFECT ビルダを生成して返す
-     *
-     * @deprecated instead AffectBuilder::new
-     * @codeCoverageIgnore
-     */
-    public function createAffectBuilder(): AffectBuilder
-    {
-        return AffectBuilder::new($this);
     }
 
     /**
