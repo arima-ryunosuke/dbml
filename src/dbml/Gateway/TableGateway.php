@@ -329,44 +329,44 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     use JoinTrait;
 
     use SelectMethodTrait {
-        selectArray as public array; // phpstorm がエラーを吐くので public を付けている
-        selectAssoc as assoc;
-        selectLists as lists;
-        selectPairs as pairs;
-        selectTuple as tuple;
-        selectValue as value;
+        selectArray as public array;
+        selectAssoc as public assoc;
+        selectLists as public lists;
+        selectPairs as public pairs;
+        selectTuple as public tuple;
+        selectValue as public value;
     }
     use SelectOrThrowTrait {
-        selectArrayOrThrow as arrayOrThrow;
-        selectAssocOrThrow as assocOrThrow;
-        selectListsOrThrow as listsOrThrow;
-        selectPairsOrThrow as pairsOrThrow;
-        selectTupleOrThrow as tupleOrThrow;
-        selectValueOrThrow as valueOrThrow;
+        selectArrayOrThrow as public arrayOrThrow;
+        selectAssocOrThrow as public assocOrThrow;
+        selectListsOrThrow as public listsOrThrow;
+        selectPairsOrThrow as public pairsOrThrow;
+        selectTupleOrThrow as public tupleOrThrow;
+        selectValueOrThrow as public valueOrThrow;
     }
     use SelectInShareTrait {
-        selectArrayInShare as arrayInShare;
-        selectAssocInShare as assocInShare;
-        selectListsInShare as listsInShare;
-        selectPairsInShare as pairsInShare;
-        selectTupleInShare as tupleInShare;
-        selectValueInShare as valueInShare;
+        selectArrayInShare as public arrayInShare;
+        selectAssocInShare as public assocInShare;
+        selectListsInShare as public listsInShare;
+        selectPairsInShare as public pairsInShare;
+        selectTupleInShare as public tupleInShare;
+        selectValueInShare as public valueInShare;
     }
     use SelectForUpdateTrait {
-        selectArrayForUpdate as arrayForUpdate;
-        selectAssocForUpdate as assocForUpdate;
-        selectListsForUpdate as listsForUpdate;
-        selectPairsForUpdate as pairsForUpdate;
-        selectTupleForUpdate as tupleForUpdate;
-        selectValueForUpdate as valueForUpdate;
+        selectArrayForUpdate as public arrayForUpdate;
+        selectAssocForUpdate as public assocForUpdate;
+        selectListsForUpdate as public listsForUpdate;
+        selectPairsForUpdate as public pairsForUpdate;
+        selectTupleForUpdate as public tupleForUpdate;
+        selectValueForUpdate as public valueForUpdate;
     }
     use SelectForAffectTrait {
-        selectArrayForAffect as arrayForAffect;
-        selectAssocForAffect as assocForAffect;
-        selectListsForAffect as listsForAffect;
-        selectPairsForAffect as pairsForAffect;
-        selectTupleForAffect as tupleForAffect;
-        selectValueForAffect as valueForAffect;
+        selectArrayForAffect as public arrayForAffect;
+        selectAssocForAffect as public assocForAffect;
+        selectListsForAffect as public listsForAffect;
+        selectPairsForAffect as public pairsForAffect;
+        selectTupleForAffect as public tupleForAffect;
+        selectValueForAffect as public valueForAffect;
     }
     use FindTrait;
     use YieldTrait;
@@ -377,12 +377,12 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         AggregateTrait::count as countAggregate;
     }
     use SubSelectTrait {
-        subselectArray as subArray;
-        subselectAssoc as subAssoc;
-        subselectLists as subLists;
-        subselectPairs as subPairs;
-        subselectTuple as subTuple;
-        subselectValue as subValue;
+        subselectArray as public subArray;
+        subselectAssoc as public subAssoc;
+        subselectLists as public subLists;
+        subselectPairs as public subPairs;
+        subselectTuple as public subTuple;
+        subselectValue as public subValue;
     }
     use SubAggregateTrait;
 

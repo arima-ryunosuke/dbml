@@ -251,11 +251,46 @@ class Database
         fetchTupleOrThrowWithSql as public fetchTupleOrThrow;
         fetchValueOrThrowWithSql as public fetchValueOrThrow;
     }
-    use SelectMethodTrait;
-    use SelectOrThrowTrait;
-    use SelectInShareTrait;
-    use SelectForUpdateTrait;
-    use SelectForAffectTrait;
+    use SelectMethodTrait {
+        selectArray as public;
+        selectAssoc as public;
+        selectLists as public;
+        selectPairs as public;
+        selectTuple as public;
+        selectValue as public;
+    }
+    use SelectOrThrowTrait {
+        selectArrayOrThrow as public;
+        selectAssocOrThrow as public;
+        selectListsOrThrow as public;
+        selectPairsOrThrow as public;
+        selectTupleOrThrow as public;
+        selectValueOrThrow as public;
+    }
+    use SelectInShareTrait {
+        selectArrayInShare as public;
+        selectAssocInShare as public;
+        selectListsInShare as public;
+        selectPairsInShare as public;
+        selectTupleInShare as public;
+        selectValueInShare as public;
+    }
+    use SelectForUpdateTrait {
+        selectArrayForUpdate as public;
+        selectAssocForUpdate as public;
+        selectListsForUpdate as public;
+        selectPairsForUpdate as public;
+        selectTupleForUpdate as public;
+        selectValueForUpdate as public;
+    }
+    use SelectForAffectTrait {
+        selectArrayForAffect as public;
+        selectAssocForAffect as public;
+        selectListsForAffect as public;
+        selectPairsForAffect as public;
+        selectTupleForAffect as public;
+        selectValueForAffect as public;
+    }
     use EntityMethodTrait;
     use EntityInShareTrait;
     use EntityOrThrowTrait;
@@ -266,7 +301,14 @@ class Database
     use SelectAggregateTrait;
 
     use AggregateTrait;
-    use SubSelectTrait;
+    use SubSelectTrait {
+        subselectArray as public;
+        subselectAssoc as public;
+        subselectLists as public;
+        subselectPairs as public;
+        subselectTuple as public;
+        subselectValue as public;
+    }
     use SubAggregateTrait;
 
     use AffectOrThrowTrait {
@@ -1463,7 +1505,7 @@ class Database
                     'upsert'      => ['insertData' => 'single', 'updateData' => 'single'],
                     'modify'      => ['insertData' => 'single', 'updateData' => 'single'],
                     'replace'     => ['data' => 'single'],
-                ];
+                            ];
                 $suffixes = ['', 'AndPrimary', 'AndBefore', 'OrThrow'];
                 foreach ($affect_methods as $mname => $affect_method) {
                     foreach ($suffixes as $suffix) {
@@ -1476,16 +1518,16 @@ class Database
                                 $type = $affect_method[$parameter->getName()] ?? null;
                                 if ($type) {
                                     $types[$parameter->getName()] = $declare_types[$type];
-                                }
                             }
+                        }
 
                             if ($types) {
                                 $params = array_sprintf($types, ' * @param $%2$s %1$s', "\n");
                                 $args = implode(', ', function_parameter($refmethod));
                                 $return = $refmethod->hasReturnType() ? ":{$refmethod->getReturnType()}" : "";
                                 $methods[$fullname] = "/**\n$params\n */\npublic function $fullname({$args})$return { }";
-                            }
-                        }
+                    }
+                }
                     }
                 }
 

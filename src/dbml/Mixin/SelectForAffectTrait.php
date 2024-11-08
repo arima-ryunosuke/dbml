@@ -11,7 +11,7 @@ trait SelectForAffectTrait
      *
      * @inheritdoc Database::selectArray()
      */
-    public function selectArrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectArrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchArrayOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
     }
@@ -21,7 +21,7 @@ trait SelectForAffectTrait
      *
      * @inheritdoc Database::selectAssoc()
      */
-    public function selectAssocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectAssocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchAssocOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
     }
@@ -31,7 +31,7 @@ trait SelectForAffectTrait
      *
      * @inheritdoc Database::selectLists()
      */
-    public function selectListsForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectListsForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchListsOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
     }
@@ -41,7 +41,7 @@ trait SelectForAffectTrait
      *
      * @inheritdoc Database::selectPairs()
      */
-    public function selectPairsForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectPairsForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchPairsOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
     }
@@ -51,7 +51,7 @@ trait SelectForAffectTrait
      *
      * @inheritdoc Database::selectTuple()
      */
-    public function selectTupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectTupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchTupleOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
     }
@@ -61,7 +61,7 @@ trait SelectForAffectTrait
      *
      * @inheritdoc Database::selectValue()
      */
-    public function selectValueForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectValueForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchValueOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
     }

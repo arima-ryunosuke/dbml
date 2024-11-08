@@ -2352,7 +2352,7 @@ FROM t_article Article", $Article->column([
         $test2 = new TableGateway($database, 'test2');
 
         $rows = $test1->assoc([
-            'tests2s{id}' => $test2->subselectAssoc('*'),
+            'tests2s{id}' => $test2->subAssoc('*'),
         ], ['id' => 1]);
         $this->assertEquals([
             1 => [

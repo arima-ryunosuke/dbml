@@ -11,7 +11,7 @@ trait SelectMethodTrait
      *
      * @inheritdoc Database::select()
      */
-    public function selectArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->array();
     }
@@ -21,7 +21,7 @@ trait SelectMethodTrait
      *
      * @inheritdoc Database::select()
      */
-    public function selectAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->assoc();
     }
@@ -31,7 +31,7 @@ trait SelectMethodTrait
      *
      * @inheritdoc Database::select()
      */
-    public function selectLists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectLists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lists();
     }
@@ -41,7 +41,7 @@ trait SelectMethodTrait
      *
      * @inheritdoc Database::select()
      */
-    public function selectPairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectPairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->pairs();
     }
@@ -51,7 +51,7 @@ trait SelectMethodTrait
      *
      * @inheritdoc Database::select()
      */
-    public function selectTuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectTuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->tuple();
     }
@@ -61,7 +61,7 @@ trait SelectMethodTrait
      *
      * @inheritdoc Database::select()
      */
-    public function selectValue($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectValue($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->value();
     }

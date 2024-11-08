@@ -11,7 +11,7 @@ trait SelectOrThrowTrait
      *
      * @inheritdoc Database::selectArray()
      */
-    public function selectArrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectArrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchArrayOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
     }
@@ -21,7 +21,7 @@ trait SelectOrThrowTrait
      *
      * @inheritdoc Database::selectAssoc()
      */
-    public function selectAssocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectAssocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchAssocOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
     }
@@ -31,7 +31,7 @@ trait SelectOrThrowTrait
      *
      * @inheritdoc Database::selectLists()
      */
-    public function selectListsOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectListsOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchListsOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
     }
@@ -41,7 +41,7 @@ trait SelectOrThrowTrait
      *
      * @inheritdoc Database::selectPairs()
      */
-    public function selectPairsOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectPairsOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchPairsOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
     }
@@ -51,7 +51,7 @@ trait SelectOrThrowTrait
      *
      * @inheritdoc Database::selectTuple()
      */
-    public function selectTupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectTupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchTupleOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
     }
@@ -61,7 +61,7 @@ trait SelectOrThrowTrait
      *
      * @inheritdoc Database::selectValue()
      */
-    public function selectValueOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectValueOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchValueOrThrow($this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
     }

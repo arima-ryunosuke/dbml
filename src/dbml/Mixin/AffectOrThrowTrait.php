@@ -19,7 +19,7 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    public function insertArrayOrThrowWithTable($tableName, $data, ...$opt)
+    private function insertArrayOrThrowWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->insertArray($tableName, $data, ...($opt + ['throw' => true, 'return' => 'primary']));
@@ -48,7 +48,7 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    public function createWithTable($tableName, $data, ...$opt)
+    private function createWithTable($tableName, $data, ...$opt)
     {
         return $this->insertOrThrowWithTable($tableName, $data, ...$opt);
     }
@@ -59,7 +59,7 @@ trait AffectOrThrowTrait
      * @inheritdoc TableGateway::insert()
      * @see createWithTable()
      */
-    public function createWithoutTable($data, ...$opt)
+    private function createWithoutTable($data, ...$opt)
     {
         return $this->insertOrThrowWithoutTable($data, ...$opt);
     }

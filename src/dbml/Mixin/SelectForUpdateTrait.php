@@ -11,7 +11,7 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectArray()
      */
-    public function selectArrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectArrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->array();
     }
@@ -21,7 +21,7 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectAssoc()
      */
-    public function selectAssocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectAssocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->assoc();
     }
@@ -31,7 +31,7 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectLists()
      */
-    public function selectListsForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectListsForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->lists();
     }
@@ -41,7 +41,7 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectPairs()
      */
-    public function selectPairsForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectPairsForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->pairs();
     }
@@ -51,7 +51,7 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectTuple()
      */
-    public function selectTupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectTupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->tuple();
     }
@@ -61,7 +61,7 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectValue()
      */
-    public function selectValueForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectValueForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->value();
     }
