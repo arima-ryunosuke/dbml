@@ -1223,6 +1223,182 @@ class Database
     }
 
     /**
+     * 全テーブルの Gateway, Entity を出力する
+     *
+     * テーブル毎に各クラスを生成するのは面倒かつ単純作業なのでそれを自動化したもの。
+     * 無ければファイルごと作成し、有れば自動生成部分のみを書き換える。
+     *
+     * 出力場所は TableMapper に従う（つまり「あるべき場所」に出力され、現在のところそれを変更することはできない）。
+     *
+     * @param string $annotation_namespace アノテーションの名前空間
+     * @return array 追加:'+', 変更:'*', 削除:'-' の結果配列（「削除」とは実際に削除するわけではなく「管理外」程度の意味）
+     */
+    public function echoTableClass(string $annotation_namespace = ''): array
+    {
+        // 各コードブロックを即時クロージャで包んでいるのは特に意味はない
+        // キャッシュしたりメソッド化したりする際に変更差分が少なくなる程度
+
+        $classdirs = (function () {
+            $loader = class_loader();
+            $basePath ??= dirname((new \ReflectionClass($loader))->getFileName(), 3);
+
+            $classdirs = [];
+            foreach ([
+                0 => $loader->getPrefixes() + ["" => $loader->getFallbackDirs()],
+                4 => $loader->getPrefixesPsr4() + ["" => $loader->getFallbackDirsPsr4()],
+            ] as $level => $psr) {
+                foreach ($psr as $prefix => $dirs) {
+                    foreach ($dirs as $dir) {
+                        if ($level === 0) {
+                            $subdir = strtr($prefix, ['\\' => DIRECTORY_SEPARATOR]);
+                            $classdirs[$prefix] = path_is_absolute($dir) ? $dir : "$basePath/$dir/$subdir";
+                        }
+                        if ($level === 4) {
+                            $classdirs[$prefix] = path_is_absolute($dir) ? $dir : "$basePath/$dir";
+                        }
+                    }
+                }
+            }
+
+            uksort($classdirs, fn($a, $b) => strlen($b) <=> strlen($a));
+            return $classdirs;
+        })();
+
+        [$gateways, $entities] = (function ($classdirs) {
+            $tableMapper = $this->getUnsafeOption('tableMapper');
+            $targets = [
+                'gateway' => [],
+                'entity'  => [],
+            ];
+            foreach (['' => 'abstract'] + $this->getSchema()->getTableNames() as $n => $tablename) {
+                $map = $tableMapper($tablename);
+                if (!is_array($map)) {
+                    continue;
+                }
+                foreach ($map as $name => $classes) {
+                    foreach ($classdirs as $prefix => $classdir) {
+                        $prefixlen = strlen($prefix);
+                        if ($prefixlen) {
+                            foreach (array_keys($targets) as $key) {
+                                $cname = "{$key}Class";
+                                if (str_starts_with($classes[$cname] ?? '', $prefix)) {
+                                    $targets[$key][$n === '' ? $n : $name] = [
+                                        $classes[$cname],
+                                        path_normalize($classdir . strtr(substr($classes[$cname], $prefixlen - 1), ['\\' => DIRECTORY_SEPARATOR]) . '.php'),
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return [$targets['gateway'], $targets['entity']];
+        })($classdirs);
+
+        $currents = [];
+        $result = [];
+
+        $generate = function ($name, $class, $file, $template) use (&$currents, &$result, $annotation_namespace) {
+            $currents += array_flip(array_map('realpath', glob(dirname($file) . "/*.php")));
+
+            [$namespace, $classname] = namespace_split($class);
+            $newcontents = "<?php\nnamespace {$namespace};\n\n" . sprintf($template, $classname) . "\n";
+
+            $result[$file] = null; // あとで差分を取る関係上、キーだけは生やしておく必要がある
+            if (file_exists($file)) {
+                $regex = "#auto generated (?<name>[-_0-9a-zA-Z]+):start(?<body>.*?)auto generated \\g<name>:end$#usm";
+                preg_match_all($regex, $newcontents, $newmatches, PREG_SET_ORDER);
+                $newmatches = array_column($newmatches, 0, 'name');
+
+                $contents = file_get_contents($file);
+                $newcontents = preg_replace_callback($regex, fn($m) => $newmatches[$m['name']] ?? $m[0], $contents);
+
+                if ($newcontents !== $contents) {
+                    $result[$file] = '*';
+                    file_set_contents($file, $newcontents);
+                }
+            }
+            else {
+                $result[$file] = '+';
+                file_set_contents($file, $newcontents);
+            }
+        };
+
+        $V = fn($v) => $v;
+        foreach ($gateways as $name => [$class, $file]) {
+            if ($name === '') {
+                $generate($name, $class, $file, <<<CLASS
+                /**
+                 * auto generated comment:start
+                 *
+                 * @mixin \\{$annotation_namespace}\\{$name}TableGatewayProvider
+                 *
+                 * auto generated comment:end
+                 */
+                abstract class %s extends \\{$V(TableGateway::class)}
+                {
+                    // auto generated method:start
+                    
+                    public function getDatabase(): \\{$V(get_class($this))}
+                    {
+                        /** @noinspection PhpIncompatibleReturnTypeInspection */
+                        return parent::getDatabase();
+                    }
+                    
+                    // auto generated method:end
+                }
+                CLASS,);
+            }
+            else {
+                $generate($name, $class, $file, <<<CLASS
+                /**
+                 * auto generated comment:start
+                 *
+                 * @mixin \\{$annotation_namespace}\\{$name}TableGateway
+                 *
+                 * auto generated comment:end
+                 */
+                class %s extends \\{$V($gateways[''][0])}
+                {
+                }
+                CLASS,);
+            }
+        }
+        foreach ($entities as $name => [$class, $file]) {
+            if ($name === '') {
+                $generate($name, $class, $file, <<<CLASS
+                /**
+                 */
+                abstract class %s extends \\{$V(Entity::class)}
+                {
+                }
+                CLASS,);
+            }
+            else {
+                $generate($name, $class, $file, <<<CLASS
+                /**
+                 * auto generated comment:start
+                 *
+                 * @mixin \\{$annotation_namespace}\\{$name}Entity
+                 *
+                 * auto generated comment:end
+                 */
+                class %s extends \\{$V($entities[''][0])}
+                {
+                }
+                CLASS,);
+            }
+        }
+
+        foreach (array_diff_key($currents, $result) as $file => $dummy) {
+            $result[$file] = '-';
+        }
+
+        return array_filter($result, fn($v) => $v !== null);
+    }
+
+    /**
      * コード補完用のアノテーショントレイトを取得する
      *
      * 存在するテーブル名や tableMapper などを利用して mixin 用のトレイトを作成する。

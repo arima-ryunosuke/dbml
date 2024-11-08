@@ -38,8 +38,12 @@ use ryunosuke\Test\Platforms\SqlitePlatform;
 use ryunosuke\Test\StringEnum;
 use function ryunosuke\dbml\array_order;
 use function ryunosuke\dbml\array_remove;
+use function ryunosuke\dbml\class_loader;
+use function ryunosuke\dbml\class_namespace;
+use function ryunosuke\dbml\file_rewrite_contents;
 use function ryunosuke\dbml\kvsort;
 use function ryunosuke\dbml\mkdir_p;
+use function ryunosuke\dbml\pascal_case;
 use function ryunosuke\dbml\rm_rf;
 use function ryunosuke\dbml\try_null;
 use function ryunosuke\dbml\try_return;
@@ -2510,6 +2514,69 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertInstanceOf(Schema\Column::class, $database->describe('t_article.article_id'));
         $this->assertInstanceOf(Schema\Index::class, $database->describe('t_article.secondary'));
         that($database)->describe('hogera')->wasThrown("undefined schema object");
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_echoTableClass($database)
+    {
+        // 定義に違いがあるわけではない（実はあるけど）ので sqlite だけで十分
+        if (!$database->getPlatform() instanceof SqlitePlatform) {
+            return;
+        }
+
+        $gen = __DIR__ . '/../../.gen';
+        class_loader()->add('dummy0\\', 'tests/.gen/psr0');
+        class_loader()->addPsr4('dummy4\\', 'tests/.gen/psr4');
+        rm_rf($gen);
+        @mkdir("$gen/psr0");
+        @mkdir("$gen/psr4");
+        $psr0 = "$gen/psr0/dummy0";
+        $psr4 = "$gen/psr4";
+
+        $database = $database->context([
+            'tableMapper' => static function ($tablename) {
+                if ($tablename === 'test') {
+                    return null;
+                }
+                $classname = pascal_case(preg_replace('#^[a-z]_#', '_', $tablename));
+                return [
+                    $classname => [
+                        'entityClass'  => class_namespace(\dummy0\Entity\AbstractEntity::class) . "\\{$classname}Entity",
+                        'gatewayClass' => class_namespace(\dummy4\Gateway\AbstractGateway::class) . "\\{$classname}Gateway",
+                    ],
+                ];
+            },
+        ]);
+
+        $annotation = $database->echoTableClass('ryunosuke\\Test\\dbml\\Annotation');
+        $this->assertEquals('+', $annotation[realpath("$psr0/Entity/ArticleEntity.php")]);
+        $this->assertEquals('+', $annotation[realpath("$psr0/Entity/CommentEntity.php")]);
+        $this->assertEquals('+', $annotation[realpath("$psr4/Gateway/ArticleGateway.php")]);
+        $this->assertEquals('+', $annotation[realpath("$psr4/Gateway/CommentGateway.php")]);
+
+        touch("$psr0/Entity/DummyEntity.php");
+        touch("$psr4/Gateway/DummyGateway.php");
+        $annotation = $database->echoTableClass('ryunosuke\\Test\\dbml\\Annotation');
+        $this->assertArrayNotHasKey(realpath("$psr0/Entity/ArticleEntity.php"), $annotation);
+        $this->assertArrayNotHasKey(realpath("$psr4/Gateway/ArticleGateway.php"), $annotation);
+        $this->assertEquals('-', $annotation[realpath("$psr0/Entity/DummyEntity.php")]);
+        $this->assertEquals('-', $annotation[realpath("$psr4/Gateway/DummyGateway.php")]);
+
+        file_rewrite_contents("$psr0/Entity/ArticleEntity.php", fn($c) => strtr($c, ['mixin' => '']));
+        file_rewrite_contents("$psr4/Gateway/ArticleGateway.php", fn($c) => strtr($c, ['mixin' => '']));
+        $annotation = $database->echoTableClass('ryunosuke\\Test\\dbml\\Annotation');
+        $this->assertArrayNotHasKey(realpath("$psr0/Entity/CommentEntity.php"), $annotation);
+        $this->assertArrayNotHasKey(realpath("$psr4/Gateway/CommentGateway.php"), $annotation);
+        $this->assertEquals('*', $annotation[realpath("$psr0/Entity/ArticleEntity.php")]);
+        $this->assertEquals('*', $annotation[realpath("$psr4/Gateway/ArticleGateway.php")]);
+
+        $this->assertTrue(class_exists(\dummy0\Entity\ArticleEntity::class));
+        $this->assertTrue(class_exists(\dummy4\Gateway\ArticleGateway::class));
+
+        $database->refresh();
     }
 
     /**
