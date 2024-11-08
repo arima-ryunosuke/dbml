@@ -115,4 +115,14 @@ trait SubAggregateTrait
     {
         return $this->subaggregate('avg', $column, $where);
     }
+
+    /**
+     * 相関サブクエリの MEDIAN を表すビルダを返す（{@uses Database::subaggregate()} を参照）
+     *
+     * @inheritdoc Database::subaggregate()
+     */
+    public function submedian($column = [], $where = [])
+    {
+        throw new \LogicException('Not implemented');
+    }
 }

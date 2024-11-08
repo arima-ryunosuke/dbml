@@ -1376,6 +1376,7 @@ AND ((flag=1))", "$gw");
         $this->assertEquals(10, $gateway->max('id'));
         $this->assertEquals(55, $gateway->sum('id'));
         $this->assertEquals(5.5, $gateway->avg('id'));
+        $this->assertEquals(5.5, $gateway->median('id'));
     }
 
     /**

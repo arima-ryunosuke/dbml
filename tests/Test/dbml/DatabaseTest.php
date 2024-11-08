@@ -7023,6 +7023,14 @@ AND
         that(function () use ($database) {
             $database->selectTuple([
                 't_article' => [
+                    'cmedian' => $database->submedian('t_comment.comment_id, comment'),
+                ],
+            ], [], [], 1);
+        })()->wasThrown("Not implemented");
+
+        that(function () use ($database) {
+            $database->selectTuple([
+                't_article' => [
                     'cmin' => $database->submin('t_comment.comment_id, comment'),
                     'cmax' => $database->submax('t_comment.comment_id, comment'),
                 ],
@@ -7282,6 +7290,18 @@ ORDER BY T.id DESC, name ASC
             10 => 1,
             20 => 6,
         ], $builder->pairs());
+
+        $builder = $database->selectMedian('aggregate.group_id2', [], ['group_id1']);
+        $avgexpr = $database->getCompatiblePlatform()->getAvgExpression('group_id2');
+        $this->assertEquals("SELECT group_id1, $avgexpr AS {$qi('aggregate.group_id2@median')} FROM (SELECT aggregate.group_id2, group_id1, ROW_NUMBER() OVER (PARTITION BY group_id1 ORDER BY aggregate.group_id2) AS _number, COUNT(*) OVER (PARTITION BY group_id1) AS _count FROM aggregate) __dbml_auto_table WHERE _number BETWEEN _count * 1.0 / 2 AND _count * 1.0 / 2 + 1 GROUP BY group_id1", "$builder");
+        $this->assertEquals([], $builder->getParams());
+        $this->assertEquals([
+            1 => 10.0,
+            2 => 10.0,
+            3 => 15.0,
+            4 => 20.0,
+            5 => 20.0,
+        ], $builder->pairs());
     }
 
     /**
@@ -7335,6 +7355,16 @@ ORDER BY T.id DESC, name ASC
                 'aggregate.name@count' => 2,
             ],
         ], $database->aggregate('count', 'aggregate.id, name', ['id > 5'], ['group_id1'], ['count(aggregate.id) > 1']));
+
+        // median
+        $this->assertEquals(15.0, $database->aggregate('median', 'aggregate.group_id2'));
+        $this->assertEquals([
+            1 => 10.0,
+            2 => 10.0,
+            3 => 15.0,
+            4 => 20.0,
+            5 => 20.0,
+        ], $database->aggregate('median', 'aggregate.group_id2', [], 'aggregate.group_id1'));
 
         // 自由モード
         $this->assertEquals([

@@ -84,4 +84,14 @@ trait AggregateTrait
     {
         return $this->aggregate('avg', $column, $where, $groupBy, $having);
     }
+
+    /**
+     * MEDIAN クエリを実行する（{@uses Database::aggregate()} を参照）
+     *
+     * @inheritdoc Database::aggregate()
+     */
+    public function median($column, $where = [], $groupBy = [], $having = [])
+    {
+        return $this->aggregate('median', $column, $where, $groupBy, $having);
+    }
 }

@@ -2969,6 +2969,38 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             return $this->select($columns)->_dirty();
         }
 
+        $platform = $this->database->getCompatiblePlatform();
+        $delimiter = $this->getAggregationDelimiter();
+
+        // median は統一できない程度に固有処理
+        if (is_string($aggregations) && strtolower($aggregations) === 'median') {
+            $rawcolumns = [];
+            foreach ($this->sqlParts['select'] as $column) {
+                $c = array_pad(explode('.', $column, 2), -2, '')[1];
+                $rawcolumns[$column . $delimiter . $aggregations] = $platform->getAvgExpression($c);
+            }
+            $rawgroupBys = [];
+            foreach ($this->sqlParts['groupBy'] as $column) {
+                $rawgroupBys[] = array_pad(explode('.', $column, 2), -2, '')[1];
+            }
+
+            $selects = implode(',', $this->sqlParts['select']) ?: "'1'";
+            $groupBys = implode(',', $this->sqlParts['groupBy']) ?: "'1'";
+            $this->addSelect([
+                ...$this->sqlParts['groupBy'],
+                '_number' => new Expression("ROW_NUMBER() OVER (PARTITION BY $groupBys ORDER BY $selects)"),
+                '_count'  => new Expression("COUNT(*) OVER (PARTITION BY $groupBys)"),
+            ]);
+            $this->resetQueryPart('groupBy');
+
+            $select = $this->database->select([]);
+            $select->from(['__dbml_auto_table' => $this]);
+            $select->addSelect(array_merge($rawgroupBys, $rawcolumns));
+            $select->where('_number BETWEEN _count * 1.0 / 2 AND _count * 1.0 / 2 + 1');
+            $select->groupBy($rawgroupBys);
+            return $select;
+        }
+
         // カラムとタプルのセットを取得しておく
         $fields = $this->sqlParts['select'] ?: ['*'];
         $tuples = array_each(arrayize($aggregations), function (&$carry, $aggregation) {

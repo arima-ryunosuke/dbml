@@ -100,4 +100,14 @@ trait SelectAggregateTrait
     {
         return $this->selectAggregate('avg', $column, $where, $groupBy, $having);
     }
+
+    /**
+     * MEDIAN クエリを返す（{@uses Database::selectAggregate()} を参照）
+     *
+     * @inheritdoc Database::selectAggregate()
+     */
+    public function selectMedian($column, $where = [], $groupBy = [], $having = [])
+    {
+        return $this->selectAggregate('median', $column, $where, $groupBy, $having);
+    }
 }

@@ -2697,6 +2697,7 @@ class Database
      * @used-by selectMax()
      * @used-by selectSum()
      * @used-by selectAvg()
+     * @used-by selectMedian()
      *
      * @param string|array $aggregation 集約関数名
      * @param array|string $column 取得テーブルとカラム
@@ -2969,6 +2970,7 @@ class Database
      * @used-by submax()
      * @used-by subsum()
      * @used-by subavg()
+     * @used-by submedian()
      *
      * @param array|string $aggregate 集約関数名
      * @param array|string $column サブテーブル名
@@ -3053,6 +3055,7 @@ class Database
      * @used-by max()
      * @used-by sum()
      * @used-by avg()
+     * @used-by median()
      *
      * @param string|array $aggregation 集約関数名
      * @param array|string $column 取得テーブルとカラム
