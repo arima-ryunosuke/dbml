@@ -8,7 +8,6 @@ use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Mixin\AffectAndBeforeTrait;
 use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
-use ryunosuke\dbml\Mixin\AffectIgnoreTrait;
 use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
 use ryunosuke\dbml\Mixin\AggregateTrait;
 use ryunosuke\dbml\Mixin\ExportTrait;
@@ -387,27 +386,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
     use SubAggregateTrait;
 
-    use AffectIgnoreTrait {
-        insertSelectIgnoreWithoutTable as public insertSelectIgnore;
-        insertArrayIgnoreWithoutTable as public insertArrayIgnore;
-        updateArrayIgnoreWithoutTable as public updateArrayIgnore;
-        deleteArrayIgnoreWithoutTable as public deleteArrayIgnore;
-        modifyArrayIgnoreWithoutTable as public modifyArrayIgnore;
-        changeArrayIgnoreWithoutTable as public changeArrayIgnore;
-        affectArrayIgnoreWithoutTable as public affectArrayIgnore;
-        saveIgnoreWithoutTable as public saveIgnore;
-        insertIgnoreWithoutTable as public insertIgnore;
-        updateIgnoreWithoutTable as public updateIgnore;
-        deleteIgnoreWithoutTable as public deleteIgnore;
-        invalidIgnoreWithoutTable as public invalidIgnore;
-        reviseIgnoreWithoutTable as public reviseIgnore;
-        upgradeIgnoreWithoutTable as public upgradeIgnore;
-        removeIgnoreWithoutTable as public removeIgnore;
-        destroyIgnoreWithoutTable as public destroyIgnore;
-        createIgnoreWithoutTable as public createIgnore;
-        modifyIgnoreWithoutTable as public modifyIgnore;
-        modifyIgnoreWithoutTable as public modifyIgnore;
-    }
     use AffectOrThrowTrait {
         insertArrayOrThrowWithoutTable as public insertArrayOrThrow;
         createWithoutTable as public create;
@@ -2224,8 +2202,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::insertSelect()>
      *
-     * @used-by insertSelectIgnore()
-     *
      * @inheritdoc Database::insertSelect()
      */
     public function insertSelect($sql, $columns = [], iterable $params = [], ...$opt)
@@ -2237,7 +2213,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::insertArray()>
      *
-     * @used-by insertArrayIgnore()
      * @used-by insertArrayOrThrow()
      *
      * @inheritdoc Database::insertArray()
@@ -2251,7 +2226,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::updateArray()>
      *
-     * @used-by updateArrayIgnore()
      * @used-by updateArrayAndBefore()
      *
      * @inheritdoc Database::updateArray()
@@ -2265,7 +2239,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::deleteArray()>
      *
-     * @used-by deleteArrayIgnore()
      * @used-by deleteArrayAndBefore()
      *
      * @inheritdoc Database::deleteArray()
@@ -2279,7 +2252,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::modifyArray()>
      *
-     * @used-by modifyArrayIgnore()
      * @used-by modifyArrayAndBefore()
      *
      * @inheritdoc Database::modifyArray()
@@ -2293,8 +2265,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::changeArray()>
      *
-     * @used-by changeArrayIgnore()
-     *
      * @inheritdoc Database::changeArray()
      */
     public function changeArray($dataarray, $where, $uniquekey = 'PRIMARY', $returning = [], ...$opt)
@@ -2306,8 +2276,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     /**
      * 駆動表を省略できる <@uses Database::affectArray()>
      *
-     * @used-by affectArrayIgnore()
-     *
      * @inheritdoc Database::affectArray()
      */
     public function affectArray($dataarray, ...$opt)
@@ -2318,8 +2286,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * 駆動表を省略できる <@uses Database::save()>
-     *
-     * @used-by saveIgnore()
      *
      * @inheritdoc Database::save()
      */
@@ -2334,7 +2300,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @used-by insertOrThrow()
      * @used-by insertAndPrimary()
-     * @used-by insertIgnore()
      *
      * @inheritdoc Database::insert()
      */
@@ -2350,7 +2315,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @used-by updateOrThrow()
      * @used-by updateAndPrimary()
      * @used-by updateAndBefore()
-     * @used-by updateIgnore()
      *
      * @inheritdoc Database::update()
      */
@@ -2366,7 +2330,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @used-by deleteOrThrow()
      * @used-by deleteAndPrimary()
      * @used-by deleteAndBefore()
-     * @used-by deleteIgnore()
      *
      * @inheritdoc Database::delete()
      */
@@ -2382,7 +2345,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @used-by invalidOrThrow()
      * @used-by invalidAndPrimary()
      * @used-by invalidAndBefore()
-     * @used-by invalidIgnore()
      *
      * @inheritdoc Database::invalid()
      */
@@ -2398,7 +2360,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @used-by reviseOrThrow()
      * @used-by reviseAndPrimary()
      * @used-by reviseAndBefore()
-     * @used-by reviseIgnore()
      *
      * @inheritdoc Database::revise()
      */
@@ -2414,7 +2375,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @used-by upgradeOrThrow()
      * @used-by upgradeAndPrimary()
      * @used-by upgradeAndBefore()
-     * @used-by upgradeIgnore()
      *
      * @inheritdoc Database::upgrade()
      */
@@ -2430,7 +2390,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @used-by removeOrThrow()
      * @used-by removeAndPrimary()
      * @used-by removeAndBefore()
-     * @used-by removeIgnore()
      *
      * @inheritdoc Database::remove()
      */
@@ -2446,7 +2405,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @used-by destroyOrThrow()
      * @used-by destroyAndPrimary()
      * @used-by destroyAndBefore()
-     * @used-by destroyIgnore()
      *
      * @inheritdoc Database::destroy()
      */
@@ -2490,7 +2448,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @used-by modifyOrThrow()
      * @used-by modifyAndPrimary()
-     * @used-by modifyIgnore()
      * @used-by modifyAndBefore()
      *
      * @inheritdoc Database::modify()

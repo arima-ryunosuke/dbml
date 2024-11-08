@@ -17,7 +17,7 @@ trait AffectAndBeforeTrait
     private function updateArrayAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->updateArray($tableName, $data, $where, ...($opt + ['return' => 1]));
+        return $this->updateArray($tableName, $data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -28,7 +28,7 @@ trait AffectAndBeforeTrait
     private function updateArrayAndBeforeWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->updateArray($data, $where, ...($opt + ['return' => 1]));
+        return $this->updateArray($data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -39,7 +39,7 @@ trait AffectAndBeforeTrait
     private function deleteArrayAndBeforeWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'deleteArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->deleteArray($tableName, $where, ...($opt + ['return' => 1]));
+        return $this->deleteArray($tableName, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -50,7 +50,7 @@ trait AffectAndBeforeTrait
     private function deleteArrayAndBeforeWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'deleteArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->deleteArray($where, ...($opt + ['return' => 1]));
+        return $this->deleteArray($where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -61,7 +61,7 @@ trait AffectAndBeforeTrait
     private function modifyArrayAndBeforeWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->modifyArray($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['return' => 1]));
+        return $this->modifyArray($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -72,7 +72,7 @@ trait AffectAndBeforeTrait
     private function modifyArrayAndBeforeWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->modifyArray($insertData, $updateData, $uniquekey, ...($opt + ['return' => 1]));
+        return $this->modifyArray($insertData, $updateData, $uniquekey, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -84,7 +84,7 @@ trait AffectAndBeforeTrait
     private function updateAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
-        return $this->update($tableName, $data, $where, ...($opt + ['return' => 1]));
+        return $this->update($tableName, $data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -96,7 +96,7 @@ trait AffectAndBeforeTrait
     private function updateAndBeforeWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
-        return $this->update($data, $where, ...($opt + ['return' => 1]));
+        return $this->update($data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -108,7 +108,7 @@ trait AffectAndBeforeTrait
     private function deleteAndBeforeWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
-        return $this->delete($tableName, $where, ...($opt + ['return' => 1]));
+        return $this->delete($tableName, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -120,7 +120,7 @@ trait AffectAndBeforeTrait
     private function deleteAndBeforeWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
-        return $this->delete($where, ...($opt + ['return' => 1]));
+        return $this->delete($where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -132,7 +132,7 @@ trait AffectAndBeforeTrait
     private function invalidAndBeforeWithTable($tableName, $where, $invalid_columns = null, ...$opt)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
-        return $this->invalid($tableName, $where, $invalid_columns, ...($opt + ['return' => 1]));
+        return $this->invalid($tableName, $where, $invalid_columns, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -144,7 +144,7 @@ trait AffectAndBeforeTrait
     private function invalidAndBeforeWithoutTable($where = [], $invalid_columns = null, ...$opt)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
-        return $this->invalid($where, $invalid_columns, ...($opt + ['return' => 1]));
+        return $this->invalid($where, $invalid_columns, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -156,7 +156,7 @@ trait AffectAndBeforeTrait
     private function reviseAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->revise($tableName, $data, $where, ...($opt + ['return' => 1]));
+        return $this->revise($tableName, $data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -168,7 +168,7 @@ trait AffectAndBeforeTrait
     private function reviseAndBeforeWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->revise($data, $where, ...($opt + ['return' => 1]));
+        return $this->revise($data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -180,7 +180,7 @@ trait AffectAndBeforeTrait
     private function upgradeAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upgrade($tableName, $data, $where, ...($opt + ['return' => 1]));
+        return $this->upgrade($tableName, $data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -192,7 +192,7 @@ trait AffectAndBeforeTrait
     private function upgradeAndBeforeWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upgrade($data, $where, ...($opt + ['return' => 1]));
+        return $this->upgrade($data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -204,7 +204,7 @@ trait AffectAndBeforeTrait
     private function removeAndBeforeWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->remove($tableName, $where, ...($opt + ['return' => 1]));
+        return $this->remove($tableName, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -216,7 +216,7 @@ trait AffectAndBeforeTrait
     private function removeAndBeforeWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->remove($where, ...($opt + ['return' => 1]));
+        return $this->remove($where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -228,7 +228,7 @@ trait AffectAndBeforeTrait
     private function destroyAndBeforeWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->destroy($tableName, $where, ...($opt + ['return' => 1]));
+        return $this->destroy($tableName, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -240,7 +240,7 @@ trait AffectAndBeforeTrait
     private function destroyAndBeforeWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->destroy($where, ...($opt + ['return' => 1]));
+        return $this->destroy($where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -253,7 +253,7 @@ trait AffectAndBeforeTrait
     private function reduceAndBeforeWithTable($tableName, $limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'reduce']) === parameter_default([$this, __FUNCTION__]));
-        return $this->reduce($tableName, $limit, $orderBy, $groupBy, $where, ...($opt + ['return' => 1]));
+        return $this->reduce($tableName, $limit, $orderBy, $groupBy, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -266,7 +266,7 @@ trait AffectAndBeforeTrait
     private function reduceAndBeforeWithoutTable($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'reduce']) === parameter_default([$this, __FUNCTION__]));
-        return $this->reduce($limit, $orderBy, $groupBy, $where, ...($opt + ['return' => 1]));
+        return $this->reduce($limit, $orderBy, $groupBy, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -278,7 +278,7 @@ trait AffectAndBeforeTrait
     private function upsertAndBeforeWithTable($tableName, $insertData, $updateData = [], ...$opt)
     {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upsert($tableName, $insertData, $updateData, ...($opt + ['return' => 1]));
+        return $this->upsert($tableName, $insertData, $updateData, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -290,7 +290,7 @@ trait AffectAndBeforeTrait
     private function upsertAndBeforeWithoutTable($insertData, $updateData = [], ...$opt)
     {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upsert($insertData, $updateData, ...($opt + ['return' => 1]));
+        return $this->upsert($insertData, $updateData, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -302,7 +302,7 @@ trait AffectAndBeforeTrait
     private function modifyAndBeforeWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
-        return $this->modify($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['return' => 1]));
+        return $this->modify($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -314,7 +314,7 @@ trait AffectAndBeforeTrait
     private function modifyAndBeforeWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
-        return $this->modify($insertData, $updateData, $uniquekey, ...($opt + ['return' => 1]));
+        return $this->modify($insertData, $updateData, $uniquekey, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -326,7 +326,7 @@ trait AffectAndBeforeTrait
     private function replaceAndBeforeWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
-        return $this->replace($tableName, $data, ...($opt + ['return' => 1]));
+        return $this->replace($tableName, $data, ...($opt + ['return' => 'before']));
     }
 
     /**
@@ -338,6 +338,6 @@ trait AffectAndBeforeTrait
     private function replaceAndBeforeWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
-        return $this->replace($data, ...($opt + ['return' => 1]));
+        return $this->replace($data, ...($opt + ['return' => 'before']));
     }
 }

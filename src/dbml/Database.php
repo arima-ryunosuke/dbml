@@ -40,7 +40,6 @@ use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Metadata\Schema;
 use ryunosuke\dbml\Mixin\AffectAndBeforeTrait;
 use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
-use ryunosuke\dbml\Mixin\AffectIgnoreTrait;
 use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
 use ryunosuke\dbml\Mixin\AggregateTrait;
 use ryunosuke\dbml\Mixin\EntityForAffectTrait;
@@ -169,11 +168,6 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * 返り値として条件一致した更新前のレコード群を返すようになる。
  * 履歴ログを取るようなケースで有用（もちろん実行前に能動的に SELECT しておくのでも構わない）。
  *
- * **Ignore**
- *
- * [insert, updert, modify, delete, invalid, revise, upgrade, remove, destroy] メソッドのみに付与できる。
- * RDBMS に動作は異なるが、 `INSERT IGNORE` のようなクエリが発行される。
- *
  * ### エスケープ
  *
  * 識別子のエスケープは一切面倒をみない。外部入力を識別子にしたい（テーブル・カラムを外部指定するとか）場合は自前でエスケープすること。
@@ -275,27 +269,6 @@ class Database
     use SubSelectTrait;
     use SubAggregateTrait;
 
-    use AffectIgnoreTrait {
-        insertSelectIgnoreWithTable as public insertSelectIgnore;
-        insertArrayIgnoreWithTable as public insertArrayIgnore;
-        updateArrayIgnoreWithTable as public updateArrayIgnore;
-        deleteArrayIgnoreWithTable as public deleteArrayIgnore;
-        modifyArrayIgnoreWithTable as public modifyArrayIgnore;
-        changeArrayIgnoreWithTable as public changeArrayIgnore;
-        affectArrayIgnoreWithTable as public affectArrayIgnore;
-        saveIgnoreWithTable as public saveIgnore;
-        insertIgnoreWithTable as public insertIgnore;
-        updateIgnoreWithTable as public updateIgnore;
-        deleteIgnoreWithTable as public deleteIgnore;
-        invalidIgnoreWithTable as public invalidIgnore;
-        reviseIgnoreWithTable as public reviseIgnore;
-        upgradeIgnoreWithTable as public upgradeIgnore;
-        removeIgnoreWithTable as public removeIgnore;
-        destroyIgnoreWithTable as public destroyIgnore;
-        createIgnoreWithTable as public createIgnore;
-        modifyIgnoreWithTable as public modifyIgnore;
-        modifyIgnoreWithTable as public modifyIgnore;
-    }
     use AffectOrThrowTrait {
         insertArrayOrThrowWithTable as public insertArrayOrThrow;
         createWithTable as public create;
@@ -974,7 +947,7 @@ class Database
             return [];
         }
 
-        if ($opt['return'] ?? false) {
+        if (($opt['return'] ?? '') === 'before') {
             $tablename = $builder->getTable() . concat(" AS ", $builder->getAlias());
             $select = $this->select($tablename, $builder->getCondition());
             if ($builder->getAlias() !== null && $builder->getTable() === $this->convertTableName($builder->getAlias())) {
@@ -983,7 +956,7 @@ class Database
             return $select->array();
         }
 
-        if ($opt['primary'] ?? false) {
+        if (($opt['return'] ?? '') === 'primary') {
             $pkcols = $this->getSchema()->getTablePrimaryColumns($builder->getTable());
             $result = [];
             foreach ($builder->getValues() as $row) {
@@ -1013,16 +986,10 @@ class Database
             $this->resetAutoIncrement($builder->getTable(), $seq);
         }
 
-        // 歴史的な経緯で primary:1 は例外モード
-        if (array_get($opt, 'primary') === 1 && $affected === 0) {
+        if (($opt['throw'] ?? false) && $affected === 0) {
             throw new NonAffectedException('affected row is nothing.');
         }
-        // 同上。 primary:2 は空配列返しモード
-        if (array_get($opt, 'primary') === 2 && $affected === 0) {
-            return [];
-        }
-        // 同上。 primary:3 は主キー返しモード
-        if (array_get($opt, 'primary')) {
+        if (($opt['return'] ?? '') === 'primary') {
             $data = $builder->getSet() + $builder->getWhere();
             foreach ($data as $k => $v) {
                 $kk = str_lchop($k, "{$builder->getTable()}.");
@@ -1045,7 +1012,7 @@ class Database
             }
             return $primary;
         }
-        if (array_get($opt, 'return')) {
+        if (($opt['return'] ?? '') === 'before') {
             assert(is_array($returns));
             return $returns;
         }
@@ -1066,18 +1033,12 @@ class Database
 
         $affected = array_sum($affecteds);
 
-        // 歴史的な経緯で primary:1 は例外モード
-        if (array_get($opt, 'primary') === 1 && $affected === 0) {
+        if (($opt['throw'] ?? false) && $affected === 0) {
             throw new NonAffectedException('affected row is nothing.');
         }
-        // 同上。 primary:2 は空配列返しモード（for compatible. なぜか BULK 系は空配列ではなく affected 返しになっている）
-        if (array_get($opt, 'primary') === 2) {
-            return $affected;
-        }
-        // 同上。 primary:3 は主キー返しモード
-        if (array_get($opt, 'primary')) {
+        if (($opt['return'] ?? '') === 'primary') {
             // 主キー指定されていたやつを分離
-            $notnull_pks = array_filter($return, fn($pkval) => !array_find($pkval, 'is_null', false));
+            $notnull_pks = array_filter($return, fn($pkval) => !array_find_first($pkval, 'is_null', false));
 
             // されていないやつが含まれているなら、後ろからされているやつを除くその件数を取れば追加されたやつになる
             if ($null_count = (count($return) - count($notnull_pks))) {
@@ -1096,7 +1057,7 @@ class Database
 
             return $notnull_pks;
         }
-        if (array_get($opt, 'return')) {
+        if (($opt['return'] ?? '') === 'before') {
             return $return;
         }
         return $affected;
@@ -4293,8 +4254,6 @@ class Database
      * // INSERT INTO t_destination SELECT * FROM t_source
      * ```
      *
-     * @used-by insertSelectIgnore()
-     *
      * @param string|TableDescriptor $tableName テーブル名
      * @param string|SelectBuilder $sql SELECT クエリ
      * @param array $columns カラム定義
@@ -4342,7 +4301,6 @@ class Database
      * // INSERT INTO t_table (colA, colB) VALUES ('1', UPPER('b')), ('2', UPPER('b'))
      * ```
      *
-     * @used-by insertArrayIgnore()
      * @used-by insertArrayOrThrow()
      * @used-by insertArrayAndPrimary()
      *
@@ -4396,7 +4354,6 @@ class Database
      * `$data` の引数配列に含めた主キーは WHERE 句に必ず追加される。
      * したがって $where を指定するのは「`status_cd = 50` のもののみ」などといった「前提となるような条件」を書く。
      *
-     * @used-by updateArrayIgnore()
      * @used-by updateArrayAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
@@ -4464,7 +4421,6 @@ class Database
      * //    (id = '997') OR (id = '998') OR (id = '999')
      * ```
      *
-     * @used-by deleteArrayIgnore()
      * @used-by deleteArrayAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
@@ -4548,7 +4504,6 @@ class Database
      * //   name = VALUES(name)
      * ```
      *
-     * @used-by modifyArrayIgnore()
      * @used-by modifyArrayAndBefore()
      * @used-by modifyArrayAndPrimary()
      *
@@ -4669,8 +4624,6 @@ class Database
      *     ['id' => 8, 'name' => 'piyo', '' => -1], // 削除された行は -1
      * ]
      * ```
-     *
-     * @used-by changeArrayIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array $dataarray カラムデータ配列あるいは Generator
@@ -4856,8 +4809,6 @@ class Database
      * // INSERT INTO tablename (id, name) VALUES ('1', 'hoge')
      * ```
      *
-     * @used-by affectArrayIgnore()
-     *
      * @param string $tableName テーブル名
      * @param array $dataarray カラムデータ配列あるいは Generator
      * @return array 基本的には主キー配列. dryrun 中は SQL をネストして返す
@@ -4923,7 +4874,7 @@ class Database
         foreach ($affects as $method => $rows) {
             foreach ($rows as $n => $args) {
                 /** @var int|string $n */
-                $results[$n] = $this->$method(...$args, ...(['primary' => 3] + $opt));
+                $results[$n] = $this->$method(...$args, ...(['return' => 'primary'] + $opt));
                 if (!$dryrunning) {
                     $results[$n][''] = $this->getAffectedRows();
                 }
@@ -5013,8 +4964,6 @@ class Database
      * // changeArray で興味のない行は吹き飛ぶ
      * // DELETE FROM t_grand WHERE (t_grand.child_id IN(1, 2)) AND (NOT(t_grand.grand_id IN(1, 2, 3, 4)))
      * ```
-     *
-     * @used-by saveIgnore()
      *
      * @param string|array $tableName テーブル名
      * @param array $data 階層を持ったデータ配列
@@ -5122,7 +5071,6 @@ class Database
      *
      * @used-by insertOrThrow()
      * @used-by insertAndPrimary()
-     * @used-by insertIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data INSERT データ配列
@@ -5161,7 +5109,6 @@ class Database
      * @used-by updateOrThrow()
      * @used-by updateAndPrimary()
      * @used-by updateAndBefore()
-     * @used-by updateIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
@@ -5229,7 +5176,6 @@ class Database
      * @used-by deleteOrThrow()
      * @used-by deleteAndPrimary()
      * @used-by deleteAndBefore()
-     * @used-by deleteIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
@@ -5305,7 +5251,6 @@ class Database
      * @used-by invalidOrThrow()
      * @used-by invalidAndPrimary()
      * @used-by invalidAndBefore()
-     * @used-by invalidIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
@@ -5343,7 +5288,7 @@ class Database
                     }
                 }
                 else {
-                    $affecteds = array_merge($affecteds, arrayize($this->invalid($ltable, $subwhere, $lcolumns, ...array_remove($opt, ['primary', 'return']))));
+                    $affecteds = array_merge($affecteds, arrayize($this->invalid($ltable, $subwhere, $lcolumns, ...array_remove($opt, ['return']))));
                 }
             }
         }
@@ -5370,7 +5315,6 @@ class Database
      * @used-by reviseOrThrow()
      * @used-by reviseAndPrimary()
      * @used-by reviseAndBefore()
-     * @used-by reviseIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
@@ -5413,7 +5357,6 @@ class Database
      * @used-by upgradeOrThrow()
      * @used-by upgradeAndPrimary()
      * @used-by upgradeAndBefore()
-     * @used-by upgradeIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
@@ -5443,7 +5386,7 @@ class Database
 
                     $ltable = first_key($schema->getForeignTable($fkey));
                     $subwhere = $builder->cascadeWheres($fkey);
-                    $affecteds = array_merge($affecteds, arrayize($this->upgrade($ltable, $subdata, $subwhere, ...array_remove($opt, ['primary', 'return']))));
+                    $affecteds = array_merge($affecteds, arrayize($this->upgrade($ltable, $subdata, $subwhere, ...array_remove($opt, ['return']))));
                 }
             }
 
@@ -5476,7 +5419,6 @@ class Database
      * @used-by removeOrThrow()
      * @used-by removeAndPrimary()
      * @used-by removeAndBefore()
-     * @used-by removeIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
@@ -5518,7 +5460,6 @@ class Database
      * @used-by destroyOrThrow()
      * @used-by destroyAndPrimary()
      * @used-by destroyAndBefore()
-     * @used-by destroyIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
@@ -5536,7 +5477,7 @@ class Database
             if ($fkey->onDelete() === null) {
                 $ltable = first_key($schema->getForeignTable($fkey));
                 $subwhere = $builder->cascadeWheres($fkey);
-                $affecteds = array_merge($affecteds, arrayize($this->destroy($ltable, $subwhere, ...array_remove($opt, ['primary', 'return']))));
+                $affecteds = array_merge($affecteds, arrayize($this->destroy($ltable, $subwhere, ...array_remove($opt, ['return']))));
             }
         }
 
@@ -5638,9 +5579,6 @@ class Database
             $unseter = $this->_setIdentityInsert($builder->getTable(), $builder->getSet());
             try {
                 $builder->execute();
-                if (($opt['return'] ?? false && !$this->getUnsafeOption('dryrun'))) {
-                    return [];
-                }
                 return $this->_postaffect($builder, [], $opt);
             }
             finally {
@@ -5715,7 +5653,6 @@ class Database
      * @used-by modifyOrThrow()
      * @used-by modifyAndPrimary()
      * @used-by modifyAndBefore()
-     * @used-by modifyIgnore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $insertData INSERT データ配列

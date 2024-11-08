@@ -321,9 +321,9 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $ex = new NonAffectedException('affected row is nothing');
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
             $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
-            that($database)->insert('test', ['id' => 9, 'name' => 'hoge'], primary: 1, ignore: true)->wasThrown($ex);
+            that($database)->insert('test', ['id' => 9, 'name' => 'hoge'], throw: true, ignore: true)->wasThrown($ex);
             if ($database->getCompatiblePlatform()->getName() !== 'mysql') {
-                that($database)->modify('test', ['id' => 9, 'name' => null], [], 'PRIMARY', primary: 1, ignore: true)->wasThrown($ex);
+                that($database)->modify('test', ['id' => 9, 'name' => null], [], 'PRIMARY', throw: true, ignore: true)->wasThrown($ex);
             }
         }
         that($database)->updateOrThrow('test', ['name' => 'd'], ['id' => -1])->wasThrown($ex);
@@ -342,74 +342,6 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['id' => 'a'], $database->insertAndPrimary('noauto[id:a]', ['id' => 'a', 'name' => 'hoge']));
         $this->assertEquals(['id' => 'b'], $database->upsertAndPrimary('noauto[id:b]', ['id' => 'b', 'name' => 'fuga']));
         $this->assertEquals(['id' => 'c'], $database->modifyAndPrimary('noauto[id:c]', ['id' => 'c', 'name' => 'piyo']));
-
-        // affectIgnore
-        if ($database->getCompatiblePlatform()->supportsIgnore()) {
-            $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
-            $database->truncate('noauto');
-            $database->insert('noauto', ['id' => 'x', 'name' => '']);
-            $this->assertEquals(['id' => 'b'], $database->createIgnore('noauto', ['id' => 'b', 'name' => 'hoge']));
-            $this->assertEquals(['id' => 'a'], $database->insertIgnore('noauto', ['id' => 'a', 'name' => 'hoge']));
-            $this->assertEquals(['id' => 'a'], $database->updateIgnore('noauto', ['name' => 'fuga'], ['id' => 'a']));
-            $this->assertEquals(['id' => 'a'], $database->modifyIgnore('noauto', ['id' => 'a', 'name' => 'piyo']));
-            $this->assertEquals([], $database->createIgnore('noauto', ['id' => 'x']));
-            $this->assertEquals([], $database->insertIgnore('noauto', ['id' => 'x']));
-            if ($database->getCompatibleConnection()->getName() !== 'mysqli') {
-                $this->assertEquals([], $database->updateIgnore('noauto', ['id' => 'x'], ['id' => 'a']));
-            }
-            // insert しようとしてダメでさらに update しようとしてダメだった場合に無視できるのは mysql のみ（本当は方法があるのかもしれないが詳しくないのでわからない）
-            if ($database->getPlatform() instanceof MySQLPlatform) {
-                $this->assertEquals([], $database->modifyIgnore('noauto', ['id' => 'x'], ['id' => 'a']));
-            }
-
-            // array 系
-            $database->truncate('noauto');
-            $database->insert('noauto', ['id' => 1, 'name' => '']);
-            $database->insert('noauto', ['id' => 2, 'name' => '']);
-            $this->assertEquals(0, $database->insertSelectIgnore('noauto', 'select 1 union select 2', ['id']));
-            $this->assertEquals(0, $database->insertArrayIgnore('noauto', [
-                ['id' => 1, 'name' => ''],
-                ['id' => 2, 'name' => ''],
-            ]));
-            $updatedRow = $database->getCompatibleConnection()->getName() === 'mysqli' ? 2 : 0;
-            $this->assertEquals($updatedRow, $database->updateArrayIgnore('noauto', [
-                ['id' => 1, 'name' => null],
-                ['id' => 2, 'name' => null],
-            ]));
-            $this->assertEquals(0, $database->modifyArrayIgnore('noauto', [
-                ['id' => 1, 'name' => null],
-                ['id' => 2, 'name' => null],
-            ]));
-            $this->assertEquals([
-                [],
-                [],
-            ], $database->changeArrayIgnore('noauto', [
-                ['name' => null],
-                ['name' => null],
-            ], false));
-
-            $database->import([
-                'foreign_p' => [
-                    [
-                        'id'         => 1,
-                        'name'       => 'P1',
-                        'foreign_c1' => [],
-                    ],
-                    [
-                        'id'         => 2,
-                        'name'       => 'P2',
-                        'foreign_c1' => [['seq' => 1, 'name' => 'C']],
-                    ],
-                ],
-            ]);
-
-            // for coverage
-            $this->assertEquals(['id' => 1], $database->saveIgnore('foreign_p', ['id' => 1]));
-
-            if ($database->getPlatform() instanceof MySQLPlatform) {
-                $this->assertEquals(['id' => 1], $database->deleteIgnore('foreign_p', ['id' => 1]));
-            }
-        }
 
         if ($database->getCompatibleConnection()->getName() === 'pdo-mysql') {
             that($database)->upsertOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => ''])->wasThrown($ex);
@@ -6320,20 +6252,6 @@ INSERT INTO test (id, name) VALUES
                     ""     => 1,
                 ],
             ], $primaries);
-
-            if ($database->getCompatiblePlatform()->supportsIgnore()) {
-                $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
-
-                $primaries = $database->changeArrayIgnore('test', [
-                    ['id' => 1, 'name' => null],
-                ], ['id' => 1], 'PRIMARY', ['name']);
-                $this->assertEquals([
-                    [
-                        "name" => "a",
-                        ""     => 2,
-                    ],
-                ], $primaries);
-            }
         }
     }
 
@@ -6438,19 +6356,6 @@ INSERT INTO test (id, name) VALUES
         that($database)->affectArray('test', [['@method' => 'unknown']])->wasThrown('is invalid');
         that($database)->affectArray('multiprimary', [['@method' => 'update', 'mainid' => 1]])->wasThrown('primary data mismatch');
         that($database)->affectArray('multiprimary', [['@method' => 'delete', 'mainid' => 1]])->wasThrown('primary data mismatch');
-
-        if ($database->getCompatiblePlatform()->supportsIgnore()) {
-            $primaries = $database->affectArrayIgnore('test', [
-                ['@method' => 'insert', 'id' => 5, 'name' => 'X'],
-                ['@method' => 'update', 'id' => 6, 'name' => 'Y'],
-            ]);
-            $this->assertEquals([
-                1 => ["id" => 6, "" => 1],
-                0 => ["id" => 5, "" => 0],
-            ], $primaries);
-
-            $this->assertEquals('e', $database->selectValue('test(5).name'));
-        }
     }
 
     /**
@@ -6683,7 +6588,7 @@ INSERT INTO test (id, name) VALUES
             that($database)->insertArray('foreign_c1', [
                 ['id' => null, 'name' => ''],
             ],
-                primary: 3,
+                return: 'primary',
                 ignore: true,
             )->wasThrown('affected row is mismatch');
 
@@ -6978,40 +6883,40 @@ INSERT INTO test (id, name) VALUES
     function test_affect_ignore($database)
     {
         if ($database->getCompatiblePlatform()->supportsIgnore()) {
-            $this->assertEquals([], $database->insertIgnore('test', ['id' => 1]));
+            $this->assertEquals(['id' => 1], $database->insertAndPrimary('test', ['id' => 1], ignore: true));
             if ($database->getCompatibleConnection()->getName() !== 'mysqli') {
-                $this->assertEquals([], $database->updateIgnore('test', ['id' => 1], ['id' => 2]));
+                $this->assertEquals(['id' => 1], $database->updateAndPrimary('test', ['id' => 1], ['id' => 2], ignore: true));
             }
 
             $database->insert('foreign_p', ['id' => 1, 'name' => 'p']);
             $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'c1']);
 
-            $this->assertEquals([], $database->reviseIgnore('foreign_p', ['id' => 2, 'name' => 'pp'], ['id' => 1]));
-            $this->assertEquals(['id' => 2], $database->upgradeIgnore('foreign_p', ['id' => 2, 'name' => 'pp'], ['id' => 1]));
+            $this->assertEquals(['id' => 2], $database->reviseAndPrimary('foreign_p', ['id' => 2, 'name' => 'pp'], ['id' => 1], ignore: true));
+            $this->assertEquals(['id' => 2], $database->upgradeAndPrimary('foreign_p', ['id' => 2, 'name' => 'pp'], ['id' => 1], ignore: true));
 
             // sqlite は外部キーを無視できない（というか DELETE OR IGNORE が対応していない？）のでシンタックスだけ
             $ignore = $database->getCompatiblePlatform()->getIgnoreSyntax();
             $database = $database->dryrun();
             $this->assertEquals([
                 "DELETE $ignore FROM foreign_p WHERE (id = '1') OR (id = '2')",
-            ], $database->deleteArrayIgnore('foreign_p', [['id' => 1], ['id' => 2]]));
+            ], $database->deleteArray('foreign_p', [['id' => 1], ['id' => 2]], ignore: true));
             $this->assertEquals([
                 "DELETE $ignore FROM foreign_p WHERE id = '1'",
-            ], $database->deleteIgnore('foreign_p', ['id' => 1]));
+            ], $database->delete('foreign_p', ['id' => 1], ignore: true));
             $this->assertEquals([
                 "UPDATE $ignore foreign_p SET name = 'deleted' WHERE id = '1'",
-            ], $database->invalidIgnore('foreign_p', ['id' => 1], ['name' => 'deleted']));
+            ], $database->invalid('foreign_p', ['id' => 1], ['name' => 'deleted'], ignore: true));
             $this->assertStringIgnoreBreak(<<<ACTUAL
                 DELETE $ignore FROM foreign_p WHERE
                 (id = '1')
                 AND ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = foreign_p.id)))
                 AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = foreign_p.id)))
-                ACTUAL, $database->removeIgnore('foreign_p', ['id' => 1])[0]);
+                ACTUAL, $database->remove('foreign_p', ['id' => 1], ignore: true)[0]);
             $this->assertEquals([
                 "DELETE $ignore FROM foreign_c1 WHERE (id) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '1')",
                 "DELETE $ignore FROM foreign_c2 WHERE (cid) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '1')",
                 "DELETE $ignore FROM foreign_p WHERE id = '1'",
-            ], $database->destroyIgnore('foreign_p', ['id' => 1]));
+            ], $database->destroy('foreign_p', ['id' => 1], ignore: true));
         }
     }
 

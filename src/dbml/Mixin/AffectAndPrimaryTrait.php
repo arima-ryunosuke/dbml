@@ -17,7 +17,7 @@ trait AffectAndPrimaryTrait
     private function insertArrayAndPrimaryWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->insertArray($tableName, $data, ...($opt + ['primary' => 3]));
+        return $this->insertArray($tableName, $data, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -29,7 +29,7 @@ trait AffectAndPrimaryTrait
     private function insertArrayAndPrimaryWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->insertArray($data, ...($opt + ['primary' => 3]));
+        return $this->insertArray($data, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -41,7 +41,7 @@ trait AffectAndPrimaryTrait
     private function modifyArrayAndPrimaryWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->modifyArray($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['primary' => 3]));
+        return $this->modifyArray($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -53,7 +53,7 @@ trait AffectAndPrimaryTrait
     private function modifyArrayAndPrimaryWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
-        return $this->modifyArray($insertData, $updateData, $uniquekey, ...($opt + ['primary' => 3]));
+        return $this->modifyArray($insertData, $updateData, $uniquekey, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -65,7 +65,7 @@ trait AffectAndPrimaryTrait
     private function insertAndPrimaryWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'insert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->insert($tableName, $data, ...($opt + ['primary' => 3]));
+        return $this->insert($tableName, $data, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -77,7 +77,7 @@ trait AffectAndPrimaryTrait
     private function insertAndPrimaryWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'insert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->insert($data, ...($opt + ['primary' => 3]));
+        return $this->insert($data, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -89,7 +89,7 @@ trait AffectAndPrimaryTrait
     private function updateAndPrimaryWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
-        return $this->update($tableName, $data, $where, ...($opt + ['primary' => 3]));
+        return $this->update($tableName, $data, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -101,7 +101,7 @@ trait AffectAndPrimaryTrait
     private function updateAndPrimaryWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
-        return $this->update($data, $where, ...($opt + ['primary' => 3]));
+        return $this->update($data, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -113,7 +113,7 @@ trait AffectAndPrimaryTrait
     private function deleteAndPrimaryWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
-        return $this->delete($tableName, $where, ...($opt + ['primary' => 3]));
+        return $this->delete($tableName, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -125,7 +125,7 @@ trait AffectAndPrimaryTrait
     private function deleteAndPrimaryWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
-        return $this->delete($where, ...($opt + ['primary' => 3]));
+        return $this->delete($where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -137,7 +137,7 @@ trait AffectAndPrimaryTrait
     private function invalidAndPrimaryWithTable($tableName, $where, $invalid_columns = null, ...$opt)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
-        return $this->invalid($tableName, $where, $invalid_columns, ...($opt + ['primary' => 3]));
+        return $this->invalid($tableName, $where, $invalid_columns, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -149,7 +149,7 @@ trait AffectAndPrimaryTrait
     private function invalidAndPrimaryWithoutTable($where = [], $invalid_columns = null, ...$opt)
     {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
-        return $this->invalid($where, $invalid_columns, ...($opt + ['primary' => 3]));
+        return $this->invalid($where, $invalid_columns, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -161,7 +161,7 @@ trait AffectAndPrimaryTrait
     private function reviseAndPrimaryWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->revise($tableName, $data, $where, ...($opt + ['primary' => 3]));
+        return $this->revise($tableName, $data, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -173,7 +173,7 @@ trait AffectAndPrimaryTrait
     private function reviseAndPrimaryWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->revise($data, $where, ...($opt + ['primary' => 3]));
+        return $this->revise($data, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -185,7 +185,7 @@ trait AffectAndPrimaryTrait
     private function upgradeAndPrimaryWithTable($tableName, $data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upgrade($tableName, $data, $where, ...($opt + ['primary' => 3]));
+        return $this->upgrade($tableName, $data, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -197,7 +197,7 @@ trait AffectAndPrimaryTrait
     private function upgradeAndPrimaryWithoutTable($data, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upgrade($data, $where, ...($opt + ['primary' => 3]));
+        return $this->upgrade($data, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -209,7 +209,7 @@ trait AffectAndPrimaryTrait
     private function removeAndPrimaryWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->remove($tableName, $where, ...($opt + ['primary' => 3]));
+        return $this->remove($tableName, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -221,7 +221,7 @@ trait AffectAndPrimaryTrait
     private function removeAndPrimaryWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->remove($where, ...($opt + ['primary' => 3]));
+        return $this->remove($where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -233,7 +233,7 @@ trait AffectAndPrimaryTrait
     private function destroyAndPrimaryWithTable($tableName, $where = [], ...$opt)
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->destroy($tableName, $where, ...($opt + ['primary' => 3]));
+        return $this->destroy($tableName, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -245,7 +245,7 @@ trait AffectAndPrimaryTrait
     private function destroyAndPrimaryWithoutTable($where = [], ...$opt)
     {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->destroy($where, ...($opt + ['primary' => 3]));
+        return $this->destroy($where, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -257,7 +257,7 @@ trait AffectAndPrimaryTrait
     private function upsertAndPrimaryWithTable($tableName, $insertData, $updateData = [], ...$opt)
     {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upsert($tableName, $insertData, $updateData, ...($opt + ['primary' => 3]));
+        return $this->upsert($tableName, $insertData, $updateData, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -269,7 +269,7 @@ trait AffectAndPrimaryTrait
     private function upsertAndPrimaryWithoutTable($insertData, $updateData = [], ...$opt)
     {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upsert($insertData, $updateData, ...($opt + ['primary' => 3]));
+        return $this->upsert($insertData, $updateData, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -281,7 +281,7 @@ trait AffectAndPrimaryTrait
     private function modifyAndPrimaryWithTable($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
-        return $this->modify($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['primary' => 3]));
+        return $this->modify($tableName, $insertData, $updateData, $uniquekey, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -293,7 +293,7 @@ trait AffectAndPrimaryTrait
     private function modifyAndPrimaryWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
-        return $this->modify($insertData, $updateData, $uniquekey, ...($opt + ['primary' => 3]));
+        return $this->modify($insertData, $updateData, $uniquekey, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -305,7 +305,7 @@ trait AffectAndPrimaryTrait
     private function replaceAndPrimaryWithTable($tableName, $data, ...$opt)
     {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
-        return $this->replace($tableName, $data, ...($opt + ['primary' => 3]));
+        return $this->replace($tableName, $data, ...($opt + ['return' => 'primary']));
     }
 
     /**
@@ -317,6 +317,6 @@ trait AffectAndPrimaryTrait
     private function replaceAndPrimaryWithoutTable($data, ...$opt)
     {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
-        return $this->replace($data, ...($opt + ['primary' => 3]));
+        return $this->replace($data, ...($opt + ['return' => 'primary']));
     }
 }

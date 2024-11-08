@@ -2,7 +2,6 @@
 
 namespace ryunosuke\Test\dbml\Gateway;
 
-use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Types\StringType;
@@ -1507,19 +1506,6 @@ AND ((flag=1))", "$gw");
             ]);
             $this->assertEquals(['AAA', 'BBB', 'CCC', 'affectArray'], $gateway->lists('name'));
         }
-
-        if ($database->getCompatiblePlatform()->supportsIgnore()) {
-            $primaries = $gateway->affectArrayIgnore([
-                ['@method' => 'insert', 'id' => 1, 'name' => 'X'],
-                ['@method' => 'update', 'id' => 2, 'name' => 'Y'],
-            ]);
-            $this->assertEquals([
-                1 => ["id" => 2, "" => 1],
-                0 => ["id" => 1, "" => 0],
-            ], $primaries);
-
-            $this->assertEquals('AAA', $gateway->pk(1)->value('name'));
-        }
     }
 
     /**
@@ -1839,81 +1825,6 @@ AND ((flag=1))", "$gw");
      * @param TableGateway $gateway
      * @param Database $database
      */
-    function test_affect_ignore($gateway, $database)
-    {
-        if ($database->getCompatiblePlatform()->supportsIgnore()) {
-            $this->assertEquals(['id' => '11'], $gateway->insertIgnore(['id' => 11, 'name' => 'hoge']));
-            $this->assertEquals([], $gateway->insertIgnore(['id' => 11, 'name' => 'hoge']));
-
-            $this->assertEquals(['id' => '11'], $gateway->updateIgnore(['name' => 'fuga'], ['id' => 11]));
-            $this->assertEquals([], $gateway->updateIgnore(['name' => 'hoge'], ['id' => -1]));
-
-            $this->assertEquals(['id' => '11'], $gateway->modifyIgnore(['id' => 11, 'name' => 'piyo']));
-            $this->assertEquals(['id' => '11'], $gateway->saveIgnore(['id' => 11]));
-
-            // array 系
-            $database = $database->context(['filterNullAtNotNullColumn' => false]); // not null に null を入れることでエラーを発生させる
-            $gateway = $database->noauto;
-            $gateway->truncate();
-            $gateway->insert(['id' => 1, 'name' => '']);
-            $gateway->insert(['id' => 2, 'name' => '']);
-            $this->assertEquals(0, $gateway->insertSelectIgnore('select 1 union select 2', ['id']));
-            $this->assertEquals(0, $gateway->insertArrayIgnore([
-                ['id' => 1, 'name' => ''],
-                ['id' => 2, 'name' => ''],
-            ]));
-            $updatedRow = $database->getCompatibleConnection()->getName() === 'mysqli' ? 2 : 0;
-            $this->assertEquals($updatedRow, $gateway->updateArrayIgnore([
-                ['id' => 1, 'name' => null],
-                ['id' => 2, 'name' => null],
-            ]));
-            $this->assertEquals(0, $gateway->modifyArrayIgnore([
-                ['id' => 1, 'name' => null],
-                ['id' => 2, 'name' => null],
-            ]));
-            $this->assertEquals([
-                [],
-                [],
-            ], $gateway->changeArrayIgnore([
-                ['name' => null],
-                ['name' => null],
-            ], false));
-
-            $database->import([
-                'foreign_p' => [
-                    [
-                        'id'         => 1,
-                        'name'       => 'P1',
-                        'foreign_c1' => [],
-                    ],
-                    [
-                        'id'         => 2,
-                        'name'       => 'P2',
-                        'foreign_c1' => [['seq' => 1, 'name' => 'C']],
-                    ],
-                ],
-            ]);
-
-            // for coverage
-            $this->assertEquals(['id' => 1], $database->foreign_p->saveIgnore(['id' => 1]));
-            $this->assertEquals(['id' => 1], $database->foreign_p->reviseIgnore(['name' => 'revise'], ['id' => 1]));
-            $this->assertEquals(['id' => 1], $database->foreign_p->upgradeIgnore(['name' => 'upgrade'], ['id' => 1]));
-            $this->assertEquals(['id' => 1], $database->foreign_p->invalidIgnore(['id' => 1], ['name' => 'deleted']));
-            // delete の syntax error はしょうがない
-            if (!$database->getCompatiblePlatform()->getWrappedPlatform() instanceof MySQLPlatform) {
-                that($database)->foreign_c1->deleteArrayIgnore(['id' => -1])->wasThrown('');
-                that($database)->foreign_c1->deleteIgnore(['id' => -1])->wasThrown('');
-                that($database)->foreign_c1->removeIgnore(['id' => -1])->wasThrown('');
-                that($database)->foreign_c1->destroyIgnore(['id' => -1])->wasThrown('');
-            }
-        }
-    }
-
-    /**
-     * @dataProvider provideGateway
-     * @param TableGateway $gateway
-     * @param Database $database
-     */
     function test_affect_override($gateway, $database)
     {
         if (!$database->getCompatiblePlatform()->supportsIgnore()) {
@@ -2009,12 +1920,12 @@ AND ((flag=1))", "$gw");
         };
         $gateway->truncate();
         $gateway->eliminate();
-        $gateway->createIgnore(['id' => 1]);
+        $gateway->create(['id' => 1]);
         $gateway->upsertOrThrow(['id' => 2]);
         $gateway->where(['id' => 3])->modify(['id' => 3]);
-        $gateway->insertIgnore(['id' => 4]);
+        $gateway->insert(['id' => 4]);
         $gateway->where(['id' => 5])->insert(['id' => 5]);
-        $gateway->updateIgnore(['name' => 'aaa'], ['id' => 1]);
+        $gateway->update(['name' => 'aaa'], ['id' => 1]);
         $gateway->updateOrThrow(['name' => 'aaa'], ['id' => 2]);
         $gateway->replaceOrThrow(['id' => 3, 'name' => 'aaa']);
         $gateway->invalidOrThrow(['id' => 3], ['name' => 'XXX']);
