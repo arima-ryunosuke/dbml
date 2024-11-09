@@ -2544,6 +2544,9 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'cdate' => [
                     'type' => 'birthday',
                 ],
+                'eint'  => [
+                    'type' => 'enum_int',
+                ],
             ],
         ]);
 
@@ -2557,6 +2560,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertStringContainsString('class ArticleEntity extends', $annotation);
         $this->assertStringContainsString('class CommentEntity extends', $annotation);
         $this->assertStringContainsString('class ManagedCommentEntity extends', $annotation);
+        $this->assertStringContainsString('eint: \\ryunosuke\\Test\\IntEnum', $annotation);
         $this->assertStringContainsString('@var \\DateTimeImmutable', $annotation);
         $this->assertStringContainsString('$tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []', $annotation);
         $this->assertStringContainsString('insertAndPrimary', $annotation);
@@ -2588,6 +2592,9 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
                 'cdate' => [
                     'type' => 'birthday',
                 ],
+                'eint'  => [
+                    'type' => 'enum_int',
+                ],
             ],
             'misctype_child' => [
                 'cdate' => [
@@ -2598,11 +2605,13 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $metafile = sys_get_temp_dir() . '/phpstormmeta';
         $phpstorm_meta = $database->echoPhpStormMeta(null, $metafile);
+
         $this->assertFileExists($metafile);
         $this->assertStringContainsString('namespace PHPSTORM_META', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\dbml\\Entity\\Entityable', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Article', $phpstorm_meta);
         $this->assertStringContainsString('new \\ryunosuke\\Test\\Entity\\Comment', $phpstorm_meta);
+        $this->assertStringContainsString('=> \\ryunosuke\\Test\\IntEnum::class', $phpstorm_meta);
         $this->assertStringContainsString('=> \DateTimeImmutable::class', $phpstorm_meta);
         $this->assertStringContainsString('=> \ArrayObject::class', $phpstorm_meta);
 

@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Query\SelectBuilder;
 
@@ -20,6 +21,7 @@ trait YieldTrait
      *
      * @inheritdoc Database::yieldArray()
      */
+    #[AssumeType('iterable')]
     public function yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->yield($this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('array');
@@ -30,6 +32,7 @@ trait YieldTrait
      *
      * @inheritdoc Database::yieldAssoc()
      */
+    #[AssumeType('iterable')]
     public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->yield($this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('assoc');

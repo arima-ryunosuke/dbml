@@ -21,6 +21,7 @@ use Doctrine\DBAL\Types\Types;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Psr\SimpleCache\CacheInterface;
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Driver\ArrayResult;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Entity\Entityable;
@@ -69,6 +70,7 @@ use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Query\TableDescriptor;
 use ryunosuke\dbml\Transaction\Transaction;
+use ryunosuke\dbml\Types\EnumType;
 use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\utility\attribute\Attribute\DebugInfo;
 use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
@@ -1128,6 +1130,37 @@ class Database
         }
     }
 
+    private function _getColumnTypehint(string $tablename): array
+    {
+        $special_types = [
+            Types::SIMPLE_ARRAY => 'array|string',
+            Types::JSON         => 'array|string',
+            Types::BOOLEAN      => 'bool',
+            Types::INTEGER      => 'int',
+            Types::SMALLINT     => 'int',
+            Types::BIGINT       => 'int|string',
+            Types::DECIMAL      => 'float|string',
+            Types::FLOAT        => 'float',
+        ];
+
+        return array_map(function (Column $column) use ($special_types) {
+            $type = $column->getType();
+            if ($type instanceof EnumType) {
+                return '\\' . $type->getEnum();
+            }
+            $typename = $type->getName();
+            $autocast = $this->getUnsafeOption('autoCastType');
+            $converter = $autocast[$typename]['select'] ?? null;
+            if (is_callable($converter)) {
+                $reftype = reflect_callable($converter)->getReturnType();
+            }
+            else {
+                $reftype = (new \ReflectionMethod($type, 'convertToPHPValue'))->getReturnType();
+            }
+            return reflect_type_resolve($reftype) ?? $special_types[$typename] ?? 'string';
+        }, $this->getSchema()->getTableColumns($tablename));
+    }
+
     /**
      * 動作ログを取る
      *
@@ -1400,17 +1433,6 @@ class Database
      */
     public function echoAnnotation(?string $namespace = null, ?string $filename = null): string
     {
-        $special_types = [
-            Types::SIMPLE_ARRAY => 'array|string',
-            Types::JSON         => 'array|string',
-            Types::BOOLEAN      => 'bool',
-            Types::INTEGER      => 'int',
-            Types::SMALLINT     => 'int',
-            Types::BIGINT       => 'int|string',
-            Types::DECIMAL      => 'float|string',
-            Types::FLOAT        => 'float',
-        ];
-
         $tablemap = $this->_tableMap();
 
         $gateway_provider = [
@@ -1432,93 +1454,68 @@ class Database
         $gateways = [];
         $entities = [];
         foreach ($tablemap['TtoE'] ?? [] as $tname => $entity_names) {
-            $column_types = array_each($this->getSchema()->getTableColumns($tname), function (&$carry, Column $column) use ($special_types) {
-                $type = $column->getType();
-                $typename = $type->getName();
-                $reftype = (new \ReflectionMethod($type, 'convertToPHPValue'))->getReturnType();
-                $carry[$column->getName()] = reflect_type_resolve($reftype) ?? $special_types[$typename] ?? 'string';
-            }, []);
+            $column_types = $this->_getColumnTypehint($tname);
             $shape = array_sprintf($column_types, '%2$s: %1$s', ', ');
             $props = array_sprintf($column_types, "/** @var %1\$s */\npublic \$%2\$s;");
 
             foreach ($entity_names as $entity_name) {
-                $methods = [];
                 $gclass = $tablemap['gatewayClass'][$entity_name] ?? TableGateway::class;
                 $eclass = $tablemap['entityClass'][$entity_name] ?? Entity::class;
                 $entity = "{$entity_name}Entity";
 
-                $declare_types = [
-                    'shape'  => "array{{$shape}}",
-                    'shapes' => "array<array{{$shape}}>",
-                    'single' => "{$entity}|array{{$shape}}",
-                    'multi'  => "{$entity}[]|array<array{{$shape}}>",
+                $assume_types = [
+                    'entity'          => "{$entity}",
+                    'shape'           => "array{{$shape}}",
+                    'entities'        => "array<{$entity}>",
+                    'shapes'          => "array<array{{$shape}}>",
+                    'iterable'        => "iterable<{$entity}|array{{$shape}}>",
+                    'iterable-entiry' => "iterable<{$entity}>",
+                    'iterable-shape'  => "iterable<array{{$shape}}>",
                 ];
 
-                $select_methods = [
-                    'array'    => 'multi',
-                    'assoc'    => 'multi',
-                    'tuple'    => 'single',
-                    'find'     => 'single',
-                    'neighbor' => 'multi',
-                ];
-                $suffixes = ['', 'InShare', 'ForUpdate', 'OrThrow', 'ForAffect'];
-                foreach ($select_methods as $mname => $select_method) {
-                    foreach ($suffixes as $suffix) {
-                        $fullname = $mname . $suffix;
-                        if (method_exists($gclass, $fullname)) {
-                            $refmethod = new \ReflectionMethod($gclass, $fullname);
-
-                            $type = $declare_types[$select_method];
-                            $args = implode(', ', function_parameter($refmethod));
-                            $return = $refmethod->hasReturnType() ? ":{$refmethod->getReturnType()}" : "";
-                            $methods[$fullname] = "/** @return {$type} */\npublic function $fullname({$args})$return { }";
-                        }
-                    }
-                }
-
-                $affect_methods = [
-                    'insertArray' => ['data' => 'multi'],
-                    'updateArray' => ['data' => 'multi', 'where' => 'single'],
-                    'deleteArray' => ['where' => 'shapes'],
-                    'modifyArray' => ['insertData' => 'multi', 'updateData' => 'single'],
-                    'changeArray' => ['dataarray' => 'multi', 'where' => 'shape'],
-                    'affectArray' => ['dataarray' => 'multi'],
-                    'save'        => ['data' => 'single'],
-                    'insert'      => ['data' => 'single'],
-                    'update'      => ['data' => 'single', 'where' => 'shape'],
-                    'delete'      => ['where' => 'shape'],
-                    'invalid'     => ['where' => 'shape'],
-                    'revise'      => ['data' => 'single', 'where' => 'shape'],
-                    'upgrade'     => ['data' => 'single', 'where' => 'shape'],
-                    'remove'      => ['where' => 'shape'],
-                    'destroy'     => ['where' => 'shape'],
-                    'reduce'      => ['where' => 'shape'],
-                    'upsert'      => ['insertData' => 'single', 'updateData' => 'single'],
-                    'modify'      => ['insertData' => 'single', 'updateData' => 'single'],
-                    'replace'     => ['data' => 'single'],
+                $refclass = new \ReflectionClass($gclass);
+                $targets = [];
+                foreach ($refclass->getMethods() as $method) {
+                    if ($method->isPublic()) {
+                        $return_types = AssumeType::of($method)?->newInstance();
+                        if ($return_types) {
+                            $targets[$method->getName()] ??= [];
+                            $targets[$method->getName()] += [
+                                'method' => $method,
+                                'return' => $return_types,
                             ];
-                $suffixes = ['', 'AndPrimary', 'AndBefore', 'OrThrow'];
-                foreach ($affect_methods as $mname => $affect_method) {
-                    foreach ($suffixes as $suffix) {
-                        $fullname = $mname . $suffix;
-                        if (method_exists($gclass, $fullname)) {
-                            $refmethod = new \ReflectionMethod($gclass, $fullname);
+                        }
 
-                            $types = [];
-                            foreach ($refmethod->getParameters() as $parameter) {
-                                $type = $affect_method[$parameter->getName()] ?? null;
-                                if ($type) {
-                                    $types[$parameter->getName()] = $declare_types[$type];
+                        $params = [];
+                        foreach ($method->getParameters() as $parameter) {
+                            $param_types = AssumeType::of($parameter)?->newInstance();
+                            if ($param_types) {
+                                $params[$parameter->getName()] = $param_types;
                             }
                         }
-
-                            if ($types) {
-                                $params = array_sprintf($types, ' * @param $%2$s %1$s', "\n");
-                                $args = implode(', ', function_parameter($refmethod));
-                                $return = $refmethod->hasReturnType() ? ":{$refmethod->getReturnType()}" : "";
-                                $methods[$fullname] = "/**\n$params\n */\npublic function $fullname({$args})$return { }";
+                        if ($params) {
+                            $targets[$method->getName()] ??= [];
+                            $targets[$method->getName()] += [
+                                'method' => $method,
+                                'params' => $params,
+                            ];
+                        }
                     }
                 }
+
+                $methods = [];
+                foreach ($targets as $name => $target) {
+                    // こいつらにも属性を付ければこんなことは不要だが面倒くさすぎる
+                    foreach (['', 'InShare', 'ForUpdate', 'ForAffect', 'AndPrimary', 'AndBefore', 'OrThrow'] as $suffix) {
+                        $fullname = $name . $suffix;
+                        if ($refclass->hasMethod($fullname)) {
+                            $params = $target['params'] ?? [] ? implode('', array_maps($target['params'], fn($v, $k) => "\n * @param {$v->type($assume_types)} \$$k")) : "";
+                            $return = $target['return'] ?? '' ? "\n * @return {$target['return']->type($assume_types)}" : "";
+                            $doccomment = "/**{$params}{$return}\n */";
+                            $args = implode(', ', function_parameter($target['method']));
+                            $type = $target['method']->hasReturnType() ? ":{$target['method']->getReturnType()}" : "";
+                            $methods[$fullname] = "$doccomment\npublic function $fullname($args)$type { }";
+                        }
                     }
                 }
 
@@ -1553,17 +1550,6 @@ class Database
      */
     public function echoPhpStormMeta(?string $namespace = null, ?string $filename = null): string
     {
-        $special_types = [
-            Types::SIMPLE_ARRAY => 'array|string',
-            Types::JSON         => 'array|string',
-            Types::BOOLEAN      => 'bool',
-            Types::INTEGER      => 'int',
-            Types::SMALLINT     => 'int',
-            Types::BIGINT       => 'int|string',
-            Types::DECIMAL      => 'float|string',
-            Types::FLOAT        => 'float',
-        ];
-
         $export = function ($value, $nest = 0, $parents = []) use (&$export) {
             if (!is_array($value) || !$value) {
                 return var_export($value, true);
@@ -1596,21 +1582,7 @@ class Database
                 }
             }
 
-            $columns = array_map(function (Column $column) use ($special_types) {
-                $type = $column->getType();
-                $typename = $type->getName();
-                $autocast = $this->getUnsafeOption('autoCastType');
-                $converter = $autocast[$typename]['select'] ?? null;
-                if ($converter) {
-                    if (is_callable($converter)) {
-                        $reftype = reflect_callable($converter)->getReturnType();
-                    }
-                    else {
-                        $reftype = (new \ReflectionMethod($type, 'convertToPHPValue'))->getReturnType();
-                    }
-                }
-                return reflect_type_resolve($reftype ?? null) ?? $special_types[$typename] ?? 'string';
-            }, $this->getSchema()->getTableColumns($tname));
+            $columns = $this->_getColumnTypehint($tname);
             $entities[$entityname] = ($entities[$entityname] ?? []) + $columns;
         }
 

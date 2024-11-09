@@ -3,6 +3,7 @@
 namespace ryunosuke\dbml\Gateway;
 
 use Doctrine\DBAL\Schema\Column;
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Attribute\VirtualColumn;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
@@ -2084,6 +2085,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::neighbor()
      */
+    #[AssumeType('entities', 'shapes')]
     public function neighbor(array $predicates = [], int $limit = 1): array
     {
         if ($this->pkukval && !$predicates) {
@@ -2218,8 +2220,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::insertArray()
      */
-    public function insertArray($data, ...$opt)
-    {
+    public function insertArray(
+        #[AssumeType('entities', 'shapes')] $data,
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->insertArray($this, $data, ...$opt);
     }
@@ -2231,8 +2235,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::updateArray()
      */
-    public function updateArray($data, $where = [], ...$opt)
-    {
+    public function updateArray(
+        #[AssumeType('entities', 'shapes')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->updateArray($this, $data, $where, ...$opt);
     }
@@ -2244,8 +2251,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::deleteArray()
      */
-    public function deleteArray($where = [], ...$opt)
-    {
+    public function deleteArray(
+        #[AssumeType('shapes')] $where = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->deleteArray($this, $where, ...$opt);
     }
@@ -2257,8 +2266,12 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::modifyArray()
      */
-    public function modifyArray($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
-    {
+    public function modifyArray(
+        #[AssumeType('entities', 'shapes')] $insertData,
+        #[AssumeType('entity', 'shape')] $updateData = [],
+        $uniquekey = 'PRIMARY',
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->modifyArray($this, $insertData, $updateData, $uniquekey, ...$opt);
     }
@@ -2268,8 +2281,13 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::changeArray()
      */
-    public function changeArray($dataarray, $where, $uniquekey = 'PRIMARY', $returning = [], ...$opt)
-    {
+    public function changeArray(
+        #[AssumeType('entities', 'shapes')] $dataarray,
+        #[AssumeType('shape')] $where,
+        $uniquekey = 'PRIMARY',
+        $returning = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->changeArray($this->tableName, $dataarray, $where, $uniquekey, $returning, ...$opt);
     }
@@ -2279,8 +2297,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::affectArray()
      */
-    public function affectArray($dataarray, ...$opt)
-    {
+    public function affectArray(
+        #[AssumeType('entities', 'shapes')] $dataarray,
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->affectArray($this->tableName, $dataarray, ...$opt);
     }
@@ -2290,8 +2310,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::save()
      */
-    public function save($data, ...$opt)
-    {
+    public function save(
+        #[AssumeType('entity', 'shape')] $data,
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->save($this->tableName, $data, ...$opt);
     }
@@ -2304,8 +2326,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::insert()
      */
-    public function insert($data, ...$opt)
-    {
+    public function insert(
+        #[AssumeType('entity', 'shape')] $data,
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->insert($this, $data, ...$opt);
     }
@@ -2319,8 +2343,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::update()
      */
-    public function update($data, $where = [], ...$opt)
-    {
+    public function update(
+        #[AssumeType('entity', 'shape')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->update($this, $data, $where, ...$opt);
     }
@@ -2334,7 +2361,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::delete()
      */
-    public function delete($where = [], ...$opt)
+    public function delete(#[AssumeType('shape')] $where = [], ...$opt)
     {
         $this->resetResult();
         return $this->database->delete($this, $where, ...$opt);
@@ -2349,8 +2376,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::invalid()
      */
-    public function invalid($where = [], ?array $invalid_columns = null, ...$opt)
-    {
+    public function invalid(
+        #[AssumeType('shape')] $where = [],
+        #[AssumeType('shape')] ?array $invalid_columns = null,
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->invalid($this, $where, $invalid_columns, ...$opt);
     }
@@ -2364,8 +2394,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::revise()
      */
-    public function revise($data, $where = [], ...$opt)
-    {
+    public function revise(
+        #[AssumeType('entity', 'shape')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->revise($this, $data, $where, ...$opt);
     }
@@ -2379,8 +2412,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::upgrade()
      */
-    public function upgrade($data, $where = [], ...$opt)
-    {
+    public function upgrade(
+        #[AssumeType('entity', 'shape')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->upgrade($this, $data, $where, ...$opt);
     }
@@ -2394,8 +2430,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::remove()
      */
-    public function remove($where = [], ...$opt)
-    {
+    public function remove(
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->remove($this, $where, ...$opt);
     }
@@ -2409,8 +2447,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::destroy()
      */
-    public function destroy($where = [], ...$opt)
-    {
+    public function destroy(
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->destroy($this, $where, ...$opt);
     }
@@ -2423,8 +2463,13 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::reduce()
      */
-    public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
-    {
+    public function reduce(
+        $limit = null,
+        $orderBy = [],
+        $groupBy = [],
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->reduce($this, $limit, $orderBy, $groupBy, $where, ...$opt);
     }
@@ -2438,8 +2483,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::upsert()
      */
-    public function upsert($insertData, $updateData = [], ...$opt)
-    {
+    public function upsert(
+        #[AssumeType('entity', 'shape')] $insertData,
+        #[AssumeType('entity', 'shape')] $updateData = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->upsert($this, $insertData, $updateData, ...$opt);
     }
@@ -2453,8 +2501,12 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::modify()
      */
-    public function modify($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
-    {
+    public function modify(
+        #[AssumeType('entity', 'shape')] $insertData,
+        #[AssumeType('entity', 'shape')] $updateData = [],
+        $uniquekey = 'PRIMARY',
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->modify($this, $insertData, $updateData, $uniquekey, ...$opt);
     }
@@ -2468,8 +2520,10 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::replace()
      */
-    public function replace($data, ...$opt)
-    {
+    public function replace(
+        #[AssumeType('entity', 'shape')] $data,
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->replace($this, $data, ...$opt);
     }

@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 
 trait SelectMethodTrait
@@ -11,6 +12,7 @@ trait SelectMethodTrait
      *
      * @inheritdoc Database::select()
      */
+    #[AssumeType('entities', 'shapes')]
     private function selectArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->array();
@@ -21,6 +23,7 @@ trait SelectMethodTrait
      *
      * @inheritdoc Database::select()
      */
+    #[AssumeType('entities', 'shapes')]
     private function selectAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->assoc();
@@ -51,6 +54,7 @@ trait SelectMethodTrait
      *
      * @inheritdoc Database::select()
      */
+    #[AssumeType('entity', 'shape')]
     private function selectTuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->tuple();
