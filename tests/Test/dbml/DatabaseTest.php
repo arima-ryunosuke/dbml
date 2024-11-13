@@ -1374,7 +1374,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $pk = $database->insertAndPrimary('test', [
             'name' => new class() implements \JsonSerializable {
-                public function jsonSerialize()
+                public function jsonSerialize(): mixed
                 {
                     return ['a' => ['b' => ['c' => ['a', 'b', 'c']]]];
                 }

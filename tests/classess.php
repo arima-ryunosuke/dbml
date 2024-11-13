@@ -2,27 +2,52 @@
 
 namespace ryunosuke\Test {
 
-    use ryunosuke\polyfill\enum\IntBackedEnum;
-    use ryunosuke\polyfill\enum\StringBackedEnum;
+    if (version_compare(PHP_VERSION, '8.1') >= 0) {
+        eval(<<<'PHP'
+        namespace ryunosuke\Test;
+        enum IntEnum: int
+        {
+            case Int1 = 1;
+            case Int2 = 2;
+            
+            public static function __callStatic(string $name, mixed $arguments): mixed
+            {
+                return constant("self::$name");
+            }
+        }
 
-    /**
-     * @method static self Int1()
-     * @method static self Int2()
-     */
-    class IntEnum extends IntBackedEnum
-    {
-        const Int1 = 1;
-        const Int2 = 2;
+        enum StringEnum: string
+        {
+            case StringHoge = 'hoge';
+            case StringFuga = 'fuga';
+            
+            public static function __callStatic(string $name, mixed $arguments): mixed
+            {
+                return constant("self::$name");
+            }
+        }
+        PHP);
     }
+    else {
+        /**
+         * @method static self Int1()
+         * @method static self Int2()
+         */
+        class IntEnum extends \ryunosuke\polyfill\enum\IntBackedEnum
+        {
+            const Int1 = 1;
+            const Int2 = 2;
+        }
 
-    /**
-     * @method static self StringHoge()
-     * @method static self StringFuga()
-     */
-    class StringEnum extends StringBackedEnum
-    {
-        const StringHoge = 'hoge';
-        const StringFuga = 'fuga';
+        /**
+         * @method static self StringHoge()
+         * @method static self StringFuga()
+         */
+        class StringEnum extends \ryunosuke\polyfill\enum\StringBackedEnum
+        {
+            const StringHoge = 'hoge';
+            const StringFuga = 'fuga';
+        }
     }
 
     /**

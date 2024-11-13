@@ -478,7 +478,7 @@ class TableDescriptor
             $this->scope = array_each(array_slice(explode('@', $scope), 1), function (&$carry, $item) {
                 $sargs = [];
                 $args = str_between($item, '(', ')');
-                if ($args !== false) {
+                if ($args !== null) {
                     $item = str_replace("($args)", '', $item);
                     $sargs = paml_import($args);
                 }

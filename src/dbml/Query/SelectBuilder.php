@@ -2365,7 +2365,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 if (is_bool($order)) {
                     $order = $order ? 'ASC' : 'DESC';
                 }
-                $this->sqlParts['orderBy'][] = [$sort, strtoupper($order) !== 'DESC', $nullsOrder];
+                $this->sqlParts['orderBy'][] = [$sort, strtoupper($order ?? '') !== 'DESC', $nullsOrder];
             }
         }
 
