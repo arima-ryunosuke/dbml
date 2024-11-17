@@ -264,13 +264,13 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertDescriptor(new TableDescriptor($database, 'foreign_c1+aid-did', []), [
             'table' => 'foreign_c1',
             'order' => ['aid' => 'ASC', 'did' => 'DESC'],
-            'key'   => 'foreign_c1',
+            'key'   => 'foreign_c1+aid-did',
         ]);
         $this->assertDescriptor(new TableDescriptor($database, 'foreign_c1-did+aid AS FC', []), [
             'table' => 'foreign_c1',
             'alias' => 'FC',
             'order' => ['did' => 'DESC', 'aid' => 'ASC'],
-            'key'   => 'foreign_c1 FC',
+            'key'   => 'foreign_c1-did+aid FC',
         ]);
 
         // RANGE
@@ -278,19 +278,19 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
             'table'  => 'foreign_c1',
             'offset' => 10,
             'limit'  => 1,
-            'key'    => 'foreign_c1',
+            'key'    => 'foreign_c1#10',
         ]);
         $this->assertDescriptor(new TableDescriptor($database, 'foreign_c1#-20', []), [
             'table'  => 'foreign_c1',
             'offset' => null,
             'limit'  => 20,
-            'key'    => 'foreign_c1',
+            'key'    => 'foreign_c1#-20',
         ]);
         $this->assertDescriptor(new TableDescriptor($database, 'foreign_c1#10-20', []), [
             'table'  => 'foreign_c1',
             'offset' => 10,
             'limit'  => 10,
-            'key'    => 'foreign_c1',
+            'key'    => 'foreign_c1#10-20',
         ]);
 
         // 複合
@@ -316,7 +316,7 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
             'offset'    => 10,
             'limit'     => 10,
             'column'    => ['id as ID'],
-            'key'       => 't_article(1)@@scope1@scope2(1, 2):fkeyname[on1 = 1]<id, cid> T',
+            'key'       => 't_article(1)@@scope1@scope2(1, 2):fkeyname[on1 = 1]<id, cid>+aid-did#10-20 T',
         ];
         $this->assertDescriptor(new TableDescriptor($database, 't_article(1)<id, cid>@@scope1@scope2(1, 2):fkeyname[on1 = 1]+aid-did#10-20 AS T.id as ID', []), $expected);
         $this->assertDescriptor(new TableDescriptor($database, 't_article(1)#10-20@@scope1@scope2(1, 2)[on1 = 1]+aid-did<id, cid>:fkeyname AS T.id as ID', []), $expected);

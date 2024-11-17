@@ -416,16 +416,20 @@ class TableDescriptor
         $primary = $this->_parseBlock($descriptor, '(', ')');
 
         $descriptor = preg_splice("`(\s*[+-]$identifier*)+`ui", '', trim($descriptor), $m);
+        $order = '';
         if ($m) {
-            foreach (preg_split('#(?=[+-])#u', $m[0], -1, PREG_SPLIT_NO_EMPTY) as $order) {
-                $sign = $order[0];
-                $order = substr($order, 1);
-                $this->order[trim($order)] = ['+' => 'ASC', '-' => 'DESC'][$sign];
+            foreach (preg_split('#(?=[+-])#u', $m[0], -1, PREG_SPLIT_NO_EMPTY) as $ord) {
+                $order .= $ord;
+                $sign = $ord[0];
+                $ord = substr($ord, 1);
+                $this->order[trim($ord)] = ['+' => 'ASC', '-' => 'DESC'][$sign];
             }
         }
 
         $descriptor = preg_splice('`#((\d+)?-?(\d+)?)`ui', '', trim($descriptor), $m);
+        $range = '';
         if (isset($m[1])) {
+            $range = $m[0];
             [$offset, $limit] = explode('-', $m[1]) + [1 => ''];
             if (strlen($offset) && strlen($limit)) {
                 $this->offset = (int) $offset;
@@ -468,7 +472,7 @@ class TableDescriptor
             assert(is_null($gateway) || is_object($gateway));
         }
 
-        $this->key = $this->joinsign . $this->table . $primary . $scope . $fkeyname . $condition1 . $condition2 . $group . concat(' ', $this->alias);
+        $this->key = $this->joinsign . $this->table . $primary . $scope . $fkeyname . $condition1 . $condition2 . $group . $order . $range . concat(' ', $this->alias);
 
         if ($scope !== null) {
             $this->scope = array_each(array_slice(explode('@', $scope), 1), function (&$carry, $item) {
