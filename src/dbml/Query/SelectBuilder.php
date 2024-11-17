@@ -467,6 +467,9 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         array_maps(array_filter(array_column($builder->getFromPart(), 'table'), fn($v) => is_a($v, self::class)), ['wrap' => ['', '']]);
 
         // ORDER BY 句に手を加える
+        foreach ($builder->joinOrders as $jorder) {
+            $builder->addOrderBy($jorder);
+        }
         if ($builder->enableAutoOrder) {
             // 集約なら除外
             if (!$builder->sqlParts['groupBy']) {
@@ -480,9 +483,6 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                     }
                 }
             }
-        }
-        foreach ($builder->joinOrders as $jorder) {
-            $builder->addOrderBy($jorder);
         }
         $builder->sqlParts['orderBy'] = array_each($builder->sqlParts['orderBy'], function (&$carry, $v) {
             [$expr, $order, $nulls] = $v + [1 => null, 2 => null];
@@ -1613,7 +1613,12 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 $this->addGroupBy([$descriptor->accessor => $descriptor->group]);
             }
             if ($descriptor->order) {
-                $this->addOrderBy(array_strpad($descriptor->order, $descriptor->accessor . '.'));
+                if ($parent) {
+                    $this->joinOrders[] = array_strpad($descriptor->order, $descriptor->accessor . '.');
+                }
+                else {
+                    $this->addOrderBy(array_strpad($descriptor->order, $descriptor->accessor . '.'));
+                }
             }
             if ($descriptor->offset || $descriptor->limit) {
                 $this->limit($descriptor->limit, $descriptor->offset);

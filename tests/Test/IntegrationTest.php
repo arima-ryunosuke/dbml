@@ -193,7 +193,7 @@ class IntegrationTest extends AbstractUnitTestCase
         $this->assertEquals('SELECT * FROM t_article A INNER JOIN t_comment C ON C.article_id = A.article_id INNER JOIN (SELECT tA.* FROM t_article tA WHERE delete_flg = 0 GROUP BY article_id) tA ON tA.article_id = C.article_id', "$select");
 
         /** @var Article $row */
-        $row = $database->Article()->joinForeign($database->t_comment()->column('*')->orderBy('comment_id'))->limit(1)->tuple();
+        $row = $database->Article()->innerJoinForeign($database->t_comment()->column('*')->orderBy('comment_id'))->limit(1)->tuple();
         $this->assertInstanceOf(Article::class, $row);
         $this->assertEquals('コメント1です', $row->comment);
 
