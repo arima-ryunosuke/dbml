@@ -453,6 +453,9 @@ class AffectBuilder extends AbstractBuilder
                     $this->database->debug("convertObjectToJson json_encode({$this->getTable()}.$cname$cname)");
                     $row[$cname] = json_encode($row[$cname], $convertObjectToJson);
                 }
+                if (is_object($row[$cname]) && get_class($row[$cname]) === \stdClass::class) {
+                    $row[$cname] = json_encode($row[$cname], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                }
 
                 if ($truncateString && is_string($row[$cname]) && isset($stringTypes[$typename])) {
                     $tstring = $this->database->getCompatiblePlatform()->truncateString($row[$cname], $column);

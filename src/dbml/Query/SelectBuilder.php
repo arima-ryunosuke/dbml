@@ -729,6 +729,19 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                     $parsed->alias ?: $this->database->convertEntityName($parsed->table) . $parsed->fkeysuffix
                 );
             }
+            // stdClass なら JSON 化
+            elseif (is_object($column) && get_class($column) === \stdClass::class) {
+                $column = (array) $column;
+                $jsonkey = array_unset($column, '$');
+                $column2 = [];
+                foreach ($column as $k => $v) {
+                    if (is_int($k)) {
+                        $k = $v;
+                    }
+                    $column2[$k] = $v;
+                }
+                $result[] = Select::forge($key, $this->database->getCompatiblePlatform()->getJsonAggExpression($column2, $jsonkey), $prefix);
+            }
             // Gateway は subselect 化
             elseif ($column instanceof TableGateway) {
                 $parsed = new TableDescriptor($this->database, $key, []);
@@ -1426,6 +1439,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * | 10 | `"+prefix.column_name"`                          | JOIN 記号＋ドットを含む文字列は prefix テーブルと JOIN してそのカラムを取得
      * | 11 | `Expression::new("NOW()")`                       | {@link Expression} を与えると一切加工せずそのまま文字列を表す
      * | 12 | `"NOW()"`                                        | 上と同じ。 `()` を含む文字列は自動で {@link Expression} 化される
+     * | 13 | `(object) ['$' => 'id', 'key' => 'value']`       | stdClass を与えると JSON で集約される。$ を与えるとキーになる
      * | 21 | `['alias|typename' => 'column']`                 | 配列のキーをパイプでつなぐとその型に変換されて取得できる
      * | 22 | `['alias' => function($row){}]`                  | デフォルト値がないクロージャは行全体が渡ってくるコールバックになる
      * | 25 | `['cname' => function($cname=null){}]`           | デフォルト値が null のクロージャはカラム値が単一で渡ってくるコールバックになる

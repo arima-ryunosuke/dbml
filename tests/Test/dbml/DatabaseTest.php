@@ -2693,6 +2693,74 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_executeSelect_and_Affect_json($database)
+    {
+        if ($database->getPlatform() instanceof SQLServerPlatform) {
+            return;
+        }
+
+        $rows = $database->selectArray([
+            'aggregate' => [
+                'json' => (object) [
+                    '$'     => 'id',
+                    'id',
+                    'alias' => 'aggregate.name',
+                ],
+            ],
+        ], groupBy: 'group_id2');
+        $this->assertEquals([
+            1 => [
+                "id"    => 1,
+                "alias" => "a",
+            ],
+            2 => [
+                "id"    => 2,
+                "alias" => "b",
+            ],
+            3 => [
+                "id"    => 3,
+                "alias" => "c",
+            ],
+            4 => [
+                "id"    => 4,
+                "alias" => "d",
+            ],
+            5 => [
+                "id"    => 5,
+                "alias" => "e",
+            ],
+        ], json_decode($rows[0]['json'], true));
+        $this->assertEquals([
+            6  => [
+                "id"    => 6,
+                "alias" => "f",
+            ],
+            7  => [
+                "id"    => 7,
+                "alias" => "g",
+            ],
+            8  => [
+                "id"    => 8,
+                "alias" => "h",
+            ],
+            9  => [
+                "id"    => 9,
+                "alias" => "i",
+            ],
+            10 => [
+                "id"    => 10,
+                "alias" => "j",
+            ],
+        ], json_decode($rows[1]['json'], true));
+
+        $id = $database->insertOrThrow('test', ['name' => (object) ['a' => 'A']]);
+        $this->assertEquals('{"a":"A"}', $database->test->pk($id)->value('name'));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_executeSelect_cache($database)
     {
         $query = 'select id, name from test where id = ?';

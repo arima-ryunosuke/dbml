@@ -534,6 +534,56 @@ FROM foreign_p INNER JOIN foreign_c1 ON foreign_c1.id = foreign_p.id
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
      */
+    function test_column_json($builder)
+    {
+        $json = $builder->getDatabase()->getCompatiblePlatform()->getJsonAggExpression([
+            'name1'  => 'name1',
+            'alias2' => 'test2.name2',
+            'expr'   => 'NOW(?)',
+        ], 'id');
+        $expected = "SELECT $json AS json FROM test2 LEFT JOIN test1 ON test1.id=test2.id";
+        $actual = $builder->column([
+            'test2' => [
+                '<test1[test1.id=test2.id]',
+            ],
+            ''      => [
+                'json' => (object) [
+                    '$'      => 'id',
+                    'name1',
+                    'alias2' => 'test2.name2',
+                    'expr'   => new Expression('NOW(?)', 1),
+                ],
+            ],
+        ]);
+        $this->assertEquals($expected, (string) $actual);
+        $this->assertEquals(['name1', 'alias2', 'expr', 1], $actual->getParams());
+
+        $json = $builder->getDatabase()->getCompatiblePlatform()->getJsonAggExpression([
+            'name1'  => 'name1',
+            'alias2' => 'test2.name2',
+            'expr'   => 'NOW(?)',
+        ]);
+        $expected = "SELECT $json AS json FROM test2 LEFT JOIN test1 ON test1.id=test2.id";
+        $actual = $builder->column([
+            'test2' => [
+                '<test1[test1.id=test2.id]',
+            ],
+            ''      => [
+                'json' => (object) [
+                    'name1',
+                    'alias2' => 'test2.name2',
+                    'expr'   => new Expression('NOW(?)', 1),
+                ],
+            ],
+        ]);
+        $this->assertEquals($expected, (string) $actual);
+        $this->assertEquals(['name1', 'alias2', 'expr', 1], $actual->getParams());
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
     function test_column_closure($builder)
     {
         $builder->column([
