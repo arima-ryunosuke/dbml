@@ -20,7 +20,7 @@ abstract class AbstractBuilder implements Queryable, \Stringable
     protected Database $database;
 
     protected string $sql;
-    protected array  $params = [];
+    protected array  $params;
 
     protected Statement $statement;
 
@@ -272,7 +272,7 @@ abstract class AbstractBuilder implements Queryable, \Stringable
     public function reset(): static
     {
         unset($this->sql);
-        $this->params = []; // 参照変数で直接渡されることが多いので unset だと都合が悪い
+        unset($this->params);
         unset($this->statement);
 
         return $this;

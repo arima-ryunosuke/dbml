@@ -492,9 +492,9 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             . concat(' ', implode(' ', $builder->sqlParts['option']))
             . concat(' ', implode(', ', $builder->sqlParts['select']) ?: '*')
             . concat(' FROM ', implode(', ', $builder->_getFromClauses()))
-            . concat(' WHERE ', $this->_getConditionClause($builder->sqlParts['where']))
+            . concat(' WHERE ', $builder->_getConditionClause($builder->sqlParts['where']))
             . concat(' GROUP BY ', implode(', ', $builder->sqlParts['groupBy']))
-            . concat(' HAVING ', $this->_getConditionClause($builder->sqlParts['having']))
+            . concat(' HAVING ', $builder->_getConditionClause($builder->sqlParts['having']))
             . concat(' WINDOW ', array_sprintf($builder->sqlParts['window'], '%2$s AS (%1$s)', ', '))
             . concat(' ORDER BY ', implode(', ', $builder->_getOrderByClause($builder->sqlParts['orderBy'])));
 
@@ -1027,6 +1027,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     private function _dirty(): static
     {
         unset($this->sql);
+        unset($this->params);
         $this->resetResult();
         return $this;
     }
@@ -3516,6 +3517,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     public function getParams(?string $queryPartName = null): array
     {
+        if ($queryPartName === null && isset($this->params)) {
+            return $this->params;
+        }
+
         // _getSql で内部構造が変わることがあるので呼んでおく必要がある
         $this->__toString();
 
@@ -3529,6 +3534,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 $params = array_merge($params, $param->getParams());
             }
         });
+
+        if ($queryPartName === null) {
+            $this->params = $params;
+        }
         return $params;
     }
 }
