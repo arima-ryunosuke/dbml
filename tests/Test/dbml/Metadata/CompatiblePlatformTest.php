@@ -14,6 +14,7 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
+use ryunosuke\dbml\Query\Queryable;
 
 class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -1042,7 +1043,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertExpression($cplatform->convertSelectExistsQuery(new Expression('select ?', 1)), $expected, [1]);
     }
 
-    function assertExpression(Expression $expr, $expectedQuery, array $expectedparams)
+    function assertExpression(Queryable $expr, $expectedQuery, array $expectedparams)
     {
         $this->assertEquals($expectedQuery, (string) $expr);
         $this->assertEquals($expectedparams, $expr->getParams());

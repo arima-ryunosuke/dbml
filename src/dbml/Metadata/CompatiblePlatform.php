@@ -841,7 +841,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     /**
      * 文字列結合句を返す
      */
-    public function getConcatExpression(string|Queryable ...$args): Expression
+    public function getConcatExpression(string|Queryable ...$args): Queryable
     {
         $count = count($args);
 

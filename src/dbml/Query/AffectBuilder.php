@@ -385,7 +385,7 @@ class AffectBuilder extends AbstractBuilder
         }
 
         if ($this->getUnsafeOption('filterNoExistsColumn')) {
-            $this->database->debug("filterNoExistsColumn column {$this->getTable()}." . implode(',', array_keys(array_diff_key($row, $columns))) , if: !!array_diff_key($row, $columns));
+            $this->database->debug("filterNoExistsColumn column {$this->getTable()}." . implode(',', array_keys(array_diff_key($row, $columns))), if: !!array_diff_key($row, $columns));
             $row = array_intersect_key($row, $columns);
         }
 

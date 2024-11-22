@@ -569,7 +569,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param Transaction $transaction
      * @param Database $database
      */
-    function test_presview_ex($transaction, $database)
+    function test_preview_ex($transaction, $database)
     {
         $logsT = [];
         $loggerT = new Logger([

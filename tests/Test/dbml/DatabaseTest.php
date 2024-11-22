@@ -4251,7 +4251,7 @@ CSV
         if ($database->getPlatform() instanceof SqlitePlatform || $database->getPlatform() instanceof MySQLPlatform) {
             $cache = that($database)->var('cache');
             $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
-            $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+            $cache['compatiblePlatform'] = new class($database->getPlatform(), $database->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
                 public function supportsIdentityNullable(): bool { return true; }
             };
 
@@ -4842,7 +4842,7 @@ INSERT INTO test (name) VALUES
 
         $cache = that($database)->var('cache');
         $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
-        $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+        $cache['compatiblePlatform'] = new class($database->getPlatform(), $database->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
             public function supportsIdentityAutoUpdate(): bool { return false; }
         };
 
@@ -4852,7 +4852,7 @@ INSERT INTO test (name) VALUES
         ]);
         $this->assertEquals(2, $pk);
 
-        $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+        $cache['compatiblePlatform'] = new class($database->getPlatform(), $database->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
             public function supportsBulkMerge(): bool { return false; }
         };
 
@@ -5937,14 +5937,14 @@ INSERT INTO test (id, name) VALUES
 
         $cache = that($database)->var('cache');
         $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
-        $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+        $cache['compatiblePlatform'] = new class($database->getPlatform(), $database->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
             public function supportsIdentityAutoUpdate(): bool { return false; }
         };
 
         $pk = $database->modifyOrThrow('test', ['id' => 99, 'name' => 'xx']);
         $this->assertEquals(['id' => 99], $pk);
 
-        $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+        $cache['compatiblePlatform'] = new class($database->getPlatform(), $database->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
             public function supportsMerge(): bool { return false; }
         };
 
@@ -6555,7 +6555,7 @@ INSERT INTO test (id, name) VALUES
         if ($database->getPlatform() instanceof SqlitePlatform || $database->getPlatform() instanceof MySQLPlatform) {
             $cache = that($database)->var('cache');
             $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
-            $cache['compatiblePlatform'] = new class($database->getPlatform()) extends CompatiblePlatform {
+            $cache['compatiblePlatform'] = new class($database->getPlatform(), $database->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
                 public function supportsIdentityNullable(): bool { return true; }
             };
 
@@ -7447,6 +7447,11 @@ ORDER BY T.id DESC, name ASC
         $this->assertEquals("SELECT COUNT(aggregate.id) AS {$qi('aggregate.id@count')} FROM aggregate", "$builder");
         $this->assertEquals([], $builder->getParams());
         $this->assertEquals(10, $builder->value());
+
+        $builder = $database->selectSum('aggregate.id');
+        $this->assertEquals("SELECT SUM(aggregate.id) AS {$qi('aggregate.id@sum')} FROM aggregate", "$builder");
+        $this->assertEquals([], $builder->getParams());
+        $this->assertEquals(55, $builder->value());
 
         $builder = $database->selectMax('aggregate.id');
         $this->assertEquals("SELECT MAX(aggregate.id) AS {$qi('aggregate.id@max')} FROM aggregate", "$builder");

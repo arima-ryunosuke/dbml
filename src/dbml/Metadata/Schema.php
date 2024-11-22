@@ -207,9 +207,8 @@ class Schema
      */
     public function setForeignKeyMetadata(string|ForeignKeyConstraint $fkey, array $metadata)
     {
-        $fkey = $fkey instanceof ForeignKeyConstraint ? $fkey : $this->getForeignKeys()[$fkey] ?? null;
-        if (!isset($fkey)) {
-            throw new \InvalidArgumentException("undefined foreign key '$fkey'.");
+        if (is_string($fkey)) {
+            $fkey = $this->getForeignKeys()[$fkey] ?? throw new \InvalidArgumentException("undefined foreign key '$fkey'.");
         }
         (fn() => $this->_options = array_replace($this->_options, $metadata))->bindTo($fkey, ForeignKeyConstraint::class)();
     }
