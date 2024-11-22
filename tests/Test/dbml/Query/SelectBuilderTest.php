@@ -2398,6 +2398,19 @@ AND (FALSE)", $builder->queryInto());
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
      */
+    function test_orderByArray($builder)
+    {
+        $builder->column('test.id');
+        $this->assertQuery("SELECT test.id FROM test ORDER BY (CASE id WHEN '3' THEN '0' WHEN '6' THEN '1' WHEN '999' THEN '2' WHEN '5' THEN '3' WHEN '1' THEN '4' END)", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]]))->queryInto());
+        $this->assertQuery("SELECT test.id FROM test ORDER BY (CASE id WHEN '3' THEN '0' WHEN '6' THEN '1' WHEN '999' THEN '2' WHEN '5' THEN '3' WHEN '1' THEN '4' END) DESC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], false))->queryInto());
+        $this->assertQuery("SELECT test.id FROM test ORDER BY (CASE id WHEN '3' THEN '0' WHEN '6' THEN '1' WHEN '999' THEN '2' WHEN '5' THEN '3' WHEN '1' THEN '4' END) ASC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], false), true)->queryInto());
+        $this->assertQuery("SELECT test.id FROM test ORDER BY CASE WHEN (CASE id WHEN '3' THEN '0' WHEN '6' THEN '1' WHEN '999' THEN '2' WHEN '5' THEN '3' WHEN '1' THEN '4' END) IS NULL THEN 0 ELSE 1 END ASC, (CASE id WHEN '3' THEN '0' WHEN '6' THEN '1' WHEN '999' THEN '2' WHEN '5' THEN '3' WHEN '1' THEN '4' END) ASC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]]), true, 'min')->queryInto());
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
     function test_orderByPrimary($builder)
     {
         $builder->column('noprimary.id');
@@ -2483,9 +2496,11 @@ AND (FALSE)", $builder->queryInto());
         $this->assertEquals([null, null, null, null, null, -4, -2, 0, 2, 4], $builder->orderBy('cint', true, 'min')->lists());
         $this->assertEquals([null, null, null, null, null, 4, 2, 0, -2, -4], $builder->orderBy('cint', false, 'first')->lists());
 
-        $builder->setNullsOrder('hoge');
-        that($builder)->orderBy('hoge')->getQuery()->wasThrown("hoge is not supported");
-        that($builder)->orderBy(new Expression('? + ?', [1, 2]))->getQuery()->wasThrown("is not support parametable query");
+        $select = $builder->orderBy(new Expression('? + ?', [1, 2]), true, 'min');
+        $this->assertStringContainsString('CASE WHEN ? + ? IS NULL THEN 0 ELSE 1 END ASC, ? + ? ASC', (string) $select);
+        $this->assertEquals([1, 2, 1, 2], $select->getParams());
+
+        that($builder)->orderBy('hoge', true, 'hoge')->wasThrown("hoge is not supported");
     }
 
     /**

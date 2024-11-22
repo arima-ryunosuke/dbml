@@ -290,7 +290,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             /** @var ?string ORDER BY で NULL をどう扱うか
              * - null: 何もしない
              * - "min": 最小値として扱う
-             * - "max": 最小値として扱う
+             * - "max": 最大値として扱う
              * - "first": 常に最初に来る
              * - "last": 常に最後に来る
              */
@@ -485,42 +485,6 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 }
             }
         }
-        $builder->sqlParts['orderBy'] = array_each($builder->sqlParts['orderBy'], function (&$carry, $v) {
-            [$expr, $order, $nulls] = $v + [1 => null, 2 => null];
-            $nulls = $nulls ?? $this->getUnsafeOption('nullsOrder');
-            if ($nulls !== null) {
-                $expr2 = $expr;
-                if ($expr2 instanceof Queryable) {
-                    if (count($expr2->getParams()) > 0) {
-                        throw new \InvalidArgumentException("nulls order is not support parametable query. please use select alias.");
-                    }
-                    $expr2 = $expr2->getQuery();
-                }
-                switch (strtolower($nulls)) {
-                    default:
-                        throw new \InvalidArgumentException("$nulls is not supported.");
-                    case 'min':
-                        $carry[] = ["CASE WHEN $expr2 IS NULL THEN 0 ELSE 1 END", $order];
-                        break;
-                    case 'max':
-                        $carry[] = ["CASE WHEN $expr2 IS NULL THEN 1 ELSE 0 END", $order];
-                        break;
-                    case 'first':
-                        $carry[] = ["CASE WHEN $expr2 IS NULL THEN 1 ELSE 0 END", false];
-                        break;
-                    case 'last':
-                        $carry[] = ["CASE WHEN $expr2 IS NULL THEN 1 ELSE 0 END", true];
-                        break;
-                }
-            }
-            $carry[] = [$expr, $order];
-        }, []);
-        $builder->sqlParts['orderBy'] = array_unique(array_map(function ($v) {
-            if (($v[1] ?? null) === null) {
-                return $v[0];
-            }
-            return "{$v[0]} " . ($v[1] ? 'ASC' : 'DESC');
-        }, $builder->sqlParts['orderBy']));
 
         // 色々手を加えたやつでクエリ文字列化
         $sql = concat($cplatform->getWithRecursiveSyntax(), ' ', array_sprintf($builder->sqlParts['with'], '%2$s AS (%1$s)', ','), ' ')
@@ -532,7 +496,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             . concat(' GROUP BY ', implode(', ', $builder->sqlParts['groupBy']))
             . concat(' HAVING ', $this->_getConditionClause($builder->sqlParts['having']))
             . concat(' WINDOW ', array_sprintf($builder->sqlParts['window'], '%2$s AS (%1$s)', ', '))
-            . concat(' ORDER BY ', implode(', ', $builder->sqlParts['orderBy']));
+            . concat(' ORDER BY ', implode(', ', $builder->_getOrderByClause($builder->sqlParts['orderBy'])));
 
         $sql = $platform->modifyLimitQuery($sql, $builder->sqlParts['limit'], $builder->sqlParts['offset'] ?? 0);
         $sql = $cplatform->appendLockSuffix($sql, $builder->lockMode, $builder->lockOption);
@@ -586,6 +550,19 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             $result .= $andor . $condition;
         }
         return $result;
+    }
+
+    private function _getOrderByClause(array $orderBy): array
+    {
+        $result = [];
+        foreach ($orderBy as [$column, $order]) {
+            if ($order === null) {
+                $result[] = $column;
+                continue;
+            }
+            $result[] = "{$column} " . ($order ? 'ASC' : 'DESC');
+        }
+        return array_unique($result);
     }
 
     private function _buildColumn($columns, $table = null, ?string $alias = null): static
@@ -2322,25 +2299,6 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * # [col, col, col], ORD 形式
      * $qb->orderBy(['colA', 'colB', 'colC'], false);  // ORDER BY colA DESC, colB DESC, colC DESC
      * ```
-     *
-     * 特殊な機能として、SQL レイヤではなく、「取得後にアプリレイヤでソートする」機能があり、クロージャを渡すとそのような動作になる。
-     *
-     * ```php
-     * # シンプルにクロージャを渡すと uasort される（$a, $b は行配列）
-     * $qb->orderBy(function ($a, $b) {
-     *      // アプリレイヤ で id 降順になる
-     *      return $a['id'] - $b['id'];
-     * });
-     *
-     * # 空文字キーで配列を渡すと https://arima-ryunosuke.github.io/php-functions/#ryunosuke\Functions\Package\Arrays::array_order() 相当の動作になる
-     * $qb->orderBy([
-     *     '' => [
-     *         'colA' => misc,
-     *         'colB' => misc,
-     *         'colC' => misc,
-     *     ],
-     * ]);
-     * ```
      */
     public function orderBy($sort, $order = null, ?string $nullsOrder = null): static
     {
@@ -2354,14 +2312,33 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      */
     public function addOrderBy($sort, $order = null, ?string $nullsOrder = null): static
     {
+        $add = function ($sort, $order, $nullsOrder) {
+            $nullsOrder = $nullsOrder ?? $this->getUnsafeOption('nullsOrder');
+            if ($nullsOrder !== null) {
+                $expr = $sort;
+                $params = [];
+                if ($expr instanceof Queryable) {
+                    $expr = $expr->merge($params);
+                }
+                $this->sqlParts['orderBy'][] = match (strtolower($nullsOrder)) {
+                    default => throw new \InvalidArgumentException("$nullsOrder is not supported."),
+                    'min'   => [Expression::new("CASE WHEN $expr IS NULL THEN 0 ELSE 1 END", $params), $order],
+                    'max'   => [Expression::new("CASE WHEN $expr IS NULL THEN 1 ELSE 0 END", $params), $order],
+                    'first' => [Expression::new("CASE WHEN $expr IS NULL THEN 1 ELSE 0 END", $params), false],
+                    'last'  => [Expression::new("CASE WHEN $expr IS NULL THEN 1 ELSE 0 END", $params), true],
+                };
+            }
+            $this->sqlParts['orderBy'][] = [$sort, $order];
+        };
+
         // bool は特別扱いで主キーとする
         if (is_bool($sort)) {
-            return $this->addOrderBy(OrderBy::primary(), $sort);
+            return $this->addOrderBy(OrderBy::primary(), $sort, $nullsOrder);
         }
 
         if ($sort instanceof OrderBy) {
             if (!$sort->isRewritable()) {
-                return $this->addOrderBy($sort($this), $order);
+                return $this->addOrderBy($sort($this), $order ?? $sort->asc, $nullsOrder ?? $sort->nullsOrder);
             }
 
             // 超特殊な処理（build 時に遅延構築する）
@@ -2370,13 +2347,13 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         elseif (is_array($sort)) {
             foreach ($sort as $col => $ord) {
                 if (is_int($col) && is_array($ord)) {
-                    $this->addOrderBy($ord[0], $ord[1] ?? $order);
+                    $this->addOrderBy($ord[0], $ord[1] ?? $order, $nullsOrder);
                 }
                 elseif (is_int($col)) {
-                    $this->addOrderBy($ord, $order);
+                    $this->addOrderBy($ord, $order, $nullsOrder);
                 }
                 else {
-                    $this->addOrderBy($col, $ord);
+                    $this->addOrderBy($col, $ord, $nullsOrder);
                 }
             }
         }
@@ -2384,12 +2361,12 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         elseif ($order === null && is_string($sort) && str_exists($sort, ['+', '-'])) {
             $parts = preg_split('#([+-])#', $sort, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
             foreach (array_chunk($parts, 2) as $part) {
-                $this->addOrderBy($part[1], $part[0] === '+');
+                $this->addOrderBy($part[1], $part[0] === '+', $nullsOrder);
             }
         }
         else {
             if ($sort instanceof Queryable && $order === null) {
-                $this->sqlParts['orderBy'][] = [$sort, null, $nullsOrder];
+                $add($sort, null, $nullsOrder);
             }
             else {
                 if (is_array($order)) {
@@ -2399,7 +2376,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 if (is_bool($order)) {
                     $order = $order ? 'ASC' : 'DESC';
                 }
-                $this->sqlParts['orderBy'][] = [$sort, strtoupper($order ?? '') !== 'DESC', $nullsOrder];
+                $add($sort, strtoupper($order ?? '') !== 'DESC', $nullsOrder);
             }
         }
 

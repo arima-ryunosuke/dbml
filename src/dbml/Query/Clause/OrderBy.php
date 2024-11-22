@@ -30,9 +30,8 @@ class OrderBy extends AbstractClause
     public const CTE_TABLE_ALIAS = '__dbml_cte_table_alias';
     public const CTE_AUTO_PKEY   = Database::AUTO_DEPEND_KEY . '_cte';
 
-    public function __construct(private bool $rewritable)
+    public function __construct(private bool $rewritable, public ?bool $asc = null, public ?string $nullsOrder = null)
     {
-        $this->rewritable = $rewritable;
     }
 
     public function __invoke(SelectBuilder $builder) { }
@@ -45,9 +44,9 @@ class OrderBy extends AbstractClause
     /**
      * 主キーで ORDER BY する
      */
-    public static function primary(): static
+    public static function primary(?bool $asc = null): static
     {
-        return new class(false) extends OrderBy {
+        return new class(false, $asc) extends OrderBy {
             public function __invoke(SelectBuilder $builder)
             {
                 $sqlParts = $builder->getQueryPart(null);
@@ -101,12 +100,12 @@ class OrderBy extends AbstractClause
      *
      * エラーや例外が出ないので挙動が分かりにくいが、下手にエラーを出すと「攻撃が可能そう」に見えてしまうのでこのような動作にしている。
      */
-    public static function secure($columns): static
+    public static function secure($columns, ?bool $asc = null, ?string $nullsOrder = null): static
     {
-        return new class(arrayize($columns)) extends OrderBy {
-            public function __construct(private array $columns)
+        return new class(arrayize($columns), $asc, $nullsOrder) extends OrderBy {
+            public function __construct(private array $columns, ?bool $asc = null, ?string $nullsOrder = null)
             {
-                parent::__construct(false);
+                parent::__construct(false, $asc, $nullsOrder);
             }
 
             public function __invoke(SelectBuilder $builder)
@@ -203,6 +202,29 @@ class OrderBy extends AbstractClause
 
                 // 上記で引っかからなかったら false
                 return false;
+            }
+        };
+    }
+
+    /**
+     * 指定配列の順番で ORDER BY する
+     */
+    public static function array(array $array, ?bool $asc = null, ?string $nullsOrder = null): static
+    {
+        return new class($array, $asc, $nullsOrder) extends OrderBy {
+            public function __construct(private $array, ?bool $asc = null, ?string $nullsOrder = null)
+            {
+                parent::__construct(false, $asc, $nullsOrder);
+            }
+
+            public function __invoke(SelectBuilder $builder)
+            {
+                $orderBy = [];
+                foreach ($this->array as $column => $orders) {
+                    // 範囲外の値は null にして nullsOrder で制御させる
+                    $orderBy[] = Expression::case($column, array_flip(array_values($orders)), null);
+                }
+                return $orderBy;
             }
         };
     }
