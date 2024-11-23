@@ -650,10 +650,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         }
 
         $args = func_get_args();
+        $that = $this;
         if ($args) {
-            $this->scoping(...$args);
+            $that = $that->scoping(...$args);
         }
-        return $this->end(1);
+        return $that->end(1);
     }
 
     /**

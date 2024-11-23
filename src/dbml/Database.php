@@ -779,14 +779,7 @@ class Database
 
         // Gateway 取得
         if ($gateway = $this->$name) {
-            if ($arguments) {
-                if (filter_var($arguments[0], \FILTER_VALIDATE_INT) !== false) {
-                    return $gateway->pk($arguments[0]);
-                }
-
-                $gateway = $gateway->scoping(...$arguments);
-            }
-            return $gateway;
+            return $gateway(...$arguments);
         }
 
         throw new \BadMethodCallException("'$name' is undefined.");
