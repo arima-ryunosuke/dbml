@@ -2,16 +2,15 @@
 
 namespace ryunosuke\dbml\Types;
 
-use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 use function ryunosuke\dbml\class_shorten;
 
 abstract class AbstractType extends Type
 {
-    public function getSQLDeclaration(array $column, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        throw DBALException::notSupported("dbml Type is not supported DDL");
+        throw new \LogicException(__METHOD__ . ' is not supported.');
     }
 
     public function getName()
@@ -19,7 +18,7 @@ abstract class AbstractType extends Type
         return array_search($this, Type::getTypeRegistry()->getMap(), true) ?: strtolower(class_shorten(static::class));
     }
 
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         if (is_object($value) && method_exists($value, '__toString')) {
             return (string) $value;
@@ -32,7 +31,7 @@ abstract class AbstractType extends Type
      *
      * アノテーション出力のため、返り値の型は指定するのが望ましい。
      */
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue($value, AbstractPlatform $platform): mixed
     {
         return $value;
     }

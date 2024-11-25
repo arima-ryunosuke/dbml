@@ -400,7 +400,7 @@ class IntegrationTest extends AbstractUnitTestCase
                 new Column('c_integer', Type::getType(Types::INTEGER), []),
 
                 new Column('c_float', Type::getType(Types::FLOAT), []),
-                new Column('c_decimal', Type::getType(Types::DECIMAL), []),
+                new Column('c_decimal', Type::getType(Types::DECIMAL), ['scale' => 2, 'precision' => 3]),
 
                 new Column('c_dateinterval', Type::getType(Types::DATEINTERVAL), []),
                 new Column('c_date', Type::getType(Types::DATE_MUTABLE), []),
@@ -408,8 +408,8 @@ class IntegrationTest extends AbstractUnitTestCase
                 new Column('c_datetime', Type::getType(Types::DATETIME_MUTABLE), []),
                 new Column('c_datetimetz', Type::getType(Types::DATETIMETZ_MUTABLE), []),
 
-                new Column('c_string', Type::getType(Types::STRING), []),
-                new Column('c_binary', Type::getType(Types::BINARY), []),
+                new Column('c_string', Type::getType(Types::STRING), ['length' => 255]),
+                new Column('c_binary', Type::getType(Types::BINARY), ['length' => 255]),
                 new Column('c_text', Type::getType(Types::TEXT), []),
                 new Column('c_blob', Type::getType(Types::BLOB), []),
             ],

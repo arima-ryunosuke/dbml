@@ -3,6 +3,7 @@
 namespace ryunosuke\Test\dbml\Gateway;
 
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Types\StringType;
 use ryunosuke\dbml\Entity\Entity;
@@ -15,7 +16,6 @@ use ryunosuke\dbml\Query\Statement;
 use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\ManagedComment;
-use ryunosuke\Test\Platforms\SqlitePlatform;
 use function ryunosuke\dbml\csv_import;
 use function ryunosuke\dbml\json_import;
 

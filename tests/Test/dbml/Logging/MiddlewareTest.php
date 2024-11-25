@@ -2,13 +2,12 @@
 
 namespace ryunosuke\Test\dbml\Logging;
 
-use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Result;
 use Psr\Log\AbstractLogger;
 use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Logging\Middleware;
+use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\try_catch;
 
 class MiddlewareTest extends \ryunosuke\Test\AbstractUnitTestCase
@@ -29,10 +28,9 @@ class MiddlewareTest extends \ryunosuke\Test\AbstractUnitTestCase
         };
         $config = new Configuration();
         $config->setMiddlewares(['logging' => new Middleware($logger)]);
-        $connection = DriverManager::getConnection([
-            'url'          => 'sqlite:///:memory:',
-            'wrapperClass' => Connection::class,
-        ], $config);
+        $connection = DriverManager::getConnection(Adhoc::parseParams([
+            'url' => 'sqlite:///:memory:',
+        ]), $config);
 
         $connection->getNativeConnection()->exec('CREATE TABLE logs(id PRIMARY KEY)');
 
@@ -41,22 +39,21 @@ class MiddlewareTest extends \ryunosuke\Test\AbstractUnitTestCase
         $connection->beginTransaction();
         $connection->commit();
 
-        $connection->query('select 1');
-        try_catch(fn() => $connection->query('select fail'));
-        $connection->exec('select 2');
-        try_catch(fn() => $connection->exec('select fail'));
+        $connection->executeQuery('select 1');
+        try_catch(fn() => $connection->executeQuery('select fail'));
+        $connection->executeStatement('select 2');
+        try_catch(fn() => $connection->executeStatement('select fail'));
 
-        $dummy = 1;
         $statement = $connection->prepare('insert into logs values(? + ?)');
-        $statement->bindParam(1, $dummy);
+        $statement->bindValue(1, 1);
         $statement->bindValue(2, 2);
-        $statement->execute();
-        $statement->bindValue(1, $dummy);
+        $statement->executeStatement();
+        $statement->bindValue(1, 1);
         $statement->bindValue(2, 2);
-        try_catch(fn() => $statement->execute());
+        try_catch(fn() => $statement->executeStatement());
 
-        try_catch(fn() => $connection->executeQuery('fail1 ?, ?', [1, 2]));
-        try_catch(fn() => $connection->executeStatement('fail2 ?, ?', [1, 2]));
+        try_catch(fn() => $connection->executeQuery('fail1 1, 2', [1, 2]));
+        try_catch(fn() => $connection->executeStatement('fail2 1, 2', [1, 2]));
 
         unset($connection);
         unset($statement);
@@ -130,31 +127,5 @@ class MiddlewareTest extends \ryunosuke\Test\AbstractUnitTestCase
                 ],
             ],
         ], $logger->logs);
-    }
-}
-
-
-class Connection extends \Doctrine\DBAL\Connection
-{
-    public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
-    {
-        $connection = $this->getWrappedConnection();
-
-        if (count($params) > 0) {
-            return new Result($connection->prepare($sql, $params, $types)->execute(), $this);
-        }
-
-        return new Result($connection->query($sql), $this);
-    }
-
-    public function executeStatement($sql, array $params = [], array $types = [])
-    {
-        $connection = $this->getWrappedConnection();
-
-        if (count($params) > 0) {
-            return $connection->prepare($sql, $params, $types)->execute()->rowCount();
-        }
-
-        return $connection->exec($sql);
     }
 }

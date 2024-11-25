@@ -2,7 +2,6 @@
 
 namespace ryunosuke\dbml\Metadata;
 
-use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
@@ -15,6 +14,7 @@ use Doctrine\DBAL\Types\Types;
 use ryunosuke\dbml\Mixin\FactoryTrait;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Queryable;
+use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_sprintf;
 use function ryunosuke\dbml\array_strpad;
@@ -92,9 +92,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsIdentityNullable(): bool
     {
-        if ($this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
-            return false;
-        }
         if ($this->platform instanceof SqlitePlatform) {
             return true;
         }
@@ -137,7 +134,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsInsertSet(): bool
     {
-        if ($this->platform instanceof MySQLPlatform || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
+        if ($this->platform instanceof MySQLPlatform) {
             return true;
         }
 
@@ -257,14 +254,13 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function supportsRowConstructor(): bool
     {
+        if ($this->platform instanceof SqlitePlatform) {
+            // どうも中途半端な対応のようで文脈によってはエラーが出るため false にする
+            //return version_compare($this->version, '3.15.0') >= 0;
+            return false;
+        }
         if ($this->platform instanceof SQLServerPlatform) {
             return false;
-        }
-        if ($this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
-            return false;
-        }
-        if ($this->platform instanceof SqlitePlatform) {
-            return version_compare($this->version, '3.15.0') >= 0;
         }
         return true;
     }
@@ -275,9 +271,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     public function supportsCompatibleCharAndBinary(): bool
     {
         if ($this->platform instanceof SQLServerPlatform) {
-            return false;
-        }
-        if ($this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
             return false;
         }
         return true;
@@ -338,7 +331,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return $string;
         }
 
-        if (in_array($column->getType()->getName(), [Types::STRING], true)) {
+        $name = Adhoc::typeName($column->getType());
+        if (in_array($name, [Types::STRING], true)) {
             if (!$column->getLength() || !$column->hasPlatformOption('charset')) {
                 return $string;
             }
@@ -346,14 +340,14 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             $charset = starts_with($charset, 'utf8') ? 'utf-8' : $charset;
             return mb_substr($string, 0, $column->getLength(), $charset);
         }
-        if (in_array($column->getType()->getName(), [Types::BINARY, Types::TEXT, Types::BLOB], true)) {
+        if (in_array($name, [Types::BINARY, Types::TEXT, Types::BLOB], true)) {
             if (!$column->getLength()) {
                 return $string;
             }
             return substr($string, 0, $column->getLength());
         }
 
-        throw new \InvalidArgumentException($column->getType()->getName() . ' is not supported');
+        throw new \InvalidArgumentException($name . ' is not supported');
     }
 
     /**
@@ -430,7 +424,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return 'SET IDENTITY_INSERT ' . $tableName . ($onoffflag ? ' ON' : ' OFF');
         }
 
-        throw DBALException::notSupported(__METHOD__);
+        throw new \LogicException(__METHOD__ . ' is not supported.');
     }
 
     /**
@@ -480,37 +474,9 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
-     * @internal
-     * @codeCoverageIgnore
-     */
-    public function getListTableColumnsSQL(string $table, ?string $database = null): string
-    {
-        // doctrine 4.4 から VIEW のカラムが得られなくなったので暫定対応（SQLServer 以外は辛うじて getListTableColumnsSQL が使える）
-        if ($this->platform instanceof SQLServerPlatform) {
-            return <<<SQL
-                SELECT 
-                    c.name                  AS name,
-                    type_name(user_type_id) AS type,
-                    c.max_length            AS length,
-                    ~c.is_nullable          AS notnull,
-                    NULL                    AS "default",
-                    c.scale                 AS scale,
-                    c.precision             AS precision,
-                    0                       AS autoincrement,
-                    c.collation_name        AS collation,
-                    NULL                    AS comment
-                FROM sys.columns c
-                JOIN sys.views v ON v.object_id = c.object_id
-                WHERE SCHEMA_NAME(v.schema_id) = SCHEMA_NAME() AND v.name = {$this->platform->quoteStringLiteral($table)}
-            SQL;
-        }
-        return $this->platform->getListTableColumnsSQL($table, $database);
-    }
-
-    /**
      * クエリにロック構文を付加して返す
      */
-    public function appendLockSuffix(string $query, int $lockmode, string $lockoption): string
+    public function appendLockSuffix(string $query, int|LockMode $lockmode, string $lockoption): string
     {
         // SQLServer はクエリ自体ではなく from 句に紐づくので不要
         if ($this->platform instanceof SQLServerPlatform) {
@@ -523,10 +489,18 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
         switch (true) {
             case $lockmode === LockMode::PESSIMISTIC_READ:
-                $query .= ' ' . $this->platform->getReadLockSQL();
+                $query .= match (true) {
+                    $this->platform instanceof SqlitePlatform     => ' /* lock for read */',
+                    $this->platform instanceof MySQLPlatform      => ' LOCK IN SHARE MODE',
+                    $this->platform instanceof PostgreSQLPlatform => ' FOR SHARE',
+                    default                                       => ' FOR UPDATE'
+                };
                 break;
             case $lockmode === LockMode::PESSIMISTIC_WRITE:
-                $query .= ' ' . $this->platform->getWriteLockSQL();
+                $query .= match (true) {
+                    $this->platform instanceof SqlitePlatform => ' /* lock for write */',
+                    default                                   => ' FOR UPDATE'
+                };
                 break;
         }
 
@@ -686,7 +660,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return $query;
         }
 
-        throw DBALException::notSupported(__METHOD__);
+        throw new \LogicException(__METHOD__ . ' is not supported.');
     }
 
     /**
@@ -786,7 +760,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             $this->platform instanceof MySQLPlatform      => ['JSON_OBJECT', ','],
             $this->platform instanceof PostgreSQLPlatform => ['JSON_BUILD_OBJECT', ','],
             $this->platform instanceof SQLServerPlatform  => ['JSON_OBJECT', ':'],
-            default                                       => throw DBALException::notSupported(__METHOD__),
+            default                                       => throw new \LogicException(__METHOD__ . ' is not supported.'),
         };
 
         $params = [];
@@ -818,7 +792,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             $this->platform instanceof MySQLPlatform      => ['JSON_ARRAYAGG', 'JSON_OBJECTAGG'],
             $this->platform instanceof PostgreSQLPlatform => ['JSON_AGG', 'JSON_OBJECT_AGG'],
             $this->platform instanceof SQLServerPlatform  => ['JSON_ARRAYAGG', 'JSON_OBJECTAGG'],
-            default                                       => throw DBALException::notSupported(__METHOD__),
+            default                                       => throw new \LogicException(__METHOD__ . ' is not supported.'),
         };
 
         $params = [];
@@ -882,7 +856,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return Expression::new("$column ~* ?", [$pattern]);
         }
 
-        throw DBALException::notSupported(__METHOD__);
+        throw new \LogicException(__METHOD__ . ' is not supported.');
     }
 
     /**
@@ -936,7 +910,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return Expression::new("pg_sleep(?)", $second);
         }
 
-        throw DBALException::notSupported(__METHOD__);
+        throw new \LogicException(__METHOD__ . ' is not supported.');
     }
 
     /**
@@ -961,7 +935,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return Expression::new("RAND(CHECKSUM(NEWID()))");
         }
 
-        throw DBALException::notSupported(__METHOD__);
+        throw new \LogicException(__METHOD__ . ' is not supported.');
     }
 
     /**

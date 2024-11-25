@@ -10,6 +10,7 @@ use ryunosuke\dbml\Metadata\Schema;
 use ryunosuke\dbml\Mixin\FactoryTrait;
 use ryunosuke\dbml\Query\Clause\Where;
 use ryunosuke\dbml\Query\Expression\Expression;
+use ryunosuke\dbml\Utility\Adhoc;
 use function ryunosuke\dbml\array_assort;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_get;
@@ -413,7 +414,7 @@ class AffectBuilder extends AbstractBuilder
         foreach ($columns as $cname => $column) {
             if (array_key_exists($cname, $row)) {
                 $type = $column->getType();
-                $typename = $type->getName();
+                $typename = Adhoc::typeName($type);
                 $nullable = !$column->getNotnull();
 
                 if ($filterNullAtNotNullColumn && $row[$cname] === null && !$nullable && $cname !== $autocolumn) {

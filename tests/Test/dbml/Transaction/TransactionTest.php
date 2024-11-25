@@ -9,6 +9,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\DBAL\TransactionIsolationLevel;
 use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Transaction\Transaction;
+use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\Test\Database;
 
 class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
@@ -615,8 +616,8 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test_masterslave()
     {
-        $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
-        $slave = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
+        $master = DriverManager::getConnection(Adhoc::parseParams(['url' => 'sqlite:///:memory:']));
+        $slave = DriverManager::getConnection(Adhoc::parseParams(['url' => 'sqlite:///:memory:']));
         $master->executeStatement('CREATE TABLE test(id integer)');
         $slave->executeStatement('CREATE TABLE test(id integer)');
         $master->insert('test', ['id' => 66]);

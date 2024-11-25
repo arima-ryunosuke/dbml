@@ -937,7 +937,7 @@ class Database
                 }
                 // Result 由来の変換（Result がテーブル名とカラム名を返してくれるなら対応表が作れる）
                 elseif (isset($metadataTableColumn[$c]) && $type = $getTableColumnType(...$metadataTableColumn[$c]['tableColumn'])) {
-                    $v = $cconverter($type->getName(), $v);
+                    $v = $cconverter(Adhoc::typeName($type), $v);
                 }
                 // Native 由来の変換（Result が NativeType を返してくれるなら直接変換できる）
                 elseif (isset($metadataTableColumn[$c]['doctrineType'])) {
@@ -1124,7 +1124,7 @@ class Database
                 implode(',', array_map(fn($column) => "`$column`", $fkey->getForeignColumns())),
             ]);
             $driverException = new class("Cannot delete or update a parent row: a foreign key constraint fails ($message)") extends \Exception implements Driver\Exception {
-                public function getSQLState() { return '10000'; } // @codeCoverageIgnore
+                public function getSQLState(): ?string { return '10000'; } // @codeCoverageIgnore
             };
             throw new ForeignKeyConstraintViolationException($driverException, null);
         }
@@ -1148,7 +1148,7 @@ class Database
             if ($type instanceof EnumType) {
                 return '\\' . $type->getEnum();
             }
-            $typename = $type->getName();
+            $typename = Adhoc::typeName($type);
             $autocast = $this->getUnsafeOption('autoCastType');
             $converter = $autocast[$typename]['select'] ?? null;
             if (is_callable($converter)) {
@@ -3422,7 +3422,7 @@ class Database
         $tmpname = '__dbml_auto_join';
 
         $pkcols = $this->getSchema()->getTablePrimaryColumns($tablename);
-        $columns = $this->getSchema()->getTable($tablename)->getColumns();
+        $columns = $this->getSchema()->getTableColumns($tablename);
 
         $joincols = null;
         $selects = [];

@@ -219,8 +219,8 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
             "false"  => ParameterType::BOOLEAN,
             "true"   => ParameterType::BOOLEAN,
             "int"    => ParameterType::INTEGER,
-            "float"  => null,
-            "string" => null,
+            "float"  => ParameterType::STRING,
+            "string" => ParameterType::STRING,
         ], Adhoc::bindableTypes([
             'null'   => null,
             'false'  => false,

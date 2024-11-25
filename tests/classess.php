@@ -213,22 +213,3 @@ namespace ryunosuke\Test\Entity {
     {
     }
 }
-
-namespace ryunosuke\Test\Platforms {
-
-    /**
-     * テスト用 Platform
-     */
-    class SqlitePlatform extends \Doctrine\DBAL\Platforms\SqlitePlatform
-    {
-        public function getReadLockSQL()
-        {
-            return '/* lock for read */';
-        }
-
-        public function getWriteLockSQL()
-        {
-            return '/* lock for write */';
-        }
-    }
-}

@@ -3,13 +3,13 @@
 namespace ryunosuke\Test\dbml\Metadata;
 
 use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\Exception as SchemaException;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
-use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Metadata\Schema;
+use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\SimpleCache\NullCache;
 use ryunosuke\Test\Database;
 use function ryunosuke\dbml\try_return;
@@ -26,11 +26,6 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
             ],
             [new Index('PRIMARY', ['id'], true, true)]
-        ));
-        try_return([$schmer, 'dropView'], 'viewsample');
-        $schmer->createView(new View(
-            'viewsample',
-            'SELECT * FROM metasample'
         ));
 
         return [
@@ -80,7 +75,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertStringContainsString('Table', get_class($schema->getTable('metatest')));
 
-        that($schema)->addTable($this->getDummyTable('metatest'))->wasThrown(SchemaException::tableAlreadyExists('metatest'));
+        that($schema)->addTable($this->getDummyTable('metatest'))->wasThrown(SchemaException\TableDoesNotExist::new('metatest'));
     }
 
     /**
@@ -91,9 +86,6 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $this->assertTrue($schema->hasTable('metasample'));
         $this->assertFalse($schema->hasTable('metahoge'));
-
-        // VIEW も含まれる
-        $this->assertTrue($schema->hasTable('viewsample'));
     }
 
     /**
@@ -106,13 +98,11 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertContains('metasample', $schema->getTableNames());
         $this->assertContains('metatest', $schema->getTableNames());
-        $this->assertContains('viewsample', $schema->getTableNames());
 
         $schema->refresh();
 
         $this->assertNotContains('metatest', $schema->getTableNames());
         $this->assertContains('metasample', $schema->getTableNames());
-        $this->assertContains('viewsample', $schema->getTableNames());
     }
 
     /**
@@ -127,7 +117,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertStringContainsString('Table', get_class($schema->getTable('metasample')));
 
-        that($schema)->getTable('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
+        that($schema)->getTable('hogera')->wasThrown(SchemaException\tableDoesNotExist::new('hogera'));
     }
 
     /**
@@ -153,14 +143,14 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals([
             'foreign_p',
             'metasample',
+            'misctype',
             't',
             'test',
-            'viewsample',
         ], array_keys($schema->getTables('!foreign_c?')));
         $this->assertEquals([
             'foreign_p',
             'metasample',
-            'viewsample',
+            'misctype',
         ], array_keys($schema->getTables(['!foreign_c?', '!t*'])));
 
         $this->assertEquals([
@@ -178,9 +168,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $schema->addTable($this->getDummyTable('metatest'));
 
         $this->assertIsArray($schema->getTableColumns('metatest'));
-        $this->assertIsArray($schema->getTableColumns('viewsample'));
 
-        that($schema)->getTableColumns('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
+        that($schema)->getTableColumns('hogera')->wasThrown(SchemaException\tableDoesNotExist::new('hogera'));
     }
 
     /**
@@ -193,7 +182,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertStringContainsString('Index', get_class($schema->getTablePrimaryKey('metatest')));
 
-        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
+        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException\tableDoesNotExist::new('hogera'));
     }
 
     /**
@@ -205,9 +194,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $schema->addTable($this->getDummyTable('metatest'));
 
         $this->assertEquals(array_intersect_key($schema->getTableColumns('metatest'), ['id' => '']), $schema->getTablePrimaryColumns('metatest'));
-        $this->assertEquals([], $schema->getTablePrimaryColumns('viewsample'));
 
-        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
+        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException\tableDoesNotExist::new('hogera'));
     }
 
     /**
@@ -237,7 +225,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         that($schema)->getTableUniqueColumns('metasample')->wasThrown('is not found');
         that($schema)->getTableUniqueColumns('uniquetable', 'undefined')->wasThrown('does not exist');
-        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
+        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException\tableDoesNotExist::new('hogera'));
     }
 
     /**
@@ -272,7 +260,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertIsArray($schema->getTableForeignKeys('metatest'));
 
-        that($schema)->getTableForeignKeys('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
+        that($schema)->getTableForeignKeys('hogera')->wasThrown(SchemaException\tableDoesNotExist::new('hogera'));
     }
 
     /**
@@ -292,8 +280,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             "virtual"  => false,
             "implicit" => true,
         ], $column->getPlatformOptions());
-        $this->assertEquals('string', $column->getType()->getName());
-        $this->assertEquals('string', $schema->getTableColumns('metasample')['id']->getType()->getName());
+        $this->assertEquals('string', Adhoc::typeName($column->getType()));
+        $this->assertEquals('string', Adhoc::typeName($schema->getTableColumns('metasample')['id']->getType()));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample')));
 
         // 仮想カラムの追加
@@ -316,8 +304,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             "affect"   => null,
             "virtual"  => true,
         ], $column->getPlatformOptions());
-        $this->assertEquals('integer', $column->getType()->getName());
-        $this->assertEquals('integer', $schema->getTableColumns('metasample')['dummy']->getType()->getName());
+        $this->assertEquals('integer', Adhoc::typeName($column->getType()));
+        $this->assertEquals('integer', Adhoc::typeName($schema->getTableColumns('metasample')['dummy']->getType()));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_UPDATABLE)));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_REAL)));
 
@@ -346,8 +334,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
                 "expression" => "concat(\"a\", \"b\")",
             ],
         ], $column->getPlatformOptions());
-        $this->assertEquals('string', $column->getType()->getName());
-        $this->assertEquals('string', $schema->getTableColumns('metasample')['dummy']->getType()->getName());
+        $this->assertEquals('string', Adhoc::typeName($column->getType()));
+        $this->assertEquals('string', Adhoc::typeName($schema->getTableColumns('metasample')['dummy']->getType()));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_UPDATABLE)));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_REAL)));
 
@@ -367,8 +355,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             "affect"     => $affect,
             "generation" => null,
         ], $column->getPlatformOptions());
-        $this->assertEquals('string', $column->getType()->getName());
-        $this->assertEquals('string', $schema->getTableColumns('metasample')['dummy']->getType()->getName());
+        $this->assertEquals('string', Adhoc::typeName($column->getType()));
+        $this->assertEquals('string', Adhoc::typeName($schema->getTableColumns('metasample')['dummy']->getType()));
         $this->assertEquals(['id', 'dummy'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_UPDATABLE)));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_REAL)));
 
@@ -413,7 +401,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertEquals(['FK_1', 'FK_2'], array_keys($schema->getForeignKeys('metatest')));
 
-        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException::tableDoesNotExist('hogera'));
+        that($schema)->getTablePrimaryKey('hogera')->wasThrown(SchemaException\tableDoesNotExist::new('hogera'));
     }
 
     /**
@@ -552,10 +540,10 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertEquals('fk_hogera', $schema->addForeignKey($newFK('fk_hogera', 'id', 'foreign2', 'id'), 'foreign1')->getName());
 
-        that($schema)->addForeignKey($newFK(null, 'id', 'foreign2', 'id'), null)->wasThrown('localTable is not set');
+        that($schema)->addForeignKey($newFK('', 'id', 'foreign2', 'id'), null)->wasThrown('localTable is not set');
         that($schema)->addForeignKey($newFK('fk_hogera', 'id', 'foreign2', 'id'), 'foreign1')->wasThrown('already defined same');
-        that($schema)->addForeignKey($newFK(null, 'foreign2', 'foreign2', 'foreign2'), 'foreign1')->wasThrown('column for foreign1');
-        that($schema)->addForeignKey($newFK(null, 'foreign2', 'foreign1', 'foreign2'), 'foreign2')->wasThrown('column for foreign1');
+        that($schema)->addForeignKey($newFK('', 'foreign2', 'foreign2', 'foreign2'), 'foreign1')->wasThrown('column for foreign1');
+        that($schema)->addForeignKey($newFK('', 'foreign2', 'foreign1', 'foreign2'), 'foreign2')->wasThrown('column for foreign1');
     }
 
     /**
@@ -577,8 +565,8 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEmpty($schema->getTableForeignKeys('foreign'));
 
         that($schema)->ignoreForeignKey('undefined')->wasThrown('undefined foreign key');
-        that($schema)->ignoreForeignKey($newFK(null, 'id', 'foreign2', 'id'), null)->wasThrown('localTable is not set');
-        that($schema)->ignoreForeignKey($newFK(null, 'notfound', 'metatest', 'notfound'), 'foreign')->wasThrown('matched foreign key');
+        that($schema)->ignoreForeignKey($newFK('', 'id', 'foreign2', 'id'), null)->wasThrown('localTable is not set');
+        that($schema)->ignoreForeignKey($newFK('', 'notfound', 'metatest', 'notfound'), 'foreign')->wasThrown('matched foreign key');
     }
 
     /**

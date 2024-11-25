@@ -2,6 +2,7 @@
 
 namespace ryunosuke\Test\dbml\Query;
 
+use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\AffectBuilder;
 use ryunosuke\dbml\Query\Expression\Expression;
 
@@ -80,11 +81,6 @@ class AffectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         $row->title = 'newest';
         $this->assertSame($row->arrayize(), $builder->build(['table' => 't_article'])->normalize($row));
 
-        // null なオートインクリメントは伏せられる
-        $builder = AffectBuilder::new(self::getDummyDatabase());
-        $builder->build(['table' => 'test']);
-        $this->assertEquals([], $builder->normalize(['id' => null]));
-
         $row = ['name' => (object) ['a' => 'A']];
         $this->assertSame([
             'name' => '{"a":"A"}',
@@ -106,5 +102,39 @@ class AffectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
         ]);
 
         $this->assertEquals(new AffectBuilder($builder->getDatabase()), $builder->reset());
+    }
+
+    /**
+     * @dataProvider provideAffectBuilder
+     * @param AffectBuilder $builder
+     */
+    function test_misc($builder)
+    {
+        $builder->setInsertSet(true);
+        $cache = that($builder->getDatabase())->var('cache');
+        $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
+        $cache['compatiblePlatform'] = new class($builder->getDatabase()->getPlatform(), $builder->getDatabase()->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
+            public function supportsCompatibleCharAndBinary(): bool { return false; }
+
+            public function supportsIdentityNullable(): bool { return false; }
+
+            public function supportsInsertSet(): bool { return true; }
+        };
+
+        // バイナリ型はバイナリになる
+        $builder->reset()->build(['table' => 'misctype']);
+        $this->assertInstanceOf(Expression::class, $builder->normalize(['cbinary' => 'x'])['cbinary']);
+
+        // null なオートインクリメントは伏せられる
+        $builder->reset()->build(['table' => 'test']);
+        $this->assertEquals([], $builder->normalize(['id' => null]));
+
+        // INSERT SET(insert)
+        $builder->reset()->insert('test', ['name' => 'A', 'dummy' => 'D']);
+        $this->assertEquals('INSERT INTO test SET name = ?', (string) $builder);
+
+        // INSERT SET(modify)
+        $builder->reset()->modify('test', ['name' => 'A', 'dummy' => 'D']);
+        $this->assertStringStartsWith('INSERT INTO test SET name = ?', (string) $builder);
     }
 }

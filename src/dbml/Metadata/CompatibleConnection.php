@@ -6,7 +6,6 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\Driver\Middleware\AbstractConnectionMiddleware;
-use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Result;
 use ryunosuke\dbml\Mixin\FactoryTrait;
 use ryunosuke\dbml\Query\Parser;
@@ -38,7 +37,7 @@ class CompatibleConnection
 
         $this->connection = $connection;
 
-        $driverConnection = $connection->getWrappedConnection();
+        $driverConnection = (fn() => $this->_conn)->bindTo($connection, Connection::class)();
         while ($driverConnection instanceof AbstractConnectionMiddleware) {
             $driverConnection = (fn() => $this->wrappedConnection)->bindTo($driverConnection, AbstractConnectionMiddleware::class)();
         }
@@ -75,7 +74,7 @@ class CompatibleConnection
             return 'sqlsrv';
         }
 
-        throw DBALException::notSupported(__METHOD__);
+        throw new \LogicException(__METHOD__ . ' is not supported.');
     }
 
     public function isSupportedNamedPlaceholder(): bool
@@ -359,7 +358,7 @@ class CompatibleConnection
         if (!isset($next, $tick)) {
             // カバレッジのために無名クラス自体は返すようにする
             $next = function () {
-                throw DBALException::notSupported(__METHOD__);
+                throw new \LogicException(__METHOD__ . ' is not supported.');
             };
             $tick = function () { };
         }

@@ -26,7 +26,7 @@ class ArrayResult implements DriverResult, ResultInterface
         return $this->metadata;
     }
 
-    public function fetchNumeric()
+    public function fetchNumeric(): false|array
     {
         if (!$this->rows->valid()) {
             return false;
@@ -37,7 +37,7 @@ class ArrayResult implements DriverResult, ResultInterface
         return $result;
     }
 
-    public function fetchAssociative()
+    public function fetchAssociative(): false|array
     {
         if (!$this->rows->valid()) {
             return false;
@@ -49,7 +49,7 @@ class ArrayResult implements DriverResult, ResultInterface
         return array_combine($this->columns, $this->fetchNumeric());
     }
 
-    public function fetchOne()
+    public function fetchOne(): mixed
     {
         if (!$this->rows->valid()) {
             return false;

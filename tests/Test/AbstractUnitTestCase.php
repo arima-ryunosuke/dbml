@@ -6,13 +6,13 @@ use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\AbstractSQLiteDriver\Middleware\EnableForeignKeys;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\AbstractAsset;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Tools\DsnParser;
 use Doctrine\DBAL\Types\Type;
 use PHPUnit\Framework\SkippedTestError;
@@ -61,11 +61,10 @@ abstract class AbstractUnitTestCase extends TestCase
             unset($mparam['url'], $mparam['dbname'], $mparam['path']);
             $schemaManager = DriverManager::getConnection($mparam)->createSchemaManager();
             try_null(fn() => $schemaManager->dropDatabase($dbname));
-            $schemaManager->createDatabase($dbname);
+            try_null(fn() => $schemaManager->createDatabase($dbname));
         }
 
         if (strpos($dbms, 'sqlite') !== false) {
-            $params['platform'] = new \ryunosuke\Test\Platforms\SqlitePlatform();
             $middlewares[] = new EnableForeignKeys();
         }
 
@@ -259,9 +258,9 @@ abstract class AbstractUnitTestCase extends TestCase
                         new Table('multiunique',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
-                                new Column('uc_s', Type::getType('string')),
+                                new Column('uc_s', Type::getType('string'), ['length' => 255]),
                                 new Column('uc_i', Type::getType('integer')),
-                                new Column('uc1', Type::getType('string')),
+                                new Column('uc1', Type::getType('string'), ['length' => 255]),
                                 new Column('uc2', Type::getType('integer')),
                                 new Column('groupkey', Type::getType('integer')),
                             ],
@@ -281,7 +280,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('pid', Type::getType('integer'), ['notnull' => false]),
                                 new Column('cint', Type::getType('integer')),
                                 new Column('cfloat', Type::getType('float')),
-                                new Column('cdecimal', Type::getType('decimal')),
+                                new Column('cdecimal', Type::getType('decimal'), ['scale' => 2, 'precision' => 3]),
                                 new Column('cdate', Type::getType('date')),
                                 new Column('cdatetime', Type::getType('datetime')),
                                 new Column('cstring', Type::getType('string'), ['length' => 8]),
@@ -304,12 +303,12 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('cid', Type::getType('integer')),
                                 new Column('cint', Type::getType('integer')),
                                 new Column('cfloat', Type::getType('float')),
-                                new Column('cdecimal', Type::getType('decimal')),
+                                new Column('cdecimal', Type::getType('decimal'), ['scale' => 2, 'precision' => 3]),
                                 new Column('cdate', Type::getType('date')),
                                 new Column('cdatetime', Type::getType('datetime')),
-                                new Column('cstring', Type::getType('string')),
+                                new Column('cstring', Type::getType('string'), ['length' => 255]),
                                 new Column('ctext', Type::getType('text')),
-                                new Column('cbinary', Type::getType('binary'), ['notnull' => false]),
+                                new Column('cbinary', Type::getType('binary'), ['length' => 255, 'notnull' => false]),
                                 new Column('cblob', Type::getType('blob'), ['notnull' => false]),
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
@@ -501,7 +500,7 @@ abstract class AbstractUnitTestCase extends TestCase
                         new Table('horizontal1',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
-                                new Column('name', Type::getType('string')),
+                                new Column('name', Type::getType('string'), ['length' => 255]),
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
                             [],
@@ -511,7 +510,7 @@ abstract class AbstractUnitTestCase extends TestCase
                         new Table('horizontal2',
                             [
                                 new Column('id', Type::getType('integer')),
-                                new Column('summary', Type::getType('string')),
+                                new Column('summary', Type::getType('string'), ['length' => 255]),
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
                             [],
@@ -520,7 +519,7 @@ abstract class AbstractUnitTestCase extends TestCase
                         ),
                         new Table('master_table',
                             [
-                                new Column('category', Type::getType('string')),
+                                new Column('category', Type::getType('string'), ['length' => 255]),
                                 new Column('subid', Type::getType('integer')),
                             ],
                             [new Index('PRIMARY', ['category', 'subid'], true, true)],
@@ -568,8 +567,8 @@ abstract class AbstractUnitTestCase extends TestCase
                         new Table('t_article',
                             [
                                 new Column('article_id', Type::getType('integer')),
-                                new Column('title', Type::getType('string')),
-                                new Column('checks', Type::getType('string')),
+                                new Column('title', Type::getType('string'), ['length' => 255]),
+                                new Column('checks', Type::getType('string'), ['length' => 255]),
                                 new Column('delete_at', Type::getType('datetime'), ['notnull' => false, 'default' => null]),
                             ],
                             [
@@ -596,15 +595,6 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             ['collation' => 'utf8mb3_bin'],
                         ),
-                        new View('v_blog', '
-                            SELECT
-                              A.article_id,
-                              A.title,
-                              C.comment_id,
-                              C.comment
-                            FROM t_article A
-                            JOIN t_comment C ON A.article_id = C.article_id
-                        '),
                     ]
                 );
             }
@@ -652,7 +642,7 @@ abstract class AbstractUnitTestCase extends TestCase
                     }
                     return $tablename;
                 },
-                'debugLogger'              => $v[0]->getDatabasePlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform ? (new StreamLogger(__DIR__ . '/../debug-log.jsonl', [
+                'debugLogger'              => $v[0]->getDatabasePlatform() instanceof SqlitePlatform ? (new StreamLogger(__DIR__ . '/../debug-log.jsonl', [
                     'mode' => 'wb',
                 ]))->appendPlugin(new SuppressPlugin(3600), new LevelUnsetPlugin()) : null,
             ]);
@@ -682,13 +672,12 @@ abstract class AbstractUnitTestCase extends TestCase
     {
         if (self::$database === null) {
             $configuration = new Configuration();
-            $configuration->setMiddlewares([new Middleware(new LoggerChain())]);
+            $configuration->setMiddlewares([
+                new Middleware(new LoggerChain()),
+            ]);
 
             $parser = new DsnParser();
             $params = $parser->parse('sqlite3:///:memory:');
-            $params += [
-                'platform' => new \ryunosuke\Test\Platforms\SqlitePlatform(),
-            ];
 
             $connection = DriverManager::getConnection($params, $configuration);
             self::createTables($connection, [
@@ -740,6 +729,27 @@ abstract class AbstractUnitTestCase extends TestCase
                     [new Index('PRIMARY', ['cid', 'seq'], true, true)],
                     [],
                     [new ForeignKeyConstraint(['cid'], 'foreign_p', ['id'], 'fk_parentchild2')],
+                    ['collation' => 'utf8mb3_bin'],
+                ),
+                new Table('misctype',
+                    [
+                        new Column('id', Type::getType('integer'), ['autoincrement' => true]),
+                        new Column('pid', Type::getType('integer'), ['notnull' => false]),
+                        new Column('cint', Type::getType('integer')),
+                        new Column('cfloat', Type::getType('float')),
+                        new Column('cdecimal', Type::getType('decimal'), ['scale' => 2, 'precision' => 3]),
+                        new Column('cdate', Type::getType('date')),
+                        new Column('cdatetime', Type::getType('datetime')),
+                        new Column('cstring', Type::getType('string'), ['length' => 8]),
+                        new Column('ctext', Type::getType('text'), ['length' => 255]),
+                        new Column('cbinary', Type::getType('binary'), ['length' => 24, 'notnull' => false]),
+                        new Column('cblob', Type::getType('blob'), ['length' => 255, 'notnull' => false]),
+                        new Column('carray', Type::getType('simple_array'), ['notnull' => false]),
+                        new Column('cjson', Type::getType('json'), ['notnull' => false]),
+                    ],
+                    [new Index('PRIMARY', ['id'], true, true), new Index('IDX_MISCTYPE1', ['pid'], true)],
+                    [],
+                    [],
                     ['collation' => 'utf8mb3_bin'],
                 ),
             ]);
@@ -994,7 +1004,7 @@ abstract class AbstractUnitTestCase extends TestCase
                 continue;
             }
             $tablename = $tableorview->getQuotedName($connection->getDatabasePlatform());
-            if ($schemeManager->tablesExist($tablename)) {
+            if ($schemeManager->tablesExist([$tablename])) {
                 $method = 'drop' . class_shorten($tableorview);
                 $schemeManager->$method($tablename);
             }

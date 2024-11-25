@@ -4,6 +4,7 @@ namespace ryunosuke\dbml\Utility;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Tools\DsnParser;
+use Doctrine\DBAL\Types\Type;
 use Psr\SimpleCache\CacheInterface;
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\SelectBuilder;
@@ -47,6 +48,12 @@ class Adhoc
             $urlParams['serverVersion'] = $m[2];
         }
 
+        if (isset($urlParts['path'])) {
+            if ($urlParts['path'] === '/:memory:') {
+                $urlParams['memory'] = true;
+            }
+        }
+
         if (isset($urlParts['fragment'])) {
             parse_str($urlParts['fragment'], $fragments);
             foreach ($fragments as $k => $v) {
@@ -64,7 +71,20 @@ class Adhoc
         $params['driverOptions'] += $urlParams['driverOptions'];
 
         unset($params['url']);
-        return $params + (new DsnParser())->parse($url);
+        return $params + (new DsnParser([
+                'pdo_mysql'  => \Doctrine\DBAL\Driver\PDO\MySQL\Driver::class,
+                'pdo_sqlite' => \Doctrine\DBAL\Driver\PDO\SQLite\Driver::class,
+                'pdo_pgsql'  => \Doctrine\DBAL\Driver\PDO\PgSQL\Driver::class,
+                'pdo_oci'    => \Doctrine\DBAL\Driver\PDO\OCI\Driver::class,
+                'oci8'       => \Doctrine\DBAL\Driver\OCI8\Driver::class,
+                'ibm_db2'    => \Doctrine\DBAL\Driver\IBMDB2\Driver::class,
+                'pdo_sqlsrv' => \Doctrine\DBAL\Driver\PDO\SQLSrv\Driver::class,
+                'mysqli'     => \Doctrine\DBAL\Driver\Mysqli\Driver::class,
+                'pgsql'      => \Doctrine\DBAL\Driver\PgSQL\Driver::class,
+                'sqlsrv'     => \Doctrine\DBAL\Driver\SQLSrv\Driver::class,
+                'sqlite'     => \Doctrine\DBAL\Driver\SQLite3\Driver::class,
+                'sqlite3'    => \Doctrine\DBAL\Driver\SQLite3\Driver::class,
+            ]))->parse($url);
     }
 
     /**
@@ -84,6 +104,28 @@ class Adhoc
             $cacher->set($cacheid, $cache, $ttl);
         }
         return $cache[$key];
+    }
+
+    /**
+     * dbal4.0 から Type::getName が無くなったので互換する
+     */
+    public static function typeName(Type $type): string
+    {
+        // 4.0 までは getName が使える
+        if (method_exists($type, 'getName')) {
+            return $type->getName();
+        }
+
+        // getName は 4.0 で削除された
+        // ちなみに Type::lookupName は使用できないので注意（インスタンスごとで保持されるためスキーマをキャッシュから読み込むと正常動作しない）
+        // @codeCoverageIgnoreStart
+        foreach (Type::getTypeRegistry()->getMap() as $name => $class) {
+            if (get_class($type) === get_class($class)) {
+                return $name;
+            }
+        }
+        throw new \InvalidArgumentException(get_class($type) . 'failed to resolve name(' . get_class($type) . ')');
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -246,7 +288,7 @@ class Adhoc
                 $types[$k] = ParameterType::INTEGER;
             }
             else {
-                $types[$k] = null; // 決め打ちしない（null にすることで呼び元で ?? Hoge できるようにする）
+                $types[$k] = ParameterType::STRING;
             }
         }
         return $types;

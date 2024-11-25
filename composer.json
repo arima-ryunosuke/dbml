@@ -16,7 +16,7 @@
   ],
   "require": {
     "php": ">=8.0",
-    "doctrine/dbal": "3.*",
+    "doctrine/dbal": "3.*|4.*",
     "psr/simple-cache": "2.*|3.*",
     "ryunosuke/utility-attribute": "1.*"
   },

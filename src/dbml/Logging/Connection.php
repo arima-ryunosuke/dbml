@@ -75,24 +75,24 @@ final class Connection extends AbstractConnectionMiddleware
         }
     }
 
-    public function beginTransaction()
+    public function beginTransaction(): void
     {
         $this->logger->info('BEGIN', ['time' => microtime(true)]);
 
-        return parent::beginTransaction();
+        parent::beginTransaction();
     }
 
-    public function commit()
+    public function commit(): void
     {
         $this->logger->info('COMMIT', ['time' => microtime(true)]);
 
-        return parent::commit();
+        parent::commit();
     }
 
-    public function rollBack()
+    public function rollBack(): void
     {
         $this->logger->info('ROLLBACK', ['time' => microtime(true)]);
 
-        return parent::rollBack();
+        parent::rollBack();
     }
 }

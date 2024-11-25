@@ -2,11 +2,11 @@
 
 namespace ryunosuke\dbml\Metadata;
 
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
-use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
@@ -126,7 +126,7 @@ class Schema
         $table_name = $table->getName();
 
         if ($this->hasTable($table_name)) {
-            throw SchemaException::tableAlreadyExists($table_name);
+            throw \Doctrine\DBAL\Schema\Exception\TableDoesNotExist::new($table_name);
         }
 
         $table = $this->listeners['onIntrospectTable']($table) ?? $table;
@@ -210,7 +210,11 @@ class Schema
         if (is_string($fkey)) {
             $fkey = $this->getForeignKeys()[$fkey] ?? throw new \InvalidArgumentException("undefined foreign key '$fkey'.");
         }
-        (fn() => $this->_options = array_replace($this->_options, $metadata))->bindTo($fkey, ForeignKeyConstraint::class)();
+        (function () use ($metadata) {
+            // for compatible
+            $option_name = isset($this->options) ? 'options' : '_options';
+            return $this->$option_name = array_replace($this->$option_name, $metadata);
+        })->bindTo($fkey, ForeignKeyConstraint::class)();
     }
 
     /**
@@ -232,11 +236,9 @@ class Schema
             $this->tableNames = cache_fetch($this->cache, 'Schema-table_names', function () {
                 $table_names = $this->schemaManger->listTableNames();
 
-                /** @noinspection PhpDeprecationInspection */
-                $paths = array_fill_keys($this->schemaManger->getSchemaSearchPaths(), '');
-                $views = array_each($this->schemaManger->listViews(), function (&$carry, View $view) use ($paths) {
+                $views = array_each($this->schemaManger->listViews(), function (&$carry, View $view) {
                     $ns = $view->getNamespaceName();
-                    if ($ns === null || isset($paths[$ns])) {
+                    if ($ns === null) {
                         $carry[] = $view->getShortestName($ns);
                     }
                 }, []);
@@ -254,24 +256,52 @@ class Schema
     {
         if (!isset($this->tables[$table_name])) {
             if (!$this->hasTable($table_name)) {
-                throw SchemaException::tableDoesNotExist($table_name);
+                throw \Doctrine\DBAL\Schema\Exception\TableDoesNotExist::new($table_name);
             }
 
             $this->tables[$table_name] = cache_fetch($this->cache, "Table-$table_name", function () use ($table_name) {
-                // doctrine 3.4 から view のカラムが得られなくなっている？ ようなのでかなりアドホックだが暫定対応
                 if ($this->schemaManger->tablesExist([$table_name])) {
                     $table = $this->schemaManger->introspectTable($table_name);
                 }
-                else {
+                // optional for ryunosuke/dbal
+                elseif (method_exists($this->schemaManger, 'introspectViewAsTable')) {
+                    $table = $this->schemaManger->introspectViewAsTable($table_name); // @codeCoverageIgnore for compatible
+                }
+                // https://github.com/doctrine/dbal/issues/5821
+                elseif (class_exists(\Doctrine\DBAL\Exception::class)) {
+                    // @codeCoverageIgnoreStart for compatible
                     $columns = \Closure::bind(function ($table) {
                         $database = $this->_conn->getDatabase();
-                        $cplatform = CompatiblePlatform::new($this->_platform);
-                        /** @noinspection PhpDeprecationInspection */
-                        $sql = $cplatform->getListTableColumnsSQL($table, $database);
+                        if ($this->_platform instanceof SQLServerPlatform) {
+                            $sql = <<<SQL
+                                SELECT 
+                                    c.name                  AS name,
+                                    type_name(user_type_id) AS type,
+                                    c.max_length            AS length,
+                                    ~c.is_nullable          AS notnull,
+                                    NULL                    AS "default",
+                                    c.scale                 AS scale,
+                                    c.precision             AS precision,
+                                    0                       AS autoincrement,
+                                    c.collation_name        AS collation,
+                                    NULL                    AS comment
+                                FROM sys.columns c
+                                JOIN sys.views v ON v.object_id = c.object_id
+                                WHERE SCHEMA_NAME(v.schema_id) = SCHEMA_NAME() AND v.name = {$this->_platform->quoteStringLiteral($table)}
+                            SQL;
+                        }
+                        else {
+                            /** @noinspection PhpDeprecationInspection */
+                            $sql = $this->_platform->getListTableColumnsSQL($table, $database);
+                        }
                         $tableColumns = $this->_conn->fetchAllAssociative($sql);
                         return $this->_getPortableTableColumnList($table, $database, $tableColumns);
                     }, $this->schemaManger, $this->schemaManger)($table_name);
                     $table = new Table($table_name, $columns);
+                    // @codeCoverageIgnoreEnd
+                }
+                if (!isset($table)) {
+                    throw \Doctrine\DBAL\Schema\Exception\TableDoesNotExist::new($table_name); // @codeCoverageIgnore for compatible
                 }
                 $table->setSchemaConfig($this->schemaManger->createSchemaConfig());
 
@@ -319,7 +349,9 @@ class Schema
     public function getTableColumns(string $table_name, null|int|callable $filter = null): array
     {
         if (!isset($this->tableColumns[$table_name])) {
-            $this->tableColumns[$table_name] = $this->getTable($table_name)->getColumns();
+            $this->tableColumns[$table_name] = array_each($this->getTable($table_name)->getColumns(), function (&$carry, Column $column) {
+                $carry[$column->getName()] = $column;
+            }, []);
         }
         foreach ($this->lazyTableColumns[$table_name] ?? [] as $name => $lazy) {
             unset($this->lazyTableColumns[$table_name][$name]);
@@ -620,8 +652,7 @@ class Schema
      */
     public function addForeignKey(ForeignKeyConstraint $fkey, ?string $lTable = null): ForeignKeyConstraint
     {
-        /** @noinspection PhpDeprecationInspection */
-        $lTable ??= $fkey->getLocalTable()?->getName();
+        $lTable ??= array_key_first($this->getForeignTable($fkey));
         if ($lTable === null) {
             throw new \InvalidArgumentException('$fkey\'s localTable is not set.');
         }
@@ -674,8 +705,7 @@ class Schema
             $fkey = $all[$fkey];
         }
 
-        /** @noinspection PhpDeprecationInspection */
-        $lTable ??= $fkey->getLocalTable()?->getName();
+        $lTable ??= array_key_first($this->getForeignTable($fkey));
         if ($lTable === null) {
             throw new \InvalidArgumentException('$fkey\'s localTable is not set.');
         }

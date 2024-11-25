@@ -114,7 +114,7 @@ use function ryunosuke\dbml\arrayize;
  *   - catch
  *   - finish
  *
- * @property int $isolationLevel トランザクション分離レベル
+ * @property int|TransactionIsolationLevel $isolationLevel トランザクション分離レベル
  * @property LoggerInterface $logger ロガーインスタンス
  * @property \Closure[] $begin begin イベント配列
  * @property \Closure[] $commit commit イベント配列

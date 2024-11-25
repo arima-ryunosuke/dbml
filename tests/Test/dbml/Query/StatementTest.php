@@ -4,6 +4,7 @@ namespace ryunosuke\Test\dbml\Query;
 
 use Doctrine\DBAL\DriverManager;
 use ryunosuke\dbml\Query\Statement;
+use ryunosuke\dbml\Utility\Adhoc;
 use ryunosuke\Test\Database;
 
 class StatementTest extends \ryunosuke\Test\AbstractUnitTestCase
@@ -56,8 +57,8 @@ class StatementTest extends \ryunosuke\Test\AbstractUnitTestCase
 
     function test_execute()
     {
-        $master = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
-        $slave = DriverManager::getConnection(['url' => 'sqlite:///:memory:']);
+        $master = DriverManager::getConnection(Adhoc::parseParams(['url' => 'sqlite:///:memory:']));
+        $slave = DriverManager::getConnection(Adhoc::parseParams(['url' => 'sqlite:///:memory:']));
         $database = new Database([$master, $slave]);
 
         $master->executeStatement('CREATE TABLE test_master(id integer, name string)');

@@ -16,7 +16,7 @@ trait ResultTrait
         $this->checkSameMethod = $method;
     }
 
-    public function fetchAssociative()
+    public function fetchAssociative(): false|array
     {
         if ($this->checkSameMethod) {
             return $this->checkSameColumn(parent::fetchNumeric(), false);

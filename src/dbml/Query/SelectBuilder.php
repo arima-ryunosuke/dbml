@@ -86,8 +86,8 @@ use function ryunosuke\dbml\str_exists;
  * @method $this                  setArrayFetch($string)
  * @method string                 getNullsOrder()
  * @method $this                  setNullsOrder($string = null)
- * @method int                    getPropagateLockMode()
- * @method $this                  setPropagateLockMode($int)
+ * @method int|LockMode           getPropagateLockMode()
+ * @method $this                  setPropagateLockMode($lockMode)
  * @method bool                   getInjectChildColumn()
  * @method $this                  setInjectChildColumn($bool)
  *
@@ -178,8 +178,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     protected array $wrappers = [];
 
-    protected int    $lockMode   = LockMode::NONE;
-    protected string $lockOption = '';
+    protected int|LockMode $lockMode   = LockMode::NONE;
+    protected string       $lockOption = '';
 
     /** @var SelectBuilder[] */
     protected array            $subbuilders = [];
@@ -532,7 +532,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             . concat(' HAVING ', $this->_getConditionClause($builder->sqlParts['having']))
             . concat(' ORDER BY ', implode(', ', $builder->sqlParts['orderBy']));
 
-        $sql = $platform->modifyLimitQuery($sql, $builder->sqlParts['limit'], $builder->sqlParts['offset']);
+        $sql = $platform->modifyLimitQuery($sql, $builder->sqlParts['limit'], $builder->sqlParts['offset'] ?? 0);
         $sql = $cplatform->appendLockSuffix($sql, $builder->lockMode, $builder->lockOption);
 
         // 最後にラッピングして終わり

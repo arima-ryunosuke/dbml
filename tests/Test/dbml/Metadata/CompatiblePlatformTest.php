@@ -2,7 +2,6 @@
 
 namespace ryunosuke\Test\dbml\Metadata;
 
-use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
@@ -24,7 +23,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     public static function providePlatform()
     {
         $platforms = [
-            'sqlite_t'    => [new \ryunosuke\Test\Platforms\SqlitePlatform(), "3.31.1"],
             'sqlite'      => [new SqlitePlatform(), "3.31.1"],
             'mysql8.0.18' => [new MySQLPlatform(), "8.0.18"],
             'mysql8.0.19' => [new MySQLPlatform(), "8.0.19"],
@@ -89,7 +87,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_supportsIdentityNullable($cplatform, $platform)
     {
         $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform;
-        $expected = $expected && !$platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform;
         $this->assertEquals($expected, $cplatform->supportsIdentityNullable());
     }
 
@@ -122,7 +119,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_supportsInsertSet($cplatform, $platform)
     {
-        $expected = $platform instanceof MySQLPlatform || $platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform;
+        $expected = $platform instanceof MySQLPlatform;
         $this->assertEquals($expected, $cplatform->supportsInsertSet());
     }
 
@@ -225,11 +222,8 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         if ($platform instanceof SQLServerPlatform) {
             $expected = false;
         }
-        elseif ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
-            $expected = false;
-        }
         elseif ($platform instanceof SqlitePlatform) {
-            $expected = version_compare(\SQLite3::version()['versionString'], '3.15.0', '>=');
+            $expected = false;
         }
         $this->assertEquals($expected, $cplatform->supportsRowConstructor());
     }
@@ -243,9 +237,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $expected = true;
         if ($platform instanceof SQLServerPlatform) {
-            $expected = false;
-        }
-        elseif ($platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
             $expected = false;
         }
         $this->assertEquals($expected, $cplatform->supportsCompatibleCharAndBinary());
@@ -420,8 +411,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertStringContainsString($expected, $cplatform->getIdentityInsertSQL('t_table', true));
         }
         else {
-            $expected = new DBALException('is not supported by platform');
-            that($cplatform)->getIdentityInsertSQL('t_table', true)->wasThrown($expected);
+            that($cplatform)->getIdentityInsertSQL('t_table', true)->wasThrown('is not supported');
         }
     }
 
@@ -472,13 +462,42 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_appendLockSuffix($cplatform, $platform)
     {
-        $expected = $platform instanceof SQLServerPlatform ? 'select * from t_table' : 'select * from t_table ' . $platform->getReadLockSQL();
-        $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_READ, ''));
-        $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
+        if ($platform instanceof SqlitePlatform) {
+            $expected = 'select * from t_table /* lock for read */';
+            $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_READ, ''));
+            $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
 
-        $expected = $platform instanceof SQLServerPlatform ? 'select * from t_table' : 'select * from t_table ' . $platform->getWriteLockSQL() . ' hoge';
-        $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_WRITE, 'hoge'));
-        $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
+            $expected = 'select * from t_table /* lock for write */ hoge';
+            $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_WRITE, 'hoge'));
+            $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
+        }
+        if ($platform instanceof MySQLPlatform) {
+            $expected = 'select * from t_table LOCK IN SHARE MODE';
+            $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_READ, ''));
+            $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
+
+            $expected = 'select * from t_table FOR UPDATE hoge';
+            $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_WRITE, 'hoge'));
+            $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
+        }
+        if ($platform instanceof PostgreSQLPlatform) {
+            $expected = 'select * from t_table FOR SHARE';
+            $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_READ, ''));
+            $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
+
+            $expected = 'select * from t_table FOR UPDATE hoge';
+            $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_WRITE, 'hoge'));
+            $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
+        }
+        if ($platform instanceof SQLServerPlatform) {
+            $expected = 'select * from t_table';
+            $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_READ, ''));
+            $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
+
+            $expected = 'select * from t_table';
+            $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_WRITE, 'hoge'));
+            $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
+        }
     }
 
     /**
@@ -634,8 +653,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertEquals($expected, $cplatform->getGroupConcatSyntax('id', '|'));
         }
         if ($platform instanceof SQLServerPlatform) {
-            $expected = new DBALException('is not supported by platform');
-            that($cplatform)->getGroupConcatSyntax('id')->wasThrown($expected);
+            that($cplatform)->getGroupConcatSyntax('id')->wasThrown('is not supported');
         }
     }
 
@@ -716,7 +734,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getJsonObjectExpression($cplatform, $platform)
     {
-        $this->trapThrowable('is not supported by platform');
+        $this->trapThrowable('is not supported');
 
         $jsonObject = $cplatform->getJsonObjectExpression([
             'id'  => 'id',
@@ -743,7 +761,7 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getJsonAggExpression($cplatform, $platform)
     {
-        $this->trapThrowable('is not supported by platform');
+        $this->trapThrowable('is not supported');
 
         $jsonObject = $cplatform->getJsonAggExpression([
             'id'  => 'id',

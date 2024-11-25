@@ -5,6 +5,7 @@ namespace ryunosuke\Test\dbml\Query;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\LockMode;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
@@ -2383,9 +2384,6 @@ AND (FALSE)", $builder->queryInto());
         $builder->column('noprimary.id');
         $this->assertQuery('SELECT noprimary.id FROM noprimary', $builder->orderBy(OrderBy::primary()));
 
-        $builder->column('v_blog.*');
-        $this->assertQuery('SELECT v_blog.* FROM v_blog', $builder->orderBy(OrderBy::primary()));
-
         $builder->reset()->column('test1.id');
         $this->assertQuery('SELECT test1.id FROM test1 ORDER BY test1.id ASC', $builder->orderBy(OrderBy::primary()));
         $this->assertQuery('SELECT test1.id FROM test1 ORDER BY test1.id DESC', $builder->orderBy(OrderBy::primary(), false));
@@ -2708,7 +2706,7 @@ SQL
         $this->assertEquals('0', $builder->reset()->column('test')->where('id = -1')->existize()->value());
         $this->assertEquals('1', $builder->reset()->column('test')->where('id = -1')->existize(false)->value());
 
-        if ($builder->getDatabase()->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
+        if ($builder->getDatabase()->getPlatform() instanceof SqlitePlatform) {
             $this->assertQuery('SELECT EXISTS (SELECT * FROM test WHERE id = 1 /* lock for write */)', $builder->reset()->column('test')->where('id = 1')->existize(true, true));
         }
     }
@@ -2771,7 +2769,7 @@ SQL
         $this->assertQuery('SELECT COUNT(*) AS __dbml_auto_cnt FROM (SELECT group_id1 AS gk, SUM(group_id2) AS hk FROM aggregate GROUP BY gk HAVING hk >= ?) __dbml_auto_table', $counter);
         $this->assertEquals([40], $counter->getParams());
         // かなり特殊なので実際に投げておく
-        if ($builder->getDatabase()->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $builder->getDatabase()->getPlatform() instanceof MySQLPlatform) {
+        if ($builder->getDatabase()->getPlatform() instanceof SqlitePlatform || $builder->getDatabase()->getPlatform() instanceof MySQLPlatform) {
             $this->assertEquals(2, $counter->value());
         }
 
@@ -2926,7 +2924,7 @@ SQL
         ], $builder->neighbor(['id' => 10], 1));
 
         // 複数指定は行値式になる
-        if ($builder->getDatabase()->getPlatform() instanceof \ryunosuke\Test\Platforms\SqlitePlatform || $builder->getDatabase()->getCompatiblePlatform()->supportsRowConstructor()) {
+        if ($builder->getDatabase()->getPlatform() instanceof SqlitePlatform || $builder->getDatabase()->getCompatiblePlatform()->supportsRowConstructor()) {
             $builder->column('multiprimary.mainid, subid');
             $this->assertEquals([
                 -1 => ['mainid' => '1', 'subid' => '4'],
@@ -3265,10 +3263,11 @@ SQL
      */
     function test_inheritLockMode($builder, $database)
     {
+        $cplatform = $database->getCompatiblePlatform();
         $platform = $database->getPlatform();
-        $readlock = trim($platform->getReadLockSQL());
+        $readlock = trim($cplatform->appendLockSuffix('', LockMode::PESSIMISTIC_READ, ''));
         $readlock = $readlock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_READ));
-        $writelock = trim($platform->getWriteLockSQL());
+        $writelock = trim($cplatform->appendLockSuffix('', LockMode::PESSIMISTIC_WRITE, ''));
         $writelock = $writelock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_WRITE));
 
         $parent = SelectBuilder::new($database);
@@ -3679,8 +3678,8 @@ SQL
         $fk1 = new ForeignKeyConstraint(['gg_id'], 'gg1', ['gg_id'], 'fk_gg12');
         $fk2 = new ForeignKeyConstraint(['gg_id'], 'gg2', ['gg_id'], 'fk_gg21');
         $smanager = $builder->getDatabase()->getConnection()->createSchemaManager();
-        try_return([$smanager, 'dropForeignKey'], $fk1, 'gg2');
-        try_return([$smanager, 'dropForeignKey'], $fk2, 'gg1');
+        try_return([$smanager, 'dropForeignKey'], $fk1->getName(), 'gg2');
+        try_return([$smanager, 'dropForeignKey'], $fk2->getName(), 'gg1');
         self::createTables($builder->getDatabase()->getConnection(), [
             new Table('ppp',
                 [
@@ -4068,11 +4067,13 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
      */
     function test_lockInShare($builder)
     {
+        $cplatform = $builder->getDatabase()->getCompatiblePlatform();
         $platform = $builder->getDatabase()->getPlatform();
-        $lock = trim($platform->getReadLockSQL());
-        $lock = $lock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_READ));
+        $readlock = trim($cplatform->appendLockSuffix('', LockMode::PESSIMISTIC_READ, ''));
+        $readlock = $readlock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_READ));
+
         $builder->select('*')->from('test1')->lockInShare();
-        $this->assertStringContainsString(' ' . $lock, (string) $builder);
+        $this->assertStringContainsString($readlock, (string) $builder);
         $builder->array();
     }
 
@@ -4082,16 +4083,18 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
      */
     function test_lockForUpdate($builder)
     {
+        $cplatform = $builder->getDatabase()->getCompatiblePlatform();
         $platform = $builder->getDatabase()->getPlatform();
-        $lock = trim($platform->getWriteLockSQL());
-        $lock = $lock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_WRITE));
+        $writelock = trim($cplatform->appendLockSuffix('', LockMode::PESSIMISTIC_WRITE, ''));
+        $writelock = $writelock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_WRITE));
+
         $builder->select('*')->from('test1')->lockForUpdate();
-        $this->assertStringContainsString(' ' . $lock, (string) $builder);
+        $this->assertStringContainsString($writelock, (string) $builder);
         $builder->array();
 
         if ($builder->getDatabase()->getCompatiblePlatform()->appendLockSuffix('dummy', LockMode::PESSIMISTIC_WRITE, 'forupdate') !== 'dummy') {
             $builder->select('*')->from('test1')->lockForUpdate('SKIP LOCKED');
-            $this->assertStringContainsString(' ' . $lock . ' SKIP LOCKED', (string) $builder);
+            $this->assertStringContainsString($writelock . ' SKIP LOCKED', (string) $builder);
         }
     }
 

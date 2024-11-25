@@ -7,8 +7,6 @@ use Doctrine\DBAL\Driver\Result as ResultInterface;
 use Doctrine\DBAL\Driver\Statement as StatementInterface;
 use Doctrine\DBAL\ParameterType;
 use Psr\Log\LoggerInterface;
-use function array_slice;
-use function func_get_args;
 
 final class Statement extends AbstractStatementMiddleware
 {
@@ -27,21 +25,12 @@ final class Statement extends AbstractStatementMiddleware
         $this->sql = $sql;
     }
 
-    public function bindParam($param, &$variable, $type = ParameterType::STRING, $length = null)
-    {
-        $this->params[$param] = &$variable;
-        $this->types[$param] = $type;
-
-        /** @noinspection PhpDeprecationInspection */
-        return parent::bindParam($param, $variable, $type, ...array_slice(func_get_args(), 3));
-    }
-
-    public function bindValue($param, $value, $type = ParameterType::STRING)
+    public function bindValue($param, $value, $type = ParameterType::STRING): void
     {
         $this->params[$param] = $value;
         $this->types[$param] = $type;
 
-        return parent::bindValue($param, $value, $type);
+        parent::bindValue($param, $value, $type);
     }
 
     public function execute($params = null): ResultInterface
