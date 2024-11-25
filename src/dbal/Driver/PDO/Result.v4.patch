@@ -1,0 +1,31 @@
+@@ -1,9 +1,16 @@
+ <?php
++//@formatter:off
++/**
++ * @see \Doctrine\DBAL\Driver\PDO\Result
++ * @copyright 2006 Doctrine Project
++ * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
++ */
+ 
+ declare(strict_types=1);
+ 
+-namespace Doctrine\DBAL\Driver\PDO;
++namespace ryunosuke\dbal\Driver\PDO;
+ 
++use Doctrine\DBAL\Driver\PDO\Exception;
+ use Doctrine\DBAL\Driver\Result as ResultInterface;
+ use Doctrine\DBAL\Exception\InvalidColumnIndex;
+ use PDO;
+@@ -11,10 +18,10 @@
+ use PDOStatement;
+ use ValueError;
+ 
+-final class Result implements ResultInterface
++class Result implements ResultInterface
+ {
+     /** @internal The result can be only instantiated by its driver connection or statement. */
+-    public function __construct(private readonly PDOStatement $statement)
++    public function __construct(protected readonly PDOStatement $statement)
+     {
+     }
+ 

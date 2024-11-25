@@ -1,4 +1,4 @@
-@@ -1,9 +1,13 @@
+@@ -1,8 +1,14 @@
  <?php
 +//@formatter:off
 +/**
@@ -7,15 +7,14 @@
 + * @link https://raw.githubusercontent.com/doctrine/dbal/master/LICENSE
 + */
  
--declare(strict_types=1);
-+namespace ryunosuke\dbal\Driver\SQLSrv;
+ declare(strict_types=1);
  
 -namespace Doctrine\DBAL\Driver\SQLSrv;
--
++namespace ryunosuke\dbal\Driver\SQLSrv;
+ 
  use Doctrine\DBAL\Driver\FetchUtils;
  use Doctrine\DBAL\Driver\Result as ResultInterface;
- 
-@@ -15,10 +19,10 @@
+@@ -15,10 +21,10 @@
  use const SQLSRV_FETCH_ASSOC;
  use const SQLSRV_FETCH_NUMERIC;
  
