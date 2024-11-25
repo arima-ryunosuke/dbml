@@ -8,9 +8,9 @@ Doctrine/dbal を使用して CRUD 操作に特化したライブラリです。
 対応（テスト済み）RDBMS
 
 - sqlite 3.8
-- MySQL 8.0
-- PostgreSQL 15
-- SQLServer 2017
+- MySQL 8.0.23
+- PostgreSQL 16.3
+- SQLServer 2022
 
 ドキュメントは下記においてあります。
 

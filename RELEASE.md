@@ -21,6 +21,36 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.0
+
+- [refactor] Builder の整合性のないところを修正
+- [*feature] OrderBy 周りを改善
+- [*feature] Window 機能を強化
+- [*feature] view の更新機能と table 情報の継承
+- [*change] patch も 3/4 の両対応しなければならない
+- [*change] dbal4.* の対応
+- [refactor] php8.2 でも最低限動くように修正
+- [refactor] code format, fix inspection
+- [refactor] echoAnnotation のヒントを属性化
+- [fixbug] Database を経由しない invoke が効いていない不具合
+- [*fixbug] SelectBuilder の OrderBy の順番がおかしい不具合
+- [*fixbug] TableDescriptor 経由の orderBy,range が効かない不具合
+- [*change] 非互換・非推奨の削除
+- [*change] setTableColumn の遅延化
+- [*change] 1つでもメソッドエイリアスされるトレイトの可視性を private に変更
+- [*change] 歴史的経緯でメチャクチャだった opt を正規化
+- [*change] 隠し引数ではなくなったため chunk が引数で指定可能になった
+- [*change] 隠し引数 opt の撲滅
+- [feature] chunk の min/max 固定化機能
+- [feature] Gateway/Entity クラスを出力するechoTableClass を実装
+- [feature] EnumType を追加
+- [feature] mysql8.0.20 から VALUES が非推奨になってたので対応
+- [feature] insert/modifyArray の andPrimary 対応
+- [feature] JSON 機能の強化
+- [feature] JSON 集約機能を追加
+- [feature] MEDIAN 集約機能を追加
+- Merge tag 'v2.1.22'
+
 ## 3.0.3
 
 - [feature] デバッグログ機能
