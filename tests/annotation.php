@@ -101,6 +101,9 @@ trait TableGatewayProvider
     /** @var ArticleTableGateway */
     public $Article;
 
+    /** @var ManagedArticleTableGateway */
+    public $ManagedArticle;
+
     /** @var CommentTableGateway */
     public $t_comment;
 
@@ -127,6 +130,9 @@ trait TableGatewayProvider
 
     /** @var tran_table3TableGateway */
     public $tran_table3;
+
+    /** @var v_articleTableGateway */
+    public $v_article;
 
     /** @return aggregateTableGateway */
     public function aggregate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
@@ -221,6 +227,9 @@ trait TableGatewayProvider
     /** @return ArticleTableGateway */
     public function Article($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
+    /** @return ManagedArticleTableGateway */
+    public function ManagedArticle($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
     /** @return CommentTableGateway */
     public function t_comment($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
@@ -247,6 +256,9 @@ trait TableGatewayProvider
 
     /** @return tran_table3TableGateway */
     public function tran_table3($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return v_articleTableGateway */
+    public function v_article($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 }
 
 class Database extends \ryunosuke\Test\Database
@@ -12854,6 +12866,426 @@ class ArticleTableGateway extends \ryunosuke\Test\Gateway\Article
     public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 }
 
+class ManagedArticleTableGateway extends \ryunosuke\Test\Gateway\Article
+{
+    use TableGatewayProvider;
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function neighbor(array $predicates = [], int $limit = 1):array { }
+
+    /**
+     * @param array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $data
+     */
+    public function insertArray($data, ...$opt) { }
+
+    /**
+     * @param array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $data
+     */
+    public function insertArrayAndPrimary($data, ...$opt) { }
+
+    /**
+     * @param array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $data
+     */
+    public function insertArrayOrThrow($data, ...$opt) { }
+
+    /**
+     * @param array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function updateArray($data, $where = [], ...$opt) { }
+
+    /**
+     * @param array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function updateArrayAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @param array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $where
+     */
+    public function deleteArray($where = [], ...$opt) { }
+
+    /**
+     * @param array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $where
+     */
+    public function deleteArrayAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @param array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function modifyArrayAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function modifyArrayAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $dataarray
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function changeArray($dataarray, $where, $uniquekey = "PRIMARY", $returning = [], ...$opt) { }
+
+    /**
+     * @param array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}> $dataarray
+     */
+    public function affectArray($dataarray, ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     */
+    public function save($data, ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     */
+    public function insert($data, ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     */
+    public function insertAndPrimary($data, ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     */
+    public function insertOrThrow($data, ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function update($data, $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function updateAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function updateAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function updateOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function delete($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function deleteAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function deleteAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function deleteOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $invalid_columns
+     */
+    public function invalid($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $invalid_columns
+     */
+    public function invalidAndPrimary($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $invalid_columns
+     */
+    public function invalidAndBefore($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $invalid_columns
+     */
+    public function invalidOrThrow($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function revise($data, $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function reviseAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function reviseAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function reviseOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function upgrade($data, $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function upgradeAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function upgradeAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function upgradeOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function remove($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function removeAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function removeAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function removeOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function destroy($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function destroyAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function destroyAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function destroyOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function reduceAndBefore($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $where
+     */
+    public function reduceOrThrow($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function upsert($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function upsertAndPrimary($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function upsertAndBefore($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function upsertOrThrow($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function modifyAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $insertData
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $updateData
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     */
+    public function replace($data, ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     */
+    public function replaceAndPrimary($data, ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     */
+    public function replaceAndBefore($data, ...$opt) { }
+
+    /**
+     * @param ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int} $data
+     */
+    public function replaceOrThrow($data, ...$opt) { }
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<ManagedArticleEntity>|array<array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}
+     */
+    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}
+     */
+    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}
+     */
+    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}
+     */
+    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}
+     */
+    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return iterable<ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return iterable<ManagedArticleEntity|array{article_id: int, title: string, checks: array|string, delete_at: string, title2: int, title3: int, title4: int, title5: int, comment_count: int, vaffect: int}>
+     */
+    public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+}
+
 class CommentTableGateway extends \ryunosuke\Test\Gateway\Comment
 {
     use TableGatewayProvider;
@@ -16214,6 +16646,426 @@ class tran_table3TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 }
 
+class v_articleTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
+{
+    use TableGatewayProvider;
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function neighbor(array $predicates = [], int $limit = 1):array { }
+
+    /**
+     * @param array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $data
+     */
+    public function insertArray($data, ...$opt) { }
+
+    /**
+     * @param array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $data
+     */
+    public function insertArrayAndPrimary($data, ...$opt) { }
+
+    /**
+     * @param array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $data
+     */
+    public function insertArrayOrThrow($data, ...$opt) { }
+
+    /**
+     * @param array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function updateArray($data, $where = [], ...$opt) { }
+
+    /**
+     * @param array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function updateArrayAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @param array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $where
+     */
+    public function deleteArray($where = [], ...$opt) { }
+
+    /**
+     * @param array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $where
+     */
+    public function deleteArrayAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @param array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function modifyArrayAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function modifyArrayAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $dataarray
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function changeArray($dataarray, $where, $uniquekey = "PRIMARY", $returning = [], ...$opt) { }
+
+    /**
+     * @param array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}> $dataarray
+     */
+    public function affectArray($dataarray, ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     */
+    public function save($data, ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     */
+    public function insert($data, ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     */
+    public function insertAndPrimary($data, ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     */
+    public function insertOrThrow($data, ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function update($data, $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function updateAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function updateAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function updateOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function delete($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function deleteAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function deleteAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function deleteOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $invalid_columns
+     */
+    public function invalid($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $invalid_columns
+     */
+    public function invalidAndPrimary($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $invalid_columns
+     */
+    public function invalidAndBefore($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $invalid_columns
+     */
+    public function invalidOrThrow($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function revise($data, $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function reviseAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function reviseAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function reviseOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function upgrade($data, $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function upgradeAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function upgradeAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function upgradeOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function remove($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function removeAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function removeAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function removeOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function destroy($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function destroyAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function destroyAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function destroyOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function reduceAndBefore($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @param array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $where
+     */
+    public function reduceOrThrow($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function upsert($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function upsertAndPrimary($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function upsertAndBefore($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function upsertOrThrow($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function modifyAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $insertData
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $updateData
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     */
+    public function replace($data, ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     */
+    public function replaceAndPrimary($data, ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     */
+    public function replaceAndBefore($data, ...$opt) { }
+
+    /**
+     * @param v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string} $data
+     */
+    public function replaceOrThrow($data, ...$opt) { }
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return array<v_articleEntity>|array<array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}
+     */
+    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}
+     */
+    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}
+     */
+    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}
+     */
+    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}
+     */
+    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return iterable<v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @return iterable<v_articleEntity|array{article_id: int, title: string, checks: string, delete_at: string, comment_count: string}>
+     */
+    public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+}
+
 class aggregateEntity extends \ryunosuke\dbml\Entity\Entity
 {
     /** @var int */
@@ -16667,6 +17519,39 @@ class ArticleEntity extends \ryunosuke\Test\Entity\Article
     public $vaffect;
 }
 
+class ManagedArticleEntity extends \ryunosuke\Test\Entity\Article
+{
+    /** @var int */
+    public $article_id;
+
+    /** @var string */
+    public $title;
+
+    /** @var array|string */
+    public $checks;
+
+    /** @var string */
+    public $delete_at;
+
+    /** @var int */
+    public $title2;
+
+    /** @var int */
+    public $title3;
+
+    /** @var int */
+    public $title4;
+
+    /** @var int */
+    public $title5;
+
+    /** @var int */
+    public $comment_count;
+
+    /** @var int */
+    public $vaffect;
+}
+
 class CommentEntity extends \ryunosuke\Test\Entity\Comment
 {
     /** @var int */
@@ -16746,4 +17631,22 @@ class tran_table3Entity extends \ryunosuke\dbml\Entity\Entity
 
     /** @var int */
     public $master_id;
+}
+
+class v_articleEntity extends \ryunosuke\dbml\Entity\Entity
+{
+    /** @var int */
+    public $article_id;
+
+    /** @var string */
+    public $title;
+
+    /** @var string */
+    public $checks;
+
+    /** @var string */
+    public $delete_at;
+
+    /** @var string */
+    public $comment_count;
 }
