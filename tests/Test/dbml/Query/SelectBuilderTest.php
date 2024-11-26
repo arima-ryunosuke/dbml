@@ -2087,6 +2087,25 @@ AND (FALSE)", $builder->queryInto());
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
      */
+    function test_window($builder)
+    {
+        $builder->column([
+            'aggregate' => [
+                'sum_id' => "SUM(id) OVER w1",
+                'ranks'  => "RANK() OVER w2",
+            ],
+        ])
+            ->window('w', ['not appear'])
+            ->window('w1', ['group_id2'])
+            ->addWindow('w2', ['group_id2'], ['id' => false]);
+
+        $this->assertQuery('SELECT SUM(id) OVER w1 AS sum_id, RANK() OVER w2 AS ranks FROM aggregate WINDOW w1 AS (PARTITION BY group_id2), w2 AS (PARTITION BY group_id2 ORDER BY id DESC)', $builder);
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
     function test_groupBy($builder)
     {
         $builder->column('test');

@@ -575,46 +575,6 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
-    function test_getCaseWhenSyntax($cplatform, $platform)
-    {
-        $expected = "(CASE WHEN id = 1 THEN ? WHEN id = 2 THEN ? END)";
-        $actual = $cplatform->getCaseWhenSyntax(null, ['id = 1' => 'hoge', 'id = 2' => 'fuga']);
-        $this->assertExpression($actual, $expected, ['hoge', 'fuga']);
-
-        $expected = "(CASE id WHEN ? THEN ? WHEN ? THEN ? END)";
-        $actual = $cplatform->getCaseWhenSyntax('id', ['1' => 'hoge', '2' => 'fuga']);
-        $this->assertExpression($actual, $expected, [1, 'hoge', 2, 'fuga']);
-
-        $expected = "(CASE NOW(?) WHEN ? THEN ? WHEN ? THEN ? END)";
-        $actual = $cplatform->getCaseWhenSyntax(new Expression('NOW(?)', ['time']), ['1' => 'hoge', '2' => 'fuga']);
-        $this->assertExpression($actual, $expected, ['time', 1, 'hoge', 2, 'fuga']);
-
-        $expected = "(CASE id WHEN ? THEN ? WHEN ? THEN ? WHEN ? THEN ? ELSE ? END)";
-        $actual = $cplatform->getCaseWhenSyntax('id', ['h' => 'hoge', 'f' => 'fuga', '1' => '123'], 'other');
-        $this->assertExpression($actual, $expected, ['h', 'hoge', 'f', 'fuga', 1, '123', 'other']);
-
-        $expected = "(CASE id WHEN ? THEN ? WHEN ? THEN ? WHEN ? THEN ? ELSE NOW(?) END)";
-        $actual = $cplatform->getCaseWhenSyntax('id', ['h' => 'hoge', 'f' => 'fuga', '1' => '123'], new Expression('NOW(?)', ['time']));
-        $this->assertExpression($actual, $expected, ['h', 'hoge', 'f', 'fuga', 1, '123', 'time']);
-
-        // very very complex
-        $expected = "(CASE (SELECT t.c FROM t WHERE w = ?) WHEN ? THEN (SELECT t.d FROM t WHERE dw = ?) WHEN ? THEN ADD(?, ?) ELSE NOW(?) END)";
-        $actual = $cplatform->getCaseWhenSyntax(
-            self::getDummyDatabase()->select('t.c', ['w' => 1]),
-            [
-                'qb'  => self::getDummyDatabase()->select('t.d', ['dw' => 2]),
-                'exp' => new Expression('ADD(?, ?)', [3, 4]),
-            ],
-            new Expression('NOW(?)', ['time'])
-        );
-        $this->assertExpression($actual, $expected, [1, 'qb', 2, 'exp', 3, 4, 'time']);
-    }
-
-    /**
-     * @dataProvider providePlatform
-     * @param CompatiblePlatform $cplatform
-     * @param AbstractPlatform $platform
-     */
     function test_getGroupConcatSyntax($cplatform, $platform)
     {
         if ($platform instanceof SqlitePlatform) {

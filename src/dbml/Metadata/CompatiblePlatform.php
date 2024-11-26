@@ -580,41 +580,6 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
-     * CASE ～ END 構文
-     *
-     * @param null|string|Queryable $expr 対象カラム。null 指定時は CASE WHEN 構文になる
-     * @param array $whens [条件 => 値]の配列
-     * @param mixed $else else 句。未指定時は else 句なし
-     * @return Expression CASE ～ END 構文の Expression インスタンス
-     */
-    public function getCaseWhenSyntax($expr, array $whens, $else = null): Expression
-    {
-        $params = [];
-        $entry = function ($expr, $raw = false) use (&$params) {
-            if ($expr instanceof Queryable) {
-                return $expr->merge($params);
-            }
-            elseif ($raw) {
-                return $expr;
-            }
-            else {
-                $params[] = $expr;
-                return '?';
-            }
-        };
-
-        $query = '(CASE ';
-        $query .= $expr === null ? '' : "{$entry($expr, true)} ";
-        $query .= array_reduce(array_keys($whens), function ($carry, $cond) use ($whens, $expr, $entry) {
-            return "{$carry}WHEN " . ($expr === null ? $cond : $entry($cond)) . " THEN {$entry($whens[$cond])} ";
-        });
-        $query .= $else === null ? '' : "ELSE {$entry($else)} ";
-        $query .= 'END)';
-
-        return Expression::new($query, $params);
-    }
-
-    /**
      * GROUP_CONCAT 構文を返す
      *
      * @param string|array $expr 結合式

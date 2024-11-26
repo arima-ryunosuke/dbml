@@ -834,7 +834,7 @@ class AffectBuilder extends AbstractBuilder
             else {
                 $pkisnull = array_sprintf($primary, "$this->table.%2\$s IS NULL", ' AND ');
                 $default = $this->database->raw($this->database->quote($defaults[$cname]));
-                $selects[$cname] = $cplatform->getCaseWhenSyntax(null, [$pkisnull => $default], $this->database->raw($cname))->merge($this->params);
+                $selects[$cname] = Expression::case(null, [$pkisnull => $default], $this->database->raw($cname))->merge($this->params);
             }
         }
 

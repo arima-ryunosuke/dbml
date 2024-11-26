@@ -1876,10 +1876,67 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $cplatform = $database->getCompatiblePlatform();
 
         // CASE WHEN の条件なしとか ELSE 節とかを実際に投げてみて正当性を担保
-        $syntax = $cplatform->getCaseWhenSyntax("2", [1 => 10, 2 => 20], 99);
+        $syntax = Expression::case("2", [1 => 10, 2 => 20], 99);
         $this->assertEquals(20, $database->fetchValue("SELECT $syntax", $syntax->getParams()));
-        $syntax = $cplatform->getCaseWhenSyntax("9", [1 => 10, 2 => 20], 99);
+        $syntax = Expression::case("9", [1 => 10, 2 => 20], 99);
         $this->assertEquals(99, $database->fetchValue("SELECT $syntax", $syntax->getParams()));
+
+        // 同上（OVER）
+        $this->assertEquals([
+            [
+                'sum_id' => 15,
+                'ranks'  => 5,
+            ],
+            [
+                'sum_id' => 15,
+                'ranks'  => 4,
+            ],
+            [
+                'sum_id' => 15,
+                'ranks'  => 3,
+            ],
+            [
+                'sum_id' => 15,
+                'ranks'  => 2,
+            ],
+            [
+                'sum_id' => 15,
+                'ranks'  => 1,
+            ],
+            [
+                'sum_id' => 40,
+                'ranks'  => 5,
+            ],
+            [
+                'sum_id' => 40,
+                'ranks'  => 4,
+            ],
+            [
+                'sum_id' => 40,
+                'ranks'  => 3,
+            ],
+            [
+                'sum_id' => 40,
+                'ranks'  => 2,
+            ],
+            [
+                'sum_id' => 40,
+                'ranks'  => 1,
+            ],
+        ], $database->selectArray([
+            'aggregate' => [
+                'sum_id' => "SUM(id) " . Expression::over(['group_id2']),
+                'ranks'  => "RANK() " . Expression::over(['group_id2'], ['id' => false]),
+            ],
+        ]));
+        // エラーにさえならなければよい
+        $this->assertIsArray($database->selectArray([
+            'aggregate' => [
+                'w3' => "SUM(id) " . Expression::over(['group_id2'], ['id'], ['ROWS' => [0, 0]]),
+                'w1' => "SUM(id) " . Expression::over(['group_id2'], ['id'], ['ROWS' => [1, 1]]),
+                'w2' => "SUM(id) " . Expression::over(['group_id2'], ['id'], ['ROWS' => [null, null]]),
+            ],
+        ]));
 
         // SQLServer は LIKE に特殊性があるので実際に投げてみて正当性を担保
         $this->assertSame([], $database->selectArray('test', ['name:LIKE' => 'w%r_o[d',]));

@@ -157,6 +157,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         'where'    => [],
         'groupBy'  => [],
         'having'   => [],
+        'window'   => [],
         'orderBy'  => [],
         'offset'   => null,
         'limit'    => null,
@@ -530,6 +531,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             . concat(' WHERE ', $this->_getConditionClause($builder->sqlParts['where']))
             . concat(' GROUP BY ', implode(', ', $builder->sqlParts['groupBy']))
             . concat(' HAVING ', $this->_getConditionClause($builder->sqlParts['having']))
+            . concat(' WINDOW ', array_sprintf($builder->sqlParts['window'], '%2$s AS (%1$s)', ', '))
             . concat(' ORDER BY ', implode(', ', $builder->sqlParts['orderBy']));
 
         $sql = $platform->modifyLimitQuery($sql, $builder->sqlParts['limit'], $builder->sqlParts['offset'] ?? 0);
@@ -2125,6 +2127,38 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             }
             $this->sqlParts['where'] = [Expression::new($this->_getConditionClause($this->sqlParts['where']), $params)];
         }
+        return $this->_dirty();
+    }
+
+    /**
+     * WINDOW 句（クリア版）
+     *
+     * エスケープなどは一切行われないので注意（OVER でリテラルを指定するシチュエーションが少ないため）。
+     * ただし Queryable は受け付ける。
+     *
+     * ```php
+     * // 簡易な文字列指定
+     * $qb->window('w', 'gid', 'id', 'ROWS UNBOUNDED PRECEDING');
+     * // results: WINDOW w AS (PARTITION BY gid ORDER BY id ROWS UNBOUNDED PRECEDING)
+     *
+     * // 配列など
+     * $qb->window('w', ['gid1', 'gid2'], ['id', 'subid' => false, '-prise'], ['ROWS' => [1, 1]]);
+     * // results: WINDOW w AS (PARTITION BY gid1, gid2 ORDER BY id, subid DESC, prise DESC ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING)
+     * ```
+     */
+    public function window(string $name, $partitionBy = [], $orderBy = [], $frame = null): static
+    {
+        return $this->resetQueryPart('window')->addWindow(...func_get_args());
+    }
+
+    /**
+     * WINDOW 句（追加版）
+     *
+     * @inheritdoc window()
+     */
+    public function addWindow(string $name, $partitionBy = [], $orderBy = [], $frame = null): static
+    {
+        $this->sqlParts['window'][$name] = Expression::window($partitionBy, $orderBy, $frame);
         return $this->_dirty();
     }
 
