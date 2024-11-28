@@ -7,6 +7,7 @@ use Doctrine\DBAL\Schema\Exception as SchemaException;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Metadata\Schema;
 use ryunosuke\dbml\Utility\Adhoc;
@@ -27,6 +28,11 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             ],
             [new Index('PRIMARY', ['id'], true, true)]
         ));
+        try_return([$schmer, 'dropView'], 'viewsample');
+        $schmer->createView(new View(
+            'viewsample',
+            'SELECT *, 1 AS dummy FROM metasample WHERE id >= 0',
+        ));
 
         return [
             [self::getDummyDatabase()->getSchema(), self::getDummyDatabase()],
@@ -37,7 +43,12 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         parent::setUp();
 
-        self::getDummyDatabase()->getSchema()->refresh();
+        $schema = self::getDummyDatabase()->getSchema();
+        $schema->refresh();
+        $schema->setViewSource([
+            'viewsample' => 'metasample',
+            'v_dummy'    => 'metasample',
+        ]);
     }
 
     function getDummyTable($name)
@@ -86,6 +97,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
     {
         $this->assertTrue($schema->hasTable('metasample'));
         $this->assertFalse($schema->hasTable('metahoge'));
+        $this->assertFalse($schema->hasTable('v_dummy'));
     }
 
     /**
@@ -112,12 +124,28 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_getTable($schema)
     {
         $this->assertStringContainsString('Table', get_class($schema->getTable('metasample')));
+        $this->assertStringContainsString('Table', get_class($schema->getTable('viewsample')));
 
         $schema->refresh();
 
         $this->assertStringContainsString('Table', get_class($schema->getTable('metasample')));
 
         that($schema)->getTable('hogera')->wasThrown(SchemaException\tableDoesNotExist::new('hogera'));
+    }
+
+    /**
+     * @dataProvider provideSchema
+     * @param Schema $schema
+     */
+    function test_getViewAsTable($schema)
+    {
+        $this->assertStringContainsString('Table', get_class($schema->getTable('viewsample')));
+        $this->assertEquals(['id', 'dummy'], array_keys($schema->getTableColumns('viewsample')));
+        $this->assertEquals(['id'], array_keys($schema->getTablePrimaryColumns('viewsample')));
+
+        // proxy to metasample
+        $this->assertEquals(['id'], array_keys($schema->getTableColumns('v_dummy')));
+        $this->assertEquals(['id'], array_keys($schema->getTablePrimaryColumns('v_dummy')));
     }
 
     /**
@@ -146,11 +174,13 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             'misctype',
             't',
             'test',
+            'viewsample',
         ], array_keys($schema->getTables('!foreign_c?')));
         $this->assertEquals([
             'foreign_p',
             'metasample',
             'misctype',
+            'viewsample',
         ], array_keys($schema->getTables(['!foreign_c?', '!t*'])));
 
         $this->assertEquals([
@@ -270,6 +300,10 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_setTableColumn($schema, $database)
     {
+        $schema->setViewSource([
+            'viewsample' => 'metasample',
+        ]);
+
         // 実カラムの上書き
         $schema->setTableColumn('metasample', 'id', ['type' => 'string']);
         $column = $schema->getTableColumns('metasample')['id'];
@@ -282,6 +316,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         ], $column->getPlatformOptions());
         $this->assertEquals('string', Adhoc::typeName($column->getType()));
         $this->assertEquals('string', Adhoc::typeName($schema->getTableColumns('metasample')['id']->getType()));
+        $this->assertEquals('string', Adhoc::typeName($schema->getTableColumns('viewsample')['id']->getType()));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample')));
 
         // 仮想カラムの追加
@@ -306,6 +341,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         ], $column->getPlatformOptions());
         $this->assertEquals('integer', Adhoc::typeName($column->getType()));
         $this->assertEquals('integer', Adhoc::typeName($schema->getTableColumns('metasample')['dummy']->getType()));
+        $this->assertEquals('integer', Adhoc::typeName($schema->getTableColumns('viewsample')['dummy']->getType()));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_UPDATABLE)));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_REAL)));
 
@@ -336,6 +372,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         ], $column->getPlatformOptions());
         $this->assertEquals('string', Adhoc::typeName($column->getType()));
         $this->assertEquals('string', Adhoc::typeName($schema->getTableColumns('metasample')['dummy']->getType()));
+        $this->assertEquals('string', Adhoc::typeName($schema->getTableColumns('viewsample')['dummy']->getType()));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_UPDATABLE)));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_REAL)));
 
@@ -357,7 +394,9 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         ], $column->getPlatformOptions());
         $this->assertEquals('string', Adhoc::typeName($column->getType()));
         $this->assertEquals('string', Adhoc::typeName($schema->getTableColumns('metasample')['dummy']->getType()));
+        $this->assertEquals('string', Adhoc::typeName($schema->getTableColumns('viewsample')['dummy']->getType()));
         $this->assertEquals(['id', 'dummy'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_UPDATABLE)));
+        $this->assertEquals(['id', 'dummy'], array_keys($schema->getTableColumns('viewsample', Schema::COLUMN_UPDATABLE)));
         $this->assertEquals(['id'], array_keys($schema->getTableColumns('metasample', Schema::COLUMN_REAL)));
 
         // キャッシュが効いていないか担保しておく
@@ -429,6 +468,11 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getForeignColumns($schema)
     {
+        $schema->setViewSource([
+            'v_foreign1' => 'foreign1',
+            'v_foreign2' => 'foreign2',
+        ]);
+
         $schema->addTable($this->getDummyTable('metatest'));
         $foreign1 = $this->getDummyTable('foreign1');
         $foreign1->addForeignKeyConstraint('metatest', ['id'], ['foreign1'], [], 'FK_1');
@@ -440,15 +484,29 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
         $fkey = null;
         $this->assertEquals(['id' => 'foreign1'], $schema->getForeignColumns('metatest', 'foreign1', $fkey));
         $this->assertEquals('FK_1', $fkey->getName());
+
+        $fkey = null;
+        $this->assertEquals(['id' => 'foreign1'], $schema->getForeignColumns('metatest', 'v_foreign1', $fkey));
+        $this->assertEquals('FK_1', $fkey->getName());
+
         $fkey = null;
         $this->assertEquals(['id' => 'foreign2'], $schema->getForeignColumns('metatest', 'foreign2', $fkey));
         $this->assertEquals('FK_2', $fkey->getName());
+
+        $fkey = null;
+        $this->assertEquals(['id' => 'foreign2'], $schema->getForeignColumns('metatest', 'v_foreign2', $fkey));
+        $this->assertEquals('FK_2', $fkey->getName());
+
         $this->assertEquals(['foreign1' => 'id'], $schema->getForeignColumns('foreign1', 'metatest'));
         $this->assertEquals(['foreign2' => 'id'], $schema->getForeignColumns('foreign2', 'metatest'));
+        $this->assertEquals(['foreign1' => 'id'], $schema->getForeignColumns('v_foreign1', 'metatest'));
+        $this->assertEquals(['foreign2' => 'id'], $schema->getForeignColumns('v_foreign2', 'metatest'));
         $this->assertEquals([], $schema->getForeignColumns('foreign1', 'foreign2'));
+
         $fkey = 'FK_1';
         $this->assertEquals(['id' => 'foreign1'], $schema->getForeignColumns('metatest', 'foreign1', $fkey));
         $this->assertEquals('FK_1', $fkey->getName());
+
         $fkey = 'FK_2';
         that($schema)->getForeignColumns('metatest', 'foreign1', $fkey)->wasThrown('is not exists');
     }
@@ -587,10 +645,16 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test_followColumnName($database)
     {
         $schema = $database->getSchema();
+        $schema->setViewSource([
+            'v_article' => 't_article',
+        ]);
         $this->assertEquals(['foreign_d2/foreign_d1' => 'id'], $schema->followColumnName('foreign_d1', 'foreign_d2', 'id'));
         $this->assertEquals([], $schema->followColumnName('foreign_d1', 'foreign_d2', 'd2_id'));
         $this->assertEquals([], $schema->followColumnName('foreign_d2', 'foreign_d1', 'id'));
         $this->assertEquals(['foreign_d1/foreign_d2' => 'id'], $schema->followColumnName('foreign_d2', 'foreign_d1', 'd2_id'));
+
+        $this->assertEquals([], $schema->followColumnName('t_comment', 'v_article', 'article_id'));
+        $this->assertEquals(['t_comment/v_article' => 'article_id'], $schema->followColumnName('v_article', 't_comment', 'article_id'));
     }
 
     function test_relation()

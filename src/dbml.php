@@ -299,6 +299,43 @@
  * 上は**プレーンな配列**で1行を返すが、下は **エンティティインスタンス**で1行を返す。
  * その「エンティティインスタンス」とは tableMapper で指定した完全修飾クラス名である。
  *
+ * ### テーブル名 ⇔ ビュー名の自動変換
+ *
+ * tableMapper は前述に加えてテーブルとビューのマッピングも指定できる。
+ *
+ * ```php
+ * $db = new Database($connection, [
+ *     'tableMapper'    => function ($tablename) {
+ *         $entityname = ucfirst(preg_replace('#^t_#', '', $tablename));
+ *         return [
+ *             $entityname => [
+ *                 'selectView' => preg_replace('#^t_#', 'v_', $tablename),
+ *             ],
+ *         ];
+ *     },
+ * ]);
+ * ```
+ *
+ * このような設定を行うと、内部で「ビュー名 ⇒ テーブル名」の自動変換が行われ、view は table の外部キーやインデックスを引き継ぐようになる。
+ * これによって「取得時は view, 更新時は table」のようなことが透過的に可能になる。
+ * さらに view は存在しなくてもよい。存在しない場合テーブル名が代理で使用される。
+ *
+ * この設定の効果として、具体的には下記のようなコードが書ける。
+ *
+ * ```php
+ * // v_article と t_comment は外部キーで繋がっていないが、 t_article の外部キーで接続される
+ * $db->selectArray('v_article+t_comment');
+ *
+ * // v_article は view なので本来更新できないが、t_article への insert と読み替えられる
+ * $db->insert('v_article', $dataarray);
+ * ```
+ *
+ * つまり・・・
+ * SELECT 系を実行するとき v_article は t_article の外部キーを引き継ぐため、あたかも t_article であるかのように JOIN できる。
+ * AFFECT 系を実行するとき内部的には単純に t_article への更新とみなされる。
+ *
+ * v_article に子テーブルの件数や exists などの SELECT, 論理削除などの WHERE を設定しておけば「便利な t_article」として使用できる。
+ *
  * ### 外部キーの扱いについて
  *
  * TableA ⇔ TableBのような相互参照外部キーの場合は例外が飛ぶ。

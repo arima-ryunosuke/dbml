@@ -663,13 +663,13 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     function test_overrideColumns($database)
     {
         $database->overrideColumns([
-            'test1'     => [
+            'test1' => [
                 'lower_name' => [
                     'type'   => 'string',
                     'select' => 'LOWER(%s.name1)',
                 ],
             ],
-            'test2'     => [
+            'test2' => [
                 'lower_name' => 'LOWER(%s.name2)',
                 'is_a'       => [
                     'select' => $database->operator(['LOWER(?)' => 'A']),
@@ -683,10 +683,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         // lazy:true での循環参照
         $database->overrideColumns([
-            't_article'     => [
+            't_article' => [
                 'comments' => fn(Database $database) => $database->subselectArray('t_comment.comment_id,article'),
             ],
-            't_comment'     => [
+            't_comment' => [
                 'article' => fn(Database $database) => $database->subselectTuple('t_article.title'),
             ],
         ]);
@@ -1145,7 +1145,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertEquals('test', $database->convertEntityName('test'));
 
         // 存在するならそれのはず
-        $this->assertEquals('t_article', $database->convertTableName('Article'));
+        $this->assertEquals('t_article', $database->convertSelectTableName('Article'));
         // 存在しないならそのままのはず
         $this->assertEquals('test', $database->convertEntityName('test'));
     }
@@ -1199,6 +1199,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
             'TtoE'         => [
                 'test' => ['TestClass'],
             ],
+            'EtoV'         => [],
+            'TtoV'         => [],
+            'VtoE'         => [],
+            'VtoT'         => [],
         ]);
 
         // 後処理
@@ -3024,6 +3028,114 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         finally {
             $database->setOption('dynamicPlaceholder', 0);
         }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_executeView($database)
+    {
+        $database->getSchema()->refresh();
+        $database->getSchema()->setViewSource([
+            'v_article' => 't_article',
+            'v_comment' => 't_comment',
+        ]);
+
+        $database->insertArray('v_article', [
+            [
+                "article_id" => 4,
+                "title"      => "insert",
+                "checks"     => "",
+            ],
+            [
+                "article_id" => 5,
+                "title"      => "insert",
+                "checks"     => "",
+            ],
+            [
+                "article_id" => 6,
+                "title"      => "insert",
+                "checks"     => "",
+            ],
+        ]);
+        $database->update('v_article', ['title' => 'update'], ['' => 5]);
+        $database->delete('v_article', ['' => 6]);
+
+        $expecteds = [
+            'v_article'      => 'v_article', // 存在するので v_
+            'Article'        => 't_article', // マッピングしていないので t_
+            'ManagedArticle' => 'v_article', // マッピングしているので v_
+            // v_comment は存在しないのですべて t_comment
+            'v_comment'      => 't_comment',
+            'Comment'        => 't_comment',
+            'ManagedComment' => 't_comment',
+        ];
+        foreach ($expecteds as $entity => $table) {
+            $this->assertEquals($table, $database->convertSelectTableName($entity), "entity:$entity <=> target:$table");
+        }
+
+        $expecteds = [
+            // view の更新はできないのですべて t_
+            'v_article'      => 't_article',
+            'Article'        => 't_article',
+            'ManagedArticle' => 't_article',
+            // v_comment は存在しないのですべて t_comment
+            'v_comment'      => 't_comment',
+            'Comment'        => 't_comment',
+            'ManagedComment' => 't_comment',
+        ];
+        foreach ($expecteds as $entity => $table) {
+            $this->assertEquals($table, $database->convertAffectTableName($entity), "entity:$entity <=> target:$table");
+        }
+
+        $this->assertEquals([
+            [
+                "article_id"    => "1",
+                "title"         => "タイトルです",
+                "comment_count" => "3",
+                "comment"       => "コメント1です",
+            ],
+            [
+                "article_id"    => "1",
+                "title"         => "タイトルです",
+                "comment_count" => "3",
+                "comment"       => "コメント2です",
+            ],
+            [
+                "article_id"    => "1",
+                "title"         => "タイトルです",
+                "comment_count" => "3",
+                "comment"       => "コメント3です",
+            ],
+            [
+                "article_id"    => "2",
+                "title"         => "コメントのない記事です",
+                "comment_count" => "0",
+                "comment"       => null,
+            ],
+            [
+                "article_id"    => "4",
+                "title"         => "insert",
+                "comment_count" => "0",
+                "comment"       => null,
+            ],
+            [
+                "article_id"    => "5",
+                "title"         => "update",
+                "comment_count" => "0",
+                "comment"       => null,
+            ],
+        ], $database->selectArray([
+            'v_article+article_id' => [
+                'article_id',
+                'title',
+                'comment_count',
+                '<v_comment+comment_id' => [
+                    'comment',
+                ],
+            ],
+        ]));
     }
 
     /**
@@ -7504,7 +7616,7 @@ ORDER BY T.id DESC, name ASC
             4 => 20.0,
             5 => 20.0,
         ], $builder->pairs());
-        
+
         if (!$database->getPlatform() instanceof SQLServerPlatform) {
             $builder = $database->selectJson('aggregate.id,name', [], ['group_id2']);
             $this->assertStringContainsString("JSON_", "$builder");

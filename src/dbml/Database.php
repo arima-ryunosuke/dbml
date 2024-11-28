@@ -429,6 +429,8 @@ class Database
             'onIntrospectTable'  => function (Table $table) { },
             /** @var \Closure テーブル名 => Entity クラス名のコンバータ */
             'tableMapper'        => function ($table) { return pascal_case($table); },
+            /** @var \Closure ビュー名 => テーブル名のコンバータ */
+            'viewMapper'         => function ($view) { return null; },
             /** @var bool SET IDENTITY_INSERT を自動発行するか（SQLServer 以外は無視される） */
             'autoIdentityInsert' => true,
             /** @var ?int|string バルク系メソッドのデフォルトチャンクサイズ
@@ -746,7 +748,7 @@ class Database
      */
     public function __get(string $name): ?TableGateway
     {
-        $tablename = $this->convertTableName($name);
+        $tablename = $this->convertSelectTableName($name);
         if (!$this->getSchema()->hasTable($tablename)) {
             return null;
         }
@@ -794,7 +796,11 @@ class Database
                 'entityClass'  => [],
                 'gatewayClass' => [],
                 'EtoT'         => [],
+                'EtoV'         => [],
                 'TtoE'         => [],
+                'TtoV'         => [],
+                'VtoE'         => [],
+                'VtoT'         => [],
             ];
             $defaultEntity = namespace_split(Entity::class)[0];
             $defaultGateway = namespace_split(TableGateway::class)[0];
@@ -831,6 +837,12 @@ class Database
                     $maps['gatewayClass'][$entityname] = class_exists($class['gatewayClass']) ? $class['gatewayClass'] : null;
                     $maps['EtoT'][$entityname] = $tablename;
                     $maps['TtoE'][$tablename][] = $entityname;
+                    if (isset($class['selectView'])) {
+                        $maps['EtoV'][$entityname] = $class['selectView'];
+                        $maps['TtoV'][$tablename] = $class['selectView'];
+                        $maps['VtoE'][$class['selectView']][] = $entityname;
+                        $maps['VtoT'][$class['selectView']] = $tablename;
+                    }
                 }
             }
             $this->debug("generate tableMap", $maps);
@@ -985,7 +997,7 @@ class Database
         if (($opt['return'] ?? '') === 'before') {
             $tablename = $builder->getTable() . concat(" AS ", $builder->getAlias());
             $select = $this->select($tablename, $builder->getCondition());
-            if ($builder->getAlias() !== null && $builder->getTable() === $this->convertTableName($builder->getAlias())) {
+            if ($builder->getAlias() !== null && $builder->getTable() === $this->convertAffectTableName($builder->getAlias())) {
                 $select->cast();
             }
             return $select->array();
@@ -1837,6 +1849,7 @@ class Database
             $cacher = $this->getUnsafeOption('cacheProvider');
             $callback = $this->getUnsafeOption('onRequireSchema');
             $this->cache['schema'] = new Schema($this->connections['slave']->createSchemaManager(), $listeners, $cacher);
+            $this->cache['schema']->setViewSource(array_flip(array_filter($this->_tableMap()['TtoV'])));
             $callback($this);
         }
         return $this->cache['schema'];
@@ -1858,17 +1871,8 @@ class Database
     public function getGatewayClass(string $tablename): string
     {
         $map = $this->_tableMap()['gatewayClass'];
-        $tablename = $this->convertTableName($tablename);
+        $tablename = $this->convertSelectTableName($tablename);
         return $map[$tablename] ?? TableGateway::class;
-    }
-
-    /**
-     * エンティティ名からテーブル名へ変換する
-     */
-    public function convertTableName(string $entityname): string
-    {
-        $map = $this->_tableMap()['EtoT'];
-        return $map[$entityname] ?? $entityname;
     }
 
     /**
@@ -1878,6 +1882,29 @@ class Database
     {
         $map = $this->_tableMap()['TtoE'];
         return first_value($map[$tablename] ?? []) ?: $tablename;
+    }
+
+    /**
+     * エンティティ・ビュー名から取得テーブル名へ変換する
+     */
+    public function convertSelectTableName(string $targetname): string
+    {
+        $map = $this->_tableMap();
+        // view は存在するときのみ（view を作成しなくても透過的に v_table でアクセスできた方が便利なため）
+        $viewname = $map['EtoV'][$targetname] ?? null;
+        if ($viewname !== null && $this->getSchema()->hasTable($viewname)) {
+            return $viewname;
+        }
+        return $map['EtoT'][$targetname] ?? $map['VtoT'][$targetname] ?? $targetname;
+    }
+
+    /**
+     * エンティティ・ビュー名から更新テーブル名へ変換する
+     */
+    public function convertAffectTableName(string $targetname): string
+    {
+        $map = $this->_tableMap();
+        return $map['VtoT'][$targetname] ?? $map['EtoT'][$targetname] ?? $targetname;
     }
 
     /**
@@ -3734,7 +3761,7 @@ class Database
      */
     public function getEmptyRecord(string $tablename, $default = [])
     {
-        $table = $this->convertTableName($tablename);
+        $table = $this->convertAffectTableName($tablename);
         $columns = $this->getSchema()->getTableColumns($table);
 
         $record = $default;
@@ -3802,7 +3829,7 @@ class Database
             'chunk'  => null,
         ];
 
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->convertAffectTableName($tableName);
 
         $primary = $this->getSchema()->getTablePrimaryColumns($tableName);
         $columns = $this->getSchema()->getTableColumns($tableName);
@@ -3960,13 +3987,13 @@ class Database
             $children = [];
             foreach ($rows as $n => &$row) {
                 foreach ($row as $c => $v) {
-                    if (is_array($v) && $this->getSchema()->hasTable($this->convertTableName($c))) {
+                    if (is_array($v) && $this->getSchema()->hasTable($this->convertAffectTableName($c))) {
                         $children[$c][$n] = $v;
                         unset($row[$c]);
                     }
                 }
             }
-            $tname = $this->convertTableName($tableName);
+            $tname = $this->convertAffectTableName($tableName);
             $pks = $this->changeArray($tname, $rows, false);
             $nest = [];
             foreach ($children as $cn => $child) {
@@ -4891,7 +4918,7 @@ class Database
         $INDEX_SEPARATOR = '#';
         $SEPARATOR_REGEX = "#[" . preg_quote("{$TABLE_SEPARATOR}{$INDEX_SEPARATOR}", '#') . "]#";
 
-        $tableName = $this->convertTableName($tableName);
+        $tableName = $this->convertAffectTableName($tableName);
         $schema = $this->getSchema();
 
         $single_mode = !is_indexarray($data);
@@ -4902,12 +4929,12 @@ class Database
         // ツリー構造を、キーに親情報を持ったフラット構造に変換する
         $flatten = function ($tname, $rows, $key, &$dataarray) use (&$flatten, $schema, $INDEX_SEPARATOR, $TABLE_SEPARATOR) {
             assert(is_indexarray($rows), "$tname rows is not index array");
-            $tname = $this->convertTableName($tname);
+            $tname = $this->convertAffectTableName($tname);
             $key .= ($key ? $TABLE_SEPARATOR : '') . $tname . $INDEX_SEPARATOR;
             foreach ($rows as $n => $row) {
                 // 出現順もそれなりに大事なのでまず子供行を抽出してから親行の処理をする
                 $children = array_filter($row, function ($crow, $col) use ($tname, $schema) {
-                    return is_array($crow) && $schema->getForeignColumns($tname, $this->convertTableName($col));
+                    return is_array($crow) && $schema->getForeignColumns($tname, $this->convertAffectTableName($col));
                 }, ARRAY_FILTER_USE_BOTH);
 
                 // 親を処理してから抽出しておいた子行で再帰

@@ -153,8 +153,12 @@ class AffectBuilder extends AbstractBuilder
             assert(!$append || ($append && $this->table === null));
             assert(!$append || ($append && $this->alias === null));
 
+            if (is_string($queryParts['table'])) {
+                $queryParts['table'] = $this->database->convertAffectTableName($queryParts['table']);
+            }
             if (is_string($queryParts['table']) && str_exists($queryParts['table'], TableDescriptor::META_CHARACTORS)) {
                 $queryParts['table'] = new TableDescriptor($this->database, $queryParts['table'], []);
+                $queryParts['table']->table = $this->database->convertAffectTableName($queryParts['table']->table);
             }
 
             if ($queryParts['table'] instanceof TableGateway) {
@@ -167,7 +171,7 @@ class AffectBuilder extends AbstractBuilder
                     $queryParts['having'] ?? [],
                 );
 
-                $queryParts['table'] = $gateway->tableName() ?? $queryParts['table'];
+                $queryParts['table'] = $this->database->convertAffectTableName($gateway->tableName()) ?? $queryParts['table'];
                 $queryParts['alias'] = $gateway->alias() ?? $queryParts['alias'] ?? null;
                 $queryParts['constraint'] = $gateway->foreign() ?? $queryParts['constraint'] ?? null; // 流用
 
@@ -203,7 +207,7 @@ class AffectBuilder extends AbstractBuilder
                 $queryParts['limit'] ??= $tableDescriptor->limit ?? $scp['limit'] ?? null;
             }
 
-            $this->table = $this->database->convertTableName($queryParts['table']);
+            $this->table = $this->database->convertAffectTableName($queryParts['table']);
         }
 
         if (array_key_exists('alias', $queryParts) && $queryParts['alias']) {
@@ -901,7 +905,7 @@ class AffectBuilder extends AbstractBuilder
         $this->params = [];
 
         $sourceTable = $sourceTable === null ? $this->table : $sourceTable;
-        $sourceTable = $this->database->convertTableName($sourceTable);
+        $sourceTable = $this->database->convertSelectTableName($sourceTable);
 
         $metatarget = $this->database->getSchema()->getTableColumns($this->table, Schema::COLUMN_REAL | Schema::COLUMN_UPDATABLE);
         $metasource = $this->database->getSchema()->getTableColumns($sourceTable);

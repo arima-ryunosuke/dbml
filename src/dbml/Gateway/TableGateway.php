@@ -593,7 +593,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function __get(string $name): ?self
     {
-        $tname = $this->database->convertTableName($name);
+        $tname = $this->database->convertSelectTableName($name);
         if (isset($this->database->$tname)) {
             $that = $this->join($this->getUnsafeOption('defaultJoinMethod') ?: 'auto', $this->database->$name);
             return end($that->joins);
@@ -620,7 +620,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         }
 
         // マジックジョイン
-        $tname = $this->database->convertTableName($name);
+        $tname = $this->database->convertSelectTableName($name);
         if (isset($this->database->$tname)) {
             return $this->join($this->getUnsafeOption('defaultJoinMethod') ?: 'auto', $this->database->$name(...$arguments));
         }

@@ -476,6 +476,20 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test___set($database)
+    {
+        $td = new TableDescriptor($database, '+test T', ['id']);
+        $td->table = 'test2';
+        $this->assertSame('test2', $td->table);
+
+        $this->expectExceptionMessage('is undefined');
+        $td->hogera = null;
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_bind($database)
     {
         $td = new TableDescriptor($database, 'test[id:?, "name like ?"] T', []);

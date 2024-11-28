@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Metadata;
 
+use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Column;
@@ -52,6 +53,9 @@ class Schema
     private array $listeners;
 
     private CacheInterface $cache;
+
+    /** @var string[] */
+    private array $viewSource = [];
 
     /** @var string[] */
     private array $tableNames = [];
@@ -105,6 +109,7 @@ class Schema
      */
     public function refresh()
     {
+        $this->viewSource = [];
         $this->tableNames = [];
         $this->tables = [];
         $this->tableColumns = [];
@@ -114,6 +119,14 @@ class Schema
         $this->foreignColumns = [];
 
         $this->cache->clear();
+    }
+
+    /**
+     * ビューオブジェクトのデータソースを設定する
+     */
+    public function setViewSource(array $viewSource)
+    {
+        $this->viewSource = array_merge($this->viewSource, $viewSource);
     }
 
     /**
@@ -145,56 +158,59 @@ class Schema
      */
     public function setTableColumn(string $table_name, string $column_name, $definitation)
     {
-        $this->lazyTableColumns[$table_name][$column_name] = function () use ($table_name, $column_name, $definitation) {
-            $table = $this->getTable($table_name);
+        $target_tables = array_merge([$table_name], array_keys($this->viewSource, $table_name, true));
+        foreach ($target_tables as $table_name) {
+            $this->lazyTableColumns[$table_name][$column_name] = function () use ($table_name, $column_name, $definitation) {
+                $table = $this->getTable($table_name);
 
-            if ($definitation === null) {
-                $table->dropColumn($column_name);
-                return null;
-            }
-
-            if ($definitation !== null && !is_array($definitation)) {
-                $definitation = ['select' => $definitation];
-            }
-
-            if ($table->hasColumn($column_name)) {
-                $column = $table->getColumn($column_name);
-                $definitation['virtual'] ??= $column->getPlatformOptions()['virtual'] ?? false;
-                $definitation['implicit'] ??= $column->getPlatformOptions()['implicit'] ?? ($definitation['virtual'] ? $definitation['implicit'] ?? false : true);
-            }
-            else {
-                $column = $table->addColumn($column_name, Types::INTEGER);
-                $definitation['virtual'] = true;
-                $definitation['implicit'] = $definitation['implicit'] ?? false;
-            }
-
-            $defaults = [
-                'lazy'   => false,
-                'type'   => null,
-                'select' => null,
-                'affect' => null,
-            ];
-            $definitation += array_intersect_key($column->getPlatformOptions(), $defaults) + $defaults;
-
-            if ($definitation['select'] instanceof \Closure) {
-                $ref = new \ReflectionFunction($definitation['select']);
-                $params = $ref->getParameters();
-                $rtype = isset($params[0]) ? $params[0]->getType() : null;
-                if ($rtype instanceof \ReflectionNamedType && is_a($rtype->getName(), Database::class, true)) {
-                    $definitation['lazy'] = true;
+                if ($definitation === null) {
+                    $table->dropColumn($column_name);
+                    return null;
                 }
-            }
 
-            $type = array_unset($definitation, 'type');
-            if ($type) {
-                $column->setType($type instanceof Type ? $type : Type::getType($type));
-            }
-            foreach ($definitation as $name => $value) {
-                $column->setPlatformOption($name, $value);
-            }
+                if ($definitation !== null && !is_array($definitation)) {
+                    $definitation = ['select' => $definitation];
+                }
 
-            return $column;
-        };
+                if ($table->hasColumn($column_name)) {
+                    $column = $table->getColumn($column_name);
+                    $definitation['virtual'] ??= $column->getPlatformOptions()['virtual'] ?? false;
+                    $definitation['implicit'] ??= $column->getPlatformOptions()['implicit'] ?? ($definitation['virtual'] ? $definitation['implicit'] ?? false : true);
+                }
+                else {
+                    $column = $table->addColumn($column_name, Types::INTEGER);
+                    $definitation['virtual'] = true;
+                    $definitation['implicit'] = $definitation['implicit'] ?? false;
+                }
+
+                $defaults = [
+                    'lazy'   => false,
+                    'type'   => null,
+                    'select' => null,
+                    'affect' => null,
+                ];
+                $definitation += array_intersect_key($column->getPlatformOptions(), $defaults) + $defaults;
+
+                if ($definitation['select'] instanceof \Closure) {
+                    $ref = new \ReflectionFunction($definitation['select']);
+                    $params = $ref->getParameters();
+                    $rtype = isset($params[0]) ? $params[0]->getType() : null;
+                    if ($rtype instanceof \ReflectionNamedType && is_a($rtype->getName(), Database::class, true)) {
+                        $definitation['lazy'] = true;
+                    }
+                }
+
+                $type = array_unset($definitation, 'type');
+                if ($type) {
+                    $column->setType($type instanceof Type ? $type : Type::getType($type));
+                }
+                foreach ($definitation as $name => $value) {
+                    $column->setPlatformOption($name, $value);
+                }
+
+                return $column;
+            };
+        }
     }
 
     /**
@@ -238,7 +254,7 @@ class Schema
 
                 $views = array_each($this->schemaManger->listViews(), function (&$carry, View $view) {
                     $ns = $view->getNamespaceName();
-                    if ($ns === null) {
+                    if ($ns === null || $ns === 'public') {
                         $carry[] = $view->getShortestName($ns);
                     }
                 }, []);
@@ -295,6 +311,14 @@ class Schema
                             $sql = $this->_platform->getListTableColumnsSQL($table, $database);
                         }
                         $tableColumns = $this->_conn->fetchAllAssociative($sql);
+                        if ($this->_platform instanceof SqlitePlatform) {
+                            array_walk($tableColumns, function (&$column) {
+                                // sqlite は view だけの列の型が得られない（テスト用だし汎用的な VARCHAR で代替する）
+                                if (!strlen($column['type'])) {
+                                    $column['type'] = 'VARCHAR(255)';
+                                }
+                            });
+                        }
                         return $this->_getPortableTableColumnList($table, $database, $tableColumns);
                     }, $this->schemaManger, $this->schemaManger)($table_name);
                     $table = new Table($table_name, $columns);
@@ -348,6 +372,9 @@ class Schema
      */
     public function getTableColumns(string $table_name, null|int|callable $filter = null): array
     {
+        if (isset($this->viewSource[$table_name]) && !$this->hasTable($table_name)) {
+            $table_name = $this->viewSource[$table_name];
+        }
         if (!isset($this->tableColumns[$table_name])) {
             $this->tableColumns[$table_name] = array_each($this->getTable($table_name)->getColumns(), function (&$carry, Column $column) {
                 $carry[$column->getName()] = $column;
@@ -417,6 +444,7 @@ class Schema
      */
     public function getTablePrimaryKey(string $table_name): ?Index
     {
+        $table_name = $this->viewSource[$table_name] ?? $table_name;
         return $this->getTable($table_name)->getPrimaryKey();
     }
 
@@ -441,6 +469,7 @@ class Schema
      */
     public function getTableUniqueColumns(string $table_name, string $ukname = ''): array
     {
+        $table_name = $this->viewSource[$table_name] ?? $table_name;
         $table = $this->getTable($table_name);
 
         if (strcasecmp($ukname, 'PRIMARY') === 0) {
@@ -487,6 +516,8 @@ class Schema
      */
     public function getTableForeignKeys(string $table_name): array
     {
+        $table_name = $this->viewSource[$table_name] ?? $table_name;
+
         if (!isset($this->foreignKeys[$table_name])) {
             // doctrine が制約名を小文字化してるみたいなのでオリジナルでマップする
             $this->foreignKeys[$table_name] = array_each($this->getTable($table_name)->getForeignKeys(), function (&$fkeys, ForeignKeyConstraint $fkey) {
@@ -523,7 +554,7 @@ class Schema
         foreach (arrayize($from_table) as $from) {
             $fkeys = $this->getTableForeignKeys($from);
             foreach ($fkeys as $fk) {
-                if ($to_table === null || $to_table === $fk->getForeignTableName()) {
+                if ($to_table === null || $to_table === ($this->viewSource[$fk->getForeignTableName()] ?? $fk->getForeignTableName())) {
                     $result[$fk->getName()] = $fk;
                 }
             }
@@ -556,7 +587,10 @@ class Schema
      */
     public function getForeignColumns(string $table_name1, string $table_name2, ?string &$fkeyname = null, ?bool &$direction = null): array
     {
+        $table_name1 = $this->viewSource[$table_name1] ?? $table_name1;
+        $table_name2 = $this->viewSource[$table_name2] ?? $table_name2;
         $direction = null;
+
         if (!$this->hasTable($table_name1) || !$this->hasTable($table_name2)) {
             return [];
         }
@@ -754,6 +788,9 @@ class Schema
             $fcolumns = $fkey->getForeignColumns();
             foreach ($fcolumns as $n => $fcolumn) {
                 $carry[$ltable][$lcolumns[$n]][$ftable][$fcolumn] = $fkey->getName();
+                foreach (array_keys($this->viewSource, $ftable, true) as $vtable) {
+                    $carry[$ltable][$lcolumns[$n]][$vtable][$fcolumn] = $fkey->getName();
+                }
             }
         }, []);
     }

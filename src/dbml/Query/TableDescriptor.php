@@ -389,7 +389,7 @@ class TableDescriptor
         // テーブルに紐付かないカラムのための下ごしらえ
         if (true
             && preg_match("#^$alnumscore+$#i", $descriptor)
-            && !$schema->hasTable($database->convertTableName($descriptor))
+            && !$schema->hasTable($database->convertSelectTableName($descriptor))
         ) {
             $cols = [$descriptor => $cols];
             $descriptor = '';
@@ -455,7 +455,7 @@ class TableDescriptor
         $this->joinsign = $joinsign;
         $this->alias = $alias;
 
-        $this->table = $database->convertTableName($table ?? '');
+        $this->table = $database->convertSelectTableName($table ?? '');
         if ($this->alias === null && $this->table !== $table) {
             $this->alias = $table;
         }
@@ -623,6 +623,16 @@ class TableDescriptor
         }
         if (strcasecmp($name, 'fkeysuffix') === 0) {
             return concat(':', $this->fkeyname ?? null);
+        }
+
+        throw new \InvalidArgumentException("'$name' is undefined.");
+    }
+
+    public function __set(string $name, mixed $value): void
+    {
+        if (property_exists($this, $name)) {
+            $this->$name = $value;
+            return;
         }
 
         throw new \InvalidArgumentException("'$name' is undefined.");

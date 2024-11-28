@@ -13,6 +13,7 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Tools\DsnParser;
 use Doctrine\DBAL\Types\Type;
 use PHPUnit\Framework\SkippedTestError;
@@ -595,6 +596,13 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             ['collation' => 'utf8mb3_bin'],
                         ),
+                        new View('v_article', <<<SQL
+                            SELECT
+                                t_article.*,
+                                (SELECT COUNT(*) FROM t_comment WHERE t_comment.article_id = t_article.article_id) AS comment_count
+                            FROM
+                                t_article
+                        SQL,),
                     ]
                 );
             }
@@ -622,7 +630,12 @@ abstract class AbstractUnitTestCase extends TestCase
                 'tableMapper'              => static function ($tablename) {
                     if ($tablename === 't_article') {
                         return [
-                            'Article' => [
+                            'Article'        => [
+                                'entityClass'  => \ryunosuke\Test\Entity\Article::class,
+                                'gatewayClass' => \ryunosuke\Test\Gateway\Article::class,
+                            ],
+                            'ManagedArticle' => [
+                                'selectView'   => 'v_article',
                                 'entityClass'  => \ryunosuke\Test\Entity\Article::class,
                                 'gatewayClass' => \ryunosuke\Test\Gateway\Article::class,
                             ],
@@ -635,6 +648,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 'gatewayClass' => \ryunosuke\Test\Gateway\Comment::class,
                             ],
                             'ManagedComment' => [
+                                'selectView'   => 'v_comment',
                                 'entityClass'  => \ryunosuke\Test\Entity\ManagedComment::class,
                                 'gatewayClass' => \ryunosuke\Test\Gateway\Comment::class,
                             ],

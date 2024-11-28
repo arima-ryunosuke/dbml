@@ -1960,6 +1960,84 @@ AND ((flag=1))", "$gw");
      * @param TableGateway $gateway
      * @param Database $database
      */
+    function test_executeView($gateway, $database)
+    {
+        $database->getSchema()->refresh();
+        $database->getSchema()->setViewSource([
+            'v_article' => 't_article',
+        ]);
+
+        $database->v_article->insertArray([
+            [
+                "article_id" => 4,
+                "title"      => "insert",
+                "checks"     => "",
+            ],
+            [
+                "article_id" => 5,
+                "title"      => "insert",
+                "checks"     => "",
+            ],
+            [
+                "article_id" => 6,
+                "title"      => "insert",
+                "checks"     => "",
+            ],
+        ]);
+        $database->v_article->update(['title' => 'update'], ['' => 5]);
+        $database->v_article->delete(['' => 6]);
+
+        $this->assertEquals([
+            [
+                "article_id"    => 1,
+                "title"         => "タイトルです",
+                "comment_count" => 3,
+                "comment"       => "コメント1です",
+            ],
+            [
+                "article_id"    => 1,
+                "title"         => "タイトルです",
+                "comment_count" => 3,
+                "comment"       => "コメント2です",
+            ],
+            [
+                "article_id"    => 1,
+                "title"         => "タイトルです",
+                "comment_count" => 3,
+                "comment"       => "コメント3です",
+            ],
+            [
+                "article_id"    => 2,
+                "title"         => "コメントのない記事です",
+                "comment_count" => 0,
+                "comment"       => null,
+            ],
+            [
+                "article_id"    => 4,
+                "title"         => "insert",
+                "comment_count" => 0,
+                "comment"       => null,
+            ],
+            [
+                "article_id"    => 5,
+                "title"         => "update",
+                "comment_count" => 0,
+                "comment"       => null,
+            ],
+        ], $database->v_article->column([
+            'article_id',
+            'title',
+            'comment_count',
+        ])->orderBy(true)->joinForeign($database->t_comment->column([
+            'comment',
+        ])->orderBy(['comment_id']))->array());
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
     function test_scoped_affect($gateway, $database)
     {
         $logs = [];
