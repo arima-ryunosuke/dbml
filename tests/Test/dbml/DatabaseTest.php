@@ -8229,8 +8229,10 @@ ORDER BY T.id DESC, name ASC
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_getAffectedRows($database)
+    function test_affected($database)
     {
+        that($database)->isAffected = false;
+
         $pk = $database->insertOrThrow('test', ['name' => 'hoge']);
         $this->assertEquals(1, $database->getAffectedRows());
 
@@ -8246,6 +8248,23 @@ ORDER BY T.id DESC, name ASC
 
         try_null([$database, 'delete'], 'test', 'unknown = 1');
         $this->assertNull($database->getAffectedRows());
+
+        $this->assertTrue($database->isAffected());
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_affected_async($database)
+    {
+        $this->trapThrowable('is not supported');
+        that($database)->isAffected = false;
+
+        $this->assertFalse($database->isAffected());
+        $result = $database->executeAffectAsync("INSERT INTO test (name) VALUES ('x')");
+        $result();
+        $this->assertTrue($database->isAffected());
     }
 
     /**

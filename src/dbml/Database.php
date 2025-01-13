@@ -412,6 +412,7 @@ class Database
     private array $foreignKeySwitchingLevels = [];
 
     private ?int $affectedRows;
+    private bool $isAffected = false;
 
     /** @var int[] dryrun 中の挿入 ID. dryrun でしか使わないので（値が戻って欲しいので ArrayObject にはしていない） */
     private array $lastInsertIds = [];
@@ -3624,6 +3625,7 @@ class Database
                 try {
                     $this->affectedRows = null;
                     $this->affectedRows = $this->getMasterConnection()->executeStatement($query, $params, Adhoc::bindableTypes($params));
+                    $this->isAffected = $this->isAffected || !!$this->affectedRows;
                     // 利便性のため $this->affectedRows には代入しない（こうしておくと mysqli においてマッチ行と変更行が得られる）
                     return $this->getCompatibleConnection($this->getMasterConnection())->alternateMatchedRows() ?? $this->affectedRows;
                 }
@@ -3736,7 +3738,10 @@ class Database
             })($queries);
         }
 
-        return $this->getCompatibleConnection($connection)->executeAsync($queries, $this->_getConverter(null), $this->affectedRows);
+        return $this->getCompatibleConnection($connection)->executeAsync($queries, $this->_getConverter(null), function ($affectedRows) {
+            $this->affectedRows = $affectedRows;
+            $this->isAffected = $this->isAffected || !!$this->affectedRows;
+        });
     }
 
     /**
@@ -5797,6 +5802,17 @@ class Database
     public function getAffectedRows(): ?int
     {
         return $this->affectedRows;
+    }
+
+    /**
+     * 1回でも更新操作をしたかを返す
+     *
+     * 例えば master/slave 構成でこのメソッドが true を返した場合、次のリクエストは masterMode:true にした方が良い。
+     * （レプリケーションの遅延などで slave の古いデータを SELECT してしまう可能性がある）。
+     */
+    public function isAffected(): bool
+    {
+        return $this->isAffected;
     }
 
     /**

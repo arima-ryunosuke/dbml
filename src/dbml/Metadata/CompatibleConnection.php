@@ -311,7 +311,7 @@ class CompatibleConnection
         return null;
     }
 
-    public function executeAsync($sqls, $converter, &$affectedRows = null)
+    public function executeAsync($sqls, $converter, $affected)
     {
         $parser = new Parser($this->connection->getDatabasePlatform()->createSQLParser());
 
@@ -407,28 +407,29 @@ class CompatibleConnection
 
         if (!isset($next, $tick)) {
             // カバレッジのために無名クラス自体は返すようにする
-            $next = function () {
+            $next = function () use ($affected) {
+                $affected(1);
                 throw new \LogicException(__METHOD__ . ' is not supported.');
             };
             $tick = function () { };
         }
 
-        return new class($this->nativeConnection, $sqls, $next, $tick, $affectedRows) {
+        return new class($this->nativeConnection, $sqls, $next, $tick, $affected) {
             private            $native;
             private \Generator $sqls;
             private \Closure   $next;
             private \Closure   $tick;
             private bool       $waiting = false;
             private array      $results = [];
-            private            $affectedRows;
+            private \Closure   $affected;
 
-            public function __construct($native, $sqls, $next, $tick, &$affectedRows)
+            public function __construct($native, $sqls, $next, $tick, $affected)
             {
                 $this->native = $native;
                 $this->sqls = $sqls;
                 $this->next = $next;
                 $this->tick = $tick;
-                $this->affectedRows = &$affectedRows;
+                $this->affected = $affected;
 
                 $this->tick();
                 register_tick_function([$this, 'tick']);
@@ -489,8 +490,9 @@ class CompatibleConnection
                         $this->waiting = false;
                     }
                     elseif (is_int($result)) {
-                        $this->affectedRows = $this->results[] = $result;
+                        $this->results[] = $result;
                         $this->waiting = false;
+                        ($this->affected)($result);
                     }
                     return -1;
                 }
