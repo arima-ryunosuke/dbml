@@ -73,6 +73,8 @@ abstract class AbstractUnitTestCase extends TestCase
         $configuration->setMiddlewares([new Middleware(new LoggerChain()), ...$middlewares]);
         $connection = DriverManager::getConnection($params, $configuration);
 
+        $connection->setNestTransactionsWithSavepoints(true);
+
         $native = $connection->getNativeConnection();
         if ($native instanceof \PDO && strpos($dbms, 'sqlite') !== false) {
             $native->sqliteCreateFunction('REGEXP', fn($pattern, $value) => (int) mb_eregi($pattern, $value), 2);

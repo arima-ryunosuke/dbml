@@ -48,9 +48,7 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test___construct($transaction, $database)
     {
-        $transaction = new Transaction($database, [
-            'savepointable' => true,
-        ]);
+        $transaction = new Transaction($database);
         $ex1 = (new \ReflectionClass(UniqueConstraintViolationException::class))->newInstanceWithoutConstructor();
         $ex2 = (new \ReflectionClass(LockWaitTimeoutException::class))->newInstanceWithoutConstructor();
         $this->assertEquals(null, ($transaction->retryable)(100, $ex1, $database->getConnection()));
@@ -333,27 +331,32 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param Transaction $transaction
      * @param Database $database
      */
-    function test_savepoint($transaction, $database)
+    function test_nesting($transaction, $database)
     {
-        if (!$database->getPlatform()->supportsSavepoints()) {
-            return;
-        }
-
-        $count = $transaction->savepointable(true)->main(function (Database $db) {
+        $names = $transaction->main(function (Database $db) {
             // ここで1件追加すれば11件になる
-            $db->insert('test', ['name' => 'XXX', 'data' => 'YYY']);
+            $first = $db->insertOrThrow('test', ['name' => 'T1', 'data' => '']);
 
-            // セーブポイント内で1件追加する
-            $db->begin();
-            $db->insert('test', ['name' => 'XXX', 'data' => 'YYY']);
+            // ネストしてさらに1件追加するが例外で失敗する
+            $transaction2 = new Transaction($db);
+            $transaction2->main(function (Database $db) {
+                $db->insert('test', ['name' => 'T2', 'data' => '']);
+                throw new \Exception();
+            });
+            $transaction2->perform(false);
 
-            // セーブポイントの状態を返す$db
-            $db->rollback();
-            return $db->count('test');
+            // ネストしてさらに1件追加する
+            $transaction2 = new Transaction($db);
+            $transaction2->main(function (Database $db) {
+                $db->insert('test', ['name' => 'T3', 'data' => '']);
+            });
+            $transaction2->perform(false);
+
+            return $db->selectLists('test.name', ['id >= ?' => reset($first)]);
         })->perform();
 
-        // 追加した1件は有効なので11件のはず
-        $this->assertEquals(11, $count);
+        // ロールバック分は含まれていないはず
+        $this->assertEquals(['T1', 'T3'], $names);
     }
 
     /**

@@ -126,7 +126,6 @@ use function ryunosuke\dbml\arrayize;
  * @property \Closure[] $catch catch イベント配列
  * @property \Closure[] $finish finish イベント配列
  * @property \Closure $retryable リトライ判定処理
- * @property bool $savepointable savepoint 有効/無効フラグ
  *
  * @method $this|int       isolationLevel($int = null) トランザクション分離レベルを設定・取得する
  * @method int             getIsolationLevel()  トランザクション分離レベルを取得する
@@ -155,9 +154,6 @@ use function ryunosuke\dbml\arrayize;
  * @method $this|\Closure  retryable($closure = null) リトライ判定処理を設定・取得する
  * @method \Closure        getRetryable() リトライ判定処理を取得する
  * @method $this           setRetryable(\Closure $closure) リトライ判定処理を設定する
- * @method $this|bool      savepointable($bool = null) savepoint 有効/無効フラグを設定・取得する
- * @method bool            getSavepointable() savepoint 有効/無効フラグを取得する
- * @method $this           setSavepointable($bool) savepoint 有効/無効フラグを設定する
  */
 class Transaction
 {
@@ -216,7 +212,7 @@ class Transaction
                 return null;
             },
             /** @var ?bool セーブポイントを活かすか */
-            'savepointable'  => null,
+            'savepointable'  => null, // delete in future scope
         ];
     }
 
@@ -321,12 +317,14 @@ class Transaction
             }
         }
 
+        // @codeCoverageIgnoreStart delete in future scope
         // セーブポイント有効
         $current_savepoint = null;
         if ($this->savepointable !== null && $this->savepointable !== $connection->getNestTransactionsWithSavepoints()) {
             $current_savepoint = $connection->getNestTransactionsWithSavepoints();
             $connection->setNestTransactionsWithSavepoints($this->savepointable);
         }
+        // @codeCoverageIgnoreEnd
 
         // 分離レベル変更
         $current_level = null;
@@ -345,9 +343,11 @@ class Transaction
             if ($current_level !== null) {
                 $connection->setTransactionIsolation($current_level);
             }
+            // @codeCoverageIgnoreStart delete in future scope
             if ($current_savepoint !== null) {
                 $connection->setNestTransactionsWithSavepoints($current_savepoint);
             }
+            // @codeCoverageIgnoreEnd
         };
     }
 
