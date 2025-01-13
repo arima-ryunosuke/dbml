@@ -6,6 +6,7 @@ return [
     'directory'       => ['src'],
     'contain'         => ['ryunosuke\\dbml', 'Doctrine\\DBAL'],
     'except'          => ['ryunosuke\\dbml\\Utility'],
+    'exclude'         => ['src/dbal/*'],
     'no-constant'     => true,
     'no-function'     => true,
     'no-private'      => true,
