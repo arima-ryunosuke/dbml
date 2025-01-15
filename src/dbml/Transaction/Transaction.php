@@ -15,6 +15,7 @@ use ryunosuke\dbml\Mixin\OptionTrait;
 use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 use function ryunosuke\dbml\array_set;
 use function ryunosuke\dbml\arrayize;
+use function ryunosuke\dbml\str_exists;
 
 /**
  * トランザクションを表すクラス
@@ -130,6 +131,8 @@ use function ryunosuke\dbml\arrayize;
  * @method $this|int       isolationLevel($int = null) トランザクション分離レベルを設定・取得する
  * @method int             getIsolationLevel()  トランザクション分離レベルを取得する
  * @method $this           setIsolationLevel($int) トランザクション分離レベルを設定する
+ * @method bool            getCheckImplicit() 暗黙コミット/ロールバックを検出するかを取得する
+ * @method $this           setCheckImplicit($bool) 暗黙コミット/ロールバックを検出するかを設定する
  * @method $this|int       logger(LoggerInterface $logger = null) ロガーインスタンスを設定・取得する
  * @method LoggerInterface getLogger() ロガーインスタンスを取得する
  * @method $this           setLogger(LoggerInterface $logger) ロガーインスタンスを設定する
@@ -177,6 +180,8 @@ class Transaction
             'masterMode'     => true,
             /** @var ?int トランザクション分離レベル(REPEATABLE_READ, ...) */
             'isolationLevel' => null,
+            /** @var bool 暗黙コミット/ロールバックを検出するか（余計なクエリを投げるので開発時のみを推奨） */
+            'checkImplicit'  => false,
             /** @var LoggerInterface 実行クエリロガー */
             'logger'         => null,
             /** @var \Closure[] トランザクションイベント */
@@ -353,6 +358,44 @@ class Transaction
 
     private function _execute(Connection $connection, bool $previewMode)
     {
+        // - RDBMS によっては暗黙のコミット/ロールバックが発生することがある（truncate/deadlock）
+        // - driver によっては実際のトランザクションレベルを見るものがある（php>=8.0 の PDO）
+        // 上記の複合で There is no active transaction で即死してしまい正常フローにならないことがあるため、暗黙していたらスルーする
+        // commit: normal1->implicit->normal2 で暗黙のコミットにより例外が飛ぶと normal1 は戻らない
+        // - 暗黙のコミットと言えど成功しているならさほど実害はないのでスルーした方がマシ
+        // rollback: normal1->implicit->normal2 で暗黙のロールバックにより例外が飛ぶとリトライされない
+        // - try~catch を突き抜けるため。リトライで成功することもあるのでスルーすべき
+        $endTransaction = function (Connection $connection, $method) {
+            // そもそも暗黙のコミット/ロールバックが発生するようなトランザクションは避けるべきであり、開発時に気づけるようにチェックして例外を投げる
+            if ($this->getUnsafeOption('checkImplicit') && $connection->getTransactionNestingLevel() === 1) {
+                if (!($this->database->getCompatibleConnection($connection)->isTransactionActive() ?? true)) {
+                    throw new \DomainException('detect transaction implicit commit/rollback');
+                }
+            }
+            try {
+                return $connection->$method();
+            }
+            catch (\Exception $ex) {
+                // 判断する術がないので文字列ベース
+                if (str_exists($ex->getMessage(), [
+                    'There is no active transaction', // pdo
+                    'no transaction is active',       // sqlite
+                    'transaction must be started',    // mssql
+                ], true)) {
+                    $this->database->debug('detect transaction implicit commit/rollback');
+                    // doctrine が
+                    // - transactionLevel=0 後に rollback
+                    // - rollbackSavepoint 後に --transactionLevel
+                    // としていて一貫性がないので強制的に設定しなければならない
+                    // rollback が失敗しても transactionLevel=0 になるのはバグに見えるが…
+                    (fn() => $this->transactionNestingLevel = 0)->bindTo($connection, Connection::class)();
+                    return true;
+                }
+
+                throw $ex; // @codeCoverageIgnore
+            }
+        };
+
         // begin
         $connection->beginTransaction();
         $this->_invokeArray($this->begin, $connection);
@@ -363,16 +406,11 @@ class Transaction
 
             // commit
             $this->_invokeArray($this->commit, $connection);
-            if ($previewMode) {
-                $connection->rollBack();
-            }
-            else {
-                $connection->commit();
-            }
+            $endTransaction($connection, $previewMode ? 'rollBack' : 'commit');
         }
         catch (\Exception $ex) {
             // rollback
-            $connection->rollBack();
+            $endTransaction($connection, 'rollBack');
             $this->_invokeArray($this->rollback, $connection);
 
             // fail

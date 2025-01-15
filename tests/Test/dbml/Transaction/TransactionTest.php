@@ -5,6 +5,7 @@ namespace ryunosuke\Test\dbml\Transaction;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception\LockWaitTimeoutException;
+use Doctrine\DBAL\Exception\RetryableException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\DBAL\TransactionIsolationLevel;
 use ryunosuke\dbml\Logging\Logger;
@@ -299,6 +300,83 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('x', $database->selectValue('test.name', ['id' => 3]));
         // id1, id2 が重複でコケるのでまぁ 0.5 秒くらいで終わるはず
         $this->assertLessThanOrEqual(0.5, microtime(true) - $start);
+    }
+
+    /**
+     * @dataProvider provideTransaction
+     * @param Transaction $transaction
+     * @param Database $database
+     */
+    function test_implicit_throw($transaction, $database)
+    {
+        if ($database->getCompatibleConnection()->getName() === 'sqlite3') {
+            return;
+        }
+
+        // 暗黙の commit を模倣
+        $forciblyCommit = function (Connection $connection) {
+            $level = $connection->getTransactionNestingLevel();
+            $connection->commit();
+            (fn() => $this->transactionNestingLevel = $level)->bindTo($connection, Connection::class)();
+        };
+
+        $transaction->setCheckImplicit(true);
+        $transaction->main(function (Database $db) use ($forciblyCommit) {
+            $db->insert('test', ['id' => 11, 'name' => 'tx11']);
+            $forciblyCommit($db->getConnection());
+        });
+
+        $ex = $this->tryableCallable([$transaction, 'perform'])();
+        (fn() => $this->transactionNestingLevel = 0)->bindTo($database->getConnection(), Connection::class)();
+
+        $this->assertEquals('detect transaction implicit commit/rollback', $ex->getMessage());
+    }
+
+    /**
+     * @dataProvider provideTransaction
+     * @param Transaction $transaction
+     * @param Database $database
+     */
+    function test_implicit_commit($transaction, $database)
+    {
+        $transaction->main(function (Database $db) {
+            $db->insert('test', ['id' => 12, 'name' => 'tx12']);
+            // truncate で暗黙の commit を模倣（実質的に mysql 専用）
+            $db->truncate('test');
+            $db->insert('test', ['id' => 13, 'name' => 'tx13']);
+            $db->insert('test', ['id' => 14, 'name' => 'tx14']);
+        })->perform();
+
+        // 挿入されているはず
+        $this->assertEquals(['tx13', 'tx14'], $database->selectLists('test.name', ['id' => [13, 14]]));
+    }
+
+    /**
+     * @dataProvider provideTransaction
+     * @param Transaction $transaction
+     * @param Database $database
+     */
+    function test_implicit_rollback($transaction, $database)
+    {
+        // 暗黙の rollback を模倣
+        $forciblyRollback = function (Connection $connection) {
+            $level = $connection->getTransactionNestingLevel();
+            $connection->rollBack();
+            (fn() => $this->transactionNestingLevel = $level)->bindTo($connection, Connection::class)();
+        };
+
+        $count = 0;
+        $transaction->main(function (Database $db) use ($forciblyRollback, &$count) {
+            $db->insert('test', ['id' => 15, 'name' => 'tx15']);
+            if (++$count === 1) {
+                $forciblyRollback($db->getConnection());
+                throw new class extends \Exception implements RetryableException { };
+            }
+        })->perform();
+        (fn() => $this->transactionNestingLevel = 0)->bindTo($database->getConnection(), Connection::class)();
+
+        // 挿入されているはず
+        $this->assertEquals('tx15', $database->selectValue('test.name', ['id' => 15]));
     }
 
     /**

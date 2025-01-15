@@ -125,6 +125,56 @@ class CompatibleConnection
         }
     }
 
+    public function isTransactionActive(): ?bool
+    {
+        $DUMMY_SAVEPOINT = '__TRANSACTION_CHECKER';
+
+        // PDO は inTransaction がそのまま使える
+        if ($this->driverConnection instanceof Driver\PDO\Connection) {
+            return $this->nativeConnection->inTransaction();
+        }
+        // SQLite3 は本当に得る術がない
+        if ($this->driverConnection instanceof Driver\SQLite3\Connection) {
+            return null;
+        }
+        // Mysqli は対応していないが試行することはできる
+        if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
+            try {
+                $this->connection->createSavepoint($DUMMY_SAVEPOINT);
+                $this->connection->rollbackSavepoint($DUMMY_SAVEPOINT);
+                return true;
+            }
+            catch (\Doctrine\DBAL\Exception\DriverException $ex) {
+                if ($ex->getCode() === 1305 && stripos($ex->getMessage(), $DUMMY_SAVEPOINT) !== false) {
+                    return false;
+                }
+                throw $ex;
+            }
+        }
+        // PgSql は transaction_status が使える
+        if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
+            // https://www.php.net/manual/ja/function.pg-transaction-status.php#126528
+            // > Even after the first call (or all valid calls) to pg_get_result() the transaction status will stay PGSQL_TRANSACTION_ACTIVE
+            pg_fetch_all(pg_query($this->nativeConnection, 'SELECT 1'));
+            return pg_transaction_status($this->nativeConnection) !== PGSQL_TRANSACTION_IDLE;
+        }
+        // SQLSrv は対応していないが試行することはできる
+        if ($this->driverConnection instanceof Driver\SQLSrv\Connection) {
+            try {
+                $this->connection->createSavepoint($DUMMY_SAVEPOINT);
+                return true;
+            }
+            catch (\Doctrine\DBAL\Exception\DriverException $ex) {
+                if ($ex->getCode() === 628) {
+                    return false;
+                }
+                throw $ex;
+            }
+        }
+
+        throw new \LogicException(__METHOD__ . ' is not supported.');
+    }
+
     public function getSupportedMetadata(): array
     {
         if (isset(self::$storage[$this->connection][__FUNCTION__])) {
