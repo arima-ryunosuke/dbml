@@ -5,7 +5,6 @@ namespace ryunosuke\dbml;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
-use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\DBAL\Exception\RetryableException;
@@ -23,6 +22,7 @@ use Psr\Log\LogLevel;
 use Psr\SimpleCache\CacheInterface;
 use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Driver\ArrayResult;
+use ryunosuke\dbml\Driver\ConnectionMiddleware;
 use ryunosuke\dbml\Entity\Entity;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Exception\NonAffectedException;
@@ -422,6 +422,8 @@ class Database
         $default_options = [
             /** @var ?CacheInterface キャッシュオブジェクト */
             'cacheProvider'      => null,
+            /** @var ?callable 接続時のリトライ（float を返すとその分待機し、null を返すまで試行する） */
+            'connectRetryer'     => function (int $retry, \Exception $e) { return null; },
             /** @var ?string|array 初期化後の SQL コマンド（mysql@PDO でいう MYSQL_ATTR_INIT_COMMAND） */
             'initCommand'        => null,
             /** @var \Closure スキーマを必要としたときのコールバック */
@@ -632,58 +634,34 @@ class Database
             \Doctrine\DBAL\Driver\PDO\Result::class     => \ryunosuke\dbml\Driver\PDO\Result::class,
         ]);
 
-        $configure = function (Configuration $configuration) use ($options) {
-            $middlewares = $configuration->getMiddlewares();
-            if (array_find_first($middlewares, fn($middleware) => $middleware instanceof LoggingMiddleware) === null) {
-                $middlewares[] = new LoggingMiddleware(new LoggerChain());
-                $configuration->setMiddlewares($middlewares);
+        // $dbconfig の正規化
+        [$dbconfig, $isConnections] = (function () use ($dbconfig) {
+            if ($dbconfig instanceof Connection) {
+                $dbconfig = [$dbconfig];
             }
-            if ($options['initCommand'] ?? []) {
-                $middlewares[] = new class((array) $options['initCommand']) implements \Doctrine\DBAL\Driver\Middleware {
-                    private $initCommands;
-
-                    public function __construct($initCommands)
-                    {
-                        $this->initCommands = $initCommands;
-                    }
-
-                    public function wrap(Driver $driver): Driver
-                    {
-                        return new class ($driver, $this->initCommands) extends AbstractDriverMiddleware {
-                            private $initCommands;
-
-                            public function __construct(Driver $wrappedDriver, $initCommands)
-                            {
-                                parent::__construct($wrappedDriver);
-                                $this->initCommands = $initCommands;
-                            }
-
-                            public function connect(array $params): \Doctrine\DBAL\Driver\Connection
-                            {
-                                $connection = parent::connect($params);
-                                foreach ($this->initCommands as $initCommand) {
-                                    $connection->exec($initCommand);
-                                }
-                                return $connection;
-                            }
-                        };
-                    }
-                };
+            if (!is_array($dbconfig)) {
+                throw new \DomainException('$dbconfig must be Connection or Database config array.');
             }
-            $configuration->setMiddlewares($middlewares);
-            return $configuration;
-        };
+            return [$dbconfig, array_and($dbconfig, fn($v) => $v instanceof Connection)];
+        })();
 
-        if ($dbconfig instanceof Connection) {
-            $connections = array_fill(0, 2, $dbconfig);
-        }
-        elseif (!is_array($dbconfig)) {
-            throw new \DomainException('$dbconfig must be Connection or Database config array.');
-        }
-        elseif (array_and($dbconfig, function ($v) { return $v instanceof Connection; })) {
+        // $options の正規化（cacheProvider だけは $dbconfig に応じて動的に作りたい）
+        $options['cacheProvider'] ??= (function () use ($isConnections, $dbconfig) {
+            $params = $isConnections ? reset($dbconfig)->getParams() : $dbconfig;
+            $hashed = sha1(serialize(array_pickup($params, ['url', 'driver', 'host', 'port', 'user', 'password', 'dbname'])));
+            return cacheobject(sys_get_temp_dir() . "/dbml-$hashed");
+        })();
+        $this->setDefault($options);
+
+        // $connections の正規化（[Connection, Connection]）
+        if ($isConnections) {
             $connections = array_pad($dbconfig, 2, reset($dbconfig));
         }
         else {
+            $configure = fn() => (new Configuration())->setMiddlewares([
+                new LoggingMiddleware(new LoggerChain()),
+                new ConnectionMiddleware($this->getUnsafeOption('connectRetryer'), (array) $this->getUnsafeOption('initCommand')),
+            ]);
             $master = $slave = $dbconfig = Adhoc::parseParams($dbconfig);
             foreach ($dbconfig as $key => $value) {
                 if ($key !== 'driverOptions' && is_array($value) && isset($value[0], $value[1])) {
@@ -692,12 +670,12 @@ class Database
                 }
             }
             if ($master === $slave) {
-                $connections = array_fill(0, 2, DriverManager::getConnection($dbconfig, $configure(new Configuration())));
+                $connections = array_fill(0, 2, DriverManager::getConnection($dbconfig, $configure()));
             }
             else {
                 $connections = [
-                    DriverManager::getConnection($master, $configure(new Configuration())),
-                    DriverManager::getConnection($slave, $configure(new Configuration())),
+                    DriverManager::getConnection($master, $configure()),
+                    DriverManager::getConnection($slave, $configure()),
                 ];
             }
         }
@@ -709,13 +687,6 @@ class Database
         $this->txConnection = $this->getMasterConnection();
         $this->vtables = new \ArrayObject();
         $this->cache = new \ArrayObject();
-
-        if (!isset($options['cacheProvider'])) {
-            $source = array_pickup($this->txConnection->getParams(), ['url', 'driver', 'host', 'port', 'user', 'password', 'dbname']);
-            $options['cacheProvider'] = cacheobject(sys_get_temp_dir() . '/dbml-' . sha1(serialize($source)));
-        }
-
-        $this->setDefault($options);
 
         $this->setLogger($this->getUnsafeOption('logger'));
         $this->setAutoCastType($this->getUnsafeOption('autoCastType')); // デフォルト兼サンプルの正規化の必要があるので無駄に呼んでおく

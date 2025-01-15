@@ -155,6 +155,47 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         that(Database::class)->new(null)->wasThrown('$dbconfig must be');
     }
 
+    function test___construct_retry()
+    {
+        $targets = [
+            'pdo-mysql://unknown-host/dbml' => [\Doctrine\DBAL\Driver\PDO\Exception::class, [\PDO::ATTR_TIMEOUT => 1]],
+        ];
+        if (extension_loaded('mysqli')) {
+            $targets['mysql://unknown-host/dbml'] = [\Doctrine\DBAL\Driver\Mysqli\Exception\ConnectionFailed::class, [MYSQLI_OPT_CONNECT_TIMEOUT => 1]];
+        }
+        if (extension_loaded('pgsql')) {
+            $targets['pgsql://unknown-host/dbml'] = [\Doctrine\DBAL\Driver\PgSQL\Exception::class, ['connect_timeout' => 1]];
+        }
+        if (extension_loaded('sqlsrv')) {
+            $targets['mssql://unknown-host/dbml'] = [\Doctrine\DBAL\Driver\SQLSrv\Exception\Error::class, ['LoginTimeout' => 1]];
+        }
+        foreach ($targets as $url => [$exception, $doptions]) {
+            $receiver = (object) [
+                'count'  => 0,
+                'thrown' => null,
+            ];
+            try {
+                $db = new Database([
+                    'url'           => $url,
+                    'driverOptions' => $doptions,
+                ], [
+                    'connectRetryer' => function ($retry, $ex) use ($receiver) {
+                        $receiver->count++;
+                        $receiver->thrown = $ex;
+                        if ($retry <= 1) {
+                            return 0.01;
+                        }
+                    },
+                ]);
+                $db->getConnection()->getNativeConnection();
+            }
+            catch (\Exception) {
+                $this->assertEquals(2, $receiver->count);
+                $this->assertInstanceOf($exception, $receiver->thrown);
+            }
+        }
+    }
+
     /**
      * @dataProvider provideDatabase
      * @param Database $database
