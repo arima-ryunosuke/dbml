@@ -1,4 +1,4 @@
-@@ -1,8 +1,14 @@
+@@ -1,12 +1,19 @@
  <?php
 +//@formatter:off
 +/**
@@ -14,7 +14,12 @@
  
  use Doctrine\DBAL\Driver\Exception;
  use Doctrine\DBAL\Driver\FetchUtils;
-@@ -17,7 +23,7 @@
+ use Doctrine\DBAL\Driver\Mysqli\Exception\StatementError;
++use Doctrine\DBAL\Driver\Mysqli\Statement;
+ use Doctrine\DBAL\Driver\Result as ResultInterface;
+ use Doctrine\DBAL\Exception\InvalidColumnIndex;
+ use mysqli_sql_exception;
+@@ -17,7 +24,7 @@
  use function array_fill;
  use function count;
  
@@ -23,16 +28,16 @@
  {
      /**
       * Whether the statement result has columns. The property should be used only after the result metadata
-@@ -41,7 +47,7 @@
-      *
+@@ -47,7 +54,7 @@
       * @throws Exception
       */
--    public function __construct(private readonly mysqli_stmt $statement)
-+    public function __construct(protected readonly mysqli_stmt $statement)
-     {
+     public function __construct(
+-        private readonly mysqli_stmt $statement,
++        protected readonly mysqli_stmt $statement,
+         private ?Statement $statementReference = null, // @phpstan-ignore property.onlyWritten
+     ) {
          $meta              = $statement->result_metadata();
-         $this->hasColumns  = $meta !== false;
-@@ -56,7 +62,7 @@
+@@ -63,7 +70,7 @@
          // Store result of every execution which has it. Otherwise it will be impossible
          // to execute a new statement in case if the previous one has non-fetched rows
          // @link http://dev.mysql.com/doc/refman/5.7/en/commands-out-of-sync.html

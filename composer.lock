@@ -101,16 +101,16 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "3.9.3",
+            "version": "3.9.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "61446f07fcb522414d6cfd8b1c3e5f9e18c579ba"
+                "reference": "ec16c82f20be1a7224e65ac67144a29199f87959"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/61446f07fcb522414d6cfd8b1c3e5f9e18c579ba",
-                "reference": "61446f07fcb522414d6cfd8b1c3e5f9e18c579ba",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/ec16c82f20be1a7224e65ac67144a29199f87959",
+                "reference": "ec16c82f20be1a7224e65ac67144a29199f87959",
                 "shasum": ""
             },
             "require": {
@@ -126,15 +126,13 @@
                 "doctrine/coding-standard": "12.0.0",
                 "fig/log-test": "^1",
                 "jetbrains/phpstorm-stubs": "2023.1",
-                "phpstan/phpstan": "1.12.6",
-                "phpstan/phpstan-strict-rules": "^1.6",
-                "phpunit/phpunit": "9.6.20",
-                "psalm/plugin-phpunit": "0.18.4",
+                "phpstan/phpstan": "2.1.1",
+                "phpstan/phpstan-strict-rules": "^2",
+                "phpunit/phpunit": "9.6.22",
                 "slevomat/coding-standard": "8.13.1",
                 "squizlabs/php_codesniffer": "3.10.2",
                 "symfony/cache": "^5.4|^6.0|^7.0",
-                "symfony/console": "^4.4|^5.4|^6.0|^7.0",
-                "vimeo/psalm": "4.30.0"
+                "symfony/console": "^4.4|^5.4|^6.0|^7.0"
             },
             "suggest": {
                 "symfony/console": "For helpful console commands such as SQL execution and import of files."
@@ -194,7 +192,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/dbal/issues",
-                "source": "https://github.com/doctrine/dbal/tree/3.9.3"
+                "source": "https://github.com/doctrine/dbal/tree/3.9.4"
             },
             "funding": [
                 {
@@ -210,7 +208,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-10-10T17:56:43+00:00"
+            "time": "2025-01-16T08:28:55+00:00"
         },
         {
             "name": "doctrine/deprecations",
@@ -1275,16 +1273,16 @@
         },
         {
             "name": "ryunosuke/functions",
-            "version": "v2.0.15",
+            "version": "v2.0.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/arima-ryunosuke/php-functions.git",
-                "reference": "0b115c8e393cf20debcc9c809ed925564c272dba"
+                "reference": "da3e6f78e72ee15810bbfdb61aad66fec182f175"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arima-ryunosuke/php-functions/zipball/0b115c8e393cf20debcc9c809ed925564c272dba",
-                "reference": "0b115c8e393cf20debcc9c809ed925564c272dba",
+                "url": "https://api.github.com/repos/arima-ryunosuke/php-functions/zipball/da3e6f78e72ee15810bbfdb61aad66fec182f175",
+                "reference": "da3e6f78e72ee15810bbfdb61aad66fec182f175",
                 "shasum": ""
             },
             "require": {
@@ -1320,9 +1318,9 @@
             "description": "Utility functions for PHP",
             "support": {
                 "issues": "https://github.com/arima-ryunosuke/php-functions/issues",
-                "source": "https://github.com/arima-ryunosuke/php-functions/tree/v2.0.15"
+                "source": "https://github.com/arima-ryunosuke/php-functions/tree/v2.0.16"
             },
-            "time": "2024-12-01T08:21:35+00:00"
+            "time": "2025-01-26T05:18:21+00:00"
         },
         {
             "name": "ryunosuke/phpunit-extension",
@@ -1470,16 +1468,16 @@
         },
         {
             "name": "ryunosuke/simple-logger",
-            "version": "v1.1.5",
+            "version": "v1.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/arima-ryunosuke/php-simple-logger.git",
-                "reference": "9f5ece49b314ddbcd912940abdcc8e0c299f749c"
+                "reference": "7919be65799b43e7d4eabf1e9b5757ca9ffbc5de"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arima-ryunosuke/php-simple-logger/zipball/9f5ece49b314ddbcd912940abdcc8e0c299f749c",
-                "reference": "9f5ece49b314ddbcd912940abdcc8e0c299f749c",
+                "url": "https://api.github.com/repos/arima-ryunosuke/php-simple-logger/zipball/7919be65799b43e7d4eabf1e9b5757ca9ffbc5de",
+                "reference": "7919be65799b43e7d4eabf1e9b5757ca9ffbc5de",
                 "shasum": ""
             },
             "require": {
@@ -1514,9 +1512,9 @@
             "description": "simple psr-3 logger",
             "support": {
                 "issues": "https://github.com/arima-ryunosuke/php-simple-logger/issues",
-                "source": "https://github.com/arima-ryunosuke/php-simple-logger/tree/v1.1.5"
+                "source": "https://github.com/arima-ryunosuke/php-simple-logger/tree/v1.1.6"
             },
-            "time": "2024-08-07T10:35:35+00:00"
+            "time": "2025-01-12T07:35:45+00:00"
         },
         {
             "name": "sebastian/cli-parser",

@@ -13,6 +13,7 @@ namespace ryunosuke\dbal\Driver\Mysqli;
 use Doctrine\DBAL\Driver\Exception;
 use Doctrine\DBAL\Driver\FetchUtils;
 use Doctrine\DBAL\Driver\Mysqli\Exception\StatementError;
+use Doctrine\DBAL\Driver\Mysqli\Statement;
 use Doctrine\DBAL\Driver\Result as ResultInterface;
 use Doctrine\DBAL\Exception\InvalidColumnIndex;
 use mysqli_sql_exception;
@@ -45,10 +46,17 @@ class Result implements ResultInterface
     /**
      * @internal The result can be only instantiated by its driver connection or statement.
      *
+     * @param Statement|null $statementReference Maintains a reference to the Statement that generated this result. This
+     *                                           ensures that the lifetime of the Statement is managed in conjunction
+     *                                           with its associated results, so they are destroyed together at the
+     *                                           appropriate time, see {@see Statement::__destruct()}.
+     *
      * @throws Exception
      */
-    public function __construct(protected readonly mysqli_stmt $statement)
-    {
+    public function __construct(
+        protected readonly mysqli_stmt $statement,
+        private ?Statement $statementReference = null, // @phpstan-ignore property.onlyWritten
+    ) {
         $meta              = $statement->result_metadata();
         $this->hasColumns  = $meta !== false;
         $this->columnNames = $meta !== false ? array_column($meta->fetch_fields(), 'name') : [];

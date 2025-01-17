@@ -105,7 +105,7 @@ class Result implements ResultInterface
     }
 
     /**
-     * @psalm-param PDO::FETCH_* $mode
+     * @phpstan-param PDO::FETCH_* $mode
      *
      * @throws Exception
      */
@@ -119,7 +119,7 @@ class Result implements ResultInterface
     }
 
     /**
-     * @psalm-param PDO::FETCH_* $mode
+     * @phpstan-param PDO::FETCH_* $mode
      *
      * @return list<mixed>
      *
