@@ -621,7 +621,7 @@ class Database
      *
      * つまり実質的には「本ライブラリの設定が全て可能」となる。あまり「この設定はどこのクラスに係るのか？」は気にしなくて良い。
      *
-     * @param array|Connection|Connection[] $dbconfig 設定配列
+     * @param string|array|Connection|Connection[] $dbconfig 設定配列
      */
     public function __construct($dbconfig, array $options = [])
     {
@@ -638,6 +638,9 @@ class Database
         [$dbconfig, $isConnections] = (function () use ($dbconfig) {
             if ($dbconfig instanceof Connection) {
                 $dbconfig = [$dbconfig];
+            }
+            if (is_string($dbconfig)) {
+                $dbconfig = ['url' => $dbconfig];
             }
             if (!is_array($dbconfig)) {
                 throw new \DomainException('$dbconfig must be Connection or Database config array.');

@@ -139,7 +139,7 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $tmpdir = sys_get_temp_dir() . '/dbml/tmp';
         rm_rf($tmpdir);
         mkdir_p($tmpdir);
-        $db = new Database(['url' => 'sqlite3:///:memory:'], [
+        $db = new Database('sqlite3:///:memory:', [
             'logger'      => new Logger([
                 'destination' => "$tmpdir/log.txt",
                 'metadata'    => [],
