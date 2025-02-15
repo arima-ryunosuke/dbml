@@ -34,7 +34,7 @@ class_aliases([
             putenv("TMPDIR=$tmpdir/dbml");
         }
     }
-    ryunosuke\dbml\rm_rf("$tmpdir/dbml", false);
+    ryunosuke\dbml\rm_rf("$tmpdir/dbml*", false);
 
     if (DIRECTORY_SEPARATOR === '\\') {
         setlocale(LC_CTYPE, 'C');
