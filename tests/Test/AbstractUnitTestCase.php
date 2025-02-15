@@ -628,7 +628,6 @@ abstract class AbstractUnitTestCase extends TestCase
                 'convertBoolToInt'         => true,
                 'convertNumericToDatetime' => true,
                 'truncateString'           => true,
-                'modifyAutoSelect'         => false,
                 'tableMapper'              => static function ($tablename) {
                     if ($tablename === 't_article') {
                         return [

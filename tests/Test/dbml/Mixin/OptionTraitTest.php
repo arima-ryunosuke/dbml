@@ -222,6 +222,13 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
         that($this)->unstack()->wasThrown(new \UnexpectedValueException('empty'));
     }
 
+    function test_checkUnknownOption()
+    {
+        $this->assertEquals(true, $this->checkUnknownOption(['op1' => 'hoge']));
+        $this->assertEquals(false, @$this->checkUnknownOption(['opX' => 'hoge']));
+        $this->assertStringContainsString('options(opX)', error_get_last()['message']);
+    }
+
     function test_setDefault()
     {
         $this->setDefault(['opX' => 'hoge', 'op1' => 'hoge']);

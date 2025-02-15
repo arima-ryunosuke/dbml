@@ -147,6 +147,15 @@ trait OptionTrait
         return $this->__stacking ??= new \ArrayObject();
     }
 
+    public function checkUnknownOption(array $options): bool
+    {
+        if ($diff = array_diff_key($options, static::getDefaultOptions())) {
+            trigger_error(sprintf('%s specified unknown options(%s)', get_class($this), implode(',', array_keys($diff))), E_USER_NOTICE);
+            return false;
+        }
+        return true;
+    }
+
     /**
      * デフォルト値を設定する
      *

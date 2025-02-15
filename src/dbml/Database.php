@@ -654,6 +654,7 @@ class Database
             $hashed = sha1(serialize(array_pickup($params, ['url', 'driver', 'host', 'port', 'user', 'password', 'dbname'])));
             return cacheobject(sys_get_temp_dir() . "/dbml-$hashed");
         })();
+        $this->checkUnknownOption($options);
         $this->setDefault($options);
 
         // $connections の正規化（[Connection, Connection]）

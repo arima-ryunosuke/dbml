@@ -235,6 +235,7 @@ class Transaction
                 $default[lcfirst($key)] = $value;
             }
         }
+        $this->checkUnknownOption($options);
         $this->setDefault($options + $default);
     }
 
