@@ -212,26 +212,29 @@
         },
         {
             "name": "doctrine/deprecations",
-            "version": "1.1.4",
+            "version": "1.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/deprecations.git",
-                "reference": "31610dbb31faa98e6b5447b62340826f54fbc4e9"
+                "reference": "459c2f5dd3d6a4633d3b5f46ee2b1c40f57d3f38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/deprecations/zipball/31610dbb31faa98e6b5447b62340826f54fbc4e9",
-                "reference": "31610dbb31faa98e6b5447b62340826f54fbc4e9",
+                "url": "https://api.github.com/repos/doctrine/deprecations/zipball/459c2f5dd3d6a4633d3b5f46ee2b1c40f57d3f38",
+                "reference": "459c2f5dd3d6a4633d3b5f46ee2b1c40f57d3f38",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.1 || ^8.0"
             },
+            "conflict": {
+                "phpunit/phpunit": "<=7.5 || >=13"
+            },
             "require-dev": {
-                "doctrine/coding-standard": "^9 || ^12",
-                "phpstan/phpstan": "1.4.10 || 2.0.3",
+                "doctrine/coding-standard": "^9 || ^12 || ^13",
+                "phpstan/phpstan": "1.4.10 || 2.1.11",
                 "phpstan/phpstan-phpunit": "^1.0 || ^2",
-                "phpunit/phpunit": "^7.5 || ^8.5 || ^9.5",
+                "phpunit/phpunit": "^7.5 || ^8.5 || ^9.6 || ^10.5 || ^11.5 || ^12",
                 "psr/log": "^1 || ^2 || ^3"
             },
             "suggest": {
@@ -251,9 +254,9 @@
             "homepage": "https://www.doctrine-project.org/",
             "support": {
                 "issues": "https://github.com/doctrine/deprecations/issues",
-                "source": "https://github.com/doctrine/deprecations/tree/1.1.4"
+                "source": "https://github.com/doctrine/deprecations/tree/1.1.5"
             },
-            "time": "2024-12-07T21:18:45+00:00"
+            "time": "2025-04-07T20:06:18+00:00"
         },
         {
             "name": "doctrine/event-manager",
@@ -615,16 +618,16 @@
         },
         {
             "name": "myclabs/deep-copy",
-            "version": "1.12.1",
+            "version": "1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "123267b2c49fbf30d78a7b2d333f6be754b94845"
+                "reference": "024473a478be9df5fdaca2c793f2232fe788e414"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/123267b2c49fbf30d78a7b2d333f6be754b94845",
-                "reference": "123267b2c49fbf30d78a7b2d333f6be754b94845",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/024473a478be9df5fdaca2c793f2232fe788e414",
+                "reference": "024473a478be9df5fdaca2c793f2232fe788e414",
                 "shasum": ""
             },
             "require": {
@@ -663,7 +666,7 @@
             ],
             "support": {
                 "issues": "https://github.com/myclabs/DeepCopy/issues",
-                "source": "https://github.com/myclabs/DeepCopy/tree/1.12.1"
+                "source": "https://github.com/myclabs/DeepCopy/tree/1.13.0"
             },
             "funding": [
                 {
@@ -671,7 +674,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-11-08T17:47:46+00:00"
+            "time": "2025-02-12T12:17:51+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -1273,16 +1276,16 @@
         },
         {
             "name": "ryunosuke/functions",
-            "version": "v2.0.16",
+            "version": "v2.0.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/arima-ryunosuke/php-functions.git",
-                "reference": "da3e6f78e72ee15810bbfdb61aad66fec182f175"
+                "reference": "683aa1ddd888b4e9fa0a700c6cc7fdc4f0e0b57d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arima-ryunosuke/php-functions/zipball/da3e6f78e72ee15810bbfdb61aad66fec182f175",
-                "reference": "da3e6f78e72ee15810bbfdb61aad66fec182f175",
+                "url": "https://api.github.com/repos/arima-ryunosuke/php-functions/zipball/683aa1ddd888b4e9fa0a700c6cc7fdc4f0e0b57d",
+                "reference": "683aa1ddd888b4e9fa0a700c6cc7fdc4f0e0b57d",
                 "shasum": ""
             },
             "require": {
@@ -1318,9 +1321,9 @@
             "description": "Utility functions for PHP",
             "support": {
                 "issues": "https://github.com/arima-ryunosuke/php-functions/issues",
-                "source": "https://github.com/arima-ryunosuke/php-functions/tree/v2.0.16"
+                "source": "https://github.com/arima-ryunosuke/php-functions/tree/v2.0.21"
             },
-            "time": "2025-01-26T05:18:21+00:00"
+            "time": "2025-03-23T03:39:53+00:00"
         },
         {
             "name": "ryunosuke/phpunit-extension",
@@ -1371,16 +1374,16 @@
         },
         {
             "name": "ryunosuke/polyfill-enum",
-            "version": "v1.1.1",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/arima-ryunosuke/php-polyfill-enum.git",
-                "reference": "525a9c320fcf6c9a495226dddcba98de8155a0ae"
+                "reference": "2220a1c0ddebbb6a7af36b080dd2a806184d1d64"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arima-ryunosuke/php-polyfill-enum/zipball/525a9c320fcf6c9a495226dddcba98de8155a0ae",
-                "reference": "525a9c320fcf6c9a495226dddcba98de8155a0ae",
+                "url": "https://api.github.com/repos/arima-ryunosuke/php-polyfill-enum/zipball/2220a1c0ddebbb6a7af36b080dd2a806184d1d64",
+                "reference": "2220a1c0ddebbb6a7af36b080dd2a806184d1d64",
                 "shasum": ""
             },
             "require": {
@@ -1393,9 +1396,12 @@
             "type": "library",
             "autoload": {
                 "files": [
-                    "bootstrap.php"
+                    "bootstrap.php",
+                    "src/polyfill/bootstrap.php",
+                    "src/ponyfill/bootstrap.php"
                 ],
                 "psr-4": {
+                    "ryunosuke\\utility\\enum\\": "src/utility/enum",
                     "ryunosuke\\polyfill\\enum\\": "src/polyfill/enum"
                 }
             },
@@ -1412,9 +1418,9 @@
             "description": "Emulate php8.1's enum",
             "support": {
                 "issues": "https://github.com/arima-ryunosuke/php-polyfill-enum/issues",
-                "source": "https://github.com/arima-ryunosuke/php-polyfill-enum/tree/v1.1.1"
+                "source": "https://github.com/arima-ryunosuke/php-polyfill-enum/tree/v1.2.1"
             },
-            "time": "2024-07-05T01:45:13+00:00"
+            "time": "2025-04-12T05:03:41+00:00"
         },
         {
             "name": "ryunosuke/simple-cache",
@@ -1468,16 +1474,16 @@
         },
         {
             "name": "ryunosuke/simple-logger",
-            "version": "v1.1.6",
+            "version": "v1.1.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/arima-ryunosuke/php-simple-logger.git",
-                "reference": "7919be65799b43e7d4eabf1e9b5757ca9ffbc5de"
+                "reference": "7e5b059ad22e17b3395e04fd2ebc99ce096eae3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arima-ryunosuke/php-simple-logger/zipball/7919be65799b43e7d4eabf1e9b5757ca9ffbc5de",
-                "reference": "7919be65799b43e7d4eabf1e9b5757ca9ffbc5de",
+                "url": "https://api.github.com/repos/arima-ryunosuke/php-simple-logger/zipball/7e5b059ad22e17b3395e04fd2ebc99ce096eae3e",
+                "reference": "7e5b059ad22e17b3395e04fd2ebc99ce096eae3e",
                 "shasum": ""
             },
             "require": {
@@ -1512,9 +1518,9 @@
             "description": "simple psr-3 logger",
             "support": {
                 "issues": "https://github.com/arima-ryunosuke/php-simple-logger/issues",
-                "source": "https://github.com/arima-ryunosuke/php-simple-logger/tree/v1.1.6"
+                "source": "https://github.com/arima-ryunosuke/php-simple-logger/tree/v1.1.7"
             },
-            "time": "2025-01-12T07:35:45+00:00"
+            "time": "2025-02-22T04:49:44+00:00"
         },
         {
             "name": "sebastian/cli-parser",
