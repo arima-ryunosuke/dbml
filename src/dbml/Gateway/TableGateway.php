@@ -304,6 +304,22 @@ use function ryunosuke\dbml\split_noempty;
  * 場合によっては非常に非効率なクエリになるので注意。
  * また、その性質上、外部キー結合をすることはできない。
  *
+ * ### マジックカラム
+ *
+ * __get にカラム名を渡すとマジックカラム状態の自身を返す。
+ * マジックカラムは状況に応じて（現在のところ） column/where に適宜使用される。
+ * マジックカラムは一過性であり、適用された後は null になる。
+ *
+ * ```
+ * // title をマジックカラムにして title を SELECT
+ * $title = $gw->title->value();
+ * // => $gw->value('title') と同じ
+ *
+ * // id をマジックカラムにして id で WHERE
+ * $gw->id[1]->tuple();
+ * // => $gw->where(['id' => 1])->tuple() と同じ
+ * ```
+ *
  * @method bool                   getImmutable()
  * @method $this                  setImmutable($immutableMode)
  * @method string                 getDefaultIteration()
@@ -466,6 +482,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     private ?string $foreign = null;
     private ?string $hint    = null;
 
+    private ?string $magicColumn = null;
+
     #[DebugInfo(false)]
     private TableGateway $end;
 
@@ -589,30 +607,49 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * 自身と指定先テーブルを JOIN する
+     * column 指定か自身と指定先テーブルを JOIN する
      *
-     * 返り値として「JOIN したテーブルの Gateway」を返す。
+     * $name がカラム名ならマジックカラム設定される。
+     *
+     * $name がテーブル名なら返り値として「JOIN したテーブルの Gateway」を返す。
      * JOIN 先に対してなにかしたい場合は {@link end()} が必要。冒頭の「メソッドコール or マジックゲット or マジックコール」も参照。
      */
     public function __get(string $name): ?self
     {
+        // マジックカラム
+        $columns = $this->database->getSchema()->getTableColumns($this->tableName);
+        if (isset($columns[$name])) {
+            return $this->_ephemeral('magicColumn', $name);
+        }
+
+        // マジックジョイン
         $tname = $this->database->convertSelectTableName($name);
         if (isset($this->database->$tname)) {
             $that = $this->join($this->getUnsafeOption('defaultJoinMethod') ?: 'auto', $this->database->$name);
             return end($that->joins);
         }
-        return null;
+
+        throw new \BadMethodCallException("'$name' is undefined.");
     }
 
     /**
-     * サポートされない
-     *
-     * 将来のために予約されており、呼ぶと無条件で例外を投げる。
+     * update([$name => $value]) のエイリアス
      */
-    public function __set(string $name, mixed $value): void { throw new \DomainException(__METHOD__ . ' is not supported.'); }
+    public function __set(string $name, mixed $value): void
+    {
+        // マジック update
+        $columns = $this->database->getSchema()->getTableColumns($this->tableName);
+        if (isset($columns[$name])) {
+            $this->update([$name => $value]);
+            return;
+        }
+
+        throw new \BadMethodCallException("'$name' is undefined.");
+    }
 
     /**
      * @ignore
+     * @return $this|mixed
      */
     public function __call(string $name, array $arguments): mixed
     {
@@ -621,6 +658,12 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         if ($called) {
             return $result;
         }
+
+        // 良いアイディアが出ないので残骸として残しておく
+        //$columns = $this->database->getSchema()->getTableColumns($this->tableName);
+        //if (isset($columns[$name])) {
+        //    return $this->where([$name => $arguments]);
+        //}
 
         // マジックジョイン
         $tname = $this->database->convertSelectTableName($name);
@@ -697,6 +740,20 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         return $that;
     }
 
+    private function _ephemeral(string $name, $value = null): null|string|self
+    {
+        // 引数なしの場合は getter として振る舞う
+        if (func_num_args() === 1) {
+            $result = $this->$name;
+            $this->$name = null;
+            return $result;
+        }
+
+        $that = $this->clone();
+        $that->$name = $value;
+        return $that;
+    }
+
     /**
      * なにがしかの存在を返す
      *
@@ -715,6 +772,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function offsetExists(mixed $offset): bool
     {
+        if ($magicColumn = $this->_ephemeral('magicColumn')) {
+            return $this->where([$magicColumn => $offset])->exists('*');
+        }
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
             return $this->exists('*', $this->_primary($offset));
         }
@@ -765,9 +825,14 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * # invoke と組み合わせると下記のようなことが可能になる
      * $db->t_article->t_comment['@scope1@scope2 AS C']($column, $where);
      * ```
+     *
+     * @return $this|mixed
      */
     public function offsetGet(mixed $offset): mixed
     {
+        if ($magicColumn = $this->_ephemeral('magicColumn')) {
+            return $this->where([$magicColumn => $offset]);
+        }
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
             return $this->pk($offset);
         }
@@ -835,6 +900,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function offsetSet(mixed $offset, mixed $value): void
     {
+        // 一時状態で set は本質的に無意味だし危険なのでアイディアが出るまで assert しておく
+        assert($this->magicColumn === null);
+
         if ($offset === null) {
             $this->insert($value);
             return;
@@ -860,6 +928,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function offsetUnset(mixed $offset): void
     {
+        if ($magicColumn = $this->_ephemeral('magicColumn')) {
+            $this->where([$magicColumn => $offset])->delete();
+            return;
+        }
+
         if (is_array($offset) || filter_var($offset, \FILTER_VALIDATE_INT) !== false) {
             $this->delete($this->_primary($offset));
             return;
@@ -1696,8 +1769,15 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function getScopeParams($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): array
     {
+        $that = $this;
+
+        // マジックカラムの解決
+        if ($magicColumn = $this->_ephemeral('magicColumn')) {
+            $that = $that->scoping($magicColumn);
+        }
+
         // スコープの解決
-        $that = ($tableDescriptor || $where || $orderBy || $limit || $groupBy || $having) ? $this->scoping(...func_get_args()) : $this;
+        $that = ($tableDescriptor || $where || $orderBy || $limit || $groupBy || $having) ? $that->scoping(...func_get_args()) : $that;
         $scopes = array_map([$that, 'getScopeParts'], array_keys($that->activeScopes));
 
         // 修飾子の解決

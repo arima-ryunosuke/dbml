@@ -47,9 +47,15 @@ class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertEquals(false, $gateway->where(['id' => 999])['name']);
 
-        $this->assertNull($gateway->hogera);
+        // set/get
+        /** @var \ryunosuke\Test\dbml\Annotation\testTableGateway $gateway */
 
-        that(fn() => $gateway->test = 123)()->wasThrown('is not supported');
+        $gateway->id[2]->name = "hogera2";
+        $this->assertEquals("hogera2", $gateway->id[2]->name->value());
+        $this->assertNotEquals("hogera2", $gateway->id[3]->name->value());
+
+        that(fn() => $gateway->hogera)()->wasThrown('is undefined');
+        that(fn() => $gateway->hogera = 123)()->wasThrown('is undefined');
     }
 
     /**
@@ -112,6 +118,9 @@ class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         $this->assertTrue(isset($gateway[1]));
         $this->assertFalse(isset($gateway[999]));
+
+        $this->assertTrue(isset($gateway->id[1]));
+        $this->assertFalse(isset($gateway->id[999]));
     }
 
     /**
@@ -127,6 +136,9 @@ class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
             'name' => 'a',
             'data' => '',
         ], $gateway[1]->tuple());
+
+        $this->assertTrue(isset($gateway->id[1]));
+        $this->assertFalse(isset($gateway->id[999]));
     }
 
     /**
@@ -249,6 +261,9 @@ AND ((flag=1))", "$gw");
     {
         unset($gateway[1]);
         $this->assertFalse($gateway[1]->tuple());
+
+        unset($gateway->id[2]);
+        $this->assertFalse($gateway->id[2]->tuple());
 
         that(function () use ($gateway) {
             unset($gateway['undefined']);
