@@ -1300,6 +1300,7 @@ class Database
                                     $targets[$key][$n === '' ? $n : $name] = [
                                         $classes[$cname],
                                         path_normalize($classdir . strtr(substr($classes[$cname], $prefixlen - 1), ['\\' => DIRECTORY_SEPARATOR]) . '.php'),
+                                        $n === '' ? [] : $this->getSchema()->getTableColumns($tablename),
                                     ];
                                 }
                             }
@@ -1341,7 +1342,7 @@ class Database
         };
 
         $V = fn($v) => $v;
-        foreach ($gateways as $name => [$class, $file]) {
+        foreach ($gateways as $name => [$class, $file, $columns]) {
             if ($name === '') {
                 $generate($name, $class, $file, <<<CLASS
                 /**
@@ -1376,11 +1377,18 @@ class Database
                  */
                 class %s extends \\{$V($gateways[''][0])}
                 {
+                    // auto generated constant:start
+                    
+                    // @formatter\x3Aoff
+                    {$V(array_sprintf($columns, fn($v, $k) => "public const {$V(strtoupper($k))} = {$V(var_export($k, true))};", "\n    "))}
+                    // @formatter\x3Aon
+                    
+                    // auto generated constant:end
                 }
                 CLASS,);
             }
         }
-        foreach ($entities as $name => [$class, $file]) {
+        foreach ($entities as $name => [$class, $file, $columns]) {
             if ($name === '') {
                 $generate($name, $class, $file, <<<CLASS
                 /**
@@ -1444,7 +1452,8 @@ class Database
         foreach ($tablemap['TtoE'] ?? [] as $tname => $entity_names) {
             $column_types = $this->_getColumnTypehint($tname);
             $shape = array_sprintf($column_types, '%2$s: %1$s', ', ');
-            $props = array_sprintf($column_types, "/** @var %1\$s */\npublic \$%2\$s;");
+            $eprops = array_sprintf($column_types, "/** @var %1\$s */\npublic \$%2\$s;");
+            $gwprops = array_sprintf($column_types, "/** @var static|%1\$s */\npublic \$%2\$s;");
 
             foreach ($entity_names as $entity_name) {
                 $gclass = $tablemap['gatewayClass'][$entity_name] ?? TableGateway::class;
@@ -1491,24 +1500,30 @@ class Database
                     }
                 }
 
+                $aliases = $refclass->getTraitAliases();
                 $methods = [];
+
+                foreach ($this->getSchema()->getTableColumns($tname) as $cname => $column) {
+                    $methods[$cname] = "public function $cname(...\$args): static { }";
+                }
                 foreach ($targets as $name => $target) {
                     // こいつらにも属性を付ければこんなことは不要だが面倒くさすぎる
                     foreach (['', 'InShare', 'ForUpdate', 'ForAffect', 'AndPrimary', 'AndBefore', 'OrThrow'] as $suffix) {
                         $fullname = $name . $suffix;
                         if ($refclass->hasMethod($fullname)) {
+                            $see = "\n * @see \\$gclass::$fullname()" . (isset($aliases[$fullname]) ? "\n * @see \\{$aliases[$fullname]}()" : "");
                             $params = $target['params'] ?? [] ? implode('', array_maps($target['params'], fn($v, $k) => "\n * @param {$v->type($assume_types)} \$$k")) : "";
                             $return = $target['return'] ?? '' ? "\n * @return {$target['return']->type($assume_types)}" : "";
-                            $doccomment = "/**{$params}{$return}\n */";
+                            $doccomment = "/**{$see}{$params}{$return}\n */";
                             $args = implode(', ', function_parameter($target['method']));
-                            $type = $target['method']->hasReturnType() ? ":{$target['method']->getReturnType()}" : "";
+                            $type = $target['method']->hasReturnType() ? ": {$target['method']->getReturnType()}" : "";
                             $methods[$fullname] = "$doccomment\npublic function $fullname($args)$type { }";
                         }
                     }
                 }
 
-                $gateways["{$entity_name}TableGateway extends \\$gclass"] = ["use TableGatewayProvider;"] + $methods;
-                $entities["{$entity_name}Entity extends \\$eclass"] = $props;
+                $gateways["{$entity_name}TableGateway extends \\$gclass"] = ["use TableGatewayProvider;"] + $gwprops + $methods;
+                $entities["{$entity_name}Entity extends \\$eclass"] = $eprops;
             }
         }
 

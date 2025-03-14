@@ -2637,6 +2637,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $this->assertTrue(class_exists(\dummy0\Entity\ArticleEntity::class));
         $this->assertTrue(class_exists(\dummy4\Gateway\ArticleGateway::class));
+        $this->assertEquals('article_id', \dummy4\Gateway\ArticleGateway::ARTICLE_ID);
 
         $database->refresh();
     }
