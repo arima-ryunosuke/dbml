@@ -129,6 +129,11 @@ class OptionTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
         unset($context1);
         // 伏せると値はもとに戻るはず
         $this->assertEquals(0, $optioner->getOption('test'));
+
+        // shallow モードは元に影響を与えない
+        $context1 = $optioner->context(['test' => 1], true);
+        $this->assertEquals(1, $context1->getOption('test'));
+        $this->assertEquals(0, $optioner->getOption('test'));
     }
 
     function test_stacking()

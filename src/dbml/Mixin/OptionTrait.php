@@ -40,6 +40,8 @@ trait OptionTrait
 
     private self $__original;
 
+    private bool $__shallow;
+
     /**
      * オプションのデフォルト値を返す static メソッド
      *
@@ -168,7 +170,7 @@ trait OptionTrait
         $default = static::getDefaultOptions();
         $this->__options = array_intersect_key($overridden, $default) + $default;
 
-        if (isset($this->__original)) {
+        if (isset($this->__original) && !$this->__shallow) {
             $this->__original->setDefault($this->__options);
         }
 
@@ -196,6 +198,8 @@ trait OptionTrait
      *
      * このメソッドを呼ぶと「自身の設定と同一のインスタンス」が得られる。
      * そのインスタンスへの操作は自身・オリジナルに反映されるが、スコープを外れるとオリジナルの方は元に戻る。
+     * $shallow:true にすると上記の「オリジナルに反映」は行われなくなる。
+     * 将来的にこちらの動作がデフォルトとなる（そもそもオリジナルも変更されて嬉しいことはあるか？ 無くしてテストしてみても全件パスしたが…）。
      *
      * ```php
      * // somthing が呼ばれる時点では hoge:1, fuga:2 となっている
@@ -206,12 +210,13 @@ trait OptionTrait
      *
      * @ignoreinherit
      */
-    public function context(array $options = []): static
+    public function context(array $options = [], bool $shallow = false): static
     {
         $this->stack();
 
         $that = clone $this;
         $that->__original = $this;
+        $that->__shallow = $shallow; // for compatible
         return $that->setOptions($options);
     }
 
@@ -361,7 +366,7 @@ trait OptionTrait
     {
         $this->__options[$name] = $value;
 
-        if (isset($this->__original)) {
+        if (isset($this->__original) && !$this->__shallow) {
             $this->__original->setUnsafeOption($name, $value);
         }
 
