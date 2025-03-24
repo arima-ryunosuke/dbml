@@ -513,6 +513,8 @@ class Database
             'dryrun'             => false,
             /** @var bool 更新クエリを実行せずプリペアされたステートメントを返すようにするか（内部向け） */
             'preparing'          => false,
+            /** @var bool 取得クエリをキャッシュするか（内部向け） */
+            'caching'            => null,
             /** @var bool 参照系クエリをマスターで実行するか(「スレーブに書き込みたい」はまずあり得ないが「マスターから読み込みたい」はままある) */
             'masterMode'         => false,
             /** @var array exportXXX 呼び出し時にどのクラスを使用するか */
@@ -3534,6 +3536,40 @@ class Database
     }
 
     /**
+     * cache モードへ移行する
+     *
+     * このメソッドを呼んだ直後は、取得系メソッドがキャッシュされるようになる。
+     *
+     * このメソッドは `setOption` を利用した {@link context()} メソッドで実装されている。つまり
+     *
+     * - `setOption('caching', true);`
+     * - `context(['caching' => true]);`
+     *
+     * などと実質的にはほとんど同じ（後者に至っては全く同じ=移譲・糖衣構文）。
+     * つまりは {@link dryrun()} と同じなのでそちらも参照。
+     *
+     * このメソッドは「キャッシュ有効モード」のような意味合いも持つ。
+     * つまり「結果をキャッシュするか」「キャッシュが有ったら使用するか」という2軸の効果を持つ。
+     *
+     * - 指定すればキャッシュされるしキャッシュがあれば使用する
+     * - 指定しなければキャッシュされないしキャッシュがあっても使用しない
+     *
+     * 秒数指定はキャッシュされるときの ttl であり、キャッシュヒットしただけの延長は為されない。
+     *
+     * ```php
+     * $db->cache(10)->selectArray('t_table'); // この SELECT は10秒間キャッシュされる
+     * // ・・・この間でいかなる更新をしても（されても）
+     * $db->cache(10)->selectArray('t_table'); // この SELECT は10秒以内ならキャッシュを返す
+     * // ↓は↑でキャッシュされていてもキャッシュを返さない
+     * $db->selectArray('t_table');// この SELECT はキャッシュを返さない
+     * ```
+     */
+    public function cache(int $seconds): static
+    {
+        return $this->context(['caching' => $seconds], true);
+    }
+
+    /**
      * 取得系クエリをプリペアする
      *
      * @inheritdoc Database::select()
@@ -3548,8 +3584,9 @@ class Database
      *
      * @inheritdoc Connection::executeQuery()
      */
-    public function executeSelect(string $query, iterable $params = [], ?int $ttl = 0)
+    public function executeSelect(string $query, iterable $params = [], ?int $ttl = null)
     {
+        $ttl ??= $this->getUnsafeOption('caching');
         $params = Adhoc::bindableParameters($params);
 
         if ($this->getDynamicPlaceholder()) {
@@ -3559,12 +3596,14 @@ class Database
 
         // コンテキストを戻すための try～catch
         try {
-            $result = null;
-            $cache = Adhoc::cacheByHash($this->getUnsafeOption('cacheProvider'), "$query:" . json_encode($params), function () use ($query, $params, $ttl, &$result) {
+            if ($ttl === null) {
+                return $this->getSlaveConnection()->executeQuery($query, $params, Adhoc::bindableTypes($params));
+            }
+
+            $called = false;
+            $cache = Adhoc::cacheByHash($this->getUnsafeOption('cacheProvider'), "$query:" . json_encode($params), function () use ($query, $params, $ttl, &$called) {
+                $called = true;
                 $result = $this->getSlaveConnection()->executeQuery($query, $params, Adhoc::bindableTypes($params));
-                if ($ttl === 0) {
-                    return null;
-                }
                 $cconnection = $this->getCompatibleConnection($this->getSlaveConnection());
                 $cache = [
                     'meta' => $cconnection->getMetadata($result),
@@ -3573,11 +3612,10 @@ class Database
                 $result->free();
                 return $cache;
             }, $ttl);
-            if ($cache) {
+            if (!$called) {
                 $this->debug("cache $query", $params);
-                return new Result(new ArrayResult($cache['data'], $cache['meta']), $this->getSlaveConnection());
             }
-            return $result;
+            return new Result(new ArrayResult($cache['data'], $cache['meta']), $this->getSlaveConnection());
         }
         catch (\Exception $ex) {
             $this->unstackAll();

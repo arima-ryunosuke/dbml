@@ -1422,6 +1422,27 @@ AND ((flag=1))", "$gw");
     /**
      * @dataProvider provideGateway
      * @param TableGateway $gateway
+     */
+    function test_cache($gateway)
+    {
+        // cache に関しては immutable の方が扱いやすい（というかこれのためだけに immutable 対応したまである）
+        $gateway->setImmutable(true);
+
+        $cache = $gateway->cache(10);
+        $nocache = $gateway;
+
+        $row1 = $cache->pk(1)->tuple();
+        $row2 = $nocache->pk(1)->tuple();
+
+        $gateway->update(['name' => 'Z'], ['id' => 1]);
+
+        $this->assertEquals($row1, $cache->pk(1)->tuple());
+        $this->assertNotEquals($row2, $nocache->pk(1)->tuple());
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
      * @param Database $database
      */
     function test_affect($gateway, $database)

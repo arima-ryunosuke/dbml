@@ -2929,8 +2929,8 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $database->update('test', ['name' => 'Z1'], ['id' => 1]);
         $database->update('test', ['name' => 'Z2'], ['id' => 2]);
 
-        $this->assertEquals($row1, $database->executeSelect($query, [1])->fetchAllAssociative());
-        $this->assertEquals([1 => ['name' => 'a']], $database->executeSelect($query, [1])->fetchAllAssociativeIndexed());
+        $this->assertEquals($row1, $database->executeSelect($query, [1], 1)->fetchAllAssociative());
+        $this->assertEquals([1 => ['name' => 'a']], $database->executeSelect($query, [1], 1)->fetchAllAssociativeIndexed());
 
         $this->assertNotEquals($row2, $database->executeSelect($query, [2])->fetchAllAssociative());
         $this->assertEquals([2 => ['name' => 'Z2']], $database->executeSelect($query, [2])->fetchAllAssociativeIndexed());

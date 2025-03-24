@@ -1253,6 +1253,18 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * cache モードに移行する
+     *
+     * Gateway 版の {@link Database::cache()} 。
+     */
+    public function cache(int $seconds): static
+    {
+        $that = $this->context();
+        $that->database = $that->database->cache($seconds);
+        return $that;
+    }
+
+    /**
      * 取得系クエリをプリペアする
      *
      * Gateway 版の {@link Database::prepareSelect()} 。

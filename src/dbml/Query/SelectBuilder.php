@@ -3440,16 +3440,12 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      */
     public function getCacheTtl(): ?int
     {
-        // 未設定
-        if (!$this->cache) {
-            return 0;
-        }
         // ロッククエリでキャッシュを有効化するのは多くの場合良くない
         if ($this->lockMode !== LockMode::NONE) {
-            return 0;
+            return null;
         }
 
-        return $this->cache['ttl'];
+        return $this->cache['ttl'] ?? null;
     }
 
     /**
