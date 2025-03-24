@@ -304,6 +304,8 @@ use function ryunosuke\dbml\split_noempty;
  * 場合によっては非常に非効率なクエリになるので注意。
  * また、その性質上、外部キー結合をすることはできない。
  *
+ * @method bool                   getImmutable()
+ * @method $this                  setImmutable($immutableMode)
  * @method string                 getDefaultIteration()
  * @method $this                  setDefaultIteration($iterationMode)
  * @method string                 getDefaultJoinMethod()
@@ -476,6 +478,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public static function getDefaultOptions(): array
     {
         return [
+            /** @var bool true にすると常に clone される */
+            'immutable'         => false, // for compatible. change to true or delete in future scope
             /** @var string 直接回した場合のフェッチモード */
             'defaultIteration'  => 'array',
             /** @var string マジック JOIN 時のデフォルトモード */
@@ -541,8 +545,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         foreach ($magic_methods as $method) {
             if ($method['type'] === 'scope') {
                 $this->addScope($method['name'], function (...$args) use ($method) {
-                    $this->{$method['method']}(...$args);
-                    return $this;
+                    return $this->{$method['method']}(...$args) ?? $this;
                 });
                 continue;
             }
@@ -781,25 +784,29 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             $td = new TableDescriptor($this->database, $this->tableName . "[$offset]", []);
         }
 
-        $that = $this->clone();
-        $that->as($td->alias);
-        $that->foreign($td->fkeyname);
-        foreach ($td->scope as $scope => $sargs) {
-            $that->scope($scope, ...$sargs);
-        }
-        if ($td->column) {
-            $that->column($td->column);
-        }
-        if ($td->condition) {
-            $that->where($td->condition);
-        }
-        if ($td->order) {
-            $that->orderBy($td->order);
-        }
-        if ($td->offset || $td->limit) {
-            $that->limit([$td->offset => $td->limit]);
-        }
-        return $that;
+        return $this->clone(function () use ($td) {
+            if ($td->alias !== null) {
+                $this->as($td->alias);
+            }
+            if ($td->fkeyname !== null) {
+                $this->foreign($td->fkeyname);
+            }
+            foreach ($td->scope as $scope => $sargs) {
+                $this->scope($scope, ...$sargs);
+            }
+            if ($td->column) {
+                $this->column($td->column);
+            }
+            if ($td->condition) {
+                $this->where($td->condition);
+            }
+            if ($td->order) {
+                $this->orderBy($td->order);
+            }
+            if ($td->offset || $td->limit) {
+                $this->limit([$td->offset => $td->limit]);
+            }
+        });
     }
 
     /**
@@ -864,19 +871,53 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * コピーインスタンスを返す
      *
      * 「コピーインスタンス」とは「オリジナルではないインスタンス」のこと。
-     * オリジナルでなければコピーなので複数回呼んでも初回以外は同じインスタンスを返す。
+     * immutable:false の時はオリジナルでなければコピーなので複数回呼んでも初回以外は同じインスタンスを返す。
      * それを避けるには $force に true を渡す必要がある。
+     *
+     * $force にクロージャを渡すと clone 後に $this bind で call される。
+     * コールバック中は immutable が false となり、コールバック中の操作はダイレクトに変更される。
+     * これは利便性とパフォーマンスのためで、例えば immutable:true の時、下記のコードは clone が多発してパフォーマンスが悪くなる。
+     *
+     * ```php
+     * $gw->column(['column_name'])->where(['condition'])->orderBy(['+column_name']);
+     * ```
+     *
+     * コールバックを渡すと1回しか clone されないため無駄がなくなる。
+     *
+     * ```php
+     * $gw->clone(function () {
+     *     $this->column(['column_name']);
+     *     $this->where(['condition']);
+     *     $this->orderBy(['+column_name']);
+     * });
+     * ```
+     *
+     * @param bool|\Closure $force 強制フラグ or コールバック
      */
-    public function clone(bool $force = false): static
+    public function clone($force = false): static
     {
         $this->resetResult();
 
-        // スコープを呼ぶたびにコピーが生成されるのは無駄なので clone する（ただし、1度だけ）
-        if ($force || $this->original === $this) {
+        $immutableMode = $this->getUnsafeOption('immutable');
+
+        // immutable:false の時は1度だけ
+        $that = $this;
+        if ($immutableMode !== 'never' && ($immutableMode || ($force || $this->original === $this))) {
             $this->database->debug("{$this->tableName}");
-            return clone $this;
+            $that = clone $this;
         }
-        return $this;
+
+        if ($force instanceof \Closure) {
+            $that->setUnsafeOption('immutable', false);
+            try {
+                return $force->call($that) ?? $that;
+            }
+            finally {
+                $that->setUnsafeOption('immutable', $immutableMode);
+            }
+        }
+
+        return $that;
     }
 
     /**
@@ -1106,9 +1147,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             'addition' => $on,
         ];
 
-        // 自身
+        // 自身（joins に放り込んだ後、変化を追従する術がないので immutable であってはならない）
         $that = $this->clone();
-        $that->joins[] = $gateway;
+        $that->joins[] = $gateway->setUnsafeOption('immutable', 'never');
         $gateway->end = $that;
 
         return $that;

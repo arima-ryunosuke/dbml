@@ -110,7 +110,7 @@ namespace ryunosuke\Test\Gateway {
 
         public function scopeId($id)
         {
-            $this->where(['article_id' => $id]);
+            return $this->where(['article_id' => $id]);
         }
 
         public function virtualTitleChecksColumn($value = null)

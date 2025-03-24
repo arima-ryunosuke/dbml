@@ -261,6 +261,8 @@ AND ((flag=1))", "$gw");
      */
     function test_alias_and_as($gateway)
     {
+        $this->assertEquals('C', $gateway->as('A')->as('B')->as('C')->as('')->alias());
+
         $this->assertEquals('test U', $gateway->tableName() . ' ' . $gateway->as('U')->alias());
         $this->assertEquals('SELECT * FROM test', (string) $gateway->select());
         $this->assertEquals('SELECT * FROM test T', (string) $gateway->alias('T')->select());
@@ -286,6 +288,12 @@ AND ((flag=1))", "$gw");
 
         // ただし $force = true にすると新しく生成されるはず
         $this->assertNotSame($clone, $clone->clone(true));
+
+        // さらに immutable を true にすると常にクローンされるはず
+        $gateway = $gateway->context(['immutable' => true]);
+        $clone = $gateway->clone();
+        $this->assertNotSame($clone, $clone->clone());
+        $this->assertNotSame($clone, $clone->clone()->clone());
     }
 
     /**

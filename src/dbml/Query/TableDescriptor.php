@@ -556,8 +556,10 @@ class TableDescriptor
                 }
                 // ['+Alias' => $db->t_table] のために特殊なことをしなければならない（テーブル名部分がなくエイリアス部分だけなので読み替える）
                 if ($c instanceof TableGateway && $c->tableName() !== $join->table) {
-                    $c = $c->clone();
-                    $c->as($join->table);// alias とかもいじる必要がある。が、当面使ってないのでこれで OK
+                    $c = $c->clone(function () use ($join) {
+                        /** @var TableGateway $this */
+                        $this->as($join->table);// alias とかもいじる必要がある。が、当面使ってないのでこれで OK
+                    });
                     $join->key = $join->joinsign . $c->descriptor();
                 }
                 $join->descriptor = $c;

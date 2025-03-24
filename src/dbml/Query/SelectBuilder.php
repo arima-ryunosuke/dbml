@@ -1301,8 +1301,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      */
     public function scope(string $tablename, string|array $scope, ...$args): static
     {
-        $gateway = $this->database->$tablename->clone();
-        $gateway->scope($scope, $args);
+        $gateway = $this->database->$tablename->clone(function () use ($scope, $args) {
+            /** @var TableGateway $this */
+            $this->scope($scope, $args);
+        });
         $sparam = $gateway->getScopeParams([]);
         $scolumn = array_unset($sparam, 'column');
         $this->addColumn($scolumn);
@@ -1607,9 +1609,11 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             $defaultScope = $defaultScoped ? [] : $this->getDefaultScope();
 
             if ($defaultScope || $descriptor->scope) {
-                $gateway = $this->database->{$descriptor->table}->clone();
-                $gateway->as($descriptor->alias);
-                $gateway->scope(array_merge($defaultScope, $descriptor->scope));
+                $gateway = $this->database->{$descriptor->table}->clone(function () use ($defaultScope, $descriptor) {
+                    /** @var TableGateway $this */
+                    $this->as($descriptor->alias);
+                    $this->scope(array_merge($defaultScope, $descriptor->scope));
+                });
                 $sparam = $gateway->getScopeParams([]);
                 $scolumn = array_unset($sparam, 'column');
                 $this->addColumn($scolumn, $parent, !!$defaultScope);
@@ -1623,10 +1627,12 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
                 if ($defaultScope || $join->scope) {
                     $key = $join->joinsign . $join->table . ' ' . $join->alias;
-                    $jointable = $this->database->{$join->table}->clone();
-                    $jointable->as($join->alias);
-                    $jointable->column($join->descriptor);
-                    $jointable->scope(array_merge($defaultScope, $join->scope));
+                    $jointable = $this->database->{$join->table}->clone(function () use ($defaultScope, $join) {
+                        /** @var TableGateway $this */
+                        $this->as($join->alias);
+                        $this->column($join->descriptor);
+                        $this->scope(array_merge($defaultScope, $join->scope));
+                    });
                 }
                 if ($jointable instanceof TableGateway) {
                     $this->hint($jointable->hint(), $jointable->modifier());
