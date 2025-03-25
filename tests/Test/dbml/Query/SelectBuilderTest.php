@@ -1216,6 +1216,24 @@ GREATEST(1,2,3) FROM test1', $builder);
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
      */
+    function test_column_comment($builder)
+    {
+        $builder->column('/*+ INDEX(test PRIMARY) */test');
+        $this->assertStringContainsString("SELECT /*+ INDEX(test PRIMARY) */", "$builder");
+
+        $builder->column([
+            '/*+ INDEX(test1 PRIMARY) */test1' => [
+                '/*+ INDEX(test2 PRIMARY) */+test2 AS T' => 'title2',
+            ],
+        ]);
+        $this->assertStringContainsString("SELECT /*+ INDEX(test1 PRIMARY)", "$builder");
+        $this->assertStringContainsString("INDEX(test2 PRIMARY) */", "$builder");
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
     function test_column_join_string($builder)
     {
         $builder->column([

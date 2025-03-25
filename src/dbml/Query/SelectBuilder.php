@@ -146,22 +146,23 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     private const COUNT_ALIAS = '__dbml_auto_cnt';
 
     protected array $sqlParts = [
-        'comment'  => [],
-        'with'     => [],
-        'option'   => [],
-        'select'   => [],
-        'union'    => [],
-        'from'     => [],
-        'join'     => [],
-        'hint'     => [],
-        'where'    => [],
-        'groupBy'  => [],
-        'having'   => [],
-        'window'   => [],
-        'orderBy'  => [],
-        'offset'   => null,
-        'limit'    => null,
-        'operator' => null,
+        'comment'       => [],
+        'with'          => [],
+        'option'        => [],
+        'select'        => [],
+        'selectComment' => [],
+        'union'         => [],
+        'from'          => [],
+        'join'          => [],
+        'hint'          => [],
+        'where'         => [],
+        'groupBy'       => [],
+        'having'        => [],
+        'window'        => [],
+        'orderBy'       => [],
+        'offset'        => null,
+        'limit'         => null,
+        'operator'      => null,
     ];
 
     protected array $cache = [];
@@ -369,24 +370,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         $platform = $this->database->getPlatform();
         $cplatform = $this->database->getCompatiblePlatform();
 
-        $commentize = static function ($comments, $nest) use (&$commentize, $cplatform) {
-            $spacer = str_repeat(' ', $nest * 3);
-            $result = '';
-            foreach ($comments as $key => $comment) {
-                if (is_array($comment)) {
-                    if (!is_int($key)) {
-                        $result .= $spacer . $cplatform->commentize($key);
-                    }
-                    $result .= $commentize($comment, $nest + 1);
-                }
-                else {
-                    $result .= $spacer . $cplatform->commentize($comment);
-                }
-            }
-            return $result;
-        };
-
-        $comments = $commentize($this->sqlParts['comment'], 0);
+        $comments = $this->_commentize($this->sqlParts['comment'], 0);
 
         // 無理に変更してるので clone する
         $builder = clone $this;
@@ -489,6 +473,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         // 色々手を加えたやつでクエリ文字列化
         $sql = concat($cplatform->getWithRecursiveSyntax(), ' ', array_sprintf($builder->sqlParts['with'], '%2$s AS (%1$s)', ','), ' ')
             . 'SELECT'
+            . concat(' ', $this->_commentize($builder->sqlParts['selectComment']))
             . concat(' ', implode(' ', $builder->sqlParts['option']))
             . concat(' ', implode(', ', $builder->sqlParts['select']) ?: '*')
             . concat(' FROM ', implode(', ', $builder->_getFromClauses()))
@@ -507,6 +492,31 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         }
 
         return $this->sql = $comments . $sql;
+    }
+
+    private function _commentize(string|array $comments, ?int $nest = null): string
+    {
+        $cplatform = $this->database->getCompatiblePlatform();
+        if ($nest === null) {
+            // cplatform->commentize は閉じ記号をごにょごにょしてるので使わないでおく
+            //return $cplatform->commentize(implode("\n", (array) $comments), true);
+            return concat("/*", implode("\n", (array) $comments), "*/");
+        }
+
+        $spacer = str_repeat(' ', $nest * 3);
+        $result = '';
+        foreach ($comments as $key => $comment) {
+            if (is_array($comment)) {
+                if (!is_int($key)) {
+                    $result .= $spacer . $cplatform->commentize($key);
+                }
+                $result .= $this->_commentize($comment, $nest + 1);
+            }
+            else {
+                $result .= $spacer . $cplatform->commentize($comment);
+            }
+        }
+        return $result;
     }
 
     private function _getFromClauses(): array
@@ -1571,7 +1581,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      */
     public function column($tableDescriptor): static
     {
-        return $this->resetQueryPart(['select', 'from', 'join', 'where', 'groupBy', 'orderBy'])->addColumn($tableDescriptor);
+        return $this->resetQueryPart(['select', 'selectComment', 'from', 'join', 'where', 'groupBy', 'orderBy'])->addColumn($tableDescriptor);
     }
 
     /**
@@ -1582,6 +1592,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     public function addColumn($tableDescriptor, ?string $parent = null, bool $defaultScoped = false): static
     {
         foreach (TableDescriptor::forge($this->database, $tableDescriptor, $this->getSubmethod() === 'query' ? [] : ['*']) as $descriptor) {
+            if ($descriptor->comment !== null) {
+                $this->comment($descriptor->comment, 'select');
+            }
+
             $this->_buildColumn($descriptor->column, $descriptor->table, $descriptor->alias);
 
             // テーブル未指定ならカラムが確定したこの時点で終わり
@@ -1621,6 +1635,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             }
 
             foreach ($descriptor->jointable as $join) {
+                if ($join->comment !== null) {
+                    $this->comment($join->comment, 'select');
+                }
+
                 $jointable = $join->descriptor;
                 $jcondition = $join->condition;
                 $key = $join->key;
@@ -2464,6 +2482,9 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * コメントはクエリ冒頭に改行付きで付与される。複数設定した場合はその分付与される。
      * コメント内に : や ? などのメタ的な文字列を含んではならない。
      *
+     * $clause で句を指定できるが内部向け。
+     * 現在のところ "select" だけが指定できる。
+     *
      * ```php
      * # 単一文字列は追加される
      * echo $qb->column('test')->comment('hoge')->comment('fuga');
@@ -2482,13 +2503,20 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * // SELECT * FROM test
      * ```
      */
-    public function comment(string|array $comment): static
+    public function comment(string|array $comment, string $clause = ''): static
     {
-        if (is_array($comment)) {
-            $this->sqlParts['comment'] = $comment;
+        if (strlen($clause)) {
+            $key = "{$clause}Comment";
         }
         else {
-            $this->sqlParts['comment'][] = $comment;
+            $key = "comment";
+        }
+
+        if (is_array($comment)) {
+            $this->sqlParts[$key] = $comment;
+        }
+        else {
+            $this->sqlParts[$key][] = $comment;
         }
         return $this->_dirty();
     }
