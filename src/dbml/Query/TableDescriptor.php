@@ -154,6 +154,17 @@ use function ryunosuke\dbml\str_between;
  *
  * -----
  *
+ * ### コメント
+ *
+ * 一部の記法はコメントを受け入れる。例えば下記は valid なテーブル記法である（php の doccoment の仕様上 \ でエスケープしてあるが本来は不要）。
+ *
+ * - `/* this is query comment *\/tablename/* this is table comment *\/@scope:fkeyname[condition]`
+ *
+ * 今のところ冒頭で全体のコメントのみ対応している（↑の table comment は実装の名残だが、そのうち対応する）。
+ * これを利用して SQL にコメントを埋め込んだりオプティマイザヒントを記述することができる（ただし、これらをどう使用するかはこのクラスでは言及しない）。
+ *
+ * -----
+ *
  * +order-by と #offset-limit は下記のように非常に相性が良い。
  *
  * - `tablename-create_date#0` （作成日降順で1件取得）
@@ -179,6 +190,7 @@ use function ryunosuke\dbml\str_between;
  * (pkval) などは埋め込みたくなるが、テーブル記法は値のエスケープなどを一切行わないので致命的な脆弱性となりうる。
  *
  * @property string|SelectBuilder|TableGateway|mixed $descriptor
+ * @property string $comment
  * @property string $joinsign
  * @property string $table
  * @property ?string $alias
@@ -204,6 +216,8 @@ class TableDescriptor
     public const META_CHARACTORS = ['(', ')', '@', '[', ']', '{', '}', '+', '-', '#', '.', ' '];
 
     private mixed $descriptor;
+
+    private ?string $comment;
 
     private ?string $joinsign;
 
@@ -271,11 +285,19 @@ class TableDescriptor
                     continue;
                 }
                 if ($i !== 0 && $brace_count === 0 && strpos($delimiters, $string[$i]) !== false) {
+                    $prev2 = $string[$i - 2] ?? '';
                     $prev = $string[$i - 1] ?? '';
+                    $next = $string[$i + 1] ?? '';
                     if ($prev === '.') {
                         continue;
                     }
                     if ($prev === '*' && $string[$i] === '*') {
+                        continue;
+                    }
+                    if ($prev2 === '/' && $prev === '*' && $string[$i] === '+') {
+                        continue;
+                    }
+                    if (($prev === '/' || $next === '/') && $string[$i] === '*') {
                         continue;
                     }
                     $result[] = preg_replace("#^([$ejoinsigns])\s#u", '$1', trim(substr($string, $current, $i - $current), ', '));
@@ -287,7 +309,7 @@ class TableDescriptor
         };
 
         $result = [];
-        foreach (explode('/', $descriptor) as $column) {
+        foreach (preg_split('#(?<!\*)/(?!\*)#', $descriptor) as $column) {
             $aliases = [];
             $tables = [];
             $lasttable = null;
@@ -396,6 +418,9 @@ class TableDescriptor
         }
 
         $this->descriptor = $descriptor;
+
+        $descriptor = preg_splice("`^/\*(.*?)\*/`us", '', trim($descriptor), $m);
+        $this->comment = $m[1] ?? null;
 
         $joinsigns = preg_quote(implode('', Database::JOIN_MAPPER), '`');
         $descriptor = preg_splice("`^([$joinsigns]?)\s*($alnumscore+)`ui", '', trim($descriptor), $m);
@@ -549,7 +574,7 @@ class TableDescriptor
                 $this->jointable[] = $join;
             }
             // ['+othertable' => ['columname']] モード
-            elseif (preg_match("#^[$joinsigns].#u", trim($k), $m)) {
+            elseif (preg_match("#^(^/\*(.*?)\*/)?[$joinsigns].#u", trim($k), $m)) {
                 $join = new self($database, $k, []);
                 foreach ($join->column as $c2) {
                     $this->column[] = new Select(...Select::split($join->accessor . '.' . $c2, null));

@@ -103,6 +103,12 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
             'test',
             ['c',],
         ])));
+
+        $this->assertEquals(['/*+comment*/test'], array_map($of, TableDescriptor::forge($database, '/*+comment*/test')));
+
+        $nest = TableDescriptor::forge($database, 'test1/*test1 1*//test2/*test2 2*/', []);
+        $this->assertEquals(['test1/*test1 1*/'], array_map($of, $nest));
+        $this->assertEquals('test2/*test2 2*/', array_key_first($nest[0]->column));
     }
 
     /**
@@ -325,6 +331,9 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertDescriptor(new TableDescriptor($database, 't_article(1)+aid-did#10-20[on1 = 1]@@scope1@scope2(1, 2):fkeyname<id, cid> AS T.id as ID', []), $expected);
         $this->assertDescriptor(new TableDescriptor($database, 't_article(1)[on1 = 1]+aid-did<id, cid>#10-20:fkeyname@@scope1@scope2(1, 2) AS T.id as ID', []), $expected);
 
+        $expected['comment'] = ' this is comment ';
+        $this->assertDescriptor(new TableDescriptor($database, '/* this is comment */t_article(1)[on1 = 1]+aid-did<id, cid>#10-20:fkeyname@@scope1@scope2(1, 2) AS T.id as ID', []), $expected);
+
         // JOIN
         $td = new TableDescriptor($database, '+t_table T', [
             'alias' => '+t_join.id',
@@ -421,6 +430,17 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
     function test___construct_misc($database)
     {
         // misc
+        $this->assertDescriptor(new TableDescriptor($database, '/*+comment*/+test T', ['id']), [
+            'comment'  => '+comment',
+            'table'    => 'test',
+            'alias'    => 'T',
+            'accessor' => 'T',
+            'joinsign' => '+',
+            'jointype' => 'INNER',
+            'fkeyname' => null,
+            'column'   => ['id'],
+            'key'      => '+test T',
+        ]);
         $this->assertDescriptor(new TableDescriptor($database, '+test T', ['id']), [
             'table'    => 'test',
             'alias'    => 'T',
