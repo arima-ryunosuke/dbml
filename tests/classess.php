@@ -50,6 +50,20 @@ namespace ryunosuke\Test {
         }
     }
 
+    class Mailaddress
+    {
+        public function __construct(private string $mailaddress)
+        {
+        }
+    }
+
+    class DateTime
+    {
+        public function __construct(...$args)
+        {
+        }
+    }
+
     /**
      * テスト用 Database
      *

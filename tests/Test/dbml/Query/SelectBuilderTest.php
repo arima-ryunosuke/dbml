@@ -22,6 +22,9 @@ use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Expression\Operator;
 use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\Test\Database;
+use ryunosuke\Test\DateTime;
+use ryunosuke\Test\Mailaddress;
+use ryunosuke\Test\StringEnum;
 use function ryunosuke\dbml\arrayval;
 use function ryunosuke\dbml\try_return;
 
@@ -643,6 +646,59 @@ FROM test1 t1 INNER JOIN test2 t2 ON t1.id = t2.id", $builder);
                 'id' => function ($id = 123) { },
             ],
         ])->wasThrown('only ?string is allowed');
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
+    function test_column_class($builder)
+    {
+        $builder->getDatabase()->test->update(['data' => 'hoge'], ['id' => 1]);
+        $builder->getDatabase()->test->update(['data' => 'fuga'], ['id' => 2]);
+        $builder->getDatabase()->test->update(['data' => null], ['id' => 3]);
+
+        $builder->column([
+            'test t' => [
+                'id',
+                'mailaddress'  => 'data',
+                'vo1'          => Mailaddress::class,
+                'vo2'          => DateTime::class,
+                'data AS vo3'  => DateTime::class,
+                'data AS enum' => StringEnum::class,
+                'data'         => StringEnum::class,
+            ],
+        ])->where(['' => [1, 2, 3]]);
+
+        $rows = $builder->assoc();
+
+        $this->assertInstanceOf(Mailaddress::class, $rows[1]['vo1']);
+        $this->assertInstanceOf(Mailaddress::class, $rows[2]['vo1']);
+        $this->assertNull($rows[3]['vo1']);
+
+        $this->assertInstanceOf(DateTime::class, $rows[1]['vo2']);
+        $this->assertInstanceOf(DateTime::class, $rows[2]['vo2']);
+        $this->assertInstanceOf(DateTime::class, $rows[3]['vo2']);
+
+        $this->assertInstanceOf(DateTime::class, $rows[1]['vo3']);
+        $this->assertInstanceOf(DateTime::class, $rows[2]['vo3']);
+        $this->assertInstanceOf(DateTime::class, $rows[3]['vo3']);
+
+        $this->assertSame(StringEnum::StringHoge(), $rows[1]['enum']);
+        $this->assertSame(StringEnum::StringFuga(), $rows[2]['enum']);
+        $this->assertNull($rows[3]['enum']);
+
+        $this->assertSame(StringEnum::StringHoge(), $rows[1]['data']);
+        $this->assertSame(StringEnum::StringFuga(), $rows[2]['data']);
+        $this->assertNull($rows[3]['data']);
+
+        $builder->reset()->column([
+            'test t' => [
+                'data' => StringEnum::class,
+            ],
+        ])->where(['' => [4]]);
+
+        that($builder)->assoc()->wasThrown('is not a valid backing value');
     }
 
     /**

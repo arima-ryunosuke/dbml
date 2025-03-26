@@ -116,7 +116,7 @@ abstract class AbstractUnitTestCase extends TestCase
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
                                 new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
-                                new Column('data', Type::getType('string'), ['length' => 255, 'default' => '']),
+                                new Column('data', Type::getType('string'), ['length' => 255, 'default' => '', 'notnull' => false]),
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
                             [],

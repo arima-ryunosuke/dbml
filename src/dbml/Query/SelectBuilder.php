@@ -801,6 +801,58 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 }
                 $this->callbacks[$key] = [$column, array_and($args, 'is_null') ? [] : $args];
             }
+            // クラス名は new するコールバック（ValueObject のようなものを想定）
+            // 互換性の問題でたまたま一致した場合に壊れてしまうので完全一致かつ名前空間所属のみとする
+            elseif (is_string($column) && class_exists($column) && ($ref = new \ReflectionClass($column)) && $ref->getName() === $column && $ref->inNamespace()) {
+                /** @noinspection PhpElementIsNotAvailableInCurrentPhpVersionInspection */
+                if (is_subclass_of($column, \BackedEnum::class)) {
+                    // エイリアスを指定する術がないので AS を許容する
+                    [$key2, $col] = Select::split($key, null);
+                    if ($key2 !== null) {
+                        $key = $key2;
+                    }
+                    $arg = Database::AUTO_DEPEND_KEY . "{$table}___{$col}";
+                    $result[] = Select::forge($arg, "{$prefix}{$col}", $prefix);
+
+                    $this->callbacks[$key] = [fn($arg) => isset($arg) ? $column::from($arg) : null, [$arg]];
+                    $result[] = Select::forge($key, 'NULL');
+                }
+                elseif ($constructor = $ref->getConstructor()) {
+                    $new = function ($args) use ($column) {
+                        try {
+                            return new $column(...$args);
+                        }
+                        catch (\TypeError) {
+                            return null;
+                        }
+                    };
+                    // 基本的に名前付き引数の行コールバックでいいが、名前を合わせるのが難しい時にカラムを指定したいことがある
+                    [$key2, $col] = Select::split($key, null);
+                    if ($key2 === null) {
+                        // 可変引数ならあらゆる名前付き引数を受け入れるがそうでない場合はエラーになるので名前の共通を取る
+                        if ($constructor->isVariadic()) {
+                            $params = null;
+                        }
+                        else {
+                            $params = array_flip(array_map(fn($p) => $p->getName(), $constructor->getParameters()));
+                        }
+
+                        $this->callbacks[$key] = [fn($row) => $new(($params === null ? $row : array_intersect_key($row, $params))), []];
+                    }
+                    else {
+                        $key = $key2;
+                        $cols = split_noempty(',', $col);
+                        $args = [];
+                        foreach ($cols as $n => $col) {
+                            $args[$n] = Database::AUTO_DEPEND_KEY . "{$table}___{$col}";
+                            $result[] = Select::forge($args[$n], "{$prefix}{$col}", $prefix);
+                        }
+
+                        $this->callbacks[$key] = [fn(...$args) => $new($args), $args];
+                    }
+                    $result[] = Select::forge($key, 'NULL');
+                }
+            }
             // Expression なら文字列化したものをそのまま select
             elseif ($column instanceof Expression) {
                 $result[] = Select::forge($key, $column, $prefix);
