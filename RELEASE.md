@@ -21,6 +21,17 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.3
+
+- [feature] カラムにクラス名を指定するとオブジェクトが得られる機能
+- [feature] select 句自体のコメントに対応
+- [feature] テーブル記法のコメントに対応
+- [fixbug] 一度キャッシュすると通常クエリもキャッシュされてしまう不具合
+- [feature] TableGateway に immutable モードを追加
+- [feature] TableGateway の get/set でカラムアクセスできる機能
+- [feature] OptionTrait に shallow モードを追加
+- [feature] generate 機能の強化
+
 ## 3.1.2
 
 - [tests] sqlite の memory までキャッシュされているので明確に消す
