@@ -1,4 +1,5 @@
 /.php_cs.cache
+/docs/.md
 /vendor
 /tests/.gen
 /tests/.stub

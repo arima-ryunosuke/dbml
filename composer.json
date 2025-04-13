@@ -49,7 +49,8 @@
     "build": [
       "@export",
       "@diff",
-      "@test"
+      "@test",
+      "@docs"
     ],
     "export": [
       "export-function",
@@ -63,6 +64,11 @@
     ],
     "test": [
       "vendor/bin/phpunit --configuration=tests/phpunit.xml"
+    ],
+    "docs": [
+      "rm -rf ./docs",
+      "@php ./bin/documentize.phar generate ./ ./docs/.md --force --stats --config=./.docconfig.php",
+      "@php ./bin/htmarkdown.phar --locale=ja --sort_order=asc --defaults.toc_level=3 --defaults.toc_number=false --defaults.section_number=false ./docs/.md ./docs"
     ],
     "post-install-cmd": [
       "@export",
