@@ -14,7 +14,7 @@ Doctrine/dbal を使用して CRUD 操作に特化したライブラリです。
 
 ドキュメントは下記においてあります。
 
-- [クラスリファレンス](https://arima-ryunosuke.github.io/document/dbml/)
+- [クラスリファレンス](https://arima-ryunosuke.github.io/dbml/)
 
 ## Install
 
