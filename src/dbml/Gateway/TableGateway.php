@@ -2304,6 +2304,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::getEmptyRecord()
      */
+    #[AssumeType('entity', 'shape')]
     public function getEmptyRecord($default = [])
     {
         return $this->database->getEmptyRecord($this->original->alias ?: $this->tableName, $default);
@@ -2340,6 +2341,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::insertSelect()
      */
+    #[AssumeType('mixed')]
     public function insertSelect($sql, $columns = [], iterable $params = [], ...$opt)
     {
         $this->resetResult();
@@ -2353,6 +2355,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::insertArray()
      */
+    #[AssumeType('mixed')]
     public function insertArray(
         #[AssumeType('entities', 'shapes')] $data,
         ...$opt
@@ -2368,6 +2371,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::updateArray()
      */
+    #[AssumeType('mixed')]
     public function updateArray(
         #[AssumeType('entities', 'shapes')] $data,
         #[AssumeType('shape')] $where = [],
@@ -2384,6 +2388,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::deleteArray()
      */
+    #[AssumeType('mixed')]
     public function deleteArray(
         #[AssumeType('shapes')] $where = [],
         ...$opt
@@ -2399,6 +2404,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::modifyArray()
      */
+    #[AssumeType('mixed')]
     public function modifyArray(
         #[AssumeType('entities', 'shapes')] $insertData,
         #[AssumeType('entity', 'shape')] $updateData = [],
@@ -2414,6 +2420,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::changeArray()
      */
+    #[AssumeType('mixed')]
     public function changeArray(
         #[AssumeType('entities', 'shapes')] $dataarray,
         #[AssumeType('shape')] $where,
@@ -2430,6 +2437,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::affectArray()
      */
+    #[AssumeType('mixed')]
     public function affectArray(
         #[AssumeType('entities', 'shapes')] $dataarray,
         ...$opt
@@ -2443,6 +2451,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::save()
      */
+    #[AssumeType('mixed')]
     public function save(
         #[AssumeType('entity', 'shape')] $data,
         ...$opt
@@ -2459,6 +2468,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::insert()
      */
+    #[AssumeType('mixed')]
     public function insert(
         #[AssumeType('entity', 'shape')] $data,
         ...$opt
@@ -2476,6 +2486,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::update()
      */
+    #[AssumeType('mixed')]
     public function update(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
@@ -2494,8 +2505,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::delete()
      */
-    public function delete(#[AssumeType('shape')] $where = [], ...$opt)
-    {
+    #[AssumeType('mixed')]
+    public function delete(
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         $this->resetResult();
         return $this->database->delete($this, $where, ...$opt);
     }
@@ -2509,6 +2523,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::invalid()
      */
+    #[AssumeType('mixed')]
     public function invalid(
         #[AssumeType('shape')] $where = [],
         #[AssumeType('shape')] ?array $invalid_columns = null,
@@ -2527,6 +2542,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::revise()
      */
+    #[AssumeType('mixed')]
     public function revise(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
@@ -2545,6 +2561,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::upgrade()
      */
+    #[AssumeType('mixed')]
     public function upgrade(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
@@ -2563,6 +2580,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::remove()
      */
+    #[AssumeType('mixed')]
     public function remove(
         #[AssumeType('shape')] $where = [],
         ...$opt
@@ -2580,6 +2598,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::destroy()
      */
+    #[AssumeType('mixed')]
     public function destroy(
         #[AssumeType('shape')] $where = [],
         ...$opt
@@ -2596,6 +2615,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::reduce()
      */
+    #[AssumeType('mixed')]
     public function reduce(
         $limit = null,
         $orderBy = [],
@@ -2616,6 +2636,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::upsert()
      */
+    #[AssumeType('mixed')]
     public function upsert(
         #[AssumeType('entity', 'shape')] $insertData,
         #[AssumeType('entity', 'shape')] $updateData = [],
@@ -2634,6 +2655,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::modify()
      */
+    #[AssumeType('mixed')]
     public function modify(
         #[AssumeType('entity', 'shape')] $insertData,
         #[AssumeType('entity', 'shape')] $updateData = [],
@@ -2653,6 +2675,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::replace()
      */
+    #[AssumeType('mixed')]
     public function replace(
         #[AssumeType('entity', 'shape')] $data,
         ...$opt
@@ -2666,6 +2689,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::truncate()
      */
+    #[AssumeType('mixed')]
     public function truncate()
     {
         $this->resetResult();
@@ -2677,6 +2701,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc Database::eliminate()
      */
+    #[AssumeType('mixed')]
     public function eliminate()
     {
         $this->resetResult();

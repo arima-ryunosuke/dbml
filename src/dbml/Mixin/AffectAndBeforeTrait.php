@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Exception\NonAffectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
@@ -25,8 +26,12 @@ trait AffectAndBeforeTrait
      *
      * @inheritdoc TableGateway::updateArray()
      */
-    private function updateArrayAndBeforeWithoutTable($data, $where = [], ...$opt)
-    {
+    #[AssumeType('shapes', 'entities')]
+    private function updateArrayAndBeforeWithoutTable(
+        #[AssumeType('entities', 'shapes')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'updateArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->updateArray($data, $where, ...($opt + ['return' => 'before']));
     }
@@ -47,8 +52,11 @@ trait AffectAndBeforeTrait
      *
      * @inheritdoc TableGateway::deleteArray()
      */
-    private function deleteArrayAndBeforeWithoutTable($where = [], ...$opt)
-    {
+    #[AssumeType('shapes', 'entities')]
+    private function deleteArrayAndBeforeWithoutTable(
+        #[AssumeType('shapes')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'deleteArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->deleteArray($where, ...($opt + ['return' => 'before']));
     }
@@ -69,8 +77,13 @@ trait AffectAndBeforeTrait
      *
      * @inheritdoc TableGateway::modifyArray()
      */
-    private function modifyArrayAndBeforeWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
-    {
+    #[AssumeType('shapes', 'entities')]
+    private function modifyArrayAndBeforeWithoutTable(
+        #[AssumeType('entities', 'shapes')] $insertData,
+        #[AssumeType('entity', 'shape')] $updateData = [],
+        $uniquekey = 'PRIMARY',
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'modifyArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->modifyArray($insertData, $updateData, $uniquekey, ...($opt + ['return' => 'before']));
     }
@@ -93,8 +106,12 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::update()
      * @return array|string
      */
-    private function updateAndBeforeWithoutTable($data, $where = [], ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function updateAndBeforeWithoutTable(
+        #[AssumeType('entity', 'shape')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
         return $this->update($data, $where, ...($opt + ['return' => 'before']));
     }
@@ -117,8 +134,11 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::delete()
      * @return array|string
      */
-    private function deleteAndBeforeWithoutTable($where = [], ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function deleteAndBeforeWithoutTable(
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
         return $this->delete($where, ...($opt + ['return' => 'before']));
     }
@@ -141,8 +161,12 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::invalid()
      * @return array|string
      */
-    private function invalidAndBeforeWithoutTable($where = [], $invalid_columns = null, ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function invalidAndBeforeWithoutTable(
+        #[AssumeType('shape')] $where = [],
+        #[AssumeType('shape')] ?array $invalid_columns = null,
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
         return $this->invalid($where, $invalid_columns, ...($opt + ['return' => 'before']));
     }
@@ -165,8 +189,12 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::revise()
      * @return array|string
      */
-    private function reviseAndBeforeWithoutTable($data, $where = [], ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function reviseAndBeforeWithoutTable(
+        #[AssumeType('entity', 'shape')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
         return $this->revise($data, $where, ...($opt + ['return' => 'before']));
     }
@@ -189,8 +217,12 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::upgrade()
      * @return array|string
      */
-    private function upgradeAndBeforeWithoutTable($data, $where = [], ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function upgradeAndBeforeWithoutTable(
+        #[AssumeType('entity', 'shape')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
         return $this->upgrade($data, $where, ...($opt + ['return' => 'before']));
     }
@@ -213,8 +245,11 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::remove()
      * @return array|string
      */
-    private function removeAndBeforeWithoutTable($where = [], ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function removeAndBeforeWithoutTable(
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
         return $this->remove($where, ...($opt + ['return' => 'before']));
     }
@@ -237,8 +272,11 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::destroy()
      * @return array|string
      */
-    private function destroyAndBeforeWithoutTable($where = [], ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function destroyAndBeforeWithoutTable(
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
         return $this->destroy($where, ...($opt + ['return' => 'before']));
     }
@@ -263,8 +301,14 @@ trait AffectAndBeforeTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function reduceAndBeforeWithoutTable($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function reduceAndBeforeWithoutTable(
+        $limit = null,
+        $orderBy = [],
+        $groupBy = [],
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'reduce']) === parameter_default([$this, __FUNCTION__]));
         return $this->reduce($limit, $orderBy, $groupBy, $where, ...($opt + ['return' => 'before']));
     }
@@ -287,8 +331,12 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::upsert()
      * @return array|string
      */
-    private function upsertAndBeforeWithoutTable($insertData, $updateData = [], ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function upsertAndBeforeWithoutTable(
+        #[AssumeType('entity', 'shape')] $insertData,
+        #[AssumeType('entity', 'shape')] $updateData = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
         return $this->upsert($insertData, $updateData, ...($opt + ['return' => 'before']));
     }
@@ -311,8 +359,13 @@ trait AffectAndBeforeTrait
      * @inheritdoc Database::modify()
      * @return array|string
      */
-    private function modifyAndBeforeWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function modifyAndBeforeWithoutTable(
+        #[AssumeType('entity', 'shape')] $insertData,
+        #[AssumeType('entity', 'shape')] $updateData = [],
+        $uniquekey = 'PRIMARY',
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
         return $this->modify($insertData, $updateData, $uniquekey, ...($opt + ['return' => 'before']));
     }
@@ -335,8 +388,11 @@ trait AffectAndBeforeTrait
      * @inheritdoc TableGateway::replace()
      * @return array|string
      */
-    private function replaceAndBeforeWithoutTable($data, ...$opt)
-    {
+    #[AssumeType('shape', 'entity')]
+    private function replaceAndBeforeWithoutTable(
+        #[AssumeType('entity', 'shape')] $data,
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
         return $this->replace($data, ...($opt + ['return' => 'before']));
     }

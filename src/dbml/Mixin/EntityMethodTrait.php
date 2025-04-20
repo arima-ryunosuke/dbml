@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 
 trait EntityMethodTrait
@@ -11,6 +12,7 @@ trait EntityMethodTrait
      *
      * @inheritdoc Database::entity()
      */
+    #[AssumeType('entities')]
     public function entityArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->array();
@@ -21,6 +23,7 @@ trait EntityMethodTrait
      *
      * @inheritdoc Database::entity()
      */
+    #[AssumeType('entities')]
     public function entityAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->assoc();
@@ -31,6 +34,7 @@ trait EntityMethodTrait
      *
      * @inheritdoc Database::entity()
      */
+    #[AssumeType('entity')]
     public function entityTuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->tuple();

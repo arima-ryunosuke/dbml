@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 
 trait EntityForAffectTrait
@@ -11,7 +12,8 @@ trait EntityForAffectTrait
      *
      * @inheritdoc Database::entityArray()
      */
-    public function entityArrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities')]
+    public function entityArrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchArrayOrThrow($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
     }
@@ -21,7 +23,8 @@ trait EntityForAffectTrait
      *
      * @inheritdoc Database::entityAssoc()
      */
-    public function entityAssocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities')]
+    public function entityAssocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchAssocOrThrow($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
     }
@@ -31,7 +34,8 @@ trait EntityForAffectTrait
      *
      * @inheritdoc Database::entityTuple()
      */
-    public function entityTupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entity')]
+    public function entityTupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchTupleOrThrow($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate());
     }

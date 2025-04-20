@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 
 trait SelectForUpdateTrait
@@ -11,7 +12,8 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectArray()
      */
-    private function selectArrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities', 'shapes')]
+    private function selectArrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->array();
     }
@@ -21,7 +23,8 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectAssoc()
      */
-    private function selectAssocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities', 'shapes')]
+    private function selectAssocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->assoc();
     }
@@ -31,7 +34,7 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectLists()
      */
-    private function selectListsForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectListsForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->lists();
     }
@@ -41,7 +44,7 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectPairs()
      */
-    private function selectPairsForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectPairsForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->pairs();
     }
@@ -51,7 +54,8 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectTuple()
      */
-    private function selectTupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entity', 'shape')]
+    private function selectTupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->tuple();
     }
@@ -61,7 +65,7 @@ trait SelectForUpdateTrait
      *
      * @inheritdoc Database::selectValue()
      */
-    private function selectValueForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectValueForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->value();
     }

@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Exception\NonAffectedException;
 use ryunosuke\dbml\Gateway\TableGateway;
@@ -32,8 +33,11 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function insertArrayOrThrowWithoutTable($data, ...$opt)
-    {
+    #[AssumeType('primaries')]
+    private function insertArrayOrThrowWithoutTable(
+        #[AssumeType('entities', 'shapes')] $data,
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'insertArray']) === parameter_default([$this, __FUNCTION__]));
         return $this->insertArray($data, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -59,8 +63,11 @@ trait AffectOrThrowTrait
      * @inheritdoc TableGateway::insert()
      * @see createWithTable()
      */
-    private function createWithoutTable($data, ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function createWithoutTable(
+        #[AssumeType('entity', 'shape')] $data,
+        ...$opt
+    ) {
         return $this->insertOrThrowWithoutTable($data, ...$opt);
     }
 
@@ -84,8 +91,11 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function insertOrThrowWithoutTable($data, ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function insertOrThrowWithoutTable(
+        #[AssumeType('entity', 'shape')] $data,
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'insert']) === parameter_default([$this, __FUNCTION__]));
         return $this->insert($data, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -110,8 +120,12 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function updateOrThrowWithoutTable($data, $where = [], ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function updateOrThrowWithoutTable(
+        #[AssumeType('entity', 'shape')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'update']) === parameter_default([$this, __FUNCTION__]));
         return $this->update($data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -136,8 +150,11 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function deleteOrThrowWithoutTable($where = [], ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function deleteOrThrowWithoutTable(
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'delete']) === parameter_default([$this, __FUNCTION__]));
         return $this->delete($where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -162,8 +179,12 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function invalidOrThrowWithoutTable($where = [], $invalid_columns = null, ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function invalidOrThrowWithoutTable(
+        #[AssumeType('shape')] $where = [],
+        #[AssumeType('shape')] ?array $invalid_columns = null,
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'invalid']) === parameter_default([$this, __FUNCTION__]));
         return $this->invalid($where, $invalid_columns, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -188,8 +209,12 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function reviseOrThrowWithoutTable($data, $where = [], ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function reviseOrThrowWithoutTable(
+        #[AssumeType('entity', 'shape')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
         return $this->revise($data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -214,8 +239,12 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function upgradeOrThrowWithoutTable($data, $where = [], ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function upgradeOrThrowWithoutTable(
+        #[AssumeType('entity', 'shape')] $data,
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
         return $this->upgrade($data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -240,8 +269,11 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function removeOrThrowWithoutTable($where = [], ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function removeOrThrowWithoutTable(
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
         return $this->remove($where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -266,8 +298,11 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function destroyOrThrowWithoutTable($where = [], ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function destroyOrThrowWithoutTable(
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
         return $this->destroy($where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -292,8 +327,14 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function reduceOrThrowWithoutTable($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function reduceOrThrowWithoutTable(
+        $limit = null,
+        $orderBy = [],
+        $groupBy = [],
+        #[AssumeType('shape')] $where = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'reduce']) === parameter_default([$this, __FUNCTION__]));
         return $this->reduce($limit, $orderBy, $groupBy, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -318,8 +359,12 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function upsertOrThrowWithoutTable($insertData, $updateData = [], ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function upsertOrThrowWithoutTable(
+        #[AssumeType('entity', 'shape')] $insertData,
+        #[AssumeType('entity', 'shape')] $updateData = [],
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
         return $this->upsert($insertData, $updateData, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -344,8 +389,13 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function modifyOrThrowWithoutTable($insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function modifyOrThrowWithoutTable(
+        #[AssumeType('entity', 'shape')] $insertData,
+        #[AssumeType('entity', 'shape')] $updateData = [],
+        $uniquekey = 'PRIMARY',
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'modify']) === parameter_default([$this, __FUNCTION__]));
         return $this->modify($insertData, $updateData, $uniquekey, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
@@ -370,8 +420,11 @@ trait AffectOrThrowTrait
      * @return array|string
      * @throws NonAffectedException
      */
-    private function replaceOrThrowWithoutTable($data, ...$opt)
-    {
+    #[AssumeType('primary')]
+    private function replaceOrThrowWithoutTable(
+        #[AssumeType('entity', 'shape')] $data,
+        ...$opt
+    ) {
         assert(parameter_default([$this, 'replace']) === parameter_default([$this, __FUNCTION__]));
         return $this->replace($data, ...($opt + ['throw' => true, 'return' => 'primary']));
     }

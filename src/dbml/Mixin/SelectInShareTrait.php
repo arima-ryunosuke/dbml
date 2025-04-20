@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 
 trait SelectInShareTrait
@@ -11,7 +12,8 @@ trait SelectInShareTrait
      *
      * @inheritdoc Database::selectArray()
      */
-    private function selectArrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities', 'shapes')]
+    private function selectArrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->array();
     }
@@ -21,7 +23,8 @@ trait SelectInShareTrait
      *
      * @inheritdoc Database::selectAssoc()
      */
-    private function selectAssocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities', 'shapes')]
+    private function selectAssocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->assoc();
     }
@@ -31,7 +34,7 @@ trait SelectInShareTrait
      *
      * @inheritdoc Database::selectLists()
      */
-    private function selectListsInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectListsInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->lists();
     }
@@ -41,7 +44,7 @@ trait SelectInShareTrait
      *
      * @inheritdoc Database::selectPairs()
      */
-    private function selectPairsInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectPairsInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->pairs();
     }
@@ -51,7 +54,8 @@ trait SelectInShareTrait
      *
      * @inheritdoc Database::selectTuple()
      */
-    private function selectTupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entity', 'shape')]
+    private function selectTupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->tuple();
     }
@@ -61,7 +65,7 @@ trait SelectInShareTrait
      *
      * @inheritdoc Database::selectValue()
      */
-    private function selectValueInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function selectValueInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->value();
     }

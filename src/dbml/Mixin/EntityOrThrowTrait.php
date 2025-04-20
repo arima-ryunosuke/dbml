@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 
 trait EntityOrThrowTrait
@@ -11,7 +12,8 @@ trait EntityOrThrowTrait
      *
      * @inheritdoc Database::entityArray()
      */
-    public function entityArrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities')]
+    public function entityArrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchArrayOrThrow($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
     }
@@ -21,7 +23,8 @@ trait EntityOrThrowTrait
      *
      * @inheritdoc Database::entityAssoc()
      */
-    public function entityAssocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities')]
+    public function entityAssocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchAssocOrThrow($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
     }
@@ -31,7 +34,8 @@ trait EntityOrThrowTrait
      *
      * @inheritdoc Database::entityTuple()
      */
-    public function entityTupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entity')]
+    public function entityTupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->getDatabase()->fetchTupleOrThrow($this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having));
     }

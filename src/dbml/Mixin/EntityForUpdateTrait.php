@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 
 trait EntityForUpdateTrait
@@ -11,7 +12,8 @@ trait EntityForUpdateTrait
      *
      * @inheritdoc Database::entityArray()
      */
-    public function entityArrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities')]
+    public function entityArrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->array();
     }
@@ -21,7 +23,8 @@ trait EntityForUpdateTrait
      *
      * @inheritdoc Database::entityAssoc()
      */
-    public function entityAssocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities')]
+    public function entityAssocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->assoc();
     }
@@ -31,7 +34,8 @@ trait EntityForUpdateTrait
      *
      * @inheritdoc Database::entityTuple()
      */
-    public function entityTupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entity')]
+    public function entityTupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockForUpdate()->tuple();
     }

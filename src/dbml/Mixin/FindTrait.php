@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Gateway\TableGateway;
 
 trait FindTrait
@@ -11,6 +12,7 @@ trait FindTrait
      *
      * @inheritdoc TableGateway::selectFind()
      */
+    #[AssumeType('entity', 'shape')]
     public function find($variadic_primary, $tableDescriptor = [])
     {
         return $this->getDatabase()->fetchTuple($this->selectFind(...func_get_args()));
@@ -21,6 +23,7 @@ trait FindTrait
      *
      * @inheritdoc TableGateway::find()
      */
+    #[AssumeType('entity', 'shape')]
     public function findOrThrow($variadic_primary, $tableDescriptor = [])
     {
         return $this->getDatabase()->fetchTupleOrThrow($this->selectFind(...func_get_args()));
@@ -31,6 +34,7 @@ trait FindTrait
      *
      * @inheritdoc TableGateway::find()
      */
+    #[AssumeType('entity', 'shape')]
     public function findInShare($variadic_primary, $tableDescriptor = [])
     {
         return $this->getDatabase()->fetchTuple($this->selectFind(...func_get_args())->lockInShare());
@@ -41,6 +45,7 @@ trait FindTrait
      *
      * @inheritdoc TableGateway::find()
      */
+    #[AssumeType('entity', 'shape')]
     public function findForUpdate($variadic_primary, $tableDescriptor = [])
     {
         return $this->getDatabase()->fetchTuple($this->selectFind(...func_get_args())->lockForUpdate());
@@ -51,6 +56,7 @@ trait FindTrait
      *
      * @inheritdoc TableGateway::find()
      */
+    #[AssumeType('entity', 'shape')]
     public function findForAffect($variadic_primary, $tableDescriptor = [])
     {
         return $this->getDatabase()->fetchTupleOrThrow($this->selectFind(...func_get_args())->lockForUpdate());

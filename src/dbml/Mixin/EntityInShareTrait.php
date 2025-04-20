@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
 
 trait EntityInShareTrait
@@ -11,7 +12,8 @@ trait EntityInShareTrait
      *
      * @inheritdoc Database::entityArray()
      */
-    public function entityArrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities')]
+    public function entityArrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->array();
     }
@@ -21,7 +23,8 @@ trait EntityInShareTrait
      *
      * @inheritdoc Database::entityAssoc()
      */
-    public function entityAssocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entities')]
+    public function entityAssocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->assoc();
     }
@@ -31,7 +34,8 @@ trait EntityInShareTrait
      *
      * @inheritdoc Database::entityTuple()
      */
-    public function entityTupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    #[AssumeType('entity')]
+    public function entityTupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->entity($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lockInShare()->tuple();
     }

@@ -1431,6 +1431,7 @@ class Database
      */
     public function echoAnnotation(?string $namespace = null, ?string $filename = null): string
     {
+        $schema = $this->getSchema();
         $tablemap = $this->_tableMap();
 
         $gateway_provider = [
@@ -1454,6 +1455,7 @@ class Database
         foreach ($tablemap['TtoE'] ?? [] as $tname => $entity_names) {
             $column_types = $this->_getColumnTypehint($tname);
             $shape = array_sprintf($column_types, '%2$s: %1$s', ', ');
+            $primary = array_sprintf(array_intersect_key($column_types, $schema->getTablePrimaryColumns($tname)), '%2$s: %1$s', ', ');
             $eprops = array_sprintf($column_types, "/** @var %1\$s */\npublic \$%2\$s;");
             $gwprops = array_sprintf($column_types, "/** @var static|%1\$s */\npublic \$%2\$s;");
 
@@ -1463,10 +1465,13 @@ class Database
                 $entity = "{$entity_name}Entity";
 
                 $assume_types = [
+                    'mixed'           => 'mixed',
                     'entity'          => "{$entity}",
                     'shape'           => "array{{$shape}}",
+                    'primary'         => "array{{$primary}}",
                     'entities'        => "array<{$entity}>",
                     'shapes'          => "array<array{{$shape}}>",
+                    'primaries'       => "array<array{{$primary}}>",
                     'iterable'        => "iterable<{$entity}|array{{$shape}}>",
                     'iterable-entiry' => "iterable<{$entity}>",
                     'iterable-shape'  => "iterable<array{{$shape}}>",
@@ -1502,29 +1507,25 @@ class Database
                     }
                 }
 
+                $cmethods = [];
+                foreach ($schema->getTableColumns($tname) as $cname => $column) {
+                    $cmethods[$cname] = "public function $cname(...\$args): static { }";
+                }
+
+                $mmethods = [];
                 $aliases = $refclass->getTraitAliases();
-                $methods = [];
-
-                foreach ($this->getSchema()->getTableColumns($tname) as $cname => $column) {
-                    $methods[$cname] = "public function $cname(...\$args): static { }";
-                }
                 foreach ($targets as $name => $target) {
-                    // こいつらにも属性を付ければこんなことは不要だが面倒くさすぎる
-                    foreach (['', 'InShare', 'ForUpdate', 'ForAffect', 'AndPrimary', 'AndBefore', 'OrThrow'] as $suffix) {
-                        $fullname = $name . $suffix;
-                        if ($refclass->hasMethod($fullname)) {
-                            $see = "\n * @see \\$gclass::$fullname()" . (isset($aliases[$fullname]) ? "\n * @see \\{$aliases[$fullname]}()" : "");
-                            $params = $target['params'] ?? [] ? implode('', array_maps($target['params'], fn($v, $k) => "\n * @param {$v->type($assume_types)} \$$k")) : "";
-                            $return = $target['return'] ?? '' ? "\n * @return {$target['return']->type($assume_types)}" : "";
-                            $doccomment = "/**{$see}{$params}{$return}\n */";
-                            $args = implode(', ', function_parameter($target['method']));
-                            $type = $target['method']->hasReturnType() ? ": {$target['method']->getReturnType()}" : "";
-                            $methods[$fullname] = "$doccomment\npublic function $fullname($args)$type { }";
-                        }
-                    }
+                    $see = "\n * @see \\$gclass::$name()" . (isset($aliases[$name]) ? "\n * @see \\{$aliases[$name]}()" : "");
+                    $params = $target['params'] ?? [] ? implode('', array_maps($target['params'], fn($v, $k) => "\n * @param {$v->type($assume_types)} \$$k")) : "";
+                    $return = $target['return'] ?? '' ? "\n * @return {$target['return']->type($assume_types)}" : "";
+                    $doccomment = "/**{$see}{$params}{$return}\n */";
+                    $args = implode(', ', function_parameter($target['method']));
+                    $type = $target['method']->hasReturnType() ? ": {$target['method']->getReturnType()}" : "";
+                    $mmethods[$name] = "$doccomment\npublic function $name($args)$type { }";
                 }
+                ksort($mmethods);
 
-                $gateways["{$entity_name}TableGateway extends \\$gclass"] = ["use TableGatewayProvider;"] + $gwprops + $methods;
+                $gateways["{$entity_name}TableGateway extends \\$gclass"] = ["use TableGatewayProvider;"] + $gwprops + $cmethods + $mmethods;
                 $entities["{$entity_name}Entity extends \\$eclass"] = $eprops;
             }
         }
