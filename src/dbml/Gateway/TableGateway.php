@@ -1911,12 +1911,14 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function pk(...$variadic): static
     {
-        $where = array_map([$this, '_primary'], $variadic);
-        $that = $this->where([$where]);
-        if (count($where) === 1) {
-            $that->pkukval = reset($where);
+        // OR の対処のために構造がぶっ壊れるので1つの時は特別扱いする
+        if (count($variadic) === 1) {
+            $where = $this->_primary($variadic[0]);
+            $that = $this->where($where);
+            $that->pkukval = $where;
+            return $that;
         }
-        return $that;
+        return $this->where([array_map([$this, '_primary'], $variadic)]);
     }
 
     /**
