@@ -48,6 +48,30 @@ class IteratorTraitTest extends \ryunosuke\Test\AbstractUnitTestCase
 
         that($it)->setProvider(123)->wasThrown('is invalid');
     }
+
+    function test_applay()
+    {
+        $it = new IteratorTest();
+
+        $it->setProvider((function () {
+            yield 1 => 'a';
+            yield 2 => 'b';
+            yield 3 => 'c';
+        }));
+
+        $it->apply(function ($v) {
+            return strtoupper($v);
+        });
+        $it->apply(function ($v, $k, $n) {
+            return "$n:$k:$v";
+        });
+
+        $this->assertEquals([
+            1 => '0:1:A',
+            2 => '1:2:B',
+            3 => '2:3:C',
+        ], $it->getResult());
+    }
 }
 
 class IteratorTest implements \Countable

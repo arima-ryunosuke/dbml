@@ -16,6 +16,8 @@ trait IteratorTrait
 
     private array $__args = [];
 
+    private array $__applyments = [];
+
     #[DebugInfo(false)]
     private ?array $__result = null;
 
@@ -100,7 +102,31 @@ trait IteratorTrait
             throw new \UnexpectedValueException('provider is not set.');
         }
 
-        return $this->__result ??= $this->__provider->call($this, ...$this->__args);
+        return $this->__result ??= (function () {
+            $result = [];
+            $i = 0;
+            foreach ($this->__provider->call($this, ...$this->__args) as $n => $item) {
+                foreach ($this->__applyments as $applyment) {
+                    $item = $applyment($item, $n, $i);
+                }
+                $result[$n] = $item;
+                $i++;
+            }
+            return $result;
+        })();
+    }
+
+    /**
+     * 結果セットの map 処理を登録する
+     *
+     * 複数呼べば複数実行される。
+     *
+     * @ignoreinherit
+     */
+    public function apply(callable $callback): static
+    {
+        $this->__applyments[] = \Closure::fromCallable($callback);
+        return $this;
     }
 
     /**
