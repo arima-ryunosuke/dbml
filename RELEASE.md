@@ -21,6 +21,12 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.4
+
+- [fixbug] pk したときに AndPrimary が動かない不具合
+- [feature] IteratorTrait に apply を追加
+- [feature] 特殊なメソッドの返り値の型の対応
+
 ## 3.1.3
 
 - [feature] カラムにクラス名を指定するとオブジェクトが得られる機能
