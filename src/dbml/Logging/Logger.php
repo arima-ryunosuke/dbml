@@ -216,19 +216,16 @@ class Logger extends AbstractLogger
         return function ($sql, $params, $types, $metadata) use ($simple) {
             // ログ目的なので token_get_all で雑にやる（"" も '' も `` も php 的にはクオーティングなのでリテラルが保護される）
             // SqlServer はなんか特殊なクオートがあった気がするが考慮しない
-            $tokens = token_get_all("<?php " . $sql);
+            $tokens = \PhpToken::tokenize("<?php " . $sql);
             unset($tokens[0]);
 
             $stripsql = '';
             foreach ($tokens as $token) {
-                if (is_string($token)) {
-                    $stripsql .= $token;
-                    continue;
+                $text = $token->text;
+                if ($token->id === T_WHITESPACE) {
+                    $text = ' ';
                 }
-                if ($token[0] === T_WHITESPACE) {
-                    $token[1] = ' ';
-                }
-                $stripsql .= $token[1];
+                $stripsql .= $text;
             }
             return $simple($stripsql, $params, $types, $metadata);
         };
