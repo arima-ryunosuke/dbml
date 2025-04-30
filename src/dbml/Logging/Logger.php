@@ -16,6 +16,7 @@ use function ryunosuke\dbml\is_stringable;
 use function ryunosuke\dbml\parameter_length;
 use function ryunosuke\dbml\sql_format;
 use function ryunosuke\dbml\sql_quote;
+use function ryunosuke\dbml\starts_with;
 use function ryunosuke\dbml\str_ellipsis;
 
 /**
@@ -85,7 +86,7 @@ class Logger extends AbstractLogger
     use DebugInfoTrait;
     use OptionTrait;
 
-    private bool $transacting;
+    private int $transacting;
 
     /** @var resource|\Closure */
     private $handle;
@@ -280,7 +281,7 @@ class Logger extends AbstractLogger
             $buffer = false;
         }
 
-        $this->transacting = false;
+        $this->transacting = 0;
 
         $this->handle = is_string($destination) ? fopen($destination, 'ab') : $destination;
 
@@ -343,7 +344,7 @@ class Logger extends AbstractLogger
 
         // バッファモードじゃないと入り乱れるのでインデントの意味がない（むしろ誤読を助長するので害悪）
         if ($indent && !($this->handle instanceof \Closure && $this->resourceBuffer === null && $this->arrayBuffer === null)) {
-            $result = preg_replace('#^#usm', '  ', $result);
+            $result = preg_replace('#^#usm', str_repeat('  ', $indent), $result);
         }
 
         return $result;
@@ -363,15 +364,23 @@ class Logger extends AbstractLogger
         $currentTransacting = $this->transacting;
 
         if (strcasecmp($message, 'BEGIN') === 0) {
-            $this->transacting = true;
+            $this->transacting = 1;
         }
 
         if (!$this->transacting && $this->getUnsafeOption('transaction')) {
             return;
         }
 
+        if (starts_with($context['sql'] ?? $message, ['SAVEPOINT', 'SAVE TRANSACTION'], true)) {
+            $this->transacting = 1 + $currentTransacting;
+        }
+
+        if (starts_with($context['sql'] ?? $message, ['RELEASE SAVEPOINT', 'ROLLBACK TO SAVEPOINT', 'ROLLBACK TRANSACTION'], true)) {
+            $this->transacting = --$currentTransacting;
+        }
+
         if (strcasecmp($message, 'COMMIT') === 0 || strcasecmp($message, 'ROLLBACK') === 0) {
-            $this->transacting = $currentTransacting = false;
+            $this->transacting = $currentTransacting = 0;
         }
 
         $sql = $context['sql'] ?? $message;

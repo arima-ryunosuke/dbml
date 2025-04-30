@@ -300,11 +300,19 @@ select 4, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 
         $logger->info('ignore');
         $logger->info('begin');
+        $logger->info('transaction1');
+        $logger->info('savepoint hoge');
         $logger->info('logging1');
+        $logger->info('release savepoint hoge');
+        $logger->info('transaction2');
         $logger->info('commit');
         $logger->info('ignore');
         $logger->info('begin');
+        $logger->info('transaction1');
+        $logger->info('savepoint fuga');
         $logger->info('logging2');
+        $logger->info('release savepoint fuga');
+        $logger->info('transaction2');
         $logger->info('rollback');
         $logger->info('ignore');
         unset($logger);
@@ -312,10 +320,18 @@ select 4, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
         rewind($log);
         $this->assertEquals(<<<LOG
         begin
-          logging1
+          transaction1
+          savepoint hoge
+            logging1
+          release savepoint hoge
+          transaction2
         commit
         begin
-          logging2
+          transaction1
+          savepoint fuga
+            logging2
+          release savepoint fuga
+          transaction2
         rollback
         
         LOG, stream_get_contents($log));
