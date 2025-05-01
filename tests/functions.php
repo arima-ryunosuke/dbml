@@ -1702,7 +1702,7 @@ if (!function_exists('ryunosuke\\dbml\\array_filter_map')) {
      *
      * @param iterable $array 対象配列
      * @param callable $callback 評価クロージャ
-     * @return iterable $callback が !false を返し map された配列
+     * @return iterable|array $callback が !false を返し map された配列
      */
     function array_filter_map($array, $callback)
     {
@@ -1790,7 +1790,7 @@ if (!function_exists('ryunosuke\\dbml\\array_filter_recursive')) {
      *
      * @package ryunosuke\Functions\Package\array
      *
-     * @template T as iterable&\ArrayAccess
+     * @template T of iterable&\ArrayAccess
      */
     function array_filter_recursive(
         /** @var T 対象配列 */ iterable $array,
@@ -2887,7 +2887,7 @@ if (!function_exists('ryunosuke\\dbml\\array_map_filter')) {
      * @param iterable $array 対象配列
      * @param callable $callback 評価クロージャ
      * @param bool $strict 厳密比較フラグ。 true だと null のみが偽とみなされる
-     * @return iterable $callback が真を返した新しい配列
+     * @return iterable|array $callback が真を返した新しい配列
      */
     function array_map_filter($array, $callback, $strict = false)
     {
@@ -3069,7 +3069,7 @@ if (!function_exists('ryunosuke\\dbml\\array_maps')) {
      *
      * @param iterable $array 対象配列
      * @param callable ...$callbacks 評価クロージャ配列
-     * @return iterable 評価クロージャを通した新しい配列
+     * @return iterable|array 評価クロージャを通した新しい配列
      */
     function array_maps($array, ...$callbacks)
     {
@@ -4191,6 +4191,75 @@ if (!function_exists('ryunosuke\\dbml\\array_remove')) {
             unset($array[$k]);
         }
         return $array;
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\array_replace_callback') || (new \ReflectionFunction('ryunosuke\\dbml\\array_replace_callback'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\array_replace_callback')) {
+    /**
+     * array_replace のコールバック版
+     *
+     * 基本的なルールは array_replace と全く同じ（連番の扱いや後方優先など）。
+     * 値が重複している場合に重複している配列でコールバックが呼ばれる。
+     *
+     * コールバックの引数は($重複値配列, $そのキー)であり、$重複値配列には重複しなかった配列の値は含まれない。
+     * ただし、キーは維持されるので歯抜けになっていたり、あるべきキーが無かったりを調べればどれとどれが重複ししていたの判定が可能。
+     * もっとも、普通の使用（2引数の配列）では両方に値が入ってくるという前提で問題ない。
+     *
+     * Example:
+     * ```php
+     * $a1 = [
+     *     'a' => 'a1',
+     *     'b' => 'b1',
+     *     'c' => 'c1',
+     *     'x' => 'x1',
+     * ];
+     * $a2 = [
+     *     'a' => 'a2',
+     *     'b' => 'b2',
+     *     'y' => 'y2',
+     * ];
+     * $a3 = [
+     *     'a' => 'a3',
+     *     'c' => 'c3',
+     *     'z' => 'z3',
+     * ];
+     * that(array_replace_callback(fn($args, $k) => "$k:" . json_encode($args), $a1, $a2, $a3))->isSame([
+     *     "a" => 'a:["a1","a2","a3"]',    // 全てに存在するので3つ全てが渡ってくる
+     *     "b" => 'b:["b1","b2"]',         // 1,2 に存在するので2つ渡ってくる
+     *     "c" => 'c:{"0":"c1","2":"c3"}', // 1,3 に存在するので2つ渡ってくる（2が歯抜けになる）
+     *     "x" => 'x1', // 重複していないのでコールバック自体が呼ばれない
+     *     "y" => 'y2', // 重複していないのでコールバック自体が呼ばれない
+     *     "z" => 'z3', // 重複していないのでコールバック自体が呼ばれない
+     * ]);
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\array
+     *
+     * @param callable $callback 重複コールバック
+     * @param array ...$arrays マージする配列
+     * @return array マージされた配列
+     */
+    function array_replace_callback(callable $callback, array ...$arrays)
+    {
+        $callback = func_user_func_array($callback);
+
+        // まず普通に呼んで・・・
+        $result = array_replace(...$arrays);
+
+        // 重複値をコールバックすれば順番も乱れずシンプルに上書きできる
+        foreach ($result as $k => $v) {
+            $duplicated = [];
+            foreach ($arrays as $n => $array) {
+                if (array_key_exists($k, $array)) {
+                    $duplicated[$n] = $array[$k];
+                }
+            }
+            if (count($duplicated) > 1) {
+                $result[$k] = $callback($duplicated, $k);
+            }
+        }
+        return $result;
     }
 }
 
@@ -5719,11 +5788,10 @@ if (!function_exists('ryunosuke\\dbml\\kvsort')) {
      *
      * @package ryunosuke\Functions\Package\array
      *
-     * @template T of iterable|array
-     * @param T $array 対象配列
+     * @param iterable|array 対象配列
      * @param callable|int|null $comparator 比較関数。SORT_XXX も使える
      * @param callable|callable[] $schwartzians シュワルツ変換に使用する仮想列
-     * @return T ソートされた配列
+     * @return array ソートされた配列
      */
     function kvsort($array, $comparator = null, $schwartzians = [])
     {
@@ -5836,7 +5904,6 @@ if (!function_exists('ryunosuke\\dbml\\last_keyvalue')) {
             $k = array_key_last($array);
             return [$k, $array[$k]];
         }
-        /** @noinspection PhpStatementHasEmptyBodyInspection */
         foreach ($array as $k => $v) {
             // dummy
         }
@@ -6360,7 +6427,7 @@ if (!function_exists('ryunosuke\\dbml\\class_extends')) {
 
         $newclassname = "X{$classalias}Class" . md5(uniqid('RF', true));
         $implements = $implements ? 'implements ' . implode(',', $implements) : '';
-        evaluate("class $newclassname extends $classname $implements\n{\nuse X{$classalias}Trait;\n$declares}", [], 10);
+        evaluate("class $newclassname extends $classname $implements\n{\nuse X{$classalias}Trait;\n$declares}");
         return new $newclassname($spawners[$classname]['original'], $object, $fields, $methods);
     }
 }
@@ -7640,6 +7707,7 @@ if (!function_exists('ryunosuke\\dbml\\sql_format')) {
             'KEYS'                       => true,
             'KILL'                       => true,
             'LAST_INSERT_ID'             => true,
+            'LATERAL'                    => true,
             'LEADING'                    => true,
             'LEFT'                       => true,
             'LEVEL'                      => true,
@@ -7715,6 +7783,7 @@ if (!function_exists('ryunosuke\\dbml\\sql_format')) {
             'READ_WRITE'                 => true,
             'REFERENCES'                 => true,
             'REGEXP'                     => true,
+            'RELEASE'                    => true,
             'RELOAD'                     => true,
             'RENAME'                     => true,
             'REPAIR'                     => true,
@@ -7734,6 +7803,7 @@ if (!function_exists('ryunosuke\\dbml\\sql_format')) {
             'ROW'                        => true,
             'ROWS'                       => true,
             'ROW_FORMAT'                 => true,
+            'SAVEPOINT'                  => true,
             'SECOND'                     => true,
             'SECURITY'                   => true,
             'SELECT'                     => true,
@@ -8268,10 +8338,11 @@ if (!function_exists('ryunosuke\\dbml\\sql_format')) {
                 switch ($uppertoken) {
                     default:
                         _DEFAULT:
+                        // （コメントを含めた）先頭行にスペースがついてしまう
                         // "tablename. columnname" になってしまう
                         // "@ var" になってしまう
                         // ": holder" になってしまう
-                        if (!in_array($prev[1], ['.', '@', ':', ';'])) {
+                        if (!in_array($prev[1], ['', '.', '@', ':', ';'], true)) {
                             $result[] = $MARK_SP;
                         }
 
@@ -8360,6 +8431,7 @@ if (!function_exists('ryunosuke\\dbml\\sql_format')) {
                     case "BY":
                     case "ALL":
                     case "RECURSIVE":
+                    case "LATERAL":
                         $result[] = $MARK_SP . $virttoken . $MARK_SP . array_pop($result);
                         break;
                     case "SELECT":
@@ -8489,6 +8561,8 @@ if (!function_exists('ryunosuke\\dbml\\sql_format')) {
                         break;
                     case "COMMIT":
                     case "ROLLBACK":
+                    case "SAVEPOINT":
+                    case "RELEASE":
                         // begin は begin～end の一部の可能性があるが commit,rollback は俺の知る限りそのような構文はない
                         $result[] = $virttoken;
                         break;
@@ -10868,13 +10942,12 @@ if (!function_exists('ryunosuke\\dbml\\paml_import')) {
             }
 
             if ($options['expression']) {
-                $semicolon = ';';
                 if ($prefix === '`' && $suffix === '`') {
-                    $value = eval("return " . substr($value, 1, -1) . $semicolon);
+                    $value = evaluate("return " . substr($value, 1, -1) . ';');
                     return true;
                 }
                 try {
-                    $evalue = @eval("return $value$semicolon");
+                    $evalue = @evaluate("return $value;");
                     if ($value !== $evalue) {
                         $value = $evalue;
                         return true;
@@ -13634,7 +13707,6 @@ if (!function_exists('ryunosuke\\dbml\\process_async')) {
                 }
 
                 try {
-                    /** @noinspection PhpStatementHasEmptyBodyInspection */
                     while ($this->update()) {
                         // noop
                     }
@@ -13832,7 +13904,7 @@ if (!function_exists('ryunosuke\\dbml\\process_closure')) {
         foreach ($autoload as $file) {
             require_once $file;
         }
-        $stdin  = eval(stream_get_contents(STDIN));
+        $stdin  = ' . $namespace . 'evaluate(stream_get_contents(STDIN));
         $timer  = ' . $namespace . 'cpu_timer();
         $return = ' . $closure_code . '(...$stdin);
         file_put_contents($argv[1], ' . $namespace . 'var_export3([$return, $timer->result(), memory_get_peak_usage()], ["outmode" => "file"]));
@@ -17159,7 +17231,7 @@ if (!function_exists('ryunosuke\\dbml\\func_eval')) {
                     $stmt .= $tmp[$i]->text;
                 }
             }
-            $cache[$cachekey] = eval("return function($args) { return $stmt; };");
+            $cache[$cachekey] = evaluate("return function($args) { return $stmt; };");
         }
         return $cache[$cachekey];
     }
@@ -19966,10 +20038,8 @@ if (!function_exists('ryunosuke\\dbml\\evaluate')) {
      * また、素の eval は ParseError が起こったときの表示がわかりにくすぎるので少し見やすくしてある。
      *
      * 関数化してる以上 eval におけるコンテキストの引き継ぎはできない。
-     * ただし、引数で変数配列を渡せるようにしてあるので get_defined_vars を併用すれば基本的には同じ（$this はどうしようもない）。
-     *
-     * 短いステートメントだと opcode が少ないのでファイルを経由せず直接 eval したほうが速いことに留意。
-     * 一応引数で指定できるようにはしてある。
+     *  ただし、引数で変数配列を渡せるようにしてあるので get_defined_vars を併用すれば基本的には同じ。
+     * コンテキストに $this がある場合は bind して疑似的に模倣する。
      *
      * Example:
      * ```php
@@ -19986,34 +20056,40 @@ if (!function_exists('ryunosuke\\dbml\\evaluate')) {
      *
      * @param string $phpcode 実行する php コード
      * @param array $contextvars コンテキスト変数配列
-     * @param int $cachesize キャッシュするサイズ
      * @return mixed eval の return 値
      */
-    function evaluate($phpcode, $contextvars = [], $cachesize = 256)
+    function evaluate($phpcode, $contextvars = [])
     {
-        $cachefile = null;
-        if ($cachesize && strlen($phpcode) >= $cachesize) {
-            $cachefile = function_configure('storagedir') . '/' . rawurlencode(__FUNCTION__) . '-' . sha1($phpcode) . '.php';
-            if (!file_exists($cachefile)) {
-                file_put_contents($cachefile, "<?php $phpcode", LOCK_EX);
-            }
+        $cachefile = function_configure('storagedir') . '/' . rawurlencode(__FUNCTION__) . '-' . sha1($phpcode) . '.php';
+        if (!file_exists($cachefile)) {
+            file_put_contents($cachefile, "<?php $phpcode", LOCK_EX);
         }
 
         try {
-            if ($cachefile) {
-                /** @noinspection PhpMethodParametersCountMismatchInspection */
-                return (static function () {
-                    extract(func_get_arg(1));
-                    return require func_get_arg(0);
-                })($cachefile, $contextvars);
+            $evaler = function () {
+                // extract は数値キーをそのまま展開できない
+                // しかし "${0}" のような記法で数値変数を利用することはできる（可変変数限定だし php8.2 で非推奨になったが）
+                // 要するに数値キーのみをローカルコンテキストに展開しないと完全な eval の代替にならない
+                if (func_get_arg(1)) {
+                    foreach (func_get_arg(1) as $k => $v) {
+                        $$k = $v;
+                    }
+                    // 現スコープで宣言してしまっているので伏せなければならない
+                    unset($k, $v);
+                }
+                extract(func_get_arg(1));
+                return require func_get_arg(0);
+            };
+
+            // $this を模倣する
+            if (isset($contextvars['this'])) {
+                assert(is_object($contextvars['this']));
+                $evaler = $evaler->bindTo($contextvars['this'], get_class($contextvars['this']));
+                unset($contextvars['this']);
             }
-            else {
-                /** @noinspection PhpMethodParametersCountMismatchInspection */
-                return (static function () {
-                    extract(func_get_arg(1));
-                    return eval(func_get_arg(0));
-                })($phpcode, $contextvars);
-            }
+
+            /** @noinspection PhpMethodParametersCountMismatchInspection */
+            return $evaler($cachefile, $contextvars);
         }
         catch (\ParseError $ex) {
             $errline = $ex->getLine();
@@ -20024,9 +20100,7 @@ if (!function_exists('ryunosuke\\dbml\\evaluate')) {
             $N = 5; // 前後の行数
             $message = $ex->getMessage();
             $message .= "\n" . implode("\n", array_slice($codes, max(0, $errline_1 - $N), $N * 2 + 1));
-            if ($cachefile) {
-                $message .= "\n in " . realpath($cachefile) . " on line " . $errline . "\n";
-            }
+            $message .= "\n in " . realpath($cachefile) . " on line " . $errline . "\n";
             throw new \ParseError($message, $ex->getCode(), $ex);
         }
     }
@@ -22258,6 +22332,26 @@ if (!function_exists('ryunosuke\\dbml\\getipaddress')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\http_bechmark') || (new \ReflectionFunction('ryunosuke\\dbml\\http_bechmark'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\http_bechmark')) {
+    /**
+     * @see http_benchmark()
+     * @deprecated スペルミス
+     * @codeCoverageIgnore
+     * @package ryunosuke\Functions\Package\network
+     */
+    function http_bechmark(
+        /** URLs */ array|string $urls,
+        /** 合計リクエスト */ int $requests = 10,
+        /** 同時接続数 */ int $concurrency = 3,
+        /** @param null|resource|bool 出力先（省略時は標準出力） */ $output = null,
+    ): /** 結果配列 */ array
+    {
+        trigger_error(__FUNCTION__ . ' is deprecated. use http_benchmark', E_USER_DEPRECATED);
+        return http_benchmark(...func_get_args());
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\http_benchmark') || (new \ReflectionFunction('ryunosuke\\dbml\\http_benchmark'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\http_benchmark')) {
     /**
@@ -22294,7 +22388,7 @@ if (!function_exists('ryunosuke\\dbml\\http_benchmark')) {
      *
      * @package ryunosuke\Functions\Package\network
      */
-    function http_bechmark(
+    function http_benchmark(
         /** URLs */ array|string $urls,
         /** 合計リクエスト */ int $requests = 10,
         /** 同時接続数 */ int $concurrency = 3,
@@ -25838,6 +25932,7 @@ if (!function_exists('ryunosuke\\dbml\\reflect_callable')) {
      * - getDeclaration: 宣言部のコードを返す
      * - getCode: 定義部のコードを返す
      * - isAnonymous: 無名関数なら true を返す（8.2 の isAnonymous 互換）
+     * - isArrow: アロー演算子で定義されたかを返す（クロージャのみ）
      * - isStatic: $this バインド可能かを返す（クロージャのみ）
      * - getUsedVariables: use している変数配列を返す（クロージャのみ）
      * - getClosure: 元となったオブジェクトを $object としたクロージャを返す（メソッドのみ）
@@ -25942,6 +26037,12 @@ if (!function_exists('ryunosuke\\dbml\\reflect_callable')) {
                     }
 
                     return strpos($this->name, '{closure}') !== false;
+                }
+
+                public function isArrow(): bool
+                {
+                    // しっかりやるなら PHPToken を使った方がいいけど今の php 構文ならこれで大丈夫のはず
+                    return str_starts_with($this->getDeclaration(), 'fn') !== false;
                 }
 
                 public function isStatic(): bool
@@ -28585,16 +28686,7 @@ if (!function_exists('ryunosuke\\dbml\\render_string')) {
         try {
             /** @noinspection PhpMethodParametersCountMismatchInspection */
             return (function () {
-                // extract は数値キーを展開してくれないので自前ループで展開
-                foreach (func_get_arg(1) as $k => $v) {
-                    $$k = $v;
-                }
-                // 現スコープで宣言してしまっているので伏せなければならない
-                unset($k, $v);
-                // かと言って変数配列に k, v キーがあると使えなくなるので更に extract で補完
-                extract(func_get_arg(1));
-                // そして eval. ↑は要するに数値キーのみを展開している
-                return eval(func_get_arg(0));
+                return evaluate(func_get_arg(0), func_get_arg(1));
             })($evalcode, $vars);
         }
         catch (\ParseError $ex) {
@@ -31468,7 +31560,7 @@ if (!function_exists('ryunosuke\\dbml\\cast')) {
 
         // 判定・変換が複雑極まるため実際に投げてその値を返すのが最も間違いが少ない
         static $test_functions = [];
-        $test_functions[$type] ??= eval("return static fn({$type} \$value) => \$value;");
+        $test_functions[$type] ??= evaluate("return static fn({$type} \$value) => \$value;");
         try {
             return $test_functions[$type]($value);
         }
@@ -31506,7 +31598,7 @@ if (!function_exists('ryunosuke\\dbml\\instance_of')) {
      *
      * @package ryunosuke\Functions\Package\syntax
      *
-     * @template T as object
+     * @template T of object
      * @param T $object 調べるオブジェクト
      * @param string|object $class クラス名
      * @return ?T $object が $class のインスタンスなら $object, そうでなければ null
@@ -35635,6 +35727,8 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
      * - 特定の内部クラス（PDO など）
      * - 大部分のリソース
      *
+     * ただし args キーに指定した値は出力されず、import 時にそれらを引数とするクロージャを返すようになるため、疑似的に出力することは可能。
+     *
      * オブジェクトは「リフレクションを用いてコンストラクタなしで生成してプロパティを代入する」という手法で復元する。
      * ただしコンストラクタが必須引数無しの場合はコールされる。
      * のでクラスによってはおかしな状態で復元されることがある（大体はリソース型のせいだが…）。
@@ -35652,6 +35746,28 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
      * 軽くベンチを取ったところ、オブジェクトを含まない純粋な配列の場合、serialize の 200 倍くらいは速い（それでも var_export の方が速いが…）。
      * オブジェクトを含めば含むほど遅くなり、全要素がオブジェクトになると serialize と同程度になる。
      * 大体 var_export:var_export3:serialize が 1:5:1000 くらい。
+     *
+     * Example:
+     * ```php
+     * // 出力不可を含む配列
+     * $value = [
+     *     'stdout' => STDOUT,
+     *     'pdo'    => new \PDO('sqlite::memory:'),
+     * ];
+     * // args を指定すると実際はエクスポートされず、クロージャ表現を返すようになる（値だけ見るのでキーはなんでもよい）
+     * $exported = var_export3($value, ['outmode' => 'eval', 'args' => ['k1' => STDOUT, 'k2' => $value['pdo']]]);
+     * // import するとクロージャが得られる
+     * $closure = eval($exported);
+     * that($closure)->isInstanceOf(\Closure::class);
+     * // 引数付きで実行すれば値が得られる（この引数のキーは出力時のキーと合わせなければならない）
+     * $imported = $closure(['k1' => STDOUT, 'k2' => $value['pdo']]);
+     * that($imported['stdout'])->isSame($value['stdout']);
+     * that($imported['pdo'])->isSame($value['pdo']);
+     * // 要するに実行時に与えられるわけなので、やる気になれば全く関係ない値でも可能
+     * $imported = $closure(['k1' => 123, 'k2' => 456]);
+     * that($imported['stdout'])->isSame(123);
+     * that($imported['pdo'])->isSame(456);
+     * ```
      *
      * @package ryunosuke\Functions\Package\var
      *
@@ -35671,6 +35787,7 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
         $options += [
             'format'  => 'pretty', // pretty or minify
             'outmode' => null,     // null: 本体のみ, 'eval': return ...;, 'file': <?php return ...;
+            'args'    => [],       // ここで指定した値は export に含まれず、import 時に引数で要求されるようになる
         ];
         $options['return'] ??= !!$options['outmode'];
 
@@ -35749,7 +35866,7 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
 
         // 再帰用クロージャ
         $vars = [];
-        $export = function ($value, $nest = 0, $raw = false) use (&$export, &$vars, $var_manager) {
+        $export = function ($value, $nest = 0, $raw = false) use (&$export, &$vars, $var_manager, $options) {
             $spacer0 = str_repeat(" ", 4 * max(0, $nest + 0));
             $spacer1 = str_repeat(" ", 4 * max(0, $nest + 1));
             $raw_export = fn($v) => $v;
@@ -35761,6 +35878,10 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
                     return "\$this->$vid";
                 }
                 $vars[$vid] = $value;
+            }
+
+            if (($arg = array_search($value, $options['args'], true)) !== false) {
+                return "\$this->$vid = \$this->args[{$var_export($arg)}]";
             }
 
             if (is_array($value)) {
@@ -36168,12 +36289,20 @@ if (!function_exists('ryunosuke\\dbml\\var_export3')) {
         }
 
         $E = fn($v) => $v;
-        $result = <<<PHP
-            (function () {
+        $function = <<<PHP
+            function (\$args) {
+                \$this->args = \$args;
                 {$E(implode("\n    ", $others))}
                 return $exported;
-            })->call($factory)
+            }
             PHP;
+
+        if ($options['args']) {
+            $result = "fn(\$args) => ({$function})->call($factory, \$args)";
+        }
+        else {
+            $result = "({$function})->call($factory, [])";
+        }
 
         if ($options['format'] === 'minify') {
             $tmp = tempnam(sys_get_temp_dir(), 've3');
@@ -36625,12 +36754,12 @@ if (!function_exists('ryunosuke\\dbml\\var_pretty')) {
                 if (is_object($value)) {
                     if ($this->options['debuginfo'] && method_exists($value, '__debugInfo')) {
                         $properties = [];
-                        foreach (array_reverse($value->__debugInfo(), true) as $k => $v) {
+                        foreach ($value->__debugInfo() as $k => $v) {
                             $p = strrpos($k, "\0");
                             if ($p !== false) {
                                 $k = substr($k, $p + 1);
                             }
-                            $properties[$k] = $v;
+                            $properties[$k] ??= $v;
                         }
                     }
                     else {
@@ -36776,7 +36905,7 @@ if (!function_exists('ryunosuke\\dbml\\var_pretty')) {
                             }
                             $this->plain($spacer1);
                             if ($is_hasharray) {
-                                $this->index($k)->plain(': ');
+                                $this->index($k === '' ? '""' : $k)->plain(': ');
                             }
                             $this->export($v, $nest + 1, $parents, array_merge($keys, [$k]), true);
                             $this->plain(",\n");
@@ -36803,7 +36932,7 @@ if (!function_exists('ryunosuke\\dbml\\var_pretty')) {
                                 $this->plain('...(too length)...')->plain(', ');
                             }
                             if ($is_hasharray && $n !== $k) {
-                                $this->index($k)->plain(':');
+                                $this->index($k === '' ? '""' : $k)->plain(':');
                             }
                             $this->export($v, $nest, $parents, array_merge($keys, [$k]), true);
                             if ($k !== $lastkey) {
@@ -36839,13 +36968,24 @@ if (!function_exists('ryunosuke\\dbml\\var_pretty')) {
                 elseif ($value instanceof \Closure) {
                     $this->value($value);
 
+                    $ref = reflect_callable($value);
+
+                    if (!str_contains($ref->getFileName(), "eval()'d code") && $ref->isArrow()) {
+                        $this->plain("(");
+                        if ($ref->isStatic()) {
+                            $this->plain("static ");
+                        }
+                        $this->plain("{$ref->getDeclaration()} => {$ref->getCode()}");
+                        $this->plain(')');
+                        goto FINALLY_;
+                    }
+
                     if ($this->options['minify']) {
                         goto FINALLY_;
                     }
 
-                    $ref = reflect_callable($value);
                     $that = $ref->getClosureThis();
-                    $properties = $ref->getStaticVariables();
+                    $properties = $ref->getUsedVariables();
 
                     $this->plain("(");
                     if ($that) {
@@ -36877,7 +37017,12 @@ if (!function_exists('ryunosuke\\dbml\\var_pretty')) {
 
                     $this->plain(" ");
                     if ($properties) {
-                        $this->export($properties, $nest, $parents, $keys, false);
+                        if (count($properties) === 1 && array_keys($properties) === [''] && is_string($properties[''])) {
+                            $this->plain($properties['']);
+                        }
+                        else {
+                            $this->export($properties, $nest, $parents, $keys, false);
+                        }
                     }
                     else {
                         $this->plain('{}');
