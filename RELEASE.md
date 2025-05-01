@@ -21,6 +21,11 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.5
+
+- [refactor] token_get_all を PhpToken::tokenize に変更
+- [feature] SAVEPOINT でもログをインデントする
+
 ## 3.1.4
 
 - [fixbug] pk したときに AndPrimary が動かない不具合
