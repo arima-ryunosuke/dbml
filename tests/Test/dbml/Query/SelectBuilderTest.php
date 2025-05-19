@@ -2475,10 +2475,66 @@ AND (FALSE)", $builder->queryInto());
     function test_orderByArray($builder)
     {
         $builder->column('test.id');
-        $this->assertQuery("SELECT test.id FROM test ORDER BY (CASE id WHEN '3' THEN '0' WHEN '6' THEN '1' WHEN '999' THEN '2' WHEN '5' THEN '3' WHEN '1' THEN '4' END)", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]]))->queryInto());
-        $this->assertQuery("SELECT test.id FROM test ORDER BY (CASE id WHEN '3' THEN '0' WHEN '6' THEN '1' WHEN '999' THEN '2' WHEN '5' THEN '3' WHEN '1' THEN '4' END) DESC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], false))->queryInto());
-        $this->assertQuery("SELECT test.id FROM test ORDER BY (CASE id WHEN '3' THEN '0' WHEN '6' THEN '1' WHEN '999' THEN '2' WHEN '5' THEN '3' WHEN '1' THEN '4' END) ASC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], false), true)->queryInto());
-        $this->assertQuery("SELECT test.id FROM test ORDER BY CASE WHEN (CASE id WHEN '3' THEN '0' WHEN '6' THEN '1' WHEN '999' THEN '2' WHEN '5' THEN '3' WHEN '1' THEN '4' END) IS NULL THEN 0 ELSE 1 END ASC, (CASE id WHEN '3' THEN '0' WHEN '6' THEN '1' WHEN '999' THEN '2' WHEN '5' THEN '3' WHEN '1' THEN '4' END) ASC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]]), true, 'min')->queryInto());
+        $this->assertStringEndsWith("(CASE WHEN id = '3' THEN 0 WHEN id = '6' THEN 1 WHEN id = '999' THEN 2 WHEN id = '5' THEN 3 WHEN id = '1' THEN 4 ELSE 5 END)", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]]))->queryInto());
+        $this->assertStringEndsWith("(CASE WHEN id = '3' THEN 0 WHEN id = '6' THEN 1 WHEN id = '999' THEN 2 WHEN id = '5' THEN 3 WHEN id = '1' THEN 4 ELSE 5 END) DESC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], false))->queryInto());
+        $this->assertStringEndsWith("(CASE WHEN id = '3' THEN 0 WHEN id = '6' THEN 1 WHEN id = '999' THEN 2 WHEN id = '5' THEN 3 WHEN id = '1' THEN 4 ELSE 5 END) ASC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], false), true)->queryInto());
+        $this->assertStringEndsWith("(CASE WHEN id = '3' THEN 0 WHEN id = '6' THEN 1 WHEN id = '999' THEN 2 WHEN id = '5' THEN 3 WHEN id = '1' THEN 4 ELSE NULL END) IS NULL THEN 0 ELSE 1 END ASC, (CASE WHEN id = '3' THEN 0 WHEN id = '6' THEN 1 WHEN id = '999' THEN 2 WHEN id = '5' THEN 3 WHEN id = '1' THEN 4 ELSE NULL END) ASC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], true, 'min'))->queryInto());
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
+    function test_orderByArray_exec($builder)
+    {
+        $builder->getDatabase()->test->update(['data' => 'x'], ['id' => 5]);
+        $builder->getDatabase()->test->update(['data' => 'y'], ['id' => 6]);
+        $builder->getDatabase()->test->update(['data' => null], ['id' => 7]);
+
+        $builder->column([
+            'test' => [
+                'id' => fn($v = 'id') => intval($v),
+                'name',
+            ],
+        ])->limit(3);
+
+        // normal1
+        $builder->orderBy('id', [2, 1, 3]);
+        $this->assertSame([
+            ['id' => 2, 'name' => 'b'],
+            ['id' => 1, 'name' => 'a'],
+            ['id' => 3, 'name' => 'c'],
+        ], $builder->array());
+
+        // normal2
+        $builder->orderBy([
+            'name' => ['b', 'c', 'a'],
+        ]);
+        $this->assertSame([
+            ['id' => 2, 'name' => 'b'],
+            ['id' => 3, 'name' => 'c'],
+            ['id' => 1, 'name' => 'a'],
+        ], $builder->array());
+
+        // null
+        $builder->orderBy([
+            'data' => ['x', null, 'y'],
+        ]);
+        $this->assertSame([
+            ['id' => 5, 'name' => 'e'],
+            ['id' => 7, 'name' => 'g'],
+            ['id' => 6, 'name' => 'f'],
+        ], $builder->array());
+
+        // empty
+        $builder->orderBy([
+            'id' => [],
+        ]);
+        $this->assertSame([
+            ['id' => 1, 'name' => 'a'],
+            ['id' => 2, 'name' => 'b'],
+            ['id' => 3, 'name' => 'c'],
+        ], $builder->array());
     }
 
     /**

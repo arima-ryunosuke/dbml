@@ -219,10 +219,26 @@ class OrderBy extends AbstractClause
 
             public function __invoke(SelectBuilder $builder)
             {
+                $cplatform = $builder->getDatabase()->getCompatiblePlatform();
+
                 $orderBy = [];
                 foreach ($this->array as $column => $orders) {
+                    $params = [];
+                    $whens = array_maps($orders, function ($value, $rank) use ($column, $cplatform, &$params) {
+                        assert(is_int($rank), 'array order is numeric-key array only');
+                        if ($value !== null) {
+                            $params[] = $value;
+                        }
+                        return "WHEN {$column}" . ($value === null ? ' IS NULL' : ' = ?') . " THEN {$rank}";
+                    });
                     // 範囲外の値は null にして nullsOrder で制御させる
-                    $orderBy[] = Expression::case($column, array_flip(array_values($orders)), null);
+                    // ただし大抵の場合は後ろに持って行きたいし null 自体の制御もある
+                    // さらに nullsOrder を使うと ORDER BY が非常に長くなり精神衛生上よくない
+                    $else = 'NULL';
+                    if ($this->nullsOrder === null) {
+                        $else = max(array_keys($orders)) + 1;
+                    }
+                    $orderBy[] = Expression::new("(CASE " . implode(' ', $whens) . " ELSE $else END)", $params);
                 }
                 return $orderBy;
             }

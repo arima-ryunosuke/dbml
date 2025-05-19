@@ -2356,6 +2356,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * 「カラム名」に特記事項はない。「順序」は 未指定, 'ASC', true などが昇順を表し、 'DESC', false などが降順を表す。
      * 第3引数で null の場合の挙動を指定できる。
      *
+     * 配列を渡すとその値の順番の CASE WHEN で生成される。
+     * CASE WHEN は値がカラム値でキーが順番となる。
+     * いわゆる任意順であり、手元の配列値で ORDER BY したい場合に使える。
+     *
      * ```php
      * # シンプルなカラム ORD
      * $qb->orderBy('col');         // ORDER BY col ASC
@@ -2375,6 +2379,9 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * # [col, col, col], ORD 形式
      * $qb->orderBy(['colA', 'colB', 'colC'], false);  // ORDER BY colA DESC, colB DESC, colC DESC
+     *
+     * # 配列による任意順
+     * $qb->orderBy('id' => [2, 3, 1]);  // ORDER BY CASE WHEN id = 2 THEN 0 WHEN id = 3 THEN 1 WHEN id = 1 THEN 2
      * ```
      */
     public function orderBy($sort, $order = null, ?string $nullsOrder = null): static
@@ -2444,6 +2451,9 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         else {
             if ($sort instanceof Queryable && $order === null) {
                 $add($sort, null, $nullsOrder);
+            }
+            elseif (is_array($order) && $order && !is_bool($order[0] ?? null)) {
+                $this->addOrderBy(OrderBy::array([$sort => $order]), null, $nullsOrder);
             }
             else {
                 if (is_array($order)) {
