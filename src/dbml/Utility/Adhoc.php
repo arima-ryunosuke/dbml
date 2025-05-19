@@ -207,7 +207,7 @@ class Adhoc
     /** @noinspection PhpElementIsNotAvailableInCurrentPhpVersionInspection */
     public static function stringifyParameter($param, callable $quoter): string
     {
-        if ($param instanceof \BackedEnum) {
+        if ($param instanceof \BackedEnum || $param instanceof \ryunosuke\polyfill\enum\interfaces\BackedEnum) {
             $param = $param->value;
         }
         if (is_object($param) && is_callable($param) && !is_stringable($param)) {
@@ -227,7 +227,7 @@ class Adhoc
     {
         $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
         foreach ($params as $k => $param) {
-            if ($param instanceof \BackedEnum) {
+            if ($param instanceof \BackedEnum || $param instanceof \ryunosuke\polyfill\enum\interfaces\BackedEnum) {
                 $param = $param->value;
             }
             if (is_object($param) && is_callable($param) && !is_stringable($param)) {
