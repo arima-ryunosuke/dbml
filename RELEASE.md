@@ -24,6 +24,11 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.23
+
+- [fixbug] BackedEnum の判定にポリフィルも追加
+- [feature] orderBy に配列を与えると任意順にできる機能
+
 ## 2.1.22
 
 - [feature] echoAnnotation で affect 系の補完も出す機能
