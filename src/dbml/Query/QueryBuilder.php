@@ -635,6 +635,14 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             if (($v[1] ?? null) === null) {
                 return $v[0];
             }
+            if (is_array($v[1])) {
+                $max = max(array_keys($v[1])) + 1;
+                $whens = array_maps($v[1], function ($value, $rank) use ($v) {
+                    assert(is_int($rank), 'array order is numeric-key array only');
+                    return "WHEN {$v[0]}" . ($value === null ? ' IS NULL' : ' = ' . $this->database->quote($value)) . " THEN {$rank} ";
+                });
+                return "CASE " . implode(' ', $whens) . " ELSE $max END";
+            }
             return "{$v[0]} " . ($v[1] ? 'ASC' : 'DESC');
         }, $builder->sqlParts['orderBy']));
 
@@ -2759,6 +2767,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * 「カラム名」に特記事項はない。「順序」は 未指定, 'ASC', true などが昇順を表し、 'DESC', false などが降順を表す。
      * 第3引数で null の場合の挙動を指定できる。
      *
+     * 配列を渡すとその値の順番の CASE WHEN で生成される。
+     * CASE WHEN は値がカラム値でキーが順番となる。
+     * いわゆる任意順であり、手元の配列値で ORDER BY したい場合に使える。
+     *
      * ```php
      * # シンプルなカラム ORD
      * $qb->orderBy('col');         // ORDER BY col ASC
@@ -2778,6 +2790,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      *
      * # [col, col, col], ORD 形式
      * $qb->orderBy(['colA', 'colB', 'colC'], false);  // ORDER BY colA DESC, colB DESC, colC DESC
+     *
+     * # 配列による任意順
+     * $qb->orderBy('id' => [2, 3, 1]);  // ORDER BY CASE WHEN id = 2 THEN 0 WHEN id = 3 THEN 1 WHEN id = 1 THEN 2
      *
      * # 配列指定で子ビルダを設定
      * $qb->column('t_parent P/t_child C')->orderBy([
@@ -2877,6 +2892,9 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
             }
             elseif ($sort instanceof Queryable && $order === null) {
                 $this->sqlParts['orderBy'][] = [$sort, null, $nullsOrder];
+            }
+            elseif (is_array($order) && $order && !is_bool($order[0] ?? null)) {
+                $this->sqlParts['orderBy'][] = [$sort, $order, $nullsOrder];
             }
             else {
                 if (is_array($order)) {

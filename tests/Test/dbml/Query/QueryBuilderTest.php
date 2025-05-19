@@ -2328,6 +2328,62 @@ WHERE C.article_id = '3'", $builder->getSubbuilder('C')->queryInto());
      * @dataProvider provideQueryBuilder
      * @param QueryBuilder $builder
      */
+    function test_orderBy_array($builder)
+    {
+        $builder->getDatabase()->test->update(['data' => 'x'], ['id' => 5]);
+        $builder->getDatabase()->test->update(['data' => 'y'], ['id' => 6]);
+        $builder->getDatabase()->test->update(['data' => null], ['id' => 7]);
+
+        $builder->column([
+            'test' => [
+                'id' => \Closure::fromCallable('intval'),
+                'name',
+            ],
+        ])->limit(3);
+
+        // normal1
+        $builder->orderBy('id', [2, 1, 3]);
+        $this->assertSame([
+            ['id' => 2, 'name' => 'b'],
+            ['id' => 1, 'name' => 'a'],
+            ['id' => 3, 'name' => 'c'],
+        ], $builder->array());
+
+        // normal2
+        $builder->orderBy([
+            'name' => ['b', 'c', 'a'],
+        ]);
+        $this->assertSame([
+            ['id' => 2, 'name' => 'b'],
+            ['id' => 3, 'name' => 'c'],
+            ['id' => 1, 'name' => 'a'],
+        ], $builder->array());
+
+        // null
+        $builder->orderBy([
+            'data' => ['x', null, 'y'],
+        ]);
+        $this->assertSame([
+            ['id' => 5, 'name' => 'e'],
+            ['id' => 7, 'name' => 'g'],
+            ['id' => 6, 'name' => 'f'],
+        ], $builder->array());
+
+        // empty
+        $builder->orderBy([
+            'id' => [],
+        ]);
+        $this->assertSame([
+            ['id' => 1, 'name' => 'a'],
+            ['id' => 2, 'name' => 'b'],
+            ['id' => 3, 'name' => 'c'],
+        ], $builder->array());
+    }
+
+    /**
+     * @dataProvider provideQueryBuilder
+     * @param QueryBuilder $builder
+     */
     function test_orderBy_php($builder)
     {
         $builder->column([
