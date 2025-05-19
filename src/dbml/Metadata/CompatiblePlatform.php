@@ -629,27 +629,12 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
-     * null 許容演算子（<=>）構文を返す
-     *
-     * $column はカラム名を想定しており、エスケープされないので注意すること。
-     *
-     * @todo 呼び元で ? の数を算出してるので Syntax ではなく Expression 返しの方が良い
+     * @deprecated use getSpaceshipExpression
+     * @codeCoverageIgnore
      */
     public function getSpaceshipSyntax(string $column): string
     {
-        if ($this->platform instanceof SqlitePlatform) {
-            return "$column IS ?";
-        }
-        if ($this->platform instanceof MySQLPlatform) {
-            return "$column <=> ?";
-        }
-        if ($this->platform instanceof PostgreSQLPlatform) {
-            return "$column IS NOT DISTINCT FROM ?";
-        }
-        if ($this->platform instanceof SQLServerPlatform && version_compare($this->version, '16') >= 0) {
-            return "$column IS NOT DISTINCT FROM ?";
-        }
-        return "($column IS NULL AND ? IS NULL) OR $column = ?";
+        return (string) $this->getSpaceshipExpression($column, null);
     }
 
     /**
@@ -662,6 +647,28 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return "WITH";
         }
         return "WITH RECURSIVE";
+    }
+
+    /**
+     * null 許容演算子（<=>）表現を返す
+     *
+     * $column はカラム名を想定しており、エスケープされないので注意すること。
+     */
+    public function getSpaceshipExpression(string $column, $value): Expression
+    {
+        if ($this->platform instanceof SqlitePlatform) {
+            return Expression::new("$column IS ?", [$value]);
+        }
+        if ($this->platform instanceof MySQLPlatform) {
+            return Expression::new("$column <=> ?", [$value]);
+        }
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            return Expression::new("$column IS NOT DISTINCT FROM ?", [$value]);
+        }
+        if ($this->platform instanceof SQLServerPlatform && version_compare($this->version, '16') >= 0) {
+            return Expression::new("$column IS NOT DISTINCT FROM ?", [$value]);
+        }
+        return Expression::new("($column IS NULL AND ? IS NULL) OR $column = ?", [$value, $value]);
     }
 
     /**

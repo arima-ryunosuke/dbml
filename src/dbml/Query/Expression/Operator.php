@@ -334,8 +334,9 @@ class Operator extends Expression
         if (count($this->operand2) !== 1) {
             throw new \UnexpectedValueException("SPACESHIP's operand2 must be array contains 1 elements.");
         }
-        $this->expr = $this->platform->getSpaceshipSyntax($this->operand1);
-        $this->params = array_fill(0, substr_count($this->expr, '?'), reset($this->operand2));
+        $spaceship = $this->platform->getSpaceshipExpression($this->operand1, reset($this->operand2));
+        $this->expr = $spaceship;
+        $this->params = $spaceship->getParams();
     }
 
     private function _isnull()

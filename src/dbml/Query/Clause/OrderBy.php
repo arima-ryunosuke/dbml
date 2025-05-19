@@ -226,10 +226,7 @@ class OrderBy extends AbstractClause
                     $params = [];
                     $whens = array_maps($orders, function ($value, $rank) use ($column, $cplatform, &$params) {
                         assert(is_int($rank), 'array order is numeric-key array only');
-                        if ($value !== null) {
-                            $params[] = $value;
-                        }
-                        return "WHEN {$column}" . ($value === null ? ' IS NULL' : ' = ?') . " THEN {$rank}";
+                        return "WHEN {$cplatform->getSpaceshipExpression($column, $value)->merge($params)} THEN {$rank}";
                     });
                     // 範囲外の値は null にして nullsOrder で制御させる
                     // ただし大抵の場合は後ろに持って行きたいし null 自体の制御もある

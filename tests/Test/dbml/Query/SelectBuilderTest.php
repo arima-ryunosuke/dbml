@@ -2474,11 +2474,17 @@ AND (FALSE)", $builder->queryInto());
      */
     function test_orderByArray($builder)
     {
+        $spaceship = fn($column, $value) => $builder->getDatabase()->queryInto($builder->getDatabase()->getCompatiblePlatform()->getSpaceshipExpression($column, $value));
+
+        $whens = "WHEN {$spaceship('id', 3)} THEN 0 WHEN {$spaceship('id', 6)} THEN 1 WHEN {$spaceship('id', 999)} THEN 2 WHEN {$spaceship('id', 5)} THEN 3 WHEN {$spaceship('id', 1)} THEN 4";
+        $casewhen_count = "(CASE $whens ELSE 5 END)";
+        $casewhen_null = "(CASE $whens ELSE NULL END)";
+
         $builder->column('test.id');
-        $this->assertStringEndsWith("(CASE WHEN id = '3' THEN 0 WHEN id = '6' THEN 1 WHEN id = '999' THEN 2 WHEN id = '5' THEN 3 WHEN id = '1' THEN 4 ELSE 5 END)", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]]))->queryInto());
-        $this->assertStringEndsWith("(CASE WHEN id = '3' THEN 0 WHEN id = '6' THEN 1 WHEN id = '999' THEN 2 WHEN id = '5' THEN 3 WHEN id = '1' THEN 4 ELSE 5 END) DESC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], false))->queryInto());
-        $this->assertStringEndsWith("(CASE WHEN id = '3' THEN 0 WHEN id = '6' THEN 1 WHEN id = '999' THEN 2 WHEN id = '5' THEN 3 WHEN id = '1' THEN 4 ELSE 5 END) ASC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], false), true)->queryInto());
-        $this->assertStringEndsWith("(CASE WHEN id = '3' THEN 0 WHEN id = '6' THEN 1 WHEN id = '999' THEN 2 WHEN id = '5' THEN 3 WHEN id = '1' THEN 4 ELSE NULL END) IS NULL THEN 0 ELSE 1 END ASC, (CASE WHEN id = '3' THEN 0 WHEN id = '6' THEN 1 WHEN id = '999' THEN 2 WHEN id = '5' THEN 3 WHEN id = '1' THEN 4 ELSE NULL END) ASC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], true, 'min'))->queryInto());
+        $this->assertStringEndsWith("$casewhen_count", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]]))->queryInto());
+        $this->assertStringEndsWith("$casewhen_count DESC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], false))->queryInto());
+        $this->assertStringEndsWith("$casewhen_count ASC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], false), true)->queryInto());
+        $this->assertStringEndsWith("$casewhen_null IS NULL THEN 0 ELSE 1 END ASC, $casewhen_null ASC", $builder->orderBy(OrderBy::array(['id' => [3, 6, 999, 5, 1]], true, 'min'))->queryInto());
     }
 
     /**
