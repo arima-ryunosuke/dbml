@@ -432,8 +432,6 @@ class Database
             'onIntrospectTable'  => function (Table $table) { },
             /** @var \Closure テーブル名 => Entity クラス名のコンバータ */
             'tableMapper'        => function ($table) { return pascal_case($table); },
-            /** @var \Closure ビュー名 => テーブル名のコンバータ */
-            'viewMapper'         => function ($view) { return null; },
             /** @var bool SET IDENTITY_INSERT を自動発行するか（SQLServer 以外は無視される） */
             'autoIdentityInsert' => true,
             /** @var ?int|string バルク系メソッドのデフォルトチャンクサイズ
