@@ -1042,6 +1042,47 @@ GREATEST(1,2,3) FROM test1', $builder);
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
      */
+    function test_column_nest($builder)
+    {
+        $builder = $builder->context(['nestDelimiter' => '@@@']);
+
+        $builder->column([
+            'test' => [
+                'id',
+                't@@@id'   => 'id',
+                't@@@name' => 'name',
+            ],
+        ])->where(['id' => [1, 2, 3]]);
+
+        $this->assertEquals([
+            [
+                "id" => "1",
+                "t"  => [
+                    "id"   => "1",
+                    "name" => "a",
+                ],
+            ],
+            [
+                "id" => "2",
+                "t"  => [
+                    "id"   => "2",
+                    "name" => "b",
+                ],
+            ],
+            [
+                "id" => "3",
+                "t"  => [
+                    "id"   => "3",
+                    "name" => "c",
+                ],
+            ],
+        ], $builder->array());
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
     function test_column_notable($builder)
     {
         $builder->column([

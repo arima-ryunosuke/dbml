@@ -82,6 +82,8 @@ use function ryunosuke\dbml\str_exists;
  * @method $this                  setPrimarySeparator($string)
  * @method string                 getAggregationDelimiter()
  * @method $this                  setAggregationDelimiter($string)
+ * @method string                 getNestDelimiter()
+ * @method $this                  setNestDelimiter($string)
  * @method string                 getArrayFetch()
  * @method $this                  setArrayFetch($string)
  * @method string                 getNullsOrder()
@@ -246,6 +248,23 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
              * ```
              */
             'aggregationDelimiter' => '@',
+            /** @var string 入れ子にするための区切り文字列
+             * この文字列をエイリアスに含めるとフェッチ結果をネストして入れ子で返すようになる。
+             *
+             * ```php
+             * # 例えば "." を指定しておくとこのようになる
+             * $db->selectTuple(['table' => ['id', 'name.hoge' => 'name1', 'name.fuga' => 'name2']]);
+             * // results:
+             * [
+             *     'id' => 1,
+             *     'name' => [
+             *         'hoge' => 'NAME1',
+             *         'fuga' => 'NAME2',
+             *     ],
+             * ]
+             * ```
+             */
+            'nestDelimiter'        => "", // change to "." or "/" in future scope
             /** @var string 配列を指定した場合のフェッチモード（通常は array か assoc）
              *
              * ```php
@@ -2893,8 +2912,9 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      */
     public function getRowConverter(): \Closure
     {
+        $nester = $this->getUnsafeOption('nestDelimiter');
         $caster = $this->getCaster();
-        return function ($parent_row) use ($caster) {
+        return function ($parent_row) use ($nester, $caster) {
             foreach ($this->callbacks as $name => [$callback, $args]) {
                 if ($args) {
                     $args2 = [];
@@ -2907,6 +2927,15 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             foreach ($parent_row as $col => $val) {
                 if (strpos($col, Database::AUTO_DEPEND_KEY) === 0) {
                     unset($parent_row[$col]);
+                }
+            }
+            if (strlen($nester)) {
+                foreach ($parent_row as $col => $val) {
+                    $parts = explode($nester, $col);
+                    if (count($parts) > 1) {
+                        array_set($parent_row, $val, $parts);
+                        unset($parent_row[$col]);
+                    }
                 }
             }
             if ($caster) {
