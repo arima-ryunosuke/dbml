@@ -2,6 +2,7 @@
 
 namespace ryunosuke\dbml\Driver\Mysqli;
 
+use Doctrine\DBAL\Driver\Mysqli\Exception\StatementError;
 use Doctrine\DBAL\Types\Types;
 use mysqli_result;
 use ryunosuke\dbml\Driver\ResultInterface;
@@ -138,6 +139,9 @@ final class Result extends \ryunosuke\dbal\Driver\Mysqli\Result implements Resul
     {
         try {
             $result = $this->statement->result_metadata();
+            if ($result === false) {
+                throw StatementError::new($this->statement);
+            }
             return self::getMetadataFrom($result);
         }
         finally {
