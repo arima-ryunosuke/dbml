@@ -43,6 +43,7 @@ use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\first_key;
 use function ryunosuke\dbml\first_keyvalue;
 use function ryunosuke\dbml\first_value;
+use function ryunosuke\dbml\glob2regex;
 use function ryunosuke\dbml\instance_of;
 use function ryunosuke\dbml\is_bindable_closure;
 use function ryunosuke\dbml\is_hasharray;
@@ -208,14 +209,14 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     {
         return [
             /** @var string 配列や Gateway 指定時のデフォルト sub lazy mode */
-            'defaultLazyMode'      => self::LAZY_MODE_EAGER,
+            'defaultLazyMode'         => self::LAZY_MODE_EAGER,
             /** @var array TableGateway の暗黙的スコープ名 */
-            'defaultScope'         => [],
+            'defaultScope'            => [],
             /** @var string|bool orderBy が無かったとき、あったとしても必ず最後に付与されるデフォルトの並び順
              * true を指定すると主キーの昇順、 false を指定すると主キーの降順が付与される。
              * あるいは任意の文字列や表現を渡すとそれが追加される。
              */
-            'defaultOrder'         => true,
+            'defaultOrder'            => true,
             /** @var string 複合主キーを単一主キーとみなすための結合文字列
              * 1. 共に自動採番主キーである親テーブルと子テーブル
              * 2. 親テーブルへの外部キーが複合主キーの一部である子テーブル
@@ -227,7 +228,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
              * それでも冗長にキーを持っていたりするとどうしても自動では一意性が検出できない場合がある。
              * そのような場合に結合する文字列を指定する。
              */
-            'primarySeparator'     => "\x1F",
+            'primarySeparator'        => "\x1F",
             /** @var string aggregate 時（columnname@sum）の区切り文字
              * 集約関数は大抵の場合は単一クエリで実行するので大部分で指定不要だが、時折指定が必要になることがある。
              *
@@ -247,7 +248,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
              * ]
              * ```
              */
-            'aggregationDelimiter' => '@',
+            'aggregationDelimiter'    => '@',
             /** @var string 入れ子にするための区切り文字列
              * この文字列をエイリアスに含めるとフェッチ結果をネストして入れ子で返すようになる。
              *
@@ -264,7 +265,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
              * ]
              * ```
              */
-            'nestDelimiter'        => "", // change to "." or "/" in future scope
+            'nestDelimiter'           => "", // change to "." or "/" in future scope
             /** @var string 配列を指定した場合のフェッチモード（通常は array か assoc）
              *
              * ```php
@@ -306,7 +307,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
              * ]
              * ```
              */
-            'arrayFetch'           => Database::METHOD_ASSOC,
+            'arrayFetch'              => Database::METHOD_ASSOC,
             /** @var ?string ORDER BY で NULL をどう扱うか
              * - null: 何もしない
              * - "min": 最小値として扱う
@@ -314,11 +315,13 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
              * - "first": 常に最初に来る
              * - "last": 常に最後に来る
              */
-            'nullsOrder'           => null,
+            'nullsOrder'              => null,
             /** @var bool 遅延実行時に親のロックモードを受け継ぐか否か */
-            'propagateLockMode'    => true,
+            'propagateLockMode'       => true,
             /** @var bool サブクエリをコメント化して親のクエリに埋め込むか否か */
-            'injectChildColumn'    => false,
+            'injectChildColumn'       => false,
+            /** @var bool column に object が来た時に objectAgg として働くか */
+            'compatibleObjectGroupBy' => true, // change to false or delete in future scope
         ];
     }
 
@@ -739,16 +742,67 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             }
             // stdClass なら JSON 化
             elseif (is_object($column) && get_class($column) === \stdClass::class) {
-                $column = (array) $column;
-                $jsonkey = array_unset($column, '$');
-                $column2 = [];
-                foreach ($column as $k => $v) {
-                    if (is_int($k)) {
-                        $k = $v;
+                if ($this->getUnsafeOption('compatibleObjectGroupBy')) {
+                    $column = (array) $column;
+                    $jsonkey = array_unset($column, '$');
+                    $column2 = [];
+                    foreach ($column as $k => $v) {
+                        if (is_int($k)) {
+                            $k = $v;
+                        }
+                        $column2[$k] = $v;
                     }
-                    $column2[$k] = $v;
+                    $result[] = Select::forge($key, $this->database->getCompatiblePlatform()->getJsonAggExpression($column2, $jsonkey), $prefix);
                 }
-                $result[] = Select::forge($key, $this->database->getCompatiblePlatform()->getJsonAggExpression($column2, $jsonkey), $prefix);
+                else {
+                    $allcolumns = $schema->getTableColumns($table);
+                    $datasource = [];
+                    foreach ((array) $column as $name => $value) {
+                        $found = false;
+                        foreach ($allcolumns as $cname => $col) {
+                            if (preg_match("#\A" . glob2regex($value, GLOB_BRACE) . "\z#", $cname, $matches, PREG_OFFSET_CAPTURE)) {
+                                $found = true;
+                                unset($matches[0]);
+                                $index = implode('', array_column($matches, 0));
+                                $alias = Database::AUTO_DEPEND_KEY . "{$table}___{$cname}";
+                                if (is_int($name)) {
+                                    $name = $cname;
+                                    foreach (array_reverse($matches) as $match) {
+                                        $name = substr_replace($name, '', $match[1], strlen($match[0]));
+                                    }
+                                }
+                                $datasource[] = [$index, $alias, $name];
+                                $result[] = Select::forge($alias, "{$prefix}{$cname}", $prefix);
+                            }
+                        }
+                        if (!$found) {
+                            throw new \InvalidArgumentException('column is not found (' . $value . ').');
+                        }
+                    }
+
+                    $template = array_fill_keys(
+                        array_filter(array_column($datasource, 0), 'strlen'),
+                        array_fill_keys(array_column($datasource, 2), null),
+                    );
+
+                    $this->callbacks[$key] = [
+                        function ($row) use ($datasource, $template) {
+                            $result = $template;
+                            foreach ($datasource as [$index, $alias, $name]) {
+                                if ($template) {
+                                    foreach ($index === '' ? array_keys($template) : [$index] as $n) {
+                                        $result[$n][$name] = $row[$alias];
+                                    }
+                                }
+                                else {
+                                    $result[$name] = $row[$alias];
+                                }
+                            }
+                            return $result;
+                        },
+                        [null],
+                    ];
+                }
             }
             // Gateway は subselect 化
             elseif ($column instanceof TableGateway) {
@@ -879,6 +933,20 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             // .. プレフィクスなら「親カラムの参照」（識別のために $prefix を付与しないで追加する）
             elseif (is_string($column) && strpos($column, '..') === 0) {
                 $result[] = Select::forge($key, $column);
+            }
+            // * を含むならマルチセレクト
+            elseif (is_string($column) && preg_match('#[_a-z0-9][?*{}[\]]#i', $column)) {
+                $allcolumns = $schema->getTableColumns($table);
+                $found = false;
+                foreach ($allcolumns as $name => $col) {
+                    if (fnmatch($column, $name)) {
+                        $found = true;
+                        $result[] = is_int($key) ? $name : Select::forge($key . $name, $prefix . $name, $prefix);
+                    }
+                }
+                if (!$found) {
+                    throw new \InvalidArgumentException('column is not found (' . $column . ').');
+                }
             }
             // 上記以外。文字列として扱う
             else {
@@ -1496,9 +1564,11 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * |  0 | `['cond1', 'cond2' => 1]`                        | ネスト配列に素の配列を混ぜると JOIN 条件扱い
      * |  1 | `"**"`                                           | 子テーブルを含めた全テーブル全列を取得
      * |  2 | `null`                                           | null を与えると「何も取得しない」を明示
+     * |  3 | `hoge*`                                          | hoge1,hoge2 等のワイルドカードにマッチした列の取得
      * |  4 | `"!hoge"`                                        | hoge 列**以外**を取得
      * |  5 | `"!"`                                            | 仮想カラムを含めたテーブルの全列を取得（これは「空文字カラム以外を全て」を意味するので結局全てのカラムが得られる、ということになる）
      * |  8 | `"..hoge"`                                       | subselect 時において親のカラムを表す
+     * |  9 | `(object) ["hoge*"]`                             | stdClass は入れ子にして返す。その際ワイルドカードが使え、パターンごとの配列が生成される
      * | 10 | `"+prefix.column_name"`                          | JOIN 記号＋ドットを含む文字列は prefix テーブルと JOIN してそのカラムを取得
      * | 11 | `Expression::new("NOW()")`                       | {@link Expression} を与えると一切加工せずそのまま文字列を表す
      * | 12 | `"NOW()"`                                        | 上と同じ。 `()` を含む文字列は自動で {@link Expression} 化される
@@ -1540,6 +1610,13 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *     ],
      * ]);
      *
+     * # No.3： hoge* ワイルドカラム（マルチカラムアトリビュートを採用している場合の一括取得など）
+     * $qb->column([
+     *     't_article' => [
+     *         'flag*', // 'flag1', 'flag2', ... と同じ
+     *     ],
+     * ]);
+     *
      * # No.4： ! を付けるとそのテーブル内でそれ以外を取得する
      * $qb->column([
      *     't_article' => [
@@ -1557,6 +1634,19 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *         ],
      *     ],
      * ]);
+     *
+     * # No.8： (object) ["hoge*"] でオブジェクトの配列が得られる
+     * $qb->column([
+     *     't_generic' => [
+     *         'id',
+     *         'generic' => (object) [
+     *             'flag*',
+     *             'title*',
+     *         ],
+     *     ],
+     * ]);
+     * // t_generic に flag1,flag2,title1,title2 というカラムがあると下記が得られる
+     * // results: ['generic' => [1 => ['flag' => 0, 'title' => 'title1'], 1 => ['flag' => 1, 'title' => 'title2']]
      *
      * # No.10： 自動プレフィックス JOIN
      * $qb->column([

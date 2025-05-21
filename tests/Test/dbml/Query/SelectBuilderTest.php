@@ -1042,6 +1042,202 @@ GREATEST(1,2,3) FROM test1', $builder);
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
      */
+    function test_column_multi($builder)
+    {
+        // no alias
+        $builder->column([
+            'multicolumn' => [
+                'id',
+                'flag*',
+                'title*',
+                'value*',
+            ],
+        ])->where(['id' => [1, 2, 3]]);
+
+        $this->assertEquals([
+            [
+                "id"     => "1",
+                "flag1"  => "1",
+                "flag2"  => "0",
+                "flag3"  => "0",
+                "flag4"  => "0",
+                "flag5"  => "0",
+                "title1" => "Title1-1",
+                "title2" => "Title1-2",
+                "title3" => "Title1-3",
+                "title4" => "Title1-4",
+                "title5" => "Title1-5",
+                "value1" => "1-1",
+                "value2" => "1-2",
+                "value3" => "1-3",
+                "value4" => "1-4",
+                "value5" => "1-5",
+            ],
+            [
+                "id"     => "2",
+                "flag1"  => "0",
+                "flag2"  => "1",
+                "flag3"  => "0",
+                "flag4"  => "0",
+                "flag5"  => "0",
+                "title1" => "Title2-1",
+                "title2" => "Title2-2",
+                "title3" => "Title2-3",
+                "title4" => "Title2-4",
+                "title5" => "Title2-5",
+                "value1" => "2-1",
+                "value2" => "2-2",
+                "value3" => "2-3",
+                "value4" => "2-4",
+                "value5" => "2-5",
+            ],
+            [
+                "id"     => "3",
+                "flag1"  => "0",
+                "flag2"  => "0",
+                "flag3"  => "1",
+                "flag4"  => "0",
+                "flag5"  => "0",
+                "title1" => "Title3-1",
+                "title2" => "Title3-2",
+                "title3" => "Title3-3",
+                "title4" => "Title3-4",
+                "title5" => "Title3-5",
+                "value1" => "3-1",
+                "value2" => "3-2",
+                "value3" => "3-3",
+                "value4" => "3-4",
+                "value5" => "3-5",
+            ],
+        ], $builder->array());
+
+        // with alias
+        $builder->column([
+            'multicolumn' => [
+                'id',
+                'flag-'  => 'flag*',
+                'title-' => 'title*',
+                'value-' => 'value*',
+            ],
+        ])->where(['id' => [1]]);
+
+        $this->assertEquals([
+            "id"           => "1",
+            "flag-flag1"   => "1",
+            "flag-flag2"   => "0",
+            "flag-flag3"   => "0",
+            "flag-flag4"   => "0",
+            "flag-flag5"   => "0",
+            "title-title1" => "Title1-1",
+            "title-title2" => "Title1-2",
+            "title-title3" => "Title1-3",
+            "title-title4" => "Title1-4",
+            "title-title5" => "Title1-5",
+            "value-value1" => "1-1",
+            "value-value2" => "1-2",
+            "value-value3" => "1-3",
+            "value-value4" => "1-4",
+            "value-value5" => "1-5",
+        ], $builder->tuple());
+
+        that($builder)->column([
+            'multicolumn' => [
+                'id',
+                'hoge*',
+            ],
+        ])->wasThrown('not found (hoge*)');
+
+        // object
+        $builder = $builder->context(['compatibleObjectGroupBy' => false]);
+        $builder->column([
+            'multicolumn' => [
+                'id',
+                'items' => (object) [
+                    'name',
+                    'flag*',
+                    'valias' => 'value*',
+                    'title*',
+                ],
+            ],
+        ])->where(['id' => [1]]);
+
+        $this->assertEquals([
+            "id"    => "1",
+            "items" => [
+                1 => [
+                    "name"   => "a",
+                    "flag"   => "1",
+                    "title"  => "Title1-1",
+                    "valias" => "1-1",
+                ],
+                2 => [
+                    "name"   => "a",
+                    "flag"   => "0",
+                    "title"  => "Title1-2",
+                    "valias" => "1-2",
+                ],
+                3 => [
+                    "name"   => "a",
+                    "flag"   => "0",
+                    "title"  => "Title1-3",
+                    "valias" => "1-3",
+                ],
+                4 => [
+                    "name"   => "a",
+                    "flag"   => "0",
+                    "title"  => "Title1-4",
+                    "valias" => "1-4",
+                ],
+                5 => [
+                    "name"   => "a",
+                    "flag"   => "0",
+                    "title"  => "Title1-5",
+                    "valias" => "1-5",
+                ],
+            ],
+        ], $builder->tuple());
+
+         // not contain "*"
+        $builder->column([
+            'multicolumn' => [
+                'id',
+                'items' => (object) [
+                    'name',
+                    'flag1',
+                    'valias' => 'value1',
+                    'title1',
+                ],
+            ],
+        ])->where(['id' => [1]]);
+
+        $this->assertEquals([
+            "id"    => "1",
+            "items" => [
+                "name"   => "a",
+                "flag1"  => "1",
+                "valias" => "1-1",
+                "title1" => "Title1-1",
+            ],
+        ], $builder->tuple());
+
+        that($builder)->column([
+            'multicolumn' => [
+                'id',
+                'items' => (object) [
+                    'name',
+                    'flag*',
+                    'valias' => 'value*',
+                    'title*',
+                    'notfoundcolumn',
+                ],
+            ],
+        ])->wasThrown('not found (notfoundcolumn)');
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
     function test_column_nest($builder)
     {
         $builder = $builder->context(['nestDelimiter' => '@@@']);

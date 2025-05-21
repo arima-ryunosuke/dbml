@@ -277,6 +277,33 @@ abstract class AbstractUnitTestCase extends TestCase
                             [],
                             ['collation' => 'utf8mb3_bin'],
                         ),
+                        new Table('multicolumn',
+                            [
+                                new Column('id', Type::getType('integer'), ['autoincrement' => true]),
+                                new Column('name', Type::getType('string'), ['length' => 255]),
+                                new Column('flag1', Type::getType('integer')),
+                                new Column('title1', Type::getType('string')),
+                                new Column('value1', Type::getType('string')),
+                                new Column('flag2', Type::getType('integer')),
+                                new Column('title2', Type::getType('string')),
+                                new Column('value2', Type::getType('string')),
+                                new Column('flag3', Type::getType('integer')),
+                                new Column('title3', Type::getType('string')),
+                                new Column('value3', Type::getType('string')),
+                                new Column('flag4', Type::getType('integer')),
+                                new Column('title4', Type::getType('string')),
+                                new Column('value4', Type::getType('string')),
+                                new Column('flag5', Type::getType('integer')),
+                                new Column('title5', Type::getType('string')),
+                                new Column('value5', Type::getType('string')),
+                            ],
+                            [
+                                new Index('PRIMARY', ['id'], true, true),
+                            ],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
+                        ),
                         new Table('misctype',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
@@ -816,6 +843,7 @@ abstract class AbstractUnitTestCase extends TestCase
                 $db->truncate('noprimary');
                 $db->truncate('nullable');
                 $db->truncate('multiunique');
+                $db->truncate('multicolumn');
                 $db->truncate('misctype');
                 $db->truncate('misctype_child');
                 $db->truncate('master_table');
@@ -900,6 +928,28 @@ abstract class AbstractUnitTestCase extends TestCase
                             'uc1'      => "$char,$char",
                             'uc2'      => $i * 100,
                             'groupkey' => ceil($i / 5),
+                        ]);
+                        $char++;
+                    }
+                    for ($i = 1, $char = 'a'; $i <= 10; $i++) {
+                        $db->insert('multicolumn', [
+                            'id'     => $i,
+                            'name'   => $char,
+                            'flag1'  => $i === 1 ? 1 : 0,
+                            'title1' => "Title$i-1",
+                            'value1' => "$i-1",
+                            'flag2'  => $i === 2 ? 1 : 0,
+                            'title2' => "Title$i-2",
+                            'value2' => "$i-2",
+                            'flag3'  => $i === 3 ? 1 : 0,
+                            'title3' => "Title$i-3",
+                            'value3' => "$i-3",
+                            'flag4'  => $i === 4 ? 1 : 0,
+                            'title4' => "Title$i-4",
+                            'value4' => "$i-4",
+                            'flag5'  => $i === 5 ? 1 : 0,
+                            'title5' => "Title$i-5",
+                            'value5' => "$i-5",
                         ]);
                         $char++;
                     }
