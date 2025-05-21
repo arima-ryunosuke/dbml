@@ -889,7 +889,7 @@ class Database
             return $cache[$tableName][$columnName] ?? null;
         };
 
-        $cconverter = function ($typename, $value) use ($cast_type, $platform) {
+        $cconverter = function ($typename, $value, $explicit) use ($cast_type, $platform) {
             if (isset($cast_type[$typename]['select'])) {
                 $converter = $cast_type[$typename]['select'];
                 if ($converter instanceof \Closure) {
@@ -898,6 +898,9 @@ class Database
                 else {
                     return Type::getType($typename)->convertToPHPValue($value, $platform);
                 }
+            }
+            if ($explicit) {
+                return Type::getType($typename)->convertToPHPValue($value, $platform);
             }
             return $value;
         };
@@ -923,15 +926,15 @@ class Database
                 // Alias|Typename 由来の変換（修飾子があればアドホックに変換できる）
                 if (count($parts = explode('|', $c, 2)) === 2) {
                     [$c, $typename] = $parts;
-                    $v = $cconverter($typename, $v);
+                    $v = $cconverter($typename, $v, true);
                 }
                 // Result 由来の変換（Result がテーブル名とカラム名を返してくれるなら対応表が作れる）
                 elseif (isset($metadataTableColumn[$c]) && $type = $getTableColumnType(...$metadataTableColumn[$c]['tableColumn'])) {
-                    $v = $cconverter(Adhoc::typeName($type), $v);
+                    $v = $cconverter(Adhoc::typeName($type), $v, false);
                 }
                 // Native 由来の変換（Result が NativeType を返してくれるなら直接変換できる）
                 elseif (isset($metadataTableColumn[$c]['doctrineType'])) {
-                    $v = $cconverter($metadataTableColumn[$c]['doctrineType'], $v);
+                    $v = $cconverter($metadataTableColumn[$c]['doctrineType'], $v, false);
                 }
 
                 $newrow[$c] = $v;

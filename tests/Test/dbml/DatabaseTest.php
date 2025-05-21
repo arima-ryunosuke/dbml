@@ -1985,7 +1985,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         // SQLServer は GROUP_CONCAT に対応していないのでトラップ
         $this->trapThrowable('is not supported');
         $syntax = $cplatform->getGroupConcatSyntax('name', '|');
-        $this->assertEquals('a|b|c|d|e|f|g|h|i|j', $database->fetchValue("SELECT $syntax FROM test"));
+        $this->assertEquals('a|b|c|d|e|f|g|h|i|j', $database->fetchValue("SELECT $syntax GC FROM test"));
     }
 
     /**
@@ -2462,6 +2462,50 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
 
         $database->setAutoCastType([]);
         $database->getSchema()->refresh();
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_fetch_explicitCast($database)
+    {
+        $database->getSchema()->setTableColumn('misctype', 'carray', ['type' => Types::SIMPLE_ARRAY]);
+        $database->getSchema()->setTableColumn('misctype', 'cjson', ['type' => Types::JSON]);
+
+        $database->insert('misctype', [
+            'cint'      => 1,
+            'cfloat'    => 1.1,
+            'cdecimal'  => 1.2,
+            'cdate'     => '2012-12-12',
+            'cdatetime' => '2012-12-12 12:34:56',
+            'cstring'   => 'hoge',
+            'ctext'     => 'fuga',
+            'carray'    => new Expression('?', [implode(',', [1, 2, 3, 4, 5, 6, 7, 8, 9])]),
+            'cjson'     => new Expression('?', [json_encode(['a' => 'A'])]),
+            'eint'      => 0,
+            'estring'   => '',
+        ]);
+        $row = $database->selectTuple([
+            'misctype MT' => [
+                'cint|integer'        => 'cint',
+                'cfloat|float'        => 'cfloat',
+                'cstring|string'      => 'cstring',
+                'cdatetime|datetime'  => 'cdatetime',
+                'carray|simple_array' => 'carray',
+                'cjson|json'          => 'cjson',
+            ],
+            ''            => [
+                'now|datetime' => $database->getCompatiblePlatform()->getNowExpression(0),
+            ],
+        ], [], [], 1);
+        $this->assertSame(1, $row['cint']);
+        $this->assertSame(1.1, $row['cfloat']);
+        $this->assertSame('hoge', $row['cstring']);
+        $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9], $row['carray']);
+        $this->assertEquals(['a' => 'A'], $row['cjson']);
+        $this->assertInstanceOf('\DateTime', $row['cdatetime']);
+        $this->assertInstanceOf('\DateTime', $row['now']);
     }
 
     /**
