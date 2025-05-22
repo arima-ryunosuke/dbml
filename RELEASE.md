@@ -141,6 +141,10 @@
   - Sequencer の負数降順を廃止
   - Sequencer の has メソッド改名
 
+## 2.1.24
+
+- [package] dbal 3.9
+
 ## 2.1.23
 
 - [fixbug] BackedEnum の判定にポリフィルも追加
