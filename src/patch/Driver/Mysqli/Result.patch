@@ -1,4 +1,4 @@
-@@ -1,8 +1,14 @@
+@@ -1,12 +1,19 @@
  <?php
 +//@formatter:off
 +/**
@@ -14,7 +14,12 @@
  
  use Doctrine\DBAL\Driver\Exception;
  use Doctrine\DBAL\Driver\FetchUtils;
-@@ -16,9 +22,9 @@
+ use Doctrine\DBAL\Driver\Mysqli\Exception\StatementError;
++use Doctrine\DBAL\Driver\Mysqli\Statement;
+ use Doctrine\DBAL\Driver\Result as ResultInterface;
+ use mysqli_sql_exception;
+ use mysqli_stmt;
+@@ -16,9 +23,9 @@
  use function array_fill;
  use function count;
  
@@ -25,8 +30,8 @@
 +    protected mysqli_stmt $statement;
  
      /**
-      * Whether the statement result has columns. The property should be used only after the result metadata
-@@ -61,7 +67,7 @@
+      * Maintains a reference to the Statement that generated this result. This ensures that the lifetime of the
+@@ -73,7 +80,7 @@
          // Store result of every execution which has it. Otherwise it will be impossible
          // to execute a new statement in case if the previous one has non-fetched rows
          // @link http://dev.mysql.com/doc/refman/5.7/en/commands-out-of-sync.html
