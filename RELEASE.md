@@ -24,6 +24,10 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.24
+
+- [package] dbal 3.9
+
 ## 2.1.23
 
 - [fixbug] BackedEnum の判定にポリフィルも追加
