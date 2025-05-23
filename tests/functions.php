@@ -24737,9 +24737,11 @@ if (!function_exists('ryunosuke\\dbml\\glob2regex')) {
     {
         $replacer = [
             // target glob character
-            '*'  => '.*',
-            '?'  => '.',
-            '[!' => '[^',
+            '*'  => '(.*)',
+            '?'  => '(.)',
+            '[!' => '([^',
+            '['  => '([',
+            ']'  => '])',
             // quote regex character
             '.'  => '\\.',
             //'\\' => '\\\\',
@@ -24764,9 +24766,9 @@ if (!function_exists('ryunosuke\\dbml\\glob2regex')) {
             '#'  => '\\#',
         ];
 
-        if ($flags & GLOB_RECURSIVE) {
-            $replacer['**'] = '.*';
-            $replacer['*'] = '[^/]*';
+        if ($flags & \ryunosuke\Functions\Package\GLOB_RECURSIVE) {
+            $replacer['**'] = '(.*)';
+            $replacer['*'] = '([^/]*)';
         }
 
         if (!($flags & GLOB_BRACE)) {
@@ -24776,11 +24778,11 @@ if (!function_exists('ryunosuke\\dbml\\glob2regex')) {
             ];
         }
 
-        $pattern = strtr_escaped($pattern, $replacer);
+        $pattern = \ryunosuke\Functions\Package\strtr_escaped($pattern, $replacer);
 
         if ($flags & GLOB_BRACE) {
             while (true) {
-                $brace_s = strpos_escaped($pattern, '{');
+                $brace_s = \ryunosuke\Functions\Package\strpos_escaped($pattern, '{');
                 if ($brace_s === null) {
                     break;
                 }

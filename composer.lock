@@ -1284,16 +1284,16 @@
         },
         {
             "name": "ryunosuke/functions",
-            "version": "v2.0.24",
+            "version": "v2.0.25",
             "source": {
                 "type": "git",
                 "url": "https://github.com/arima-ryunosuke/php-functions.git",
-                "reference": "45cc7598fbef6509d6f1c744bbb1f1e3090ba4bc"
+                "reference": "d3213a4e676c0d31eaacb5dfaf3fae33c194171b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arima-ryunosuke/php-functions/zipball/45cc7598fbef6509d6f1c744bbb1f1e3090ba4bc",
-                "reference": "45cc7598fbef6509d6f1c744bbb1f1e3090ba4bc",
+                "url": "https://api.github.com/repos/arima-ryunosuke/php-functions/zipball/d3213a4e676c0d31eaacb5dfaf3fae33c194171b",
+                "reference": "d3213a4e676c0d31eaacb5dfaf3fae33c194171b",
                 "shasum": ""
             },
             "require": {
@@ -1329,22 +1329,22 @@
             "description": "Utility functions for PHP",
             "support": {
                 "issues": "https://github.com/arima-ryunosuke/php-functions/issues",
-                "source": "https://github.com/arima-ryunosuke/php-functions/tree/v2.0.24"
+                "source": "https://github.com/arima-ryunosuke/php-functions/tree/v2.0.25"
             },
-            "time": "2025-05-03T17:13:13+00:00"
+            "time": "2025-05-29T04:31:41+00:00"
         },
         {
             "name": "ryunosuke/phpunit-extension",
-            "version": "v4.2.1",
+            "version": "v4.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/arima-ryunosuke/phpunit-extension.git",
-                "reference": "164ddb3f52af1a70685be45a90f13eef3c23e166"
+                "reference": "b0f2bc3dc49008567596725e283c91a82c892f41"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arima-ryunosuke/phpunit-extension/zipball/164ddb3f52af1a70685be45a90f13eef3c23e166",
-                "reference": "164ddb3f52af1a70685be45a90f13eef3c23e166",
+                "url": "https://api.github.com/repos/arima-ryunosuke/phpunit-extension/zipball/b0f2bc3dc49008567596725e283c91a82c892f41",
+                "reference": "b0f2bc3dc49008567596725e283c91a82c892f41",
                 "shasum": ""
             },
             "require": {
@@ -1376,9 +1376,9 @@
             "description": "PHPUnit Fluent interface and Custom assertions",
             "support": {
                 "issues": "https://github.com/arima-ryunosuke/phpunit-extension/issues",
-                "source": "https://github.com/arima-ryunosuke/phpunit-extension/tree/v4.2.1"
+                "source": "https://github.com/arima-ryunosuke/phpunit-extension/tree/v4.2.2"
             },
-            "time": "2024-08-04T11:07:43+00:00"
+            "time": "2025-05-10T05:13:28+00:00"
         },
         {
             "name": "ryunosuke/polyfill-enum",

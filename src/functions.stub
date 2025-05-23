@@ -7062,66 +7062,68 @@ if (!function_exists('ryunosuke\\dbml\\glob2regex')) {
      */
     function glob2regex($pattern, $flags = 0)
     {
-        $replacer = [
-            // target glob character
-            '*'  => '.*',
-            '?'  => '.',
-            '[!' => '[^',
-            // quote regex character
-            '.'  => '\\.',
-            //'\\' => '\\\\',
-            '+'  => '\\+',
-            //'*' => '\\*',
-            //'?' => '\\?',
-            //'[' => '\\[',
-            '^'  => '\\^',
-            //']' => '\\]',
-            '$'  => '\\$',
-            '('  => '\\(',
-            ')'  => '\\)',
-            //'{' => '\\{',
-            //'}' => '\\}',
-            '='  => '\\=',
-            '!'  => '\\!',
-            '<'  => '\\<',
-            '>'  => '\\>',
-            '|'  => '\\|',
-            ':'  => '\\:',
-            //'-' => '\\-',
-            '#'  => '\\#',
+    $replacer = [
+        // target glob character
+        '*'  => '(.*)',
+        '?'  => '(.)',
+        '[!' => '([^',
+        '['  => '([',
+        ']'  => '])',
+        // quote regex character
+        '.'  => '\\.',
+        //'\\' => '\\\\',
+        '+'  => '\\+',
+        //'*' => '\\*',
+        //'?' => '\\?',
+        //'[' => '\\[',
+        '^'  => '\\^',
+        //']' => '\\]',
+        '$'  => '\\$',
+        '('  => '\\(',
+        ')'  => '\\)',
+        //'{' => '\\{',
+        //'}' => '\\}',
+        '='  => '\\=',
+        '!'  => '\\!',
+        '<'  => '\\<',
+        '>'  => '\\>',
+        '|'  => '\\|',
+        ':'  => '\\:',
+        //'-' => '\\-',
+        '#'  => '\\#',
+    ];
+
+    if ($flags & GLOB_RECURSIVE) {
+        $replacer['**'] = '(.*)';
+        $replacer['*'] = '([^/]*)';
+    }
+
+    if (!($flags & GLOB_BRACE)) {
+        $replacer += [
+            '{' => '\\{',
+            '}' => '\\}',
         ];
+    }
 
-        if ($flags & GLOB_RECURSIVE) {
-            $replacer['**'] = '.*';
-            $replacer['*'] = '[^/]*';
-        }
+    $pattern = strtr_escaped($pattern, $replacer);
 
-        if (!($flags & GLOB_BRACE)) {
-            $replacer += [
-                '{' => '\\{',
-                '}' => '\\}',
-            ];
-        }
-
-        $pattern = strtr_escaped($pattern, $replacer);
-
-        if ($flags & GLOB_BRACE) {
-            while (true) {
-                $brace_s = strpos_escaped($pattern, '{');
-                if ($brace_s === null) {
-                    break;
-                }
-                $brace_e = strpos_escaped($pattern, '}', $brace_s);
-                if ($brace_e === null) {
-                    break;
-                }
-                $brace = substr($pattern, $brace_s + 1, $brace_e - $brace_s - 1);
-                $brace = strtr_escaped($brace, [',' => '|']);
-                $pattern = substr_replace($pattern, "($brace)", $brace_s, $brace_e - $brace_s + 1);
+    if ($flags & GLOB_BRACE) {
+        while (true) {
+            $brace_s = strpos_escaped($pattern, '{');
+            if ($brace_s === null) {
+                break;
             }
+            $brace_e = strpos_escaped($pattern, '}', $brace_s);
+            if ($brace_e === null) {
+                break;
+            }
+            $brace = substr($pattern, $brace_s + 1, $brace_e - $brace_s - 1);
+            $brace = strtr_escaped($brace, [',' => '|']);
+            $pattern = substr_replace($pattern, "($brace)", $brace_s, $brace_e - $brace_s + 1);
         }
+    }
 
-        return $pattern;
+    return $pattern;
     }
 }
 

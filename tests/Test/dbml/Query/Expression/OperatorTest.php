@@ -183,13 +183,13 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertOperator('a REGEXP ?', ['w'], $operator);
 
         $operator = new Operator(self::$platform, 'PHRASE', 'a', 'wo*rd');
-        $this->assertOperator('a REGEXP ?', ['wo.*rd'], $operator);
+        $this->assertOperator('a REGEXP ?', ['wo(.*)rd'], $operator);
 
         $operator = new Operator(self::$platform, 'PHRASE', 'a', '*wo*rd*');
-        $this->assertOperator('a REGEXP ?', ['.*wo.*rd.*'], $operator);
+        $this->assertOperator('a REGEXP ?', ['(.*)wo(.*)rd(.*)'], $operator);
 
         $operator = new Operator(self::$platform, 'PHRASE', 'a', '?wo*rd?');
-        $this->assertOperator('a REGEXP ?', ['.wo.*rd.'], $operator);
+        $this->assertOperator('a REGEXP ?', ['(.)wo(.*)rd(.)'], $operator);
 
         $operator = new Operator(self::$platform, 'PHRASE', 'a', 'hello world');
         $this->assertOperator('(a REGEXP ?) AND (a REGEXP ?)', ['hello', 'world'], $operator);
@@ -201,7 +201,7 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertOperator('(a REGEXP ?) OR ((a REGEXP ?) AND (a REGEXP ?) AND (NOT (a REGEXP ?)))', ['aruiha', 'hello', 'world', 'ignore'], $operator);
 
         $operator = new Operator(self::$platform, 'PHRASE', 'a', 'aruiha | "hello*world" -ignore');
-        $this->assertOperator('(a REGEXP ?) OR ((a REGEXP ?) AND (NOT (a REGEXP ?)))', ['aruiha', 'hello.*world', 'ignore'], $operator);
+        $this->assertOperator('(a REGEXP ?) OR ((a REGEXP ?) AND (NOT (a REGEXP ?)))', ['aruiha', 'hello(.*)world', 'ignore'], $operator);
 
         $operator = new Operator(self::$platform, 'PHRASE', 'a', 'aruiha | \'hello*world\' -ignore');
         $this->assertOperator('(a REGEXP ?) OR ((a REGEXP ?) AND (NOT (a REGEXP ?)))', ['aruiha', '^hello\*world$', 'ignore'], $operator);
