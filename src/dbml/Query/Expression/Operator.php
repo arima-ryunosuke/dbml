@@ -481,6 +481,9 @@ class Operator extends Expression
      */
     public function lazy(?string $operand1, ?CompatiblePlatform $platform = null): static
     {
+        // string に null を入れて再生成を促す必要がある
+        $this->expr = null;
+
         $this->platform = $platform ?? $this->platform;
         $this->operand1 = $operand1;
         return $this;

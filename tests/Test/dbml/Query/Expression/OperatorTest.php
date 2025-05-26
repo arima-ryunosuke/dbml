@@ -43,8 +43,11 @@ class OperatorTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(['hoge'], $actual->getParams());
 
         $actual = Operator::equal('hoge');
-        $actual->lazy('columnName');
-        $this->assertEquals('columnName = ?', $actual);
+        $actual->lazy('columnName1');
+        $this->assertEquals('columnName1 = ?', $actual);
+        $this->assertEquals(['hoge'], $actual->getParams());
+        $actual->lazy('columnName2');
+        $this->assertEquals('columnName2 = ?', $actual);
         $this->assertEquals(['hoge'], $actual->getParams());
 
         that(Operator::class)::hoge('columnName')->wasThrown(new \InvalidArgumentException('length must be greater than 2'));
