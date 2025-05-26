@@ -90,6 +90,28 @@ abstract class AbstractBuilder implements Queryable, \Stringable
                 }
                 return $subcond;
             }
+            // マルチカラム（table.prefix*）
+            if (is_string($cond) && preg_match('#[_a-z0-9][?*{}[\]]#i', $cond)) {
+                if (!$is_toplevel) {
+                    return false;
+                }
+                [$modifier, $column] = array_pad(explode('.', $cond, 2), -2, '');
+                $subcond = [];
+                foreach ($tables as $alias => $table) {
+                    if (in_array($modifier, ['', $alias, $table], true) && $this->database->getSchema()->hasTable($table)) {
+                        $allcolumns = $this->database->getSchema()->getTableColumns($table);
+                        foreach ($allcolumns as $name => $col) {
+                            if (fnmatch($column, $name)) {
+                                $subcond[$alias . '.' . $name] = $param;
+                            }
+                        }
+                    }
+                }
+                if (!$subcond) {
+                    throw new \InvalidArgumentException("$cond is not match any columns");
+                }
+                return [$subcond];
+            }
             // 仮想カラム（tablename.virtualname）@todo 何をしているか分からない
             $cond2 = $is_int ? $param : $cond;
             if (is_string($cond2) && preg_match('#([a-z_][a-z0-9_]*)\.([a-z_][a-z0-9_]*)#ui', $cond2, $matches) && $is_toplevel) {

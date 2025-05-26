@@ -2129,6 +2129,45 @@ AND
     /**
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
+     */
+    function test_wheres_multicolumn($builder)
+    {
+        $this->assertQuery('SELECT multicolumn.* FROM multicolumn WHERE (multicolumn.flag1 = ?) OR (multicolumn.flag2 = ?) OR (multicolumn.flag3 = ?) OR (multicolumn.flag4 = ?) OR (multicolumn.flag5 = ?)', $builder->column('multicolumn')->where(['flag*' => 1]));
+        $this->assertEquals([1, 1, 1, 1, 1], $builder->getParams());
+
+        $builder->reset()->column([
+            'test1 t1' => [
+                '<test2{id}' => [],
+            ],
+        ]);
+
+        // 両方につく
+        $builder->where(['name*' => 'a']);
+        $this->assertQuery('SELECT * FROM test1 t1 LEFT JOIN test2 ON test2.id = t1.id WHERE (t1.name1 = ?) OR (test2.name2 = ?)', $builder);
+        $this->assertEquals(['a', 'a'], $builder->getParams());
+
+        // t1(alias) につく
+        $builder->where(['t1.name*' => 'a']);
+        $this->assertQuery('SELECT * FROM test1 t1 LEFT JOIN test2 ON test2.id = t1.id WHERE t1.name1 = ?', $builder);
+        $this->assertEquals(['a'], $builder->getParams());
+
+        // test2 につく
+        $builder->where(['test2.name*' => 'a']);
+        $this->assertQuery('SELECT * FROM test1 t1 LEFT JOIN test2 ON test2.id = t1.id WHERE test2.name2 = ?', $builder);
+        $this->assertEquals(['a'], $builder->getParams());
+
+        // トップレベル以外はスルー
+        $builder->where([['hoge' => ['name*' => 'a']]]);
+        $this->assertQuery('SELECT * FROM test1 t1 LEFT JOIN test2 ON test2.id = t1.id WHERE FALSE', $builder);
+        $this->assertEquals([], $builder->getParams());
+
+        // マッチしないと例外
+        that($builder)->where(['test2.unknowncolumn*' => 'a'])->wasThrown('is not match any columns');
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
      * @param Database $database
      */
     function test_wheres_vcolumn($builder, $database)

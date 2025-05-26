@@ -2160,6 +2160,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * | --:|:--                            |:--
      * | 30 | `['' => 123]`                 | キーを空文字にすると駆動表の主キーを表す
      * | 33 | `['*.delete_flg' => 1]`       | テーブル部分に `*` を指定すると「あらゆるテーブルのそのカラム」を意味する
+     * | 34 | `['table.prefix*' => 1]`      | カラム部分に `*` を含めると「ワイルドカードに一致するカラム」の OR を意味する
      * | 40 | `['table.vcolumn' => "hoge"]` | 仮想カラム（単純なものに限る）も普通のカラムと同じように指定できる
      * | 41 | `['table.vcolumn' => [cond]]` | 仮想カラム（実態が subselect に限る）に配列パラメータを与えると「追加の WHERE で EXISTS」となる。この記法は whereInto と同じく、ユーザ入力を直接与えると SQL インジェクションの危険があるため、**決してユーザ由来の値を渡してはならない**
      *
@@ -2175,6 +2176,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * # No.33（例えば対象テーブルに delete_flg があり、 delete_flg = 0 を付与したい場合、下記のようにすると全てのテーブルに付与される）
      * $qb->column('table1 t1, table2 t2, table3 t3')->where(['*.delete_flg' => 0]); // WHERE (t1.delete_flg = 0) AND (t2.delete_flg = 0) AND (t3.delete_flg = 0)
+     * # No.34（例えば対象テーブルに hanyou{1,2,3} があり、 いずれかで引っ張りたい場合、下記のようにすると OR になる）
+     * $qb->where(['table.hanyou*' => 1]); // WHERE (table.hanyou1 = 1) OR (table.hanyou2 = 1) AND (table.hanyou3 = 1)
      *
      * # No.40（仮想カラムを指定。仮想カラムは「親に紐づく子供の COUNT」とする）
      * $qb->column('t_parent')->where(['t_parent.child_count' => 0]); // WHERE (SELECT COUNT(*) FROM t_child WHERE (t_child.parent_id = t_parent.id)) = 0
