@@ -68,6 +68,9 @@ trait TableGatewayProvider
     /** @var misctype_childTableGateway */
     public $misctype_child;
 
+    /** @var multicolumnTableGateway */
+    public $multicolumn;
+
     /** @var multifkeyTableGateway */
     public $multifkey;
 
@@ -193,6 +196,9 @@ trait TableGatewayProvider
 
     /** @return misctype_childTableGateway */
     public function misctype_child($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multicolumnTableGateway */
+    public function multicolumn($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multifkeyTableGateway */
     public function multifkey($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
@@ -14066,6 +14072,761 @@ class misctype_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 }
 
+class multicolumnTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
+{
+    use TableGatewayProvider;
+
+    /** @var static|string */
+    public $name;
+
+    /** @var static|int */
+    public $flag1;
+
+    /** @var static|string */
+    public $title1;
+
+    /** @var static|string */
+    public $value1;
+
+    /** @var static|int */
+    public $flag2;
+
+    /** @var static|string */
+    public $title2;
+
+    /** @var static|string */
+    public $value2;
+
+    /** @var static|int */
+    public $flag3;
+
+    /** @var static|string */
+    public $title3;
+
+    /** @var static|string */
+    public $value3;
+
+    /** @var static|int */
+    public $flag4;
+
+    /** @var static|string */
+    public $title4;
+
+    /** @var static|string */
+    public $value4;
+
+    /** @var static|int */
+    public $flag5;
+
+    /** @var static|string */
+    public $title5;
+
+    /** @var static|string */
+    public $value5;
+
+    public function id(...$args): static { }
+
+    public function name(...$args): static { }
+
+    public function flag1(...$args): static { }
+
+    public function title1(...$args): static { }
+
+    public function value1(...$args): static { }
+
+    public function flag2(...$args): static { }
+
+    public function title2(...$args): static { }
+
+    public function value2(...$args): static { }
+
+    public function flag3(...$args): static { }
+
+    public function title3(...$args): static { }
+
+    public function value3(...$args): static { }
+
+    public function flag4(...$args): static { }
+
+    public function title4(...$args): static { }
+
+    public function value4(...$args): static { }
+
+    public function flag5(...$args): static { }
+
+    public function title5(...$args): static { }
+
+    public function value5(...$args): static { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::affectArray()
+     * @param array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $dataarray
+     * @return mixed
+     */
+    public function affectArray($dataarray, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::array()
+     * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectArray()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayForAffect()
+     * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectArrayForAffect()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayForUpdate()
+     * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectArrayForUpdate()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayInShare()
+     * @see \ryunosuke\dbml\Mixin\SelectInShareTrait::selectArrayInShare()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayOrThrow()
+     * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectArrayOrThrow()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assoc()
+     * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectAssoc()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocForAffect()
+     * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectAssocForAffect()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocForUpdate()
+     * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectAssocForUpdate()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocInShare()
+     * @see \ryunosuke\dbml\Mixin\SelectInShareTrait::selectAssocInShare()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocOrThrow()
+     * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectAssocOrThrow()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::changeArray()
+     * @param array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $dataarray
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return mixed
+     */
+    public function changeArray($dataarray, $where, $uniquekey = "PRIMARY", $returning = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::create()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::createWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @return array{id: int}
+     */
+    public function create($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::delete()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return mixed
+     */
+    public function delete($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::deleteAndBeforeWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function deleteAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::deleteAndPrimaryWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function deleteAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteArray()
+     * @param array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $where
+     * @return mixed
+     */
+    public function deleteArray($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteArrayAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::deleteArrayAndBeforeWithoutTable()
+     * @param array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $where
+     * @return array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>|array<multicolumnEntity>
+     */
+    public function deleteArrayAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::deleteOrThrowWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function deleteOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::destroy()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return mixed
+     */
+    public function destroy($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::destroyAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::destroyAndBeforeWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function destroyAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::destroyAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::destroyAndPrimaryWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function destroyAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::destroyOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::destroyOrThrowWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function destroyOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::eliminate()
+     * @return mixed
+     */
+    public function eliminate() { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::find()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function find($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findForAffect()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function findForAffect($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findForUpdate()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findInShare()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function findInShare($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findOrThrow()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::getEmptyRecord()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function getEmptyRecord($default = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insert()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @return mixed
+     */
+    public function insert($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::insertAndPrimaryWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @return array{id: int}
+     */
+    public function insertAndPrimary($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertArray()
+     * @param array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $data
+     * @return mixed
+     */
+    public function insertArray($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertArrayAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::insertArrayAndPrimaryWithoutTable()
+     * @param array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $data
+     * @return array<array{id: int}>
+     */
+    public function insertArrayAndPrimary($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertArrayOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::insertArrayOrThrowWithoutTable()
+     * @param array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $data
+     * @return array<array{id: int}>
+     */
+    public function insertArrayOrThrow($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::insertOrThrowWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @return array{id: int}
+     */
+    public function insertOrThrow($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertSelect()
+     * @return mixed
+     */
+    public function insertSelect($sql, $columns = [], iterable $params = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalid()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $invalid_columns
+     * @return mixed
+     */
+    public function invalid($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalidAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::invalidAndBeforeWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $invalid_columns
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function invalidAndBefore($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalidAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::invalidAndPrimaryWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $invalid_columns
+     * @return array{id: int}
+     */
+    public function invalidAndPrimary($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalidOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::invalidOrThrowWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $invalid_columns
+     * @return array{id: int}
+     */
+    public function invalidOrThrow($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modify()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return mixed
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::modifyAndBeforeWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function modifyAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::modifyAndPrimaryWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return array{id: int}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArray()
+     * @param array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return mixed
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArrayAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::modifyArrayAndBeforeWithoutTable()
+     * @param array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>|array<multicolumnEntity>
+     */
+    public function modifyArrayAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArrayAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::modifyArrayAndPrimaryWithoutTable()
+     * @param array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return array<array{id: int}>
+     */
+    public function modifyArrayAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::modifyOrThrowWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return array{id: int}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::neighbor()
+     * @return array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function neighbor(array $predicates = [], int $limit = 1): array { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reduce()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return mixed
+     */
+    public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reduceAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::reduceAndBeforeWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function reduceAndBefore($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reduceOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::reduceOrThrowWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function reduceOrThrow($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::remove()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return mixed
+     */
+    public function remove($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::removeAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::removeAndBeforeWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function removeAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::removeAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::removeAndPrimaryWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function removeAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::removeOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::removeOrThrowWithoutTable()
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function removeOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replace()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @return mixed
+     */
+    public function replace($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replaceAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::replaceAndBeforeWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function replaceAndBefore($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replaceAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::replaceAndPrimaryWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @return array{id: int}
+     */
+    public function replaceAndPrimary($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replaceOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::replaceOrThrowWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @return array{id: int}
+     */
+    public function replaceOrThrow($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::revise()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return mixed
+     */
+    public function revise($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reviseAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::reviseAndBeforeWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function reviseAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reviseAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::reviseAndPrimaryWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function reviseAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reviseOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::reviseOrThrowWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function reviseOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::save()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @return mixed
+     */
+    public function save($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::truncate()
+     * @return mixed
+     */
+    public function truncate() { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tuple()
+     * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectTuple()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleForAffect()
+     * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectTupleForAffect()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleForUpdate()
+     * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectTupleForUpdate()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleInShare()
+     * @see \ryunosuke\dbml\Mixin\SelectInShareTrait::selectTupleInShare()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleOrThrow()
+     * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectTupleOrThrow()
+     * @return multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}
+     */
+    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::update()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return mixed
+     */
+    public function update($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::updateAndBeforeWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function updateAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::updateAndPrimaryWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function updateAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateArray()
+     * @param array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return mixed
+     */
+    public function updateArray($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateArrayAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::updateArrayAndBeforeWithoutTable()
+     * @param array<multicolumnEntity>|array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}> $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array<array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>|array<multicolumnEntity>
+     */
+    public function updateArrayAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::updateOrThrowWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function updateOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upgrade()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return mixed
+     */
+    public function upgrade($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upgradeAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::upgradeAndBeforeWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function upgradeAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upgradeAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::upgradeAndPrimaryWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function upgradeAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upgradeOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::upgradeOrThrowWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $data
+     * @param array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $where
+     * @return array{id: int}
+     */
+    public function upgradeOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upsert()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return mixed
+     */
+    public function upsert($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upsertAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::upsertAndBeforeWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}|multicolumnEntity
+     */
+    public function upsertAndBefore($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upsertAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::upsertAndPrimaryWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return array{id: int}
+     */
+    public function upsertAndPrimary($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upsertOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::upsertOrThrowWithoutTable()
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $insertData
+     * @param multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string} $updateData
+     * @return array{id: int}
+     */
+    public function upsertOrThrow($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::yieldArray()
+     * @return iterable<multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::yieldAssoc()
+     * @return iterable<multicolumnEntity|array{id: int, name: string, flag1: int, title1: string, value1: string, flag2: int, title2: string, value2: string, flag3: int, title3: string, value3: string, flag4: int, title4: string, value4: string, flag5: int, title5: string, value5: string}>
+     */
+    public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+}
+
 class multifkeyTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
@@ -27915,6 +28676,60 @@ class misctype_childEntity extends \ryunosuke\dbml\Entity\Entity
 
     /** @var string */
     public $cblob;
+}
+
+class multicolumnEntity extends \ryunosuke\dbml\Entity\Entity
+{
+    /** @var int */
+    public $id;
+
+    /** @var string */
+    public $name;
+
+    /** @var int */
+    public $flag1;
+
+    /** @var string */
+    public $title1;
+
+    /** @var string */
+    public $value1;
+
+    /** @var int */
+    public $flag2;
+
+    /** @var string */
+    public $title2;
+
+    /** @var string */
+    public $value2;
+
+    /** @var int */
+    public $flag3;
+
+    /** @var string */
+    public $title3;
+
+    /** @var string */
+    public $value3;
+
+    /** @var int */
+    public $flag4;
+
+    /** @var string */
+    public $title4;
+
+    /** @var string */
+    public $value4;
+
+    /** @var int */
+    public $flag5;
+
+    /** @var string */
+    public $title5;
+
+    /** @var string */
+    public $value5;
 }
 
 class multifkeyEntity extends \ryunosuke\dbml\Entity\Entity

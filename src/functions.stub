@@ -3903,9 +3903,7 @@ if (!function_exists('ryunosuke\\dbml\\csv_import')) {
             $fp = $csvstring;
         }
         else {
-            $fp = fopen('php://temp', 'r+b');
-            fwrite($fp, $csvstring);
-            rewind($fp);
+            $fp = str_resource($csvstring);
         }
 
         $restore = set_error_exception_handler();
@@ -5815,6 +5813,57 @@ if (!function_exists('ryunosuke\\dbml\\path_normalize')) {
     }
 }
 
+assert(!function_exists('ryunosuke\\dbml\\tmpname') || (new \ReflectionFunction('ryunosuke\\dbml\\tmpname'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\tmpname')) {
+    /**
+     * 終了時に削除される一時ファイル名を生成する
+     *
+     * tempnam とほぼ同じで違いは下記。
+     *
+     * - 引数が逆
+     * - 終了時に削除される
+     * - 失敗時に false を返すのではなく例外を投げる
+     *
+     * @package ryunosuke\Functions\Package\filesystem
+     *
+     * @param string $prefix ファイル名プレフィックス
+     * @param ?string $dir 生成ディレクトリ。省略時は sys_get_temp_dir()
+     * @return string 一時ファイル名
+     */
+    function tmpname($prefix = 'rft', $dir = null)
+    {
+        // デフォルト付きで tempnam を呼ぶ
+        $dir = $dir ?: function_configure('cachedir');
+        $tempfile = tempnam($dir, $prefix);
+
+        // tempnam が何をしても false を返してくれないんだがどうしたら返してくれるんだろうか？
+        if ($tempfile === false) {
+            throw new \UnexpectedValueException("tmpname($dir, $prefix) failed.");// @codeCoverageIgnore
+        }
+
+        // 生成したファイルを覚えておいて最後に消す
+        static $files = [];
+        $files[$tempfile] = new class($tempfile) {
+            private $tempfile;
+
+            public function __construct($tempfile) { $this->tempfile = $tempfile; }
+
+            public function __destruct() { return $this(); }
+
+            public function __invoke()
+            {
+                // 明示的に消されたかもしれないので file_exists してから消す
+                if (file_exists($this->tempfile)) {
+                    // レースコンディションのため @ を付ける
+                    @unlink($this->tempfile);
+                }
+            }
+        };
+
+        return $tempfile;
+    }
+}
+
 assert(!function_exists('ryunosuke\\dbml\\func_user_func_array') || (new \ReflectionFunction('ryunosuke\\dbml\\func_user_func_array'))->isUserDefined());
 if (!function_exists('ryunosuke\\dbml\\func_user_func_array')) {
     /**
@@ -7062,68 +7111,68 @@ if (!function_exists('ryunosuke\\dbml\\glob2regex')) {
      */
     function glob2regex($pattern, $flags = 0)
     {
-    $replacer = [
-        // target glob character
-        '*'  => '(.*)',
-        '?'  => '(.)',
-        '[!' => '([^',
-        '['  => '([',
-        ']'  => '])',
-        // quote regex character
-        '.'  => '\\.',
-        //'\\' => '\\\\',
-        '+'  => '\\+',
-        //'*' => '\\*',
-        //'?' => '\\?',
-        //'[' => '\\[',
-        '^'  => '\\^',
-        //']' => '\\]',
-        '$'  => '\\$',
-        '('  => '\\(',
-        ')'  => '\\)',
-        //'{' => '\\{',
-        //'}' => '\\}',
-        '='  => '\\=',
-        '!'  => '\\!',
-        '<'  => '\\<',
-        '>'  => '\\>',
-        '|'  => '\\|',
-        ':'  => '\\:',
-        //'-' => '\\-',
-        '#'  => '\\#',
-    ];
-
-    if ($flags & GLOB_RECURSIVE) {
-        $replacer['**'] = '(.*)';
-        $replacer['*'] = '([^/]*)';
-    }
-
-    if (!($flags & GLOB_BRACE)) {
-        $replacer += [
-            '{' => '\\{',
-            '}' => '\\}',
+        $replacer = [
+            // target glob character
+            '*'  => '(.*)',
+            '?'  => '(.)',
+            '[!' => '([^',
+            '['  => '([',
+            ']'  => '])',
+            // quote regex character
+            '.'  => '\\.',
+            //'\\' => '\\\\',
+            '+'  => '\\+',
+            //'*' => '\\*',
+            //'?' => '\\?',
+            //'[' => '\\[',
+            '^'  => '\\^',
+            //']' => '\\]',
+            '$'  => '\\$',
+            '('  => '\\(',
+            ')'  => '\\)',
+            //'{' => '\\{',
+            //'}' => '\\}',
+            '='  => '\\=',
+            '!'  => '\\!',
+            '<'  => '\\<',
+            '>'  => '\\>',
+            '|'  => '\\|',
+            ':'  => '\\:',
+            //'-' => '\\-',
+            '#'  => '\\#',
         ];
-    }
 
-    $pattern = strtr_escaped($pattern, $replacer);
-
-    if ($flags & GLOB_BRACE) {
-        while (true) {
-            $brace_s = strpos_escaped($pattern, '{');
-            if ($brace_s === null) {
-                break;
-            }
-            $brace_e = strpos_escaped($pattern, '}', $brace_s);
-            if ($brace_e === null) {
-                break;
-            }
-            $brace = substr($pattern, $brace_s + 1, $brace_e - $brace_s - 1);
-            $brace = strtr_escaped($brace, [',' => '|']);
-            $pattern = substr_replace($pattern, "($brace)", $brace_s, $brace_e - $brace_s + 1);
+        if ($flags & GLOB_RECURSIVE) {
+            $replacer['**'] = '(.*)';
+            $replacer['*'] = '([^/]*)';
         }
-    }
 
-    return $pattern;
+        if (!($flags & GLOB_BRACE)) {
+            $replacer += [
+                '{' => '\\{',
+                '}' => '\\}',
+            ];
+        }
+
+        $pattern = strtr_escaped($pattern, $replacer);
+
+        if ($flags & GLOB_BRACE) {
+            while (true) {
+                $brace_s = strpos_escaped($pattern, '{');
+                if ($brace_s === null) {
+                    break;
+                }
+                $brace_e = strpos_escaped($pattern, '}', $brace_s);
+                if ($brace_e === null) {
+                    break;
+                }
+                $brace = substr($pattern, $brace_s + 1, $brace_e - $brace_s - 1);
+                $brace = strtr_escaped($brace, [',' => '|']);
+                $pattern = substr_replace($pattern, "($brace)", $brace_s, $brace_e - $brace_s + 1);
+            }
+        }
+
+        return $pattern;
     }
 }
 
@@ -8724,6 +8773,48 @@ if (!function_exists('ryunosuke\\dbml\\str_quote')) {
         }
 
         return '"' . $string . '"';
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\str_resource') || (new \ReflectionFunction('ryunosuke\\dbml\\str_resource'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\str_resource')) {
+    /**
+     * 文字列をリソース化する
+     *
+     * resource で統一的に扱いたいシチュエーションはまれによくある。
+     *
+     * Example:
+     * ```php
+     * // 文字列からリソースを作る
+     * $resource = str_resource('hoge');
+     * that(stream_get_contents($resource))->is('hoge');
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\strings
+     */
+    function str_resource(
+        /** 対象文字列 */ string $string,
+        /** 最大メモリ */ ?int $maxmemory = null,
+        /** 自動削除 */ bool $volatile = true,
+    ) {
+        // stream_get_meta_data でファイル情報が得られると便利なことが多いので 0 は maxmemory:0 ではなく tmpfile とする
+        // さらに自動削除も制御したいので $volatile で分岐する
+        $fp = match ($maxmemory) {
+            0       => $volatile ? tmpfile() : fopen(tmpname('tmp', sys_get_temp_dir()), 'rb+'),
+            null    => fopen("php://memory", 'rb+'),
+            default => fopen("php://temp/maxmemory:$maxmemory", 'rb+'),
+        };
+
+        if ($fp === false) {
+            throw new \UnexpectedValueException('fopen returned false'); // @codeCoverageIgnore
+        }
+
+        if (strlen($string)) {
+            fwrite($fp, $string);
+            rewind($fp);
+        }
+
+        return $fp;
     }
 }
 
