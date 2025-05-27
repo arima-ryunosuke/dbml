@@ -21,6 +21,20 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.6
+
+- [feature] マルチカラム Where
+- [feature] マルチカラム Select
+- [feature] エイリアスの指定文字で入れ子にする機能
+- [refactor] 試行錯誤のコードが残っていたので除去
+- [refactor] getSpaceshipSyntax 改め getSpaceshipExpression
+- [fixbug] Operator::lazy で再生成されない
+- [fixbug] LockWaitTimeoutException が投げられない
+- [fixbug] autoCast が有効じゃないと明示指定してもキャストが効かない
+- Merge tag 'v2.1.24'
+- Merge tag 'v2.1.23'
+- Merge tag 'v2.1.22'
+
 ## 3.1.5
 
 - [refactor] token_get_all を PhpToken::tokenize に変更
