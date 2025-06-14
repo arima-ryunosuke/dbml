@@ -1358,13 +1358,13 @@ class Database
                 abstract class %s extends \\{$V(TableGateway::class)}
                 {
                     // auto generated method:start
-                    
+                
                     public function getDatabase(): \\{$V(get_class($this))}
                     {
                         /** @noinspection PhpIncompatibleReturnTypeInspection */
                         return parent::getDatabase();
                     }
-                    
+                
                     // auto generated method:end
                 }
                 CLASS,);
@@ -1381,11 +1381,11 @@ class Database
                 class %s extends \\{$V($gateways[''][0])}
                 {
                     // auto generated constant:start
-                    
+                
                     // @formatter\x3Aoff
                     {$V(array_sprintf($columns, fn($v, $k) => "public const {$V(strtoupper($k))} = {$V(var_export($k, true))};", "\n    "))}
                     // @formatter\x3Aon
-                    
+                
                     // auto generated constant:end
                 }
                 CLASS,);
