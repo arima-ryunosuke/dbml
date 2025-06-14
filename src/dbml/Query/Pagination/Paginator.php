@@ -60,11 +60,11 @@ class Paginator implements \IteratorAggregate, \Countable
     /**
      * 現在ページとページ内アイテム数を設定する
      */
-    public function paginate(int $currentpage, int $countperpage): static
+    public function paginate(int $currentpage, ?int $countperpage): static
     {
         $this->resetResult();
 
-        if ($countperpage <= 0) {
+        if (is_int($countperpage) && $countperpage <= 0) {
             throw new \InvalidArgumentException('$countperpage must be positive number.');
         }
 
@@ -73,7 +73,9 @@ class Paginator implements \IteratorAggregate, \Countable
         }
         $this->page = $currentpage - 1;
 
-        $this->builder->limit($countperpage, $this->page * $countperpage);
+        if ($countperpage !== null) {
+            $this->builder->limit($countperpage, $this->page * $countperpage);
+        }
 
         return $this;
     }
@@ -125,6 +127,9 @@ class Paginator implements \IteratorAggregate, \Countable
      */
     public function getTotal(): int
     {
+        if ($this->builder->getQueryPart('limit') === null) {
+            return count($this->getItems());
+        }
         return $this->total ??= (int) $this->builder->countize()->value();
     }
 

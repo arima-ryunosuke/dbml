@@ -40,6 +40,13 @@ class PaginatorTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_paginate($paginator, $database)
     {
+        $paginator->paginate(2, null);
+        $this->assertSame(1, $paginator->getFirst());
+        $this->assertSame(100, $paginator->getLast());
+        $this->assertSame(100, $paginator->getTotal());
+        $this->assertSame(0, $paginator->getPageCount());
+        $this->assertSame([], $paginator->getPageRange(5));
+
         $database->delete('paging', []);
         $paginator->paginate(2, 9);
         $this->assertSame(null, $paginator->getFirst());
