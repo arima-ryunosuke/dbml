@@ -21,6 +21,11 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.7
+
+- [feature] paginate の countperpage を nullable 化
+- [fixbug] 自動生成された Gateway の空行スペースを削除
+
 ## 3.1.6
 
 - [feature] マルチカラム Where
