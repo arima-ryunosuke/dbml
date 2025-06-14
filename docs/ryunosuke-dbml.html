@@ -24,7 +24,7 @@
             <div class="wy-side-nav-search">
                 <a href="" class="icon icon-home"> ryunosuke-dbml.html</a>
                 <div class="version">
-                    最終更新日 2025/05/30 13:02:38                </div>
+                    最終更新日 2025/06/14 17:47:01                </div>
                 <div role="search">
                     <form id="rtd-search-form" class="wy-form hidden-download" method="get">
                         <input type="text" name="query" placeholder="ディレクトリ内検索" value="">
@@ -48137,7 +48137,7 @@ $db-&gt;exists('t_article', ['delete_flg' =&gt; 0], true);
 <summary class="">new Paginator へのプロキシメソッド</summary>
 <pre data-label="Definitation"><div class="code language-php:Definitation php:Definitation">public function paginate(
     ?int|int $currentpage,
-    ?int|int $countperpage
+    ?int $countperpage
 ): ryunosuke\dbml\Query\Pagination\Paginator</div></pre>
 <div class="description">
 <p>引数が与えられている場合は <a href="ryunosuke-dbml.html#ryunosuke-dbml-Query-Pagination-Paginator%3A%3Apaginate%28%29" title="ryunosuke\dbml\Query\Pagination\Paginator::paginate()">ryunosuke\dbml\Query\Pagination\Paginator::paginate()</a> も同時に行う。</p>
@@ -48164,7 +48164,7 @@ $db-&gt;exists('t_article', ['delete_flg' =&gt; 0], true);
 <td>​<span class="summary"></span></td>
 </tr>
 <tr>
-<td>​?int|​int</td>
+<td>​?int</td>
 <td>​<code>$countperpage</code></td>
 <td>​<span class="summary"></span></td>
 </tr>
@@ -79153,7 +79153,7 @@ $qb-&gt;column('t_article')-&gt;where(['status' =&gt; 'active'])-&gt;countize();
 <summary class="">new Paginator へのプロキシメソッド</summary>
 <pre data-label="Definitation"><div class="code language-php:Definitation php:Definitation">public function paginate(
     ?int|int $currentpage,
-    ?int|int $countperpage
+    ?int $countperpage
 ): ryunosuke\dbml\Query\Pagination\Paginator</div></pre>
 <div class="description">
 <p>引数が与えられている場合は <a href="ryunosuke-dbml.html#ryunosuke-dbml-Query-Pagination-Paginator%3A%3Apaginate%28%29" title="ryunosuke\dbml\Query\Pagination\Paginator::paginate()">ryunosuke\dbml\Query\Pagination\Paginator::paginate()</a> も同時に行う。</p>
@@ -79180,7 +79180,7 @@ $qb-&gt;column('t_article')-&gt;where(['status' =&gt; 'active'])-&gt;countize();
 <td>​<span class="summary"></span></td>
 </tr>
 <tr>
-<td>​?int|​int</td>
+<td>​?int</td>
 <td>​<code>$countperpage</code></td>
 <td>​<span class="summary"></span></td>
 </tr>
@@ -97460,7 +97460,7 @@ $expr = Expression::forge(false); // Expression: "0"</div></pre>
 </section><section id="_ede061c137fa9b53d7dab8bef360ef7f72016b8c-1" class="section section-level-h3" data-section-level="3"><h3 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator" class="anchor"></a>[C] Paginator <small><span class="summary">クエリビルダを渡して paginate するとページングしてくれるクラス</span></small></h3>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><span class="badge " data-badge-title="">iterable</span><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L9-L187" target="_blank">Paginator.php#9~187</a></p>
+<p><span class="badge " data-badge-title="">iterable</span><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L9-L192" target="_blank">Paginator.php#9~192</a></p>
 </div>
 <div class="description">
 <p>クエリビルダを渡して paginate するとページングしてくれるクラス</p>
@@ -97582,13 +97582,13 @@ foreach ($paginator as $item) {
 </section><section id="_2afa1f56c2ca8846c6f19c819a4e55063b700b28-1" class="section section-level-h4" data-section-level="4"><h4 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator::paginate()" class="anchor"></a>[m] paginate <small><span class="summary">現在ページとページ内アイテム数を設定する</span></small></h4>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L60-L79" target="_blank">Paginator.php#60~79</a></p>
+<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L60-L81" target="_blank">Paginator.php#60~81</a></p>
 </div>
 <details>
 <summary class="">現在ページとページ内アイテム数を設定する</summary>
 <pre data-label="Definitation"><div class="code language-php:Definitation php:Definitation">public function paginate(
     int $currentpage,
-    int $countperpage
+    ?int $countperpage
 ): ryunosuke\dbml\Query\Pagination\Paginator</div></pre>
 <div class="wy-table-responsive">
 <table class=" no-border docutils align-default has-colgroup has-caption has-top-caption">
@@ -97612,7 +97612,7 @@ foreach ($paginator as $item) {
 <td>​<span class="summary"></span></td>
 </tr>
 <tr>
-<td>​int</td>
+<td>​?int</td>
 <td>​<code>$countperpage</code></td>
 <td>​<span class="summary"></span></td>
 </tr>
@@ -97644,7 +97644,7 @@ foreach ($paginator as $item) {
 </section><section id="_169cb0d6bf243272c1fe824a63379029ab4d5dd0-1" class="section section-level-h4" data-section-level="4"><h4 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator::getItems()" class="anchor"></a>[m] getItems <small><span class="summary">現在アイテムを取得する</span></small></h4>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L81-L87" target="_blank">Paginator.php#81~87</a></p>
+<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L83-L89" target="_blank">Paginator.php#83~89</a></p>
 </div>
 <details>
 <summary class="">現在アイテムを取得する</summary>
@@ -97674,7 +97674,7 @@ foreach ($paginator as $item) {
 </section><section id="_598f0b824ca6728ece5f24441ca4ad8114d22c7a-1" class="section section-level-h4" data-section-level="4"><h4 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator::getPage()" class="anchor"></a>[m] getPage <small><span class="summary">現在ページを返す</span></small></h4>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L89-L95" target="_blank">Paginator.php#89~95</a></p>
+<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L91-L97" target="_blank">Paginator.php#91~97</a></p>
 </div>
 <details>
 <summary class="">現在ページを返す</summary>
@@ -97704,7 +97704,7 @@ foreach ($paginator as $item) {
 </section><section id="_816039e484b4a4b3da736fbf2b8e79286e0dd044-1" class="section section-level-h4" data-section-level="4"><h4 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator::getFirst()" class="anchor"></a>[m] getFirst <small><span class="summary">最初のインデックスを返す</span></small></h4>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L97-L108" target="_blank">Paginator.php#97~108</a></p>
+<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L99-L110" target="_blank">Paginator.php#99~110</a></p>
 </div>
 <details>
 <summary class="">最初のインデックスを返す</summary>
@@ -97737,7 +97737,7 @@ foreach ($paginator as $item) {
 </section><section id="_415c4ca6ba59ae4b9018ffffb4d4514f306cd268-1" class="section section-level-h4" data-section-level="4"><h4 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator::getLast()" class="anchor"></a>[m] getLast <small><span class="summary">最後のインデックスを返す</span></small></h4>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L110-L121" target="_blank">Paginator.php#110~121</a></p>
+<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L112-L123" target="_blank">Paginator.php#112~123</a></p>
 </div>
 <details>
 <summary class="">最後のインデックスを返す</summary>
@@ -97770,7 +97770,7 @@ foreach ($paginator as $item) {
 </section><section id="_ceaae0efe0c9e6bdecf349c31bc1c7dad9e4f721-1" class="section section-level-h4" data-section-level="4"><h4 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator::getTotal()" class="anchor"></a>[m] getTotal <small><span class="summary">全アイテム数を返す</span></small></h4>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L123-L129" target="_blank">Paginator.php#123~129</a></p>
+<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L125-L134" target="_blank">Paginator.php#125~134</a></p>
 </div>
 <details>
 <summary class="">全アイテム数を返す</summary>
@@ -97800,7 +97800,7 @@ foreach ($paginator as $item) {
 </section><section id="_8faf745fefc95ea277f52f30ff6e0bee8d9bd82a-1" class="section section-level-h4" data-section-level="4"><h4 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator::getPageRange()" class="anchor"></a>[m] getPageRange <small><span class="summary">表示ページを配列で返す</span></small></h4>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L131-L150" target="_blank">Paginator.php#131~150</a></p>
+<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L136-L155" target="_blank">Paginator.php#136~155</a></p>
 </div>
 <details>
 <summary class="">表示ページを配列で返す</summary>
@@ -97857,7 +97857,7 @@ foreach ($paginator as $item) {
 </section><section id="_beedb723e4e8c7cf21324b11e33c87e87ddea36e-1" class="section section-level-h4" data-section-level="4"><h4 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator::getPageCount()" class="anchor"></a>[m] getPageCount <small><span class="summary">全ページ数を返す</span></small></h4>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L152-L170" target="_blank">Paginator.php#152~170</a></p>
+<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L157-L175" target="_blank">Paginator.php#157~175</a></p>
 </div>
 <details>
 <summary class="">全ページ数を返す</summary>
@@ -97887,7 +97887,7 @@ foreach ($paginator as $item) {
 </section><section id="_3b18cf1017d79164d137844ea5481e549884eedf-1" class="section section-level-h4" data-section-level="4"><h4 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator::hasPrev()" class="anchor"></a>[m] hasPrev <small><span class="summary">前ページが存在するかを返す</span></small></h4>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L172-L178" target="_blank">Paginator.php#172~178</a></p>
+<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L177-L183" target="_blank">Paginator.php#177~183</a></p>
 </div>
 <details>
 <summary class="">前ページが存在するかを返す</summary>
@@ -97917,7 +97917,7 @@ foreach ($paginator as $item) {
 </section><section id="_193d606dc52faf8c249cb76400c155192d0bc354-1" class="section section-level-h4" data-section-level="4"><h4 class="section-header"><a id="ryunosuke-dbml-Query-Pagination-Paginator::hasNext()" class="anchor"></a>[m] hasNext <small><span class="summary">次ページが存在するかを返す</span></small></h4>
 <div class="right sidebar">
 <p class="sidebar-title"></p>
-<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L180-L186" target="_blank">Paginator.php#180~186</a></p>
+<p><a href="https://github.com/arima-ryunosuke/dbml/blob/master/src/dbml/Query/Pagination/Paginator.php#L185-L191" target="_blank">Paginator.php#185~191</a></p>
 </div>
 <details>
 <summary class="">次ページが存在するかを返す</summary>
