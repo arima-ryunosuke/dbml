@@ -276,6 +276,9 @@ class aggregateTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     /** @var static|string */
     public $name;
 
@@ -966,6 +969,9 @@ class autoTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     /** @var static|string */
     public $name;
 
@@ -1645,6 +1651,9 @@ class autoTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class foreign_c1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|int */
     public $seq;
@@ -2332,6 +2341,9 @@ class foreign_c2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     use TableGatewayProvider;
 
     /** @var static|int */
+    public $cid;
+
+    /** @var static|int */
     public $seq;
 
     /** @var static|string */
@@ -3015,6 +3027,9 @@ class foreign_c2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class foreign_d1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|int */
     public $d2_id;
@@ -3701,6 +3716,9 @@ class foreign_d2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     /** @var static|string */
     public $name;
 
@@ -4380,6 +4398,9 @@ class foreign_d2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class foreign_pTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|string */
     public $name;
@@ -5061,6 +5082,9 @@ class foreign_sTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     /** @var static|string */
     public $name;
 
@@ -5740,6 +5764,9 @@ class foreign_sTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class foreign_scTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|int */
     public $s_id1;
@@ -6431,6 +6458,9 @@ class g_ancestorTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $ancestor_id;
+
     /** @var static|string */
     public $ancestor_name;
 
@@ -7115,6 +7145,9 @@ class g_ancestorTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class g_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $child_id;
 
     /** @var static|int */
     public $parent_id;
@@ -7805,6 +7838,9 @@ class g_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class g_grand1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $grand_id;
 
     /** @var static|int */
     public $parent_id;
@@ -8502,6 +8538,9 @@ class g_grand2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     use TableGatewayProvider;
 
     /** @var static|int */
+    public $grand_id;
+
+    /** @var static|int */
     public $parent_id;
 
     /** @var static|int */
@@ -9197,6 +9236,9 @@ class g_parentTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     use TableGatewayProvider;
 
     /** @var static|int */
+    public $parent_id;
+
+    /** @var static|int */
     public $ancestor_id;
 
     /** @var static|string */
@@ -9886,6 +9928,9 @@ class heavyTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     /** @var static|string */
     public $data;
 
@@ -10565,6 +10610,9 @@ class heavyTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class horizontal1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|string */
     public $name;
@@ -11246,6 +11294,9 @@ class horizontal2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     /** @var static|string */
     public $summary;
 
@@ -11926,6 +11977,9 @@ class master_tableTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|string */
+    public $category;
+
     /** @var static|int */
     public $subid;
 
@@ -12605,6 +12659,9 @@ class master_tableTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class misctypeTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|int */
     public $pid;
@@ -13352,6 +13409,9 @@ class misctype_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     use TableGatewayProvider;
 
     /** @var static|int */
+    public $id;
+
+    /** @var static|int */
     public $cid;
 
     /** @var static|int */
@@ -14075,6 +14135,9 @@ class misctype_childTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class multicolumnTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|string */
     public $name;
@@ -14832,6 +14895,9 @@ class multifkeyTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     use TableGatewayProvider;
 
     /** @var static|int */
+    public $id;
+
+    /** @var static|int */
     public $mainid;
 
     /** @var static|int */
@@ -15517,6 +15583,9 @@ class multiprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     use TableGatewayProvider;
 
     /** @var static|int */
+    public $mainid;
+
+    /** @var static|int */
     public $subid;
 
     /** @var static|string */
@@ -16200,6 +16269,9 @@ class multiprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class multiuniqueTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|string */
     public $uc_s;
@@ -16902,6 +16974,9 @@ class noautoTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     use TableGatewayProvider;
 
     /** @var static|string */
+    public $id;
+
+    /** @var static|string */
     public $name;
 
     public function id(...$args): static { }
@@ -17581,6 +17656,9 @@ class noprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     public function id(...$args): static { }
 
     /**
@@ -18255,6 +18333,9 @@ class noprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class notnullsTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|string */
     public $name;
@@ -18951,6 +19032,9 @@ class nullableTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     /** @var static|string */
     public $name;
 
@@ -19646,6 +19730,9 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     /** @var static|string */
     public $category;
 
@@ -20336,6 +20423,9 @@ class pagingTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     /** @var static|string */
     public $name;
 
@@ -21016,6 +21106,9 @@ class ArticleTableGateway extends \ryunosuke\Test\Gateway\Article
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $article_id;
+
     /** @var static|string */
     public $title;
 
@@ -21679,6 +21772,9 @@ class ArticleTableGateway extends \ryunosuke\Test\Gateway\Article
 class ManagedArticleTableGateway extends \ryunosuke\Test\Gateway\Article
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $article_id;
 
     /** @var static|string */
     public $title;
@@ -22345,6 +22441,9 @@ class CommentTableGateway extends \ryunosuke\Test\Gateway\Comment
     use TableGatewayProvider;
 
     /** @var static|int */
+    public $comment_id;
+
+    /** @var static|int */
     public $article_id;
 
     /** @var static|string */
@@ -22974,6 +23073,9 @@ class ManagedCommentTableGateway extends \ryunosuke\Test\Gateway\Comment
     use TableGatewayProvider;
 
     /** @var static|int */
+    public $comment_id;
+
+    /** @var static|int */
     public $article_id;
 
     /** @var static|string */
@@ -23601,6 +23703,9 @@ class ManagedCommentTableGateway extends \ryunosuke\Test\Gateway\Comment
 class testTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|string */
     public $name;
@@ -24287,6 +24392,9 @@ class test1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
 
+    /** @var static|int */
+    public $id;
+
     /** @var static|string */
     public $name1;
 
@@ -24966,6 +25074,9 @@ class test1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class test2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|string */
     public $name2;
@@ -25648,6 +25759,9 @@ class tran_table1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     use TableGatewayProvider;
 
     /** @var static|int */
+    public $id;
+
+    /** @var static|int */
     public $master_id;
 
     public function id(...$args): static { }
@@ -26326,6 +26440,9 @@ class tran_table1TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class tran_table2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
 
     /** @var static|int */
     public $master_id;
@@ -27008,6 +27125,9 @@ class tran_table3TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     use TableGatewayProvider;
 
     /** @var static|int */
+    public $id;
+
+    /** @var static|int */
     public $master_id;
 
     public function id(...$args): static { }
@@ -27686,6 +27806,9 @@ class tran_table3TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 class v_articleTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
+
+    /** @var static|int */
+    public $article_id;
 
     /** @var static|string */
     public $title;
