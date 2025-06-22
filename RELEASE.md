@@ -21,6 +21,10 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.8
+
+- [fixbug] echoAnnotation で第1カラムが消える不具合
+
 ## 3.1.7
 
 - [feature] paginate の countperpage を nullable 化
