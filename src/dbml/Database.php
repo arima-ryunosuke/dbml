@@ -1526,7 +1526,7 @@ class Database
                 }
                 ksort($mmethods);
 
-                $gateways["{$entity_name}TableGateway extends \\$gclass"] = ["use TableGatewayProvider;"] + $gwprops + $cmethods + $mmethods;
+                $gateways["{$entity_name}TableGateway extends \\$gclass"] = array_merge(["use TableGatewayProvider;"], $gwprops, $cmethods, $mmethods);
                 $entities["{$entity_name}Entity extends \\$eclass"] = $eprops;
             }
         }
