@@ -74,6 +74,9 @@ trait TableGatewayProvider
     /** @var multifkeyTableGateway */
     public $multifkey;
 
+    /** @var multifkey2TableGateway */
+    public $multifkey2;
+
     /** @var multiprimaryTableGateway */
     public $multiprimary;
 
@@ -202,6 +205,9 @@ trait TableGatewayProvider
 
     /** @return multifkeyTableGateway */
     public function multifkey($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return multifkey2TableGateway */
+    public function multifkey2($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return multiprimaryTableGateway */
     public function multiprimary($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
@@ -15578,6 +15584,699 @@ class multifkeyTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 }
 
+class multifkey2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
+{
+    use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
+
+    /** @var static|int */
+    public $fcol1;
+
+    /** @var static|int */
+    public $fcol2;
+
+    /** @var static|int */
+    public $fcol9;
+
+    public function id(...$args): static { }
+
+    public function fcol1(...$args): static { }
+
+    public function fcol2(...$args): static { }
+
+    public function fcol9(...$args): static { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::affectArray()
+     * @param array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $dataarray
+     * @return mixed
+     */
+    public function affectArray($dataarray, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::array()
+     * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectArray()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayForAffect()
+     * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectArrayForAffect()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayForUpdate()
+     * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectArrayForUpdate()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayInShare()
+     * @see \ryunosuke\dbml\Mixin\SelectInShareTrait::selectArrayInShare()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayOrThrow()
+     * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectArrayOrThrow()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assoc()
+     * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectAssoc()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocForAffect()
+     * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectAssocForAffect()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocForUpdate()
+     * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectAssocForUpdate()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocInShare()
+     * @see \ryunosuke\dbml\Mixin\SelectInShareTrait::selectAssocInShare()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocOrThrow()
+     * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectAssocOrThrow()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::changeArray()
+     * @param array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $dataarray
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return mixed
+     */
+    public function changeArray($dataarray, $where, $uniquekey = "PRIMARY", $returning = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::create()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::createWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @return array{id: int}
+     */
+    public function create($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::delete()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return mixed
+     */
+    public function delete($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::deleteAndBeforeWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function deleteAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::deleteAndPrimaryWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function deleteAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteArray()
+     * @param array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $where
+     * @return mixed
+     */
+    public function deleteArray($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteArrayAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::deleteArrayAndBeforeWithoutTable()
+     * @param array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $where
+     * @return array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>|array<multifkey2Entity>
+     */
+    public function deleteArrayAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::deleteOrThrowWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function deleteOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::destroy()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return mixed
+     */
+    public function destroy($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::destroyAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::destroyAndBeforeWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function destroyAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::destroyAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::destroyAndPrimaryWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function destroyAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::destroyOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::destroyOrThrowWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function destroyOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::eliminate()
+     * @return mixed
+     */
+    public function eliminate() { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::find()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function find($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findForAffect()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function findForAffect($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findForUpdate()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findInShare()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function findInShare($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findOrThrow()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::getEmptyRecord()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function getEmptyRecord($default = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insert()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @return mixed
+     */
+    public function insert($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::insertAndPrimaryWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @return array{id: int}
+     */
+    public function insertAndPrimary($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertArray()
+     * @param array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $data
+     * @return mixed
+     */
+    public function insertArray($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertArrayAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::insertArrayAndPrimaryWithoutTable()
+     * @param array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $data
+     * @return array<array{id: int}>
+     */
+    public function insertArrayAndPrimary($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertArrayOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::insertArrayOrThrowWithoutTable()
+     * @param array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $data
+     * @return array<array{id: int}>
+     */
+    public function insertArrayOrThrow($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::insertOrThrowWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @return array{id: int}
+     */
+    public function insertOrThrow($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertSelect()
+     * @return mixed
+     */
+    public function insertSelect($sql, $columns = [], iterable $params = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalid()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $invalid_columns
+     * @return mixed
+     */
+    public function invalid($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalidAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::invalidAndBeforeWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $invalid_columns
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function invalidAndBefore($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalidAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::invalidAndPrimaryWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $invalid_columns
+     * @return array{id: int}
+     */
+    public function invalidAndPrimary($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalidOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::invalidOrThrowWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $invalid_columns
+     * @return array{id: int}
+     */
+    public function invalidOrThrow($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modify()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return mixed
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::modifyAndBeforeWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function modifyAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::modifyAndPrimaryWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return array{id: int}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArray()
+     * @param array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return mixed
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArrayAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::modifyArrayAndBeforeWithoutTable()
+     * @param array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>|array<multifkey2Entity>
+     */
+    public function modifyArrayAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArrayAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::modifyArrayAndPrimaryWithoutTable()
+     * @param array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return array<array{id: int}>
+     */
+    public function modifyArrayAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::modifyOrThrowWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return array{id: int}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::neighbor()
+     * @return array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function neighbor(array $predicates = [], int $limit = 1): array { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reduce()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return mixed
+     */
+    public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reduceAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::reduceAndBeforeWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function reduceAndBefore($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reduceOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::reduceOrThrowWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function reduceOrThrow($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::remove()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return mixed
+     */
+    public function remove($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::removeAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::removeAndBeforeWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function removeAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::removeAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::removeAndPrimaryWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function removeAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::removeOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::removeOrThrowWithoutTable()
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function removeOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replace()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @return mixed
+     */
+    public function replace($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replaceAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::replaceAndBeforeWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function replaceAndBefore($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replaceAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::replaceAndPrimaryWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @return array{id: int}
+     */
+    public function replaceAndPrimary($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replaceOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::replaceOrThrowWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @return array{id: int}
+     */
+    public function replaceOrThrow($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::revise()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return mixed
+     */
+    public function revise($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reviseAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::reviseAndBeforeWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function reviseAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reviseAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::reviseAndPrimaryWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function reviseAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reviseOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::reviseOrThrowWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function reviseOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::save()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @return mixed
+     */
+    public function save($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::truncate()
+     * @return mixed
+     */
+    public function truncate() { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tuple()
+     * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectTuple()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleForAffect()
+     * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectTupleForAffect()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleForUpdate()
+     * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectTupleForUpdate()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleInShare()
+     * @see \ryunosuke\dbml\Mixin\SelectInShareTrait::selectTupleInShare()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleOrThrow()
+     * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectTupleOrThrow()
+     * @return multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}
+     */
+    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::update()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return mixed
+     */
+    public function update($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::updateAndBeforeWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function updateAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::updateAndPrimaryWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function updateAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateArray()
+     * @param array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return mixed
+     */
+    public function updateArray($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateArrayAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::updateArrayAndBeforeWithoutTable()
+     * @param array<multifkey2Entity>|array<array{id: int, fcol1: int, fcol2: int, fcol9: int}> $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array<array{id: int, fcol1: int, fcol2: int, fcol9: int}>|array<multifkey2Entity>
+     */
+    public function updateArrayAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::updateOrThrowWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function updateOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upgrade()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return mixed
+     */
+    public function upgrade($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upgradeAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::upgradeAndBeforeWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function upgradeAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upgradeAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::upgradeAndPrimaryWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function upgradeAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upgradeOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::upgradeOrThrowWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $data
+     * @param array{id: int, fcol1: int, fcol2: int, fcol9: int} $where
+     * @return array{id: int}
+     */
+    public function upgradeOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upsert()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return mixed
+     */
+    public function upsert($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upsertAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::upsertAndBeforeWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return array{id: int, fcol1: int, fcol2: int, fcol9: int}|multifkey2Entity
+     */
+    public function upsertAndBefore($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upsertAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::upsertAndPrimaryWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return array{id: int}
+     */
+    public function upsertAndPrimary($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upsertOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::upsertOrThrowWithoutTable()
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $insertData
+     * @param multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int} $updateData
+     * @return array{id: int}
+     */
+    public function upsertOrThrow($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::yieldArray()
+     * @return iterable<multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::yieldAssoc()
+     * @return iterable<multifkey2Entity|array{id: int, fcol1: int, fcol2: int, fcol9: int}>
+     */
+    public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+}
+
 class multiprimaryTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 {
     use TableGatewayProvider;
@@ -19742,6 +20441,9 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /** @var static|string */
     public $log_date;
 
+    /** @var static|string */
+    public $message;
+
     public function id(...$args): static { }
 
     public function category(...$args): static { }
@@ -19750,9 +20452,11 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     public function log_date(...$args): static { }
 
+    public function message(...$args): static { }
+
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::affectArray()
-     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}> $dataarray
+     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $dataarray
      * @return mixed
      */
     public function affectArray($dataarray, ...$opt) { }
@@ -19760,77 +20464,77 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::array()
      * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectArray()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::arrayForAffect()
      * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectArrayForAffect()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::arrayForUpdate()
      * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectArrayForUpdate()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::arrayInShare()
      * @see \ryunosuke\dbml\Mixin\SelectInShareTrait::selectArrayInShare()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function arrayInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::arrayOrThrow()
      * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectArrayOrThrow()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::assoc()
      * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectAssoc()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::assocForAffect()
      * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectAssocForAffect()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::assocForUpdate()
      * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectAssocForUpdate()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::assocInShare()
      * @see \ryunosuke\dbml\Mixin\SelectInShareTrait::selectAssocInShare()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function assocInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::assocOrThrow()
      * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectAssocOrThrow()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::changeArray()
-     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}> $dataarray
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $dataarray
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return mixed
      */
     public function changeArray($dataarray, $where, $uniquekey = "PRIMARY", $returning = [], ...$opt) { }
@@ -19838,14 +20542,14 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::create()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::createWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
      * @return array{id: int}
      */
     public function create($data, ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::delete()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return mixed
      */
     public function delete($where = [], ...$opt) { }
@@ -19853,22 +20557,22 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::deleteAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::deleteAndBeforeWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function deleteAndBefore($where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::deleteAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::deleteAndPrimaryWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function deleteAndPrimary($where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::deleteArray()
-     * @param array<array{id: int, category: string, primary_id: int, log_date: string}> $where
+     * @param array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $where
      * @return mixed
      */
     public function deleteArray($where = [], ...$opt) { }
@@ -19876,22 +20580,22 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::deleteArrayAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::deleteArrayAndBeforeWithoutTable()
-     * @param array<array{id: int, category: string, primary_id: int, log_date: string}> $where
-     * @return array<array{id: int, category: string, primary_id: int, log_date: string}>|array<oprlogEntity>
+     * @param array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $where
+     * @return array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>|array<oprlogEntity>
      */
     public function deleteArrayAndBefore($where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::deleteOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::deleteOrThrowWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function deleteOrThrow($where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::destroy()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return mixed
      */
     public function destroy($where = [], ...$opt) { }
@@ -19899,15 +20603,15 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::destroyAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::destroyAndBeforeWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function destroyAndBefore($where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::destroyAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::destroyAndPrimaryWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function destroyAndPrimary($where = [], ...$opt) { }
@@ -19915,7 +20619,7 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::destroyOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::destroyOrThrowWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function destroyOrThrow($where = [], ...$opt) { }
@@ -19928,43 +20632,43 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::find()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function find($variadic_primary, $tableDescriptor = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::findForAffect()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function findForAffect($variadic_primary, $tableDescriptor = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::findForUpdate()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::findInShare()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function findInShare($variadic_primary, $tableDescriptor = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::findOrThrow()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::getEmptyRecord()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function getEmptyRecord($default = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::insert()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
      * @return mixed
      */
     public function insert($data, ...$opt) { }
@@ -19972,14 +20676,14 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::insertAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::insertAndPrimaryWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
      * @return array{id: int}
      */
     public function insertAndPrimary($data, ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::insertArray()
-     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}> $data
+     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $data
      * @return mixed
      */
     public function insertArray($data, ...$opt) { }
@@ -19987,7 +20691,7 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::insertArrayAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::insertArrayAndPrimaryWithoutTable()
-     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}> $data
+     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $data
      * @return array<array{id: int}>
      */
     public function insertArrayAndPrimary($data, ...$opt) { }
@@ -19995,7 +20699,7 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::insertArrayOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::insertArrayOrThrowWithoutTable()
-     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}> $data
+     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $data
      * @return array<array{id: int}>
      */
     public function insertArrayOrThrow($data, ...$opt) { }
@@ -20003,7 +20707,7 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::insertOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::insertOrThrowWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
      * @return array{id: int}
      */
     public function insertOrThrow($data, ...$opt) { }
@@ -20016,8 +20720,8 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::invalid()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $invalid_columns
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $invalid_columns
      * @return mixed
      */
     public function invalid($where = [], ?array $invalid_columns = null, ...$opt) { }
@@ -20025,17 +20729,17 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::invalidAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::invalidAndBeforeWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $invalid_columns
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $invalid_columns
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function invalidAndBefore($where = [], ?array $invalid_columns = null, ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::invalidAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::invalidAndPrimaryWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $invalid_columns
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $invalid_columns
      * @return array{id: int}
      */
     public function invalidAndPrimary($where = [], ?array $invalid_columns = null, ...$opt) { }
@@ -20043,16 +20747,16 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::invalidOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::invalidOrThrowWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $invalid_columns
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $invalid_columns
      * @return array{id: int}
      */
     public function invalidOrThrow($where = [], ?array $invalid_columns = null, ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::modify()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
      * @return mixed
      */
     public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
@@ -20060,25 +20764,25 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::modifyAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::modifyAndBeforeWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function modifyAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::modifyAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::modifyAndPrimaryWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
      * @return array{id: int}
      */
     public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArray()
-     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}> $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
+     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
      * @return mixed
      */
     public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
@@ -20086,17 +20790,17 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArrayAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::modifyArrayAndBeforeWithoutTable()
-     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}> $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
-     * @return array<array{id: int, category: string, primary_id: int, log_date: string}>|array<oprlogEntity>
+     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
+     * @return array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>|array<oprlogEntity>
      */
     public function modifyArrayAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArrayAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::modifyArrayAndPrimaryWithoutTable()
-     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}> $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
+     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
      * @return array<array{id: int}>
      */
     public function modifyArrayAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
@@ -20104,21 +20808,21 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::modifyOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::modifyOrThrowWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
      * @return array{id: int}
      */
     public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::neighbor()
-     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function neighbor(array $predicates = [], int $limit = 1): array { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::reduce()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return mixed
      */
     public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
@@ -20126,22 +20830,22 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::reduceAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::reduceAndBeforeWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function reduceAndBefore($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::reduceOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::reduceOrThrowWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function reduceOrThrow($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::remove()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return mixed
      */
     public function remove($where = [], ...$opt) { }
@@ -20149,15 +20853,15 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::removeAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::removeAndBeforeWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function removeAndBefore($where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::removeAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::removeAndPrimaryWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function removeAndPrimary($where = [], ...$opt) { }
@@ -20165,14 +20869,14 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::removeOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::removeOrThrowWithoutTable()
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function removeOrThrow($where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::replace()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
      * @return mixed
      */
     public function replace($data, ...$opt) { }
@@ -20180,15 +20884,15 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::replaceAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::replaceAndBeforeWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function replaceAndBefore($data, ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::replaceAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::replaceAndPrimaryWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
      * @return array{id: int}
      */
     public function replaceAndPrimary($data, ...$opt) { }
@@ -20196,15 +20900,15 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::replaceOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::replaceOrThrowWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
      * @return array{id: int}
      */
     public function replaceOrThrow($data, ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::revise()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return mixed
      */
     public function revise($data, $where = [], ...$opt) { }
@@ -20212,17 +20916,17 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::reviseAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::reviseAndBeforeWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function reviseAndBefore($data, $where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::reviseAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::reviseAndPrimaryWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function reviseAndPrimary($data, $where = [], ...$opt) { }
@@ -20230,15 +20934,15 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::reviseOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::reviseOrThrowWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function reviseOrThrow($data, $where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::save()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
      * @return mixed
      */
     public function save($data, ...$opt) { }
@@ -20252,42 +20956,42 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::tuple()
      * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectTuple()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::tupleForAffect()
      * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectTupleForAffect()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::tupleForUpdate()
      * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectTupleForUpdate()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::tupleInShare()
      * @see \ryunosuke\dbml\Mixin\SelectInShareTrait::selectTupleInShare()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function tupleInShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::tupleOrThrow()
      * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectTupleOrThrow()
-     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}
+     * @return oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}
      */
     public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::update()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return mixed
      */
     public function update($data, $where = [], ...$opt) { }
@@ -20295,25 +20999,25 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::updateAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::updateAndBeforeWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function updateAndBefore($data, $where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::updateAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::updateAndPrimaryWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function updateAndPrimary($data, $where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::updateArray()
-     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}> $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return mixed
      */
     public function updateArray($data, $where = [], ...$opt) { }
@@ -20321,25 +21025,25 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::updateArrayAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::updateArrayAndBeforeWithoutTable()
-     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string}> $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @return array<array{id: int, category: string, primary_id: int, log_date: string}>|array<oprlogEntity>
+     * @param array<oprlogEntity>|array<array{id: int, category: string, primary_id: int, log_date: string, message: string}> $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @return array<array{id: int, category: string, primary_id: int, log_date: string, message: string}>|array<oprlogEntity>
      */
     public function updateArrayAndBefore($data, $where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::updateOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::updateOrThrowWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function updateOrThrow($data, $where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::upgrade()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return mixed
      */
     public function upgrade($data, $where = [], ...$opt) { }
@@ -20347,17 +21051,17 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::upgradeAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::upgradeAndBeforeWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function upgradeAndBefore($data, $where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::upgradeAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::upgradeAndPrimaryWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function upgradeAndPrimary($data, $where = [], ...$opt) { }
@@ -20365,16 +21069,16 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::upgradeOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::upgradeOrThrowWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $data
-     * @param array{id: int, category: string, primary_id: int, log_date: string} $where
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $data
+     * @param array{id: int, category: string, primary_id: int, log_date: string, message: string} $where
      * @return array{id: int}
      */
     public function upgradeOrThrow($data, $where = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::upsert()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
      * @return mixed
      */
     public function upsert($insertData, $updateData = [], ...$opt) { }
@@ -20382,17 +21086,17 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::upsertAndBefore()
      * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::upsertAndBeforeWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
-     * @return array{id: int, category: string, primary_id: int, log_date: string}|oprlogEntity
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
+     * @return array{id: int, category: string, primary_id: int, log_date: string, message: string}|oprlogEntity
      */
     public function upsertAndBefore($insertData, $updateData = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::upsertAndPrimary()
      * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::upsertAndPrimaryWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
      * @return array{id: int}
      */
     public function upsertAndPrimary($insertData, $updateData = [], ...$opt) { }
@@ -20400,21 +21104,21 @@ class oprlogTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::upsertOrThrow()
      * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::upsertOrThrowWithoutTable()
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $insertData
-     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string} $updateData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $insertData
+     * @param oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string} $updateData
      * @return array{id: int}
      */
     public function upsertOrThrow($insertData, $updateData = [], ...$opt) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::yieldArray()
-     * @return iterable<oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return iterable<oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::yieldAssoc()
-     * @return iterable<oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string}>
+     * @return iterable<oprlogEntity|array{id: int, category: string, primary_id: int, log_date: string, message: string}>
      */
     public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 }
@@ -28867,6 +29571,21 @@ class multifkeyEntity extends \ryunosuke\dbml\Entity\Entity
     public $subid;
 }
 
+class multifkey2Entity extends \ryunosuke\dbml\Entity\Entity
+{
+    /** @var int */
+    public $id;
+
+    /** @var int */
+    public $fcol1;
+
+    /** @var int */
+    public $fcol2;
+
+    /** @var int */
+    public $fcol9;
+}
+
 class multiprimaryEntity extends \ryunosuke\dbml\Entity\Entity
 {
     /** @var int */
@@ -28964,6 +29683,9 @@ class oprlogEntity extends \ryunosuke\dbml\Entity\Entity
 
     /** @var string */
     public $log_date;
+
+    /** @var string */
+    public $message;
 }
 
 class pagingEntity extends \ryunosuke\dbml\Entity\Entity
