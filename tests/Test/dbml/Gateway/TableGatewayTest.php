@@ -1392,6 +1392,102 @@ AND ((flag=1))", "$gw");
      * @param TableGateway $gateway
      * @param Database $database
      */
+    function test_with($gateway, $database)
+    {
+        // with が効くかの簡単なテスト
+        $this->assertEquals([
+            [
+                "id"    => "1",
+                "name"  => "a",
+                "data"  => "",
+                "tname" => "a",
+            ],
+            [
+                "id"    => "2",
+                "name"  => "b",
+                "data"  => "",
+                "tname" => "b",
+            ],
+        ], $gateway->with('t', "select 1 id, 'a' tname union select 2 id, 'b' tname")->array([
+            '*',
+            '+t{id}' => [
+                '*',
+            ],
+        ]));
+
+        // もう少し実践的な「最大の1件と JOIN」のテスト
+        $this->assertEquals([
+            [
+                "id"       => "1",
+                "name"     => "a",
+                "log_date" => "2009-01-01",
+                "message"  => "message:9-1-1",
+            ],
+            [
+                "id"       => "2",
+                "name"     => "b",
+                "log_date" => "2009-02-02",
+                "message"  => "message:9-2-2",
+            ],
+            [
+                "id"       => "3",
+                "name"     => "c",
+                "log_date" => "2009-03-03",
+                "message"  => "message:9-3-3",
+            ],
+            [
+                "id"       => "4",
+                "name"     => "d",
+                "log_date" => "2009-04-04",
+                "message"  => "message:9-4-4",
+            ],
+            [
+                "id"       => "5",
+                "name"     => "e",
+                "log_date" => "2009-05-05",
+                "message"  => "message:9-5-5",
+            ],
+            [
+                "id"       => "6",
+                "name"     => "f",
+                "log_date" => "2009-06-06",
+                "message"  => "message:9-6-6",
+            ],
+            [
+                "id"       => "7",
+                "name"     => "g",
+                "log_date" => "2009-07-07",
+                "message"  => "message:9-7-7",
+            ],
+            [
+                "id"       => "8",
+                "name"     => "h",
+                "log_date" => "2009-08-08",
+                "message"  => "message:9-8-8",
+            ],
+            [
+                "id"       => "9",
+                "name"     => "i",
+                "log_date" => "2009-09-09",
+                "message"  => "message:9-9-9",
+            ],
+        ], $database->test->with('latest', $database->oprlog->select(['primary_id', 'max_logid' => 'MAX(id)'], [], [], [], 'primary_id'))->array([
+            'id',
+            'name',
+            '+latest{primary_id:id}' => [
+                '+oprlog{id:max_logid}' => [
+                    'log_date',
+                    'message',
+                ],
+            ],
+        ]));
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
     function test_aggregate($gateway, $database)
     {
         $this->assertEquals(10, $gateway->count());

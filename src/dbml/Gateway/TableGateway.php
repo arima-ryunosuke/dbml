@@ -27,6 +27,7 @@ use ryunosuke\dbml\Mixin\SubSelectTrait;
 use ryunosuke\dbml\Mixin\YieldTrait;
 use ryunosuke\dbml\Query\Pagination\Paginator;
 use ryunosuke\dbml\Query\Pagination\Sequencer;
+use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\dbml\Query\TableDescriptor;
@@ -479,6 +480,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     private \ArrayObject $scopes;
     private array        $activeScopes = ['' => []];
 
+    private array   $cte     = [];
     private ?string $foreign = null;
     private ?string $hint    = null;
 
@@ -1450,6 +1452,22 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * WITH 句を設定する
+     *
+     * $name は何も加工されずにそのままクエリに埋め込まれる。
+     * 今のところ (colname) などもここに含める用途となる。
+     *
+     * $query に null を指定すると削除として働く。
+     */
+    public function with(string $name, null|string|Queryable $query): static
+    {
+        // @todo 歴史的な経緯で cte だけは別プロパティになっているが、機会があれば scope に加えてしまう
+        $that = $this->clone();
+        $that->cte[$name] = $query;
+        return $that;
+    }
+
+    /**
      * スコープの追加と縛りを同時に行う
      *
      * 実際は {@link column()}, {@link where()} 等の句別メソッドを使うほうが多い。
@@ -2059,6 +2077,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
         $return = $this->database->select(...array_values($sp));
 
+        foreach ($this->cte as $name => $query) {
+            $return->with($name, $query);
+        }
         $return->hint($this->hint);
         if ($this->original->alias) {
             $return->cast(null);

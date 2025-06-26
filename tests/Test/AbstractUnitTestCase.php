@@ -191,6 +191,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                 new Column('category', Type::getType('string'), ['length' => 32]),
                                 new Column('primary_id', Type::getType('integer')),
                                 new Column('log_date', Type::getType('date')),
+                                new Column('message', Type::getType('text'), ['length' => 65535]),
                             ],
                             [new Index('PRIMARY', ['id'], true, true)],
                             [],
@@ -920,6 +921,7 @@ abstract class AbstractUnitTestCase extends TestCase
                                     'category'   => "category-$i",
                                     'primary_id' => $j,
                                     'log_date'   => date('Y-m-d', strtotime("200$i-$j-$k")),
+                                    'message'    => "message:$i-$j-$k",
                                 ]);
                             }
                         }
