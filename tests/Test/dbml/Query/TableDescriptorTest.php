@@ -80,6 +80,136 @@ class TableDescriptorTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_join($database)
+    {
+        $_join = function (...$args) {
+            $_join = new \ReflectionMethod(TableDescriptor::class, '_join');
+            $_join->setAccessible(true);
+            return $_join->invokeArgs(null, $args);
+        };
+
+        $this->assertDescriptor($_join($database, '<test T', ['*'], 'multifkey2'), [
+            "table"     => "test",
+            "alias"     => "T",
+            "key"       => "<test T",
+            "accessor"  => "T",
+            "joinsign"  => "<",
+            "jointype"  => "LEFT",
+            'fkeyname'  => null,
+            "column"    => ["*"],
+            "remaining" => "",
+        ]);
+        $this->assertDescriptor($_join($database, '<test T:fk', ['*'], 'multifkey2'), [
+            "table"     => "test",
+            "alias"     => "T",
+            "key"       => "<test:fk T",
+            "accessor"  => "T",
+            "joinsign"  => "<",
+            "jointype"  => "LEFT",
+            'fkeyname'  => "fk",
+            "column"    => ["*"],
+            "remaining" => "",
+        ]);
+        $this->assertDescriptor($_join($database, '<test T', ['*'], 'undefined'), [
+            "table"     => "test",
+            "alias"     => "T",
+            "key"       => "<test T",
+            "accessor"  => "T",
+            "joinsign"  => "<",
+            "jointype"  => "LEFT",
+            'fkeyname'  => null,
+            "column"    => ["*"],
+            "remaining" => "",
+        ]);
+        $this->assertDescriptor($_join($database, '<undefined T', ['*'], 'undefined'), [
+            "table"     => "undefined",
+            "alias"     => "T",
+            "key"       => "<undefined T",
+            "accessor"  => "T",
+            "joinsign"  => "<",
+            "jointype"  => "LEFT",
+            'fkeyname'  => null,
+            "column"    => ["*"],
+            "remaining" => "",
+        ]);
+        $this->assertDescriptor($_join($database, '<id', ['*'], 'test'), [
+            "table"     => "id",
+            "alias"     => null,
+            "key"       => "<id",
+            "accessor"  => "id",
+            "joinsign"  => "<",
+            "jointype"  => "LEFT",
+            'fkeyname'  => null,
+            "column"    => ["*"],
+            "remaining" => "",
+        ]);
+
+        $this->assertDescriptor($_join($database, '<fcol1', [], 'multifkey2'), [
+            "table"     => "multiunique",
+            "alias"     => "multifkey2_multiunique_fcol1",
+            "key"       => "<multiunique:fk_multifkeys1 multifkey2_multiunique_fcol1",
+            "accessor"  => "multifkey2_multiunique_fcol1",
+            "joinsign"  => "<",
+            "jointype"  => "LEFT",
+            "fkeyname"  => "fk_multifkeys1",
+            "column"    => [],
+            "remaining" => "",
+        ]);
+        $this->assertDescriptor($_join($database, '<fcol1 F1.col', [], 'multifkey2'), [
+            "table"     => "multiunique",
+            "alias"     => "F1",
+            "key"       => "<multiunique:fk_multifkeys1 F1",
+            "accessor"  => "F1",
+            "joinsign"  => "<",
+            "jointype"  => "LEFT",
+            "fkeyname"  => "fk_multifkeys1",
+            "column"    => ["col"],
+            "remaining" => "",
+        ]);
+        $this->assertDescriptor($_join($database, '<fcol1["cond"] F1.col', [], 'multifkey2'), [
+            "table"     => "multiunique",
+            "alias"     => "F1",
+            "key"       => "<multiunique:fk_multifkeys1[\"cond\"] F1",
+            "accessor"  => "F1",
+            "joinsign"  => "<",
+            "jointype"  => "LEFT",
+            "fkeyname"  => "fk_multifkeys1",
+            "column"    => ["col"],
+            "condition" => ["cond"],
+            "remaining" => "",
+        ]);
+
+        $expected = [
+            "table"     => "multiunique",
+            "alias"     => "T",
+            //"key"       => "<multiunique@@scope1@scope2(1, 2):fk_multifkeys1[on1 = 1]<id, cid>+aid-did#10-20 T",
+            "accessor"  => "T",
+            "joinsign"  => "<",
+            "jointype"  => "LEFT",
+            "fkeyname"  => "fk_multifkeys1",
+            "column"    => [],
+            "condition" => ["on1 = 1"],
+            "remaining" => "",
+            "scope"     => [
+                ""       => [],
+                "scope1" => [],
+                "scope2" => [1, 2],
+            ],
+            "group"     => ["id", "cid"],
+        ];
+        $this->assertDescriptor($_join($database, '<fcol1<id, cid>@@scope1@scope2(1, 2)[on1 = 1]+aid-did#10-20 AS T', [], 'multifkey2'), $expected);
+        $this->assertDescriptor($_join($database, '<fcol1[on1 = 1]@@scope1@scope2(1, 2)<id, cid>+aid-did#10-20 AS T', [], 'multifkey2'), $expected);
+        $this->assertDescriptor($_join($database, '<fcol1@[on1 = 1]@scope1<id, cid>@scope2(1, 2)+aid-did#10-20 AS T', [], 'multifkey2'), $expected);
+        $this->assertDescriptor($_join($database, '<fcol1+aid-did@@scope2(1, 2)@scope1<id, cid>#10-20[on1 = 1] AS T', [], 'multifkey2'), $expected);
+        $this->assertDescriptor($_join($database, '<fcol1#10-20+aid-did@@scope1<id, cid>[on1 = 1]@scope2(1, 2) AS T', [], 'multifkey2'), $expected);
+
+        that(TableDescriptor::class)::_join($database, '<fcol9', ['*'], 'multifkey2')->wasThrown('foreign key !== 1');
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_forge($database)
     {
         $of = function ($v) { return $v->descriptor; };

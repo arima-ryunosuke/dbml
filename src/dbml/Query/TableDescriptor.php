@@ -356,6 +356,49 @@ class TableDescriptor
         return $result[0];
     }
 
+    private static function _join(Database $database, string $descriptor, $cols, ?string $parent): static
+    {
+        $schema = $database->getSchema();
+
+        $join = new self($database, $descriptor, $cols);
+
+        // 外部キーが明示されてるならうま味がないのでスルー
+        if (isset($join->fkeyname)) {
+            return $join;
+        }
+
+        // 存在する場合は代替ではない
+        if ($schema->hasTable($join->table)) {
+            return $join;
+        }
+        // 親がテーブルでなければ代替外部キーカラムなど存在しない
+        if (!$schema->hasTable($parent)) {
+            return $join;
+        }
+
+        // カラムに外部キーがないあるいはサブクエリ・仮想テーブルはスルー
+        $fkeys = array_filter($schema->getForeignKeys(null, $parent), fn($fkey) => $fkey->getLocalColumns() === [$join->table]);
+        if (count($fkeys) === 0) {
+            return $join;
+        }
+        // 逆に複数持っていたら特定できない
+        if (count($fkeys) > 1) {
+            throw new \UnexpectedValueException("$parent.$join->table foreign key !== 1");
+        }
+
+        // ここまで来れば外部キーから結合表や名前が取得できる
+        $fkey = reset($fkeys);
+        $fkname = $fkey->getName();
+        $ftable = $fkey->getForeignTableName();
+        $falias = isset($join->alias) ? '' : " {$parent}_{$ftable}_{$join->table}";
+        $base = "{$join->joinsign}$ftable$falias:$fkname";
+
+        // 外部キーから得られた情報で元デスクリプタを書き換える
+        $quote = fn($v) => preg_quote($v, '#');
+        $descriptor = preg_replace_callback("#^{$quote($join->joinsign)}{$quote($join->table)}#iu", fn() => $base, $descriptor);
+        return self::_join($database, $descriptor, [], $ftable);
+    }
+
     /**
      * 文字列や配列からインスタンスの配列を生成する
      *
@@ -473,7 +516,7 @@ class TableDescriptor
         $descriptor = preg_splice("`^(as\s+)?($alnumscore+)?`ui", '', trim($descriptor), $m);
         $alias = $m[2] ?? null;
 
-        $descriptor = preg_splice('`(\.(.+))?`ui', '', trim($descriptor), $m);
+        $descriptor = preg_splice('`([\.\|](.+))?`ui', '', trim($descriptor), $m);
         $column = $m[2] ?? null;
 
         $this->remaining = trim($descriptor);
@@ -566,7 +609,7 @@ class TableDescriptor
             }
             // ['columname' => '+othertable.columname'] モード
             elseif (is_string($c) && preg_match("#^[$joinsigns]$identifier*#ui", trim($c), $m)) {
-                $join = new self($database, $c, []);
+                $join = self::_join($database, $c, [], $this->table);
                 foreach ($join->column as $c2) {
                     $this->column[] = new Select(...Select::split($join->accessor . '.' . $c2, is_int($k) ? null : $k));
                 }
@@ -575,7 +618,7 @@ class TableDescriptor
             }
             // ['+othertable' => ['columname']] モード
             elseif (preg_match("#^(^/\*(.*?)\*/)?[$joinsigns].#u", trim($k), $m)) {
-                $join = new self($database, $k, []);
+                $join = self::_join($database, $k, [], $this->table);
                 foreach ($join->column as $c2) {
                     $this->column[] = new Select(...Select::split($join->accessor . '.' . $c2, null));
                 }

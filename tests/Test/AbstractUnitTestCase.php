@@ -243,21 +243,6 @@ abstract class AbstractUnitTestCase extends TestCase
                             [],
                             ['collation' => 'utf8mb3_bin'],
                         ),
-                        new Table('multifkey',
-                            [
-                                new Column('id', Type::getType('integer'), ['autoincrement' => true]),
-                                new Column('mainid', Type::getType('integer')),
-                                new Column('subid', Type::getType('integer')),
-                            ],
-                            [
-                                new Index('PRIMARY', ['id'], true, true),
-                            ],
-                            [],
-                            [
-                                new ForeignKeyConstraint(['mainid', 'subid'], 'multiprimary', ['mainid', 'subid'], 'fk_multifkey1', []),
-                            ],
-                            ['collation' => 'utf8mb3_bin'],
-                        ),
                         new Table('multiunique',
                             [
                                 new Column('id', Type::getType('integer'), ['autoincrement' => true]),
@@ -275,6 +260,40 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             [],
                             [],
+                            ['collation' => 'utf8mb3_bin'],
+                        ),
+                        new Table('multifkey',
+                            [
+                                new Column('id', Type::getType('integer'), ['autoincrement' => true]),
+                                new Column('mainid', Type::getType('integer')),
+                                new Column('subid', Type::getType('integer')),
+                            ],
+                            [
+                                new Index('PRIMARY', ['id'], true, true),
+                            ],
+                            [],
+                            [
+                                new ForeignKeyConstraint(['mainid', 'subid'], 'multiprimary', ['mainid', 'subid'], 'fk_multifkey1', []),
+                            ],
+                            ['collation' => 'utf8mb3_bin'],
+                        ),
+                        new Table('multifkey2',
+                            [
+                                new Column('id', Type::getType('integer'), ['autoincrement' => true]),
+                                new Column('fcol1', Type::getType('integer')),
+                                new Column('fcol2', Type::getType('integer')),
+                                new Column('fcol9', Type::getType('integer')),
+                            ],
+                            [
+                                new Index('PRIMARY', ['id'], true, true),
+                            ],
+                            [],
+                            [
+                                new ForeignKeyConstraint(['fcol1'], 'multiunique', ['id'], 'fk_multifkeys1', []),
+                                new ForeignKeyConstraint(['fcol2'], 'multiunique', ['id'], 'fk_multifkeys2', []),
+                                new ForeignKeyConstraint(['fcol9'], 'multiunique', ['id'], 'fk_multifkeys91', []),
+                                new ForeignKeyConstraint(['fcol9'], 'multifkey', ['id'], 'fk_multifkeys92', []),
+                            ],
                             ['collation' => 'utf8mb3_bin'],
                         ),
                         new Table('multicolumn',
@@ -842,7 +861,6 @@ abstract class AbstractUnitTestCase extends TestCase
                 $db->truncate('oprlog');
                 $db->truncate('noprimary');
                 $db->truncate('nullable');
-                $db->truncate('multiunique');
                 $db->truncate('multicolumn');
                 $db->truncate('misctype');
                 $db->truncate('misctype_child');
@@ -850,8 +868,10 @@ abstract class AbstractUnitTestCase extends TestCase
                 $db->truncate('tran_table1');
                 $db->truncate('tran_table2');
                 $db->truncate('tran_table3');
-                $db->truncate('multifkey');
+                $db->truncate('multifkey2');
+                $db->delete('multifkey');
                 $db->delete('multiprimary');
+                $db->delete('multiunique');
                 $db->delete('foreign_c1');
                 $db->delete('foreign_c2');
                 $db->delete('foreign_p');

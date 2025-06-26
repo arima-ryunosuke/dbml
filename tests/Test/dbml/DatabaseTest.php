@@ -5687,12 +5687,14 @@ INSERT INTO test (id, name) VALUES
         $sqls = $database->dryrun()->destroy('multiprimary', ['name' => ['a', 'b']]);
         if ($database->getCompatiblePlatform()->supportsRowConstructor()) {
             $this->assertEquals([
+                "DELETE FROM multifkey2 WHERE (fcol9) IN (SELECT multifkey.id FROM multifkey WHERE (mainid,subid) IN (SELECT multiprimary.mainid, multiprimary.subid FROM multiprimary WHERE name IN ('a','b')))",
                 "DELETE FROM multifkey WHERE (mainid,subid) IN (SELECT multiprimary.mainid, multiprimary.subid FROM multiprimary WHERE name IN ('a','b'))",
                 "DELETE FROM multiprimary WHERE name IN ('a','b')",
             ], $sqls);
         }
         else {
             $this->assertEquals([
+                "DELETE FROM multifkey2 WHERE (fcol9) IN (SELECT multifkey.id FROM multifkey WHERE (multifkey.mainid = '1' AND multifkey.subid = '1') OR (multifkey.mainid = '1' AND multifkey.subid = '2'))",
                 "DELETE FROM multifkey WHERE (multifkey.mainid = '1' AND multifkey.subid = '1') OR (multifkey.mainid = '1' AND multifkey.subid = '2')",
                 "DELETE FROM multiprimary WHERE name IN ('a','b')",
             ], $sqls);

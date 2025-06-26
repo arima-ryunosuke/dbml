@@ -1582,6 +1582,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * | 31 | `['+alias' => Gateway object]`                   | Gateway の表すテーブルとの JOIN を表す
      * | 50 | `'TableDescriptor'`                              | 「テーブル名」を書く場所にはテーブル記法が使用できる（駆動表）
      * | 51 | `['+TableDescriptor' => ['*']]`                  | 「テーブル名」を書く場所にはテーブル記法が使用できる（JOIN）
+     * | 55 | `['+foreign_column' => ['*']]`                   | No.51 の亜種で「テーブル名」を書く場所に外部キーを持つカラム名を書くとその外部キーのテーブルと JOIN される
+     * | 56 | `['alias' => '<foreign_column.column']`          | No.10 の亜種で「テーブル名」を書く場所に外部キーを持つカラム名を書くとその外部キーのテーブルと JOIN される
      * | 80 | `SelectOption::DISTINCT()`                       | SelectOption インスタンスを与えると `addSelectOption` と同等の効果を示す
      * | 98 | `['' => ['expression']]`                         | 空キーは「テーブルに紐付かないカラム指定」を表す
      *
@@ -1720,6 +1722,27 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *         't_comment-create_date#0-3 AS C.*' => []
      *     ],
      * ]);
+     *
+     * # No.55, 56：外部キーカラムの JOIN 記法
+     * // 下記のように同じテーブルへの外部キーがある場合、JOIN するには外部キー名を明示する必要がある（操作ログなどで頻出）
+     * // local_to_foreign_key1: local_table.local_id1 -> foreign_table.foreign_id
+     * // local_to_foreign_key2: local_table.local_id2 -> foreign_table.foreign_id
+     * $qb->column([
+     *     'local_table' => [
+     *         'foreign1_name'                        => ['<foreign_table:local_to_foreign_key1.foreign_name'], // No.10 記法
+     *         '<foreign_table:local_to_foreign_key2' => ['foreign2_name' => 'foreign_name'],                   // No.51 記法
+     *     ],
+     * ]);
+     * // ただし、このような時は大抵名前引きであり、外部キー名は得てして長いためこのような表記は冗長すぎる
+     * // この時、外部キーの張られているカラムを明示すれば自ずと外部キー・外部テーブルは判明するため、カラムをテーブルのように表記できる
+     * $qb->column([
+     *     'local_table' => [
+     *         'foreign1_name' => ['<local_id1|foreign_name'],         // No.55 記法
+     *         '<local_id2'    => ['foreign2_name' => 'foreign_name'], // No.56 記法
+     *     ],
+     * ]);
+     * // つまり「外部テーブル名:外部キー名」を「ローカルカラム名」で読み替える機能である
+     * // ただし、この機能は実験的であり汎用性もなく、将来の変更で互換性破壊が行われる可能性がある（例えばテーブル名とカラム名が曖昧なため、何らかのプレフィックス記号を導入するなど）
      *
      * # No.80：SelectOption を与える
      * $qb->column([

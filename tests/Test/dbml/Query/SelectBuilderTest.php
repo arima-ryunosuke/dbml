@@ -1731,6 +1731,24 @@ ORDER BY P.id DESC
             ])
         );
 
+        $this->assertQuery("SELECT multifkey2_multiunique_fcol2.uc_i, multifkey2_multiunique_fcol1.uc_s FROM multifkey2 INNER JOIN multiunique multifkey2_multiunique_fcol1 ON multifkey2_multiunique_fcol1.id = multifkey2.fcol1 LEFT JOIN multiunique multifkey2_multiunique_fcol2 ON multifkey2_multiunique_fcol2.id = multifkey2.fcol2",
+            $builder->column([
+                'multifkey2' => [
+                    '+fcol1' => ['uc_s'],
+                    '<fcol2|uc_i',
+                ],
+            ])
+        );
+
+        $this->assertQuery("SELECT F2.uc_i, F1.uc_s FROM multifkey2 M2 INNER JOIN multiunique F1 ON F1.id = M2.fcol1 LEFT JOIN multiunique F2 ON F2.id = M2.fcol2",
+            $builder->column([
+                'multifkey2 M2' => [
+                    '+fcol1 F1' => ['uc_s'],
+                    '<fcol2 F2|uc_i',
+                ],
+            ])
+        );
+
         $this->assertQuery("SELECT P.*, C.* FROM foreign_p P INNER JOIN foreign_c1 C ON C.id = P.id",
             $builder->column('foreign_p P+foreign_c1 C')
         );
