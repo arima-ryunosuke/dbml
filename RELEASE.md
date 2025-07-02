@@ -21,6 +21,11 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.9
+
+- [feature] TableGateway の CTE 機能
+- [feature] 外部キー名の代わりにカラム名で JOIN できる機能
+
 ## 3.1.8
 
 - [fixbug] echoAnnotation で第1カラムが消える不具合
