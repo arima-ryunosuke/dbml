@@ -190,121 +190,121 @@ trait AffectOrThrowTrait
     }
 
     /**
-     * 作用行が 0 のときに例外を投げる {@uses Database::revise()}
+     * 作用行が 0 のときに例外を投げる {@uses Database::updateExcludeRestrict()}
      *
-     * @inheritdoc Database::revise()
+     * @inheritdoc Database::updateExcludeRestrict()
      * @return array|string
      * @throws NonAffectedException
      */
-    private function reviseOrThrowWithTable($tableName, $data, $where = [], ...$opt)
+    private function updateExcludeRestrictOrThrowWithTable($tableName, $data, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->revise($tableName, $data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
+        assert(parameter_default([$this, 'updateExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateExcludeRestrict($tableName, $data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
 
     /**
-     * 作用行が 0 のときに例外を投げる {@uses TableGateway::revise()}
+     * 作用行が 0 のときに例外を投げる {@uses TableGateway::updateExcludeRestrict()}
      *
-     * @inheritdoc TableGateway::revise()
+     * @inheritdoc TableGateway::updateExcludeRestrict()
      * @return array|string
      * @throws NonAffectedException
      */
     #[AssumeType('primary')]
-    private function reviseOrThrowWithoutTable(
+    private function updateExcludeRestrictOrThrowWithoutTable(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->revise($data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
+        assert(parameter_default([$this, 'updateExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateExcludeRestrict($data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
 
     /**
-     * 作用行が 0 のときに例外を投げる {@uses Database::upgrade()}
+     * 作用行が 0 のときに例外を投げる {@uses Database::updateIncludeRestrict()}
      *
-     * @inheritdoc Database::upgrade()
+     * @inheritdoc Database::updateIncludeRestrict()
      * @return array|string
      * @throws NonAffectedException
      */
-    private function upgradeOrThrowWithTable($tableName, $data, $where = [], ...$opt)
+    private function updateIncludeRestrictOrThrowWithTable($tableName, $data, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upgrade($tableName, $data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
+        assert(parameter_default([$this, 'updateIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateIncludeRestrict($tableName, $data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
 
     /**
-     * 作用行が 0 のときに例外を投げる {@uses TableGateway::upgrade()}
+     * 作用行が 0 のときに例外を投げる {@uses TableGateway::updateIncludeRestrict()}
      *
-     * @inheritdoc TableGateway::upgrade()
+     * @inheritdoc TableGateway::updateIncludeRestrict()
      * @return array|string
      * @throws NonAffectedException
      */
     #[AssumeType('primary')]
-    private function upgradeOrThrowWithoutTable(
+    private function updateIncludeRestrictOrThrowWithoutTable(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upgrade($data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
+        assert(parameter_default([$this, 'updateIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateIncludeRestrict($data, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
 
     /**
-     * 作用行が 0 のときに例外を投げる {@uses Database::remove()}
+     * 作用行が 0 のときに例外を投げる {@uses Database::deleteExcludeRestrict()}
      *
-     * @inheritdoc Database::remove()
+     * @inheritdoc Database::deleteExcludeRestrict()
      * @return array|string
      * @throws NonAffectedException
      */
-    private function removeOrThrowWithTable($tableName, $where = [], ...$opt)
+    private function deleteExcludeRestrictOrThrowWithTable($tableName, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->remove($tableName, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
+        assert(parameter_default([$this, 'deleteExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteExcludeRestrict($tableName, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
 
     /**
-     * 作用行が 0 のときに例外を投げる {@uses TableGateway::remove()}
+     * 作用行が 0 のときに例外を投げる {@uses TableGateway::deleteExcludeRestrict()}
      *
-     * @inheritdoc TableGateway::remove()
+     * @inheritdoc TableGateway::deleteExcludeRestrict()
      * @return array|string
      * @throws NonAffectedException
      */
     #[AssumeType('primary')]
-    private function removeOrThrowWithoutTable(
+    private function deleteExcludeRestrictOrThrowWithoutTable(
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->remove($where, ...($opt + ['throw' => true, 'return' => 'primary']));
+        assert(parameter_default([$this, 'deleteExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteExcludeRestrict($where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
 
     /**
-     * 作用行が 0 のときに例外を投げる {@uses Database::destroy()}
+     * 作用行が 0 のときに例外を投げる {@uses Database::deleteIncludeRestrict()}
      *
-     * @inheritdoc Database::destroy()
+     * @inheritdoc Database::deleteIncludeRestrict()
      * @return array|string
      * @throws NonAffectedException
      */
-    private function destroyOrThrowWithTable($tableName, $where = [], ...$opt)
+    private function deleteIncludeRestrictOrThrowWithTable($tableName, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->destroy($tableName, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
+        assert(parameter_default([$this, 'deleteIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteIncludeRestrict($tableName, $where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
 
     /**
-     * 作用行が 0 のときに例外を投げる {@uses TableGateway::destroy()}
+     * 作用行が 0 のときに例外を投げる {@uses TableGateway::deleteIncludeRestrict()}
      *
-     * @inheritdoc TableGateway::destroy()
+     * @inheritdoc TableGateway::deleteIncludeRestrict()
      * @return array|string
      * @throws NonAffectedException
      */
     #[AssumeType('primary')]
-    private function destroyOrThrowWithoutTable(
+    private function deleteIncludeRestrictOrThrowWithoutTable(
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->destroy($where, ...($opt + ['throw' => true, 'return' => 'primary']));
+        assert(parameter_default([$this, 'deleteIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteIncludeRestrict($where, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
 
     /**

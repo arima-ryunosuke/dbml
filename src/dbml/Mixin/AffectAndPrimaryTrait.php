@@ -176,113 +176,113 @@ trait AffectAndPrimaryTrait
     }
 
     /**
-     * 主キーを返す {@uses Database::revise()}
+     * 主キーを返す {@uses Database::updateExcludeRestrict()}
      *
-     * @inheritdoc Database::revise()
+     * @inheritdoc Database::updateExcludeRestrict()
      * @return array|string
      */
-    private function reviseAndPrimaryWithTable($tableName, $data, $where = [], ...$opt)
+    private function updateExcludeRestrictAndPrimaryWithTable($tableName, $data, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->revise($tableName, $data, $where, ...($opt + ['return' => 'primary']));
+        assert(parameter_default([$this, 'updateExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateExcludeRestrict($tableName, $data, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
-     * 主キーを返す {@uses TableGateway::revise()}
+     * 主キーを返す {@uses TableGateway::updateExcludeRestrict()}
      *
-     * @inheritdoc TableGateway::revise()
+     * @inheritdoc TableGateway::updateExcludeRestrict()
      * @return array|string
      */
     #[AssumeType('primary')]
-    private function reviseAndPrimaryWithoutTable(
+    private function updateExcludeRestrictAndPrimaryWithoutTable(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->revise($data, $where, ...($opt + ['return' => 'primary']));
+        assert(parameter_default([$this, 'updateExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateExcludeRestrict($data, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
-     * 主キーを返す {@uses Database::upgrade()}
+     * 主キーを返す {@uses Database::updateIncludeRestrict()}
      *
-     * @inheritdoc Database::upgrade()
+     * @inheritdoc Database::updateIncludeRestrict()
      * @return array|string
      */
-    private function upgradeAndPrimaryWithTable($tableName, $data, $where = [], ...$opt)
+    private function updateIncludeRestrictAndPrimaryWithTable($tableName, $data, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upgrade($tableName, $data, $where, ...($opt + ['return' => 'primary']));
+        assert(parameter_default([$this, 'updateIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateIncludeRestrict($tableName, $data, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
-     * 主キーを返す {@uses TableGateway::upgrade()}
+     * 主キーを返す {@uses TableGateway::updateIncludeRestrict()}
      *
-     * @inheritdoc TableGateway::upgrade()
+     * @inheritdoc TableGateway::updateIncludeRestrict()
      * @return array|string
      */
     #[AssumeType('primary')]
-    private function upgradeAndPrimaryWithoutTable(
+    private function updateIncludeRestrictAndPrimaryWithoutTable(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upgrade($data, $where, ...($opt + ['return' => 'primary']));
+        assert(parameter_default([$this, 'updateIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateIncludeRestrict($data, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
-     * 主キーを返す {@uses Database::remove()}
+     * 主キーを返す {@uses Database::deleteExcludeRestrict()}
      *
-     * @inheritdoc Database::remove()
+     * @inheritdoc Database::deleteExcludeRestrict()
      * @return array|string
      */
-    private function removeAndPrimaryWithTable($tableName, $where = [], ...$opt)
+    private function deleteExcludeRestrictAndPrimaryWithTable($tableName, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->remove($tableName, $where, ...($opt + ['return' => 'primary']));
+        assert(parameter_default([$this, 'deleteExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteExcludeRestrict($tableName, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
-     * 主キーを返す {@uses TableGateway::remove()}
+     * 主キーを返す {@uses TableGateway::deleteExcludeRestrict()}
      *
-     * @inheritdoc TableGateway::remove()
+     * @inheritdoc TableGateway::deleteExcludeRestrict()
      * @return array|string
      */
     #[AssumeType('primary')]
-    private function removeAndPrimaryWithoutTable(
+    private function deleteExcludeRestrictAndPrimaryWithoutTable(
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->remove($where, ...($opt + ['return' => 'primary']));
+        assert(parameter_default([$this, 'deleteExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteExcludeRestrict($where, ...($opt + ['return' => 'primary']));
     }
 
     /**
-     * 主キーを返す {@uses Database::destroy()}
+     * 主キーを返す {@uses Database::deleteIncludeRestrict()}
      *
-     * @inheritdoc Database::destroy()
+     * @inheritdoc Database::deleteIncludeRestrict()
      * @return array|string
      */
-    private function destroyAndPrimaryWithTable($tableName, $where = [], ...$opt)
+    private function deleteIncludeRestrictAndPrimaryWithTable($tableName, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->destroy($tableName, $where, ...($opt + ['return' => 'primary']));
+        assert(parameter_default([$this, 'deleteIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteIncludeRestrict($tableName, $where, ...($opt + ['return' => 'primary']));
     }
 
     /**
-     * 主キーを返す {@uses TableGateway::destroy()}
+     * 主キーを返す {@uses TableGateway::deleteIncludeRestrict()}
      *
-     * @inheritdoc TableGateway::destroy()
+     * @inheritdoc TableGateway::deleteIncludeRestrict()
      * @return array|string
      */
     #[AssumeType('primary')]
-    private function destroyAndPrimaryWithoutTable(
+    private function deleteIncludeRestrictAndPrimaryWithoutTable(
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->destroy($where, ...($opt + ['return' => 'primary']));
+        assert(parameter_default([$this, 'deleteIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteIncludeRestrict($where, ...($opt + ['return' => 'primary']));
     }
 
     /**

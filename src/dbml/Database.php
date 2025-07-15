@@ -320,14 +320,18 @@ class Database
         updateOrThrowWithTable as public updateOrThrow;
         deleteOrThrowWithTable as public deleteOrThrow;
         invalidOrThrowWithTable as public invalidOrThrow;
-        reviseOrThrowWithTable as public reviseOrThrow;
-        upgradeOrThrowWithTable as public upgradeOrThrow;
-        removeOrThrowWithTable as public removeOrThrow;
-        destroyOrThrowWithTable as public destroyOrThrow;
         reduceOrThrowWithTable as public reduceOrThrow;
         upsertOrThrowWithTable as public upsertOrThrow;
         modifyOrThrowWithTable as public modifyOrThrow;
         replaceOrThrowWithTable as public replaceOrThrow;
+        updateExcludeRestrictOrThrowWithTable as public reviseOrThrow;  // for compatile
+        updateIncludeRestrictOrThrowWithTable as public upgradeOrThrow; // for compatile
+        deleteExcludeRestrictOrThrowWithTable as public removeOrThrow;  // for compatile
+        deleteIncludeRestrictOrThrowWithTable as public destroyOrThrow; // for compatile
+        updateExcludeRestrictOrThrowWithTable as public updateExcludeRestrictOrThrow;
+        updateIncludeRestrictOrThrowWithTable as public updateIncludeRestrictOrThrow;
+        deleteExcludeRestrictOrThrowWithTable as public deleteExcludeRestrictOrThrow;
+        deleteIncludeRestrictOrThrowWithTable as public deleteIncludeRestrictOrThrow;
     }
     use AffectAndPrimaryTrait {
         insertArrayAndPrimaryWithTable as public insertArrayAndPrimary;
@@ -336,13 +340,17 @@ class Database
         updateAndPrimaryWithTable as public updateAndPrimary;
         deleteAndPrimaryWithTable as public deleteAndPrimary;
         invalidAndPrimaryWithTable as public invalidAndPrimary;
-        reviseAndPrimaryWithTable as public reviseAndPrimary;
-        upgradeAndPrimaryWithTable as public upgradeAndPrimary;
-        removeAndPrimaryWithTable as public removeAndPrimary;
-        destroyAndPrimaryWithTable as public destroyAndPrimary;
         upsertAndPrimaryWithTable as public upsertAndPrimary;
         modifyAndPrimaryWithTable as public modifyAndPrimary;
         replaceAndPrimaryWithTable as public replaceAndPrimary;
+        updateExcludeRestrictAndPrimaryWithTable as public reviseAndPrimary;  // for compatile
+        updateIncludeRestrictAndPrimaryWithTable as public upgradeAndPrimary; // for compatile
+        deleteExcludeRestrictAndPrimaryWithTable as public removeAndPrimary;  // for compatile
+        deleteIncludeRestrictAndPrimaryWithTable as public destroyAndPrimary; // for compatile
+        updateExcludeRestrictAndPrimaryWithTable as public updateExcludeRestrictAndPrimary;
+        updateIncludeRestrictAndPrimaryWithTable as public updateIncludeRestrictAndPrimary;
+        deleteExcludeRestrictAndPrimaryWithTable as public deleteExcludeRestrictAndPrimary;
+        deleteIncludeRestrictAndPrimaryWithTable as public deleteIncludeRestrictAndPrimary;
     }
     use AffectAndBeforeTrait {
         updateArrayAndBeforeWithTable as public updateArrayAndBefore;
@@ -351,14 +359,18 @@ class Database
         updateAndBeforeWithTable as public updateAndBefore;
         deleteAndBeforeWithTable as public deleteAndBefore;
         invalidAndBeforeWithTable as public invalidAndBefore;
-        reviseAndBeforeWithTable as public reviseAndBefore;
-        upgradeAndBeforeWithTable as public upgradeAndBefore;
-        removeAndBeforeWithTable as public removeAndBefore;
-        destroyAndBeforeWithTable as public destroyAndBefore;
         reduceAndBeforeWithTable as public reduceAndBefore;
         upsertAndBeforeWithTable as public upsertAndBefore;
         modifyAndBeforeWithTable as public modifyAndBefore;
         replaceAndBeforeWithTable as public replaceAndBefore;
+        updateExcludeRestrictAndBeforeWithTable as public reviseAndBefore;  // for compatile
+        updateIncludeRestrictAndBeforeWithTable as public upgradeAndBefore; // for compatile
+        deleteExcludeRestrictAndBeforeWithTable as public removeAndBefore;  // for compatile
+        deleteIncludeRestrictAndBeforeWithTable as public destroyAndBefore; // for compatile
+        updateExcludeRestrictAndBeforeWithTable as public updateExcludeRestrictAndBefore;
+        updateIncludeRestrictAndBeforeWithTable as public updateIncludeRestrictAndBefore;
+        deleteExcludeRestrictAndBeforeWithTable as public deleteExcludeRestrictAndBefore;
+        deleteIncludeRestrictAndBeforeWithTable as public deleteIncludeRestrictAndBefore;
     }
 
     protected function getDatabase(): Database { return $this; }
@@ -4802,17 +4814,21 @@ class Database
 
         // 処理順は下記で固定とする（概して delete 系は制約違反が少なく、insert 系が制約違反になりやすい）
         $affects = [
-            'destroy' => [],
-            'remove'  => [],
-            'delete'  => [],
-            'upgrade' => [], // 実質的な意味はなし（主キーの更新は連想配列の都合上実現できない）
-            'revise'  => [], // 実質的な意味はなし（主キーの更新は連想配列の都合上実現できない）
-            'update'  => [],
-            'upsert'  => [],
-            'modify'  => [],
-            'replace' => [],
-            'invalid' => [],
-            'insert'  => [],
+            'destroy'               => [], // for compatible
+            'deleteIncludeRestrict' => [],
+            'remove'                => [], // for compatible
+            'deleteExcludeRestrict' => [],
+            'delete'                => [],
+            'upgrade'               => [], // for compatible
+            'updateIncludeRestrict' => [], // 実質的な意味はなし（主キーの更新は連想配列の都合上実現できない）
+            'revise'                => [], // for compatible
+            'updateExcludeRestrict' => [], // 実質的な意味はなし（主キーの更新は連想配列の都合上実現できない）
+            'update'                => [],
+            'upsert'                => [],
+            'modify'                => [],
+            'replace'               => [],
+            'invalid'               => [],
+            'insert'                => [],
         ];
         foreach ($dataarray as $n => $row) {
             $method = $row[$opt['method_key']] ?? '';
@@ -4836,11 +4852,12 @@ class Database
                 throw new \UnexpectedValueException(sprintf("primary data mismatch(%s.%s != %s)", $this->table, json_encode(array_keys($pkcols)), json_encode($primary)));
             }
 
+            // for compatible revise,upgrade,remove,destroy
             $args = match ($method) {
-                'update', 'revise', 'upgrade' => [$rowdata, $primary + $builder->getWhere()],
-                'delete', 'remove', 'destroy' => [$primary + $builder->getWhere()],
-                'invalid'                     => [$primary + $builder->getWhere(), $rowdata],
-                default                       => [$row],
+                'update', 'updateExcludeRestrict', 'updateIncludeRestrict', 'revise', 'upgrade' => [$rowdata, $primary + $builder->getWhere()],
+                'delete', 'deleteExcludeRestrict', 'deleteIncludeRestrict', 'remove', 'destroy' => [$primary + $builder->getWhere()],
+                'invalid'                                                                       => [$primary + $builder->getWhere(), $rowdata],
+                default                                                                         => [$row],
             };
 
             $affects[$method][$n] = [$builder->getTable(), ...$args];
@@ -5286,18 +5303,27 @@ class Database
      *
      * ```php
      * # childtable -> parenttable に RESTRICT な外部キーがある場合
-     * $db->revise('parenttable', ['id' => 2], ['id' => 1]);
+     * $db->updateExcludeRestrict('parenttable', ['id' => 2], ['id' => 1]);
      * // UPDATE parenttable SET id = 2 WHERE id = 1 AND (NOT EXISTS (SELECT * FROM childtable WHERE parenttable.id = childtable.parent_id))
      * ```
      *
-     * @used-by reviseOrThrow()
-     * @used-by reviseAndPrimary()
-     * @used-by reviseAndBefore()
+     * @used-by updateExcludeRestrictOrThrow()
+     * @used-by updateExcludeRestrictAndPrimary()
+     * @used-by updateExcludeRestrictAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     */
+    public function updateExcludeRestrict($tableName, $data, $where = [], ...$opt)
+    {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->revise($tableName, $data, $where, ...$opt);
+    }
+
+    /**
+     * @deprecated please use updateExcludeRestrict
      */
     public function revise($tableName, $data, $where = [], ...$opt)
     {
@@ -5327,19 +5353,29 @@ class Database
      *
      * ```php
      * # childtable -> parenttable に RESTRICT な外部キーがある場合
-     * $db->upgrade('parenttable', ['pk' => 2], ['pk' => 1]);
+     * $db->updateIncludeRestrict('parenttable', ['pk' => 2], ['pk' => 1]);
      * // UPDATE childtable SET fk = 2 WHERE (cid) IN (parenttable id FROM parenttable WHERE pk = 1)
      * // UPDATE FROM parenttable SET pk = 2 WHERE pk = 1
      * ```
      *
-     * @used-by upgradeOrThrow()
-     * @used-by upgradeAndPrimary()
-     * @used-by upgradeAndBefore()
+     * @used-by updateIncludeRestrictOrThrow()
+     * @used-by updateIncludeRestrictAndPrimary()
+     * @used-by updateIncludeRestrictAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $data UPDATE データ配列
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     */
+    public function updateIncludeRestrict($tableName, $data, $where = [], ...$opt)
+    {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->upgrade($tableName, $data, $where, ...$opt);
+    }
+
+    /**
+     * @deprecated please use updateIncludeRestrict
+     * @noinspection PhpDeprecationInspection
      */
     public function upgrade($tableName, $data, $where = [], ...$opt)
     {
@@ -5390,17 +5426,26 @@ class Database
      *
      * ```php
      * # childtable -> parenttable に RESTRICT な外部キーがある場合
-     * $db->remove('parenttable', ['id' => 1]);
+     * $db->deleteExcludeRestrict('parenttable', ['id' => 1]);
      * // DELETE FROM parenttable WHERE id = '1' AND (NOT EXISTS (SELECT * FROM childtable WHERE parenttable.id = childtable.parent_id))
      * ```
      *
-     * @used-by removeOrThrow()
-     * @used-by removeAndPrimary()
-     * @used-by removeAndBefore()
+     * @used-by deleteExcludeRestrictOrThrow()
+     * @used-by deleteExcludeRestrictAndPrimary()
+     * @used-by deleteExcludeRestrictAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     */
+    public function deleteExcludeRestrict($tableName, $where = [], ...$opt)
+    {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->remove($tableName, $where, ...$opt);
+    }
+
+    /**
+     * @deprecated please use deleteExcludeRestrict
      */
     public function remove($tableName, $where = [], ...$opt)
     {
@@ -5430,18 +5475,28 @@ class Database
      *
      * ```php
      * # childtable -> parenttable に RESTRICT な外部キーがある場合
-     * $db->destroy('parenttable', ['status' => 'deleted']);
+     * $db->deleteIncludeRestrict('parenttable', ['status' => 'deleted']);
      * // DELETE FROM childtable WHERE (cid) IN (parenttable id FROM parenttable WHERE status = 'deleted')
      * // DELETE FROM parenttable WHERE status = 'deleted'
      * ```
      *
-     * @used-by destroyOrThrow()
-     * @used-by destroyAndPrimary()
-     * @used-by destroyAndBefore()
+     * @used-by deleteIncludeRestrictOrThrow()
+     * @used-by deleteIncludeRestrictAndPrimary()
+     * @used-by deleteIncludeRestrictAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param array|mixed $where WHERE 条件
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     */
+    public function deleteIncludeRestrict($tableName, $where = [], ...$opt)
+    {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->destroy($tableName, $where, ...$opt);
+    }
+
+    /**
+     * @deprecated please use deleteIncludeRestrict
+     * @noinspection PhpDeprecationInspection
      */
     public function destroy($tableName, $where = [], ...$opt)
     {
@@ -5747,13 +5802,23 @@ class Database
      * TRUNCATE 構文（子テーブルも削除）
      *
      * ```php
-     * $db->eliminate('parenttable');
+     * $db->truncateIncludeRestrict('parenttable');
      * // TRUNCATE childtable
      * // TRUNCATE parenttable
      * ```
      *
      * @param string $tableName テーブル名
      * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
+     */
+    public function truncateIncludeRestrict($tableName)
+    {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->eliminate($tableName);
+    }
+
+    /**
+     * @deprecated please use truncateIncludeRestrict
+     * @noinspection PhpDeprecationInspection
      */
     public function eliminate($tableName)
     {

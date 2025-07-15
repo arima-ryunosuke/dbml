@@ -172,113 +172,113 @@ trait AffectAndBeforeTrait
     }
 
     /**
-     * レコードを返す {@uses Database::revise()}
+     * レコードを返す {@uses Database::updateExcludeRestrict()}
      *
-     * @inheritdoc Database::revise()
+     * @inheritdoc Database::updateExcludeRestrict()
      * @return array|string
      */
-    private function reviseAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
+    private function updateExcludeRestrictAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->revise($tableName, $data, $where, ...($opt + ['return' => 'before']));
+        assert(parameter_default([$this, 'updateExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateExcludeRestrict($tableName, $data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
-     * レコードを返す {@uses TableGateway::revise()}
+     * レコードを返す {@uses TableGateway::updateExcludeRestrict()}
      *
-     * @inheritdoc TableGateway::revise()
+     * @inheritdoc TableGateway::updateExcludeRestrict()
      * @return array|string
      */
     #[AssumeType('shape', 'entity')]
-    private function reviseAndBeforeWithoutTable(
+    private function updateExcludeRestrictAndBeforeWithoutTable(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'revise']) === parameter_default([$this, __FUNCTION__]));
-        return $this->revise($data, $where, ...($opt + ['return' => 'before']));
+        assert(parameter_default([$this, 'updateExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateExcludeRestrict($data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
-     * レコードを返す {@uses Database::upgrade()}
+     * レコードを返す {@uses Database::updateIncludeRestrict()}
      *
-     * @inheritdoc Database::upgrade()
+     * @inheritdoc Database::updateIncludeRestrict()
      * @return array|string
      */
-    private function upgradeAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
+    private function updateIncludeRestrictAndBeforeWithTable($tableName, $data, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upgrade($tableName, $data, $where, ...($opt + ['return' => 'before']));
+        assert(parameter_default([$this, 'updateIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateIncludeRestrict($tableName, $data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
-     * レコードを返す {@uses TableGateway::upgrade()}
+     * レコードを返す {@uses TableGateway::updateIncludeRestrict()}
      *
-     * @inheritdoc TableGateway::upgrade()
+     * @inheritdoc TableGateway::updateIncludeRestrict()
      * @return array|string
      */
     #[AssumeType('shape', 'entity')]
-    private function upgradeAndBeforeWithoutTable(
+    private function updateIncludeRestrictAndBeforeWithoutTable(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'upgrade']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upgrade($data, $where, ...($opt + ['return' => 'before']));
+        assert(parameter_default([$this, 'updateIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->updateIncludeRestrict($data, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
-     * レコードを返す {@uses Database::remove()}
+     * レコードを返す {@uses Database::deleteExcludeRestrict()}
      *
-     * @inheritdoc Database::remove()
+     * @inheritdoc Database::deleteExcludeRestrict()
      * @return array|string
      */
-    private function removeAndBeforeWithTable($tableName, $where = [], ...$opt)
+    private function deleteExcludeRestrictAndBeforeWithTable($tableName, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->remove($tableName, $where, ...($opt + ['return' => 'before']));
+        assert(parameter_default([$this, 'deleteExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteExcludeRestrict($tableName, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
-     * レコードを返す {@uses TableGateway::remove()}
+     * レコードを返す {@uses TableGateway::deleteExcludeRestrict()}
      *
-     * @inheritdoc TableGateway::remove()
+     * @inheritdoc TableGateway::deleteExcludeRestrict()
      * @return array|string
      */
     #[AssumeType('shape', 'entity')]
-    private function removeAndBeforeWithoutTable(
+    private function deleteExcludeRestrictAndBeforeWithoutTable(
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'remove']) === parameter_default([$this, __FUNCTION__]));
-        return $this->remove($where, ...($opt + ['return' => 'before']));
+        assert(parameter_default([$this, 'deleteExcludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteExcludeRestrict($where, ...($opt + ['return' => 'before']));
     }
 
     /**
-     * レコードを返す {@uses Database::destroy()}
+     * レコードを返す {@uses Database::deleteIncludeRestrict()}
      *
-     * @inheritdoc Database::destroy()
+     * @inheritdoc Database::deleteIncludeRestrict()
      * @return array|string
      */
-    private function destroyAndBeforeWithTable($tableName, $where = [], ...$opt)
+    private function deleteIncludeRestrictAndBeforeWithTable($tableName, $where = [], ...$opt)
     {
-        assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->destroy($tableName, $where, ...($opt + ['return' => 'before']));
+        assert(parameter_default([$this, 'deleteIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteIncludeRestrict($tableName, $where, ...($opt + ['return' => 'before']));
     }
 
     /**
-     * レコードを返す {@uses TableGateway::destroy()}
+     * レコードを返す {@uses TableGateway::deleteIncludeRestrict()}
      *
-     * @inheritdoc TableGateway::destroy()
+     * @inheritdoc TableGateway::deleteIncludeRestrict()
      * @return array|string
      */
     #[AssumeType('shape', 'entity')]
-    private function destroyAndBeforeWithoutTable(
+    private function deleteIncludeRestrictAndBeforeWithoutTable(
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'destroy']) === parameter_default([$this, __FUNCTION__]));
-        return $this->destroy($where, ...($opt + ['return' => 'before']));
+        assert(parameter_default([$this, 'deleteIncludeRestrict']) === parameter_default([$this, __FUNCTION__]));
+        return $this->deleteIncludeRestrict($where, ...($opt + ['return' => 'before']));
     }
 
     /**

@@ -413,14 +413,18 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         updateOrThrowWithoutTable as public updateOrThrow;
         deleteOrThrowWithoutTable as public deleteOrThrow;
         invalidOrThrowWithoutTable as public invalidOrThrow;
-        reviseOrThrowWithoutTable as public reviseOrThrow;
-        upgradeOrThrowWithoutTable as public upgradeOrThrow;
-        removeOrThrowWithoutTable as public removeOrThrow;
-        destroyOrThrowWithoutTable as public destroyOrThrow;
         reduceOrThrowWithoutTable as public reduceOrThrow;
         upsertOrThrowWithoutTable as public upsertOrThrow;
         modifyOrThrowWithoutTable as public modifyOrThrow;
         replaceOrThrowWithoutTable as public replaceOrThrow;
+        updateExcludeRestrictOrThrowWithoutTable as public reviseOrThrow;  // for compatible
+        updateIncludeRestrictOrThrowWithoutTable as public upgradeOrThrow; // for compatible
+        deleteExcludeRestrictOrThrowWithoutTable as public removeOrThrow;  // for compatible
+        deleteIncludeRestrictOrThrowWithoutTable as public destroyOrThrow; // for compatible
+        updateExcludeRestrictOrThrowWithoutTable as public updateExcludeRestrictOrThrow;
+        updateIncludeRestrictOrThrowWithoutTable as public updateIncludeRestrictOrThrow;
+        deleteExcludeRestrictOrThrowWithoutTable as public deleteExcludeRestrictOrThrow;
+        deleteIncludeRestrictOrThrowWithoutTable as public deleteIncludeRestrictOrThrow;
     }
     use AffectAndPrimaryTrait {
         insertArrayAndPrimaryWithoutTable as public insertArrayAndPrimary;
@@ -429,13 +433,17 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         updateAndPrimaryWithoutTable as public updateAndPrimary;
         deleteAndPrimaryWithoutTable as public deleteAndPrimary;
         invalidAndPrimaryWithoutTable as public invalidAndPrimary;
-        reviseAndPrimaryWithoutTable as public reviseAndPrimary;
-        upgradeAndPrimaryWithoutTable as public upgradeAndPrimary;
-        removeAndPrimaryWithoutTable as public removeAndPrimary;
-        destroyAndPrimaryWithoutTable as public destroyAndPrimary;
         upsertAndPrimaryWithoutTable as public upsertAndPrimary;
         modifyAndPrimaryWithoutTable as public modifyAndPrimary;
         replaceAndPrimaryWithoutTable as public replaceAndPrimary;
+        updateExcludeRestrictAndPrimaryWithoutTable as public reviseAndPrimary;  // for compatible
+        updateIncludeRestrictAndPrimaryWithoutTable as public upgradeAndPrimary; // for compatible
+        deleteExcludeRestrictAndPrimaryWithoutTable as public removeAndPrimary;  // for compatible
+        deleteIncludeRestrictAndPrimaryWithoutTable as public destroyAndPrimary; // for compatible
+        updateExcludeRestrictAndPrimaryWithoutTable as public updateExcludeRestrictAndPrimary;
+        updateIncludeRestrictAndPrimaryWithoutTable as public updateIncludeRestrictAndPrimary;
+        deleteExcludeRestrictAndPrimaryWithoutTable as public deleteExcludeRestrictAndPrimary;
+        deleteIncludeRestrictAndPrimaryWithoutTable as public deleteIncludeRestrictAndPrimary;
     }
     use AffectAndBeforeTrait {
         updateArrayAndBeforeWithoutTable as public updateArrayAndBefore;
@@ -444,14 +452,18 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         updateAndBeforeWithoutTable as public updateAndBefore;
         deleteAndBeforeWithoutTable as public deleteAndBefore;
         invalidAndBeforeWithoutTable as public invalidAndBefore;
-        reviseAndBeforeWithoutTable as public reviseAndBefore;
-        upgradeAndBeforeWithoutTable as public upgradeAndBefore;
-        removeAndBeforeWithoutTable as public removeAndBefore;
-        destroyAndBeforeWithoutTable as public destroyAndBefore;
         reduceAndBeforeWithoutTable as public reduceAndBefore;
         upsertAndBeforeWithoutTable as public upsertAndBefore;
         modifyAndBeforeWithoutTable as public modifyAndBefore;
         replaceAndBeforeWithoutTable as public replaceAndBefore;
+        updateExcludeRestrictAndBeforeWithoutTable as public reviseAndBefore;  // for compatible
+        updateIncludeRestrictAndBeforeWithoutTable as public upgradeAndBefore; // for compatible
+        deleteExcludeRestrictAndBeforeWithoutTable as public removeAndBefore;  // for compatible
+        deleteIncludeRestrictAndBeforeWithoutTable as public destroyAndBefore; // for compatible
+        updateExcludeRestrictAndBeforeWithoutTable as public updateExcludeRestrictAndBefore;
+        updateIncludeRestrictAndBeforeWithoutTable as public updateIncludeRestrictAndBefore;
+        deleteExcludeRestrictAndBeforeWithoutTable as public deleteExcludeRestrictAndBefore;
+        deleteIncludeRestrictAndBeforeWithoutTable as public deleteIncludeRestrictAndBefore;
     }
 
     protected function getDatabase(): Database { return $this->database; }
@@ -2557,75 +2569,111 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * 駆動表を省略できる <@uses Database::revise()>
+     * 駆動表を省略できる <@uses Database::updateExcludeRestrict()>
      *
-     * @used-by reviseOrThrow()
-     * @used-by reviseAndPrimary()
-     * @used-by reviseAndBefore()
+     * @used-by updateExcludeRestrictOrThrow()
+     * @used-by updateExcludeRestrictAndPrimary()
+     * @used-by updateExcludeRestrictAndBefore()
      *
-     * @inheritdoc Database::revise()
+     * @inheritdoc Database::updateExcludeRestrict()
      */
     #[AssumeType('mixed')]
-    public function revise(
+    public function updateExcludeRestrict(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->revise($data, $where, ...$opt);
+    }
+
+    /**
+     * @deprecated please use updateExcludeRestrict
+     * @noinspection PhpDeprecationInspection
+     */
+    public function revise($data, $where = [], ...$opt) {
         $this->resetResult();
         return $this->database->revise($this, $data, $where, ...$opt);
     }
 
     /**
-     * 駆動表を省略できる <@uses Database::upgrade()>
+     * 駆動表を省略できる <@uses Database::updateIncludeRestrict()>
      *
-     * @used-by upgradeOrThrow()
-     * @used-by upgradeAndPrimary()
-     * @used-by upgradeAndBefore()
+     * @used-by updateIncludeRestrictOrThrow()
+     * @used-by updateIncludeRestrictAndPrimary()
+     * @used-by updateIncludeRestrictAndBefore()
      *
-     * @inheritdoc Database::upgrade()
+     * @inheritdoc Database::updateIncludeRestrict()
      */
     #[AssumeType('mixed')]
-    public function upgrade(
+    public function updateIncludeRestrict(
         #[AssumeType('entity', 'shape')] $data,
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->upgrade($data, $where, ...$opt);
+    }
+
+    /**
+     * @deprecated please use updateIncludeRestrict
+     * @noinspection PhpDeprecationInspection
+     */
+    public function upgrade($data, $where = [], ...$opt) {
         $this->resetResult();
         return $this->database->upgrade($this, $data, $where, ...$opt);
     }
 
     /**
-     * 駆動表を省略できる <@uses Database::remove()>
+     * 駆動表を省略できる <@uses Database::deleteExcludeRestrict()>
      *
-     * @used-by removeOrThrow()
-     * @used-by removeAndPrimary()
-     * @used-by removeAndBefore()
+     * @used-by deleteExcludeRestrictOrThrow()
+     * @used-by deleteExcludeRestrictAndPrimary()
+     * @used-by deleteExcludeRestrictAndBefore()
      *
-     * @inheritdoc Database::remove()
+     * @inheritdoc Database::deleteExcludeRestrict()
      */
     #[AssumeType('mixed')]
-    public function remove(
+    public function deleteExcludeRestrict(
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->remove($where, ...$opt);
+    }
+
+    /**
+     * @deprecated please use deleteExcludeRestrict
+     * @noinspection PhpDeprecationInspection
+     */
+    public function remove($where = [], ...$opt) {
         $this->resetResult();
         return $this->database->remove($this, $where, ...$opt);
     }
 
     /**
-     * 駆動表を省略できる <@uses Database::destroy()>
+     * 駆動表を省略できる <@uses Database::deleteIncludeRestrict()>
      *
-     * @used-by destroyOrThrow()
-     * @used-by destroyAndPrimary()
-     * @used-by destroyAndBefore()
+     * @used-by deleteIncludeRestrictOrThrow()
+     * @used-by deleteIncludeRestrictAndPrimary()
+     * @used-by deleteIncludeRestrictAndBefore()
      *
-     * @inheritdoc Database::destroy()
+     * @inheritdoc Database::deleteIncludeRestrict()
      */
     #[AssumeType('mixed')]
-    public function destroy(
+    public function deleteIncludeRestrict(
         #[AssumeType('shape')] $where = [],
         ...$opt
     ) {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->destroy($where, ...$opt);
+    }
+
+    /**
+     * @deprecated please use deleteIncludeRestrict
+     * @noinspection PhpDeprecationInspection
+     */
+    public function destroy($where = [], ...$opt) {
         $this->resetResult();
         return $this->database->destroy($this, $where, ...$opt);
     }
@@ -2720,11 +2768,21 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * 駆動表を省略できる <@uses Database::eliminate()>
+     * 駆動表を省略できる <@uses Database::truncateIncludeRestrict()>
      *
-     * @inheritdoc Database::eliminate()
+     * @inheritdoc Database::truncateIncludeRestrict()
      */
     #[AssumeType('mixed')]
+    public function truncateIncludeRestrict()
+    {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->eliminate();
+    }
+
+    /**
+     * @deprecated please use truncateIncludeRestrict
+     * @noinspection PhpDeprecationInspection
+     */
     public function eliminate()
     {
         $this->resetResult();
