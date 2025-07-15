@@ -3,13 +3,16 @@
 namespace ryunosuke\dbml\Query;
 
 use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Mixin\OptionTrait;
 use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 use function ryunosuke\dbml\array_convert;
 use function ryunosuke\dbml\array_depth;
 use function ryunosuke\dbml\array_each;
+use function ryunosuke\dbml\array_maps;
 use function ryunosuke\dbml\arrayize;
+use function ryunosuke\dbml\first_key;
 use function ryunosuke\dbml\preg_splice;
 
 abstract class AbstractBuilder implements Queryable, \Stringable
@@ -244,6 +247,65 @@ abstract class AbstractBuilder implements Queryable, \Stringable
             $params[] = $data;
             return '?';
         }
+    }
+
+    public function foreignWheres(string $table, ?string $alias, array $events, bool $affirmation): array
+    {
+        $default = [
+            'restrict' => false,
+            'cascade'  => false,
+            'setnull'  => false,
+        ];
+
+        $where = [];
+
+        $schema = $this->database->getSchema();
+        $fkeys = $schema->getForeignKeys($table, null);
+        foreach ($fkeys as $fkey) {
+            $fkopt = $fkey->getOptions();
+            if (($fkopt['enable'] ?? true)) {
+                foreach ($events as $event => $actions) {
+                    $actions += $default;
+                    $action = strtolower($fkey->{"on$event"}() ?? 'RESTRICT');
+                    if ($actions[$action]) {
+                        $ltable = first_key($schema->getForeignTable($fkey));
+                        $select = $this->database->select($ltable);
+                        $select->setSubwhere($table, $alias, $fkey->getName());
+                        $where[] = $affirmation ? $select->exists() : $select->notExists();
+                        continue 2;
+                    }
+                }
+            }
+        }
+        return $where;
+    }
+
+    public function cascadeValues(ForeignKeyConstraint $fkey, array $values): array
+    {
+        $subdata = [];
+        foreach (array_combine($fkey->getLocalColumns(), $fkey->getForeignColumns()) as $lcol => $fcol) {
+            if (array_key_exists($fcol, $values)) {
+                $subdata[$lcol] = $values[$fcol];
+            }
+        }
+        return $subdata;
+    }
+
+    public function cascadeWheres(ForeignKeyConstraint $fkey, array $wheres): array
+    {
+        $pselect = $this->database->select([$fkey->getForeignTableName() => $fkey->getForeignColumns()], $wheres);
+        $subwhere = [];
+        if (!$this->database->getCompatiblePlatform()->supportsRowConstructor() && count($fkey->getLocalColumns()) > 1) {
+            $pvals = array_maps($pselect->array(), fn($pval) => array_combine($fkey->getLocalColumns(), $pval));
+            $ltable = first_key($this->database->getSchema()->getForeignTable($fkey));
+            $pcond = $this->database->getCompatiblePlatform()->getPrimaryCondition($pvals, $ltable);
+            $subwhere[] = $this->database->queryInto($pcond) ?: 'FALSE';
+        }
+        else {
+            $ckey = implode(',', $fkey->getLocalColumns());
+            $subwhere["($ckey)"] = $pselect;
+        }
+        return $subwhere;
     }
 
     /**

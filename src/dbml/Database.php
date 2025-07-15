@@ -5154,19 +5154,19 @@ class Database
 
                 $onUpdate = $fkey->onUpdate();
                 if ($onUpdate === null) {
-                    if ($this->exists($ltable, $builder->cascadeWheres($fkey))) {
+                    if ($this->exists($ltable, $builder->cascadeWheres($fkey, $builder->getWhere()))) {
                         $this->_throwForeignKeyConstraintViolationException($fkey);
                     }
                 }
                 else {
                     if ($onUpdate === 'CASCADE') {
-                        $subdata = $builder->cascadeValues($fkey);
+                        $subdata = $builder->cascadeValues($fkey, $builder->getSet());
                         if ($subdata) {
-                            $affecteds = array_merge($affecteds, arrayize($this->update($ltable, $subdata, $builder->cascadeWheres($fkey))));
+                            $affecteds = array_merge($affecteds, arrayize($this->update($ltable, $subdata, $builder->cascadeWheres($fkey, $builder->getWhere()))));
                         }
                     }
                     if ($onUpdate === 'SET NULL') {
-                        $affecteds = array_merge($affecteds, arrayize($this->update($ltable, array_fill_keys($fkey->getLocalColumns(), null), $builder->cascadeWheres($fkey))));
+                        $affecteds = array_merge($affecteds, arrayize($this->update($ltable, array_fill_keys($fkey->getLocalColumns(), null), $builder->cascadeWheres($fkey, $builder->getWhere()))));
                     }
                 }
             }
@@ -5217,7 +5217,7 @@ class Database
             $fkopt = $fkey->getOptions();
             if (($fkopt['virtual'] ?? false) && ($fkopt['emulatable'] ?? true) && ($fkopt['enable'] ?? true)) {
                 $ltable = first_key($schema->getForeignTable($fkey));
-                $subwhere = $builder->cascadeWheres($fkey);
+                $subwhere = $builder->cascadeWheres($fkey, $builder->getWhere());
 
                 $onDelete = $fkey->onDelete();
                 if ($onDelete === null) {
@@ -5301,7 +5301,7 @@ class Database
                 if (!$lcolumns) {
                     continue;
                 }
-                $subwhere = $builder->cascadeWheres($fkey);
+                $subwhere = $builder->cascadeWheres($fkey, $builder->getWhere());
 
                 if ($fkey->onDelete() === null) {
                     $invalid_where = array_map(fn($column) => $this->raw("$column IS NULL"), array_keys($lcolumns));
@@ -5357,7 +5357,7 @@ class Database
         $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'set' => $data, 'where' => $where]);
         $builder->build([
-            'where' => $builder->restrictWheres('update'),
+            'where' => $builder->foreignWheres($builder->getTable(), $builder->getAlias(), ['update' => ['restrict' => true]], false),
         ], true);
 
         return $this->update($builder->getTable(), $builder->getSet(), $builder->getWhere(), ...$opt);
@@ -5416,7 +5416,7 @@ class Database
             $fkeys = $schema->getForeignKeys($builder->getTable(), null);
             foreach ($fkeys as $fkey) {
                 if ($fkey->onUpdate() === null) {
-                    $subdata = $builder->cascadeValues($fkey);
+                    $subdata = $builder->cascadeValues($fkey, $builder->getSet());
                     if (!$subdata) {
                         continue;
                     }
@@ -5426,7 +5426,7 @@ class Database
                     $recoveries[] = $fkey;
 
                     $ltable = first_key($schema->getForeignTable($fkey));
-                    $subwhere = $builder->cascadeWheres($fkey);
+                    $subwhere = $builder->cascadeWheres($fkey, $builder->getWhere());
                     $affecteds = array_merge($affecteds, arrayize($this->upgrade($ltable, $subdata, $subwhere, ...array_remove($opt, ['return']))));
                 }
             }
@@ -5479,7 +5479,7 @@ class Database
         $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'where' => $where]);
         $builder->build([
-            'where' => $builder->restrictWheres('delete'),
+            'where' => $builder->foreignWheres($builder->getTable(), $builder->getAlias(), ['delete' => ['restrict' => true]], false),
         ], true);
 
         return $this->delete($builder->getTable(), $builder->getWhere(), ...$opt);
@@ -5536,7 +5536,7 @@ class Database
         foreach ($fkeys as $fkey) {
             if ($fkey->onDelete() === null) {
                 $ltable = first_key($schema->getForeignTable($fkey));
-                $subwhere = $builder->cascadeWheres($fkey);
+                $subwhere = $builder->cascadeWheres($fkey, $builder->getWhere());
                 $affecteds = array_merge($affecteds, arrayize($this->destroy($ltable, $subwhere, ...array_remove($opt, ['return']))));
             }
         }

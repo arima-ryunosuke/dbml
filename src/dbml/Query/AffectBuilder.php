@@ -2,7 +2,6 @@
 
 namespace ryunosuke\dbml\Query;
 
-use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Types\Types;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Gateway\TableGateway;
@@ -496,52 +495,6 @@ class AffectBuilder extends AbstractBuilder
     public function tableAs(): string
     {
         return $this->table . concat(' AS ', $this->alias);
-    }
-
-    public function restrictWheres(string $event): array
-    {
-        assert(in_array(strtolower($event), ['update', 'delete']));
-        $where = [];
-
-        $schema = $this->database->getSchema();
-        $fkeys = $schema->getForeignKeys($this->table, null);
-        foreach ($fkeys as $fkey) {
-            if ($fkey->{"on$event"}() === null) {
-                $ltable = first_key($schema->getForeignTable($fkey));
-                $notexists = $this->database->select($ltable);
-                $notexists->setSubwhere($this->table, null, $fkey->getName());
-                $where[] = $notexists->notExists();
-            }
-        }
-        return $where;
-    }
-
-    public function cascadeValues(ForeignKeyConstraint $fkey): array
-    {
-        $subdata = [];
-        foreach (array_combine($fkey->getLocalColumns(), $fkey->getForeignColumns()) as $lcol => $fcol) {
-            if (array_key_exists($fcol, $this->set)) {
-                $subdata[$lcol] = $this->set[$fcol];
-            }
-        }
-        return $subdata;
-    }
-
-    public function cascadeWheres(ForeignKeyConstraint $fkey): array
-    {
-        $pselect = $this->database->select([$fkey->getForeignTableName() => $fkey->getForeignColumns()], $this->where);
-        $subwhere = [];
-        if (!$this->database->getCompatiblePlatform()->supportsRowConstructor() && count($fkey->getLocalColumns()) > 1) {
-            $pvals = array_maps($pselect->array(), fn($pval) => array_combine($fkey->getLocalColumns(), $pval));
-            $ltable = first_key($this->database->getSchema()->getForeignTable($fkey));
-            $pcond = $this->database->getCompatiblePlatform()->getPrimaryCondition($pvals, $ltable);
-            $subwhere[] = $this->database->queryInto($pcond) ?: 'FALSE';
-        }
-        else {
-            $ckey = implode(',', $fkey->getLocalColumns());
-            $subwhere["($ckey)"] = $pselect;
-        }
-        return $subwhere;
     }
 
     public function loadCsv(null|string|TableDescriptor|TableGateway $table = null, $column = null, $rows = null, array $opt = []): static
