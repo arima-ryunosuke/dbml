@@ -830,9 +830,23 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             elseif ($column instanceof SelectBuilder && !$column->lazyMode) {
                 // サブクエリで order は無意味
                 $column->detectAutoOrder(false);
+                $submethod = $column->getSubmethod();
 
+                // subusing はこの段階で where が確定する
+                if (strpos($submethod ?? '', 'using:') === 0) {
+                    $actions = json_decode(explode(':', $submethod, 2)[1], true);
+                    $subwheres = $column->foreignWheres($table, $alias, [
+                        'update' => $actions,
+                        'delete' => $actions,
+                    ], true);
+                    foreach ($subwheres as &$subwhere) {
+                        $subwhere->andWhere($column->getQueryPart('where'));
+                    }
+                    $column = $this->database->operator(...$subwheres);
+                    $column = $this->database->getCompatiblePlatform()->convertSelectExistsQuery($column);
+                }
                 // subexists はこの段階で where が確定する
-                if (($submethod = $column->getSubmethod()) !== null) {
+                elseif ($submethod !== null) {
                     $column->setSubwhere($table, $alias, null);
                     if (is_bool($submethod)) {
                         $column = $this->database->getCompatiblePlatform()->convertSelectExistsQuery($column);

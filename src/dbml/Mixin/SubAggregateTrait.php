@@ -9,6 +9,42 @@ use ryunosuke\dbml\Query\TableDescriptor;
 trait SubAggregateTrait
 {
     /**
+     * using が得られる SelectBuilder を返す
+     *
+     * この SelectBuilder を column に渡すと「その行が使われているか？（エラーや cascade なしに UPDATE/DELETE ができるか？）」を返す。
+     * 基本的に column に潜ませておいて button の非活性化や注意喚起に使用する想定。
+     * 後ろ3つの引数を渡す場合は必ず名前付き引数で呼び出さなければならない。
+     *
+     * sub を名乗っているが テーブルの指定はない。関連するテーブルをすべて漁る実装となる。
+     * 要するにすべての関連テーブルで subexists するのと同じ。
+     *
+     * ```php
+     * # t_article の行が子供行（t_comment など）を持っているかを返す
+     * $db->selectArray([
+     *     't_article' => [
+     *         '*',
+     *         'has_children' => $db->subusing(),
+     *     ],
+     * ]);
+     * ```
+     *
+     * @param array|string $where WHERE 条件（{@link SelectBuilder::where()}）
+     * @param bool $restrict RESTRICT 外部キーを見るか
+     * @param bool $cascade CASCADE 外部キーを見るか
+     * @param bool $setnull SET NULL 外部キーを見るか
+     * @return SelectBuilder クエリビルダオブジェクト
+     */
+    public function subusing($where = [], bool $restrict = true, bool $cascade = false, bool $setnull = false): SelectBuilder
+    {
+        $actions = [
+            'restrict' => $restrict,
+            'cascade'  => $cascade,
+            'setnull'  => $setnull,
+        ];
+        return $this->subquery([], $where)->setSubmethod('using:' . json_encode($actions));
+    }
+
+    /**
      * 相関サブクエリの EXISTS を表すビルダを返す
      *
      * ```php

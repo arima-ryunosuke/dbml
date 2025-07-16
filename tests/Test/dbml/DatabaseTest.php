@@ -7220,6 +7220,7 @@ INSERT INTO test (id, name) VALUES
                 "DELETE $ignore FROM foreign_p WHERE id = '1'",
             ], $database->delete('foreign_p', ['id' => 1], ignore: true));
             $this->assertEquals([
+                "UPDATE $ignore foreign_c3 SET name = 'deleted' WHERE (id) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '1')",
                 "UPDATE $ignore foreign_p SET name = 'deleted' WHERE id = '1'",
             ], $database->invalid('foreign_p', ['id' => 1], ['name' => 'deleted'], ignore: true));
             $this->assertStringIgnoreBreak(<<<ACTUAL
@@ -7419,6 +7420,57 @@ AND
             'P' => $database->subexists('foreign_c1 C', ['!id' => null]),
         ]);
         $this->assertEquals('SELECT P.* FROM foreign_p P', (string) $select);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_subusing($database)
+    {
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'a']);
+        $database->insert('foreign_p', ['id' => 2, 'name' => 'b']);
+        $database->insert('foreign_p', ['id' => 3, 'name' => 'c']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'aa']);
+        $database->insert('foreign_c3', ['id' => 3, 'seq' => 1, 'name' => 'cc']);
+
+        $this->assertEquals([
+            [
+                "id"        => 1,
+                "has_child" => 1,
+            ],
+            [
+                "id"        => 2,
+                "has_child" => 0,
+            ],
+            [
+                "id"        => 3,
+                "has_child" => 0, // cascade:false により持っていない判定
+            ],
+        ], $database->selectArray([
+            'foreign_p.id' => [
+                'has_child' => $database->subusing(),
+            ],
+        ]));
+
+        $this->assertEquals([
+            [
+                "id"        => 1,
+                "has_child" => 0, // where により持っていない判定
+            ],
+            [
+                "id"        => 2,
+                "has_child" => 0,
+            ],
+            [
+                "id"        => 3,
+                "has_child" => 1, // cascade:true により持っている判定
+            ],
+        ], $database->selectArray([
+            'foreign_p P.id' => [
+                'has_child' => $database->subusing(['id <> ?' => 1], cascade: true),
+            ],
+        ]));
     }
 
     /**
@@ -7829,6 +7881,46 @@ ORDER BY T.id DESC, name ASC
         $this->assertTrue($database->exists('test', ['id' => 1]));
         $this->assertFalse($database->exists('test', ['id' => -1]));
         $this->assertTrue($database->exists('test', ['id' => 1], true));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_using($database)
+    {
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'a']);
+        $database->insert('foreign_p', ['id' => 2, 'name' => 'b']);
+        $database->insert('foreign_p', ['id' => 3, 'name' => 'c']);
+        $database->insert('foreign_p', ['id' => 4, 'name' => 'd']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'aa']);
+        $database->insert('foreign_c2', ['cid' => 2, 'seq' => 1, 'name' => 'bb']);
+        $database->insert('foreign_c3', ['id' => 3, 'seq' => 1, 'name' => 'cc']);
+
+        /** @var Schema\ForeignKeyConstraint $fk_parentchild2 */
+        $fk_parentchild2 = $database->describe('fk_parentchild2');
+        $rewriter = $this->rewriteProperty($fk_parentchild2, '_options', fn($_options) => ['enable' => false] + $_options);
+
+        $this->assertFalse($database->using('foreign_p', ['id' => 0], cascade: false)); // 存在しないので常に false
+        $this->assertFalse($database->using('foreign_p', ['id' => 0], cascade: true));  // 存在しないので常に false
+        $this->assertTrue($database->using('foreign_p', ['id' => 1], cascade: false));  // restrict で存在するので常に true
+        $this->assertTrue($database->using('foreign_p', ['id' => 1], cascade: true));   // restrict で存在するので常に true
+        $this->assertFalse($database->using('foreign_p', ['id' => 2], cascade: false)); // 外部キーを無効にしているので常に false
+        $this->assertFalse($database->using('foreign_p', ['id' => 2], cascade: true));  // 外部キーを無効にしているので常に false
+        $this->assertFalse($database->using('foreign_p', ['id' => 3], cascade: false)); // cascade で存在するので false
+        $this->assertTrue($database->using('foreign_p', ['id' => 3], cascade: true));   // cascade で存在するので true
+        $this->assertFalse($database->using('foreign_p', ['id' => 4], cascade: false)); // 子供を持っていないので常に false
+        $this->assertFalse($database->using('foreign_p', ['id' => 4], cascade: true));  // 子供を持っていないので常に false
+
+        // 外部キーを持たない場合のカバレッジ
+        $this->assertFalse($database->using('test', ['id' => 1], cascade: false));
+        $this->assertFalse($database->using('test', ['id' => 1], cascade: true));
+
+        // cascade な外部キーしか持たない場合のカバレッジ
+        $this->assertFalse($database->using('t_article', ['article_id' => 1], cascade: false));
+        $this->assertTrue($database->using('t_article', ['article_id' => 1], cascade: true));
+
+        unset($rewriter);
     }
 
     /**

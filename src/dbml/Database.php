@@ -319,7 +319,9 @@ class Database
     use ExportTrait;
     use SelectAggregateTrait;
 
-    use AggregateTrait;
+    use AggregateTrait {
+        usingWithTable as public using;
+    }
     use SubSelectTrait {
         subselectArray as public;
         subselectAssoc as public;

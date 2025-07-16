@@ -1066,6 +1066,31 @@ AND ((flag=1))", "$gw");
     /**
      * @dataProvider provideGateway
      * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_using($gateway, $database)
+    {
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'a']);
+        $database->insert('foreign_p', ['id' => 2, 'name' => 'b']);
+        $database->insert('foreign_p', ['id' => 3, 'name' => 'c']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'aa']);
+        $database->insert('foreign_c3', ['id' => 3, 'seq' => 1, 'name' => 'cc']);
+
+        $gateway = $database->foreign_p;
+
+        $this->assertFalse($gateway->using(['id' => 0], cascade: false)); // 存在しないので常に false
+        $this->assertFalse($gateway->using(['id' => 0], cascade: true));  // 存在しないので常に false
+        $this->assertTrue($gateway->using(['id' => 1], cascade: false));  // restrict で存在するので常に true
+        $this->assertTrue($gateway->using(['id' => 1], cascade: true));   // restrict で存在するので常に true
+        $this->assertFalse($gateway->using(['id' => 2], cascade: false)); // 子供を持っていないので常に false
+        $this->assertFalse($gateway->using(['id' => 2], cascade: true));  // 子供を持っていないので常に false
+        $this->assertFalse($gateway->using(['id' => 3], cascade: false)); // cascade で存在するので false
+        $this->assertTrue($gateway->using(['id' => 3], cascade: true));   // cascade で存在するので true
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
      */
     function test_selectExists($gateway)
     {
@@ -2541,6 +2566,58 @@ FROM t_article Article", $Article->column([
         $this->assertFalse(!!$rows[1]['nothas_comment']);
         $this->assertFalse(!!$rows[2]['has_comment']);
         $this->assertTrue(!!$rows[2]['nothas_comment']);
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_subusing($gateway, $database)
+    {
+        $database->insert('foreign_p', ['id' => 1, 'name' => 'a']);
+        $database->insert('foreign_p', ['id' => 2, 'name' => 'b']);
+        $database->insert('foreign_p', ['id' => 3, 'name' => 'c']);
+        $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'aa']);
+        $database->insert('foreign_c3', ['id' => 3, 'seq' => 1, 'name' => 'cc']);
+
+        $gateway = $database->foreign_p;
+
+        $this->assertEquals([
+            [
+                "id"        => 1,
+                "has_child" => 1,
+            ],
+            [
+                "id"        => 2,
+                "has_child" => 0,
+            ],
+            [
+                "id"        => 3,
+                "has_child" => 0, // cascade:false により持っていない判定
+            ],
+        ], $gateway->array([
+            'id',
+            'has_child' => $database->subusing(),
+        ]));
+
+        $this->assertEquals([
+            [
+                "id"        => 1,
+                "has_child" => 0, // where により持っていない判定
+            ],
+            [
+                "id"        => 2,
+                "has_child" => 0,
+            ],
+            [
+                "id"        => 3,
+                "has_child" => 1, // cascade:true により持っている判定
+            ],
+        ], $gateway->as('P')->array([
+            'id',
+            'has_child' => $database->subusing(['id <> ?' => 1], cascade: true),
+        ]));
     }
 
     /**

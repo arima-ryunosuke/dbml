@@ -410,6 +410,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     use AggregateTrait {
         AggregateTrait::count as countAggregate;
+        usingWithoutTable as public using;
     }
     use SubSelectTrait {
         subselectArray as public subArray;

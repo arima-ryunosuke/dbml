@@ -2,10 +2,79 @@
 
 namespace ryunosuke\dbml\Mixin;
 
+use ryunosuke\dbml\Attribute\AssumeType;
 use ryunosuke\dbml\Database;
+use function ryunosuke\dbml\first_value;
 
 trait AggregateTrait
 {
+    /**
+     * レコードが子行などで使用されているかを返す
+     *
+     * このメソッドは本質的には「エラーなく削除できるか？（RESTRICT な外部キーで使用されているか？）」を前提にしている。
+     * 後ろ3つの引数を true にするとそれぞれ（RESTRICT/CASCADE/SET NULL）の外部キーの場合も使用されているとみなす。
+     * これは CASCADE/SET NULL の場合も注意喚起したいことはあるかもしれないのでフラグ化してある。
+     * この3つの引数を渡す場合は必ず名前付き引数で呼び出さなければならない。
+     *
+     * 返り値は bool なので大前提としてレコードは1件だけ返すような WHERE でなければならない。
+     * （assoc や pairs のような形式で返す案もあったが複雑になりそうだし用途がないのでやめた）。
+     *
+     * そもそもこのメソッドは subusing の対となるために生まれたもので、直値を得たいケースも少なく、あまり使用を想定していない。
+     *
+     * @param array|string $tableDescriptor 取得テーブルとカラム（{@link TableDescriptor}）
+     * @param array|string $where WHERE 条件（{@link SelectBuilder::where()}）
+     * @param bool $restrict RESTRICT 外部キーを見るか
+     * @param bool $cascade CASCADE 外部キーを見るか
+     * @param bool $setnull SET NULL 外部キーを見るか
+     */
+    private function usingWithTable($tableDescriptor, $where = [], bool $restrict = true, bool $cascade = false, bool $setnull = false): bool
+    {
+        $select = $this->select($tableDescriptor, $where);
+        $from = first_value($select->getFromPart());
+
+        $actions = [
+            'restrict' => $restrict,
+            'cascade'  => $cascade,
+            'setnull'  => $setnull,
+        ];
+        $subwheres = $select->foreignWheres($from['table'], $from['alias'], [
+            'update' => $actions,
+            'delete' => $actions,
+        ], true);
+
+        // 外部キーがない/CASCADE 条件などで subwhere がない ならクエリを投げるまでもない
+        if (!$subwheres) {
+            return false;
+        }
+
+        $column = $this->getDatabase()->operator(...$subwheres);
+        $column = $this->getDatabase()->getCompatiblePlatform()->convertSelectExistsQuery($column);
+
+        // bool を value(単値) で返すのはなんとなく怖いので tuple で得る
+        $tuple = $select->select($column)->detectAutoOrder(false)->tuple();
+
+        // 存在しないなら使われていないとみなす（null とかでも面白いかもしれない）
+        if (!$tuple) {
+            return false;
+        }
+        return !!first_value($tuple);
+    }
+
+    /**
+     * レコードが子行などで使用されているかを返す
+     *
+     * @see usingWithTable()
+     * @inheritdoc usingWithTable()
+     */
+    private function usingWithoutTable(
+        #[AssumeType('shape')] $where = [],
+        bool $restrict = true,
+        bool $cascade = false,
+        bool $setnull = false
+    ): bool {
+        return $this->usingWithTable([], $where, $restrict, $cascade, $setnull);
+    }
+
     /**
      * レコードの存在を返す
      *

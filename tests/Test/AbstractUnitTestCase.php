@@ -408,6 +408,22 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             ['collation' => 'utf8mb3_bin'],
                         ),
+                        new Table('foreign_c3',
+                            [
+                                new Column('id', Type::getType('integer')),
+                                new Column('seq', Type::getType('integer')),
+                                new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
+                            ],
+                            [new Index('PRIMARY', ['id', 'seq'], true, true)],
+                            [],
+                            [
+                                new ForeignKeyConstraint(['id'], 'foreign_p', ['id'], 'fk_parentchild3', [
+                                    'onUpdate' => 'CASCADE',
+                                    'onDelete' => 'CASCADE',
+                                ]),
+                            ],
+                            ['collation' => 'utf8mb3_bin'],
+                        ),
                         new Table('foreign_d1',
                             [
                                 new Column('id', Type::getType('integer')),
@@ -875,6 +891,7 @@ abstract class AbstractUnitTestCase extends TestCase
                 $db->delete('multiunique');
                 $db->delete('foreign_c1');
                 $db->delete('foreign_c2');
+                $db->delete('foreign_c3');
                 $db->delete('foreign_p');
                 $db->delete('g_child');
                 $db->delete('g_parent');
