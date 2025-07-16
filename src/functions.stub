@@ -7490,6 +7490,15 @@ if (!function_exists('ryunosuke\\dbml\\callable_code')) {
     function callable_code($callable, bool $return_token = false)
     {
         $ref = $callable instanceof \ReflectionFunctionAbstract ? $callable : reflect_callable($callable);
+        if ($ref->getFileName() === false) {
+            $reference = $ref->returnsReference() ? '&' : '';
+            $return = reflect_type_resolve($ref->getReturnType()) ?? 'void';
+            $params = function_parameter($ref);
+            $keys = implode(', ', array_map(fn($v) => ltrim($v, '&'), array_keys($params)));
+            $vals = implode(', ', $params);
+            return ["fn$reference($vals): $return", "\\$ref->name($keys)"];
+        }
+
         $contents = file($ref->getFileName());
         $start = $ref->getStartLine();
         $end = $ref->getEndLine();
@@ -7498,7 +7507,10 @@ if (!function_exists('ryunosuke\\dbml\\callable_code')) {
         $tokens = php_tokens("<?php $codeblock");
 
         $begin = $tokens[0]->next([T_FUNCTION, T_FN]);
-        $close = $begin->next(['{', T_DOUBLE_ARROW]);
+        $close = $begin->next(['{', T_DOUBLE_ARROW, '[']);
+        if ($close->is('[')) {
+            $close = $close->end()->next(['{', T_DOUBLE_ARROW]);
+        }
 
         if ($begin->is(T_FN)) {
             $meta = array_slice($tokens, $begin->index, $close->prev()->index - $begin->index + 1);
@@ -10023,6 +10035,13 @@ if (!function_exists('ryunosuke\\dbml\\function_configure')) {
         $config['chain.nullsafe'] ??= false;
         $config['process.autoload'] ??= [];
         $config['datetime.class'] ??= \DateTimeImmutable::class;
+        $config['unique_id.config'] ??= [
+            'timestamp_base'      => 1704034800, // 2024-01-01 00:00:00
+            'timestamp_precision' => 1,
+            'timestamp_bit'       => 41,
+            'sequence_bit'        => 7,
+            'ipaddress_bit'       => 16,
+        ];
 
         // setting
         if (is_array($option)) {
@@ -10403,6 +10422,64 @@ if (!function_exists('ryunosuke\\dbml\\is_empty')) {
 
         // 上記以外は empty に任せる
         return empty($var);
+    }
+}
+
+assert(!function_exists('ryunosuke\\dbml\\is_empty_recursive') || (new \ReflectionFunction('ryunosuke\\dbml\\is_empty_recursive'))->isUserDefined());
+if (!function_exists('ryunosuke\\dbml\\is_empty_recursive')) {
+    /**
+     * 値が空か再帰的に検査する
+     *
+     * `is_empty` の再帰版。
+     *
+     * クエリパラメータやオプション配列等で「実質値を持っていない」を判定したいことが稀によくある。
+     * Example を参照。
+     *
+     * Example:
+     * ```php
+     * // このような値を空判定したい
+     * that(is_empty_recursive([
+     *     'query' => [
+     *         'param1' => '',
+     *         'param2' => '',
+     *     ],
+     *     'opt' => [
+     *         'key1' => '',
+     *         'key2' => null,
+     *     ],
+     * ]))->isTrue();
+     * ```
+     *
+     * @package ryunosuke\Functions\Package\var
+     *
+     * @param mixed $var 判定する値
+     * @param bool $empty_stdClass 空の stdClass を空とみなすか
+     * @return bool 空なら true
+     */
+    function is_empty_recursive($var, $empty_stdClass = false)
+    {
+        // 見つかった時点で大域脱出するため例外を用いている
+        $ex = new \Exception();
+        try {
+            $var = [$var];
+            array_walk_recursive($var, function ($v) use ($ex, $empty_stdClass) {
+                if ($empty_stdClass && is_object($v) && get_class($v) === 'stdClass') {
+                    if (!is_empty_recursive((array) $v, $empty_stdClass)) {
+                        throw $ex;
+                    }
+                }
+                elseif (!is_empty($v, $empty_stdClass)) {
+                    throw $ex;
+                }
+            });
+        }
+        catch (\Exception $ex2) {
+            if ($ex !== $ex2) {
+                throw $ex2;
+            }
+            return false;
+        }
+        return true;
     }
 }
 
