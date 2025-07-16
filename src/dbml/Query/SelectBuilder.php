@@ -1589,6 +1589,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * | 13 | `(object) ['$' => 'id', 'key' => 'value']`       | stdClass を与えると JSON で集約される。$ を与えるとキーになる
      * | 21 | `['alias|typename' => 'column']`                 | 配列のキーをパイプでつなぐとその型に変換されて取得できる
      * | 22 | `['alias' => function($row){}]`                  | デフォルト値がないクロージャは行全体が渡ってくるコールバックになる
+     * | 23 | `['alias' => function($rows){yield 'hoge'}]`     | ジェネレータのクロージャは行セット全体が渡ってくるコールバックになる
      * | 25 | `['cname' => function($cname=null){}]`           | デフォルト値が null のクロージャはカラム値が単一で渡ってくるコールバックになる
      * | 26 | `['alias' => function($c1='id', $c2='name'){}]`  | デフォルト値が文字列のクロージャそれぞれが個別で渡ってくるコールバックになる
      * | 27 | `function(){return function($v){return $v;};}`   | クロージャの亜種。クロージャを返すクロージャはそのままクロージャとして活きるのでメソッドのような扱いにできる
@@ -1687,6 +1688,21 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *     't_article' => [
      *         // $row は行全体が渡ってくる
      *         'row' => function($row){},
+     *     ],
+     * ]);
+     *
+     * # No.23： 行セット全体を受け取るクロージャ
+     * // 言うなれば subselect のクロージャ版であり、「行セット全体を受け取って個別にバラす」ように使える
+     * $qb->column([
+     *     't_article' => [
+     *         // $rows は行セット全体が渡ってくる
+     *         'row' => function($rows){
+     *             // ここで $rows で何かして
+     *             foreach ($rows as $n => $row){
+     *                 // このように親キーの yield で値を渡せばそれが親での値となる
+     *                 yield $n => '何か',
+     *             }
+     *         },
      *     ],
      * ]);
      *
@@ -3153,11 +3169,24 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             }
 
             // binding
+            foreach ($this->callbacks as $name => [$callback, $args]) {
+                if (!$args) {
+                    if ((new \ReflectionFunction($callback))->isGenerator()) {
+                        foreach ($callback($parents) as $n => $generated) {
+                            // array,assoc の違いなどで混乱のもとになるのでキーチェックはやっておく
+                            assert(array_key_exists($n, $parents));
+                            $parents[$n][$name] = $generated;
+                        }
+                    }
+                }
+            }
             foreach ($parents as $n => $parent_row) {
                 $row_class = null;
                 foreach ($this->callbacks as $name => [$callback, $args]) {
                     if (!$args) {
-                        $parents[$n][$name] = $callback($parents[$n]);
+                        if (!(new \ReflectionFunction($callback))->isGenerator()) {
+                            $parents[$n][$name] = $callback($parents[$n]);
+                        }
                     }
                     if (isset($parents[$n][$name]) && $parents[$n][$name] instanceof \Closure) {
                         // 親行がスカラーなのは何かがおかしい

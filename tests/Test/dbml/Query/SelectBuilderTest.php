@@ -652,6 +652,40 @@ FROM test1 t1 INNER JOIN test2 t2 ON t1.id = t2.id", $builder);
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
      */
+    function test_column_closure_generator($builder)
+    {
+        $db = $builder->getDatabase();
+        $builder->column([
+            'test t.id' => [
+                'agg_maxid' => function ($rows) use ($db) {
+                    $aggs = $db->selectAssoc('aggregate.group_id1, MAX(id) maxid', [
+                        'group_id1' => array_column($rows, 'id'),
+                    ], groupBy: 'group_id1');
+                    foreach ($rows as $n => $row) {
+                        yield $n => $aggs[$row['id']]['maxid'] ?? null;
+                    }
+                },
+            ],
+        ]);
+        $this->assertQuery("SELECT t.id, NULL AS agg_maxid FROM test t", $builder);
+        $this->assertEquals([
+            ["id" => "1", "agg_maxid" => "2"],
+            ["id" => "2", "agg_maxid" => "4"],
+            ["id" => "3", "agg_maxid" => "6"],
+            ["id" => "4", "agg_maxid" => "8"],
+            ["id" => "5", "agg_maxid" => "10"],
+            ["id" => "6", "agg_maxid" => null],
+            ["id" => "7", "agg_maxid" => null],
+            ["id" => "8", "agg_maxid" => null],
+            ["id" => "9", "agg_maxid" => null],
+            ["id" => "10", "agg_maxid" => null],
+        ], $builder->array());
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
     function test_column_class($builder)
     {
         $builder->getDatabase()->test->update(['data' => 'hoge'], ['id' => 1]);
