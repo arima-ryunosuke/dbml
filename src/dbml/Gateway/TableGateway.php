@@ -563,6 +563,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             $default['defaultJoinMethod'] = $this->defaultJoinMethod;
         }
         $this->setDefault($default + $database->getOptions());
+        $this->addScope('');
 
         $cacher = $this->database->getCacheProvider();
         $classname = strpos(static::class, '@anonymous') === false ? strtr(static::class, ['\\' => '-']) : sha1(static::class);
@@ -631,7 +632,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             $table_name => $vcolumns,
         ]);
 
-        $this->addScope('');
         $this->setProvider(function () {
             $method = $this->getDefaultIteration();
             return $this->$method();
