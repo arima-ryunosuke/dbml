@@ -88,6 +88,26 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * トランザクション内でエラーがあったときに abort 状態になるか
+     */
+    public function supportsAbortTransaction(): bool
+    {
+        if ($this->platform instanceof SqlitePlatform) {
+            return true; // for test
+        }
+        if ($this->platform instanceof MySQLPlatform) {
+            return false;
+        }
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            return true;
+        }
+        if ($this->platform instanceof SQLServerPlatform) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * AUTO_INCREMENT な列に null を与えると自動採番が働くかどうか
      */
     public function supportsIdentityNullable(): bool

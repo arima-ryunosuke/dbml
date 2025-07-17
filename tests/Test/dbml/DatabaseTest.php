@@ -6081,6 +6081,29 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_insertOrUpdate_misc($database)
+    {
+        $database->transact(function () use ($database) {
+            $database->insertOrUpdate('test', [
+                'id'   => 11,
+                'name' => 'created',
+            ]);
+        });
+        $this->assertEquals('created', $database->selectValue('test[id:11].name'));
+
+        $database->transact(function () use ($database) {
+            $database->insertOrUpdate('test', [
+                'id'   => 11,
+                'name' => 'modified',
+            ]);
+        });
+        $this->assertEquals('modified', $database->selectValue('test[id:11].name'));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_modify($database)
     {
         $database->modify('test', ['name' => 'newN', 'data' => 'newD']);

@@ -85,6 +85,17 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_supportsAbortTransaction($cplatform, $platform)
+    {
+        $expected = $platform instanceof SqlitePlatform || $platform instanceof PostgreSQLPlatform || $platform instanceof SQLServerPlatform;
+        $this->assertEquals($expected, $cplatform->supportsAbortTransaction());
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_supportsIdentityNullable($cplatform, $platform)
     {
         $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform;

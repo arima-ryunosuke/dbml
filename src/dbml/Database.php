@@ -5642,6 +5642,12 @@ class Database
         $builder = AffectBuilder::new($this);
         $builder->build(['table' => $tableName, 'constraint' => 'PRIMARY']);
 
+        // エラー後になにもできなくなる RDBMS があるのでセーブポイントが必要
+        $savepointed = $this->getCompatiblePlatform()->supportsAbortTransaction() && $this->getMasterConnection()->getTransactionNestingLevel();
+        if ($savepointed) {
+            $this->getMasterConnection()->createSavepoint("_DBML_INSERT_OR_UPDATE");
+        }
+
         try {
             $builder->insert(data: $insertData, opt: $opt);
 
@@ -5655,6 +5661,11 @@ class Database
             }
         }
         catch (UniqueConstraintViolationException) {
+            if ($savepointed) {
+                $savepointed = false;
+                $this->getMasterConnection()->rollbackSavepoint("_DBML_INSERT_OR_UPDATE");
+            }
+
             $pkcols = $this->getSchema()->getTableUniqueColumns($builder->getTable(), $builder->getConstraint());
             $updateData = $builder->wildUpdate($updateData, $insertData, false);
 
@@ -5667,6 +5678,11 @@ class Database
             $returns = $this->_preaffect($builder, $opt);
             $builder->execute();
             return $this->_postaffect($builder, $returns, $opt);
+        }
+        finally {
+            if ($savepointed) {
+                $this->getMasterConnection()->releaseSavepoint("_DBML_INSERT_OR_UPDATE");
+            }
         }
     }
 
