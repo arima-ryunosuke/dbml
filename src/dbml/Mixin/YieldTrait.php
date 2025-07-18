@@ -22,9 +22,9 @@ trait YieldTrait
      * @inheritdoc Database::yieldArray()
      */
     #[AssumeType('iterable')]
-    public function yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], ...$opt)
     {
-        return $this->getDatabase()->yield($this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('array');
+        return $this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->yield($opt['chunk'] ?? null, 'array');
     }
 
     /**
@@ -33,9 +33,9 @@ trait YieldTrait
      * @inheritdoc Database::yieldAssoc()
      */
     #[AssumeType('iterable')]
-    public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], ...$opt)
     {
-        return $this->getDatabase()->yield($this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('assoc');
+        return $this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->yield($opt['chunk'] ?? null, 'assoc');
     }
 
     /**
@@ -43,9 +43,9 @@ trait YieldTrait
      *
      * @inheritdoc Database::yieldLists()
      */
-    public function yieldLists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function yieldLists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], ...$opt)
     {
-        return $this->getDatabase()->yield($this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('lists');
+        return $this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->yield($opt['chunk'] ?? null, 'lists');
     }
 
     /**
@@ -53,8 +53,8 @@ trait YieldTrait
      *
      * @inheritdoc Database::yieldPairs()
      */
-    public function yieldPairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    public function yieldPairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], ...$opt)
     {
-        return $this->getDatabase()->yield($this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having))->setFetchMethod('pairs');
+        return $this->_convertSelectBuilder($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->yield($opt['chunk'] ?? null, 'pairs');
     }
 }
