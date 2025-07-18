@@ -35,9 +35,9 @@ trait FindTrait
      * @inheritdoc TableGateway::find()
      */
     #[AssumeType('entity', 'shape')]
-    public function findInShare($variadic_primary, $tableDescriptor = [])
+    public function findForShare($variadic_primary, $tableDescriptor = [])
     {
-        return $this->getDatabase()->fetchTuple($this->selectFind(...func_get_args())->lockInShare());
+        return $this->getDatabase()->fetchTuple($this->selectFind(...func_get_args())->lockForShare());
     }
 
     /**

@@ -491,7 +491,7 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             case $lockmode === LockMode::PESSIMISTIC_READ:
                 $query .= match (true) {
                     $this->platform instanceof SqlitePlatform     => ' /* lock for read */',
-                    $this->platform instanceof MySQLPlatform      => ' LOCK IN SHARE MODE',
+                    $this->platform instanceof MySQLPlatform      => strlen($lockoption) ? ' FOR SHARE' : ' LOCK IN SHARE MODE', // for compatible
                     $this->platform instanceof PostgreSQLPlatform => ' FOR SHARE',
                     default                                       => ' FOR UPDATE'
                 };

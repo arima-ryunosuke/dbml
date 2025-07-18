@@ -44,8 +44,8 @@ use ryunosuke\dbml\Mixin\AffectAndPrimaryTrait;
 use ryunosuke\dbml\Mixin\AffectOrThrowTrait;
 use ryunosuke\dbml\Mixin\AggregateTrait;
 use ryunosuke\dbml\Mixin\EntityForAffectTrait;
+use ryunosuke\dbml\Mixin\EntityForShareTrait;
 use ryunosuke\dbml\Mixin\EntityForUpdateTrait;
-use ryunosuke\dbml\Mixin\EntityInShareTrait;
 use ryunosuke\dbml\Mixin\EntityMethodTrait;
 use ryunosuke\dbml\Mixin\EntityOrThrowTrait;
 use ryunosuke\dbml\Mixin\ExportTrait;
@@ -54,8 +54,8 @@ use ryunosuke\dbml\Mixin\FetchOrThrowTrait;
 use ryunosuke\dbml\Mixin\OptionTrait;
 use ryunosuke\dbml\Mixin\SelectAggregateTrait;
 use ryunosuke\dbml\Mixin\SelectForAffectTrait;
+use ryunosuke\dbml\Mixin\SelectForShareTrait;
 use ryunosuke\dbml\Mixin\SelectForUpdateTrait;
-use ryunosuke\dbml\Mixin\SelectInShareTrait;
 use ryunosuke\dbml\Mixin\SelectMethodTrait;
 use ryunosuke\dbml\Mixin\SelectOrThrowTrait;
 use ryunosuke\dbml\Mixin\SubAggregateTrait;
@@ -130,10 +130,10 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * いくつかのメソッドは特定のサフィックスを付けることで異なる挙動を示すようになる。
  * 内部処理が黒魔術的なので、呼ぼうとすると無理やり呼べたりするが、基本的にコード補完に出ないメソッドは使用しないこと（テストしてないから）。
  *
- * **InShare/ForUpdate**
+ * **ForShare/ForUpdate**
  *
  * 取得系メソッドに付与できる。
- * InShare を付与すると SELECT クエリに共有ロック構文が付与される（mysql なら LOCK IN SHARE MODE）。
+ * ForShare を付与すると SELECT クエリに共有ロック構文が付与される（mysql なら FOR SHARE）。
  * ForUpdate を付与すると SELECT クエリに排他ロック構文が付与される（mysql なら FOR UPDATE）。
  *
  * **OrThrow**
@@ -269,13 +269,23 @@ class Database
         selectTupleOrThrow as public;
         selectValueOrThrow as public;
     }
-    use SelectInShareTrait {
-        selectArrayInShare as public;
-        selectAssocInShare as public;
-        selectListsInShare as public;
-        selectPairsInShare as public;
-        selectTupleInShare as public;
-        selectValueInShare as public;
+
+    // for compatible
+    use SelectForShareTrait {
+        selectArrayForShare as public selectArrayInShare;
+        selectAssocForShare as public selectAssocInShare;
+        selectListsForShare as public selectListsInShare;
+        selectPairsForShare as public selectPairsInShare;
+        selectTupleForShare as public selectTupleInShare;
+        selectValueForShare as public selectValueInShare;
+    }
+    use SelectForShareTrait {
+        selectArrayForShare as public;
+        selectAssocForShare as public;
+        selectListsForShare as public;
+        selectPairsForShare as public;
+        selectTupleForShare as public;
+        selectValueForShare as public;
     }
     use SelectForUpdateTrait {
         selectArrayForUpdate as public;
@@ -294,8 +304,15 @@ class Database
         selectValueForAffect as public;
     }
     use EntityMethodTrait;
-    use EntityInShareTrait;
+
+    // for compatible
+    use EntityForShareTrait {
+        entityArrayForShare as entityArrayInShare;
+        entityAssocForShare as entityAssocInShare;
+        entityTupleForShare as entityTupleInShare;
+    }
     use EntityOrThrowTrait;
+    use EntityForShareTrait;
     use EntityForUpdateTrait;
     use EntityForAffectTrait;
     use YieldTrait;
@@ -2729,32 +2746,32 @@ class Database
      *
      * @used-by selectArray()
      * @used-by selectArrayOrThrow()
-     * @used-by selectArrayInShare()
+     * @used-by selectArrayForShare()
      * @used-by selectArrayForUpdate()
      * @used-by selectArrayForAffect()
      * @used-by selectAssoc()
      * @used-by selectAssocOrThrow()
-     * @used-by selectAssocInShare()
+     * @used-by selectAssocForShare()
      * @used-by selectAssocForUpdate()
      * @used-by selectAssocForAffect()
      * @used-by selectLists()
      * @used-by selectListsOrThrow()
-     * @used-by selectListsInShare()
+     * @used-by selectListsForShare()
      * @used-by selectListsForUpdate()
      * @used-by selectListsForAffect()
      * @used-by selectPairs()
      * @used-by selectPairsOrThrow()
-     * @used-by selectPairsInShare()
+     * @used-by selectPairsForShare()
      * @used-by selectPairsForUpdate()
      * @used-by selectPairsForAffect()
      * @used-by selectTuple()
      * @used-by selectTupleOrThrow()
-     * @used-by selectTupleInShare()
+     * @used-by selectTupleForShare()
      * @used-by selectTupleForUpdate()
      * @used-by selectTupleForAffect()
      * @used-by selectValue()
      * @used-by selectValueOrThrow()
-     * @used-by selectValueInShare()
+     * @used-by selectValueForShare()
      * @used-by selectValueForUpdate()
      * @used-by selectValueForAffect()
      *

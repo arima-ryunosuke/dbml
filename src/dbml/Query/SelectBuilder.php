@@ -3366,6 +3366,16 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     }
 
     /**
+     * @deprecated please use lockForShare
+     */
+    public function lockInShare(string $lockoption = ''): static
+    {
+        $this->lockMode = LockMode::PESSIMISTIC_READ;
+        $this->lockOption = $lockoption;
+        return $this->_dirty();
+    }
+
+    /**
      * 共有ロック構文を付与する
      *
      * $lockoption で付随するロックオプション（SKIP LOCKED とか）を指定できる（共有ロックで指定することはあまりないと思うけど）。
@@ -3374,15 +3384,14 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      *
      * ```php
      * # 共有ロック（mysql）
-     * $qb->column('t_article')->lockInShare();
-     * // SELECT t_article.* FROM t_article LOCK IN SHARE MODE
+     * $qb->column('t_article')->lockForShare();
+     * // SELECT t_article.* FROM t_article LOCK FOR SHARE
      * ```
      */
-    public function lockInShare(string $lockoption = ''): static
+    public function lockForShare(string $lockoption = ''): static
     {
-        $this->lockMode = LockMode::PESSIMISTIC_READ;
-        $this->lockOption = $lockoption;
-        return $this->_dirty();
+        /** @noinspection PhpDeprecationInspection */
+        return $this->lockInShare($lockoption);
     }
 
     /**
@@ -3412,7 +3421,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     /**
      * ロックを解除する
      *
-     * {@link lockInShare()} や {@link lockForUpdate()} で追加したロック構文を解除する。
+     * {@link lockForShare()} や {@link lockForUpdate()} で追加したロック構文を解除する。
      *
      * ```php
      * $qb->column('t_article');

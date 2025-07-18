@@ -18,8 +18,8 @@ use ryunosuke\dbml\Mixin\JoinTrait;
 use ryunosuke\dbml\Mixin\OptionTrait;
 use ryunosuke\dbml\Mixin\SelectAggregateTrait;
 use ryunosuke\dbml\Mixin\SelectForAffectTrait;
+use ryunosuke\dbml\Mixin\SelectForShareTrait;
 use ryunosuke\dbml\Mixin\SelectForUpdateTrait;
-use ryunosuke\dbml\Mixin\SelectInShareTrait;
 use ryunosuke\dbml\Mixin\SelectMethodTrait;
 use ryunosuke\dbml\Mixin\SelectOrThrowTrait;
 use ryunosuke\dbml\Mixin\SubAggregateTrait;
@@ -364,13 +364,23 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         selectTupleOrThrow as public tupleOrThrow;
         selectValueOrThrow as public valueOrThrow;
     }
-    use SelectInShareTrait {
-        selectArrayInShare as public arrayInShare;
-        selectAssocInShare as public assocInShare;
-        selectListsInShare as public listsInShare;
-        selectPairsInShare as public pairsInShare;
-        selectTupleInShare as public tupleInShare;
-        selectValueInShare as public valueInShare;
+
+    // for compatible
+    use SelectForShareTrait {
+        selectArrayForShare as public arrayInShare;
+        selectAssocForShare as public assocInShare;
+        selectListsForShare as public listsInShare;
+        selectPairsForShare as public pairsInShare;
+        selectTupleForShare as public tupleInShare;
+        selectValueForShare as public valueInShare;
+    }
+    use SelectForShareTrait {
+        selectArrayForShare as public arrayForShare;
+        selectAssocForShare as public assocForShare;
+        selectListsForShare as public listsForShare;
+        selectPairsForShare as public pairsForShare;
+        selectTupleForShare as public tupleForShare;
+        selectValueForShare as public valueForShare;
     }
     use SelectForUpdateTrait {
         selectArrayForUpdate as public arrayForUpdate;
@@ -387,6 +397,11 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         selectPairsForAffect as public pairsForAffect;
         selectTupleForAffect as public tupleForAffect;
         selectValueForAffect as public valueForAffect;
+    }
+
+    // for compatible
+    use FindTrait {
+        findForShare as public findInShare;
     }
     use FindTrait;
     use YieldTrait;
@@ -2056,32 +2071,32 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @used-by array()
      * @used-by arrayOrThrow()
-     * @used-by arrayInShare()
+     * @used-by arrayForShare()
      * @used-by arrayForUpdate()
      * @used-by arrayForAffect()
      * @used-by assoc()
      * @used-by assocOrThrow()
-     * @used-by assocInShare()
+     * @used-by assocForShare()
      * @used-by assocForUpdate()
      * @used-by assocForAffect()
      * @used-by lists()
      * @used-by listsOrThrow()
-     * @used-by listsInShare()
+     * @used-by listsForShare()
      * @used-by listsForUpdate()
      * @used-by listsForAffect()
      * @used-by pairs()
      * @used-by pairsOrThrow()
-     * @used-by pairsInShare()
+     * @used-by pairsForShare()
      * @used-by pairsForUpdate()
      * @used-by pairsForAffect()
      * @used-by tuple()
      * @used-by tupleOrThrow()
-     * @used-by tupleInShare()
+     * @used-by tupleForShare()
      * @used-by tupleForUpdate()
      * @used-by tupleForAffect()
      * @used-by value()
      * @used-by valueOrThrow()
-     * @used-by valueInShare()
+     * @used-by valueForShare()
      * @used-by valueForUpdate()
      * @used-by valueForAffect()
      *
@@ -2132,7 +2147,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @used-by find()
      * @used-by findOrThrow()
-     * @used-by findInShare()
+     * @used-by findForShare()
      * @used-by findForUpdate()
      * @used-by findForAffect()
      *
@@ -2594,7 +2609,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @deprecated please use updateExcludeRestrict
      * @noinspection PhpDeprecationInspection
      */
-    public function revise($data, $where = [], ...$opt) {
+    public function revise($data, $where = [], ...$opt)
+    {
         $this->resetResult();
         return $this->database->revise($this, $data, $where, ...$opt);
     }
@@ -2622,7 +2638,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @deprecated please use updateIncludeRestrict
      * @noinspection PhpDeprecationInspection
      */
-    public function upgrade($data, $where = [], ...$opt) {
+    public function upgrade($data, $where = [], ...$opt)
+    {
         $this->resetResult();
         return $this->database->upgrade($this, $data, $where, ...$opt);
     }
@@ -2649,7 +2666,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @deprecated please use deleteExcludeRestrict
      * @noinspection PhpDeprecationInspection
      */
-    public function remove($where = [], ...$opt) {
+    public function remove($where = [], ...$opt)
+    {
         $this->resetResult();
         return $this->database->remove($this, $where, ...$opt);
     }
@@ -2676,7 +2694,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      * @deprecated please use deleteIncludeRestrict
      * @noinspection PhpDeprecationInspection
      */
-    public function destroy($where = [], ...$opt) {
+    public function destroy($where = [], ...$opt)
+    {
         $this->resetResult();
         return $this->database->destroy($this, $where, ...$opt);
     }
