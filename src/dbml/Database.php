@@ -1547,7 +1547,13 @@ class Database
 
                 $mmethods = [];
                 $aliases = $refclass->getTraitAliases();
+                $reverse_aliases = array_flip($aliases);
                 foreach ($targets as $name => $target) {
+                    // 後方互換用メソッドも出てしまうので抑制。特に trait 経由で定義している場合属性付与ができないので判断がややこしい
+                    if (isset($aliases[$name]) && $reverse_aliases[$aliases[$name]] !== $name) {
+                        continue;
+                    }
+
                     $see = "\n * @see \\$gclass::$name()" . (isset($aliases[$name]) ? "\n * @see \\{$aliases[$name]}()" : "");
                     $params = $target['params'] ?? [] ? implode('', array_maps($target['params'], fn($v, $k) => "\n * @param {$v->type($assume_types)} \$$k")) : "";
                     $return = $target['return'] ?? '' ? "\n * @return {$target['return']->type($assume_types)}" : "";

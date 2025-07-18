@@ -3739,16 +3739,16 @@ SQL
             return implode("\n", $database->preview(function () use ($parent) { $parent->tuple(); }));
         };
 
-        // 親で lockInShare すれば伝播する
-        $parent->reset()->lockInShare()->column([
+        // 親で lockForShare すれば伝播する
+        $parent->reset()->lockForShare()->column([
             'test.*' => [
                 'ddd{id}' => $builder->reset()->column('test1')->setLazyMode()->array(),
             ],
         ])->limit(1);
         $this->assertEquals(2, substr_count($stringify($parent), $readlock));
 
-        // 親で lockInShare しても子で明示的にしてれば伝播しない
-        $parent->reset()->lockInShare()->column([
+        // 親で lockForShare しても子で明示的にしてれば伝播しない
+        $parent->reset()->lockForShare()->column([
             'test.*' => [
                 'ddd{id}' => $builder->reset()->column('test1')->setLazyMode()->lockForUpdate()->array(),
             ],
@@ -4536,7 +4536,7 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
         $readlock = trim($cplatform->appendLockSuffix('', LockMode::PESSIMISTIC_READ, ''));
         $readlock = $readlock ?: trim($platform->appendLockHint('', LockMode::PESSIMISTIC_READ));
 
-        $builder->select('*')->from('test1')->lockInShare();
+        $builder->select('*')->from('test1')->lockForShare();
         $this->assertStringContainsString($readlock, (string) $builder);
         $builder->array();
     }
@@ -4655,7 +4655,7 @@ AND ((SELECT SUM(foreign_c2.seq) AS {$qi('foreign_c2.seq@sum')} FROM foreign_c2 
         ])->where(['foreign_p.id' => 1])->cache(10);
 
         $array = $builder->array();
-        $database->destroy('foreign_p', ['id' => 1]);
+        $database->deleteExcludeRestrict('foreign_p', ['id' => 1]);
 
         $this->assertEquals($array, $builder->array());
         $this->assertEquals($array, $builder->arrayOrThrow());

@@ -477,6 +477,10 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
             $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_READ, ''));
             $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
 
+            $expected = 'select * from t_table FOR SHARE hoge';
+            $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_READ, 'hoge'));
+            $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));
+
             $expected = 'select * from t_table FOR UPDATE hoge';
             $this->assertEquals($expected, $cplatform->appendLockSuffix('select * from t_table', LockMode::PESSIMISTIC_WRITE, 'hoge'));
             $this->assertEquals('t_table', $cplatform->appendLockSuffix('t_table', LockMode::NONE, ''));

@@ -257,13 +257,13 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals($database->selectValue('test', [], [], 1), $database->select('test', [], [], 1)->value());
         $this->assertEquals($database->selectTuple('test', [], [], 1), $database->select('test', [], [], 1)->tuple());
 
-        // select～ForUpdate|InShare 系(ロックされることを担保・・・は難しいのでエラーにならないことを担保)
-        $this->assertEquals($database->selectArrayInShare('test'), $database->selectArrayForUpdate('test'));
-        $this->assertEquals($database->selectAssocInShare('test'), $database->selectAssocForUpdate('test'));
-        $this->assertEquals($database->selectListsInShare('test'), $database->selectListsForUpdate('test'));
-        $this->assertEquals($database->selectPairsInShare('test'), $database->selectPairsForUpdate('test'));
-        $this->assertEquals($database->selectTupleInShare('test', [], [], 1), $database->selectTupleForUpdate('test', [], [], 1));
-        $this->assertEquals($database->selectValueInShare('test', [], [], 1), $database->selectValueForUpdate('test', [], [], 1));
+        // select～ForUpdate|ForShare 系(ロックされることを担保・・・は難しいのでエラーにならないことを担保)
+        $this->assertEquals($database->selectArrayForShare('test'), $database->selectArrayForUpdate('test'));
+        $this->assertEquals($database->selectAssocForShare('test'), $database->selectAssocForUpdate('test'));
+        $this->assertEquals($database->selectListsForShare('test'), $database->selectListsForUpdate('test'));
+        $this->assertEquals($database->selectPairsForShare('test'), $database->selectPairsForUpdate('test'));
+        $this->assertEquals($database->selectTupleForShare('test', [], [], 1), $database->selectTupleForUpdate('test', [], [], 1));
+        $this->assertEquals($database->selectValueForShare('test', [], [], 1), $database->selectValueForUpdate('test', [], [], 1));
 
         // select～OrThrow 系(見つかる場合に同じ結果になることを担保)
         $this->assertEquals($database->selectArray('test'), $database->selectArrayOrThrow('test'));
@@ -308,59 +308,59 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals($database->entityArrayOrThrow('test'), $database->entityArrayForAffect('test'));
         $this->assertEquals($database->entityAssocOrThrow('test'), $database->entityAssocForAffect('test'));
         $this->assertEquals($database->entityTupleOrThrow('test', [], [], 1), $database->entityTupleForAffect('test', [], [], 1));
-        $this->assertEquals($database->entityArrayForUpdate('test'), $database->entityArrayInShare('test'));
-        $this->assertEquals($database->entityAssocForUpdate('test'), $database->entityAssocInShare('test'));
-        $this->assertEquals($database->entityTupleForUpdate('test', [], [], 1), $database->entityTupleInShare('test', [], [], 1));
+        $this->assertEquals($database->entityArrayForUpdate('test'), $database->entityArrayForShare('test'));
+        $this->assertEquals($database->entityAssocForUpdate('test'), $database->entityAssocForShare('test'));
+        $this->assertEquals($database->entityTupleForUpdate('test', [], [], 1), $database->entityTupleForShare('test', [], [], 1));
         that($database)->entityArrayForAffect('test', ['1=0'])->wasThrown($ex);
         that($database)->entityAssocForAffect('test', ['1=0'])->wasThrown($ex);
         that($database)->entityTupleForAffect('test', ['1=0'])->wasThrown($ex);
 
         // affectOrThrow(作用した場合に主キーが返ることを担保)
         $this->assertEquals(['id' => 99], $database->insertOrThrow('test', ['id' => 99]));
-        $this->assertEquals(['id' => 99], $database->upsertOrThrow('test', ['id' => 99, 'name' => 'hogera']));
+        $this->assertEquals(['id' => 99], $database->insertOrUpdateOrThrow('test', ['id' => 99, 'name' => 'hogera']));
         $this->assertEquals(['id' => 99], $database->modifyOrThrow('test', ['id' => 99, 'name' => 'rageho']));
         // ON AUTO_INCREMENT
         $lastid = $database->create('test', ['name' => 'hogera']);
         $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
-        $lastid = $database->upsertOrThrow('test', ['name' => 'hogera']);
+        $lastid = $database->insertOrUpdateOrThrow('test', ['name' => 'hogera']);
         $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
         $lastid = $database->modifyOrThrow('test', ['name' => 'hogera']);
         $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
         // NO AUTO_INCREMENT
         $this->assertEquals(['id' => 'a'], $database->insertOrThrow('noauto', ['id' => 'a', 'name' => 'hogera']));
-        $this->assertEquals(['id' => 'b'], $database->upsertOrThrow('noauto', ['id' => 'b', 'name' => 'hogera']));
+        $this->assertEquals(['id' => 'b'], $database->insertOrUpdateOrThrow('noauto', ['id' => 'b', 'name' => 'hogera']));
         $this->assertEquals(['id' => 'c'], $database->modifyOrThrow('noauto', ['id' => 'c', 'name' => 'hogera']));
 
         // update/delete
         $this->assertEquals(['id' => 1], $database->updateOrThrow('test', ['name' => 'hogera'], ['id' => 1]));
         $this->assertEquals(['id' => 1], $database->deleteOrThrow('test', ['id' => 1]));
-        $this->assertEquals(['id' => 2], $database->removeOrThrow('test', ['id' => 2]));
-        $this->assertEquals(['id' => 3], $database->destroyOrThrow('test', ['id' => 3]));
+        $this->assertEquals(['id' => 2], $database->deleteExcludeRestrictOrThrow('test', ['id' => 2]));
+        $this->assertEquals(['id' => 3], $database->deleteIncludeRestrictOrThrow('test', ['id' => 3]));
 
         // affectAndPrimary(作用した場合に主キーが返ることを担保)
         $this->assertEquals(['id' => 88], $database->insertAndPrimary('test', ['id' => 88]));
-        $this->assertEquals(['id' => 88], $database->upsertAndPrimary('test', ['id' => 88, 'name' => 'hogera']));
+        $this->assertEquals(['id' => 88], $database->insertOrUpdateAndPrimary('test', ['id' => 88, 'name' => 'hogera']));
         $this->assertEquals(['id' => 88], $database->modifyAndPrimary('test', ['id' => 88, 'name' => 'rageho']));
         // ON AUTO_INCREMENT
         $lastid = $database->insertAndPrimary('test', ['name' => 'hogera']);
         $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
-        $lastid = $database->upsertAndPrimary('test', ['name' => 'hogera']);
+        $lastid = $database->insertOrUpdateAndPrimary('test', ['name' => 'hogera']);
         $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
         $lastid = $database->modifyAndPrimary('test', ['name' => 'hogera']);
         $this->assertEquals(['id' => $database->getLastInsertId('test', 'id')], $lastid);
         // NO AUTO_INCREMENT
         $this->assertEquals(['id' => 'd'], $database->insertAndPrimary('noauto', ['id' => 'd', 'name' => 'fugara']));
-        $this->assertEquals(['id' => 'e'], $database->upsertAndPrimary('noauto', ['id' => 'e', 'name' => 'fugara']));
+        $this->assertEquals(['id' => 'e'], $database->insertOrUpdateAndPrimary('noauto', ['id' => 'e', 'name' => 'fugara']));
         $this->assertEquals(['id' => 'f'], $database->modifyAndPrimary('noauto', ['id' => 'f', 'name' => 'fugara']));
 
         // update/delete
         $this->assertEquals(['id' => 1], $database->updateAndPrimary('test', ['name' => 'hogera1'], ['id' => 1]));
-        $this->assertEquals(['id' => 1], $database->reviseAndPrimary('test', ['name' => 'hogera2'], ['id' => 1]));
-        $this->assertEquals(['id' => 1], $database->upgradeAndPrimary('test', ['name' => 'hogera3'], ['id' => 1]));
+        $this->assertEquals(['id' => 1], $database->updateExcludeRestrictAndPrimary('test', ['name' => 'hogera2'], ['id' => 1]));
+        $this->assertEquals(['id' => 1], $database->updateIncludeRestrictAndPrimary('test', ['name' => 'hogera3'], ['id' => 1]));
         $this->assertEquals(['id' => 1], $database->invalidAndPrimary('test', ['id' => 1], ['name' => 'deleted']));
         $this->assertEquals(['id' => 1], $database->deleteAndPrimary('test', ['id' => 1]));
-        $this->assertEquals(['id' => 2], $database->removeAndPrimary('test', ['id' => 2]));
-        $this->assertEquals(['id' => 3], $database->destroyAndPrimary('test', ['id' => 3]));
+        $this->assertEquals(['id' => 2], $database->deleteExcludeRestrictAndPrimary('test', ['id' => 2]));
+        $this->assertEquals(['id' => 3], $database->deleteIncludeRestrictAndPrimary('test', ['id' => 3]));
 
         // 作用行系(見つからなかった場合に例外が投がることを担保)
         $ex = new NonAffectedException('affected row is nothing');
@@ -373,23 +373,23 @@ class DatabaseTest extends \ryunosuke\Test\AbstractUnitTestCase
         }
         that($database)->updateOrThrow('test', ['name' => 'd'], ['id' => -1])->wasThrown($ex);
         that($database)->deleteOrThrow('test', ['id' => -1])->wasThrown($ex);
-        that($database)->removeOrThrow('test', ['id' => -1])->wasThrown($ex);
-        that($database)->destroyOrThrow('test', ['id' => -1])->wasThrown($ex);
+        that($database)->deleteExcludeRestrictOrThrow('test', ['id' => -1])->wasThrown($ex);
+        that($database)->deleteIncludeRestrictOrThrow('test', ['id' => -1])->wasThrown($ex);
         if ($database->getCompatibleConnection()->getName() === 'pdo-mysql') {
-            that($database)->upsertOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => ''])->wasThrown($ex);
+            that($database)->insertOrUpdateOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => ''])->wasThrown($ex);
         }
 
         // affectConditionally
         $database->truncate('noauto');
         $this->assertEquals(['id' => 'a'], $database->insertAndPrimary('noauto[id:""]', ['id' => 'a', 'name' => 'hoge']));
-        $this->assertEquals(['id' => 'b'], $database->upsertAndPrimary('noauto[id:""]', ['id' => 'b', 'name' => 'fuga']));
+        $this->assertEquals(['id' => 'b'], $database->insertOrUpdateAndPrimary('noauto[id:""]', ['id' => 'b', 'name' => 'fuga']));
         $this->assertEquals(['id' => 'c'], $database->modifyAndPrimary('noauto[id:""]', ['id' => 'c', 'name' => 'piyo']));
         $this->assertEquals(['id' => 'a'], $database->insertAndPrimary('noauto[id:a]', ['id' => 'a', 'name' => 'hoge']));
-        $this->assertEquals(['id' => 'b'], $database->upsertAndPrimary('noauto[id:b]', ['id' => 'b', 'name' => 'fuga']));
+        $this->assertEquals(['id' => 'b'], $database->insertOrUpdateAndPrimary('noauto[id:b]', ['id' => 'b', 'name' => 'fuga']));
         $this->assertEquals(['id' => 'c'], $database->modifyAndPrimary('noauto[id:c]', ['id' => 'c', 'name' => 'piyo']));
 
         if ($database->getCompatibleConnection()->getName() === 'pdo-mysql') {
-            that($database)->upsertOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => ''])->wasThrown($ex);
+            that($database)->insertOrUpdateOrThrow('test', ['id' => 9, 'name' => 'i', 'data' => ''])->wasThrown($ex);
         }
 
         // テーブル記法＋OrThrowもきちんと動くことを担保
@@ -5500,7 +5500,7 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_revise($database)
+    function test_updateExcludeRestrict($database)
     {
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
         $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
@@ -5509,7 +5509,7 @@ INSERT INTO test (id, name) VALUES
         $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
         $database->insert('foreign_c2', ['cid' => 2, 'seq' => 21, 'name' => 'c2name1']);
 
-        $affected = $database->revise('foreign_p', ['id' => $database->raw('id + 5')], [
+        $affected = $database->updateExcludeRestrict('foreign_p', ['id' => $database->raw('id + 5')], [
             'id' => [1, 2, 3],
         ]);
 
@@ -5526,23 +5526,23 @@ INSERT INTO test (id, name) VALUES
 
         // OrThrow
         if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            that($database)->reviseOrThrow('test', ['id' => -1], ['id' => -1])->wasThrown('affected row is nothing');
+            that($database)->updateExcludeRestrictOrThrow('test', ['id' => -1], ['id' => -1])->wasThrown('affected row is nothing');
         }
 
         // 相互外部キー
         $this->assertEquals([
             "UPDATE foreign_d1 SET name = 'hoge' WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id)))",
-        ], $database->dryrun()->revise('foreign_d1', ['name' => 'hoge'], ['id' => 1]));
+        ], $database->dryrun()->updateExcludeRestrict('foreign_d1', ['name' => 'hoge'], ['id' => 1]));
         $this->assertEquals([
             "UPDATE foreign_d2 SET name = 'hoge' WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id)))",
-        ], $database->dryrun()->revise('foreign_d2', ['name' => 'hoge'], ['id' => 1]));
+        ], $database->dryrun()->updateExcludeRestrict('foreign_d2', ['name' => 'hoge'], ['id' => 1]));
     }
 
     /**
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_upgrade($database)
+    function test_updateIncludeRestrict($database)
     {
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
         $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
@@ -5555,11 +5555,11 @@ INSERT INTO test (id, name) VALUES
         $database->begin();
         try {
             // 1, 2 は子供で使われているが強制更新される。 4 は指定していない。結果 4 が残る
-            $affected = $database->upgrade('foreign_p', ['id' => 1 + 5], ['id' => 1]);
+            $affected = $database->updateIncludeRestrict('foreign_p', ['id' => 1 + 5], ['id' => 1]);
             $this->assertEquals(1, $affected);
-            $affected = $database->upgrade('foreign_p', ['id' => 2 + 5], ['id' => 2]);
+            $affected = $database->updateIncludeRestrict('foreign_p', ['id' => 2 + 5], ['id' => 2]);
             $this->assertEquals(1, $affected);
-            $affected = $database->upgrade('foreign_p', ['id' => 3 + 5], ['id' => 3]);
+            $affected = $database->updateIncludeRestrict('foreign_p', ['id' => 3 + 5], ['id' => 3]);
             $this->assertEquals(1, $affected);
 
             // 実際に取得してみて担保する
@@ -5580,23 +5580,23 @@ INSERT INTO test (id, name) VALUES
 
         // OrThrow
         if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
-            that($database)->upgradeOrThrow('test', ['id' => -1], ['id' => -1])->wasThrown('affected row is nothing');
+            that($database)->updateIncludeRestrictOrThrow('test', ['id' => -1], ['id' => -1])->wasThrown('affected row is nothing');
         }
 
         // 主キーを更新しない
         $this->assertEquals([
             "UPDATE foreign_p SET name = 'hoge1' WHERE id = '4'",
-        ], $database->dryrun()->upgrade('foreign_p', ['name' => 'hoge1'], ['id' => 4]));
+        ], $database->dryrun()->updateIncludeRestrict('foreign_p', ['name' => 'hoge1'], ['id' => 4]));
 
         // dryrun はクエリ配列を返す
         $this->assertEquals([
             "UPDATE foreign_c1 SET id = '9' WHERE (id) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '4')",
             "UPDATE foreign_c2 SET cid = '9' WHERE (cid) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '4')",
             "UPDATE foreign_p SET id = '9' WHERE id = '4'",
-        ], $database->dryrun()->upgrade('foreign_p', ['id' => 4 + 5], ['id' => 4]));
+        ], $database->dryrun()->updateIncludeRestrict('foreign_p', ['id' => 4 + 5], ['id' => 4]));
 
         // not row constructor + 2column
-        $sqls = $database->dryrun()->upgrade('multiprimary', ['mainid' => new Expression('mainid + 99'), 'subid' => 1], ['name' => ['a', 'b']]);
+        $sqls = $database->dryrun()->updateIncludeRestrict('multiprimary', ['mainid' => new Expression('mainid + 99'), 'subid' => 1], ['name' => ['a', 'b']]);
         if ($database->getCompatiblePlatform()->supportsRowConstructor()) {
             $this->assertEquals([
                 "UPDATE multifkey SET mainid = mainid + 99, subid = '1' WHERE (mainid,subid) IN (SELECT multiprimary.mainid, multiprimary.subid FROM multiprimary WHERE name IN ('a','b'))",
@@ -5615,7 +5615,7 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_remove($database)
+    function test_deleteExcludeRestrict($database)
     {
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
         $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
@@ -5624,7 +5624,7 @@ INSERT INTO test (id, name) VALUES
         $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
         $database->insert('foreign_c2', ['cid' => 2, 'seq' => 21, 'name' => 'c2name1']);
 
-        $affected = $database->remove('foreign_p', [
+        $affected = $database->deleteExcludeRestrict('foreign_p', [
             'id' => [1, 2, 3],
         ]);
 
@@ -5641,17 +5641,17 @@ INSERT INTO test (id, name) VALUES
         // 相互外部キー
         $this->assertEquals([
             'DELETE FROM foreign_d1 WHERE (NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id))',
-        ], $database->dryrun()->remove('foreign_d1'));
+        ], $database->dryrun()->deleteExcludeRestrict('foreign_d1'));
         $this->assertEquals([
             'DELETE FROM foreign_d2 WHERE (NOT EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id))',
-        ], $database->dryrun()->remove('foreign_d2'));
+        ], $database->dryrun()->deleteExcludeRestrict('foreign_d2'));
     }
 
     /**
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_destroy($database)
+    function test_deleteIncludeRestrict($database)
     {
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
         $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
@@ -5661,7 +5661,7 @@ INSERT INTO test (id, name) VALUES
         $database->insert('foreign_c2', ['cid' => 2, 'seq' => 21, 'name' => 'c2name1']);
         $database->insert('foreign_c2', ['cid' => 4, 'seq' => 41, 'name' => 'c4name1']);
 
-        $affected = $database->destroy('foreign_p', [
+        $affected = $database->deleteIncludeRestrict('foreign_p', [
             'id' => [1, 2, 3],
         ]);
 
@@ -5681,10 +5681,10 @@ INSERT INTO test (id, name) VALUES
             "DELETE FROM foreign_c1 WHERE (id) IN (SELECT foreign_p.id FROM foreign_p WHERE name = 'name4')",
             "DELETE FROM foreign_c2 WHERE (cid) IN (SELECT foreign_p.id FROM foreign_p WHERE name = 'name4')",
             "DELETE FROM foreign_p WHERE name = 'name4'",
-        ], $database->dryrun()->destroy('foreign_p', ['name' => 'name4']));
+        ], $database->dryrun()->deleteIncludeRestrict('foreign_p', ['name' => 'name4']));
 
         // not row constructor + 2column
-        $sqls = $database->dryrun()->destroy('multiprimary', ['name' => ['a', 'b']]);
+        $sqls = $database->dryrun()->deleteIncludeRestrict('multiprimary', ['name' => ['a', 'b']]);
         if ($database->getCompatiblePlatform()->supportsRowConstructor()) {
             $this->assertEquals([
                 "DELETE FROM multifkey2 WHERE (fcol9) IN (SELECT multifkey.id FROM multifkey WHERE (mainid,subid) IN (SELECT multiprimary.mainid, multiprimary.subid FROM multiprimary WHERE name IN ('a','b')))",
@@ -5935,7 +5935,7 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_upsert($database)
+    function test_insertOrUpdate($database)
     {
         $current = $database->count('test');
 
@@ -5944,7 +5944,7 @@ INSERT INTO test (id, name) VALUES
             'name' => 'xx',
             'data' => '',
         ];
-        $database->upsert('test', $row);
+        $database->insertOrUpdate('test', $row);
 
         // 全く同じのはず
         $this->assertEquals($row, $database->fetchTuple('select * from test where id = 2'));
@@ -5956,7 +5956,7 @@ INSERT INTO test (id, name) VALUES
             'name' => 'xx',
             'data' => '',
         ];
-        $database->upsert('test', $row);
+        $database->insertOrUpdate('test', $row);
 
         // 全く同じのはず
         $this->assertEquals($row, $database->fetchTuple('select * from test where id = 999'));
@@ -5967,7 +5967,7 @@ INSERT INTO test (id, name) VALUES
             'name' => 'zz',
             'data' => '',
         ];
-        $database->upsert('test', $row);
+        $database->insertOrUpdate('test', $row);
 
         // 件数が+1されているはず
         $this->assertEquals($current + 2, $database->count('test'));
@@ -5977,7 +5977,7 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_upsert2($database)
+    function test_insertOrUpdate2($database)
     {
         $row1 = [
             'id'   => 2,
@@ -5988,7 +5988,7 @@ INSERT INTO test (id, name) VALUES
             'name' => 'zz',
             '*'    => null,
         ];
-        $database->upsert('test', $row1, $row2);
+        $database->insertOrUpdate('test', $row1, $row2);
 
         // $row2 で「更新」されているはず
         $this->assertEquals(['id' => 2, 'name' => 'zz', 'data' => 'data'], $database->fetchTuple('select * from test where id = 2'));
@@ -6003,7 +6003,7 @@ INSERT INTO test (id, name) VALUES
             'name' => 'zz',
             'data' => '',
         ];
-        $database->upsert('test', $row1, $row2);
+        $database->insertOrUpdate('test', $row1, $row2);
 
         // $row1 が「挿入」されているはず
         $this->assertEquals($row1, $database->fetchTuple('select * from test where id = 999'));
@@ -6013,7 +6013,7 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_upsertOrThrow($database)
+    function test_insertOrUpdateOrThrow($database)
     {
         $row = [
             'id'   => 2,
@@ -6022,7 +6022,7 @@ INSERT INTO test (id, name) VALUES
         ];
 
         // 更新された時はそのID値が返るはず
-        $this->assertEquals(['id' => 2], $database->upsertOrThrow('test', $row));
+        $this->assertEquals(['id' => 2], $database->insertOrUpdateOrThrow('test', $row));
         $this->assertEquals($row, $database->fetchTuple('select * from test where id = 2'));
 
         $row = [
@@ -6031,7 +6031,7 @@ INSERT INTO test (id, name) VALUES
         ];
 
         // 挿入された時はそのAUTOINCREMENTの値が返るはず
-        $this->assertEquals(['id' => 11], $database->upsertOrThrow('test', $row));
+        $this->assertEquals(['id' => 11], $database->insertOrUpdateOrThrow('test', $row));
         $this->assertEquals($row + ['id' => 11], $database->fetchTuple('select * from test where id = 11'));
 
         $row = [
@@ -6046,7 +6046,7 @@ INSERT INTO test (id, name) VALUES
             // ちょっと複雑だが、$row を insert しようとするが、[id=1] は既に存在するので、update の動作となる
             // その場合、その存在する行を $row2 で更新するので [id=1] は消えてなくなり、[id=99] に生まれ変わる
             // したがってその「更新された行のID」は99が正のはず
-            $this->assertEquals(['id' => 99], $database->upsertOrThrow('test', $row, $row2));
+            $this->assertEquals(['id' => 99], $database->insertOrUpdateOrThrow('test', $row, $row2));
             $this->assertEquals(false, $database->fetchTuple('select * from test where id = 1'));
             $this->assertEquals($row2, $database->fetchTuple('select * from test where id = 99'));
         }
@@ -6056,21 +6056,21 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_upsertAndPrimary($database)
+    function test_insertOrUpdateAndPrimary($database)
     {
-        $result = $database->upsertAndPrimary('test[id:1]', [
+        $result = $database->insertOrUpdateAndPrimary('test[id:1]', [
             'id'   => 1,
             'name' => 'a',
         ]);
         $this->assertEquals(['id' => 1], $result);
 
-        $result = $database->upsertAndPrimary('test[id:100]', [
+        $result = $database->insertOrUpdateAndPrimary('test[id:100]', [
             'id'   => 100,
             'name' => 'zzz',
         ]);
         $this->assertEquals(['id' => 100], $result);
 
-        $result = $database->upsertAndPrimary('test[id:-1]', [
+        $result = $database->insertOrUpdateAndPrimary('test[id:-1]', [
             'id'   => 10,
             'name' => 'zzz',
         ]);
@@ -6669,10 +6669,10 @@ INSERT INTO test (id, name) VALUES
 
         // 画面からこのようなデータが来たと仮定
         $post = [
-            ['@method' => 'destroy', 'id' => '1', 'name' => 'destroy'],
-            ['@method' => 'remove', 'id' => '2', 'name' => 'remove'],
-            ['@method' => 'upgrade', 'id' => '3', 'name' => 'upgrade'],
-            ['@method' => 'revise', 'id' => '4', 'name' => 'revise'],
+            ['@method' => 'deleteIncludeRestrict', 'id' => '1', 'name' => 'deleteIncludeRestrict'],
+            ['@method' => 'deleteExcludeRestrict', 'id' => '2', 'name' => 'deleteExcludeRestrict'],
+            ['@method' => 'updateIncludeRestrict', 'id' => '3', 'name' => 'updateIncludeRestrict'],
+            ['@method' => 'updateExcludeRestrict', 'id' => '4', 'name' => 'updateExcludeRestrict'],
             ['@method' => 'modify', 'id' => '5', 'name' => 'modify'],
         ];
 
@@ -6684,8 +6684,8 @@ INSERT INTO test (id, name) VALUES
                 "DELETE FROM foreign_c2 WHERE (cid) IN (",
                 "DELETE FROM foreign_p WHERE id = '1'",
                 "DELETE FROM foreign_p WHERE (id = '2') AND (",
-                "UPDATE foreign_p SET name = 'upgrade' WHERE id = '3'",
-                "UPDATE foreign_p SET name = 'revise' WHERE ",
+                "UPDATE foreign_p SET name = 'updateIncludeRestrict' WHERE id = '3'",
+                "UPDATE foreign_p SET name = 'updateExcludeRestrict' WHERE ",
                 "INSERT INTO foreign_p (id, name) VALUES ('5', 'modify') $merge_prefix",
             ], $sqls);
         }
@@ -6784,9 +6784,9 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
-    function test_eliminate($database)
+    function test_truncateIncludeRestrict($database)
     {
-        $this->assertIsArray($database->dryrun()->eliminate('g_ancestor'));
+        $this->assertIsArray($database->dryrun()->truncateIncludeRestrict('g_ancestor'));
 
         // PostgreSQLPlatform は truncate CASCADE がある故外部キーを無効化できない？
         // SQLServer は truncate の CASCADE も外部キー無効も対応していない
@@ -6810,7 +6810,7 @@ INSERT INTO test (id, name) VALUES
             ]);
 
             // truncate の affected rows はバラバラなので int で緩く
-            $this->assertIsInt($database->eliminate('g_ancestor'));
+            $this->assertIsInt($database->truncateIncludeRestrict('g_ancestor'));
 
             // すべて消えている
             $this->assertEquals(0, $database->count('g_ancestor'));
@@ -6818,7 +6818,7 @@ INSERT INTO test (id, name) VALUES
             $this->assertEquals(0, $database->count('g_child'));
 
             // 制約の種類は問わない
-            $this->assertIsInt($database->eliminate('foreign_p'));
+            $this->assertIsInt($database->truncateIncludeRestrict('foreign_p'));
         }
     }
 
@@ -7026,9 +7026,9 @@ INSERT INTO test (id, name) VALUES
             ],
         ], $actual);
 
-        $actual = $database->upsertAndBefore('test', [
+        $actual = $database->insertOrUpdateAndBefore('test', [
             'id'   => 1,
-            'name' => 'upsertAndBefore',
+            'name' => 'insertOrUpdateAndBefore',
         ]);
         $this->assertEquals([
             [
@@ -7045,7 +7045,7 @@ INSERT INTO test (id, name) VALUES
         $this->assertEquals([
             [
                 "id"   => 1,
-                "name" => "upsertAndBefore",
+                "name" => "insertOrUpdateAndBefore",
                 "data" => "",
             ],
         ], $actual);
@@ -7113,9 +7113,9 @@ INSERT INTO test (id, name) VALUES
 
         // 追加系（全て空）
 
-        $actual = $database->upsertAndBefore('test', [
+        $actual = $database->insertOrUpdateAndBefore('test', [
             'id'   => 101,
-            'name' => 'upsertAndBefore',
+            'name' => 'insertOrUpdateAndBefore',
         ]);
         $this->assertEquals([], $actual);
 
@@ -7134,26 +7134,26 @@ INSERT INTO test (id, name) VALUES
         }
 
         // 亜種（カバレッジ目的）
-        $actual = $database->reviseAndBefore('test', [
-            'name' => 'reviseAndBefore',
+        $actual = $database->updateExcludeRestrictAndBefore('test', [
+            'name' => 'updateExcludeRestrictAndPrimary',
         ], [
             'id' => 1,
         ]);
         $this->assertCount(1, $actual);
 
-        $actual = $database->upgradeAndBefore('test', [
-            'name' => 'reviseAndBefore',
+        $actual = $database->updateIncludeRestrictAndBefore('test', [
+            'name' => 'updateExcludeRestrictAndPrimary',
         ], [
             'id' => 1,
         ]);
         $this->assertCount(1, $actual);
 
-        $actual = $database->removeAndBefore('test', [
+        $actual = $database->deleteExcludeRestrictAndBefore('test', [
             'id' => 1,
         ]);
         $this->assertCount(1, $actual);
 
-        $actual = $database->destroyAndBefore('test', [
+        $actual = $database->deleteIncludeRestrictAndBefore('test', [
             'id' => 2,
         ]);
         $this->assertCount(1, $actual);
@@ -7184,8 +7184,8 @@ INSERT INTO test (id, name) VALUES
             $database->insert('foreign_p', ['id' => 1, 'name' => 'p']);
             $database->insert('foreign_c1', ['id' => 1, 'seq' => 1, 'name' => 'c1']);
 
-            $this->assertEquals(['id' => 2], $database->reviseAndPrimary('foreign_p', ['id' => 2, 'name' => 'pp'], ['id' => 1], ignore: true));
-            $this->assertEquals(['id' => 2], $database->upgradeAndPrimary('foreign_p', ['id' => 2, 'name' => 'pp'], ['id' => 1], ignore: true));
+            $this->assertEquals(['id' => 2], $database->updateExcludeRestrictAndPrimary('foreign_p', ['id' => 2, 'name' => 'pp'], ['id' => 1], ignore: true));
+            $this->assertEquals(['id' => 2], $database->updateIncludeRestrictAndPrimary('foreign_p', ['id' => 2, 'name' => 'pp'], ['id' => 1], ignore: true));
 
             // sqlite は外部キーを無視できない（というか DELETE OR IGNORE が対応していない？）のでシンタックスだけ
             $ignore = $database->getCompatiblePlatform()->getIgnoreSyntax();
@@ -7204,12 +7204,12 @@ INSERT INTO test (id, name) VALUES
                 (id = '1')
                 AND ((NOT EXISTS (SELECT * FROM foreign_c1 WHERE foreign_c1.id = foreign_p.id)))
                 AND ((NOT EXISTS (SELECT * FROM foreign_c2 WHERE foreign_c2.cid = foreign_p.id)))
-                ACTUAL, $database->remove('foreign_p', ['id' => 1], ignore: true)[0]);
+                ACTUAL, $database->deleteExcludeRestrict('foreign_p', ['id' => 1], ignore: true)[0]);
             $this->assertEquals([
                 "DELETE $ignore FROM foreign_c1 WHERE (id) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '1')",
                 "DELETE $ignore FROM foreign_c2 WHERE (cid) IN (SELECT foreign_p.id FROM foreign_p WHERE id = '1')",
                 "DELETE $ignore FROM foreign_p WHERE id = '1'",
-            ], $database->destroy('foreign_p', ['id' => 1], ignore: true));
+            ], $database->deleteIncludeRestrict('foreign_p', ['id' => 1], ignore: true));
         }
     }
 
@@ -8093,7 +8093,7 @@ ORDER BY T.id DESC, name ASC
         $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
         $database->insert('foreign_c2', ['cid' => 1, 'seq' => 21, 'name' => 'c2name1']);
 
-        $rows = $database->context(['arrayFetch' => null])->selectArrayInShare([
+        $rows = $database->context(['arrayFetch' => null])->selectArrayForShare([
             'foreign_p P' => [
                 'pie'              => new Expression('3.14'),
                 'foreign_c1 as C1' => ['name'],
@@ -8389,7 +8389,7 @@ ORDER BY T.id DESC, name ASC
         $database->update('Article', $pri + ['title' => 'yyy']);
         $this->assertEquals('yyy', $database->selectValue('t_article.title', $pri));
 
-        $pri = $database->upsertOrThrow('Article', ['article_id' => 2, 'title' => 'zzz', 'checks' => '']);
+        $pri = $database->insertOrUpdateOrThrow('Article', ['article_id' => 2, 'title' => 'zzz', 'checks' => '']);
         $this->assertEquals('zzz', $database->selectValue('t_article.title', $pri));
     }
 

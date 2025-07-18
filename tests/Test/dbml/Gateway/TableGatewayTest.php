@@ -1316,7 +1316,7 @@ AND ((flag=1))", "$gw");
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for write */', $log['sql']);
             $this->assertEquals([1], $log['params']);
 
-            $gateway->findInShare(1);
+            $gateway->findForShare(1);
             $log = $logs[2];
             $this->assertEquals('SELECT * FROM test WHERE test.id = ? /* lock for read */', $log['sql']);
             $this->assertEquals([1], $log['params']);
@@ -1560,12 +1560,12 @@ AND ((flag=1))", "$gw");
         $gateway->set(['name' => 'XXX1'])->update([], $pri);
         $this->assertEquals('XXX1', $gateway->value('name', $pri));
 
-        // revise 委譲の確認
-        $pri = $gateway->reviseOrThrow(['name' => 'XXX2'], $pri);
+        // updateExcludeRestrict 委譲の確認
+        $pri = $gateway->updateExcludeRestrictOrThrow(['name' => 'XXX2'], $pri);
         $this->assertEquals('XXX2', $gateway->value('name', $pri));
 
-        // upgrade 委譲の確認
-        $pri = $gateway->upgradeOrThrow(['name' => 'XXX3'], $pri);
+        // updateIncludeRestrict 委譲の確認
+        $pri = $gateway->updateIncludeRestrictOrThrow(['name' => 'XXX3'], $pri);
         $this->assertEquals('XXX3', $gateway->value('name', $pri));
 
         // updateOrThrow すると更新されて主キーが返ってくるはず
@@ -1578,13 +1578,13 @@ AND ((flag=1))", "$gw");
         $this->assertEquals('KKK', $gateway->value('name', $pri));
         $this->assertEquals(['id' => $count], $pri);
 
-        // 主キー有りで upsert すると更新されるはず
-        $gateway->upsert($pri + ['name' => 'ZZZ']);
+        // 主キー有りで insertOrUpdate すると更新されるはず
+        $gateway->insertOrUpdate($pri + ['name' => 'ZZZ']);
         $this->assertEquals($count, $count = $gateway->count());
         $this->assertEquals('ZZZ', $gateway->value('name', $pri));
 
-        // 主キー無しで upsert すると挿入されるはず
-        $pri = $gateway->upsertOrThrow(['name' => 'KKK']);
+        // 主キー無しで insertOrUpdate すると挿入されるはず
+        $pri = $gateway->insertOrUpdateOrThrow(['name' => 'KKK']);
         $this->assertEquals($count + 1, $count = $gateway->count());
         $this->assertEquals('KKK', $gateway->value('name', $pri));
 
@@ -1669,23 +1669,23 @@ AND ((flag=1))", "$gw");
         $this->assertEquals('YYY1', $gateway->value('name', $pri));
         $this->assertEquals(['id' => $count], $pri);
 
-        // revise 委譲
-        $pri = $gateway->reviseAndPrimary(['name' => 'YYY2'], $pri);
+        // updateExcludeRestrict 委譲
+        $pri = $gateway->updateExcludeRestrictAndPrimary(['name' => 'YYY2'], $pri);
         $this->assertEquals('YYY2', $gateway->value('name', $pri));
         $this->assertEquals(['id' => $count], $pri);
 
-        // upgrade 委譲
-        $pri = $gateway->upgradeAndPrimary(['name' => 'YYY3'], $pri);
+        // updateIncludeRestrict 委譲
+        $pri = $gateway->updateIncludeRestrictAndPrimary(['name' => 'YYY3'], $pri);
         $this->assertEquals('YYY3', $gateway->value('name', $pri));
         $this->assertEquals(['id' => $count], $pri);
 
-        // 主キー有りで upsert すると更新されるはず
-        $pri = $gateway->upsertAndPrimary($pri + ['name' => 'ZZZ']);
+        // 主キー有りで insertOrUpdate すると更新されるはず
+        $pri = $gateway->insertOrUpdateAndPrimary($pri + ['name' => 'ZZZ']);
         $this->assertEquals($count, $count = $gateway->count());
         $this->assertEquals('ZZZ', $gateway->value('name', $pri));
 
-        // 主キー無しで upsert すると挿入されるはず
-        $pri = $gateway->upsertAndPrimary(['name' => 'KKK']);
+        // 主キー無しで insertOrUpdate すると挿入されるはず
+        $pri = $gateway->insertOrUpdateAndPrimary(['name' => 'KKK']);
         $this->assertEquals($count + 1, $count = $gateway->count());
         $this->assertEquals('KKK', $gateway->value('name', $pri));
 
@@ -1708,8 +1708,8 @@ AND ((flag=1))", "$gw");
         if ($database->getCompatiblePlatform()->supportsReplace()) {
             $this->assertEquals($pri, $gateway->replaceAndPrimary($pri));
         }
-        $this->assertEquals($pri, $gateway->removeAndPrimary($pri));
-        $this->assertEquals($pri, $gateway->destroyAndPrimary($pri));
+        $this->assertEquals($pri, $gateway->deleteExcludeRestrictAndPrimary($pri));
+        $this->assertEquals($pri, $gateway->deleteIncludeRestrictAndPrimary($pri));
 
         $this->assertEquals(11, $count);
     }
@@ -1817,9 +1817,9 @@ AND ((flag=1))", "$gw");
             ],
         ], $actual);
 
-        $actual = $gateway->upsertAndBefore([
+        $actual = $gateway->insertOrUpdateAndBefore([
             'id'   => 1,
-            'name' => 'upsertAndBefore',
+            'name' => 'insertOrUpdateAndBefore',
         ]);
         $this->assertEquals([
             [
@@ -1836,7 +1836,7 @@ AND ((flag=1))", "$gw");
         $this->assertEquals([
             [
                 "id"   => 1,
-                "name" => "upsertAndBefore",
+                "name" => "insertOrUpdateAndBefore",
                 "data" => "",
             ],
         ], $actual);
@@ -1904,9 +1904,9 @@ AND ((flag=1))", "$gw");
 
         // 追加系（全て空）
 
-        $actual = $gateway->upsertAndBefore([
+        $actual = $gateway->insertOrUpdateAndBefore([
             'id'   => 101,
-            'name' => 'upsertAndBefore',
+            'name' => 'insertOrUpdateAndBefore',
         ]);
         $this->assertEquals([], $actual);
 
@@ -1925,26 +1925,26 @@ AND ((flag=1))", "$gw");
         }
 
         // 亜種（カバレッジ目的）
-        $actual = $gateway->reviseAndBefore([
-            'name' => 'reviseAndBefore',
+        $actual = $gateway->updateExcludeRestrictAndBefore([
+            'name' => 'updateExcludeRestrictAndBefore',
         ], [
             'id' => 1,
         ]);
         $this->assertCount(1, $actual);
 
-        $actual = $gateway->upgradeAndBefore([
-            'name' => 'reviseAndBefore',
+        $actual = $gateway->updateIncludeRestrictAndBefore([
+            'name' => 'updateExcludeRestrictAndBefore',
         ], [
             'id' => 1,
         ]);
         $this->assertCount(1, $actual);
 
-        $actual = $gateway->removeAndBefore([
+        $actual = $gateway->deleteExcludeRestrictAndBefore([
             'id' => 1,
         ]);
         $this->assertCount(1, $actual);
 
-        $actual = $gateway->destroyAndBefore([
+        $actual = $gateway->deleteIncludeRestrictAndBefore([
             'id' => 2,
         ]);
         $this->assertCount(1, $actual);
@@ -2059,9 +2059,9 @@ AND ((flag=1))", "$gw");
             }
         };
         $gateway->truncate();
-        $gateway->eliminate();
+        $gateway->truncateIncludeRestrict();
         $gateway->create(['id' => 1]);
-        $gateway->upsertOrThrow(['id' => 2]);
+        $gateway->insertOrUpdateOrThrow(['id' => 2]);
         $gateway->where(['id' => 3])->modify(['id' => 3]);
         $gateway->insert(['id' => 4]);
         $gateway->where(['id' => 5])->insert(['id' => 5]);
@@ -2070,8 +2070,8 @@ AND ((flag=1))", "$gw");
         $gateway->replaceOrThrow(['id' => 3, 'name' => 'aaa']);
         $gateway->invalidOrThrow(['id' => 3], ['name' => 'XXX']);
         $gateway->deleteOrThrow(['id' => 1]);
-        $gateway->removeOrThrow(['id' => 2]);
-        $gateway->destroyOrThrow(['id' => 3]);
+        $gateway->deleteExcludeRestrictOrThrow(['id' => 2]);
+        $gateway->deleteIncludeRestrictOrThrow(['id' => 3]);
         $gateway->reduceOrThrow(1, 'id');
 
         // サフィックス付きでもオーバーライドしたメソッドが呼ばれている
@@ -2334,11 +2334,11 @@ AND ((flag=1))", "$gw");
      * @param TableGateway $gateway
      * @param Database $database
      */
-    function test_remove($gateway, $database)
+    function test_deleteExcludeRestrict($gateway, $database)
     {
         // CASCADE なのですべて吹き飛ぶ
         $t_article = new TableGateway($database, 't_article');
-        $t_article->remove();
+        $t_article->deleteExcludeRestrict();
         $this->assertEmpty($t_article->array());
 
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
@@ -2347,7 +2347,7 @@ AND ((flag=1))", "$gw");
         $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
 
         $foreign_p = new TableGateway($database, 'foreign_p');
-        $affected = $foreign_p->remove([
+        $affected = $foreign_p->deleteExcludeRestrict([
             'id' => [1, 2],
         ]);
 
@@ -2361,7 +2361,7 @@ AND ((flag=1))", "$gw");
      * @param TableGateway $gateway
      * @param Database $database
      */
-    function test_destroy($gateway, $database)
+    function test_deleteIncludeRestrict($gateway, $database)
     {
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
         $database->insert('foreign_p', ['id' => 2, 'name' => 'name2']);
@@ -2369,7 +2369,7 @@ AND ((flag=1))", "$gw");
         $database->insert('foreign_c1', ['id' => 1, 'seq' => 11, 'name' => 'c1name1']);
 
         $foreign_p = new TableGateway($database, 'foreign_p');
-        $affected = $foreign_p->destroy([
+        $affected = $foreign_p->deleteIncludeRestrict([
             'id' => [1, 2],
         ]);
 
@@ -2388,6 +2388,18 @@ AND ((flag=1))", "$gw");
         $oprlog = new TableGateway($database, 'oprlog');
         $this->assertEquals(35, $oprlog->reduce(10, '-log_date', [], ['category' => 'category-9']));
         $this->assertEquals(26, $oprlog->where(["category" => 'category-8'])->orderBy(['log_date' => false])->groupBy('category')->limit(10)->reduce());
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_truncateIncludeRestrict($gateway, $database)
+    {
+        $this->assertNotFalse($gateway->truncateIncludeRestrict());
+        /** @noinspection PhpDeprecationInspection */
+        $gateway->eliminate(); // for coverage
     }
 
     /**
