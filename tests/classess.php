@@ -93,6 +93,7 @@ namespace ryunosuke\Test {
 
 namespace ryunosuke\Test\Gateway {
 
+    use ryunosuke\dbml\Attribute\Scope;
     use ryunosuke\dbml\Attribute\VirtualColumn;
     use ryunosuke\dbml\Database;
 
@@ -125,6 +126,12 @@ namespace ryunosuke\Test\Gateway {
         public function scopeId($id)
         {
             return $this->where(['article_id' => $id]);
+        }
+
+        #[Scope(selective: true, affective: false)]
+        public function scopeAttribute()
+        {
+            return [];
         }
 
         public function virtualTitleChecksColumn($value = null)

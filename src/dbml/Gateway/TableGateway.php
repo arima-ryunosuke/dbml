@@ -3,8 +3,8 @@
 namespace ryunosuke\dbml\Gateway;
 
 use Doctrine\DBAL\Schema\Column;
+use ryunosuke\dbml\Attribute;
 use ryunosuke\dbml\Attribute\AssumeType;
-use ryunosuke\dbml\Attribute\VirtualColumn;
 use ryunosuke\dbml\Database;
 use ryunosuke\dbml\Entity\Entityable;
 use ryunosuke\dbml\Mixin\AffectAndBeforeTrait;
@@ -573,19 +573,32 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
             $result = [];
             foreach (get_class_methods($this) as $method) {
+                $rmethod = new \ReflectionMethod($this, $method);
+
                 if (preg_match('#^scope(.+)#i', $method, $m)) {
+                    $attrs = Attribute\Scope::of($rmethod)?->getNamedArguments() ?? [];
+                    $attrs['selective'] = flagval($attrs['selective'] ?? true);
+                    $attrs['affective'] = flagval($attrs['affective'] ?? true);
+
                     $result[] = [
                         'type'   => 'scope',
                         'name'   => $scope_renamer($m[1]),
                         'method' => $method,
+                        'attrs'  => $attrs,
                     ];
                 }
                 if (preg_match('#^(virtual|get|set)(.+?)Column$#i', $method, $m)) {
+                    $attrs = Attribute\VirtualColumn::of($rmethod)?->getNamedArguments() ?? [];
+                    $attrs['type'] = $attrs['type'] ?? null;
+                    $attrs['lazy'] = flagval($attrs['lazy'] ?? true);
+                    $attrs['implicit'] = flagval($attrs['implicit'] ?? false);
+
                     $result[] = [
                         'type'    => 'vcolumn',
                         'subtype' => strtolower($m[1]),
                         'name'    => $column_renamer($m[2]),
                         'method'  => $method,
+                        'attrs'   => $attrs,
                     ];
                 }
             }
@@ -598,31 +611,26 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
                 $this->addScope($method['name'], function (...$args) use ($method) {
                     return $this->{$method['method']}(...$args) ?? $this;
                 });
+                $this->getScope($method['name'])->selective($method['attrs']['selective']);
+                $this->getScope($method['name'])->affective($method['attrs']['affective']);
                 continue;
             }
             elseif ($method['type'] === 'vcolumn') {
-                $rmethod = new \ReflectionMethod($this, $method['method']);
-
-                $attrs = VirtualColumn::of($rmethod)?->getNamedArguments() ?? [];
-                $attrs['type'] = $attrs['type'] ?? null;
-                $attrs['lazy'] = flagval($attrs['lazy'] ?? true);
-                $attrs['implicit'] = flagval($attrs['implicit'] ?? false);
-
-                $closure = $rmethod->getClosure($this);
+                $closure = \Closure::fromCallable([$this, $method['method']]);
                 $vcolumns[$method['name']] ??= [];
                 if ($method['subtype'] === 'virtual') {
-                    $vcolumns[$method['name']] += array_replace($attrs, [
+                    $vcolumns[$method['name']] += array_replace($method['attrs'], [
                         'select' => fn() => $closure(),
                         'affect' => fn($value, $row) => $closure($value, $row),
                     ]);
                 }
                 if ($method['subtype'] === 'get') {
-                    $vcolumns[$method['name']] += array_replace($attrs, [
+                    $vcolumns[$method['name']] += array_replace($method['attrs'], [
                         'select' => $closure,
                     ]);
                 }
                 if ($method['subtype'] === 'set') {
-                    $vcolumns[$method['name']] += array_replace($attrs, [
+                    $vcolumns[$method['name']] += array_replace($method['attrs'], [
                         'affect' => $closure,
                     ]);
                 }
@@ -1703,6 +1711,16 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             return null;
         }
         return $name;
+    }
+
+    /**
+     * 定義されているスコープを返す
+     *
+     * @return ?Scope
+     */
+    public function getScope(string $name): ?Scope
+    {
+        return $this->scopes[$name] ?? null;
     }
 
     /**

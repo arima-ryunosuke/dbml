@@ -376,6 +376,10 @@ AND ((flag=1))", "$gw");
         $gw->addScope('common', 'NOW()');
         $this->assertEquals(['NOW()'], $gateway->getScopeParts('common')['column']);
 
+        // Scope 属性の値が取得できる
+        that($database->t_article->getScope('attribute'))->selective()->isTrue();
+        that($database->t_article->getScope('attribute'))->affective()->isFalse();
+
         // 存在しないスコープは例外が飛ぶはず
         that($gateway)->scope('hogera')->wasThrown('undefined');
         that($gateway)->unscope('hogera')->wasThrown('undefined');
