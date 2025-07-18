@@ -36,12 +36,12 @@ use ryunosuke\utility\attribute\Attribute\DebugInfo;
 use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_get;
+use function ryunosuke\dbml\array_maps;
 use function ryunosuke\dbml\array_unset;
 use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\cache_fetch;
 use function ryunosuke\dbml\concat;
 use function ryunosuke\dbml\flagval;
-use function ryunosuke\dbml\parameter_length;
 use function ryunosuke\dbml\snake_case;
 use function ryunosuke\dbml\split_noempty;
 
@@ -115,6 +115,7 @@ use function ryunosuke\dbml\split_noempty;
  * また、 Closure 内の `$this` は「その時点の Gateway インスタンス」を指すように bind される。これにより `$this->alias` などが使用でき、当たっているスコープやエイリアス名などが取得できる。
  * さらに `$this` に下記の `column` `where` `orderBy` などを適用して return すればクエリビルダ引数を返さなくてもメソッドベースで適用できる。
  * scopeXXX で始まるメソッドを定義すると上記のクロージャで定義したような動作となる。
+ * 実処理はメソッド本体だが、属性を用いて selective などの属性を指定できる（ここでは記述できないのでテストを参照）。
  *
  * `scoping` を使用するとスコープを登録せずにその場限りのスコープを当てることができる。
  * また `column` `where` `orderBy` などの個別メソッドがあり、句別にスコープを当てることもできる。
@@ -176,7 +177,6 @@ use function ryunosuke\dbml\split_noempty;
  * ありがちなのは上記の例で言うと `delete_flg = 0` をデフォルトスコープにしているときで、このとき `$gw->update(['delete_flg' => 1], ['primary_id' => 99])` として無効化しようとしても無効化されない。
  * デフォルトスコープの `delete_flg = 0` が当たってヒットしなくなるからである。
  * 基本的に insert/update/delete にスコープを当てるときは `noscope` や `unscope` でデフォルトスコープを外したほうが無難。
- * あるいは ignoreAffectScope でデフォルトスコープを外しておく。
  *
  * スコープが当たっているクエリビルダは `select` メソッドで取得できる。
  * ただ1点注意として、スコープを当てても**オリジナルのインスタンスは変更されない。変更が適用された別のインスタンスを返す。**
@@ -327,8 +327,6 @@ use function ryunosuke\dbml\split_noempty;
  * @method $this                  setDefaultIteration($iterationMode)
  * @method string                 getDefaultJoinMethod()
  * @method $this                  setDefaultJoinMethod($string)
- * @method array                  getIgnoreAffectScope()
- * @method $this                  setIgnoreAffectScope(array $ignoreAffectScope)
  * @method \Closure               getScopeRenamer()
  * @method $this                  setScopeRenamer(\Closure $scopeRenamer)
  * @method \Closure               getColumnRenamer()
@@ -508,6 +506,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     private string  $tableName;
     private ?string $alias;
 
+    /** @var \ArrayObject<string, Scope> */
     private \ArrayObject $scopes;
     private array        $activeScopes = ['' => []];
 
@@ -536,7 +535,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             /** @var string マジック JOIN 時のデフォルトモード */
             'defaultJoinMethod' => 'auto',
             /** @var array affect 系で無視するスコープ */
-            'ignoreAffectScope' => [],
+            'ignoreAffectScope' => [], // for compatible please use affective scope. this is delete future scope
             /** @var \Closure メソッドベーススコープの命名規則 */
             'scopeRenamer'      => function ($name) { return lcfirst($name); },
             /** @var \Closure メソッドベース仮想カラムの命名規則 */
@@ -1076,7 +1075,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function joinize(): array
     {
-        $sparams = $this->getScopeParams([]);
+        $sparams = $this->getScopeParamsForSelect([]);
         $addition = array_get($this->joinParams, 'addition', []);
         if ($sparams['limit'] || $sparams['groupBy'] || $sparams['having']) {
             return [
@@ -1087,7 +1086,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         else {
             // @todo getScopeParams を呼ばないと判定できない＋判定後じゃないと where したらまずい、ので2回呼んでるが無駄なのでなんとかしたい
             if ($addition) {
-                $sparams = $this->where($addition)->getScopeParams([]);
+                $sparams = $this->where($addition)->getScopeParamsForSelect([]);
             }
             return [
                 'table'     => reset($sparams['column']),
@@ -1331,21 +1330,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function addScope(string $name = '', $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], $sets = []): static
     {
-        if ($tableDescriptor instanceof \Closure) {
-            $scope = $tableDescriptor;
-        }
-        else {
-            $scope = [
-                'column'  => arrayize($tableDescriptor),
-                'where'   => arrayize($where),
-                'orderBy' => arrayize($orderBy),
-                'limit'   => arrayize($limit),
-                'groupBy' => arrayize($groupBy),
-                'having'  => arrayize($having),
-                'set'     => arrayize($sets),
-            ];
-        }
-        $this->scopes[$name] = $scope;
+        $this->scopes[$name] = new Scope($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having, $sets);
         return $this;
     }
 
@@ -1405,28 +1390,12 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         }
 
         // 指定されたスコープをすべて当てるような動的スコープとして定義する
-        $defargs = self::$defargs;
-        $this->scopes[$name] = function (...$params) use ($scopes, $defargs) {
-            $result = $defargs;
-            foreach ($scopes as $scope => $args) {
-                $currents = $this->getScopes();
-                if ($currents[$scope] instanceof \Closure) {
-                    $alength = parameter_length($currents[$scope], false, true);
-                    if (is_infinite($alength)) {
-                        $alength = count($params);
-                    }
-                    $args = array_merge($args, array_splice($params, 0, $alength - count($args), []));
-                }
-                $parts = $this->getScopeParts($scope, ...$args);
-                $result = array_merge_recursive($result, $parts);
-
-                // limit は配列とスカラーで扱いが異なるので「指定されていたら上書き」という挙動にする
-                if ($parts['limit']) {
-                    $result['limit'] = $parts['limit'];
-                }
-            }
-            return $result;
-        };
+        $this->scopes[$name] = new Scope(function (...$params) use ($scopes) {
+            $currents = $this->getScopes();
+            return Scope::mergeArray(...array_map(function ($args, $scope) use ($currents, &$params) {
+                return $this->getScopeParts($scope, ...$currents[$scope]->rearguments($args, $params));
+            }, $scopes, array_keys($scopes)));
+        });
         return $this;
     }
 
@@ -1465,7 +1434,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         if (!isset($this->scopes[$name])) {
             throw new \InvalidArgumentException("'$name' scope is undefined.");
         }
-        if (!$this->scopes[$name] instanceof \Closure) {
+        if (!$this->scopes[$name]->isClosure()) {
             throw new \InvalidArgumentException("'$name' scope must be closure.");
         }
 
@@ -1474,10 +1443,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             $this->scopes[$original_name] = $this->scopes[$name];
         }
         $scope = $this->scopes[$original_name];
-        ksort($binding);
-        $this->scopes[$name] = function (...$args) use ($scope, $binding) {
-            return $scope(...($args + $binding));
-        };
+        $this->scopes[$name] = $scope->bind($binding);
 
         return $this;
     }
@@ -1741,6 +1707,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
 
     /**
      * 定義されているすべてのスコープを返す
+     *
+     * @return Scope[]
      */
     public function getScopes(): array
     {
@@ -1793,31 +1761,18 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             throw new \InvalidArgumentException("scope '$name' is undefined.");
         }
 
-        $scope = $this->scopes[$name];
-        if ($scope instanceof \Closure) {
-            $params = array_slice(func_get_args(), 1);
-            if (!$params && array_key_exists($name, $this->activeScopes)) {
-                $params = $this->activeScopes[$name];
-            }
-            $currents = $this->activeScopes;
-            $scope = $scope->call($this, ...$params);
-            if ($scope instanceof TableGateway) {
-                $that = $scope;
-                $scope = self::$defargs;
-                foreach (array_diff_key($that->activeScopes, $currents) as $name => $args) {
-                    $scope = array_merge_recursive($scope, $that->scopes[$name]);
-
-                    // limit は配列とスカラーで扱いが異なるので「指定されていたら上書き」という挙動にする
-                    if ($that->scopes[$name]['limit']) {
-                        $scope['limit'] = $that->scopes[$name]['limit'];
-                    }
-                }
-            }
-            else {
-                $scope += self::$defargs;
-            }
+        $params = array_slice(func_get_args(), 1);
+        if (!$params && array_key_exists($name, $this->activeScopes)) {
+            $params = $this->activeScopes[$name];
         }
-        return $scope;
+
+        $currents = $this->activeScopes;
+        $scope = $this->scopes[$name];
+        $result = $scope->resolve($this, ...$params);
+        if ($result instanceof TableGateway) {
+            return Scope::mergeArray(...array_maps(array_diff_key($result->activeScopes, $currents), fn($args, $name) => $result->scopes[$name]->resolve($result, ...$args)));
+        }
+        return $result + self::$defargs;
     }
 
     /**
@@ -1888,6 +1843,26 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * 取得用の {@link getScopeParams()}
+     *
+     * @inheritdoc getScopeParams()
+     */
+    public function getScopeParamsForSelect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): array
+    {
+        $activeScopes = $this->activeScopes;
+        $this->activeScopes = array_filter($this->activeScopes, fn($name) => $this->scopes[$name]->selective(), ARRAY_FILTER_USE_KEY);
+
+        try {
+            $result = $this->getScopeParams(...func_get_args());
+        }
+        finally {
+            $this->activeScopes = $activeScopes;
+        }
+
+        return $result;
+    }
+
+    /**
      * 更新用の {@link getScopeParams()}
      *
      * @inheritdoc getScopeParams()
@@ -1895,6 +1870,9 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function getScopeParamsForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): array
     {
         $activeScopes = $this->activeScopes;
+        $this->activeScopes = array_filter($this->activeScopes, fn($name) => $this->scopes[$name]->affective(), ARRAY_FILTER_USE_KEY);
+
+        // for compatible
         foreach ($this->getUnsafeOption('ignoreAffectScope') as $scope) {
             unset($this->activeScopes[$scope]);
         }
@@ -2105,7 +2083,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function select($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
-        $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
+        $sp = $this->getScopeParamsForSelect($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
         $return = $this->database->select(...array_values($sp));
 
         foreach ($this->cte as $name => $query) {
@@ -2208,7 +2186,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function subselect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
-        $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
+        $sp = $this->getScopeParamsForSelect($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
         $return = $this->database->subselect(...array_values($sp));
         $return->hint($this->hint);
         return $return;
@@ -2224,7 +2202,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function subquery($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
-        $sp = $this->getScopeParams($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
+        $sp = $this->getScopeParamsForSelect($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
         $return = $this->database->subquery(...array_values($sp));
         $return->hint($this->hint);
         return $return;
@@ -2243,7 +2221,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function subaggregate($aggregate, $column, $where = []): SelectBuilder
     {
-        $sp = $this->getScopeParams($column, $where);
+        $sp = $this->getScopeParamsForSelect($column, $where);
         $return = $this->database->subaggregate($aggregate, ...array_values($sp));
         $return->hint($this->hint);
         return $return;
@@ -2263,7 +2241,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function aggregate($aggregation, $column, $where = [], $groupBy = [], $having = [])
     {
-        $sp = $this->getScopeParams($column, $where, [], [], $groupBy, $having);
+        $sp = $this->getScopeParamsForSelect($column, $where, [], [], $groupBy, $having);
         return $this->database->aggregate($aggregation, $sp['column'], $sp['where'], $sp['groupBy'], $sp['having']);
     }
 
@@ -2373,7 +2351,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function gather($wheres = [], $other_wheres = [], $parentive = false): array
     {
-        $sp = $this->getScopeParams([], $wheres);
+        $sp = $this->getScopeParamsForSelect([], $wheres);
         return $this->database->gather($this->tableName, $sp['where'], $other_wheres, $parentive);
     }
 
@@ -2386,7 +2364,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function differ(array $array, $wheres = []): array
     {
-        $sp = $this->getScopeParams([], $wheres);
+        $sp = $this->getScopeParamsForSelect([], $wheres);
         return $this->database->differ($array, $this->tableName, $sp['where']);
     }
 

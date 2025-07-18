@@ -17,6 +17,7 @@ use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
 use ryunosuke\Test\Entity\ManagedComment;
 use function ryunosuke\dbml\csv_import;
+use function ryunosuke\dbml\first_value;
 use function ryunosuke\dbml\json_import;
 
 class TableGatewayTest extends \ryunosuke\Test\AbstractUnitTestCase
@@ -649,6 +650,25 @@ AND ((flag=1))", "$gw");
         $params = $gateway->as('hogera')->scope('this')->getScopeParams();
         $this->assertEquals(TableGateway::class, $params['where']['class']);
         $this->assertEquals('hogera', $params['where']['alias']);
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     */
+    function test_scope_mode($gateway)
+    {
+        $gateway->addScope('selective', [], ['id' => 1]);
+        $gateway->addScope('affective', [], ['id' => 2]);
+
+        $gateway->getScopes()['selective']->affective(false);
+        $gateway->getScopes()['affective']->selective(false);
+
+        $this->assertStringContainsString("test.id = '1'", $gateway->scope('selective')->select(['name'])->queryInto());
+        $this->assertStringNotContainsString("test.id = '1'", $gateway->scope('affective')->select(['name'])->queryInto());
+
+        $this->assertStringNotContainsString("test.id = '2'", first_value($gateway->dryrun()->scope('selective')->update(['name' => 'aa'])));
+        $this->assertStringContainsString("test.id = '2'", first_value($gateway->dryrun()->scope('affective')->update(['name' => 'aa'])));
     }
 
     /**

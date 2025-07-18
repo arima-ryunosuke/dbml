@@ -1468,7 +1468,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
             /** @var TableGateway $this */
             $this->scope($scope, $args);
         });
-        $sparam = $gateway->getScopeParams([]);
+        $sparam = $gateway->getScopeParamsForSelect([]);
         $scolumn = array_unset($sparam, 'column');
         $this->addColumn($scolumn);
         return $this->build($sparam, true);
@@ -1842,7 +1842,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                     $this->as($descriptor->alias);
                     $this->scope(array_merge($defaultScope, $descriptor->scope));
                 });
-                $sparam = $gateway->getScopeParams([]);
+                $sparam = $gateway->getScopeParamsForSelect([]);
                 $scolumn = array_unset($sparam, 'column');
                 $this->addColumn($scolumn, $parent, !!$defaultScope);
                 $this->build($sparam, true);
