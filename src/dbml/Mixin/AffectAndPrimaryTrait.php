@@ -286,31 +286,31 @@ trait AffectAndPrimaryTrait
     }
 
     /**
-     * 主キーを返す {@uses Database::upsert()}
+     * 主キーを返す {@uses Database::insertOrUpdate()}
      *
-     * @inheritdoc Database::upsert()
+     * @inheritdoc Database::insertOrUpdate()
      * @return array|string
      */
-    private function upsertAndPrimaryWithTable($tableName, $insertData, $updateData = [], ...$opt)
+    private function insertOrUpdateAndPrimaryWithTable($tableName, $insertData, $updateData = [], ...$opt)
     {
-        assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upsert($tableName, $insertData, $updateData, ...($opt + ['return' => 'primary']));
+        assert(parameter_default([$this, 'insertOrUpdate']) === parameter_default([$this, __FUNCTION__]));
+        return $this->insertOrUpdate($tableName, $insertData, $updateData, ...($opt + ['return' => 'primary']));
     }
 
     /**
-     * 主キーを返す {@uses TableGateway::upsert()}
+     * 主キーを返す {@uses TableGateway::insertOrUpdate()}
      *
-     * @inheritdoc TableGateway::upsert()
+     * @inheritdoc TableGateway::insertOrUpdate()
      * @return array|string
      */
     #[AssumeType('primary')]
-    private function upsertAndPrimaryWithoutTable(
+    private function insertOrUpdateAndPrimaryWithoutTable(
         #[AssumeType('entity', 'shape')] $insertData,
         #[AssumeType('entity', 'shape')] $updateData = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upsert($insertData, $updateData, ...($opt + ['return' => 'primary']));
+        assert(parameter_default([$this, 'insertOrUpdate']) === parameter_default([$this, __FUNCTION__]));
+        return $this->insertOrUpdate($insertData, $updateData, ...($opt + ['return' => 'primary']));
     }
 
     /**

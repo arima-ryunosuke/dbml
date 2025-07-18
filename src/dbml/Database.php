@@ -146,7 +146,7 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * |:--                                             |:--
  * | insert などの行追加系                          | affected row が 0 の時に例外を投げる。更に戻り値として主キー配列を返す
  * | update, delete などの行作用系                  | affected row が 0 の時に例外を投げる。更に戻り値として**可能な限り**主キー配列を返す（後述）
- * | upsert などの行置換系                          | affected row が 0 の時に例外を投げる。更に戻り値として**追加/更新した行の**主キー配列を返す（{@link upsert()}参照）
+ * | modify などの行置換系                          | affected row が 0 の時に例外を投げる。更に戻り値として**追加/更新した行の**主キー配列を返す（{@link modify()}参照）
  * | fetchArray, fetchLists などの複数行を返す系    | フェッチ行数が 0 の時に例外を投げる
  * | fetchTuple などの単一行を返す系                | 行が見つからなかった時に例外を投げる
  * | fetchValue などのスカラー値を返す系            | 行が見つからなかった時に例外を投げる。 PostgreSQL の場合やカラムキャストが有効な場合は注意
@@ -321,7 +321,8 @@ class Database
         deleteOrThrowWithTable as public deleteOrThrow;
         invalidOrThrowWithTable as public invalidOrThrow;
         reduceOrThrowWithTable as public reduceOrThrow;
-        upsertOrThrowWithTable as public upsertOrThrow;
+        insertOrUpdateOrThrowWithTable as public upsertOrThrow; // for compatile
+        insertOrUpdateOrThrowWithTable as public insertOrUpdateOrThrow;
         modifyOrThrowWithTable as public modifyOrThrow;
         replaceOrThrowWithTable as public replaceOrThrow;
         updateExcludeRestrictOrThrowWithTable as public reviseOrThrow;  // for compatile
@@ -340,7 +341,8 @@ class Database
         updateAndPrimaryWithTable as public updateAndPrimary;
         deleteAndPrimaryWithTable as public deleteAndPrimary;
         invalidAndPrimaryWithTable as public invalidAndPrimary;
-        upsertAndPrimaryWithTable as public upsertAndPrimary;
+        insertOrUpdateAndPrimaryWithTable as public upsertAndPrimary; // for compatile
+        insertOrUpdateAndPrimaryWithTable as public insertOrUpdateAndPrimary;
         modifyAndPrimaryWithTable as public modifyAndPrimary;
         replaceAndPrimaryWithTable as public replaceAndPrimary;
         updateExcludeRestrictAndPrimaryWithTable as public reviseAndPrimary;  // for compatile
@@ -360,7 +362,8 @@ class Database
         deleteAndBeforeWithTable as public deleteAndBefore;
         invalidAndBeforeWithTable as public invalidAndBefore;
         reduceAndBeforeWithTable as public reduceAndBefore;
-        upsertAndBeforeWithTable as public upsertAndBefore;
+        insertOrUpdateAndBeforeWithTable as public upsertAndBefore; // for compatile
+        insertOrUpdateAndBeforeWithTable as public insertOrUpdateAndBefore;
         modifyAndBeforeWithTable as public modifyAndBefore;
         replaceAndBeforeWithTable as public replaceAndBefore;
         updateExcludeRestrictAndBeforeWithTable as public reviseAndBefore;  // for compatile
@@ -3853,7 +3856,7 @@ class Database
      *   - dryrun なら実行されるであろう DELETE な SQL を返す
      *   - dryrun でないなら実行してレコード配列を DELETE する（削除のみで追加・更新は行われない）
      * - modify:
-     *   - dryrun なら実行されるであろう UPSERT(MODIFY) な SQL を返す
+     *   - dryrun なら実行されるであろう MODIFY な SQL を返す
      *   - dryrun でないなら実行してレコード配列を MODIFY する（追加・更新のみで削除は行われない）
      * - change:
      *   - dryrun なら実行されるであろう INSERT/UPDATE/DELETE な SQL を返す
@@ -4825,6 +4828,7 @@ class Database
             'updateExcludeRestrict' => [], // 実質的な意味はなし（主キーの更新は連想配列の都合上実現できない）
             'update'                => [],
             'upsert'                => [],
+            'insertOrUpdate'        => [], // for compatible
             'modify'                => [],
             'replace'               => [],
             'invalid'               => [],
@@ -5582,24 +5586,33 @@ class Database
      *
      * ```php
      * # id 的列が指定されていないかつ AUTOINCREMENT の場合は INSERT 確定となる
-     * $db->upsert('tablename', ['name' => 'hoge']);
+     * $db->insertOrUpdate('tablename', ['name' => 'hoge']);
      * // INSERT INTO tablename (name) VALUES ('piyo') -- 連番は AUTOINCREMENT
      *
      * # id 的列が指定されているか AUTOINCREMENT でない場合は SELECT EXISTS でチェックする
-     * $db->upsert('tablename', ['id' => 1, 'name' => 'hoge']);
+     * $db->insertOrUpdate('tablename', ['id' => 1, 'name' => 'hoge']);
      * // SELECT EXISTS (SELECT * FROM tablename WHERE id = '1')
      * //   存在しない: INSERT INTO tablename (id, name) VALUES ('1', 'hoge')
      * //   存在する:   UPDATE tablename SET name = 'hoge' WHERE id = '1'
      * ```
      *
-     * @used-by upsertOrThrow()
-     * @used-by upsertAndPrimary()
-     * @used-by upsertAndBefore()
+     * @used-by insertOrUpdateOrThrow()
+     * @used-by insertOrUpdateAndPrimary()
+     * @used-by insertOrUpdateAndBefore()
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param mixed $insertData INSERT データ配列
      * @param mixed $updateData UPDATE データ配列
      * @return int|array|array[]|Entity[]|string[]|Statement 基本的には affected row. 引数次第では主キー配列. dryrun 中は文字列配列、preparing 中は Statement
+     */
+    public function insertOrUpdate($tableName, $insertData, $updateData = [], ...$opt)
+    {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->upsert($tableName, $insertData, $updateData, ...$opt);
+    }
+
+    /**
+     * @deprecated please use insertOrUpdate
      */
     public function upsert($tableName, $insertData, $updateData = [], ...$opt)
     {
@@ -5642,7 +5655,7 @@ class Database
      * - sqlite：     INSERT ～ ON CONFLICT(...) DO UPDATE が実行される
      * - mysql：      INSERT ～ ON DUPLICATE KEY が実行される
      * - postgresql： INSERT ～ ON CONFLICT(...) DO UPDATE が実行される
-     * - sqlserver：  MERGE があるが複雑すぎるので {@link upsert()} に委譲される
+     * - sqlserver：  MERGE があるが複雑すぎるので {@link insertOrUpdate()} に委譲される
      *
      * ```php
      * # シンプルな INSERT ～ ON DUPLICATE KEY
@@ -5683,6 +5696,8 @@ class Database
      * //   id = VALUES(id), name = VALUES(name), data = 'on update data'
      * ```
      *
+     * @todo rename to upsert in future scope
+     *
      * @used-by modifyOrThrow()
      * @used-by modifyAndPrimary()
      * @used-by modifyAndBefore()
@@ -5696,7 +5711,7 @@ class Database
     public function modify($tableName, $insertData, $updateData = [], $uniquekey = 'PRIMARY', ...$opt)
     {
         if (!$this->getCompatiblePlatform()->supportsMerge()) {
-            return $this->upsert($tableName, $insertData, $updateData ?: [], ...$opt);
+            return $this->insertOrUpdate($tableName, $insertData, $updateData ?: [], ...$opt);
         }
 
         $builder = AffectBuilder::new($this);

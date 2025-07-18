@@ -340,33 +340,33 @@ trait AffectOrThrowTrait
     }
 
     /**
-     * 作用行が 0 のときに例外を投げる {@uses Database::upsert()}
+     * 作用行が 0 のときに例外を投げる {@uses Database::insertOrUpdate()}
      *
-     * @inheritdoc Database::upsert()
+     * @inheritdoc Database::insertOrUpdate()
      * @return array|string
      * @throws NonAffectedException
      */
-    private function upsertOrThrowWithTable($tableName, $insertData, $updateData = [], ...$opt)
+    private function insertOrUpdateOrThrowWithTable($tableName, $insertData, $updateData = [], ...$opt)
     {
-        assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upsert($tableName, $insertData, $updateData, ...($opt + ['throw' => true, 'return' => 'primary']));
+        assert(parameter_default([$this, 'insertOrUpdate']) === parameter_default([$this, __FUNCTION__]));
+        return $this->insertOrUpdate($tableName, $insertData, $updateData, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
 
     /**
-     * 作用行が 0 のときに例外を投げる {@uses TableGateway::upsert()}
+     * 作用行が 0 のときに例外を投げる {@uses TableGateway::insertOrUpdate()}
      *
-     * @inheritdoc TableGateway::upsert()
+     * @inheritdoc TableGateway::insertOrUpdate()
      * @return array|string
      * @throws NonAffectedException
      */
     #[AssumeType('primary')]
-    private function upsertOrThrowWithoutTable(
+    private function insertOrUpdateOrThrowWithoutTable(
         #[AssumeType('entity', 'shape')] $insertData,
         #[AssumeType('entity', 'shape')] $updateData = [],
         ...$opt
     ) {
-        assert(parameter_default([$this, 'upsert']) === parameter_default([$this, __FUNCTION__]));
-        return $this->upsert($insertData, $updateData, ...($opt + ['throw' => true, 'return' => 'primary']));
+        assert(parameter_default([$this, 'insertOrUpdate']) === parameter_default([$this, __FUNCTION__]));
+        return $this->insertOrUpdate($insertData, $updateData, ...($opt + ['throw' => true, 'return' => 'primary']));
     }
 
     /**

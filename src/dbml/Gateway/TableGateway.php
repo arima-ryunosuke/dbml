@@ -414,7 +414,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         deleteOrThrowWithoutTable as public deleteOrThrow;
         invalidOrThrowWithoutTable as public invalidOrThrow;
         reduceOrThrowWithoutTable as public reduceOrThrow;
-        upsertOrThrowWithoutTable as public upsertOrThrow;
+        insertOrUpdateOrThrowWithoutTable as public upsertOrThrow; // for compatible
+        insertOrUpdateOrThrowWithoutTable as public insertOrUpdateOrThrow;
         modifyOrThrowWithoutTable as public modifyOrThrow;
         replaceOrThrowWithoutTable as public replaceOrThrow;
         updateExcludeRestrictOrThrowWithoutTable as public reviseOrThrow;  // for compatible
@@ -433,7 +434,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         updateAndPrimaryWithoutTable as public updateAndPrimary;
         deleteAndPrimaryWithoutTable as public deleteAndPrimary;
         invalidAndPrimaryWithoutTable as public invalidAndPrimary;
-        upsertAndPrimaryWithoutTable as public upsertAndPrimary;
+        insertOrUpdateAndPrimaryWithoutTable as public upsertAndPrimary; // for compatible
+        insertOrUpdateAndPrimaryWithoutTable as public insertOrUpdateAndPrimary;
         modifyAndPrimaryWithoutTable as public modifyAndPrimary;
         replaceAndPrimaryWithoutTable as public replaceAndPrimary;
         updateExcludeRestrictAndPrimaryWithoutTable as public reviseAndPrimary;  // for compatible
@@ -453,7 +455,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         deleteAndBeforeWithoutTable as public deleteAndBefore;
         invalidAndBeforeWithoutTable as public invalidAndBefore;
         reduceAndBeforeWithoutTable as public reduceAndBefore;
-        upsertAndBeforeWithoutTable as public upsertAndBefore;
+        insertOrUpdateAndBeforeWithoutTable as public upsertAndBefore; // for compatible
+        insertOrUpdateAndBeforeWithoutTable as public insertOrUpdateAndBefore;
         modifyAndBeforeWithoutTable as public modifyAndBefore;
         replaceAndBeforeWithoutTable as public replaceAndBefore;
         updateExcludeRestrictAndBeforeWithoutTable as public reviseAndBefore;  // for compatible
@@ -2699,13 +2702,27 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
-     * 駆動表を省略できる <@uses Database::upsert()>
+     * 駆動表を省略できる <@uses Database::insertOrUpdate()>
      *
-     * @used-by upsertOrThrow()
-     * @used-by upsertAndPrimary()
-     * @used-by upsertAndBefore()
+     * @used-by insertOrUpdateOrThrow()
+     * @used-by insertOrUpdateAndPrimary()
+     * @used-by insertOrUpdateAndBefore()
      *
-     * @inheritdoc Database::upsert()
+     * @inheritdoc Database::insertOrUpdate()
+     */
+    #[AssumeType('mixed')]
+    public function insertOrUpdate(
+        #[AssumeType('entity', 'shape')] $insertData,
+        #[AssumeType('entity', 'shape')] $updateData = [],
+        ...$opt
+    ) {
+        /** @noinspection PhpDeprecationInspection */
+        return $this->upsert($insertData, $updateData, ...$opt);
+    }
+
+    /**
+     * @deprecated please use insertOrUpdate
+     * @noinspection PhpDeprecationInspection
      */
     #[AssumeType('mixed')]
     public function upsert(
