@@ -437,17 +437,20 @@ class CompatiblePlatform /*extends AbstractPlatform*/
      */
     public function getInsertSelectSyntax(array $column, string $condition): string
     {
+        return $this->getWrappedSelectSyntax(sprintf("SELECT %s WHERE $condition", array_sprintf($column, '%s AS %s', ', ')));
+    }
+
+    /**
+     * INSERT で使う SELECT をラップする
+     */
+    public function getWrappedSelectSyntax(string $select): string
+    {
         if ($this->platform instanceof MySQLPlatform) {
             if (version_compare($this->version, '8.0.19') >= 0) {
-                return sprintf("SELECT * FROM (SELECT %s WHERE $condition)", array_sprintf($column, '%s AS %s', ', '));
-            }
-            else {
-                return sprintf("SELECT %s WHERE $condition", implode(', ', $column));
+                return sprintf("SELECT * FROM ($select)");
             }
         }
-        else {
-            return sprintf("SELECT %s WHERE $condition", implode(', ', $column));
-        }
+        return $select;
     }
 
     /**

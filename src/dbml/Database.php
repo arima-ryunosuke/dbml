@@ -4301,6 +4301,54 @@ class Database
     }
 
     /**
+     * INSERT INTO SELECT ON DUPLICATE 構文
+     *
+     * ```php
+     * # 生クエリで INSERT INTO SELECT ON DUPLICATE
+     * $db->modifySelect('t_destination', 'SELECT * FROM t_source', ['update_column' => 'modified']);
+     * // INSERT INTO t_destination SELECT * FROM t_source ON DUPLICATE KEY UPDATE update_column = 'modified'
+     *
+     * # クエリビルダも渡せる
+     * $db->insertSelect('t_destination', $db->select('t_source'), ['update_column' => 'modified']);
+     * // INSERT INTO t_destination SELECT * FROM t_source ON DUPLICATE KEY UPDATE update_column = 'modified'
+     * ```
+     *
+     * @todo rename to upsertSelect in future scope
+     *
+     * @param string|TableDescriptor $tableName テーブル名
+     * @param string|SelectBuilder $sql SELECT クエリ
+     * @param array $updateData カラムデータ
+     * @param string $uniquekey 重複チェックに使うユニークキー名
+     * @param array $columns カラム定義
+     * @param iterable $params bind パラメータ
+     * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
+     */
+    public function modifySelect($tableName, $sql, $updateData = [], $uniquekey = 'PRIMARY', $columns = [], ...$opt)
+    {
+        $params = [];
+        if ($sql instanceof SelectBuilder) {
+            $sql->detectAutoOrder(true);
+            $sql->merge($params);
+            $sql = (string) $sql;
+        }
+
+        $builder = AffectBuilder::new($this);
+        $builder->build([
+            'table'      => $tableName,
+            'select'     => $sql,
+            'merge'      => $updateData,
+            'constraint' => $uniquekey,
+            'column'     => $columns,
+        ]);
+        $builder->modifySelect(opt: $opt)->merge($params);
+
+        $affected = $this->executeAffect($builder->getQuery(), $params);
+        $affecteds = [$affected];
+
+        return $this->_postaffects($builder, $affecteds, [], $opt);
+    }
+
+    /**
      * BULK INSERT 構文
      *
      * BULK INSERT の仕様上、与えるカラム配列はキーが統一されていなければならない。

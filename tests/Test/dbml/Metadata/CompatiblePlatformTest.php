@@ -427,10 +427,10 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      */
     function test_getInsertSelectSyntax($cplatform, $platform)
     {
-        $expected = 'SELECT 1, hoge WHERE 1 AND 2';
+        $expected = 'SELECT 1 AS id, hoge AS name WHERE 1 AND 2';
         if ($platform instanceof MySQLPlatform) {
             if (version_compare($cplatform->getVersion(), '8.0.19') >= 0) {
-                $expected = 'SELECT * FROM (SELECT 1 AS id, hoge AS name WHERE 1 AND 2)';
+                $expected = "SELECT * FROM ($expected)";
             }
         }
 

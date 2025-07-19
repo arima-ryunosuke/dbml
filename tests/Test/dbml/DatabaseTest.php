@@ -4476,6 +4476,51 @@ CSV
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_modifySelect($database)
+    {
+        if ($database->getPlatform() instanceof SQLServerPlatform) {
+            return;
+        }
+
+        // id:5 以上のやつに id+4 すると2件更新4件作成になるはず
+        $affected = $database->modifySelect('test', $database->select()->direct('SELECT test.id+?, test.name, test.data FROM test WHERE test.id >= ?', [4, 5]), ['name' => 'modified']);
+        // mysql は更新で2を返す
+        if ($database->getCompatiblePlatform()->getName() === 'mysql') {
+            $expected = 2 * 2 + 4;
+        }
+        else {
+            $expected = 2 * 1 + 4;
+        }
+        $this->assertEquals($expected, $affected);
+        $this->assertEquals([
+            5  => "e",
+            6  => "f",
+            7  => "g",
+            8  => "h",
+            9  => "modified",
+            10 => "modified",
+            11 => "g",
+            12 => "h",
+            13 => "i",
+            14 => "j",
+        ], $database->selectPairs('test["id>=5"].id,name'));
+
+        // 空更新（posgresql の DO NOTHING 相当）
+        $affected = $database->modifySelect('test', $database->select('test'));
+        // mysql は更新なしで0を返す
+        if ($database->getCompatiblePlatform()->getName() === 'mysql') {
+            $expected = 0;
+        }
+        else {
+            $expected = 14;
+        }
+        $this->assertEquals($expected, $affected);
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_insertArray($database)
     {
         // 空のテスト

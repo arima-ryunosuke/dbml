@@ -1652,6 +1652,13 @@ AND ((flag=1))", "$gw");
         $this->assertEquals($count * 2, $count = $gateway->count());
         $this->assertEquals(24, $count);
 
+        if (!$database->getPlatform() instanceof SQLServerPlatform) {
+            /// modifySelect（↑の delete で歯抜けが1件あり id+1 なので+2）
+            $gateway->modifySelect($gateway->select(['id' => $database->raw('id+1'), 'name', 'data']), ['name' => 'modified'], 'PRIMARY', ['id', 'name', 'data']);
+            $this->assertEquals($count + 2, $count = $gateway->count());
+            $this->assertEquals(26, $count);
+        }
+
         /// deleteArray
         $gateway->deleteArray([['id' => 1], ['id' => 2], ['id' => 3]]);
         $this->assertEquals($count - 3, $gateway->count());

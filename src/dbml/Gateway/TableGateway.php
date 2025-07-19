@@ -2399,6 +2399,23 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * 駆動表を省略できる <@uses Database::modifySelect()>
+     *
+     * @inheritdoc Database::modifySelect()
+     */
+    #[AssumeType('mixed')]
+    public function modifySelect(
+        $sql,
+        #[AssumeType('entity', 'shape')] $updateData = [],
+        $uniquekey = 'PRIMARY',
+        $columns = [],
+        ...$opt,
+    ) {
+        $this->resetResult();
+        return $this->database->modifySelect($this, $sql, $updateData, $uniquekey, $columns, ...$opt);
+    }
+
+    /**
      * 駆動表を省略できる <@uses Database::insertArray()>
      *
      * @used-by insertArrayOrThrow()

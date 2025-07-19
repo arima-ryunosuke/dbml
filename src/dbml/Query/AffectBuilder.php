@@ -576,6 +576,37 @@ class AffectBuilder extends AbstractBuilder
         return $this;
     }
 
+    public function modifySelect(null|string|TableDescriptor|TableGateway $table = null, $insertSql = null, $updateData = [], $uniquekey = null, $columns = [], array $opt = []): static
+    {
+        $this->build([
+            'table'      => $table,
+            'select'     => $insertSql,
+            'merge'      => $updateData,
+            'constraint' => $uniquekey,
+            'column'     => $columns,
+        ], true);
+        $this->params = [];
+
+        $schema = $this->database->getSchema();
+        $cplatform = $this->database->getCompatiblePlatform();
+
+        if (!count($this->merge) && $this->getUnsafeOption('updateEmpty')) {
+            foreach ($schema->getTablePrimaryColumns($this->table) as $pk => $column) {
+                $this->merge[$pk] = $this->database->raw($cplatform->getReferenceSyntax($pk));
+            }
+        }
+
+        $ignore = array_get($opt, 'ignore') ? $cplatform->getIgnoreSyntax() . ' ' : '';
+        $this->sql = "INSERT {$ignore}INTO {$this->tableAs()} " . concat('(', implode(', ', $this->column), ') ');
+        $this->sql .= $cplatform->getWrappedSelectSyntax($this->select);
+
+        $sets = $this->bindInto($this->merge, $this->params);
+        $uniquecols = $schema->getTableUniqueColumns($this->table, $this->constraint ?? 'PRIMARY');
+        $this->sql .= ' ' . $cplatform->getMergeSyntax(array_keys($uniquecols)) . ' ' . array_sprintf($sets, '%2$s = %1$s', ', ');
+
+        return $this;
+    }
+
     public function insertArray(null|string|TableDescriptor|TableGateway $table = null, $data = null, array $opt = []): static
     {
         $this->build([
