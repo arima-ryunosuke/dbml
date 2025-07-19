@@ -52,6 +52,32 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_setOptions($cplatform, $platform)
+    {
+        $current = $cplatform->setOptions([
+            'mysql.reference' => null,
+        ]);
+
+        $this->assertEquals([
+            "mysql.reference" => "excluded",
+        ], $current);
+
+        if ($platform instanceof MySQLPlatform) {
+            $this->assertEquals('VALUES(name)', $cplatform->getReferenceSyntax('name'));
+        }
+
+        $current = $cplatform->setOptions($current);
+
+        $this->assertEquals([
+            "mysql.reference" => null,
+        ], $current);
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_getWrappedPlatform($cplatform, $platform)
     {
         $this->assertEquals(spl_object_hash($platform), spl_object_hash($cplatform->getWrappedPlatform()));

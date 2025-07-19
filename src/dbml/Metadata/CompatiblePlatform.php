@@ -41,6 +41,10 @@ class CompatiblePlatform /*extends AbstractPlatform*/
 
     protected ?string $version;
 
+    protected array $options = [
+        'mysql.reference' => 'excluded',
+    ];
+
     /**
      * コンストラクタ
      */
@@ -48,6 +52,18 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     {
         $this->platform = $platform;
         $this->version = $version;
+    }
+
+    /**
+     * 設定の上書き
+     *
+     * @return array 設定前のオプション
+     */
+    public function setOptions(array $options): array
+    {
+        $result = $this->options;
+        $this->options = array_replace($this->options, $options);
+        return $result;
     }
 
     /**
@@ -380,8 +396,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return "ON CONFLICT($constraint) DO UPDATE SET";
         }
         if ($this->platform instanceof MySQLPlatform) {
-            if (version_compare($this->version, '8.0.19') >= 0) {
-                return "AS excluded ON DUPLICATE KEY UPDATE";
+            if ($this->options['mysql.reference'] !== null && version_compare($this->version, '8.0.19') >= 0) {
+                return "AS {$this->options['mysql.reference']} ON DUPLICATE KEY UPDATE";
             }
             else {
                 return "ON DUPLICATE KEY UPDATE";
@@ -403,8 +419,8 @@ class CompatiblePlatform /*extends AbstractPlatform*/
             return "excluded.$column";
         }
         if ($this->platform instanceof MySQLPlatform) {
-            if (version_compare($this->version, '8.0.19') >= 0) {
-                return "excluded.$column";
+            if ($this->options['mysql.reference'] !== null && version_compare($this->version, '8.0.19') >= 0) {
+                return "{$this->options['mysql.reference']}.$column";
             }
             else {
                 return "VALUES($column)";
