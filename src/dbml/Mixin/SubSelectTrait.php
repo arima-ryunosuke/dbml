@@ -11,7 +11,7 @@ trait SubSelectTrait
      *
      * @inheritdoc Database::subselect()
      */
-    private function subselectArray($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function subselectArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->subselect($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->array();
     }
@@ -21,7 +21,7 @@ trait SubSelectTrait
      *
      * @inheritdoc Database::subselect()
      */
-    private function subselectAssoc($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function subselectAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->subselect($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->assoc();
     }
@@ -31,7 +31,7 @@ trait SubSelectTrait
      *
      * @inheritdoc Database::subselect()
      */
-    private function subselectLists($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function subselectLists($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->subselect($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->lists();
     }
@@ -41,7 +41,7 @@ trait SubSelectTrait
      *
      * @inheritdoc Database::subselect()
      */
-    private function subselectPairs($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function subselectPairs($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->subselect($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->pairs();
     }
@@ -51,7 +51,7 @@ trait SubSelectTrait
      *
      * @inheritdoc Database::subselect()
      */
-    private function subselectTuple($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function subselectTuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->subselect($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->tuple();
     }
@@ -61,7 +61,7 @@ trait SubSelectTrait
      *
      * @inheritdoc Database::subselect()
      */
-    private function subselectValue($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
+    private function subselectValue($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [])
     {
         return $this->subselect($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having)->value();
     }
