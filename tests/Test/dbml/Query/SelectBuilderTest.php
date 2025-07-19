@@ -61,6 +61,18 @@ class SelectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
      */
+    function test_direct($builder)
+    {
+        $builder->direct('SELECT * FROM test WHERE id IN (?, ?, ?)', [1, 2, 3]);
+        $this->assertEquals("SELECT * FROM test WHERE id IN ('1', '2', '3')", $builder->queryInto());
+
+        that($builder)->build(['column' => 'name'])->wasThrown('direct mode is not allowed');
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
     function test_fetchXXX($builder)
     {
         $this->assertEquals('a', $builder->select('name1')->from('test1')->limit(1)->value());

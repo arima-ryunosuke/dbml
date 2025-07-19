@@ -15,7 +15,7 @@ class AbstractBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
                 new class($v[0]) extends AbstractBuilder {
                     public static function getDefaultOptions(): array { return []; }
 
-                    public function __toString(): string
+                    public function _toString(): string
                     {
                         return __CLASS__;
                     }

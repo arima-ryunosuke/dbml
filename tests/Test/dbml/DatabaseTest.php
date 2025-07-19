@@ -1996,6 +1996,9 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
     {
         $path = sys_get_temp_dir() . '/export.tmp';
 
+        $database->export('csv', $database->select()->direct('SELECT id, name FROM test WHERE id IN (?,?)', [2, 3]), [], [], $path);
+        $this->assertStringEqualsFile($path, "2,b\n3,c\n");
+
         $database->exportCsv(['file' => $path], 'test');
         $this->assertStringEqualsFile($path, "1,a,\n2,b,\n3,c,\n4,d,\n5,e,\n6,f,\n7,g,\n8,h,\n9,i,\n10,j,\n");
 
@@ -2528,6 +2531,10 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      */
     function test_yield($database)
     {
+        $it = $database->yield($database->select()->direct('SELECT test.name FROM test WHERE id IN (?,?)', [2, 3]))->setFetchMethod('lists');
+        $this->assertInstanceOf(Yielder::class, $it);
+        $this->assertEquals(['b', 'c'], iterator_to_array($it));
+
         $it = $database->yieldLists('test.name', ['id' => [2, 3]]);
         $this->assertInstanceOf(Yielder::class, $it);
         $this->assertEquals(['b', 'c'], iterator_to_array($it));
@@ -4456,9 +4463,13 @@ CSV
         $database->insertSelect('multiprimary', $database->select('test.id - ?, id, name'), ['mainid', 'subid', 'name'], [-2000]);
         $this->assertCount($database->count('test'), $database->selectArray('multiprimary', 'mainid > 2000'));
 
-        // 列が完全一致するなら $columns は省略できる
-        $database->insertSelect('multiprimary', 'select id + 3000 as mainid, id subid, name from test');
+        // SelectBuilder(direct) でも同じ
+        $database->insertSelect('multiprimary', $database->select()->direct('SELECT test.id - ?, test.id, test.name FROM test', [-3000]), ['mainid', 'subid', 'name']);
         $this->assertCount($database->count('test'), $database->selectArray('multiprimary', 'mainid > 3000'));
+
+        // 列が完全一致するなら $columns は省略できる
+        $database->insertSelect('multiprimary', 'select id + 4000 as mainid, id subid, name from test');
+        $this->assertCount($database->count('test'), $database->selectArray('multiprimary', 'mainid > 4000'));
     }
 
     /**

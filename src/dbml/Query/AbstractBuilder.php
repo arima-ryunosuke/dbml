@@ -22,6 +22,8 @@ abstract class AbstractBuilder implements Queryable, \Stringable
 
     protected Database $database;
 
+    protected string $direct;
+
     protected string $sql;
     protected array  $params;
 
@@ -46,6 +48,16 @@ abstract class AbstractBuilder implements Queryable, \Stringable
 
         throw new \BadMethodCallException("'$name' is undefined.");
     }
+
+    public function __toString(): string
+    {
+        if (isset($this->direct)) {
+            return $this->direct;
+        }
+        return $this->sql = $this->_toString();
+    }
+
+    protected function _toString(): string {/* to abstract in future scope */ }
 
     /**
      * WHERE/HAVING 条件を正規化する
@@ -350,11 +362,20 @@ abstract class AbstractBuilder implements Queryable, \Stringable
         return $this->database->queryInto($this->__toString(), $this->getParams());
     }
 
+    public function direct(string $sql, array $params = []): static
+    {
+        $this->direct = $sql;
+        $this->params = $params;
+
+        return $this;
+    }
+
     /**
      * すべてを無に帰す
      */
     public function reset(): static
     {
+        unset($this->direct);
         unset($this->sql);
         unset($this->params);
         unset($this->statement);

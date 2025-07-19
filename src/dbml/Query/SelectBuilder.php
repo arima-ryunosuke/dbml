@@ -46,6 +46,7 @@ use function ryunosuke\dbml\first_value;
 use function ryunosuke\dbml\glob2regex;
 use function ryunosuke\dbml\instance_of;
 use function ryunosuke\dbml\is_bindable_closure;
+use function ryunosuke\dbml\is_empty_recursive;
 use function ryunosuke\dbml\is_hasharray;
 use function ryunosuke\dbml\is_primitive;
 use function ryunosuke\dbml\split_noempty;
@@ -383,12 +384,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     /**
      * クエリ文字列を返す
      */
-    public function __toString(): string
+    protected function _toString(): string
     {
-        if (isset($this->sql)) {
-            return $this->sql;
-        }
-
         $platform = $this->database->getPlatform();
         $cplatform = $this->database->getCompatiblePlatform();
 
@@ -1189,9 +1186,19 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
 
     private function _dirty(): static
     {
+        $this->resetResult();
+
+        // 今の実装はビルダーとして使用された場合は問答無用で例外とする
+        // 将来的には offset/limit, lock などの先頭・末尾に付け足す程度なら対応したい
+        if (isset($this->direct)) {
+            if (!is_empty_recursive([$this->sqlParts, $this->onConditions])) {
+                throw new \UnexpectedValueException('direct mode is not allowed treated as QueryBuilder');
+            }
+            return $this;
+        }
+
         unset($this->sql);
         unset($this->params);
-        $this->resetResult();
         return $this;
     }
 

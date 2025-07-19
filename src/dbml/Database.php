@@ -2790,7 +2790,7 @@ class Database
      * @param array|string $groupBy グルーピング（{@link SelectBuilder::groupBy()}）
      * @param array|string $having HAVING 条件（{@link SelectBuilder::having()}）
      */
-    public function select($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
+    public function select($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         $builder = SelectBuilder::new($this);
         return $builder->build(array_combine(SelectBuilder::CLAUSES, [$tableDescriptor, $where, $orderBy, $limit, $groupBy, $having]), true);

@@ -22,6 +22,18 @@ class AffectBuilderTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @dataProvider provideAffectBuilder
      * @param AffectBuilder $builder
      */
+    function test_direct($builder)
+    {
+        $builder->direct('INSERT INTO (?,?,?)', [1, 2, 3]);
+        $this->assertEquals("INSERT INTO ('1','2','3')", $builder->queryInto());
+
+        that($builder)->build(['table' => 't_article'])->wasThrown('direct mode is not allowed');
+    }
+
+    /**
+     * @dataProvider provideAffectBuilder
+     * @param AffectBuilder $builder
+     */
     function test_build($builder)
     {
         $builder->build([

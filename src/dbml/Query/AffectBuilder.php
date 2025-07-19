@@ -141,13 +141,18 @@ class AffectBuilder extends AbstractBuilder
         ];
     }
 
-    public function __toString(): string
+    protected function _toString(): string
     {
         return $this->sql;
     }
 
     public function build(array $queryParts, bool $append = false): static
     {
+        // SelectBuilder とは違い多種多様すぎるので direct 中に build した時点で例外
+        if (isset($this->direct)) {
+            throw new \UnexpectedValueException('direct mode is not allowed treated as QueryBuilder');
+        }
+
         if (array_key_exists('table', $queryParts) && $queryParts['table']) {
             assert(!$append || ($append && $this->table === null));
             assert(!$append || ($append && $this->alias === null));
