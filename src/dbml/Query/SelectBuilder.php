@@ -3547,6 +3547,53 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     }
 
     /**
+     * SELECT 句を返す
+     *
+     * 最終的に構築される SELECT を alias => column の連想配列で返す。
+     * alias が重複した場合は例外を投げる。
+     * キーはともかく、値はどんな型で返るか一切の保証はないので注意。
+     *
+     * ```php
+     * $qb->column([
+     *     't_article A' => [
+     *         'id',                     // 素のカラム
+     *         'NOW()',                  // 式
+     *         'name' => 'article_name', // 素のカラムエイリアス
+     *         'now'  => 'NOW()',        // 式エイリアス
+     *     ],
+     * ]);
+     * $qb->getSelectPart();
+     * // result:
+     * [
+     *     'id'    => 'id',           // 素のカラム
+     *     'NOW()' => 'NOW()',        // 式
+     *     'name'  => 'article_name', // 素のカラムエイリアス
+     *     'now'   => 'NOW()',        // 式エイリアス
+     * ];
+     * ```
+     */
+    public function getSelectPart(): array
+    {
+        $result = [];
+        foreach ($this->sqlParts['select'] as $select) {
+            if ($select instanceof Select) {
+                $alias = $select->getAlias();
+                $actual = $select->getActual();
+            }
+            else {
+                [, $alias] = array_pad(explode('.', $select, 2), -2, $select);
+                $actual = $select;
+            }
+
+            if (array_key_exists($alias, $result)) {
+                throw new \UnexpectedValueException("alias '$alias' is already defined.");
+            }
+            $result[$alias] = $actual;
+        }
+        return $result;
+    }
+
+    /**
      * FROM 句(from,join)を返す
      *
      * {@link getQueryPart()} でも得られるが、 FROM は JOIN も兼ねており、ややこしい構造になっているのでそれを補正しつつシンプルな構造で返す。

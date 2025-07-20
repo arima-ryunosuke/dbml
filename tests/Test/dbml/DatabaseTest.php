@@ -45,6 +45,7 @@ use function ryunosuke\dbml\array_remove;
 use function ryunosuke\dbml\class_loader;
 use function ryunosuke\dbml\class_namespace;
 use function ryunosuke\dbml\file_rewrite_contents;
+use function ryunosuke\dbml\first_value;
 use function ryunosuke\dbml\kvsort;
 use function ryunosuke\dbml\mkdir_p;
 use function ryunosuke\dbml\pascal_case;
@@ -4470,6 +4471,9 @@ CSV
         // 列が完全一致するなら $columns は省略できる
         $database->insertSelect('multiprimary', 'select id + 4000 as mainid, id subid, name from test');
         $this->assertCount($database->count('test'), $database->selectArray('multiprimary', 'mainid > 4000'));
+
+        // 自動カラム（AS Alias で自動設定）
+        $this->assertStringStartsWith('INSERT INTO test (name, id) SELECT', first_value($database->dryrun()->insertSelect('test', $database->select('test1.name1 as name, id'), columns: null)));
     }
 
     /**
@@ -4515,6 +4519,9 @@ CSV
             $expected = 14;
         }
         $this->assertEquals($expected, $affected);
+
+        // 自動カラム（AS Alias で自動設定）
+        $this->assertStringStartsWith('INSERT INTO test (name, id) SELECT', first_value($database->dryrun()->modifySelect('test', $database->select('test1.name1 as name, id'), columns: null)));
     }
 
     /**

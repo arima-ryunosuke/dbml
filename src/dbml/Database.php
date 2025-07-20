@@ -4274,17 +4274,19 @@ class Database
      *
      * @param string|TableDescriptor $tableName テーブル名
      * @param string|SelectBuilder $sql SELECT クエリ
-     * @param array $columns カラム定義
+     * @param ?array $columns カラム定義（null 指定で $sql から自動算出）
      * @param iterable $params bind パラメータ
      * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
     public function insertSelect($tableName, $sql, $columns = [], array $params = [], ...$opt)
     {
         if ($sql instanceof SelectBuilder) {
+            $columns ??= array_keys($sql->getSelectPart());
             $sql->detectAutoOrder(true);
             $sql->merge($params);
             $sql = (string) $sql;
         }
+        assert($columns !== null);
 
         $builder = AffectBuilder::new($this);
         $builder->build([
@@ -4319,7 +4321,7 @@ class Database
      * @param string|SelectBuilder $sql SELECT クエリ
      * @param array $updateData カラムデータ
      * @param string $uniquekey 重複チェックに使うユニークキー名
-     * @param array $columns カラム定義
+     * @param ?array $columns カラム定義（null 指定で $sql から自動算出）
      * @param iterable $params bind パラメータ
      * @return int|string[]|Statement 基本的には affected row. dryrun 中は文字列配列、preparing 中は Statement
      */
@@ -4327,10 +4329,12 @@ class Database
     {
         $params = [];
         if ($sql instanceof SelectBuilder) {
+            $columns ??= array_keys($sql->getSelectPart());
             $sql->detectAutoOrder(true);
             $sql->merge($params);
             $sql = (string) $sql;
         }
+        assert($columns !== null);
 
         $builder = AffectBuilder::new($this);
         $builder->build([

@@ -3504,6 +3504,39 @@ SQL
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
      */
+    function test_getSelectPart($builder)
+    {
+        $builder->column([
+            'test1' => [
+                'name'    => 'name1',
+                'id',
+                'NOW()',
+                'now'     => $builder->getDatabase()->raw('NOW(6)'),
+                'builder' => $builder->getDatabase()->select('test'),
+                'id AS raw',
+            ],
+        ]);
+        $this->assertEquals([
+            "name"    => 'test1.name1',
+            "id"      => "test1.id",
+            "NOW()"   => $builder->getDatabase()->raw('NOW()'),
+            "now"     => $builder->getDatabase()->raw('NOW(6)'),
+            'builder' => $builder->getDatabase()->raw('(SELECT test.* FROM test)'),
+            'raw'     => 'test1.id',
+        ], $builder->getSelectPart());
+
+        $builder->addColumn([
+            'test' => [
+                'name'    => 'name1',
+            ],
+        ]);
+        that($builder)->getSelectPart()->wasThrown(new \UnexpectedValueException('already defined'));
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
     function test_resetQueryPart($builder)
     {
         $builder->column('test.id');
