@@ -21,6 +21,31 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.10
+
+- [feature] debug フラグを新設
+- [feature] affect(insert|modify)Select でエイリアスをカラムとして使用できる機能
+- [feature] modifySelect を追加
+- [feature] CompatiblePlatform に設定を持たせる
+- [change] マジックカラムの登場で $tableDescriptor を指定しないこともあるのでデフォルト引数に変更
+- [feature] クエリビルダーに生クエリ機能を追加
+- [feature] virtualColumn と同様に Scope 属性でパラメータを指定できる機能
+- [feature] Scope を別クラスに分割
+- [feature] 行セット全体のコールバック機能
+- [feature] 子供がいるかを返す using/subusing を追加
+- [refactor] 外部キー系3兄弟を Affect から Abstract に格上げ
+- [feature] yield 系メソッドに chunk を渡せるように修正
+- [fixbug] トランザクション内で insertOrUpdate がコケる不具合
+- [fixbug] デフォルトスコープが定義できない不具合
+- [tests] リネーム分のテスト
+- [change] InShare を ForShare にリネーム
+- [change] upsert を insertOrUpdate にリネーム
+- [change] 外部キーが伴う affect 系メソッドをリネーム
+- [composer] update
+  - dbal: 3.10.0
+- Merge tag 'v2.1.26'
+- Merge tag 'v2.1.25'
+
 ## 3.1.9
 
 - [feature] TableGateway の CTE 機能
