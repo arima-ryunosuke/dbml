@@ -49,6 +49,8 @@ class Schema
 
     private AbstractSchemaManager $schemaManger;
 
+    private bool $debug;
+
     /** @var callable[] */
     private array $listeners;
 
@@ -81,8 +83,9 @@ class Schema
     /**
      * コンストラクタ
      */
-    public function __construct(AbstractSchemaManager $schemaManger, array $listeners, CacheInterface $cache)
+    public function __construct(AbstractSchemaManager $schemaManger, array $listeners, CacheInterface $cache, bool $debug)
     {
+        $this->debug = $debug;
         $this->schemaManger = $schemaManger;
         $this->listeners = array_replace([
             'onIntrospectTable' => fn() => null,
@@ -651,7 +654,7 @@ class Schema
                     $vals = $fkey->getLocalColumns();
                 }
                 return ['direction' => $direction, 'columns' => array_combine($keys, $vals), 'fkey' => $fkey->getName()];
-            });
+            }, $this->debug ? 1 : null);
         }
 
         $direction = $this->foreignColumns[$cacheid]['direction'];

@@ -603,7 +603,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
                 }
             }
             return $result;
-        });
+        }, $this->database->getDebug() ? 1 : null);
 
         $vcolumns = [];
         foreach ($magic_methods as $method) {

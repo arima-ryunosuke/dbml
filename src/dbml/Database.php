@@ -176,6 +176,8 @@ use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
  * 値のエスケープに関しては基本的には安全側に倒しているが、 {@link Expression} を使用する場合はその前提が崩れる事がある（ `()` を含むエントリは自動で Expression 化されるので同じ）。
  * 原則的に外部入力を Expression 化したり、値以外の入力として使用するのは全く推奨できない。
  *
+ * @method bool                   getDebug()
+ * @method $this                  setDebug($bool)
  * @method CacheInterface         getCacheProvider()
  * @method bool                   getAutoIdentityInsert()
  * @method $this                  setAutoIdentityInsert($bool)
@@ -454,6 +456,8 @@ class Database
     public static function getDefaultOptions(): array
     {
         $default_options = [
+            /** @var bool デバッグフラグ（キャッシュを自動で消したりログが多くなったりする） */
+            'debug'              => false,
             /** @var ?CacheInterface キャッシュオブジェクト */
             'cacheProvider'      => null,
             /** @var ?callable 接続時のリトライ（float を返すとその分待機し、null を返すまで試行する） */
@@ -857,7 +861,7 @@ class Database
             }
             $this->debug("generate tableMap", $maps);
             return $maps;
-        });
+        }, $this->getUnsafeOption('debug') ? 1 : null);
 
         return $maps;
     }
@@ -1195,9 +1199,10 @@ class Database
      */
     public function debug(string|callable $message, array|callable $context = [], bool|callable $if = true, $level = null)
     {
+        $debug = $this->getUnsafeOption('debug');
         /** @var LoggerInterface $logger */
         $logger = $this->getUnsafeOption('debugLogger');
-        if ($logger) {
+        if ($debug && $logger) {
             if (is_callable($if) ? $if() : $if) {
                 foreach (array_slice(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), 1) as $trace) {
                     if (isset($trace['class'], $trace['type'], $trace['function']) && !str_contains($trace['function'], '{closure}')) {
@@ -1881,9 +1886,10 @@ class Database
                     $this->debug("add foreign key {$fkey->getName()}({$table->getName()}->{$fkey->getForeignTableName()})");
                 },
             ];
+            $debug = $this->getUnsafeOption('debug');
             $cacher = $this->getUnsafeOption('cacheProvider');
             $callback = $this->getUnsafeOption('onRequireSchema');
-            $this->cache['schema'] = new Schema($this->connections['slave']->createSchemaManager(), $listeners, $cacher);
+            $this->cache['schema'] = new Schema($this->connections['slave']->createSchemaManager(), $listeners, $cacher, $debug);
             $this->cache['schema']->setViewSource(array_flip(array_filter($this->_tableMap()['TtoV'])));
             $callback($this);
         }

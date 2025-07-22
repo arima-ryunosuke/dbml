@@ -711,7 +711,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
             ]
         ));
 
-        $schema = new Schema(self::getDummyDatabase()->getConnection()->createSchemaManager(), [], new NullCache());
+        $schema = new Schema(self::getDummyDatabase()->getConnection()->createSchemaManager(), [], new NullCache(), true);
 
         // 2つの経路がある
         $this->assertEquals([
@@ -756,7 +756,7 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
                     $table->setComment('modify-comment');
                 }
             },
-        ], new NullCache());
+        ], new NullCache(), true);
 
         $table = $this->getDummyTable('tabletest');
         $this->assertFalse($table->hasColumn('hoge'));

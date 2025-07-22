@@ -688,6 +688,7 @@ abstract class AbstractUnitTestCase extends TestCase
     {
         return self::$databases ?: self::$databases = array_map(function ($v) {
             $database = new Database($v[0], [
+                'debug'                    => true,
                 'convertBoolToInt'         => true,
                 'convertNumericToDatetime' => true,
                 'truncateString'           => true,
