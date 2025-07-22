@@ -7757,31 +7757,31 @@ ORDER BY T.id DESC, name ASC
 
         $random = $database->selectAssoc('test', ['id > ?' => 5], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectAssoc('test', ['id > ?' => 5], 'id', 5);
-        $this->assertNotSame($sorted, $random);
-        $this->assertSame($sorted, kvsort($random, fn($av, $bv, $ak, $bk) => $ak <=> $bk));
+        that($sorted)->break()->isNotSame($random);
+        that($sorted)->break()->isSame(kvsort($random, fn($av, $bv, $ak, $bk) => $ak <=> $bk));
 
         $random = $database->selectLists('test.id', ['id > ?' => 5], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectLists('test.id', ['id > ?' => 5], 'id', 5);
-        $this->assertNotSame($sorted, $random);
-        $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av) <=> intval($bv))));
+        that($sorted)->break()->isNotSame($random);
+        that($sorted)->break()->isSame(array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av) <=> intval($bv))));
 
         $random = $database->selectPairs('test.id,name', ['id > ?' => 5], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectPairs('test.id,name', ['id > ?' => 5], 'id', 5);
-        $this->assertNotSame($sorted, $random);
-        $this->assertSame($sorted, kvsort($random, fn($av, $bv, $ak, $bk) => $ak <=> $bk));
+        that($sorted)->break()->isNotSame($random);
+        that($sorted)->break()->isSame(kvsort($random, fn($av, $bv, $ak, $bk) => $ak <=> $bk));
 
         $random = $database->selectValue('test.id', ['id > ?' => 5], OrderBy::randomSuitably(), 1);
         $sorted = $database->selectValue('test.id', ['id' => $random]);
-        $this->assertSame($sorted, $random);
+        that($sorted)->break()->isSame($random);
 
         $random = $database->selectTuple('test.id,name', ['id > ?' => 5], OrderBy::randomSuitably(), 1);
         $sorted = $database->selectTuple('test.id,name', ['id' => $random['id']]);
-        $this->assertSame($sorted, $random);
+        that($sorted)->break()->isSame($random);
 
         $random = $database->selectArray('multiprimary', ['mainid' => 2], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectArray('multiprimary', ['mainid' => 2], 'subid', 5);
-        $this->assertNotSame($sorted, $random);
-        $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['subid']) <=> intval($bv['subid']))));
+        that($sorted)->break()->isNotSame($random);
+        that($sorted)->break()->isSame(array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['subid']) <=> intval($bv['subid']))));
 
         // よく分からないエラーが出るのでいったん退避
         if (!$database->getPlatform() instanceof SQLServerPlatform) {
@@ -7791,7 +7791,7 @@ ORDER BY T.id DESC, name ASC
 
             $random = $database->selectArray('noauto', [], OrderBy::randomSuitably());
             $sorted = $database->selectArray('noauto');
-            $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => $av['id'] <=> $bv['id'])));
+            that($sorted)->break()->isSame(array_values(kvsort($random, fn($av, $bv, $ak, $bk) => $av['id'] <=> $bv['id'])));
         }
 
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
@@ -7808,7 +7808,7 @@ ORDER BY T.id DESC, name ASC
         ];
         $random = $database->selectArray($columns, [], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectArray($columns, [], [], 5);
-        $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['id']) <=> intval($bv['id']))));
+        that($sorted)->break()->isSame(array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['id']) <=> intval($bv['id']))));
 
         $columns = [
             'foreign_p P' => [
@@ -7818,7 +7818,7 @@ ORDER BY T.id DESC, name ASC
         ];
         $random = $database->selectArray($columns, [], OrderBy::randomSuitably(), 5);
         $sorted = $database->selectArray($columns, [], [], 5);
-        $this->assertSame($sorted, array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['id']) <=> intval($bv['id']))));
+        that($sorted)->break()->isSame(array_values(kvsort($random, fn($av, $bv, $ak, $bk) => intval($av['id']) <=> intval($bv['id']))));
     }
 
     /**

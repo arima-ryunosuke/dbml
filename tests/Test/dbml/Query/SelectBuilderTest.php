@@ -1243,7 +1243,7 @@ GREATEST(1,2,3) FROM test1', $builder);
             ],
         ], $builder->tuple());
 
-         // not contain "*"
+        // not contain "*"
         $builder->column([
             'multicolumn' => [
                 'id',

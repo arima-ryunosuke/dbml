@@ -10,7 +10,7 @@ class VirtualColumn extends AbstractAttribute
     public function __construct(
         ?string $type = null,
         bool $lazy = true,
-        bool $implicit = false
+        bool $implicit = false,
     ) {
     }
 }
