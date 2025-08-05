@@ -1288,10 +1288,11 @@ class Database
                     $dt = new \DateTime();
                     $dt->setTimestamp($row[$cname]);
                     $dt->modify(((int) (($row[$cname] - (int) $row[$cname]) * 1000 * 1000)) . " microsecond");
+                    $formats = $this->getCompatiblePlatform()->getDateTimeTzFormats();
                     $format = null;
-                    $format ??= isset($dateTypes[$typename]) ? $this->getPlatform()->getDateFormatString() : null;
-                    $format ??= isset($datetimeTypes[$typename]) ? $this->getPlatform()->getDateTimeFormatString() : null;
-                    $format ??= isset($datetimeTZTypes[$typename]) ? $this->getPlatform()->getDateTimeTzFormatString() : null;
+                    $format ??= isset($dateTypes[$typename]) ? "{$formats[0]}" : null;
+                    $format ??= isset($datetimeTypes[$typename]) ? "{$formats[0]} {$formats[1]}" : null;
+                    $format ??= isset($datetimeTZTypes[$typename]) ? "{$formats[0]} {$formats[1]} {$formats[2]}" : null;
                     $row[$cname] = $dt->format($format);
                 }
 
