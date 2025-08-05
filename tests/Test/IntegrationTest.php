@@ -6,6 +6,8 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception\DeadlockException;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Platforms\SqlitePlatform;
+use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
@@ -174,6 +176,59 @@ class IntegrationTest extends AbstractUnitTestCase
             // 1,2 はロックされているので 1 件しか取得できないはず
             $this->assertCount(1, $rows);
         }
+    }
+
+    /**
+     * DATETIME 精度
+     *
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_datetime_precision($database)
+    {
+        $datetime_type = null;
+        if ($database->getPlatform() instanceof SqlitePlatform) {
+            $this->markTestSkipped();
+        }
+        if ($database->getPlatform() instanceof MySQLPlatform) {
+            $datetime_type = 'DATETIME(6)';
+        }
+        if ($database->getPlatform() instanceof PostgreSQLPlatform) {
+            $datetime_type = 'TIMESTAMP(6)';
+        }
+        if ($database->getPlatform() instanceof SQLServerPlatform) {
+            $datetime_type = 'DATETIME2';
+        }
+
+        try {
+            $database->executeAffect('DROP TABLE t_datetime');
+        }
+        catch (\Throwable $t) {
+        }
+        $database->executeAffect("
+        CREATE TABLE t_datetime (
+            id INTEGER PRIMARY KEY,
+            datetime $datetime_type NOT NULL
+        )");
+
+        $database->refresh();
+        $database->insert('t_datetime', [
+            'id'       => 1,
+            'datetime' => 1234567890.123456,
+        ]);
+        $database->insert('t_datetime', [
+            'id'       => 2,
+            'datetime' => -0.100,
+        ]);
+        $this->assertStringStartsWith('2009-02-14 08:31:30.123456', $database->selectValue('t_datetime.datetime', ['id' => 1]));
+        $this->assertStringStartsWith('1970-01-01 08:59:59.9', $database->selectValue('t_datetime.datetime', ['id' => 2]));
+
+        try {
+            $database->executeAffect('DROP TABLE t_datetime');
+        }
+        catch (\Throwable $t) {
+        }
+        $database->refresh();
     }
 
     /**

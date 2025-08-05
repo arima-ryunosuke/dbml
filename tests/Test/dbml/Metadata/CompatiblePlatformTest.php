@@ -14,6 +14,7 @@ use Doctrine\DBAL\Types\Type;
 use ryunosuke\dbml\Metadata\CompatiblePlatform;
 use ryunosuke\dbml\Query\Expression\Expression;
 use ryunosuke\dbml\Query\Queryable;
+use function ryunosuke\dbml\date_convert;
 
 class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
 {
@@ -527,6 +528,32 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
         else {
             $this->assertExpression($cplatform->getSpaceshipExpression('hoge', 1), $expected, [1]);
         }
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
+    function test_getDateTimeTzFormats($cplatform, $platform)
+    {
+        $expected = '2009-02-14 08:31:30.123456 +09:00';
+        if ($platform instanceof SqlitePlatform) {
+            $expected = '2009-02-14 08:31:30';
+        }
+        if ($platform instanceof MySQLPlatform) {
+            $expected = '2009-02-14 08:31:30.123456';
+        }
+        if ($platform instanceof PostgreSQLPlatform) {
+            $expected = '2009-02-14 08:31:30.123456 +0900';
+        }
+        if ($platform instanceof SQLServerPlatform) {
+            $expected = '2009-02-14 08:31:30.123456 +09:00';
+        }
+
+        $formats = array_filter($cplatform->getDateTimeTzFormats(), 'strlen');
+        $datestring = date_convert(implode(' ', $formats), 1234567890.123456);
+        $this->assertEquals($expected, $datestring);
     }
 
     /**

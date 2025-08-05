@@ -439,13 +439,13 @@ class AffectBuilder extends AbstractBuilder
 
                 if ($convertNumericToDatetime && (is_int($row[$cname]) || is_float($row[$cname])) && isset($datetimableTypes[$typename])) {
                     $dt = new \DateTime();
-                    $dt->setTimestamp((int) $row[$cname]);
+                    $dt->setTimestamp($row[$cname]);
                     $dt->modify(((int) (($row[$cname] - (int) $row[$cname]) * 1000 * 1000)) . " microsecond");
+                    $formats = $this->getDatabase()->getCompatiblePlatform()->getDateTimeTzFormats();
                     $format = null;
-                    $format ??= isset($dateTypes[$typename]) ? $this->database->getPlatform()->getDateFormatString() : null;
-                    $format ??= isset($datetimeTypes[$typename]) ? $this->database->getPlatform()->getDateTimeFormatString() : null;
-                    $format ??= isset($datetimeTZTypes[$typename]) ? $this->database->getPlatform()->getDateTimeTzFormatString() : null;
-                    $this->database->debug("convertNumericToDatetime {$this->getTable()}.$cname($format)");
+                    $format ??= isset($dateTypes[$typename]) ? "{$formats[0]}" : null;
+                    $format ??= isset($datetimeTypes[$typename]) ? "{$formats[0]} {$formats[1]}" : null;
+                    $format ??= isset($datetimeTZTypes[$typename]) ? "{$formats[0]} {$formats[1]} {$formats[2]}" : null;
                     $row[$cname] = $dt->format($format);
                 }
 

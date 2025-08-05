@@ -169,6 +169,14 @@
   - Sequencer の負数降順を廃止
   - Sequencer の has メソッド改名
 
+## 2.1.26
+
+- おかしな分岐になっていたので空タグ
+
+## 2.1.25
+
+- [fixbug] 精度付き DATETIME に float を与えても効果がない不具合
+
 ## 2.1.24
 
 - [package] dbal 3.9

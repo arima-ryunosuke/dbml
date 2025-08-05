@@ -507,6 +507,24 @@ class CompatiblePlatform /*extends AbstractPlatform*/
         return $query . concat(' ', $lockoption);
     }
 
+    public function getDateTimeTzFormats(): array
+    {
+        if ($this->platform instanceof SqlitePlatform) {
+            return ['Y-m-d', 'H:i:s', ''];
+        }
+        if ($this->platform instanceof MySQLPlatform) {
+            return ['Y-m-d', 'H:i:s.u', ''];
+        }
+        if ($this->platform instanceof PostgreSQLPlatform) {
+            return ['Y-m-d', 'H:i:s.u', 'O'];
+        }
+        if ($this->platform instanceof SQLServerPlatform) {
+            return ['Y-m-d', 'H:i:s.u', 'P'];
+        }
+
+        return ['Y-m-d', 'H:i:s.u', 'P'];
+    }
+
     /**
      * 条件配列を結合した Expression を返す
      */
