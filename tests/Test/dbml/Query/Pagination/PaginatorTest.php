@@ -54,6 +54,27 @@ class PaginatorTest extends \ryunosuke\Test\AbstractUnitTestCase
     /**
      * @dataProvider providePaginator
      * @param Paginator $paginator
+     * @param Database $database
+     */
+    function test_paginate_transaction($paginator, $database)
+    {
+        $database->transact(function () use ($paginator) {
+            that($paginator)->paginate(2, 3)->getItems()->is([
+                ["id" => "4", "name" => "d"],
+                ["id" => "5", "name" => "e"],
+                ["id" => "6", "name" => "f"],
+            ]);
+            that($paginator)->paginate(3, 3)->getItems()->is([
+                ["id" => "7", "name" => "g"],
+                ["id" => "8", "name" => "h"],
+                ["id" => "9", "name" => "i"],
+            ]);
+        });
+    }
+
+    /**
+     * @dataProvider providePaginator
+     * @param Paginator $paginator
      */
     function test_getPage($paginator)
     {

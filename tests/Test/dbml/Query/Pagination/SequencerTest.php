@@ -55,6 +55,27 @@ class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param Sequencer $sequencer
      * @param Database $database
      */
+    function test_sequence_transaction($sequencer, $database)
+    {
+        $database->transact(function () use ($sequencer) {
+            that($sequencer)->sequence(['id' => 0], 3)->getItems()->is([
+                ["id" => "1", "name" => "a"],
+                ["id" => "2", "name" => "b"],
+                ["id" => "3", "name" => "c"],
+            ]);
+            that($sequencer)->sequence(['id' => 3], 3)->getItems()->is([
+                ["id" => "4", "name" => "d"],
+                ["id" => "5", "name" => "e"],
+                ["id" => "6", "name" => "f"],
+            ]);
+        });
+    }
+
+    /**
+     * @dataProvider provideSequencer
+     * @param Sequencer $sequencer
+     * @param Database $database
+     */
     function test_getPrev($sequencer, $database)
     {
         $sequencer->sequence(['id' => 1], 10);

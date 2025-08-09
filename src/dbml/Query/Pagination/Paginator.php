@@ -89,6 +89,12 @@ class Paginator implements \IteratorAggregate, \Countable
 
         $this->shownPage = $shownpage; // for compatible
 
+        // トランザクション中はいつ呼ばれるかわからないので強制的に呼んでおかなければならない
+        if ($this->builder->getDatabase()->getConnection()->getTransactionNestingLevel()) {
+            $this->getResult();
+            $this->getTotal();
+        }
+
         return $this;
     }
 

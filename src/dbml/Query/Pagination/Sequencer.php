@@ -150,6 +150,11 @@ class Sequencer implements \IteratorAggregate, \Countable
         $this->order = $orderbyasc === null ? reset($condition) >= 0 : !!$orderbyasc;
         $this->bidirection = $bidirection;
 
+        // トランザクション中はいつ呼ばれるかわからないので強制的に呼んでおかなければならない
+        if ($this->builder->getDatabase()->getConnection()->getTransactionNestingLevel()) {
+            $this->getResult();
+        }
+
         return $this;
     }
 
