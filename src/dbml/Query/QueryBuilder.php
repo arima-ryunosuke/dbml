@@ -3409,22 +3409,45 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
      * ```
      *
      * @param int $chunk 分割数
-     * @param ?string $column 基準カラム。省略時は AUTO_INCREMENT な主キー。 '-' プレフィックスを付けると降順になる
+     * @param null|string|array $column 基準カラム。省略時は AUTO_INCREMENT な主キー。 '-' プレフィックスを付けると降順になる
      * @return \Generator 分割して返す Generator
      */
     public function chunk($chunk, $column = null)
     {
         $from = first_value($this->getFromPart())['table'] ?? throws(new \UnexpectedValueException('from table is not set.'));
         $column = $column ?: strval(optional($this->database->getSchema()->getTableAutoIncrement($from))->getName() ?: throws(new \UnexpectedValueException('not autoincrement column.')));
-        $orderasc = $column[0] !== '-';
-        $column = ltrim($column, '-+');
+
+        if (is_string($column)) {
+            $column = [$column];
+        }
+
+        $orderasc = null;
+        $columns = [];
+        foreach ($column as $key => $value) {
+            if (is_int($key)) {
+                $colname = $value;
+                $initial = 0;
+            }
+            else {
+                $colname = $key;
+                $initial = $value;
+            }
+            assert($orderasc === null || $orderasc === ($colname[0] !== '-'));
+            $orderasc = $colname[0] !== '-';
+            $columns[ltrim($colname, '-+')] = $initial;
+        }
 
         $sequencer = new Sequencer($this);
         $i = 0;
         $items = [];
         do {
-            $n = end($items)[$column] ?? 0;
-            $sequencer->sequence([$column => $n], $chunk, $orderasc, null);
+            $last = end($items);
+            $next = [];
+            foreach ($columns as $col => $initial) {
+                $col2 = array_pad(explode('.', $col, 2), -2, '')[1];
+                $next[$col] = $last === false ? $initial : $last[$col2];
+            }
+            $sequencer->sequence($next, $chunk, $orderasc, null);
             $items = $sequencer->getItems();
             foreach ($items as $item) {
                 yield $i++ => $item;

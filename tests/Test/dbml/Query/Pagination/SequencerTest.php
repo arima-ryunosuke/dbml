@@ -45,7 +45,7 @@ class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
         $sequencer->sequence(['id' => 1], 5);
         $this->assertCount(5, $sequencer->getItems());
 
-        $this->assertException(new \InvalidArgumentException('length must be 1'), L($sequencer)->sequence([], 2));
+        $this->assertException(new \InvalidArgumentException('length must be > 0'), L($sequencer)->sequence([], 2));
 
         $this->assertException(new \InvalidArgumentException('must be positive number'), L($sequencer)->sequence(['id' => 0], 0));
     }
@@ -69,6 +69,53 @@ class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
                 ["id" => "6", "name" => "f"],
             ]);
         });
+    }
+
+    /**
+     * @dataProvider provideSequencer
+     * @param Sequencer $sequencer
+     * @param Database $database
+     */
+    function test_sequence_multi($sequencer, $database)
+    {
+        if (!$database->getCompatiblePlatform()->supportsRowConstructor()) {
+            return;
+        }
+
+        $builder = $database->select('multiprimary');
+        $sequencer = new Sequencer($builder);
+
+        $sequencer->sequence([
+            'mainid' => 1,
+            'subid'  => 2,
+        ], 5, null, null);
+        $this->assertEquals([
+            [
+                "mainid" => "1",
+                "subid"  => "3",
+                "name"   => "c",
+            ],
+            [
+                "mainid" => "1",
+                "subid"  => "4",
+                "name"   => "d",
+            ],
+            [
+                "mainid" => "1",
+                "subid"  => "5",
+                "name"   => "e",
+            ],
+            [
+                "mainid" => "2",
+                "subid"  => "6",
+                "name"   => "f",
+            ],
+            [
+                "mainid" => "2",
+                "subid"  => "7",
+                "name"   => "g",
+            ],
+        ], $sequencer->getItems());
     }
 
     /**

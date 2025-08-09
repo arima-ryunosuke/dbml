@@ -4,7 +4,6 @@ namespace ryunosuke\dbml\Query\Pagination;
 
 use ryunosuke\dbml\Mixin\IteratorTrait;
 use ryunosuke\dbml\Query\QueryBuilder;
-use function ryunosuke\dbml\first_keyvalue;
 
 /**
  * クエリビルダと条件カラムを渡して sequence するとシーケンシャルアクセスしてくれるクラス
@@ -67,30 +66,36 @@ class Sequencer implements \IteratorAggregate, \Countable
     {
         $this->builder = $builder;
         $this->setProvider(function () {
-            [$key, $value] = first_keyvalue($this->condition);
-            $order = !($value >= 0 xor $this->order);
-            $bind = intval(abs($value)) ?: '';
+            $keys = array_keys($this->condition);
+            $vals = array_values($this->condition);
+
+            $key = count($keys) > 1 ? '(' . implode(',', $keys) . ')' : reset($keys);
+            $val = count($vals) > 1 ? '(' . implode(',', array_fill(0, count($vals), '?')) . ')' : '?';
+            $bind = count($vals) > 1 ? $vals : (intval(abs(reset($vals))) ?: '');
+
+            $order = !(reset($vals) >= 0 xor $this->order);
             $currentby = $this->builder->getQueryPart('orderBy');
 
             // 補足行を取得
             $appendix = false;
             if ($this->bidirection === true) {
                 $appender = clone $this->builder;
-                $appender->andWhere(["!$key " . (!$order ? '>= ?' : '<= ?') => $bind]);
-                $appender->orderBy([$key => !$order] + $currentby);
+                $appender->andWhere(["!$key " . (!$order ? ">= $val" : "<= $val") => $bind]);
+                $appender->orderBy(array_fill_keys($keys, !$order) + $currentby);
                 $appender->limit(1, 0);
                 $appendix = $appender->array();
             }
 
             // アイテムを取得
             $provider = clone $this->builder;
-            $provider->andWhere(["!$key " . ($order ? '> ?' : '< ?') => $bind]);
-            $provider->orderBy([$key => $order] + $currentby);
+            $provider->andWhere(["!$key " . ($order ? "> $val" : "< $val") => $bind]);
+            $provider->orderBy(array_fill_keys($keys, $order) + $currentby);
             $provider->limit($this->count + ($this->bidirection === null ? 0 : 1), 0);
             $items = $provider->array();
 
             // 昇順・降順・正順・逆順に基づいて prev/next を設定
-            if ($this->bidirection !== null) {
+            if ($this->bidirection !== null && count($this->condition) === 1) {
+                $value = reset($this->condition);
                 $garbage = count($items) > $this->count ? array_pop($items) : false;
                 if ($value >= 0) {
                     // $items が無い場合は 0 になって頭から始まってしまうので $appendix + 1 にする
@@ -115,12 +120,8 @@ class Sequencer implements \IteratorAggregate, \Countable
     /**
      * 読み取り範囲を設定する
      *
-     * $condition は UNSIGNED な INT カラムを1つだけ含む配列である必要がある。なぜならば
-     *
-     * - 負数は降順として表現される
-     * - 2つ以上のタプルの大小関係定義が困難
-     *
-     * が理由（大抵の場合 AUTO INCREMENT だろうから負数だったりタプルだったりは考慮しないことにする）。
+     * $condition は初期条件を渡す。この条件は1つの時と2つ以上の時で挙動が全く異なるため注意すること。
+     * 具体的には2つ以上の場合は行値式となり、負数という概念が一切通用しなくなる。
      *
      * @param array $condition シーク条件として使用する [カラム => 値]（大抵は主キー、あるいはインデックスカラム）
      * @param int $count 読み取り行数
@@ -135,9 +136,8 @@ class Sequencer implements \IteratorAggregate, \Countable
         $this->next = false;
         $this->resetResult();
 
-        // シーク条件は1つしかサポートしない(タプルの大小比較は動的生成がとてつもなくめんどくさい。行値式が使えれば別だが…)
-        if (count($condition) !== 1) {
-            throw new \InvalidArgumentException('$condition\'s length must be 1.');
+        if (count($condition) === 0) {
+            throw new \InvalidArgumentException('$condition\'s length must be > 0.');
         }
 
         $count = intval($count);
