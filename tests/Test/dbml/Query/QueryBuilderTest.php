@@ -3153,15 +3153,15 @@ SQL
 
         $logs = $builder->getDatabase()->preview(function ($a) use ($builder) {
             $builder->reset()->column('test');
-            $this->assertEquals($builder->array(), iterator_to_array($builder->chunk(3), false));
-            $this->assertEquals($builder->orderBy(['id' => false])->array(), iterator_to_array($builder->chunk(3, '-id'), false));
+            $this->assertEquals($builder->array(), $builder->chunk(3));
+            $this->assertEquals($builder->orderBy(['id' => false])->array(), $builder->chunk(3, '-id'));
         });
         $this->assertCount(14, $logs);
 
         $logs = $builder->getDatabase()->preview(function ($a) use ($builder) {
             $builder->reset()->column('multiprimary')->orderBy('subid');
-            $this->assertEquals($builder->array(), iterator_to_array($builder->chunk(3, 'subid'), false));
-            $this->assertEquals($builder->orderBy(['subid' => false])->array(), iterator_to_array($builder->chunk(3, '-subid'), false));
+            $this->assertEquals($builder->array(), $builder->chunk(3, 'subid'));
+            $this->assertEquals($builder->orderBy(['subid' => false])->array(), $builder->chunk(3, '-subid'));
         });
         $this->assertCount(14, $logs);
 

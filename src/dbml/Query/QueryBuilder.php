@@ -3420,12 +3420,15 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $column = ltrim($column, '-+');
 
         $sequencer = new Sequencer($this);
+        $i = 0;
         $items = [];
         do {
             $n = end($items)[$column] ?? 0;
             $sequencer->sequence([$column => $n], $chunk, $orderasc, null);
             $items = $sequencer->getItems();
-            yield from $items;
+            foreach ($items as $item) {
+                yield $i++ => $item;
+            }
         } while ($items);
     }
 
