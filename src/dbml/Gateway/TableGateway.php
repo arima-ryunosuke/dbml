@@ -1402,7 +1402,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
             $currents = $this->getScopes();
             return Scope::mergeArray(...array_map(function ($args, $scope) use ($currents, &$params) {
                 return $this->getScopeParts($scope, ...$currents[$scope]->rearguments($args, $params));
-            }, $scopes, array_keys($scopes)));
+            }, $scopes, array_keys($scopes))) + self::$defargs;
         });
         return $this;
     }
@@ -1788,7 +1788,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         $scope = $this->scopes[$name];
         $result = $scope->resolve($this, ...$params);
         if ($result instanceof TableGateway) {
-            return Scope::mergeArray(...array_maps(array_diff_key($result->activeScopes, $currents), fn($args, $name) => $result->scopes[$name]->resolve($result, ...$args)));
+            return Scope::mergeArray(...array_maps(array_diff_key($result->activeScopes, $currents), fn($args, $name) => $result->scopes[$name]->resolve($result, ...$args))) + self::$defargs;
         }
         return $result + self::$defargs;
     }
