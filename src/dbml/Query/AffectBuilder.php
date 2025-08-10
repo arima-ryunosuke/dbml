@@ -442,9 +442,10 @@ class AffectBuilder extends AbstractBuilder
                 }
 
                 if ($convertNumericToDatetime && (is_int($row[$cname]) || is_float($row[$cname])) && isset($datetimableTypes[$typename])) {
+                    $inttime = (int) $row[$cname];
                     $dt = new \DateTime();
-                    $dt->setTimestamp($row[$cname]);
-                    $dt->modify(((int) (($row[$cname] - (int) $row[$cname]) * 1000 * 1000)) . " microsecond");
+                    $dt->setTimestamp($inttime);
+                    $dt->modify(((int) (($row[$cname] - $inttime) * 1000 * 1000)) . " microsecond");
                     $formats = $this->getDatabase()->getCompatiblePlatform()->getDateTimeTzFormats();
                     $format = null;
                     $format ??= isset($dateTypes[$typename]) ? "{$formats[0]}" : null;
