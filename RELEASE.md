@@ -21,6 +21,13 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.11
+
+- [fixbug] $data や $where は多様な型が来うるので mixed を混ぜないと IDE のエラーが出ることがある
+- [fixbug] php8.2 での warning
+- [fixbug] scope 処理の notice を修正
+- Merge tag 'v2.1.27'
+
 ## 3.1.10
 
 - [feature] debug フラグを新設
