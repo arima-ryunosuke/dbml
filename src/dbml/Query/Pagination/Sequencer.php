@@ -4,7 +4,6 @@ namespace ryunosuke\dbml\Query\Pagination;
 
 use ryunosuke\dbml\Mixin\IteratorTrait;
 use ryunosuke\dbml\Query\SelectBuilder;
-use function ryunosuke\dbml\first_keyvalue;
 
 /**
  * クエリビルダと条件カラムを渡して sequence するとシーケンシャルアクセスしてくれるクラス
@@ -54,13 +53,19 @@ class Sequencer implements \IteratorAggregate, \Countable
     {
         $this->builder = $builder;
         $this->setProvider(function () {
-            [$key, $value] = first_keyvalue($this->condition);
+            $keys = array_keys($this->condition);
+            $vals = array_values($this->condition);
+
+            $key = count($keys) > 1 ? '(' . implode(',', $keys) . ')' : reset($keys);
+            $val = count($vals) > 1 ? '(' . implode(',', array_fill(0, count($vals), '?')) . ')' : '?';
+            $bind = count($vals) > 1 ? $vals : (intval(abs(reset($vals))) ?: '');
+
             $currentby = $this->builder->getQueryPart('orderBy');
 
             // アイテムを取得
             $provider = clone $this->builder;
-            $provider->andWhere(["!$key " . ($this->order ? '> ?' : '< ?') => $value]);
-            $provider->orderBy([$key => $this->order] + $currentby);
+            $provider->andWhere(["!$key " . ($this->order ? "> $val" : "< $val") => $bind]);
+            $provider->orderBy(array_fill_keys($keys, $this->order) + $currentby);
             $provider->limit($this->count + 1, 0);
             $items = $provider->array();
 
@@ -78,12 +83,14 @@ class Sequencer implements \IteratorAggregate, \Countable
     /**
      * 読み取り範囲を設定する
      *
-     * $condition は SIGNED な INT カラムを1つだけ含む配列である必要がある。なぜならば
+     * $condition は初期条件を渡す。この条件は1つの時と2つ以上の時で挙動が全く異なるため注意すること。
+     * 具体的には2つ以上の場合は行値式となり、負数という概念が一切通用しなくなる。
      *
-     * - 2つ以上のタプルの大小関係定義が困難
-     *
-     * が理由（大抵の場合 AUTO INCREMENT だろうから負数だったりタプルだったりは考慮しないことにする）。
-     * もっとも大抵は主キー、あるいはインデックスカラムでほぼ固定だろう。
+     * @param array $condition シーク条件として使用する [カラム => 値]（大抵は主キー、あるいはインデックスカラム）
+     * @param int $count 読み取り行数
+     * @param bool|null $orderbyasc 昇順/降順。 null を渡すと $condition の符号に応じて自動判別する
+     * @param bool|null $bidirection 双方向サポート。双方向だと2クエリ投げられる。 null を渡すと指定数以上取らない（ただし内部仕様）
+     * @return $this 自分自身
      */
     public function sequence(array $condition, int $count, bool $orderbyasc = true): static
     {
@@ -91,9 +98,8 @@ class Sequencer implements \IteratorAggregate, \Countable
         $this->more = false;
         $this->resetResult();
 
-        // シーク条件は1つしかサポートしない(タプルの大小比較は動的生成がとてつもなくめんどくさい。行値式が使えれば別だが…)
-        if (count($condition) !== 1) {
-            throw new \InvalidArgumentException('$condition\'s length must be 1.');
+        if (count($condition) === 0) {
+            throw new \InvalidArgumentException('$condition\'s length must be > 0.');
         }
 
         if ($count <= 0) {
@@ -103,6 +109,11 @@ class Sequencer implements \IteratorAggregate, \Countable
         $this->condition = $condition;
         $this->count = $count;
         $this->order = $orderbyasc;
+
+        // トランザクション中はいつ呼ばれるかわからないので強制的に呼んでおかなければならない
+        if ($this->builder->getDatabase()->getConnection()->getTransactionNestingLevel()) {
+            $this->getResult();
+        }
 
         return $this;
     }

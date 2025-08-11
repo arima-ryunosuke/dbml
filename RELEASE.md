@@ -194,6 +194,12 @@
   - Sequencer の負数降順を廃止
   - Sequencer の has メソッド改名
 
+## 2.1.27
+
+- [feature] chunk(sequence) のマルチカラム対応
+- [fixbug] chunk で同じ連番が出現する不具合
+- [fixbug] トランザクション内の paginate/sequence は即時コールする
+
 ## 2.1.26
 
 - おかしな分岐になっていたので空タグ

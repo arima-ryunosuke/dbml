@@ -3363,8 +3363,9 @@ SQL
     /**
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
+     * @param Database $database
      */
-    function test_chunk($builder)
+    function test_chunk($builder, $database)
     {
         // スキーマ収集で無駄なクエリが投がるのであらかじめ取得しておく
         foreach ($builder->getDatabase()->getSchema()->getTableNames() as $table) {
@@ -3375,15 +3376,15 @@ SQL
 
         $logs = $builder->getDatabase()->preview(function ($a) use ($builder) {
             $builder->reset()->column('test');
-            $this->assertEquals($builder->array(), iterator_to_array($builder->chunk(3)));
-            $this->assertEquals($builder->orderBy(['id' => false])->array(), iterator_to_array($builder->chunk(3, '-id')));
+            $this->assertEquals($builder->array(), $builder->chunk(3));
+            $this->assertEquals($builder->orderBy(['id' => false])->array(), $builder->chunk(3, '-id'));
         });
         $this->assertCount(14, $logs);
 
         $logs = $builder->getDatabase()->preview(function ($a) use ($builder) {
             $builder->reset()->column('multiprimary')->orderBy('subid');
-            $this->assertEquals($builder->array(), iterator_to_array($builder->chunk(3, 'subid')));
-            $this->assertEquals($builder->orderBy(['subid' => false])->array(), iterator_to_array($builder->chunk(3, '-subid')));
+            $this->assertEquals($builder->array(), $builder->chunk(3, 'subid'));
+            $this->assertEquals($builder->orderBy(['subid' => false])->array(), $builder->chunk(3, ['-subid' => 0]));
         });
         $this->assertCount(14, $logs);
 
@@ -3396,6 +3397,21 @@ SQL
         }
         $this->assertEquals(10, $count);
         $this->assertEquals(20, $builder->count());
+
+        if ($database->getCompatiblePlatform()->supportsRowConstructor()) {
+            $logs = $builder->getDatabase()->preview(function ($a) use ($builder) {
+                $builder->reset()->column('multiprimary');
+                $this->assertEquals($builder->array(), $builder->chunk(3, [
+                    'mainid' => 0,
+                    'subid',
+                ]));
+                $this->assertEquals($builder->where(['mainid' => 2])->array(), $builder->chunk(3, [
+                    'mainid' => 2,
+                    'subid',
+                ]));
+            });
+            $this->assertCount(12, $logs);
+        }
 
         try {
             iterator_to_array($builder->reset()->column('noauto')->chunk(10));

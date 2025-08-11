@@ -2342,7 +2342,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      *
      * @inheritdoc SelectBuilder::chunk()
      */
-    public function chunk(int $count, ?string $column = null, $fixrange = false): \Generator
+    public function chunk(int $count, $column = null, $fixrange = false): \Generator
     {
         return $this->select()->chunk(...func_get_args());
     }

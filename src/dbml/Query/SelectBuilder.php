@@ -2962,30 +2962,55 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      * // ・・・のようなクエリが順次投げられる（Generator で返されるので分割されていることは意識しなくて良い）
      * ```
      */
-    public function chunk(int $chunk, ?string $column = null, $fixrange = false): \Generator
+    public function chunk(int $chunk, $column = null, $fixrange = false): \Generator
     {
         $from = first_value($this->getFromPart())['table'] ?? throw new \UnexpectedValueException('from table is not set.');
         $column = $column ?: strval($this->database->getSchema()->getTableAutoIncrement($from)?->getName() ?: throw new \UnexpectedValueException('not autoincrement column.'));
-        $orderasc = $column[0] !== '-';
-        $column = ltrim($column, '-+');
+
+        $original = $column;
+        if (is_string($column)) {
+            $column = [$column];
+        }
+
+        $orderasc = null;
+        $columns = [];
+        foreach ($column as $key => $value) {
+            if (is_int($key)) {
+                $colname = $value;
+                $initial = 0;
+            }
+            else {
+                $colname = $key;
+                $initial = $value;
+            }
+            assert($orderasc === null || $orderasc === ($colname[0] !== '-'));
+            $orderasc = $colname[0] !== '-';
+            $columns[ltrim($colname, '-+')] = $initial;
+        }
 
         if ($fixrange) {
-            $breaker = (clone $this)->select($column)->aggregate($orderasc ? 'max' : 'min')->value();
+            $breaker = (clone $this)->select($original)->aggregate($orderasc ? 'max' : 'min')->value();
         }
 
         $sequencer = new Sequencer($this);
+        $i = 0;
         $items = [];
         do {
-            $n = end($items)[$column] ?? null;
-            $sequencer->sequence([$column => $n], $chunk, $orderasc);
+            $last = end($items);
+            $next = [];
+            foreach ($columns as $col => $initial) {
+                $col2 = array_pad(explode('.', $col, 2), -2, '')[1];
+                $next[$col] = $last === false ? $initial : $last[$col2];
+            }
+            $sequencer->sequence($next, $chunk, $orderasc);
             $items = $sequencer->getItems();
             foreach ($items as $item) {
                 if ($fixrange) {
-                    if (($orderasc && $item[$column] > $breaker) || (!$orderasc && $item[$column] < $breaker)) {
+                    if (($orderasc && $item[$original] > $breaker) || (!$orderasc && $item[$original] < $breaker)) {
                         break 2;
                     }
                 }
-                yield $item;
+                yield $i++ => $item;
             }
         } while ($items);
     }

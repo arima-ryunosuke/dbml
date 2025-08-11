@@ -45,9 +45,77 @@ class SequencerTest extends \ryunosuke\Test\AbstractUnitTestCase
         $sequencer->sequence(['id' => 1], 5);
         $this->assertCount(5, $sequencer->getItems());
 
-        that($sequencer)->sequence([], 2)->wasThrown(new \InvalidArgumentException('length must be 1'));
+        that($sequencer)->sequence([], 2)->wasThrown(new \InvalidArgumentException('length must be > 0'));
 
         that($sequencer)->sequence(['id' => 0], 0)->wasThrown(new \InvalidArgumentException('must be positive number'));
+    }
+
+    /**
+     * @dataProvider provideSequencer
+     * @param Sequencer $sequencer
+     * @param Database $database
+     */
+    function test_sequence_transaction($sequencer, $database)
+    {
+        $database->transact(function () use ($sequencer) {
+            that($sequencer)->sequence(['id' => 0], 3)->getItems()->is([
+                ["id" => "1", "name" => "a"],
+                ["id" => "2", "name" => "b"],
+                ["id" => "3", "name" => "c"],
+            ]);
+            that($sequencer)->sequence(['id' => 3], 3)->getItems()->is([
+                ["id" => "4", "name" => "d"],
+                ["id" => "5", "name" => "e"],
+                ["id" => "6", "name" => "f"],
+            ]);
+        });
+    }
+
+    /**
+     * @dataProvider provideSequencer
+     * @param Sequencer $sequencer
+     * @param Database $database
+     */
+    function test_sequence_multi($sequencer, $database)
+    {
+        if (!$database->getCompatiblePlatform()->supportsRowConstructor()) {
+            return;
+        }
+
+        $builder = $database->select('multiprimary');
+        $sequencer = new Sequencer($builder);
+
+        $sequencer->sequence([
+            'mainid' => 1,
+            'subid'  => 2,
+        ], 5);
+        $this->assertEquals([
+            [
+                "mainid" => "1",
+                "subid"  => "3",
+                "name"   => "c",
+            ],
+            [
+                "mainid" => "1",
+                "subid"  => "4",
+                "name"   => "d",
+            ],
+            [
+                "mainid" => "1",
+                "subid"  => "5",
+                "name"   => "e",
+            ],
+            [
+                "mainid" => "2",
+                "subid"  => "6",
+                "name"   => "f",
+            ],
+            [
+                "mainid" => "2",
+                "subid"  => "7",
+                "name"   => "g",
+            ],
+        ], $sequencer->getItems());
     }
 
     /**
