@@ -24,6 +24,11 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.28
+
+- [composer] update
+  - dbal: 3.10.*
+
 ## 2.1.27
 
 - [feature] chunk(sequence) のマルチカラム対応
