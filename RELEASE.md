@@ -21,6 +21,11 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.12
+
+- [composer] update
+- Merge tag 'v2.1.28'
+
 ## 3.1.11
 
 - [fixbug] $data や $where は多様な型が来うるので mixed を混ぜないと IDE のエラーが出ることがある
