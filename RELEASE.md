@@ -201,6 +201,11 @@
   - Sequencer の負数降順を廃止
   - Sequencer の has メソッド改名
 
+## 2.1.28
+
+- [composer] update
+  - dbal: 3.10.*
+
 ## 2.1.27
 
 - [feature] chunk(sequence) のマルチカラム対応
