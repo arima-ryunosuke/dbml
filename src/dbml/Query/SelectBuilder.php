@@ -86,6 +86,8 @@ use function ryunosuke\dbml\str_exists;
  * @method $this                  setAggregationDelimiter($string)
  * @method string                 getNestDelimiter()
  * @method $this                  setNestDelimiter($string)
+ * @method string                 getInvisiblePrefix()
+ * @method $this                  setInvisiblePrefix($string)
  * @method string                 getArrayFetch()
  * @method $this                  setArrayFetch($string)
  * @method string                 getNullsOrder()
@@ -267,6 +269,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
              * ```
              */
             'nestDelimiter'           => "", // change to "." or "/" in future scope
+            /** @var string 最終的に結果から取り除くプレフィックス
+             * ORDER BY や HAVING で使うために SELECT に追加したが、最終結果セットには不要なものに対してこれを使えば自動で除去できる。
+             */
+            'invisiblePrefix'         => "",
             /** @var string 配列を指定した場合のフェッチモード（通常は array か assoc）
              *
              * ```php
@@ -3090,9 +3096,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      */
     public function getRowConverter(): \Closure
     {
+        $prefix = $this->getUnsafeOption('invisiblePrefix');
         $nester = $this->getUnsafeOption('nestDelimiter');
         $caster = $this->getCaster();
-        return function ($parent_row) use ($nester, $caster) {
+        return function ($parent_row) use ($prefix, $nester, $caster) {
             foreach ($this->callbacks as $name => [$callback, $args]) {
                 if ($args) {
                     $args2 = [];
@@ -3103,7 +3110,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
                 }
             }
             foreach ($parent_row as $col => $val) {
-                if (strpos($col, Database::AUTO_DEPEND_KEY) === 0) {
+                if (strpos($col, Database::AUTO_DEPEND_KEY) === 0 || (strlen($prefix) && strpos($col, $prefix) === 0)) {
                     unset($parent_row[$col]);
                 }
             }

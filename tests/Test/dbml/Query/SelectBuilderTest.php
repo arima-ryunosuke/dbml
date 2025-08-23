@@ -1284,6 +1284,29 @@ GREATEST(1,2,3) FROM test1', $builder);
      * @dataProvider provideSelectBuilder
      * @param SelectBuilder $builder
      */
+    function test_column_invisiblePrefix($builder)
+    {
+        $builder = $builder->context(['invisiblePrefix' => '__']);
+
+        $builder->column([
+            'test' => [
+                '_id'     => 'id',
+                '__hoge'  => 'name',
+                '___fuga' => 123,
+            ],
+        ])->where(['id' => [1, 2, 3]]);
+
+        $this->assertEquals([
+            ["_id" => "1"],
+            ["_id" => "2"],
+            ["_id" => "3"],
+        ], $builder->array());
+    }
+
+    /**
+     * @dataProvider provideSelectBuilder
+     * @param SelectBuilder $builder
+     */
     function test_column_nest($builder)
     {
         $builder = $builder->context(['nestDelimiter' => '@@@']);
