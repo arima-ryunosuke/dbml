@@ -1852,7 +1852,7 @@ class Database
     public function getCompatibleConnection(?Connection $connection = null): CompatibleConnection
     {
         $connection ??= $this->getConnection();
-        return $this->cache['compatibleConnection'][spl_object_hash($connection)] ??= CompatibleConnection::new($connection);
+        return ($this->cache['compatibleConnection'][spl_object_hash($connection)] ??= CompatibleConnection::new($connection))->setup();
     }
 
     /**
@@ -6090,5 +6090,13 @@ class Database
         $this->affectedRows = null;
         $this->lastInsertIds = [];
         return $this->unstackAll();
+    }
+
+    /**
+     * 接続を切る
+     */
+    public function disconnect(?Connection $connection = null): bool
+    {
+        return $this->getCompatibleConnection($connection)->disconnect();
     }
 }

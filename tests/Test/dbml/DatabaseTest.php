@@ -8596,4 +8596,29 @@ ORDER BY T.id DESC, name ASC
         $database->getConnection()->createSchemaManager()->dropTable('newtable');
         $database->refresh();
     }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_disconnect($database)
+    {
+        // memory データベースだとスキーマが吹き飛ぶので sqlite だけは別接続にする
+        if ($database->getPlatform() instanceof SqlitePlatform) {
+            $database = new Database(DriverManager::getConnection(Adhoc::parseParams(['url' => 'pdo-sqlite://localhost/:memory:'])));
+        }
+
+        // force connect
+        $database->fetchArray('select 1');
+
+        $this->assertEquals(true, $database->getConnection()->isConnected());
+        $this->assertEquals(true, $database->disconnect());
+        $this->assertEquals(false, $database->disconnect());
+        $this->assertEquals(false, $database->getConnection()->isConnected());
+
+        if (!$database->getPlatform() instanceof SqlitePlatform) {
+            $database->update('test', ['name' => 'X'], ['id' => 1]);
+            $this->assertEquals('X', $database->selectValue('test.name', ['id' => 1]));
+        }
+    }
 }

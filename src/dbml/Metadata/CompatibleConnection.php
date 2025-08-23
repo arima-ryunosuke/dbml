@@ -34,17 +34,30 @@ class CompatibleConnection
     public function __construct(Connection $connection)
     {
         self::$storage ??= new \WeakMap();
+        self::$storage[$connection] ??= [];
 
         $this->connection = $connection;
+    }
 
-        $driverConnection = (fn() => $this->_conn)->bindTo($connection, Connection::class)();
-        while ($driverConnection instanceof AbstractConnectionMiddleware) {
-            $driverConnection = (fn() => $this->wrappedConnection)->bindTo($driverConnection, AbstractConnectionMiddleware::class)();
+    public function setup(): static
+    {
+        if (!$this->connection->isConnected()) {
+            return $this;
         }
-        $this->driverConnection = $driverConnection;
-        $this->nativeConnection = $driverConnection->getNativeConnection();
 
-        self::$storage[$this->connection] = [];
+        if (!isset($this->driverConnection)) {
+            $driverConnection = (fn() => $this->_conn)->bindTo($this->connection, Connection::class)();
+            while ($driverConnection instanceof AbstractConnectionMiddleware) {
+                $driverConnection = (fn() => $this->wrappedConnection)->bindTo($driverConnection, AbstractConnectionMiddleware::class)();
+            }
+            $this->driverConnection = $driverConnection;
+        }
+
+        if (!isset($this->nativeConnection)) {
+            $this->nativeConnection = $this->driverConnection->getNativeConnection();
+        }
+
+        return $this;
     }
 
     public function getConnection(): Connection
@@ -309,6 +322,35 @@ class CompatibleConnection
             }
         }
         return null;
+    }
+
+    public function disconnect(): bool
+    {
+        if (!$this->connection->isConnected()) {
+            return false;
+        }
+
+        if ($this->driverConnection instanceof Driver\PDO\Connection) {
+            // PDO は明示的な切断方法がない
+        }
+        if ($this->driverConnection instanceof Driver\SQLite3\Connection) {
+            $this->nativeConnection->close();
+        }
+        if ($this->driverConnection instanceof Driver\Mysqli\Connection) {
+            $this->nativeConnection->close();
+        }
+        if ($this->driverConnection instanceof Driver\PgSQL\Connection) {
+            pg_close($this->nativeConnection);
+        }
+        if ($this->driverConnection instanceof Driver\SQLSrv\Connection) {
+            sqlsrv_close($this->nativeConnection);
+        }
+
+        unset($this->driverConnection);
+        unset($this->nativeConnection);
+
+        $this->connection->close();
+        return true;
     }
 
     public function executeAsync($sqls, $converter, $affected)
