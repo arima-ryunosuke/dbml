@@ -21,6 +21,12 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.13
+
+- [fixbug] ビルダーの defaultScope を指定すると2重にあたる
+- [feature] 指定プレフィックスの結果を伏せる機能
+- [feature] 明示的な切断メソッド
+
 ## 3.1.12
 
 - [composer] update
