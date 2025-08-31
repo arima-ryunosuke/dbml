@@ -808,6 +808,42 @@ AND ((flag=1))", "$gw");
      * @param TableGateway $gateway
      * @param Database $database
      */
+    function test_select_scope($gateway, $database)
+    {
+        $database = $database->context(['defaultScope' => ['']]);
+
+        $database->t_article->addScope('', ['article_id'], 'delete_at IS NULL');
+        $database->t_comment->addScope('', ['comment_id'], "comment <> ''");
+
+        // 結果は割とどうでもよくて、同じスコープが多重で当たっていないかをテストする
+        $logs = $database->preview(function () use ($database) {
+            // 配列版
+            $database->t_article->array([
+                't_comment comments' => [],
+            ]);
+            // gateway 版
+            $database->t_article->array([
+                'comments' => $database->t_comment,
+            ]);
+        });
+        $this->assertEquals(1, substr_count($logs[1], 't_article.article_id,'), $logs[1]);
+        $this->assertEquals(1, substr_count($logs[1], 'delete_at IS NULL'), $logs[1]);
+        $this->assertEquals(1, substr_count($logs[2], 'comments.comment_id,'), $logs[2]);
+        $this->assertEquals(1, substr_count($logs[2], "comment <> ''"), $logs[2]);
+        $this->assertEquals(1, substr_count($logs[3], 't_article.article_id,'), $logs[3]);
+        $this->assertEquals(1, substr_count($logs[3], 'delete_at IS NULL'), $logs[3]);
+        $this->assertEquals(1, substr_count($logs[4], 't_comment.comment_id,'), $logs[4]);
+        $this->assertEquals(1, substr_count($logs[4], "comment <> ''"), $logs[4]);
+
+        $database->t_article->addScope('');
+        $database->t_comment->addScope('');
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
     function test_secureOrderBy($gateway, $database)
     {
         $t_article = new TableGateway($database, 't_article');

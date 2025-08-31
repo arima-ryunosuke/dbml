@@ -1401,8 +1401,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         $this->scopes[$name] = new Scope(function (...$params) use ($scopes) {
             $currents = $this->getScopes();
             return Scope::mergeArray(...array_map(function ($args, $scope) use ($currents, &$params) {
-                return $this->getScopeParts($scope, ...$currents[$scope]->rearguments($args, $params));
-            }, $scopes, array_keys($scopes))) + self::$defargs;
+                    return $this->getScopeParts($scope, ...$currents[$scope]->rearguments($args, $params));
+                }, $scopes, array_keys($scopes))) + self::$defargs;
         });
         return $this;
     }
@@ -2102,7 +2102,16 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function select($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): SelectBuilder
     {
         $sp = $this->getScopeParamsForSelect($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
-        $return = $this->database->select(...array_values($sp));
+        unset($sp['set']);
+
+        $builder = $this->database->select();
+        $builder->setDefaultScope(array_filter($builder->getDefaultScope(), function ($scope, $name) {
+            if (is_int($name)) {
+                $name = $scope;
+            }
+            return !isset($this->activeScopes[$name]);
+        }, ARRAY_FILTER_USE_BOTH));
+        $return = $builder->build(array_combine(SelectBuilder::CLAUSES, [...array_values($sp)]), true);
 
         foreach ($this->cte as $name => $query) {
             $return->with($name, $query);
