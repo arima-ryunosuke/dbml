@@ -49,8 +49,7 @@
     "build": [
       "@export",
       "@diff",
-      "@test",
-      "@docs"
+      "@test"
     ],
     "export": [
       "export-function",
