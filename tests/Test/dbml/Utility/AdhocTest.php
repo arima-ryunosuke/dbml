@@ -201,6 +201,7 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
             'true'        => 1,
             'int-enum'    => 1,
             'string-enum' => "hoge",
+            "datetime"    => "2014-12-24 12:34:56.789",
         ], Adhoc::bindableParameters([
             'fn-null'     => fn() => null,
             'fn-int'      => fn() => 123,
@@ -209,25 +210,56 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
             'true'        => true,
             'int-enum'    => IntEnum::Int1(),
             'string-enum' => StringEnum::StringHoge(),
-        ]));
+            'datetime'    => new \DateTime('2014/12/24 12:34:56.789'),
+        ], "Y-m-d H:i:s.v"));
+
+        $resource = tmpfile();
+        fwrite($resource, "the resource");
+        rewind($resource);
+
+        $splinfo = new \SplFileInfo(__FILE__);
+
+        $splfile = new \SplTempFileObject();
+        $splfile->fwrite("the splfile");
+        $splfile->rewind();
+
+        $generator = (function () {
+            yield "the";
+            yield " ";
+            yield "generator";
+        })();
+
+        $actual = Adhoc::bindableParameters([
+            'resource'  => $resource,
+            'splinfo'   => $splinfo,
+            'splfile'   => $splfile,
+            'generator' => $generator,
+        ], "Y-m-d H:i:s.v");
+
+        that(stream_get_contents($actual['resource']))->is('the resource');
+        that(stream_get_contents($actual['splinfo']))->is(file_get_contents(__FILE__));
+        that(stream_get_contents($actual['splfile']))->is('the splfile');
+        that(stream_get_contents($actual['generator']))->is('the generator');
     }
 
     function test_bindableTypes()
     {
         $this->assertSame([
-            "null"   => ParameterType::NULL,
-            "false"  => ParameterType::BOOLEAN,
-            "true"   => ParameterType::BOOLEAN,
-            "int"    => ParameterType::INTEGER,
-            "float"  => ParameterType::STRING,
-            "string" => ParameterType::STRING,
+            "null"     => ParameterType::NULL,
+            "false"    => ParameterType::BOOLEAN,
+            "true"     => ParameterType::BOOLEAN,
+            "int"      => ParameterType::INTEGER,
+            "float"    => ParameterType::STRING,
+            "string"   => ParameterType::STRING,
+            "resource" => ParameterType::LARGE_OBJECT,
         ], Adhoc::bindableTypes([
-            'null'   => null,
-            'false'  => false,
-            'true'   => true,
-            'int'    => 123,
-            'float'  => 3.14,
-            'string' => 'string',
+            'null'     => null,
+            'false'    => false,
+            'true'     => true,
+            'int'      => 123,
+            'float'    => 3.14,
+            'string'   => 'string',
+            'resource' => tmpfile(),
         ]));
     }
 }

@@ -10,6 +10,7 @@ use ryunosuke\dbml\Query\Parser;
 use ryunosuke\utility\attribute\Attribute\DebugInfo;
 use ryunosuke\utility\attribute\ClassTrait\DebugInfoTrait;
 use function ryunosuke\dbml\array_each;
+use function ryunosuke\dbml\array_maps;
 use function ryunosuke\dbml\date_convert;
 use function ryunosuke\dbml\is_bindable_closure;
 use function ryunosuke\dbml\is_stringable;
@@ -415,7 +416,7 @@ class Logger extends AbstractLogger
         }
 
         if ($this->bufferLimit) {
-            $this->bufferSize += strlen($sql) + array_sum(array_map('strlen', $params));
+            $this->bufferSize += strlen($sql) + array_sum(array_maps($params, 'strval', 'strlen'));
             if ($this->bufferSize > $this->bufferLimit) {
                 foreach ($this->arrayBuffer as $log) {
                     fwrite($this->resourceBuffer, $this->_stringify(...$log) . "\n");

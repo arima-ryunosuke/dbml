@@ -3635,7 +3635,7 @@ class Database
     public function executeSelect(string $query, iterable $params = [], ?int $ttl = null)
     {
         $ttl ??= $this->getUnsafeOption('caching');
-        $params = Adhoc::bindableParameters($params);
+        $params = Adhoc::bindableParameters($params, implode(' ', $this->getCompatiblePlatform()->getDateTimeTzFormats()));
 
         if ($this->getDynamicPlaceholder()) {
             $query = $this->queryInto($query, $params);
@@ -3679,7 +3679,7 @@ class Database
     public function executeAffect(string $query, iterable $params = [], ?int $retry = null)
     {
         $bare_params = $params;
-        $params = Adhoc::bindableParameters($params);
+        $params = Adhoc::bindableParameters($params, implode(' ', $this->getCompatiblePlatform()->getDateTimeTzFormats()));
 
         if ($this->getUnsafeOption('dryrun')) {
             return $this->queryInto($query, $params);
@@ -3722,7 +3722,7 @@ class Database
                         }
                         if (isset($wait)) {
                             usleep($wait * 1000 * 1000);
-                            $params = Adhoc::bindableParameters($bare_params);
+                            $params = Adhoc::bindableParameters($bare_params, implode(' ', $this->getCompatiblePlatform()->getDateTimeTzFormats()));
                             $this->debug("retry($retry) $query", $params);
                             continue;
                         }

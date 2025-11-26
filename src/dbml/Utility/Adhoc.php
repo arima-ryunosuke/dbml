@@ -9,6 +9,7 @@ use Psr\SimpleCache\CacheInterface;
 use ryunosuke\dbml\Query\Queryable;
 use ryunosuke\dbml\Query\SelectBuilder;
 use function ryunosuke\dbml\is_stringable;
+use function ryunosuke\dbml\iterator_stream;
 use function ryunosuke\dbml\preg_capture;
 
 /**
@@ -258,12 +259,21 @@ class Adhoc
     }
 
     /** @noinspection PhpElementIsNotAvailableInCurrentPhpVersionInspection */
-    public static function bindableParameters(iterable $params): array
+    public static function bindableParameters(iterable $params, string $datetimeFormat): array
     {
         $params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
         foreach ($params as $k => $param) {
             if ($param instanceof \BackedEnum || $param instanceof \ryunosuke\polyfill\enum\interfaces\BackedEnum) {
                 $param = $param->value;
+            }
+            if ($param instanceof \DateTimeInterface) {
+                $param = $param->format($datetimeFormat);
+            }
+            if ($param instanceof \Iterator) {
+                $param = iterator_stream($param);
+            }
+            if ($param instanceof \SplFileInfo) {
+                $param = fopen($param->getRealPath(), 'rb');
             }
             if (is_object($param) && is_callable($param) && !is_stringable($param)) {
                 $param = $param();
@@ -289,6 +299,9 @@ class Adhoc
             }
             elseif (is_int($param)) {
                 $types[$k] = ParameterType::INTEGER;
+            }
+            elseif (is_resource($param)) {
+                $types[$k] = ParameterType::LARGE_OBJECT;
             }
             else {
                 $types[$k] = ParameterType::STRING;

@@ -41,6 +41,8 @@ class Statement implements Queryable
 
     private bool $namedSupported;
 
+    private string $dateFormat;
+
     private array $paramMap = [];
 
     #[DebugInfo(false)]
@@ -60,6 +62,7 @@ class Statement implements Queryable
         $this->params = $params instanceof \Traversable ? iterator_to_array($params) : $params;
 
         $this->namedSupported = $database->getCompatibleConnection()->isSupportedNamedPlaceholder();
+        $this->dateFormat = implode(' ', $database->getCompatiblePlatform()->getDateTimeTzFormats());
 
         // コネクションを保持
         $this->master = $database->getMasterConnection();
@@ -89,7 +92,7 @@ class Statement implements Queryable
             array_unshift($params, null);
             unset($params[0]);
         }
-        $params = Adhoc::bindableParameters($params);
+        $params = Adhoc::bindableParameters($params, $this->dateFormat);
         $types = Adhoc::bindableTypes($params);
         foreach ($params as $k => $param) {
             $stmt->bindValue($k, $param, $types[$k]);

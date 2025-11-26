@@ -2831,6 +2831,33 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_execute_datatype($database)
+    {
+        $resource = tmpfile();
+        fwrite($resource, "the resource");
+        rewind($resource);
+
+        $now = new \DateTime('2014/12/24 12:34:56');
+        $database->executeAffect('INSERT INTO test(name, data) VALUES(?, ?)', [$now, $resource]);
+        $row = $database->executeSelect('SELECT * FROM test WHERE name = ?', [$now])->fetchAssociative();
+
+        $this->assertEquals($now->format(implode(' ', $database->getCompatiblePlatform()->getDateTimeTzFormats())), $row['name']);
+
+        if ($database->getCompatibleConnection()->getName() === 'pgsql') {
+            $this->assertEquals("the resource", hex2bin(substr($row['data'], 2)));
+        }
+        elseif ($database->getCompatibleConnection()->getName() === 'pdo-sqlsrv') {
+            $this->assertEquals("the resource", mb_convert_encoding($row['data'], 'UCS-2LE', 'utf8'));
+        }
+        else {
+            $this->assertEquals("the resource", $row['data']);
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_executeSelect_and_Affect($database)
     {
         $database->insert('noauto', ['id' => false, 'name' => fn() => 'hoge']);
