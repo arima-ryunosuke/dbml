@@ -3618,6 +3618,38 @@ class Database
     }
 
     /**
+     * 取得系クエリを蓄える
+     *
+     * 蓄えたクエリはキャッシュされ名前指定でいつでも取得できる。
+     * このメソッドを呼んでもクエリは投げらず、投げられるのは名前指定呼び出し時のみ。
+     * $ttl で有効期限を指定できるが、この引数は必ず名前付き引数でコールしなければならない。
+     *
+     * 設定時は SelectBuilder を返す。
+     * この SelectBuilder が最終的に実行されるので、返ってきたオブジェクトを設定すれば結果も変更できる。
+     * 特に array/assoc などのメソッドを呼ぶと遅延呼び出しとなり最終結果が array/assoc など形式になる。
+     *
+     * @inheritdoc Database::select()
+     * @return SelectBuilder|mixed
+     */
+    public function storeSelect(string $name, $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], ?int $ttl = null)
+    {
+        if (func_num_args() === 1) {
+            if (!isset($this->cache['storedSelect'][$name])) {
+                throw new \InvalidArgumentException("$name is undefined");
+            }
+            $select = $this->cache['storedSelect'][$name];
+            $select->setLazyMode(null);
+            return $select->fetch($select->getLazyMethod() ?? 'array');
+        }
+        else {
+            $select = instance_of($tableDescriptor, SelectBuilder::class) ?? $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having);
+            $select->setLazyMode(SelectBuilder::LAZY_MODE_STORE);
+            $select->cache($ttl);
+            return $this->cache['storedSelect'][$name] = $select;
+        }
+    }
+
+    /**
      * 取得系クエリをプリペアする
      *
      * @inheritdoc Database::select()

@@ -12,6 +12,7 @@ use ryunosuke\dbml\Gateway\TableGateway;
 use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Query\Clause\OrderBy;
 use ryunosuke\dbml\Query\Expression\Expression;
+use ryunosuke\dbml\Query\SelectBuilder;
 use ryunosuke\dbml\Query\Statement;
 use ryunosuke\Test\Database;
 use ryunosuke\Test\Entity\Article;
@@ -1006,6 +1007,43 @@ AND ((flag=1))", "$gw");
                 1  => ['id' => '6'],
             ], $database->multiunique->column(['id'])->uk(['e,e', 500])->neighbor());
         }
+    }
+
+    /**
+     * @dataProvider provideGateway
+     * @param TableGateway $gateway
+     * @param Database $database
+     */
+    function test_storeSelect($gateway, $database)
+    {
+        $database->getCacheProvider()->clear();
+
+        $gateway = $gateway->scoping(['name'], ['id' => [2, 3]]);
+        $this->assertInstanceOf(SelectBuilder::class, $gateway->storeSelect('hoge', ['id'], ['id' => [3, 4]], ttl: 1));
+
+        // 呼んだだけでは実行されない
+        $gateway->noscope()->update(['name' => 'X'], ['id' => 3]);
+        $this->assertEquals([
+            ["name" => "b", "id" => "2"],
+            ["name" => "X", "id" => "3"],
+            ["name" => "d", "id" => "4"],
+        ], $gateway->storeSelect('hoge'));
+
+        // 一度呼ぶと ttl が効いてキャッシュされている
+        $gateway->noscope()->update(['name' => 'Y'], ['id' => 3]);
+        $this->assertEquals([
+            ["name" => "b", "id" => "2"],
+            ["name" => "X", "id" => "3"],
+            ["name" => "d", "id" => "4"],
+        ], $gateway->storeSelect('hoge'));
+
+        // 1,2秒経てば最新が返る
+        sleep(2);
+        $this->assertEquals([
+            ["name" => "b", "id" => "2"],
+            ["name" => "Y", "id" => "3"],
+            ["name" => "d", "id" => "4"],
+        ], $gateway->storeSelect('hoge'));
     }
 
     /**

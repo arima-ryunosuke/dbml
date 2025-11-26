@@ -1278,6 +1278,47 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_storeSelect($database)
+    {
+        $database->getCacheProvider()->clear();
+
+        $this->assertInstanceOf(SelectBuilder::class, $database->storeSelect('hoge', ['test' => ['id, name']], ['id' => [3, 4]], ttl: 1));
+
+        // 呼んだだけでは実行されない
+        $database->update('test', ['name' => 'X'], ['id' => 3]);
+        $this->assertEquals([
+            ["name" => "X", "id" => "3"],
+            ["name" => "d", "id" => "4"],
+        ], $database->storeSelect('hoge'));
+
+        // 一度呼ぶと ttl が効いてキャッシュされている
+        $database->update('test', ['name' => 'Y'], ['id' => 3]);
+        $this->assertEquals([
+            ["name" => "X", "id" => "3"],
+            ["name" => "d", "id" => "4"],
+        ], $database->storeSelect('hoge'));
+
+        // 1,2秒経てば最新が返る
+        sleep(2);
+        $this->assertEquals([
+            ["name" => "Y", "id" => "3"],
+            ["name" => "d", "id" => "4"],
+        ], $database->storeSelect('hoge'));
+
+        // array/assoc などのメソッドを呼ぶとそれが活きる
+        $database->storeSelect('fuga', ['test' => ['id, name']], ['id' => [3, 4]])->assoc();
+        $this->assertEquals([
+            3 => ["id" => "3", "name" => "Y"],
+            4 => ["id" => "4", "name" => "d"],
+        ], $database->storeSelect('fuga'));
+
+        that($database)->storeSelect('undefined')->wasThrown('undefined');
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_preparing($database)
     {
         // select

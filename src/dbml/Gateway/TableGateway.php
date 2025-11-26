@@ -1305,6 +1305,23 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     }
 
     /**
+     * 取得系クエリを蓄える
+     *
+     * Gateway 版の {@link Database::storeSelect()} 。
+     * $name には名前空間としてのテーブル名プレフィックスが付くので留意。
+     */
+    public function storeSelect(string $name, $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], ?int $ttl = null)
+    {
+        $name = "{$this->tableName}.$name";
+        if (func_num_args() === 1) {
+            return $this->database->storeSelect($name);
+        }
+        else {
+            return $this->database->storeSelect($name, $this->select($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having), ttl: $ttl);
+        }
+    }
+
+    /**
      * 取得系クエリをプリペアする
      *
      * Gateway 版の {@link Database::prepareSelect()} 。

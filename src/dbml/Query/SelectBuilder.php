@@ -136,6 +136,8 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     ];
 
     // 遅延モード
+    public const LAZY_MODE_STORE = 'store'; // これは親子取得のモードではなく単に array/assoc 時に実行しなくなるモード
+
     public const LAZY_MODE_EAGER = 'eager';
     public const LAZY_MODE_BATCH = 'batch';
     public const LAZY_MODE_FETCH = 'fetch';
@@ -1500,7 +1502,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
      */
     public function setLazyMode(?string $lazyMode = null): static
     {
-        if ($lazyMode !== null && !isset(self::LAZY_MODES[$lazyMode])) {
+        if ($lazyMode !== null && !isset((self::LAZY_MODES + [self::LAZY_MODE_STORE => 'dummy'])[$lazyMode])) {
             throw new \InvalidArgumentException('$mode is must be self::LAZY_MODE_* (' . implode('|', array_keys(self::LAZY_MODES)) . ')');
         }
 
@@ -3875,6 +3877,14 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
     public function getLazyMode(): ?string
     {
         return $this->lazyMode;
+    }
+
+    /**
+     * 内部向け
+     */
+    public function getLazyMethod(): ?string
+    {
+        return $this->lazyMethod;
     }
 
     /**
