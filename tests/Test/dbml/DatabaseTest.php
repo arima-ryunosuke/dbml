@@ -2735,7 +2735,7 @@ WHERE (P.id >= ?) AND (C1.seq <> ?)
         $this->assertStringContainsString('class ArticleEntity extends', $annotation);
         $this->assertStringContainsString('class CommentEntity extends', $annotation);
         $this->assertStringContainsString('class ManagedCommentEntity extends', $annotation);
-        $this->assertStringContainsString('eint: \\ryunosuke\\Test\\IntEnum', $annotation);
+        $this->assertStringContainsString('eint?: \\ryunosuke\\Test\\IntEnum', $annotation);
         $this->assertStringContainsString('@var \\DateTimeImmutable', $annotation);
         $this->assertStringContainsString('$tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []', $annotation);
         $this->assertStringContainsString('insertAndPrimary', $annotation);

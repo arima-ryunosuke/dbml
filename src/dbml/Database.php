@@ -1494,8 +1494,8 @@ class Database
         $entities = [];
         foreach ($tablemap['TtoE'] ?? [] as $tname => $entity_names) {
             $column_types = $this->_getColumnTypehint($tname);
-            $shape = array_sprintf($column_types, '%2$s: %1$s|mixed', ', ');
-            $primary = array_sprintf(array_intersect_key($column_types, $schema->getTablePrimaryColumns($tname)), '%2$s: %1$s', ', ');
+            $shape = array_sprintf($column_types, '%2$s?: %1$s|mixed', ', ');
+            $primary = array_sprintf(array_intersect_key($column_types, $schema->getTablePrimaryColumns($tname)), '%2$s?: %1$s', ', ');
             $eprops = array_sprintf($column_types, "/** @var %1\$s */\npublic \$%2\$s;");
             $gwprops = array_sprintf($column_types, "/** @var static|%1\$s */\npublic \$%2\$s;");
 
