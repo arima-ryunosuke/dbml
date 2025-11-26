@@ -96,6 +96,12 @@ class Adhoc
      */
     public static function cacheByHash(CacheInterface $cacher, string $key, \Closure $provider, ?int $ttl = null): mixed
     {
+        // ttl:0 は特別扱いで「永続化しないインメモリキャッシュ」として扱う
+        if ($ttl === 0) {
+            static $inmemory = [];
+            return $inmemory[$key] ??= $provider($key);
+        }
+
         $cacheid = "Adhoc-" . hash('fnv164', $key . (new \ReflectionFunction($provider)));
 
         $cache = $cacher->get($cacheid) ?? [];

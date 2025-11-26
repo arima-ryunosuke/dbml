@@ -80,6 +80,9 @@ class AdhocTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals(2, Adhoc::cacheByHash($cacheobject, 'hoge:1', $provider, 1));
         $this->assertEquals(3, Adhoc::cacheByHash($cacheobject, 'hoge:2', $provider, 1));
 
+        $this->assertEquals(4, Adhoc::cacheByHash($cacheobject, 'hoge:3', $provider, 0));
+        $this->assertEquals(4, Adhoc::cacheByHash($cacheobject, 'hoge:3', $provider, 0));
+
         $this->assertEquals(null, Adhoc::cacheByHash($cacheobject, 'null', static fn() => null));
         $this->assertCount(2, $cacheobject->keys());
     }
