@@ -335,6 +335,17 @@ abstract class AbstractUnitTestCase extends TestCase
                             ],
                             ['collation' => 'utf8mb3_bin'],
                         ),
+                        new Table('foreign_dd',
+                            [
+                                new Column('id', Type::getType('integer')),
+                                new Column('self_id', Type::getType('integer'), ['notnull' => false]),
+                                new Column('name', Type::getType('string'), ['length' => 32, 'default' => '']),
+                            ],
+                            [new Index('PRIMARY', ['id'], true, true)],
+                            [],
+                            [],
+                            ['collation' => 'utf8mb3_bin'],
+                        ),
                         new Table('foreign_d1',
                             [
                                 new Column('id', Type::getType('integer')),
@@ -357,8 +368,14 @@ abstract class AbstractUnitTestCase extends TestCase
                             ['collation' => 'utf8mb3_bin'],
                         ),
                         function (Connection $connection) {
-                            $fk1 = new ForeignKeyConstraint(['d2_id'], 'foreign_d2', ['id'], 'fk_dd12');
-                            $fk2 = new ForeignKeyConstraint(['id'], 'foreign_d1', ['id'], 'fk_dd21');
+                            $options = [
+                                'deferrable' => true,
+                                'deferred'   => true,
+                            ];
+                            $fk = new ForeignKeyConstraint(['self_id'], 'foreign_dd', ['id'], 'fk_dd', $options);
+                            $fk1 = new ForeignKeyConstraint(['d2_id'], 'foreign_d2', ['id'], 'fk_dd12', $options);
+                            $fk2 = new ForeignKeyConstraint(['id'], 'foreign_d1', ['id'], 'fk_dd21', $options);
+                            $connection->createSchemaManager()->createForeignKey($fk, 'foreign_dd');
                             $connection->createSchemaManager()->createForeignKey($fk1, 'foreign_d1');
                             $connection->createSchemaManager()->createForeignKey($fk2, 'foreign_d2');
                         },

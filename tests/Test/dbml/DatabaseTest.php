@@ -5947,10 +5947,30 @@ INSERT INTO test (id, name) VALUES
             }
             $database->setLogger(null);
         }
+    }
 
-        // 相互外部キー
-        $this->assertEquals("UPDATE foreign_d1 SET name = 'hoge' WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id)))", $database->dryrun()->revise('foreign_d1', ['name' => 'hoge'], ['id' => 1]));
-        $this->assertEquals("UPDATE foreign_d2 SET name = 'hoge' WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id)))", $database->dryrun()->revise('foreign_d2', ['name' => 'hoge'], ['id' => 1]));
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_revise_loop($database)
+    {
+        // mysql は自己 select でエラーを吐くことがあるので実行してチェック
+        $this->assertEquals(0, $database->revise('foreign_dd', ['id' => 1]));
+        $this->assertEquals(0, $database->revise('foreign_d1', ['id' => 1]));
+        $this->assertEquals(0, $database->revise('foreign_d2', ['id' => 1]));
+
+        // 無限ループ検出テストなので dryrun で十分
+        if ($database->getCompatiblePlatform()->supportsSelfAffect()) {
+            $this->assertEquals("UPDATE foreign_dd SET id = '1' WHERE (NOT EXISTS (SELECT * FROM foreign_dd WHERE foreign_dd.self_id = foreign_dd.id))", $database->dryrun()->revise('foreign_dd', ['id' => 1]));
+            $this->assertEquals("UPDATE foreign_d1 SET id = '1' WHERE (NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id))", $database->dryrun()->revise('foreign_d1', ['id' => 1]));
+            $this->assertEquals("UPDATE foreign_d2 SET id = '1' WHERE (NOT EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id))", $database->dryrun()->revise('foreign_d2', ['id' => 1]));
+        }
+        else {
+            $this->assertEquals("UPDATE foreign_dd SET id = '1' WHERE (NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_dd WHERE foreign_dd.self_id = foreign_dd.id) __dbml_auto_tmp))", $database->dryrun()->revise('foreign_dd', ['id' => 1]));
+            $this->assertEquals("UPDATE foreign_d1 SET id = '1' WHERE (NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id) __dbml_auto_tmp))", $database->dryrun()->revise('foreign_d1', ['id' => 1]));
+            $this->assertEquals("UPDATE foreign_d2 SET id = '1' WHERE (NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id) __dbml_auto_tmp))", $database->dryrun()->revise('foreign_d2', ['id' => 1]));
+        }
     }
 
     /**
@@ -6015,6 +6035,48 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_upgrade_loop($database)
+    {
+        // mysql は自己 select でエラーを吐くことがあるので実行してチェック
+        $this->assertEquals(0, $database->upgrade('foreign_dd', ['id' => 1]));
+        $this->assertEquals(0, $database->upgrade('foreign_d1', ['id' => 1]));
+        $this->assertEquals(0, $database->upgrade('foreign_d2', ['id' => 1]));
+
+        // 無限ループ検出テストなので dryrun で十分
+        if ($database->getCompatiblePlatform()->supportsSelfAffect()) {
+            $this->assertEquals([
+                "UPDATE foreign_dd SET id = '1'",
+            ], $database->dryrun()->upgrade('foreign_dd', ['id' => 1]));
+            $this->assertEquals([
+                "UPDATE foreign_d1 SET d2_id = '1' WHERE (d2_id) IN (SELECT foreign_d2.id FROM foreign_d2 WHERE (id) IN (SELECT foreign_d1.id FROM foreign_d1))",
+                "UPDATE foreign_d2 SET id = '1' WHERE (id) IN (SELECT foreign_d1.id FROM foreign_d1)",
+                "UPDATE foreign_d1 SET id = '1'",
+            ], $database->dryrun()->upgrade('foreign_d1', ['id' => 1]));
+            $this->assertEquals([
+                "UPDATE foreign_d1 SET d2_id = '1' WHERE (d2_id) IN (SELECT foreign_d2.id FROM foreign_d2)",
+                "UPDATE foreign_d2 SET id = '1'",
+            ], $database->dryrun()->upgrade('foreign_d2', ['id' => 1]));
+        }
+        else {
+            $this->assertEquals([
+                "UPDATE foreign_dd SET id = '1'",
+            ], $database->dryrun()->upgrade('foreign_dd', ['id' => 1]));
+            $this->assertEquals([
+                "UPDATE foreign_d1 SET d2_id = '1' WHERE (d2_id) IN (SELECT * FROM (SELECT foreign_d2.id FROM foreign_d2 WHERE (id) IN (SELECT * FROM (SELECT foreign_d1.id FROM foreign_d1) __dbml_auto_tmp)) __dbml_auto_tmp)",
+                "UPDATE foreign_d2 SET id = '1' WHERE (id) IN (SELECT * FROM (SELECT foreign_d1.id FROM foreign_d1) __dbml_auto_tmp)",
+                "UPDATE foreign_d1 SET id = '1'",
+            ], $database->dryrun()->upgrade('foreign_d1', ['id' => 1]));
+            $this->assertEquals([
+                "UPDATE foreign_d1 SET d2_id = '1' WHERE (d2_id) IN (SELECT * FROM (SELECT foreign_d2.id FROM foreign_d2) __dbml_auto_tmp)",
+                "UPDATE foreign_d2 SET id = '1'",
+            ], $database->dryrun()->upgrade('foreign_d2', ['id' => 1]));
+        }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_remove($database)
     {
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
@@ -6057,10 +6119,30 @@ INSERT INTO test (id, name) VALUES
             }
             $database->setLogger(null);
         }
+    }
 
-        // 相互外部キー
-        $this->assertEquals('DELETE FROM foreign_d1 WHERE (NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id))', $database->dryrun()->remove('foreign_d1'));
-        $this->assertEquals('DELETE FROM foreign_d2 WHERE (NOT EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id))', $database->dryrun()->remove('foreign_d2'));
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_remove_loop($database)
+    {
+        // mysql は自己 select でエラーを吐くことがあるので実行してチェック
+        $this->assertEquals(0, $database->remove('foreign_dd', ['id' => 1]));
+        $this->assertEquals(0, $database->remove('foreign_d1', ['id' => 1]));
+        $this->assertEquals(0, $database->remove('foreign_d2', ['id' => 1]));
+
+        // 無限ループ検出テストなので dryrun で十分
+        if ($database->getCompatiblePlatform()->supportsSelfAffect()) {
+            $this->assertEquals("DELETE FROM foreign_dd WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_dd WHERE foreign_dd.self_id = foreign_dd.id)))", $database->dryrun()->remove('foreign_dd', ['id' => 1]));
+            $this->assertEquals("DELETE FROM foreign_d1 WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id)))", $database->dryrun()->remove('foreign_d1', ['id' => 1]));
+            $this->assertEquals("DELETE FROM foreign_d2 WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id)))", $database->dryrun()->remove('foreign_d2', ['id' => 1]));
+        }
+        else {
+            $this->assertEquals("DELETE FROM foreign_dd WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_dd WHERE foreign_dd.self_id = foreign_dd.id) __dbml_auto_tmp)))", $database->dryrun()->remove('foreign_dd', ['id' => 1]));
+            $this->assertEquals("DELETE FROM foreign_d1 WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id) __dbml_auto_tmp)))", $database->dryrun()->remove('foreign_d1', ['id' => 1]));
+            $this->assertEquals("DELETE FROM foreign_d2 WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id) __dbml_auto_tmp)))", $database->dryrun()->remove('foreign_d2', ['id' => 1]));
+        }
     }
 
     /**
@@ -6141,6 +6223,50 @@ INSERT INTO test (id, name) VALUES
             "DELETE FROM foreign_c2 WHERE FALSE",
             "DELETE FROM foreign_p WHERE name = 'name3'",
         ], $database->dryrun()->destroy('foreign_p', ['name' => 'name3'], ['in' => true]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_destroy_loop($database)
+    {
+        // mysql は自己 select でエラーを吐くことがあるので実行してチェック
+        $this->assertEquals(0, $database->destroy('foreign_dd', ['id' => 1]));
+        $this->assertEquals(0, $database->destroy('foreign_d1', ['id' => 1]));
+        $this->assertEquals(0, $database->destroy('foreign_d2', ['id' => 1]));
+
+        // 無限ループ検出テストなので dryrun で十分
+        if ($database->getCompatiblePlatform()->supportsSelfAffect()) {
+            $this->assertEquals([
+                "DELETE FROM foreign_dd WHERE id = '1'",
+            ], $database->dryrun()->destroy('foreign_dd', ['id' => 1]));
+            $this->assertEquals([
+                "DELETE FROM foreign_d1 WHERE (d2_id) IN (SELECT foreign_d2.id FROM foreign_d2 WHERE (id) IN (SELECT foreign_d1.id FROM foreign_d1 WHERE id = '1'))",
+                "DELETE FROM foreign_d2 WHERE (id) IN (SELECT foreign_d1.id FROM foreign_d1 WHERE id = '1')",
+                "DELETE FROM foreign_d1 WHERE id = '1'",
+            ], $database->dryrun()->destroy('foreign_d1', ['id' => 1]));
+            $this->assertEquals([
+                "DELETE FROM foreign_d2 WHERE (id) IN (SELECT foreign_d1.id FROM foreign_d1 WHERE (d2_id) IN (SELECT foreign_d2.id FROM foreign_d2 WHERE id = '1'))",
+                "DELETE FROM foreign_d1 WHERE (d2_id) IN (SELECT foreign_d2.id FROM foreign_d2 WHERE id = '1')",
+                "DELETE FROM foreign_d2 WHERE id = '1'",
+            ], $database->dryrun()->destroy('foreign_d2', ['id' => 1]));
+        }
+        else {
+            $this->assertEquals([
+                "DELETE FROM foreign_dd WHERE id = '1'",
+            ], $database->dryrun()->destroy('foreign_dd', ['id' => 1]));
+            $this->assertEquals([
+                "DELETE FROM foreign_d1 WHERE (d2_id) IN (SELECT * FROM (SELECT foreign_d2.id FROM foreign_d2 WHERE (id) IN (SELECT * FROM (SELECT foreign_d1.id FROM foreign_d1 WHERE id = '1') __dbml_auto_tmp)) __dbml_auto_tmp)",
+                "DELETE FROM foreign_d2 WHERE (id) IN (SELECT * FROM (SELECT foreign_d1.id FROM foreign_d1 WHERE id = '1') __dbml_auto_tmp)",
+                "DELETE FROM foreign_d1 WHERE id = '1'",
+            ], $database->dryrun()->destroy('foreign_d1', ['id' => 1]));
+            $this->assertEquals([
+                "DELETE FROM foreign_d2 WHERE (id) IN (SELECT * FROM (SELECT foreign_d1.id FROM foreign_d1 WHERE (d2_id) IN (SELECT * FROM (SELECT foreign_d2.id FROM foreign_d2 WHERE id = '1') __dbml_auto_tmp)) __dbml_auto_tmp)",
+                "DELETE FROM foreign_d1 WHERE (d2_id) IN (SELECT * FROM (SELECT foreign_d2.id FROM foreign_d2 WHERE id = '1') __dbml_auto_tmp)",
+                "DELETE FROM foreign_d2 WHERE id = '1'",
+            ], $database->dryrun()->destroy('foreign_d2', ['id' => 1]));
+        }
     }
 
     /**
