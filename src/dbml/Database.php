@@ -1495,6 +1495,9 @@ class Database
                 $ltable = first_key($schema->getForeignTable($fkey));
                 $notexists = $this->select($ltable);
                 $notexists->setSubwhere($tableName, $aliasName, $fkey->getName());
+                if (!$this->getCompatiblePlatform()->supportsSelfAffect()) {
+                    $notexists = $notexists->wrap('SELECT * FROM', '__dbml_auto_tmp');
+                }
                 $identifier[] = $notexists->notExists();
             }
         }
@@ -1525,6 +1528,9 @@ class Database
         }
         else {
             $ckey = implode(',', $fkey->getLocalColumns());
+            if (!$this->getCompatiblePlatform()->supportsSelfAffect()) {
+                $pselect = $pselect->wrap('SELECT * FROM', '__dbml_auto_tmp');
+            }
             $subwhere["($ckey)"] = $pselect;
         }
         return $subwhere;

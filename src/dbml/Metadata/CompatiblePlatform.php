@@ -163,6 +163,20 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * 自己更新が可能かを返す
+     *
+     * @return bool 自己更新が可能なら true
+     */
+    public function supportsSelfAffect()
+    {
+        if ($this->platform instanceof MySQLPlatform || $this->platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * REPLACE が使えるか否かを返す
      *
      * @return bool REPLACE が使えるなら true
