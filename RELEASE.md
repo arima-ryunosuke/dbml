@@ -24,6 +24,11 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.1.29
+
+- [fixbug] 自己参照や循環外部キーで無限ループする不具合
+- [fixbug] mysql の自己参照エラーが出る不具合
+
 ## 2.1.28
 
 - [composer] update
