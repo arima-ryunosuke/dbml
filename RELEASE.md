@@ -21,6 +21,13 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.14
+
+- [feature] クエリに名前を付けてキャッシュする機能
+- [change] ライブラリ内の ttl:0 はインメモリキャッシュとする
+- [change] array shapes のキーに ? を付与
+- [feature] 組み込みの bind 型を拡張
+
 ## 3.1.13
 
 - [fixbug] ビルダーの defaultScope を指定すると2重にあたる
