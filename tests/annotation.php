@@ -26,6 +26,9 @@ trait TableGatewayProvider
     /** @var foreign_d2TableGateway */
     public $foreign_d2;
 
+    /** @var foreign_ddTableGateway */
+    public $foreign_dd;
+
     /** @var foreign_pTableGateway */
     public $foreign_p;
 
@@ -142,6 +145,9 @@ trait TableGatewayProvider
 
     /** @return foreign_d2TableGateway */
     public function foreign_d2($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddTableGateway */
+    public function foreign_dd($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pTableGateway */
     public function foreign_p($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
@@ -1474,6 +1480,211 @@ class foreign_d2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
 
     /**
      * @param $data foreign_d2Entity|array{id: int, name: string}
+     */
+    public function replaceOrThrow($data) { }
+}
+
+class foreign_ddTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
+{
+    use TableGatewayProvider;
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function arrayInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function arrayForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function arrayOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function arrayForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function assocInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function assocForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function assocOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function assocForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity|array{id: int, self_id: int, name: string} */
+    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity|array{id: int, self_id: int, name: string} */
+    public function tupleInShare($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity|array{id: int, self_id: int, name: string} */
+    public function tupleForUpdate($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity|array{id: int, self_id: int, name: string} */
+    public function tupleOrThrow($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity|array{id: int, self_id: int, name: string} */
+    public function tupleForAffect($tableDescriptor, $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddEntity|array{id: int, self_id: int, name: string} */
+    public function find($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return foreign_ddEntity|array{id: int, self_id: int, name: string} */
+    public function findInShare($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return foreign_ddEntity|array{id: int, self_id: int, name: string} */
+    public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return foreign_ddEntity|array{id: int, self_id: int, name: string} */
+    public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return foreign_ddEntity|array{id: int, self_id: int, name: string} */
+    public function findForAffect($variadic_primary, $tableDescriptor = []) { }
+
+    /** @return foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}> */
+    public function neighbor($predicates = [], $limit = 1) { }
+
+    /**
+     * @param $data foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}>
+     */
+    public function insertArray($data, $chunk = null) { }
+
+    /**
+     * @param $data foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}>
+     */
+    public function updateArray($data, $identifier = [], $chunk = null) { }
+
+    /**
+     * @param $insertData foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}>
+     * @param $updateData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", $chunk = null) { }
+
+    /**
+     * @param $dataarray foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}>
+     */
+    public function changeArray($dataarray, $identifier, $uniquekey = "PRIMARY", $returning = []) { }
+
+    /**
+     * @param $dataarray foreign_ddEntity[]|array<array{id: int, self_id: int, name: string}>
+     */
+    public function affectArray($dataarray) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function save($data) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function insert($data) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function insertAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function insertOrThrow($data) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function update($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function updateAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function updateOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function revise($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function reviseAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function reviseOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function upgrade($data, array $identifier = []) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function upgradeAndPrimary($data, $identifier = []) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function upgradeOrThrow($data, $identifier = []) { }
+
+    /**
+     * @param $insertData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     * @param $updateData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function upsert($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     * @param $updateData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function upsertAndPrimary($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     * @param $updateData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function upsertOrThrow($insertData, $updateData = []) { }
+
+    /**
+     * @param $insertData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     * @param $updateData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     * @param $updateData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $insertData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     * @param $updateData foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY") { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
+     */
+    public function replaceAndPrimary($data) { }
+
+    /**
+     * @param $data foreign_ddEntity|array{id: int, self_id: int, name: string}
      */
     public function replaceOrThrow($data) { }
 }
@@ -7897,6 +8108,18 @@ class foreign_d2Entity extends \ryunosuke\dbml\Entity\Entity
 {
     /** @var int */
     public $id;
+
+    /** @var string */
+    public $name;
+}
+
+class foreign_ddEntity extends \ryunosuke\dbml\Entity\Entity
+{
+    /** @var int */
+    public $id;
+
+    /** @var int */
+    public $self_id;
 
     /** @var string */
     public $name;
