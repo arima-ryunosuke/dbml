@@ -425,6 +425,21 @@ class SchemaTest extends \ryunosuke\Test\AbstractUnitTestCase
     }
 
     /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_isCircularForeignKey($database)
+    {
+        $schema = $database->getSchema();
+
+        $this->assertTrue($schema->isCircularForeignKey($schema->getTableForeignKeys('foreign_dd')['fk_dd']));
+        $this->assertTrue($schema->isCircularForeignKey($schema->getTableForeignKeys('foreign_d1')['fk_dd12']));
+        $this->assertTrue($schema->isCircularForeignKey($schema->getTableForeignKeys('foreign_d2')['fk_dd21']));
+        $this->assertFalse($schema->isCircularForeignKey($schema->getTableForeignKeys('foreign_c1')['fk_parentchild1']));
+        $this->assertFalse($schema->isCircularForeignKey($schema->getTableForeignKeys('foreign_c2')['fk_parentchild2']));
+    }
+
+    /**
      * @dataProvider provideSchema
      * @param Schema $schema
      */

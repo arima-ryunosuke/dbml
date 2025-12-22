@@ -178,6 +178,18 @@ class CompatiblePlatform /*extends AbstractPlatform*/
     }
 
     /**
+     * 自己更新が可能かを返す
+     */
+    public function supportsSelfAffect(): bool
+    {
+        if ($this->platform instanceof MySQLPlatform) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * REPLACE が使えるか否かを返す
      */
     public function supportsReplace(): bool

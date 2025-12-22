@@ -536,6 +536,28 @@ class Schema
     }
 
     /**
+     * 外部キーがループ構造を持つか返す
+     */
+    public function isCircularForeignKey(ForeignKeyConstraint $fkey): bool
+    {
+        $main = function (ForeignKeyConstraint $fkey, array $history) use (&$main) {
+            if (isset($history[$fkey->getName()])) {
+                return true;
+            }
+            $history[$fkey->getName()] = $fkey;
+
+            // ループ検出なのでどこから始めてもどちらの方向でもよい
+            foreach ($this->getTableForeignKeys($fkey->getForeignTableName()) as $fkey2) {
+                if ($main($fkey2, $history)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        return $main($fkey, []);
+    }
+
+    /**
      * テーブル間外部キーオブジェクトを取得する
      *
      * 端的に言えば $from_table から $to_table へ向かう外部キーを取得する。ただし

@@ -5659,14 +5659,35 @@ INSERT INTO test (id, name) VALUES
         if ($database->getCompatiblePlatform()->supportsIdentityUpdate()) {
             that($database)->updateExcludeRestrictOrThrow('test', ['id' => -1], ['id' => -1])->wasThrown('affected row is nothing');
         }
+    }
 
-        // 相互外部キー
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_updateExcludeRestrict_loop($database)
+    {
+        // mysql は自己 select でエラーを吐くことがあるので実行してチェック
+        $this->assertEquals(0, $database->updateExcludeRestrict('foreign_dd', ['id' => 1]));
+        $this->assertEquals(0, $database->updateExcludeRestrict('foreign_d1', ['id' => 1]));
+        $this->assertEquals(0, $database->updateExcludeRestrict('foreign_d2', ['id' => 1]));
+
+        $cache = that($database)->var('cache');
+        $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
+        $cache['compatiblePlatform'] = new class($database->getPlatform(), $database->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
+            public function supportsSelfAffect(): bool { return false; }
+        };
+
+        // 無限ループ検出テストなので dryrun で十分
         $this->assertEquals([
-            "UPDATE foreign_d1 SET name = 'hoge' WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id)))",
-        ], $database->dryrun()->updateExcludeRestrict('foreign_d1', ['name' => 'hoge'], ['id' => 1]));
+            "UPDATE foreign_dd SET id = '1' WHERE (NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_dd WHERE foreign_dd.self_id = foreign_dd.id) __dbml_auto_tmp))",
+        ], $database->dryrun()->updateExcludeRestrict('foreign_dd', ['id' => 1]));
         $this->assertEquals([
-            "UPDATE foreign_d2 SET name = 'hoge' WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id)))",
-        ], $database->dryrun()->updateExcludeRestrict('foreign_d2', ['name' => 'hoge'], ['id' => 1]));
+            "UPDATE foreign_d1 SET id = '1' WHERE (NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id) __dbml_auto_tmp))",
+        ], $database->dryrun()->updateExcludeRestrict('foreign_d1', ['id' => 1]));
+        $this->assertEquals([
+            "UPDATE foreign_d2 SET id = '1' WHERE (NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id) __dbml_auto_tmp))",
+        ], $database->dryrun()->updateExcludeRestrict('foreign_d2', ['id' => 1]));
     }
 
     /**
@@ -5746,6 +5767,38 @@ INSERT INTO test (id, name) VALUES
      * @dataProvider provideDatabase
      * @param Database $database
      */
+    function test_updateIncludeRestrict_loop($database)
+    {
+        // mysql は自己 select でエラーを吐くことがあるので実行してチェック
+        $this->assertEquals(0, $database->updateIncludeRestrict('foreign_dd', ['id' => 1]));
+        $this->assertEquals(0, $database->updateIncludeRestrict('foreign_d1', ['id' => 1]));
+        $this->assertEquals(0, $database->updateIncludeRestrict('foreign_d2', ['id' => 1]));
+
+        $cache = that($database)->var('cache');
+        $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
+        $cache['compatiblePlatform'] = new class($database->getPlatform(), $database->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
+            public function supportsSelfAffect(): bool { return false; }
+        };
+
+        // 無限ループ検出テストなので dryrun で十分
+        $this->assertEquals([
+            "UPDATE foreign_dd SET id = '1'",
+        ], $database->dryrun()->updateIncludeRestrict('foreign_dd', ['id' => 1]));
+        $this->assertEquals([
+            "UPDATE foreign_d1 SET d2_id = '1' WHERE (d2_id) IN (SELECT * FROM (SELECT foreign_d2.id FROM foreign_d2 WHERE (id) IN (SELECT * FROM (SELECT foreign_d1.id FROM foreign_d1) __dbml_auto_tmp)) __dbml_auto_tmp)",
+            "UPDATE foreign_d2 SET id = '1' WHERE (id) IN (SELECT * FROM (SELECT foreign_d1.id FROM foreign_d1) __dbml_auto_tmp)",
+            "UPDATE foreign_d1 SET id = '1'",
+        ], $database->dryrun()->updateIncludeRestrict('foreign_d1', ['id' => 1]));
+        $this->assertEquals([
+            "UPDATE foreign_d1 SET d2_id = '1' WHERE (d2_id) IN (SELECT * FROM (SELECT foreign_d2.id FROM foreign_d2) __dbml_auto_tmp)",
+            "UPDATE foreign_d2 SET id = '1'",
+        ], $database->dryrun()->updateIncludeRestrict('foreign_d2', ['id' => 1]));
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
     function test_deleteExcludeRestrict($database)
     {
         $database->insert('foreign_p', ['id' => 1, 'name' => 'name1']);
@@ -5768,14 +5821,35 @@ INSERT INTO test (id, name) VALUES
             ['id' => 2, 'name' => 'name2'],
             ['id' => 4, 'name' => 'name4'],
         ], $database->selectArray('foreign_p'));
+    }
 
-        // 相互外部キー
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_deleteExcludeRestrict_loop($database)
+    {
+        // mysql は自己 select でエラーを吐くことがあるので実行してチェック
+        $this->assertEquals(0, $database->deleteExcludeRestrict('foreign_dd', ['id' => 1]));
+        $this->assertEquals(0, $database->deleteExcludeRestrict('foreign_d1', ['id' => 1]));
+        $this->assertEquals(0, $database->deleteExcludeRestrict('foreign_d2', ['id' => 1]));
+
+        $cache = that($database)->var('cache');
+        $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
+        $cache['compatiblePlatform'] = new class($database->getPlatform(), $database->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
+            public function supportsSelfAffect(): bool { return false; }
+        };
+
+        // 無限ループ検出テストなので dryrun で十分
         $this->assertEquals([
-            'DELETE FROM foreign_d1 WHERE (NOT EXISTS (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id))',
-        ], $database->dryrun()->deleteExcludeRestrict('foreign_d1'));
+            "DELETE FROM foreign_dd WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_dd WHERE foreign_dd.self_id = foreign_dd.id) __dbml_auto_tmp)))",
+        ], $database->dryrun()->deleteExcludeRestrict('foreign_dd', ['id' => 1]));
         $this->assertEquals([
-            'DELETE FROM foreign_d2 WHERE (NOT EXISTS (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id))',
-        ], $database->dryrun()->deleteExcludeRestrict('foreign_d2'));
+            "DELETE FROM foreign_d1 WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_d2 WHERE foreign_d2.id = foreign_d1.id) __dbml_auto_tmp)))",
+        ], $database->dryrun()->deleteExcludeRestrict('foreign_d1', ['id' => 1]));
+        $this->assertEquals([
+            "DELETE FROM foreign_d2 WHERE (id = '1') AND ((NOT EXISTS (SELECT * FROM (SELECT * FROM foreign_d1 WHERE foreign_d1.d2_id = foreign_d2.id) __dbml_auto_tmp)))",
+        ], $database->dryrun()->deleteExcludeRestrict('foreign_d2', ['id' => 1]));
     }
 
     /**
@@ -5830,6 +5904,39 @@ INSERT INTO test (id, name) VALUES
                 "DELETE FROM multiprimary WHERE name IN ('a','b')",
             ], $sqls);
         }
+    }
+
+    /**
+     * @dataProvider provideDatabase
+     * @param Database $database
+     */
+    function test_deleteIncludeRestrict_loop($database)
+    {
+        // mysql は自己 select でエラーを吐くことがあるので実行してチェック
+        $this->assertEquals(0, $database->deleteIncludeRestrict('foreign_dd', ['id' => 1]));
+        $this->assertEquals(0, $database->deleteIncludeRestrict('foreign_d1', ['id' => 1]));
+        $this->assertEquals(0, $database->deleteIncludeRestrict('foreign_d2', ['id' => 1]));
+
+        $cache = that($database)->var('cache');
+        $this->finalize(fn() => $cache->offsetUnset('compatiblePlatform'));
+        $cache['compatiblePlatform'] = new class($database->getPlatform(), $database->getCompatiblePlatform()->getVersion()) extends CompatiblePlatform {
+            public function supportsSelfAffect(): bool { return false; }
+        };
+
+        // 無限ループ検出テストなので dryrun で十分
+        $this->assertEquals([
+            "DELETE FROM foreign_dd WHERE id = '1'",
+        ], $database->dryrun()->deleteIncludeRestrict('foreign_dd', ['id' => 1]));
+        $this->assertEquals([
+            "DELETE FROM foreign_d1 WHERE (d2_id) IN (SELECT * FROM (SELECT foreign_d2.id FROM foreign_d2 WHERE (id) IN (SELECT * FROM (SELECT foreign_d1.id FROM foreign_d1 WHERE id = '1') __dbml_auto_tmp)) __dbml_auto_tmp)",
+            "DELETE FROM foreign_d2 WHERE (id) IN (SELECT * FROM (SELECT foreign_d1.id FROM foreign_d1 WHERE id = '1') __dbml_auto_tmp)",
+            "DELETE FROM foreign_d1 WHERE id = '1'",
+        ], $database->dryrun()->deleteIncludeRestrict('foreign_d1', ['id' => 1]));
+        $this->assertEquals([
+            "DELETE FROM foreign_d2 WHERE (id) IN (SELECT * FROM (SELECT foreign_d1.id FROM foreign_d1 WHERE (d2_id) IN (SELECT * FROM (SELECT foreign_d2.id FROM foreign_d2 WHERE id = '1') __dbml_auto_tmp)) __dbml_auto_tmp)",
+            "DELETE FROM foreign_d1 WHERE (d2_id) IN (SELECT * FROM (SELECT foreign_d2.id FROM foreign_d2 WHERE id = '1') __dbml_auto_tmp)",
+            "DELETE FROM foreign_d2 WHERE id = '1'",
+        ], $database->dryrun()->deleteIncludeRestrict('foreign_d2', ['id' => 1]));
     }
 
     /**

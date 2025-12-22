@@ -166,6 +166,17 @@ class CompatiblePlatformTest extends \ryunosuke\Test\AbstractUnitTestCase
      * @param CompatiblePlatform $cplatform
      * @param AbstractPlatform $platform
      */
+    function test_supportsSelfAffect($cplatform, $platform)
+    {
+        $expected = !($platform instanceof MySQLPlatform || $platform instanceof \ryunosuke\Test\Platforms\SqlitePlatform);
+        $this->assertEquals($expected, $cplatform->supportsSelfAffect());
+    }
+
+    /**
+     * @dataProvider providePlatform
+     * @param CompatiblePlatform $cplatform
+     * @param AbstractPlatform $platform
+     */
     function test_supportsReplace($cplatform, $platform)
     {
         $expected = $platform instanceof SqlitePlatform || $platform instanceof MySQLPlatform;

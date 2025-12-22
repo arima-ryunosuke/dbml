@@ -29,6 +29,9 @@ trait TableGatewayProvider
     /** @var foreign_d2TableGateway */
     public $foreign_d2;
 
+    /** @var foreign_ddTableGateway */
+    public $foreign_dd;
+
     /** @var foreign_pTableGateway */
     public $foreign_p;
 
@@ -163,6 +166,9 @@ trait TableGatewayProvider
 
     /** @return foreign_d2TableGateway */
     public function foreign_d2($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /** @return foreign_ddTableGateway */
+    public function foreign_dd($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
 
     /** @return foreign_pTableGateway */
     public function foreign_p($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
@@ -5294,6 +5300,723 @@ class foreign_d2TableGateway extends \ryunosuke\dbml\Gateway\TableGateway
     /**
      * @see \ryunosuke\dbml\Gateway\TableGateway::yieldAssoc()
      * @return iterable<foreign_d2Entity|array{id?: int|mixed, name?: string|mixed}>
+     */
+    public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], ...$opt) { }
+}
+
+class foreign_ddTableGateway extends \ryunosuke\dbml\Gateway\TableGateway
+{
+    use TableGatewayProvider;
+
+    /** @var static|int */
+    public $id;
+
+    /** @var static|int */
+    public $self_id;
+
+    /** @var static|string */
+    public $name;
+
+    public function id(...$args): static { }
+
+    public function self_id(...$args): static { }
+
+    public function name(...$args): static { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::affectArray()
+     * @param array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $dataarray
+     * @return mixed
+     */
+    public function affectArray($dataarray, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::array()
+     * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectArray()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function array($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayForAffect()
+     * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectArrayForAffect()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function arrayForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayForShare()
+     * @see \ryunosuke\dbml\Mixin\SelectForShareTrait::selectArrayForShare()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function arrayForShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayForUpdate()
+     * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectArrayForUpdate()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function arrayForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::arrayOrThrow()
+     * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectArrayOrThrow()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function arrayOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assoc()
+     * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectAssoc()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function assoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocForAffect()
+     * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectAssocForAffect()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function assocForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocForShare()
+     * @see \ryunosuke\dbml\Mixin\SelectForShareTrait::selectAssocForShare()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function assocForShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocForUpdate()
+     * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectAssocForUpdate()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function assocForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::assocOrThrow()
+     * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectAssocOrThrow()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function assocOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::changeArray()
+     * @param array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $dataarray
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return mixed
+     */
+    public function changeArray($dataarray, $where, $uniquekey = "PRIMARY", $returning = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::create()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::createWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @return array{id?: int}
+     */
+    public function create($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::delete()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return mixed
+     */
+    public function delete($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::deleteAndBeforeWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function deleteAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::deleteAndPrimaryWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function deleteAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteArray()
+     * @param array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $where
+     * @return mixed
+     */
+    public function deleteArray($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteArrayAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::deleteArrayAndBeforeWithoutTable()
+     * @param array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $where
+     * @return array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>|array<foreign_ddEntity>
+     */
+    public function deleteArrayAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteExcludeRestrict()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return mixed
+     */
+    public function deleteExcludeRestrict($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteExcludeRestrictAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::deleteExcludeRestrictAndBeforeWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function deleteExcludeRestrictAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteExcludeRestrictAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::deleteExcludeRestrictAndPrimaryWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function deleteExcludeRestrictAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteExcludeRestrictOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::deleteExcludeRestrictOrThrowWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function deleteExcludeRestrictOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteIncludeRestrict()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return mixed
+     */
+    public function deleteIncludeRestrict($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteIncludeRestrictAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::deleteIncludeRestrictAndBeforeWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function deleteIncludeRestrictAndBefore($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteIncludeRestrictAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::deleteIncludeRestrictAndPrimaryWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function deleteIncludeRestrictAndPrimary($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteIncludeRestrictOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::deleteIncludeRestrictOrThrowWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function deleteIncludeRestrictOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::deleteOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::deleteOrThrowWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function deleteOrThrow($where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::find()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function find($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findForAffect()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function findForAffect($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findForShare()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function findForShare($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findForUpdate()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function findForUpdate($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findInShare()
+     * @see \ryunosuke\dbml\Mixin\FindTrait::findForShare()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function findInShare($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::findOrThrow()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function findOrThrow($variadic_primary, $tableDescriptor = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::getEmptyRecord()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function getEmptyRecord($default = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insert()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @return mixed
+     */
+    public function insert($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::insertAndPrimaryWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @return array{id?: int}
+     */
+    public function insertAndPrimary($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertArray()
+     * @param array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $data
+     * @return mixed
+     */
+    public function insertArray($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertArrayAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::insertArrayAndPrimaryWithoutTable()
+     * @param array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $data
+     * @return array<array{id?: int}>
+     */
+    public function insertArrayAndPrimary($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertArrayOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::insertArrayOrThrowWithoutTable()
+     * @param array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $data
+     * @return array<array{id?: int}>
+     */
+    public function insertArrayOrThrow($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::insertOrThrowWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @return array{id?: int}
+     */
+    public function insertOrThrow($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertOrUpdate()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return mixed
+     */
+    public function insertOrUpdate($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertOrUpdateAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::insertOrUpdateAndBeforeWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function insertOrUpdateAndBefore($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertOrUpdateAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::insertOrUpdateAndPrimaryWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return array{id?: int}
+     */
+    public function insertOrUpdateAndPrimary($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertOrUpdateOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::insertOrUpdateOrThrowWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return array{id?: int}
+     */
+    public function insertOrUpdateOrThrow($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::insertSelect()
+     * @return mixed
+     */
+    public function insertSelect($sql, $columns = [], iterable $params = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalid()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $invalid_columns
+     * @return mixed
+     */
+    public function invalid($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalidAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::invalidAndBeforeWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $invalid_columns
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function invalidAndBefore($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalidAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::invalidAndPrimaryWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $invalid_columns
+     * @return array{id?: int}
+     */
+    public function invalidAndPrimary($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::invalidOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::invalidOrThrowWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $invalid_columns
+     * @return array{id?: int}
+     */
+    public function invalidOrThrow($where = [], ?array $invalid_columns = null, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modify()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return mixed
+     */
+    public function modify($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::modifyAndBeforeWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function modifyAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::modifyAndPrimaryWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return array{id?: int}
+     */
+    public function modifyAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArray()
+     * @param array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return mixed
+     */
+    public function modifyArray($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArrayAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::modifyArrayAndBeforeWithoutTable()
+     * @param array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>|array<foreign_ddEntity>
+     */
+    public function modifyArrayAndBefore($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyArrayAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::modifyArrayAndPrimaryWithoutTable()
+     * @param array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return array<array{id?: int}>
+     */
+    public function modifyArrayAndPrimary($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifyOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::modifyOrThrowWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return array{id?: int}
+     */
+    public function modifyOrThrow($insertData, $updateData = [], $uniquekey = "PRIMARY", ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::modifySelect()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return mixed
+     */
+    public function modifySelect($sql, $updateData = [], $uniquekey = "PRIMARY", $columns = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::neighbor()
+     * @return array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function neighbor(array $predicates = [], int $limit = 1): array { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reduce()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return mixed
+     */
+    public function reduce($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reduceAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::reduceAndBeforeWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function reduceAndBefore($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::reduceOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::reduceOrThrowWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function reduceOrThrow($limit = null, $orderBy = [], $groupBy = [], $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replace()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @return mixed
+     */
+    public function replace($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replaceAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::replaceAndBeforeWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function replaceAndBefore($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replaceAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::replaceAndPrimaryWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @return array{id?: int}
+     */
+    public function replaceAndPrimary($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::replaceOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::replaceOrThrowWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @return array{id?: int}
+     */
+    public function replaceOrThrow($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::save()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @return mixed
+     */
+    public function save($data, ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::truncate()
+     * @return mixed
+     */
+    public function truncate() { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::truncateIncludeRestrict()
+     * @return mixed
+     */
+    public function truncateIncludeRestrict() { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tuple()
+     * @see \ryunosuke\dbml\Mixin\SelectMethodTrait::selectTuple()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function tuple($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleForAffect()
+     * @see \ryunosuke\dbml\Mixin\SelectForAffectTrait::selectTupleForAffect()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function tupleForAffect($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleForShare()
+     * @see \ryunosuke\dbml\Mixin\SelectForShareTrait::selectTupleForShare()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function tupleForShare($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleForUpdate()
+     * @see \ryunosuke\dbml\Mixin\SelectForUpdateTrait::selectTupleForUpdate()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function tupleForUpdate($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::tupleOrThrow()
+     * @see \ryunosuke\dbml\Mixin\SelectOrThrowTrait::selectTupleOrThrow()
+     * @return foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}
+     */
+    public function tupleOrThrow($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::update()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return mixed
+     */
+    public function update($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::updateAndBeforeWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function updateAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::updateAndPrimaryWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function updateAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateArray()
+     * @param array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return mixed
+     */
+    public function updateArray($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateArrayAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::updateArrayAndBeforeWithoutTable()
+     * @param array<foreign_ddEntity>|array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}> $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array<array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>|array<foreign_ddEntity>
+     */
+    public function updateArrayAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateExcludeRestrict()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return mixed
+     */
+    public function updateExcludeRestrict($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateExcludeRestrictAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::updateExcludeRestrictAndBeforeWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function updateExcludeRestrictAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateExcludeRestrictAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::updateExcludeRestrictAndPrimaryWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function updateExcludeRestrictAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateExcludeRestrictOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::updateExcludeRestrictOrThrowWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function updateExcludeRestrictOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateIncludeRestrict()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return mixed
+     */
+    public function updateIncludeRestrict($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateIncludeRestrictAndBefore()
+     * @see \ryunosuke\dbml\Mixin\AffectAndBeforeTrait::updateIncludeRestrictAndBeforeWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}|foreign_ddEntity
+     */
+    public function updateIncludeRestrictAndBefore($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateIncludeRestrictAndPrimary()
+     * @see \ryunosuke\dbml\Mixin\AffectAndPrimaryTrait::updateIncludeRestrictAndPrimaryWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function updateIncludeRestrictAndPrimary($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateIncludeRestrictOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::updateIncludeRestrictOrThrowWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function updateIncludeRestrictOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::updateOrThrow()
+     * @see \ryunosuke\dbml\Mixin\AffectOrThrowTrait::updateOrThrowWithoutTable()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $data
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     * @return array{id?: int}
+     */
+    public function updateOrThrow($data, $where = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::upsert()
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $insertData
+     * @param foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $updateData
+     * @return mixed
+     */
+    public function upsert($insertData, $updateData = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::using()
+     * @see \ryunosuke\dbml\Mixin\AggregateTrait::usingWithoutTable()
+     * @param array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed} $where
+     */
+    public function using($where = [], bool $restrict = true, bool $cascade = false, bool $setnull = false): bool { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::yieldArray()
+     * @return iterable<foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
+     */
+    public function yieldArray($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], ...$opt) { }
+
+    /**
+     * @see \ryunosuke\dbml\Gateway\TableGateway::yieldAssoc()
+     * @return iterable<foreign_ddEntity|array{id?: int|mixed, self_id?: int|mixed, name?: string|mixed}>
      */
     public function yieldAssoc($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], ...$opt) { }
 }
@@ -31742,6 +32465,18 @@ class foreign_d2Entity extends \ryunosuke\dbml\Entity\Entity
 {
     /** @var int */
     public $id;
+
+    /** @var string */
+    public $name;
+}
+
+class foreign_ddEntity extends \ryunosuke\dbml\Entity\Entity
+{
+    /** @var int */
+    public $id;
+
+    /** @var int */
+    public $self_id;
 
     /** @var string */
     public $name;

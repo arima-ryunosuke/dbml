@@ -219,6 +219,11 @@
   - Sequencer の負数降順を廃止
   - Sequencer の has メソッド改名
 
+## 2.1.29
+
+- [fixbug] 自己参照や循環外部キーで無限ループする不具合
+- [fixbug] mysql の自己参照エラーが出る不具合
+
 ## 2.1.28
 
 - [composer] update

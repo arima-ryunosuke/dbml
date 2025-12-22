@@ -272,6 +272,8 @@ abstract class AbstractBuilder implements Queryable, \Stringable
         $where = [];
 
         $schema = $this->database->getSchema();
+        $cplatform = $this->database->getCompatiblePlatform();
+
         $fkeys = $schema->getForeignKeys($table, null);
         foreach ($fkeys as $fkey) {
             $fkopt = $fkey->getOptions();
@@ -283,6 +285,9 @@ abstract class AbstractBuilder implements Queryable, \Stringable
                         $ltable = first_key($schema->getForeignTable($fkey));
                         $select = $this->database->select($ltable);
                         $select->setSubwhere($table, $alias, $fkey->getName());
+                        if (!$cplatform->supportsSelfAffect() && $schema->isCircularForeignKey($fkey)) {
+                            $select = $select->wrap('SELECT * FROM', '__dbml_auto_tmp');
+                        }
                         $where[] = $affirmation ? $select->exists() : $select->notExists();
                         continue 2;
                     }
@@ -305,16 +310,22 @@ abstract class AbstractBuilder implements Queryable, \Stringable
 
     public function cascadeWheres(ForeignKeyConstraint $fkey, array $wheres): array
     {
+        $schema = $this->database->getSchema();
+        $cplatform = $this->database->getCompatiblePlatform();
+
         $pselect = $this->database->select([$fkey->getForeignTableName() => $fkey->getForeignColumns()], $wheres);
         $subwhere = [];
-        if (!$this->database->getCompatiblePlatform()->supportsRowConstructor() && count($fkey->getLocalColumns()) > 1) {
+        if (!$cplatform->supportsRowConstructor() && count($fkey->getLocalColumns()) > 1) {
             $pvals = array_maps($pselect->array(), fn($pval) => array_combine($fkey->getLocalColumns(), $pval));
-            $ltable = first_key($this->database->getSchema()->getForeignTable($fkey));
-            $pcond = $this->database->getCompatiblePlatform()->getPrimaryCondition($pvals, $ltable);
+            $ltable = first_key($schema->getForeignTable($fkey));
+            $pcond = $cplatform->getPrimaryCondition($pvals, $ltable);
             $subwhere[] = $this->database->queryInto($pcond) ?: 'FALSE';
         }
         else {
             $ckey = implode(',', $fkey->getLocalColumns());
+            if (!$cplatform->supportsSelfAffect() && $schema->isCircularForeignKey($fkey)) {
+                $pselect = $pselect->wrap('SELECT * FROM', '__dbml_auto_tmp');
+            }
             $subwhere["($ckey)"] = $pselect;
         }
         return $subwhere;

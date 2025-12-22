@@ -5464,9 +5464,6 @@ class Database
      * 実質的には RESTRICT/NO ACTION を無視して CASCADE 的な動作と同等なので注意して使用すべき。
      * （RESTRICT/NO ACTION にしているのには必ず理由があるはず）。
      *
-     * 相互参照外部キーでかつそれらが共に「RESTRICT/NO ACTION」だと無限ループになるので注意。
-     * （そのような外部キーはおかしいと思うので特にチェックしない）。
-     *
      * さらに、複合カラム外部キーだと行値式 IN を使うので SQLServer では実行できない。また、 mysql 5.6 以下ではインデックスが効かないので注意。
      * 単一カラム外部キーなら問題ない。
      *
@@ -5507,17 +5504,25 @@ class Database
             $schema = $this->getSchema();
             $fkeys = $schema->getForeignKeys($builder->getTable(), null);
             foreach ($fkeys as $fkey) {
-                if ($fkey->onUpdate() === null) {
+                if ($fkey->onUpdate() === null && !isset($opt['history'][$fkey->getName()])) {
+                    $opt['history'] ??= [];
+                    $opt['history'][$fkey->getName()] = $fkey;
+
                     $subdata = $builder->cascadeValues($fkey, $builder->getSet());
                     if (!$subdata) {
                         continue;
                     }
+
+                    $ltable = first_key($schema->getForeignTable($fkey));
+                    if ($builder->getTable() === $ltable) {
+                        continue;
+                    }
+
                     // 外部キー無効を戻した瞬間に結果整合性でエラーになる RDBMS も居るため false -> update -> true にはできない
                     // かといってトランザクションイベントまで巻き込みたくないため愚直に UPDATE 後（整合後）に戻す（ために覚えておく）
                     $this->switchForeignKey(false, $fkey);
                     $recoveries[] = $fkey;
 
-                    $ltable = first_key($schema->getForeignTable($fkey));
                     $subwhere = $builder->cascadeWheres($fkey, $builder->getWhere());
                     $affecteds = array_merge($affecteds, arrayize($this->upgrade($ltable, $subdata, $subwhere, ...array_remove($opt, ['return']))));
                 }
@@ -5586,9 +5591,6 @@ class Database
      * 実質的には RESTRICT/NO ACTION を無視して CASCADE 的な動作と同等なので注意して使用すべき。
      * （RESTRICT/NO ACTION にしているのには必ず理由があるはず）。
      *
-     * 相互参照外部キーでかつそれらが共に「RESTRICT/NO ACTION」だと無限ループになるので注意。
-     * （そのような外部キーはおかしいと思うので特にチェックしない）。
-     *
      * さらに、複合カラム外部キーだと行値式 IN を使うので SQLServer では実行できない。また、 mysql 5.6 以下ではインデックスが効かないので注意。
      * 単一カラム外部キーなら問題ない。
      *
@@ -5626,8 +5628,15 @@ class Database
         $schema = $this->getSchema();
         $fkeys = $schema->getForeignKeys($builder->getTable(), null);
         foreach ($fkeys as $fkey) {
-            if ($fkey->onDelete() === null) {
+            if ($fkey->onDelete() === null && !isset($opt['history'][$fkey->getName()])) {
+                $opt['history'] ??= [];
+                $opt['history'][$fkey->getName()] = $fkey;
+
                 $ltable = first_key($schema->getForeignTable($fkey));
+                if ($builder->getTable() === $ltable) {
+                    continue;
+                }
+
                 $subwhere = $builder->cascadeWheres($fkey, $builder->getWhere());
                 $affecteds = array_merge($affecteds, arrayize($this->destroy($ltable, $subwhere, ...array_remove($opt, ['return']))));
             }
