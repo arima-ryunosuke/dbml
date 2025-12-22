@@ -33,6 +33,12 @@ use function ryunosuke\dbml\str_exists;
  * 「リトライするか？」の判定は $retryable に「リトライ回数と例外オブジェクトを受け取り真偽値を返す」クロージャを設定する。
  * 例外発生時にそのクロージャが呼び出され、 float が返って来たらその分待機してリトライ処理を行う。
  *
+ * ### 常にコミット
+ *
+ * alwaysCommit を true にすると失敗時に rollback ではなく commit が行われる（この「失敗時」とはリトライも含めたものである）。
+ * 普通はそのようなことはしないしすべきではないが、成否に関わらず commit したいことが稀によくある。
+ * 例えばメールキューから1件取り出して送信する場合、成否に関わらず（エラーはファイルにログるとして）レコード自体は消したい、など。
+ *
  * ### イベント
  *
  * イベント系メソッドは内部的には配列で保持され、保持している分が全て実行される。
@@ -157,6 +163,8 @@ use function ryunosuke\dbml\str_exists;
  * @method $this|\Closure  retryable($closure = null) リトライ判定処理を設定・取得する
  * @method \Closure        getRetryable() リトライ判定処理を取得する
  * @method $this           setRetryable(\Closure $closure) リトライ判定処理を設定する
+ * @method bool            getAlwaysCommit() 常時コミットフラグを取得する
+ * @method $this           setAlwaysCommit(bool $bool) 常時コミットフラグを設定する
  */
 class Transaction
 {
@@ -218,6 +226,8 @@ class Transaction
             },
             /** @var ?bool セーブポイントを活かすか */
             'savepointable'  => null, // delete in future scope
+            /** @var bool 常にコミットをするか */
+            'alwaysCommit'   => false,
         ];
     }
 
@@ -410,15 +420,28 @@ class Transaction
             $endTransaction($connection, $previewMode ? 'rollBack' : 'commit');
         }
         catch (\Exception $ex) {
-            // rollback
-            $endTransaction($connection, 'rollBack');
-            $this->_invokeArray($this->rollback, $connection);
+            // リトライ判定
+            $retryable = null;
+            if (is_callable($this->retryable)) {
+                $retryable = ($this->retryable)($this->retryCount, $ex, $connection);
+            }
+
+            // リトライしない alwaysCommit:true なら commit
+            if (is_null($retryable) && $this->alwaysCommit) {
+                $this->_invokeArray($this->commit, $connection);
+                $endTransaction($connection, $previewMode ? 'rollBack' : 'commit');
+            }
+            // でないなら rollback
+            else {
+                $endTransaction($connection, 'rollBack');
+                $this->_invokeArray($this->rollback, $connection);
+            }
 
             // fail
             $this->_invokeArray($this->fail, $ex);
 
-            // リトライ
-            if (is_callable($this->retryable) && !is_null($retryable = ($this->retryable)($this->retryCount, $ex, $connection))) {
+            // retry
+            if (!is_null($retryable)) {
                 usleep($retryable * 1000 * 1000);
                 $this->_invokeArray($this->retry, ++$this->retryCount);
 

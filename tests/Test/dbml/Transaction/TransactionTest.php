@@ -8,6 +8,7 @@ use Doctrine\DBAL\Exception\LockWaitTimeoutException;
 use Doctrine\DBAL\Exception\RetryableException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\DBAL\TransactionIsolationLevel;
+use ryunosuke\dbml\Exception\TransactionException;
 use ryunosuke\dbml\Logging\Logger;
 use ryunosuke\dbml\Transaction\Transaction;
 use ryunosuke\dbml\Utility\Adhoc;
@@ -300,6 +301,39 @@ class TransactionTest extends \ryunosuke\Test\AbstractUnitTestCase
         $this->assertEquals('x', $database->selectValue('test.name', ['id' => 3]));
         // id1, id2 が重複でコケるのでまぁ 0.5 秒くらいで終わるはず
         $this->assertLessThanOrEqual(0.5, microtime(true) - $start);
+    }
+
+    /**
+     * @dataProvider provideTransaction
+     * @param Transaction $transaction
+     * @param Database $database
+     */
+    function test_alwaysCommit($transaction, $database)
+    {
+        $database->delete('test', []);
+        $transaction->setAlwaysCommit(true);
+
+        $transaction->retryable(fn($rc) => $rc < 5 ? 0.1 : null);
+        try {
+            // 無条件で例外を投げているため、このトランザクションは必ず失敗する
+            $count = 1;
+            $transaction->main(function () use ($database, &$count) {
+                $database->insert('test', [
+                    'id'   => $count++,
+                    'name' => 'x',
+                ]);
+                throw new \Exception('always failed');
+            })->perform();
+
+            $this->fail('never');
+        }
+        catch (\Exception $e) {
+            $this->assertEquals('always failed', $e->getMessage());
+            // リトライが行われている
+            $this->assertEquals(7, $count);
+            // しかし rollback は行われていない
+            $this->assertEquals([["id" => "6", "name" => "x"]], $database->selectArray('test.id,name'));
+        }
     }
 
     /**
