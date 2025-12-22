@@ -7027,6 +7027,10 @@ INSERT INTO test (id, name) VALUES
             ['mainid' => 3, 'subid' => 90, 'name' => 'i'],
             ['mainid' => 3, 'subid' => 100, 'name' => 'j'],
         ], $database->selectArray('multiprimary', ['mainid' => 3]));
+
+        $this->assertEquals([
+            'INSERT INTO test (name, data) SELECT name AS name, data AS data FROM test',
+        ], $database->dryrun()->duplicate('test'));
     }
 
     /**

@@ -5923,7 +5923,8 @@ class Database
 
         $unseter = $this->_setIdentityInsert($builder->getTable(), $builder->getSet());
         try {
-            return $builder->execute();
+            $builder->execute();
+            return $this->_postaffect($builder, [], []);
         }
         finally {
             $unseter();
