@@ -21,6 +21,12 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.15
+
+- [feature] トランザクションに alwaysCommit を追加
+- [fixbug] duplicate の dryrun がクエリ配列になっていない不具合
+- Merge tag 'v2.1.30'
+
 ## 3.1.14
 
 - [feature] クエリに名前を付けてキャッシュする機能
