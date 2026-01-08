@@ -506,8 +506,8 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     private string  $tableName;
     private ?string $alias;
 
-    /** @var \ArrayObject<string, Scope> */
-    private \ArrayObject $scopes;
+    /** @var array<string, Scope> */
+    private array $scopes;
     private array        $activeScopes = ['' => []];
 
     private array   $cte     = [];
@@ -553,7 +553,6 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         $this->alias = $entity_name;
 
         $this->original = $this;
-        $this->scopes = new \ArrayObject();
 
         $default = [];
         if ($this->defaultIteration) {
@@ -1356,6 +1355,16 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function addScope(string $name = '', $tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = [], $sets = []): static
     {
         $this->scopes[$name] = new Scope($tableDescriptor, $where, $orderBy, $limit, $groupBy, $having, $sets);
+
+        // for compatible
+        // clone したオブジェクトで addScope した場合でもオリジナルに伝播させる思想で scopes は ArrayObject で実装されていた
+        // しかし scoping による完全な一時スコープまでオリジナルに伝播しており、それは GC されても消えることがなくメモリリークを起こしていた
+        // clone 先で addScope できる仕様を無くせばこんなことはしなくてよい（将来的にはそうする）
+        // しかしそうすると互換性が壊れるので、ここでは「scoping で定義されたスコープは伝播しない」という処理で凌ぐ
+        if (!str_starts_with($name, "scoping\t")) {
+            $this->original->scopes[$name] = $this->scopes[$name];
+        }
+
         return $this;
     }
 
@@ -1409,7 +1418,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
         }
 
         if ($newscopes) {
-            $hash = spl_object_id($this) . '_' . count($this->scopes);
+            $hash = "scoping\t" . spl_object_id($this) . '_' . count($this->scopes);
             $this->addScope($hash, ...$newscopes);
             $scopes[$hash] = [];
         }
@@ -1512,7 +1521,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
     public function scoping($tableDescriptor = [], $where = [], $orderBy = [], $limit = [], $groupBy = [], $having = []): static
     {
         $that = $this->clone();
-        $hash = spl_object_id($that) . '_' . count($that->scopes);
+        $hash = "scoping\t" . spl_object_id($that) . '_' . count($that->scopes);
         $that->addScope($hash, ...func_get_args());
         $that->activeScopes[$hash] = [];
         return $that;
@@ -1747,7 +1756,7 @@ class TableGateway implements \ArrayAccess, \IteratorAggregate, \Countable
      */
     public function getScopes(): array
     {
-        return $this->scopes->getArrayCopy();
+        return $this->scopes;
     }
 
     /**
