@@ -7774,7 +7774,7 @@ AND (g_parent.ancestor_id = g_ancestor.ancestor_id)))
 (EXISTS (SELECT * FROM t_comment C WHERE delete_flg = '0'))", $select->queryInto());
 
         $select = $database->select('test1 T1', [
-            $database->subexists('test2[delete_flg: 0] T2'),
+            $database->subexists('test2:[delete_flg: 0] T2'),
         ]);
         $this->assertStringIgnoreBreak("SELECT T1.* FROM test1 T1 WHERE
 (EXISTS (SELECT * FROM test2 T2 WHERE delete_flg = '0'))", $select->queryInto());
@@ -7799,6 +7799,12 @@ AND
         ]);
         $this->assertStringIgnoreBreak("SELECT A.* FROM t_article A WHERE
 (EXISTS (SELECT * FROM t_comment C WHERE (delete_flg = '0') AND (C.comment_id = '9') AND (C.article_id = A.id)))", $select->queryInto());
+
+        $this->assertException('not match any fkey', function () use ($database) {
+            $database->select('test1 t1', [
+                $database->subexists('test t2'),
+            ]);
+        });
     }
 
     /**
