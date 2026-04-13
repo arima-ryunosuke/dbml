@@ -13,6 +13,7 @@ use function ryunosuke\dbml\array_each;
 use function ryunosuke\dbml\array_maps;
 use function ryunosuke\dbml\arrayize;
 use function ryunosuke\dbml\first_key;
+use function ryunosuke\dbml\first_value;
 use function ryunosuke\dbml\preg_splice;
 
 abstract class AbstractBuilder implements Queryable, \Stringable
@@ -198,7 +199,7 @@ abstract class AbstractBuilder implements Queryable, \Stringable
                 $conds = is_bool($submethod) ? "|$cond" : $cond;
                 $colname = preg_splice('#\|([a-z0-9_]+)(:([a-z0-9_]+))?#ui', '', $conds, $matches);
                 $falias = $matches[1] ?? null;
-                $fkname = $matches[3] ?? null;
+                $fkname = $matches[3] ?? first_value($param->getFromPart())['fkeyname'] ?? null;
                 if (array_key_exists($falias, $tables)) {
                     if ($param->setSubwhere($tables[$falias], $falias, $fkname)) {
                         return is_string($submethod) ? $colname : true;
@@ -210,6 +211,9 @@ abstract class AbstractBuilder implements Queryable, \Stringable
                             return null;
                         }
                     }
+                }
+                if ($fkname !== '') {
+                    throw new \InvalidArgumentException(sprintf("subbuilder is not match any fkey(%s)", json_encode($fkname)));
                 }
             }
         }, true);

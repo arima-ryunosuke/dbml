@@ -7607,7 +7607,7 @@ INSERT INTO test (id, name) VALUES
 (EXISTS (SELECT * FROM t_comment C WHERE delete_flg = '0'))", $select->queryInto());
 
         $select = $database->select('test1 T1', [
-            $database->subexists('test2[delete_flg: 0] T2'),
+            $database->subexists('test2:[delete_flg: 0] T2'),
         ]);
         $this->assertStringIgnoreBreak("SELECT T1.* FROM test1 T1 WHERE
 (EXISTS (SELECT * FROM test2 T2 WHERE delete_flg = '0'))", $select->queryInto());
@@ -7632,6 +7632,10 @@ AND
         ]);
         $this->assertStringIgnoreBreak("SELECT A.* FROM t_article A WHERE
 (EXISTS (SELECT * FROM t_comment C WHERE (delete_flg = '0') AND (C.comment_id = '9') AND (C.article_id = A.id)))", $select->queryInto());
+
+        that($database)->select('test1 t1', [
+            $database->subexists('test t2'),
+        ])->wasThrown('not match any fkey');
     }
 
     /**

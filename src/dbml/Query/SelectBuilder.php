@@ -1394,7 +1394,7 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         }
 
         if ($this->subwhere === "$table:$fkeyname") {
-            return false;
+            return true; // 設定済なのだから true でよい
         }
         $this->subwhere = "$table:$fkeyname";
         $pre_p = $alias ?: $table;
