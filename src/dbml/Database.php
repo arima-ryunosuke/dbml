@@ -5719,7 +5719,9 @@ class Database
                     throw new \InvalidArgumentException('$data\'s element must be array.');
                 }
 
-                $row = $this->_normalize($tableName, $row);
+                if ($opt['normalize'] ?? true) {
+                    $row = $this->_normalize($tableName, $row);
+                }
                 $set = $this->bindInto($row, $params);
 
                 if (!isset($columns)) {
@@ -5732,7 +5734,9 @@ class Database
                 if (!isset($updates)) {
                     if ($updateData) {
                         $updateData = $this->_wildUpdate($updateData, $row, $ukcols);
-                        $updateData = $this->_normalize($tableName, $updateData);
+                        if ($opt['normalize'] ?? true) {
+                            $updateData = $this->_normalize($tableName, $updateData);
+                        }
                         $updateData = $this->bindInto($updateData, $updateParams);
                         $updates = array_sprintf($updateData, '%2$s = %1$s', ', ');
                     }
@@ -5906,7 +5910,7 @@ class Database
         $col_group = [];
         foreach ($dataarray as $n => $row) {
             // prepare する可能性があるのでこの段階で normalize する必要がある
-            // prepare しなかった場合に2回呼ばれることになって無駄だがそもそもバラバラのカラムで呼ぶことをあまり想定していない
+            // prepare しなかった場合に2回呼ばれることになってしまうので後段で特別処理で回避する
             $row = $this->_normalize($tableName, $row);
             $primaries[$n] = array_intersect_key($row, $pcols);
 
@@ -5946,7 +5950,7 @@ class Database
 
         foreach ($col_group as $group) {
             if ($group['bulks'] ?? []) {
-                $sqls[] = $this->modifyArray($tableName, $group['bulks'], [], $uniquekey, null, $opt);
+                $sqls[] = $this->modifyArray($tableName, $group['bulks'], [], $uniquekey, null, ['normalize' => false] + $opt);
             }
             if ($group['rows'] ?? []) {
                 // 2件以上じゃないとプリペアの旨味が少ない
@@ -5960,7 +5964,7 @@ class Database
                         $affected = $sqls[] = $stmt->executeAffect($row);
                     }
                     else {
-                        $affected = $sqls[] = $this->modify($tableName, $row, [], $uniquekey, $opt);
+                        $affected = $sqls[] = $this->modify($tableName, $row, [], $uniquekey, ['normalize' => false] + $opt);
                     }
 
                     if ($autocolumn !== null && !isset($primaries[$n][$autocolumn])) {
@@ -7281,9 +7285,13 @@ class Database
 
         $tableName = $this->convertTableName($tableName);
 
-        $insertData = $this->_normalize($tableName, $insertData);
+        if ($opt['normalize'] ?? true) {
+            $insertData = $this->_normalize($tableName, $insertData);
+        }
         $updateData = $this->_wildUpdate($updateData, $insertData, $pkcols);
-        $updateData = $this->_normalize($tableName, $updateData);
+        if ($opt['normalize'] ?? true) {
+            $updateData = $this->_normalize($tableName, $updateData);
+        }
         $updateData = $this->getCompatiblePlatform()->convertMergeData($insertData, $updateData);
 
         $params = [];
