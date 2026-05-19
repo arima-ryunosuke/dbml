@@ -225,6 +225,10 @@
   - Sequencer の負数降順を廃止
   - Sequencer の has メソッド改名
 
+## 2.2.32
+
+- [fixbug] changeArray で2回normalize される不具合
+
 ## 2.2.31
 
 - [fixbug] 外部キーがない場合に例外が飛ばない不具合

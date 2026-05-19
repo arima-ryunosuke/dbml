@@ -90,6 +90,8 @@ class AffectBuilder extends AbstractBuilder
                 //'delete_user' => fn() => Auth()::id(),
                 //'delete_time' => fn() => date('Y-m-d H:i:s'),
             ],
+            /** @var bool filter* 系の統括フラグ */
+            'filter'                    => true,
             /** @var bool insert 時などにテーブルに存在しないカラムを自動でフィルタするか否か
              * この設定を true にすると INSERT/UPDATE 時に「対象テーブルに存在しないカラム」が自動で伏せられるようになる。
              * 余計なキーが有るだけでエラーになるのは多くの場合めんどくさいだけなので true にするのは有用。
@@ -103,6 +105,8 @@ class AffectBuilder extends AbstractBuilder
              * どうせエラーになるので、結局呼び出し直前に if 分岐で unset したりするのでいっそのこと自動で伏せてしまったほうが便利なことは多い。
              */
             'filterNullAtNotNullColumn' => true,
+            /** @var bool convert* 系の統括フラグ */
+            'convert'                   => true,
             /** @var bool insert 時などに NULLABLE NUMERIC カラムは 空文字を null として扱うか否か
              * この設定を true にすると、例えば `hoge_no: INTEGER NOT NULL` なカラムに空文字を与えて INSERT/UPDATE した場合に自動で NULL に変換されるようになる。
              * Web システムにおいては空文字でパラメータが来ることが多いのでこれを true にしておくといちいち変換せずに済む。
@@ -393,12 +397,10 @@ class AffectBuilder extends AbstractBuilder
             }, []);
         }
 
-        if ($this->getUnsafeOption('filterNoExistsColumn')) {
-            $this->database->debug("filterNoExistsColumn column {$this->getTable()}." . implode(',', array_keys(array_diff_key($row, $columns))), if: !!array_diff_key($row, $columns));
-            $row = array_intersect_key($row, $columns);
-        }
-
-        $filterNullAtNotNullColumn = $this->getUnsafeOption('filterNullAtNotNullColumn');
+        $filterAllFlg = $this->getUnsafeOption('filter');
+        $filterNoExistsColumn = $filterAllFlg && $this->getUnsafeOption('filterNoExistsColumn');
+        $filterNullAtNotNullColumn = $filterAllFlg && $this->getUnsafeOption('filterNullAtNotNullColumn');
+        $convertAllFlg = $this->getUnsafeOption('convert');
         $convertEmptyToNull = $this->getUnsafeOption('convertEmptyToNull');
         $convertBoolToInt = $this->getUnsafeOption('convertBoolToInt');
         $convertNumericToDatetime = $this->getUnsafeOption('convertNumericToDatetime');
@@ -419,6 +421,11 @@ class AffectBuilder extends AbstractBuilder
         $blobTypes = [Types::BINARY => true, Types::BLOB => true];
         $stringTypes = $clobTypes + $blobTypes;
 
+        if ($filterNoExistsColumn) {
+            $this->database->debug("filterNoExistsColumn column {$this->getTable()}." . implode(',', array_keys(array_diff_key($row, $columns))), if: !!array_diff_key($row, $columns));
+            $row = array_intersect_key($row, $columns);
+        }
+
         foreach ($columns as $cname => $column) {
             if (array_key_exists($cname, $row)) {
                 $type = $column->getType();
@@ -428,6 +435,11 @@ class AffectBuilder extends AbstractBuilder
                 if ($filterNullAtNotNullColumn && $row[$cname] === null && !$nullable && $cname !== $autocolumn) {
                     $this->database->debug("filterNullAtNotNullColumn unset({$this->getTable()}.$cname)");
                     unset($row[$cname]);
+                    continue;
+                }
+
+                // ここより下に filter 系を入れてはならない
+                if (!$convertAllFlg) {
                     continue;
                 }
 

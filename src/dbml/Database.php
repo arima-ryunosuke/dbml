@@ -4743,12 +4743,15 @@ class Database
     public function changeArray($tableName, $dataarray, $where, $uniquekey = 'PRIMARY', $returning = [], ...$opt)
     {
         $builder = AffectBuilder::new($this);
+
+        $builder->setOption('convert', false); // 構造は触るが変換はしない
         $builder->build([
             'table'  => $tableName,
             'where'  => $where,
             'values' => $dataarray,
             'column' => [], // 可変なので指定しない
         ]);
+        $builder->setOption('convert', true); // prepare のために変換を有効にする
 
         $dryrun = $this->getUnsafeOption('dryrun');
         $cplatform = $this->getCompatiblePlatform();
@@ -4828,7 +4831,7 @@ class Database
                 }
                 foreach ($group['rows'] as $n => $row) {
                     if ($stmt) {
-                        $affected = $sqls[] = $stmt->executeAffect($row);
+                        $affected = $sqls[] = $stmt->executeAffect($builder->normalize($row));
                     }
                     else {
                         $affected = $sqls[] = $this->modify($builder->getTable(), $row, [], $uniquekey, ...$opt);

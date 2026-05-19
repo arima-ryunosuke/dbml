@@ -6840,6 +6840,76 @@ INSERT INTO test (id, name) VALUES
             ], $changed[1]);
         }
 
+        // double normalize
+        if ($database->getCompatiblePlatform()->supportsBulkMerge()) {
+            (function () use ($database) {
+                $database->getSchema()->setTableColumn('misctype', 'carray', ['type' => Types::SIMPLE_ARRAY]);
+                $database->getSchema()->setTableColumn('misctype', 'cjson', ['type' => Types::JSON]);
+                $database->getSchema()->setTableColumn('misctype', 'cdate', ['type' => Types::DATE_IMMUTABLE]);
+                $database->getSchema()->setTableColumn('misctype', 'cdatetime', ['type' => Types::DATETIME_IMMUTABLE]);
+
+                $database = $database->context([
+                    'autoCastType' => [
+                        Types::SIMPLE_ARRAY => [
+                            'select' => true,
+                            'affect' => true,
+                        ],
+                        Types::JSON         => [
+                            'select' => true,
+                            'affect' => true,
+                        ],
+                    ],
+                ])->dryrun();
+
+                // 2件（同スキーマ）
+                $changed = $database->changeArray('misctype', [
+                    [
+                        'id'        => 1,
+                        'carray'    => ['a', 'b', 'c'],
+                        'cjson'     => [[1, 2, 3]],
+                        'cdate'     => 1234567890,
+                        'cdatetime' => 1234567890.123,
+                    ],
+                    [
+                        'id'        => 2,
+                        'carray'    => ['b', 'c', 'd'],
+                        'cjson'     => [[2, 3, 4]],
+                        'cdate'     => 1234567890 + 3600 * 24,
+                        'cdatetime' => 1234567890.123 + 60,
+                    ],
+                ], true);
+                $this->assertStringContainsString('a,b,c', $changed[1][1]);
+                $this->assertStringContainsString('[[1,2,3]]', $changed[1][1]);
+                $this->assertStringContainsString('2009-02-14', $changed[1][1]);
+                $this->assertStringContainsString('2009-02-14 08:31:30', $changed[1][1]);
+                $this->assertStringContainsString('b,c,d', $changed[1][1]);
+                $this->assertStringContainsString('[[2,3,4]]', $changed[1][1]);
+                $this->assertStringContainsString('2009-02-15', $changed[1][1]);
+                $this->assertStringContainsString('2009-02-14 08:32:30', $changed[1][1]);
+                // 2件（異スキーマ）
+                $changed = $database->changeArray('misctype', [
+                    [
+                        'id'     => 1,
+                        'carray' => ['a', 'b', 'c'],
+                        'cjson'  => [[1, 2, 3]],
+                        'cdate'  => 1234567890,
+                    ],
+                    [
+                        'id'        => 2,
+                        'carray'    => ['b', 'c', 'd'],
+                        'cjson'     => [[2, 3, 4]],
+                        'cdatetime' => 1234567890.123,
+                    ],
+                ], true);
+                $this->assertStringContainsString('a,b,c', $changed[1][1]);
+                $this->assertStringContainsString('[[1,2,3]]', $changed[1][1]);
+                $this->assertStringContainsString('2009-02-14', $changed[1][1]);
+                $this->assertStringContainsString('b,c,d', $changed[1][2]);
+                $this->assertStringContainsString('[[2,3,4]]', $changed[1][2]);
+                $this->assertStringContainsString('2009-02-14 08:31:30', $changed[1][2]);
+            })();
+        }
+
         $changed = $database->dryrun()->changeArray('multiprimary', [
             ['mainid' => 1, 'subid' => 1, 'name' => 'X'],
             ['mainid' => 1, 'subid' => 2, 'name' => 'Y'],
