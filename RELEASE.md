@@ -24,6 +24,10 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.2.32
+
+- [fixbug] changeArray で2回normalize される不具合
+
 ## 2.2.31
 
 - [fixbug] 外部キーがない場合に例外が飛ばない不具合
