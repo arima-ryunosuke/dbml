@@ -21,6 +21,12 @@
 - Entity 消したい。使わない…
 - phpstorm と相性が悪いのでマジックメソッドを撲滅したい
 
+## 3.1.16
+
+- Merge tag 'v2.1.33'
+- Merge tag 'v2.1.32'
+- Merge tag 'v2.1.31'
+
 ## 3.1.15
 
 - [feature] トランザクションに alwaysCommit を追加
