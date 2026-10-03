@@ -24,19 +24,19 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
-## 2.2.33
+## 2.1.33
 
 - [fixbug] existize/countize で before/after コールバックが呼ばれてしまう不具合
 
-## 2.2.32
+## 2.1.32
 
 - [fixbug] changeArray で2回normalize される不具合
 
-## 2.2.31
+## 2.1.31
 
 - [fixbug] 外部キーがない場合に例外が飛ばない不具合
 
-## 2.2.30
+## 2.1.30
 
 - [fixbug] scoping がメモリリークしていた
 
