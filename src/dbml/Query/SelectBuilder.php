@@ -2843,6 +2843,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         // EXISTS だけなのでこの辺は全部不要
         $that->subbuilders = [];
         $that->callbacks = [];
+        $that->applyments = [
+            'before' => null,
+            'after'  => null,
+        ];
         $that->caster = null;
 
         if ($affirmation) {
@@ -2882,6 +2886,10 @@ class SelectBuilder extends AbstractBuilder implements \IteratorAggregate, \Coun
         // COUNT だけなのでこの辺は全部不要
         $that->subbuilders = [];
         $that->callbacks = [];
+        $that->applyments = [
+            'before' => null,
+            'after'  => null,
+        ];
         $that->caster = null;
 
         // groupBy,having がある時は集約クエリなのでラップしたクエリで count する
