@@ -24,6 +24,10 @@
 - returning 句に対応したい
 - AffectBuilder を作って内部状態である dryrun や preparing を無くしたい
 
+## 2.2.33
+
+- [fixbug] existize/countize で before/after コールバックが呼ばれてしまう不具合
+
 ## 2.2.32
 
 - [fixbug] changeArray で2回normalize される不具合
