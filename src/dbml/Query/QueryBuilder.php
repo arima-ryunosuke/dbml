@@ -3283,6 +3283,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $that->subbuilders = [];
         $that->callbacks = [];
         $that->phpOrders = [];
+        $that->applyments = [
+            'before' => null,
+            'after'  => null,
+        ];
         $that->caster = null;
 
         if ($affirmation) {
@@ -3326,6 +3330,10 @@ class QueryBuilder implements Queryable, \IteratorAggregate, \Countable
         $that->subbuilders = [];
         $that->callbacks = [];
         $that->phpOrders = [];
+        $that->applyments = [
+            'before' => null,
+            'after'  => null,
+        ];
         $that->caster = null;
 
         if ($that->sqlParts['groupBy'] || $that->sqlParts['having']) {
